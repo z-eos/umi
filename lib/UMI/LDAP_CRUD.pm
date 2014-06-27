@@ -82,6 +82,35 @@ sub search {
   			    );
 }
 
+=head2 umi_del
+
+TODO
+
+to care of subtree of the object to be deleted if exist
+
+=cut
+
+sub delete {
+  my ($self, $dn, $dryrun) = @_;
+
+  my $callername = (caller(1))[3];
+  $callername = 'main' if not defined $callername;
+  my $return = 'call to LDAP_CRUD->delete from ' . $callername . ': ';
+
+  if ( not $dryrun ) {
+    my $msg = $self->ldap->delete ( $dn );
+    if ($msg->is_error()) {
+      $return .= "error_descr: " . $msg->error_desc;
+      $return .= "; server_error: " . $msg->server_error if defined $msg->server_error;
+    } else {
+      $return = 0;
+    }
+  } else {
+    $return = 0;
+  }
+  return $return;
+}
+
 =head2 last_uidNumber
 
 Last uidNumber for base ou=People,dc=ibs
@@ -108,7 +137,8 @@ sub last_uidNumber {
 
 LDAP object schema and data
 
-returned structure is:
+returned structure is hash of all mandatory and optional attributes of
+all objectClass-es of the object:
 
 $VAR1 = {
   'DN1' => {
