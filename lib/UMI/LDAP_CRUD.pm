@@ -86,7 +86,7 @@ sub search {
 
 TODO
 
-to care of subtree of the object to be deleted if exist
+to care recursively of subtree of the object to be deleted if exist
 
 =cut
 
@@ -232,6 +232,57 @@ sub obj_schema {
     }
   }
   return $obj_schema;
+}
+
+=head2 select_key_val
+
+returns ref on hash (mostly aimed for select form elements `options_'
+method. It expects each ldapsearch result entry to be single value.
+
+ldapsearch option `attrs' is expected to be single, lowercased
+(otherwise, ->search fails, do not know why but need to verify!) value
+of the attribyte for which hash to be built, DN will be the key and
+the attributes value, is the value
+
+$VAR1 = {
+          'dn1' => 'attributeValue 1',
+          ...
+          'dnN' => 'attributeValue 1',
+        }
+
+TODO:
+
+to add error correction
+
+=cut
+
+sub select_key_val {
+  my ($self, $args) = @_;
+  my $arg = {
+	     base => $args->{'base'},
+	     filter => $args->{'filter'},
+	     scope => $args->{'scope'},
+	     attrs => $args->{'attrs'},
+	    };
+  my $mesg =
+    $self->ldap->search(
+			base => $arg->{'base'},
+			filter => $arg->{'filter'},
+			scope => $arg->{'scope'},
+			attrs => [ $arg->{'attrs'} ],
+			deref => 'never',
+		       );
+
+  my $entries = $mesg->as_struct;
+
+  my %results;
+  foreach my $key (sort (keys %{$entries})) {
+    foreach my $val ( @{$entries->{$key}->{$arg->{'attrs'}}} ) {
+      # $results{"$key"} = $val if not $val =~ /[^[:ascii:]]/;
+      $results{"$key"} = $val;
+    }
+  }
+  return \%results;
 }
 
 ######################################################################
