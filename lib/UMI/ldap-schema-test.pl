@@ -2,12 +2,17 @@
 # -*- mode: cperl; cperl-indent-level: 2; cperl-continued-statement-offset: 2 -*-
 #
 
+#
+## script to test schema retrieval and parsing
+#
+
 use LDAP_CRUD;
 
 use Data::Dumper;
 
 my $uid = $ARGV[0];
 my $pwd = $ARGV[1];
+my $org = $ARGV[2];
 
 my $ldap_crud = LDAP_CRUD->new(uid => $uid, pwd => $pwd);
 
@@ -19,7 +24,7 @@ $mesg = $ldap_crud
   ->search(
 	   {
 	    base => 'ou=Organizations,dc=ibs',
-	    filter => '(ou=' . $ARGV[2] . ')',
+	    filter => '(ou=' . $org . ')',
 	    scope => 'one',
 	   }
 	  );
@@ -62,5 +67,7 @@ foreach my $entry ( @entries ) {
 }
 
 #print "mesg search\n" . Dumper($mesg) . "\nentries\n" . Dumper($mesg->entries);
+
+print "last uidNumber is: ", $ldap_crud->last_uidNumber;
 
 $ldap_crud->unbind;

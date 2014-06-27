@@ -82,6 +82,27 @@ sub search {
   			    );
 }
 
+=head2 last_uidNumber
+
+Last uidNumber for base ou=People,dc=ibs
+
+to add error correction
+
+=cut
+
+sub last_uidNumber {
+  my $self = shift;
+  my $mesg =
+    $self->ldap->search(base   => "ou=People,dc=ibs",
+			scope  => "one",
+			filter => "uidNumber=*",
+			attrs   => [ 'uidNumber' ],
+		       );
+
+  my @uids_arr = sort { $a <=> $b } map { $_->get_value('uidNumber') } $mesg->all_entries;
+  return $uids_arr[$#uids_arr];
+}
+
 ######################################################################
 
 #no Moose;
