@@ -93,7 +93,8 @@ to add error correction
 sub last_uidNumber {
   my $self = shift;
   my $mesg =
-    $self->ldap->search(base   => "ou=People,dc=ibs",
+    $self->ldap->search(
+			base   => "ou=People,dc=ibs",
 			scope  => "one",
 			filter => "uidNumber=*",
 			attrs   => [ 'uidNumber' ],
@@ -101,6 +102,106 @@ sub last_uidNumber {
 
   my @uids_arr = sort { $a <=> $b } map { $_->get_value('uidNumber') } $mesg->all_entries;
   return $uids_arr[$#uids_arr];
+}
+
+=head2 obj_schema
+
+LDAP object schema and data
+
+returned structure is:
+
+$VAR1 = {
+  'DN1' => {
+    'objectClass1' => {
+      'must' => {
+        'mustAttr1' => {
+          'equality' => ...,
+          'desc' => ...,
+          'single-value' => ...,
+          'attr_value' => ...,
+          'max_length' => ...,
+        },
+        'mustAttrN' {
+        ...
+        },
+       },
+       'may' => {
+         'mayAttr1' => {
+           'equality' => ...,
+           'desc' => ...,
+           'single-value' => ...,
+           'attr_value' => ...,
+           'max_length' => ...,
+         },
+         'mayAttrN' {
+         ...
+         },
+       },
+    },
+    'objectClass2' => {
+    ...
+    },
+  },
+  'DN2' => {
+  ...
+  },
+}
+
+Commonly, we will wish to use it for the single object to build the
+form to add or modify
+
+TODO
+
+to add error correction
+
+=cut
+
+sub obj_schema {
+  my ($self, $args) = @_;
+  my $arg = {
+  	     base   => $args->{base},
+  	     scope  => $args->{scope} || 'one',
+  	     filter => $args->{filter},
+  	    };
+
+  my $mesg =
+    $self->ldap->search(
+			base   => $arg->{base},
+			scope  => $arg->{scope},
+			filter => $arg->{filter},
+		       );
+  my @entries = $mesg->entries;
+
+  my ( $must, $may, $obj_schema );
+  foreach my $entry ( @entries ) {
+    foreach my $objectClass ( $entry->get_value('objectClass') ) {
+      next if $objectClass eq 'top';
+      foreach $must ( $self->schema->must ( $objectClass ) ) {
+	$obj_schema->{$entry->dn}->{$objectClass}->{'must'}
+	  ->{ $must->{'name'} } =
+	    {
+	     'attr_value' => $entry->get_value( $must->{'name'} ) || undef,
+	     'desc' => $must->{'desc'} || undef,
+	     'single-value' => $must->{'single-value'} || undef,
+	     'max_length' => $must->{'max_length'} || undef,
+	     'equality' => $must->{'equality'} || undef,
+	    };
+      }
+
+      foreach $may ( $self->schema->may ( $objectClass ) ) {
+	$obj_schema->{$entry->dn}->{$objectClass}->{'may'}
+	  ->{$may->{'name'}} =
+	    {
+	     'attr_value' => $entry->get_value( $may->{'name'} ) || undef ,
+	     'desc' => $may->{'desc'} || undef ,
+	     'single-value' => $may->{'single-value'} || undef ,
+	     'max_length' => $may->{'max_length'} || undef ,
+	     'equality' => $may->{'equality'} || undef ,
+	    };
+      }
+    }
+  }
+  return $obj_schema;
 }
 
 ######################################################################
