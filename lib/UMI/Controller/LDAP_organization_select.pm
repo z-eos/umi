@@ -32,44 +32,40 @@ Catalyst Controller.
 sub index :Path :Args(0) {
     my ( $self, $c, $ldap_org_id ) = @_;
     if ( $c->check_user_roles('umi-admin')) {
-      # use Data::Dumper;
+      $c->stash(
+		template => 'ldapact/ldapact_o_wrap.tt',
+		form => $self->form
+	       );
 
-      $c->stash( template => 'ldapact/ldapact_o_wrap.tt',
-		 form => $self->form );
-
-      # use Data::Dumper;
-      # $c->log->debug( "uid and pwd:\n" . Dumper($self->form));
-
-      # $c->log->debug( "uid and pwd:\n" . $c->session->{umi_ldap_uid} . "\n" . $c->session->{umi_ldap_password});
+      my $ldap_crud =
+	$c->model('LDAP_CRUD',
+		  uid => $c->session->{umi_ldap_uid},
+		  pwd => $c->session->{umi_ldap_password}
+		 );
 
       # Validate and insert/update database
       return unless $self->form->process( item_id => $ldap_org_id,
 					  posted => ($c->req->method eq 'POST'),
 					  params => $c->req->parameters,
-					  ldap_crud => $c->model('LDAP_CRUD'),
-					  uid => $c->session->{umi_ldap_uid},
-					  pwd => $c->session->{umi_ldap_password}
+					  ldap_crud => $ldap_crud,
 					);
 
-      my $ldap = 
-	$c->model('LDAP_CRUD')->umi_bind({
-					  dn => 'uid=' .
-					  $c->session->{umi_ldap_uid} .
-					  ',ou=people,dc=ibs',
-					  password => $c->session->{umi_ldap_password}
-					 });
 
       my ( $error_message, $success_message, $message);
 
-      if ( not $c->req->param('act') ) {
+      if ( ! $c->req->param('act') ) {
+
 	$c->log->debug( "we will add new Organization object");
 	$c->res->redirect($c->uri_for('/ldap_organization_add'));
-	# $c->controller('LDAP_organization_add')->index($c, ( physicaldeliveryofficename => $c->req->param('neworg') ));
+
       } elsif ( $c->req->param('act') == 1 ) {
+
 	$c->log->debug( "we will modify object " . $c->req->param('org'));
 	$c->controller('LDAP_organization_mod')->index($c, ( org => $c->req->param('org') ));
+
       } elsif ( $c->req->param('act') == 2 ) {
-	my $delete_result = $c->model('LDAP_CRUD')->umi_del($ldap, $c->req->param('org'), 0);
+
+	my $delete_result = $ldap_crud->del( $c->req->param('org') );
 	if ($delete_result) {
 	  $error_message = '<li>&laquo;<strong>' . $c->req->param('org') .
 	    '</strong>&raquo; <em>was not deleted; error is:</em> &laquo;<strong>' .
@@ -80,10 +76,11 @@ sub index :Path :Args(0) {
 	    '</strong>&raquo; <em>was successfully deleted.</em></li>';
 	  $self->form->success_message( $success_message );
 	  $c->res->redirect($c->uri_for('/ldap_organization_select'));
+
 	}
       }
 
-      $ldap->unbind;
+      $ldap_crud->unbind;
 
       my $final_message;
       $final_message = '<div class="alert alert-success">' .
@@ -114,25 +111,20 @@ sub add :Path(add) :Args(0) {
       $c->stash( template => 'ldapact/ldapact_o_add_wrap.tt',
 		 form => $self->form );
 
-      # use Data::Dumper;
-      # $c->log->debug( "\$form:\n" . Dumper($self->form));
-
       # Validate and insert/update database
       return unless $self->form->process( item_id => $ldap_org_id,
 					  posted => ($c->req->method eq 'POST'),
 					  params => $c->req->parameters,
-					  ldap_crud => $c->model('LDAP_CRUD'),
-					  uid => $c->session->{umi_ldap_uid},
-					  pwd => $c->session->{umi_ldap_password}
+					  ldap_crud => $c->model(
+								 'LDAP_CRUD',
+								 uid => $c->session->{umi_ldap_uid},
+								 pwd => $c->session->{umi_ldap_password}
+								),
 					);
-
-#    $c->response->body('Matched UMI::Controller::LDAP_organization_add in LDAP_organization_add.');
     } else {
       $c->response->body('Unauthorized!');
     }
 }
-
-
 
 =head1 AUTHOR
 
@@ -145,6 +137,7 @@ it under the same terms as Perl itself.
 
 =cut
 
+no Moose;
 __PACKAGE__->meta->make_immutable;
 
 1;

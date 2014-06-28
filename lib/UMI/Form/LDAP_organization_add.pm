@@ -10,8 +10,6 @@ use HTML::FormHandler::Widget::Wrapper::Bootstrap3;
 has '+widget_wrapper' => ( default => 'Bootstrap3');
 
 has 'ldap_crud' => (is => 'rw');
-has 'uid' => (is => 'rw');
-has 'pwd' => (is => 'rw');
 
     # businessCategory
     # description
@@ -47,20 +45,16 @@ sub options_parent {
   return unless $self->ldap_crud;
 
   my $ldap_crud = $self->ldap_crud;
-  my $ldap = $ldap_crud->umi_bind({
-  				   dn => 'uid=' . $self->uid . ',ou=people,dc=ibs',
-  				   password => $self->pwd,
-  				  });
-  my $mesg = $ldap_crud->umi_search( $ldap,
-				     {
-				      base => 'ou=Organizations,dc=ibs',
-				      scope => 'children',
-				      filter => 'ou=*',
-				      attrs => [ qw(ou physicaldeliveryofficename l) ],
-				      sizelimit => 0
-				     }
-				   );
-  push my @orgs, { value => '0', label => '--- no parent office ---', selected => 'on' };
+  my $mesg = $ldap_crud->search(
+				{
+				 base => 'ou=Organizations,dc=ibs',
+				 scope => 'children',
+				 filter => 'ou=*',
+				 attrs => [ qw(ou physicaldeliveryofficename l) ],
+				 sizelimit => 0
+				}
+			       );
+  my @orgs = ( { value => '0', label => '--- no parent office ---', selected => 'on' } );
   my @entries = $mesg->entries;
   foreach my $entry ( @entries ) {
     push @orgs, {
@@ -71,12 +65,10 @@ sub options_parent {
 				  $entry->get_value ('l')
 				 )
 		};
-		 # label => $entry->get_value ('physicaldeliveryofficename') .
-		 #  ' ( ' . $entry->get_value ('ou') . ' @ ' . $entry->get_value ('l') . ' )' };
   }
   return \@orgs;
 
-  $ldap->unbind;
+  $ldap_crud->unbind;
 }
 
 has_field 'ou' => ( label => 'Organizational Unit', label_class => [ 'col-sm-3' ],

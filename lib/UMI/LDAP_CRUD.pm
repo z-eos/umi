@@ -11,7 +11,7 @@ with 'Tools';
 has 'host' => ( is => 'ro', isa => 'Str', required => 1, default => 'ldaps://ldap1.ibs');
 has 'uid' => ( is => 'ro', isa => 'Str', required => 1 );
 has 'pwd' => ( is => 'ro', isa => 'Str', required => 1 );
-has 'dry_run' => ( is => 'ro', isa => 'Bool', );
+has 'dry_run' => ( is => 'ro', isa => 'Bool', default => 0 );
 
 has 'ldap'  => ( is => 'rw',
 		 isa => 'Net::LDAP',
@@ -74,13 +74,13 @@ sub search {
 =cut
 
 sub add {
-  my ($self, $dn, $attrs, $dryrun) = @_;
+  my ($self, $dn, $attrs) = @_;
 
   my $callername = (caller(1))[3];
-  $callername = 'main' if not defined $callername;
+  $callername = 'main' if ! defined $callername;
   my $return = 'call to LDAP_CRUD->add from ' . $callername . ': ';
   my $msg;
-  if ( not $dryrun ) {
+  if ( ! $self->dry_run ) {
     $msg = $self->ldap->add ( $dn, attrs => $attrs, );
     if ($msg->is_error()) {
       $return = "error_descr: " . $msg->error_desc();
@@ -103,13 +103,13 @@ to care recursively of subtree of the object to be deleted if exist
 =cut
 
 sub del {
-  my ($self, $dn, $dryrun) = @_;
+  my ($self, $dn) = @_;
 
   my $callername = (caller(1))[3];
-  $callername = 'main' if not defined $callername;
+  $callername = 'main' if ! defined $callername;
   my $return = 'call to LDAP_CRUD->del from ' . $callername . ': ';
 
-  if ( not $dryrun ) {
+  if ( ! $self->dry_run ) {
     my $msg = $self->ldap->delete ( $dn );
     if ($msg->is_error()) {
       $return .= "error_descr: " . $msg->error_desc;
@@ -130,7 +130,7 @@ modify method
 =cut
 
 sub mod {
-  my ($self, $dn, $dryrun) = @_;
+  my ($self, $dn) = @_;
 
 }
 
@@ -301,7 +301,7 @@ sub select_key_val {
   my %results;
   foreach my $key (sort (keys %{$entries})) {
     foreach my $val ( @{$entries->{$key}->{$arg->{'attrs'}}} ) {
-      # $results{"$key"} = $val if not $val =~ /[^[:ascii:]]/;
+      # $results{"$key"} = $val if ! $val =~ /[^[:ascii:]]/;
       $results{"$key"} = $val;
     }
   }

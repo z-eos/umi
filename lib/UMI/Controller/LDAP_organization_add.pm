@@ -35,21 +35,18 @@ has 'form' => ( isa => 'UMI::Form::LDAP_organization_add', is => 'rw',
 sub index :Path :Args(0) {
     my ( $self, $c, $ldap_org_id ) = @_;
     if ( $c->check_user_roles('umi-admin')) {
-      # use Data::Dumper;
-
       $c->stash( template => 'ldapact/ldapact_o_add_wrap.tt',
 		 form => $self->form );
-
-      # use Data::Dumper;
-      # $c->log->debug( "\$form:\n" . Dumper($self->form));
 
       # Validate and insert/update database
       return unless $self->form->process( item_id => $ldap_org_id,
 					  posted => ($c->req->method eq 'POST'),
 					  params => $c->req->parameters,
-					  ldap_crud => $c->model('LDAP_CRUD'),
-					  uid => $c->session->{umi_ldap_uid},
-					  pwd => $c->session->{umi_ldap_password}
+					  ldap_crud => $c->model(
+								 'LDAP_CRUD',
+								 uid => $c->session->{umi_ldap_uid},
+								 pwd => $c->session->{umi_ldap_password},
+								),
 					);
 
       my $res = $self->create_object( $c );
@@ -71,13 +68,12 @@ sub create_object {
   use Data::Dumper;
   # $c->log->debug( "\$attrs:\n" . Dumper($attrs));
 
-  my $ldap = 
-    $c->model('LDAP_CRUD')->umi_bind({
-				      dn => 'uid=' .
-				      $c->session->{umi_ldap_uid} .
-				      ',ou=people,dc=ibs',
-				      password => $c->session->{umi_ldap_password}
-				     });
+  my $ldap_crud =
+    $c->model('LDAP_CRUD', dn => 'uid=' .
+	      $c->session->{umi_ldap_uid} .
+	      ',ou=people,dc=ibs',
+	      password => $c->session->{umi_ldap_password}
+	     );
 
   my $descr = 'description has to be here';
   if (defined $attrs->{'descr'} and $attrs->{'descr'} ne '') {
@@ -124,7 +120,7 @@ sub create_object {
   }
   push @{$attr_defined}, objectClass => [ 'top', 'organizationalUnit' ];
 
-  $c->log->debug( "parent\n: $attrs->{'parent'} \nattr_defined:\n" . Dumper($attr_defined));
+#  $c->log->debug( "parent\n: $attrs->{'parent'} \nattr_defined:\n" . Dumper($attr_defined));
   my $success_message;
 
   ######################################################################
@@ -132,11 +128,11 @@ sub create_object {
   ######################################################################
   my $base = defined $attrs->{'parent'} ? $attrs->{'parent'} : 'ou=Organizations,dc=ibs';
   my $ldif =
-    $c->model('LDAP_CRUD')->umi_add($ldap,
-				    'ou=' . $attrs->{'ou'} . ',' .
-				    $base,
-				    $attr_defined,
-				    0);
+    $ldap_crud->add(
+		    'ou=' . $attrs->{'ou'} . ',' .
+		    $base,
+		    $attr_defined,
+		   );
   my $error_message;
   if ( $ldif ) {
     $error_message = 'Error during organization object creation occured: ' . $ldif;
@@ -158,7 +154,7 @@ sub create_object {
 
   $self->form->info_message( $final_message ) if $final_message;
 
-  $ldap->unbind;
+  $ldap_crud->unbind;
   return $ldif;
 }
 

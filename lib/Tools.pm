@@ -1,6 +1,56 @@
 package Tools;
 use Moose::Role;
 
+has 'equality2type' => ( is => 'ro',
+			 isa => 'HashRef',
+			 builder => '_build_equality2type',
+		       );
+
+sub _build_equality2type {
+return {
+	bitStringMatch => {
+			   type => 'text',
+			   validationrule => [ '' ],
+			  },
+	caseExactMatch => {
+			   type => 'text',
+			   validationrule => [ '' ],
+			  },
+	caseIgnoreIA5Match => {
+			       type => 'text',
+			       validationrule => [ '' ],
+			      },
+	caseIgnoreListMatch => {
+				type => 'text',
+				validationrule => [ '' ],
+			       },
+	caseIgnoreMatch => {
+			    type => 'text',
+			    validationrule => [ '' ],
+			   },
+	certificateExactMatch => {
+				  type => 'text',
+				  validationrule => [ '' ],
+				 },
+	distinguishedNameMatch => {
+				   type => 'text',
+				   validationrule => [ '' ],
+				  },
+	numericStringMatch => {
+			       type => 'text',
+			       validationrule => [ 'PositiveNum' ],
+			      },
+	octetStringMatch => {
+			     type => 'text',
+			     validationrule => [ '' ],
+							 },
+	telephoneNumberMatch => {
+				 type => 'text',
+				 validationrule => [ '' ],
+				},
+       };
+}
+
 sub is_ascii {
   my ($self, $arg) = @_;
   # return $arg =~ /[^[:ascii:]]/ ? 1 : 0;
