@@ -6,6 +6,8 @@ use Moose;
 use Try::Tiny;
 use namespace::autoclean;
 
+with 'Tools';
+
 has 'host' => ( is => 'ro', isa => 'Str', required => 1, default => 'ldaps://ldap1.ibs');
 has 'uid' => ( is => 'ro', isa => 'Str', required => 1 );
 has 'pwd' => ( is => 'ro', isa => 'Str', required => 1 );
@@ -308,7 +310,7 @@ sub select_key_val {
 
 ######################################################################
 
-#no Moose;
-#__PACKAGE__->meta->make_immutable;
+no Moose;
+__PACKAGE__->meta->make_immutable;
 
 1;
