@@ -19,25 +19,25 @@ my $attr = $ARGV[5];
 
 my $ldap_crud = LDAP_CRUD->new(uid => $uid, pwd => $pwd);
 
-# print "obj_schema test:\n", 
-#   Dumper($ldap_crud->obj_schema(
-# 				{
-# 				 base => $base,
-# 				 filter => $filter,
-# 				}
-# 			       )
-# 	);
-
-print "select_key_val test:\n", 
-  Dumper($ldap_crud->select_key_val (
-				     {
-				      base => $base,
-				      filter => $filter,
-				      scope => $scope,
-				      attrs => $attr,
-				     }
-				    )
+print "obj_schema test:\n", 
+  Dumper($ldap_crud->obj_schema(
+				{
+				 base => $base,
+				 filter => $filter,
+				}
+			       )
 	);
+
+# print "select_key_val test:\n", 
+#   Dumper($ldap_crud->select_key_val (
+# 				     {
+# 				      base => $base,
+# 				      filter => $filter,
+# 				      scope => $scope,
+# 				      attrs => $attr,
+# 				     }
+# 				    )
+# 	);
 
 
 $ldap_crud->unbind;
