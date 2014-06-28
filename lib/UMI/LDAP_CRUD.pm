@@ -82,7 +82,32 @@ sub search {
   			    );
 }
 
-=head2 umi_del
+=head2 add
+
+=cut
+
+sub add {
+  my ($self, $dn, $attrs, $dryrun) = @_;
+
+  my $callername = (caller(1))[3];
+  $callername = 'main' if not defined $callername;
+  my $return = 'call to LDAP_CRUD->add from ' . $callername . ': ';
+  my $msg;
+  if ( not $dryrun ) {
+    $msg = $self->ldap->add ( $dn, attrs => $attrs, );
+    if ($msg->is_error()) {
+      $return = "error_descr: " . $msg->error_desc();
+      $return .= "; server_error: " . $msg->server_error() if defined $msg->server_error();
+    } else {
+      $return = 0;
+    }
+  } else {
+    $return = $msg->ldif;
+  }
+  return $return;
+}
+
+=head2 delete
 
 TODO
 
@@ -90,12 +115,12 @@ to care recursively of subtree of the object to be deleted if exist
 
 =cut
 
-sub delete {
+sub del {
   my ($self, $dn, $dryrun) = @_;
 
   my $callername = (caller(1))[3];
   $callername = 'main' if not defined $callername;
-  my $return = 'call to LDAP_CRUD->delete from ' . $callername . ': ';
+  my $return = 'call to LDAP_CRUD->del from ' . $callername . ': ';
 
   if ( not $dryrun ) {
     my $msg = $self->ldap->delete ( $dn );
