@@ -19,8 +19,6 @@ my $attr = $ARGV[5];
 
 my $ldap_crud = LDAP_CRUD->new(uid => $uid, pwd => $pwd);
 
-my $mesg = $ldap_crud->ldap_bind;
-
 # print "obj_schema test:\n", 
 #   Dumper($ldap_crud->obj_schema(
 # 				{

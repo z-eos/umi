@@ -9,6 +9,7 @@ use namespace::autoclean;
 has 'host' => ( is => 'ro', isa => 'Str', required => 1, default => 'ldaps://ldap1.ibs');
 has 'uid' => ( is => 'ro', isa => 'Str', required => 1 );
 has 'pwd' => ( is => 'ro', isa => 'Str', required => 1 );
+has 'dry_run' => ( is => 'ro', isa => 'Bool', );
 
 has 'ldap'  => ( is => 'rw',
 		 isa => 'Net::LDAP',
@@ -25,32 +26,40 @@ sub _build_ldap {
     warn "Net::LDAP->new problem, error: $_"; # not $@
   };
 
+  my $mesg =  $ldap->bind (
+			   sprintf('uid=%s,ou=People,dc=ibs', $self->uid),
+			   password => $self->pwd,
+			   version => 3,
+			  );
+  if ( $mesg->is_error ) {
+    warn "Net::LDAP->bind error_desc: " . $mesg->error_desc . "; server_error: " . $mesg->server_error;
+  }
   return $ldap;
 }
 
-has 'ldap_bind' => ( is => 'rw',
-		     isa => 'Net::LDAP::Message',
-		     lazy => 1,
-		     builder => '_build_ldap_bind',
-		   );
+# has 'ldap_bind' => ( is => 'rw',
+# 		     isa => 'Net::LDAP::Message',
+# 		     lazy => 1,
+# 		     builder => '_build_ldap_bind',
+# 		   );
 
-sub _build_ldap_bind {
-    my $self = shift;
-    my $ldap = $self->ldap;
+# sub _build_ldap_bind {
+#     my $self = shift;
+#     my $ldap = $self->ldap;
 
-    return $ldap->bind (
-			sprintf('uid=%s,ou=People,dc=ibs', $self->uid),
-			password => $self->pwd,
-			version => 3,
-		       );
+#     return $ldap->bind (
+# 			sprintf('uid=%s,ou=People,dc=ibs', $self->uid),
+# 			password => $self->pwd,
+# 			version => 3,
+# 		       );
 
-    # my $mesg = try {
-    #   $self->ldap->bind ( $arg->{'dn'}, { password => $arg->{'password'} } );
-    # } catch {
-    #   warn "Net::LDAP->bind error: $_";
-    # }
-    # return $mesg
-}
+#     # my $mesg = try {
+#     #   $self->ldap->bind ( $arg->{'dn'}, { password => $arg->{'password'} } );
+#     # } catch {
+#     #   warn "Net::LDAP->bind error: $_";
+#     # }
+#     # return $mesg
+# }
 
 sub unbind {
   my $self = shift;
@@ -134,6 +143,17 @@ sub del {
     $return = 0;
   }
   return $return;
+}
+
+=head2 mod
+
+modify method
+
+=cut
+
+sub mod {
+  my ($self, $dn, $dryrun) = @_;
+
 }
 
 =head2 last_uidNumber
