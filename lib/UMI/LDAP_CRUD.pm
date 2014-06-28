@@ -37,30 +37,6 @@ sub _build_ldap {
   return $ldap;
 }
 
-# has 'ldap_bind' => ( is => 'rw',
-# 		     isa => 'Net::LDAP::Message',
-# 		     lazy => 1,
-# 		     builder => '_build_ldap_bind',
-# 		   );
-
-# sub _build_ldap_bind {
-#     my $self = shift;
-#     my $ldap = $self->ldap;
-
-#     return $ldap->bind (
-# 			sprintf('uid=%s,ou=People,dc=ibs', $self->uid),
-# 			password => $self->pwd,
-# 			version => 3,
-# 		       );
-
-#     # my $mesg = try {
-#     #   $self->ldap->bind ( $arg->{'dn'}, { password => $arg->{'password'} } );
-#     # } catch {
-#     #   warn "Net::LDAP->bind error: $_";
-#     # }
-#     # return $mesg
-# }
-
 sub unbind {
   my $self = shift;
   $self->ldap->unbind;
