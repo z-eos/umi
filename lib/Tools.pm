@@ -9,45 +9,133 @@ has 'equality2type' => ( is => 'ro',
 sub _build_equality2type {
 return {
 	bitStringMatch => {
-			   field_type => 'text',
-			   validationrule => [ '' ],
-			  },
-	caseExactMatch => {
-			   field_type => 'text',
-			   validationrule => [ '' ],
-			  },
-	caseIgnoreIA5Match => {
-			       field_type => 'text',
-			       validationrule => [ '' ],
-			      },
-	caseIgnoreListMatch => {
-				field_type => 'text',
-				validationrule => [ '' ],
-			       },
-	caseIgnoreMatch => {
-			    field_type => 'text',
+			    field_type => 'Text',
 			    validationrule => [ '' ],
 			   },
-	certificateExactMatch => {
-				  field_type => 'text',
-				  validationrule => [ '' ],
-				 },
-	distinguishedNameMatch => {
-				   field_type => 'text',
-				   validationrule => [ '' ],
-				  },
-	numericStringMatch => {
-			       field_type => 'text',
-			       validationrule => [ 'PositiveNum' ],
+	booleanMatch  => {
+			  field_type => 'checkbox',
+			  validationrule => [ '' ],
+			 },
+	caseExactIA5Match  => {
+			       field_type => 'Text',
+			       validationrule => [ '' ],
 			      },
-	octetStringMatch => {
-			     field_type => 'text',
-			     validationrule => [ '' ],
-							 },
-	telephoneNumberMatch => {
-				 field_type => 'text',
+	caseExactIA5SubstringsMatch  => {
+					 field_type => 'Text',
+					 validationrule => [ '' ],
+					},
+	caseExactMatch  => {
+			    field_type => 'Text',
+			    validationrule => [ '' ],
+			   },
+	caseExactOrderingMatch  => {
+				    field_type => 'Text',
+				    validationrule => [ '' ],
+				   },
+	caseExactSubstringsMatch  => {
+				      field_type => 'Text',
+				      validationrule => [ '' ],
+				     },
+	caseIgnoreIA5Match  => {
+				field_type => 'Text',
+				validationrule => [ '' ],
+			       },
+	caseIgnoreIA5SubstringsMatch  => {
+					  field_type => 'Text',
+					  validationrule => [ '' ],
+					 },
+	caseIgnoreListMatch  => {
+				 field_type => 'Text',
 				 validationrule => [ '' ],
 				},
+	caseIgnoreMatch  => {
+			     field_type => 'Text',
+			     validationrule => [ '' ],
+			    },
+	caseIgnoreOrderingMatch  => {
+				     field_type => 'Text',
+				     validationrule => [ '' ],
+				    },
+	caseIgnoreSubstringsMatch  => {
+				       field_type => 'Text',
+				       validationrule => [ '' ],
+				      },
+	certificateExactMatch  => {
+				   field_type => 'file',
+				   validationrule => [ '' ],
+				  },
+	certificateListExactMatch  => {
+				       field_type => 'file',
+				       validationrule => [ '' ],
+				      },
+	distinguishedNameMatch  => {
+				    field_type => 'Text',
+				    validationrule => [ '' ],
+				   },
+	generalizedTimeMatch  => {
+				  field_type => 'DateTime',
+				  validationrule => [ 'YYYYmmDDHHMMSSZ' ],
+				 },
+	generalizedTimeOrderingMatch  => {
+					  field_type => 'DateTime',
+					  validationrule => [ 'YYYYmmDDHHMMSSZ' ],
+					 },
+	integerBitAndMatch  => {
+				field_type => 'Integer',
+				validationrule => [ '' ],
+			       },
+	integerBitOrMatch  => {
+			       field_type => 'Integer',
+			       validationrule => [ '' ],
+			      },
+	integerFirstComponentMatch  => {
+					field_type => 'Integer',
+					validationrule => [ '' ],
+				       },
+	integerMatch  => {
+			  field_type => 'Integer',
+			  validationrule => [ '' ],
+			 },
+	integerOrderingMatch  => {
+				  field_type => 'Integer',
+				  validationrule => [ '' ],
+				 },
+	numericStringMatch  => {
+				field_type => 'Integer',
+				validationrule => [ '' ],
+			       },
+	numericStringOrderingMatch  => {
+					field_type => 'Integer',
+					validationrule => [ '' ],
+				       },
+	numericStringSubstringsMatch  => {
+					  field_type => 'Integer',
+					  validationrule => [ '' ],
+					 },
+	octetStringMatch  => {
+			      field_type => '',
+			      validationrule => [ '' ],
+			     },
+	octetStringOrderingMatch  => {
+				      field_type => '',
+				      validationrule => [ '' ],
+				     },
+	octetStringSubstringsMatch  => {
+					field_type => '',
+					validationrule => [ '' ],
+				       },
+	telephoneNumberMatch  => {
+				  field_type => 'Text',
+				  validationrule => [ '' ],
+				 },
+	telephoneNumberSubstringsMatch  => {
+					    field_type => 'Text',
+					    validationrule => [ '' ],
+					   },
+	uniqueMemberMatch  => {
+			       field_type => 'Text',
+			       validationrule => [ '' ],
+			      },
        };
 }
 
