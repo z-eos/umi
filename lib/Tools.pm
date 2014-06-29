@@ -1,7 +1,8 @@
 package Tools;
 use Moose::Role;
 
-has 'equality2type' => ( is => 'ro',
+has 'equality2type' => ( traits => ['Hash'],
+			 is => 'ro',
 			 isa => 'HashRef',
 			 builder => '_build_equality2type',
 		       );
