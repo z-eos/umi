@@ -9,43 +9,43 @@ has 'equality2type' => ( is => 'ro',
 sub _build_equality2type {
 return {
 	bitStringMatch => {
-			   type => 'text',
+			   field_type => 'text',
 			   validationrule => [ '' ],
 			  },
 	caseExactMatch => {
-			   type => 'text',
+			   field_type => 'text',
 			   validationrule => [ '' ],
 			  },
 	caseIgnoreIA5Match => {
-			       type => 'text',
+			       field_type => 'text',
 			       validationrule => [ '' ],
 			      },
 	caseIgnoreListMatch => {
-				type => 'text',
+				field_type => 'text',
 				validationrule => [ '' ],
 			       },
 	caseIgnoreMatch => {
-			    type => 'text',
+			    field_type => 'text',
 			    validationrule => [ '' ],
 			   },
 	certificateExactMatch => {
-				  type => 'text',
+				  field_type => 'text',
 				  validationrule => [ '' ],
 				 },
 	distinguishedNameMatch => {
-				   type => 'text',
+				   field_type => 'text',
 				   validationrule => [ '' ],
 				  },
 	numericStringMatch => {
-			       type => 'text',
+			       field_type => 'text',
 			       validationrule => [ 'PositiveNum' ],
 			      },
 	octetStringMatch => {
-			     type => 'text',
+			     field_type => 'text',
 			     validationrule => [ '' ],
 							 },
 	telephoneNumberMatch => {
-				 type => 'text',
+				 field_type => 'text',
 				 validationrule => [ '' ],
 				},
        };
