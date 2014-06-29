@@ -7,13 +7,14 @@ has 'equality2type' => ( is => 'ro',
 		       );
 
 sub _build_equality2type {
+
 return {
 	bitStringMatch => {
 			    field_type => 'Text',
 			    validationrule => [ '' ],
 			   },
 	booleanMatch  => {
-			  field_type => 'checkbox',
+			  field_type => 'CheckBox',
 			  validationrule => [ '' ],
 			 },
 	caseExactIA5Match  => {
@@ -61,11 +62,11 @@ return {
 				       validationrule => [ '' ],
 				      },
 	certificateExactMatch  => {
-				   field_type => 'file',
+				   field_type => 'File',
 				   validationrule => [ '' ],
 				  },
 	certificateListExactMatch  => {
-				       field_type => 'file',
+				       field_type => 'File',
 				       validationrule => [ '' ],
 				      },
 	distinguishedNameMatch  => {
@@ -137,6 +138,7 @@ return {
 			       validationrule => [ '' ],
 			      },
        };
+
 }
 
 sub is_ascii {
