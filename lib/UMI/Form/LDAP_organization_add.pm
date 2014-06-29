@@ -33,6 +33,37 @@ has 'ldap_crud' => (is => 'rw');
     # userPassword
     # x121Address
 
+######################################################################
+#
+# AUTOGENERATOR IDEA
+#
+######################################################################
+# # take schema for the object to manipulate
+# $obj_schema = $self->ldap_crud->obj_schema('ou=People, dc=ibs', 'uid=user01');
+
+# foreach my $dn (keys %{$obj_schema} ) {
+#   foreach my $objectClass (keys %{$obj_schema->{$dn}} ) {
+#     foreach my $mustAttr (keys %{$obj_schema->{$dn}->{$objectClass}->{'must'}}) {
+#       has_field $mustAttr => ( type => $self->equality2type
+# 			       ->{$obj_schema->{$dn}->{$objectClass}->{'must'}->{$mustAttr}->{'equality'}}
+# 			       ->{field_type},
+# 			       label => $mustAttr, label_class => [ 'col-sm-3' ],
+# 			       label_attr => { title => $obj_schema->{$dn}->{$objectClass}->{'must'}->{$mustAttr}->{'desc'}},
+# 			       element_wrapper_class => 'col-sm-8',
+# 			       );
+#     }
+#   }
+# }
+
+# but the difficulties to my mind are in these:
+# 1. we need to know where to use Select (static or dynamic) instead of Text
+# 2. for $obj_schema->{$dn}->{$objectClass}->{'must'}->{$mustAttr}->{'max_length'} 
+#    longer than, lets say 128 bytes, to use TextArea instead of Text
+# 3. for $obj_schema->{$dn}->{$objectClass}->{'must'}->{$mustAttr}->{'single-value'} == undef 
+#    to set possibility to add another value to the field (multivalued)
+# 4. other not obvious stuff here ...
+######################################################################
+
 has_field 'parent' => ( type => 'Select',
 			label => 'Parent Office', label_class => [ 'col-sm-3' ],
 			label_attr => { title => 'parent office, the one to be created belong' },
