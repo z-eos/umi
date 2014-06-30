@@ -14,7 +14,7 @@ has 'ldap_crud' => (is => 'rw');
 
 has_field 'org' => ( type => 'Select',
 		     label => 'Organization',
-#		     empty_select => '--- new office ---',
+		     empty_select => '--- new office ---',
 		     size => 3,
 		     required => 1 
 );
@@ -33,7 +33,7 @@ sub options_org {
 				 sizelimit => 0
 				});
   my @entries = $mesg->entries;
-  my @orgs = ( { value => '0', label => '--- new office ---' } );
+  my @orgs; # = ( { value => '0', label => '--- new office ---' } );
   foreach my $entry ( @entries ) {
     push @orgs, {
 		 value => $entry->dn,

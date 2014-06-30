@@ -1,151 +1,151 @@
 package Tools;
 use Moose::Role;
 
-has 'equality2type' => ( traits => ['Hash'],
-			 is => 'ro',
-			 isa => 'HashRef',
-			 builder => '_build_equality2type',
-		       );
+# has 'equality2type' => ( traits => ['Hash'],
+# 			 is => 'ro',
+# 			 isa => 'HashRef',
+# 			 builder => '_build_equality2type',
+# 		       );
 
-sub _build_equality2type {
+# sub _build_equality2type {
 
-return {
-	bitStringMatch => {
-			    field_type => 'Text',
-			    validationrule => [ '' ],
-			   },
-	booleanMatch  => {
-			  field_type => 'CheckBox',
-			  validationrule => [ '' ],
-			 },
-	caseExactIA5Match  => {
-			       field_type => 'Text',
-			       validationrule => [ '' ],
-			      },
-	caseExactIA5SubstringsMatch  => {
-					 field_type => 'Text',
-					 validationrule => [ '' ],
-					},
-	caseExactMatch  => {
-			    field_type => 'Text',
-			    validationrule => [ '' ],
-			   },
-	caseExactOrderingMatch  => {
-				    field_type => 'Text',
-				    validationrule => [ '' ],
-				   },
-	caseExactSubstringsMatch  => {
-				      field_type => 'Text',
-				      validationrule => [ '' ],
-				     },
-	caseIgnoreIA5Match  => {
-				field_type => 'Text',
-				validationrule => [ '' ],
-			       },
-	caseIgnoreIA5SubstringsMatch  => {
-					  field_type => 'Text',
-					  validationrule => [ '' ],
-					 },
-	caseIgnoreListMatch  => {
-				 field_type => 'Text',
-				 validationrule => [ '' ],
-				},
-	caseIgnoreMatch  => {
-			     field_type => 'Text',
-			     validationrule => [ '' ],
-			    },
-	caseIgnoreOrderingMatch  => {
-				     field_type => 'Text',
-				     validationrule => [ '' ],
-				    },
-	caseIgnoreSubstringsMatch  => {
-				       field_type => 'Text',
-				       validationrule => [ '' ],
-				      },
-	certificateExactMatch  => {
-				   field_type => 'File',
-				   validationrule => [ '' ],
-				  },
-	certificateListExactMatch  => {
-				       field_type => 'File',
-				       validationrule => [ '' ],
-				      },
-	distinguishedNameMatch  => {
-				    field_type => 'Text',
-				    validationrule => [ '' ],
-				   },
-	generalizedTimeMatch  => {
-				  field_type => 'DateTime',
-				  validationrule => [ 'YYYYmmDDHHMMSSZ' ],
-				 },
-	generalizedTimeOrderingMatch  => {
-					  field_type => 'DateTime',
-					  validationrule => [ 'YYYYmmDDHHMMSSZ' ],
-					 },
-	integerBitAndMatch  => {
-				field_type => 'Integer',
-				validationrule => [ '' ],
-			       },
-	integerBitOrMatch  => {
-			       field_type => 'Integer',
-			       validationrule => [ '' ],
-			      },
-	integerFirstComponentMatch  => {
-					field_type => 'Integer',
-					validationrule => [ '' ],
-				       },
-	integerMatch  => {
-			  field_type => 'Integer',
-			  validationrule => [ '' ],
-			 },
-	integerOrderingMatch  => {
-				  field_type => 'Integer',
-				  validationrule => [ '' ],
-				 },
-	numericStringMatch  => {
-				field_type => 'Integer',
-				validationrule => [ '' ],
-			       },
-	numericStringOrderingMatch  => {
-					field_type => 'Integer',
-					validationrule => [ '' ],
-				       },
-	numericStringSubstringsMatch  => {
-					  field_type => 'Integer',
-					  validationrule => [ '' ],
-					 },
-	octetStringMatch  => {
-			      field_type => '',
-			      validationrule => [ '' ],
-			     },
-	octetStringOrderingMatch  => {
-				      field_type => '',
-				      validationrule => [ '' ],
-				     },
-	octetStringSubstringsMatch  => {
-					field_type => '',
-					validationrule => [ '' ],
-				       },
-	telephoneNumberMatch  => {
-				  field_type => 'Text',
-				  validationrule => [ '' ],
-				 },
-	telephoneNumberSubstringsMatch  => {
-					    field_type => 'Text',
-					    validationrule => [ '' ],
-					   },
-	uniqueMemberMatch  => {
-			       field_type => 'Text',
-			       validationrule => [ '' ],
-			      },
-       };
+# return {
+# 	bitStringMatch => {
+# 			    field_type => 'Text',
+# 			    validationrule => [ '' ],
+# 			   },
+# 	booleanMatch  => {
+# 			  field_type => 'CheckBox',
+# 			  validationrule => [ '' ],
+# 			 },
+# 	caseExactIA5Match  => {
+# 			       field_type => 'Text',
+# 			       validationrule => [ '' ],
+# 			      },
+# 	caseExactIA5SubstringsMatch  => {
+# 					 field_type => 'Text',
+# 					 validationrule => [ '' ],
+# 					},
+# 	caseExactMatch  => {
+# 			    field_type => 'Text',
+# 			    validationrule => [ '' ],
+# 			   },
+# 	caseExactOrderingMatch  => {
+# 				    field_type => 'Text',
+# 				    validationrule => [ '' ],
+# 				   },
+# 	caseExactSubstringsMatch  => {
+# 				      field_type => 'Text',
+# 				      validationrule => [ '' ],
+# 				     },
+# 	caseIgnoreIA5Match  => {
+# 				field_type => 'Text',
+# 				validationrule => [ '' ],
+# 			       },
+# 	caseIgnoreIA5SubstringsMatch  => {
+# 					  field_type => 'Text',
+# 					  validationrule => [ '' ],
+# 					 },
+# 	caseIgnoreListMatch  => {
+# 				 field_type => 'Text',
+# 				 validationrule => [ '' ],
+# 				},
+# 	caseIgnoreMatch  => {
+# 			     field_type => 'Text',
+# 			     validationrule => [ '' ],
+# 			    },
+# 	caseIgnoreOrderingMatch  => {
+# 				     field_type => 'Text',
+# 				     validationrule => [ '' ],
+# 				    },
+# 	caseIgnoreSubstringsMatch  => {
+# 				       field_type => 'Text',
+# 				       validationrule => [ '' ],
+# 				      },
+# 	certificateExactMatch  => {
+# 				   field_type => 'File',
+# 				   validationrule => [ '' ],
+# 				  },
+# 	certificateListExactMatch  => {
+# 				       field_type => 'File',
+# 				       validationrule => [ '' ],
+# 				      },
+# 	distinguishedNameMatch  => {
+# 				    field_type => 'Text',
+# 				    validationrule => [ '' ],
+# 				   },
+# 	generalizedTimeMatch  => {
+# 				  field_type => 'DateTime',
+# 				  validationrule => [ 'YYYYmmDDHHMMSSZ' ],
+# 				 },
+# 	generalizedTimeOrderingMatch  => {
+# 					  field_type => 'DateTime',
+# 					  validationrule => [ 'YYYYmmDDHHMMSSZ' ],
+# 					 },
+# 	integerBitAndMatch  => {
+# 				field_type => 'Integer',
+# 				validationrule => [ '' ],
+# 			       },
+# 	integerBitOrMatch  => {
+# 			       field_type => 'Integer',
+# 			       validationrule => [ '' ],
+# 			      },
+# 	integerFirstComponentMatch  => {
+# 					field_type => 'Integer',
+# 					validationrule => [ '' ],
+# 				       },
+# 	integerMatch  => {
+# 			  field_type => 'Integer',
+# 			  validationrule => [ '' ],
+# 			 },
+# 	integerOrderingMatch  => {
+# 				  field_type => 'Integer',
+# 				  validationrule => [ '' ],
+# 				 },
+# 	numericStringMatch  => {
+# 				field_type => 'Integer',
+# 				validationrule => [ '' ],
+# 			       },
+# 	numericStringOrderingMatch  => {
+# 					field_type => 'Integer',
+# 					validationrule => [ '' ],
+# 				       },
+# 	numericStringSubstringsMatch  => {
+# 					  field_type => 'Integer',
+# 					  validationrule => [ '' ],
+# 					 },
+# 	octetStringMatch  => {
+# 			      field_type => '',
+# 			      validationrule => [ '' ],
+# 			     },
+# 	octetStringOrderingMatch  => {
+# 				      field_type => '',
+# 				      validationrule => [ '' ],
+# 				     },
+# 	octetStringSubstringsMatch  => {
+# 					field_type => '',
+# 					validationrule => [ '' ],
+# 				       },
+# 	telephoneNumberMatch  => {
+# 				  field_type => 'Text',
+# 				  validationrule => [ '' ],
+# 				 },
+# 	telephoneNumberSubstringsMatch  => {
+# 					    field_type => 'Text',
+# 					    validationrule => [ '' ],
+# 					   },
+# 	uniqueMemberMatch  => {
+# 			       field_type => 'Text',
+# 			       validationrule => [ '' ],
+# 			      },
+#        };
 
-}
+# }
 
 sub is_ascii {
   my ($self, $arg) = @_;
   # return $arg =~ /[^[:ascii:]]/ ? 1 : 0;
-  return $arg =~ /[^[:ascii:]]$/;
+  return $arg =~ /[^[:ascii:]]$/ if defined $arg;
 }
 
 =head2 cyr2lat

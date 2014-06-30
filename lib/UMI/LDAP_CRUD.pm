@@ -39,6 +39,25 @@ sub _build_ldap {
   return $ldap;
 }
 
+=head2 err
+
+Net::LDAP errors handling
+
+Net::LDAP::Message is expected as single input argument
+
+=cut
+
+sub err {
+  my ($self, $mesg) = @_;
+  return sprintf( "code: %s; error_name: %s; error_text: %s; error_desc: %s; server_error: %s",
+		  $mesg->code,
+		  $mesg->error_name,
+		  $mesg->error_text,
+		  $mesg->error_desc,
+		  $mesg->server_error)
+    if $mesg->code;
+}
+
 sub unbind {
   my $self = shift;
   $self->ldap->unbind;
@@ -111,7 +130,7 @@ sub del {
 
   if ( ! $self->dry_run ) {
     my $msg = $self->ldap->delete ( $dn );
-    if ($msg->is_error()) {
+    if ($msg->code) {
       $return .= "error_descr: " . $msg->error_desc;
       $return .= "; server_error: " . $msg->server_error if defined $msg->server_error;
     } else {
@@ -144,16 +163,40 @@ to add error correction
 
 sub last_uidNumber {
   my $self = shift;
+
+  my $callername = (caller(1))[3];
+  $callername = 'main' if ! defined $callername;
+  my $return = 'call to LDAP_CRUD->last_uidNumber from ' . $callername . ': ';
+
   my $mesg =
     $self->ldap->search(
-			base   => "ou=People,dc=ibs",
-			scope  => "one",
-			filter => "uidNumber=*",
-			attrs   => [ 'uidNumber' ],
+			base   => 'ou=People,dc=ibs',
+			scope  => 'one',
+			filter => '(uidNumber=*)',
+			attrs  => [ 'uidNumber' ],
+			deref => 'never',
 		       );
 
-  my @uids_arr = sort { $a <=> $b } map { $_->get_value('uidNumber') } $mesg->all_entries;
-  return $uids_arr[$#uids_arr];
+  if ( $mesg->code ) {
+    use Data::Dumper;
+    use Log::Contextual qw( :log :dlog set_logger with_logger );
+    use Log::Contextual::SimpleLogger;
+
+    my $logger = Log::Contextual::SimpleLogger->new({
+						     levels => [qw( trace debug )]
+						    });
+
+    set_logger $logger;
+
+    log_debug { Dumper($self) . "\n" . $self->err( $mesg ) };
+
+    $return .= $self->err( $mesg );
+  } else {
+    # my @uids_arr = sort { $a <=> $b } map { $_->get_value('uidNumber') } $mesg->entries;
+    my @uids_arr = $mesg->sorted ( 'uidNumber' );
+    $return = $uids_arr[$#uids_arr]->get_value( 'uidNumber' );
+  }
+  return $return;
 }
 
 =head2 obj_schema
