@@ -11,7 +11,7 @@ has_field 'org' => ( type => 'Select',
 		     label => 'Organization',
 		     empty_select => '--- new office ---',
 		     size => 3,
-		     required => 1 
+#		     required => 1 
 );
 
 sub options_org {
@@ -76,7 +76,7 @@ sub validate {
   if ( $self->field('org')->value && ! $self->field('act')->value ) {
     $self->field('org')->add_error('<span class="glyphicon glyphicon-exclamation-sign">' .
 				   '</span>&nbsp;You can not create an existent object!');
-  } elsif ( ! $self->field('org')->value && $self->field('act')->value ) {
+  } elsif ( ! $self->field('org')->value && $self->field('act')->value > 0 ) {
     $self->field('org')->add_error('<span class="glyphicon glyphicon-exclamation-sign">' .
 				   '</span>&nbsp;You can not manipulate an unexistent object!');
   }

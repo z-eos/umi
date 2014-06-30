@@ -69,10 +69,10 @@ sub create_object {
   # $c->log->debug( "\$attrs:\n" . Dumper($attrs));
 
   my $ldap_crud =
-    $c->model('LDAP_CRUD', dn => 'uid=' .
-	      $c->session->{umi_ldap_uid} .
-	      ',ou=people,dc=ibs',
-	      password => $c->session->{umi_ldap_password}
+    $c->model(
+	      'LDAP_CRUD',
+	      uid => $c->session->{umi_ldap_uid},
+	      pwd => $c->session->{umi_ldap_password}
 	     );
 
   my $descr = 'description has to be here';
