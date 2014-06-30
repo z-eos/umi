@@ -1,16 +1,11 @@
 package UMI::Form::LDAP_organization_select;
 
 use HTML::FormHandler::Moose;
-extends 'HTML::FormHandler';
+extends 'UMI::Form::LDAP';
 
-use HTML::FormHandler::Widget::Theme::Bootstrap3;
-use HTML::FormHandler::Widget::Wrapper::Bootstrap3;
+use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable' );
 
 has '+item_class' => ( default =>'LDAP_organization_select' );
-
-has '+widget_wrapper' => ( default => 'Bootstrap3');
-
-has 'ldap_crud' => (is => 'rw');
 
 has_field 'org' => ( type => 'Select',
 		     label => 'Organization',
