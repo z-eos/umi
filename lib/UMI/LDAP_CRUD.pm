@@ -17,6 +17,7 @@ has 'ldap'  => ( is => 'rw',
 		 isa => 'Net::LDAP',
 		 required => 0, lazy => 1,
 		 builder => '_build_ldap',
+		 clearer => 'reset_ldap',
 	       );
 
 sub _build_ldap {
@@ -168,6 +169,7 @@ sub last_uidNumber {
   $callername = 'main' if ! defined $callername;
   my $return = 'call to LDAP_CRUD->last_uidNumber from ' . $callername . ': ';
 
+  $self->reset_ldap;
   my $mesg =
     $self->ldap->search(
 			base   => 'ou=People,dc=ibs',
