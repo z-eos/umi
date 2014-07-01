@@ -1,3 +1,6 @@
+# -*- mode: cperl -*-
+#
+
 package Tools;
 use Moose::Role;
 
@@ -144,8 +147,7 @@ use Moose::Role;
 
 sub is_ascii {
   my ($self, $arg) = @_;
-  # return $arg =~ /[^[:ascii:]]/ ? 1 : 0;
-  return $arg =~ /[^[:ascii:]]$/ if defined $arg;
+  return $arg !~ /^[[:ascii:]]+$/ if defined $arg && $arg ne '';
 }
 
 =head2 cyr2lat
@@ -170,14 +172,16 @@ sub cyr2lat {
   return $tr->translit($arg->{'to_translate'});
 }
 
-# sub c2l {
-#   my ($self, $to_translit) = @_;
+sub utf2lat {
+  my ($self, $to_translit) = @_;
 
-#   use utf8;
-#   use Text::Unidecode;
+  use utf8;
+  use Text::Unidecode;
 
-#   return utf8::encode( unidecode( $to_translit ));
-# }
+  utf8::decode( $to_translit );
+
+  return unidecode( $to_translit );
+}
 
 # sub if_cyr {
 
@@ -196,7 +200,7 @@ sub pwdgen {
 		num => $args->{'num'} || 3,
 		cap => $args->{'cap'} || 4,
 		cnt => $args->{'cnt'} || 1,
-		salt => $args->{'salt'} || '123456789',
+		salt => $args->{'salt'} || 'wX3deUY/y!7g%gW%',
 		pronounceable => $args->{'pronounceable'} || 1,
 	       };
 

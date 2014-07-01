@@ -1,18 +1,15 @@
+# -*- mode: cperl -*-
+#
+
 package UMI::Form::LDAPaddUser;
 
 use HTML::FormHandler::Moose;
-BEGIN { extends 'HTML::FormHandler'; with 'Tools'; }
+BEGIN { extends 'UMI::Form::LDAP'; with 'Tools'; }
 
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable' );
-use HTML::FormHandler::Widget::Theme::Bootstrap3;
-use HTML::FormHandler::Widget::Wrapper::Bootstrap3;
 
 has '+item_class' => ( default =>'LDAPaddUser' );
-has '+widget_wrapper' => ( default => 'Bootstrap3');
 has '+enctype' => ( default => 'multipart/form-data');
-#has '+is_html5' => ( default => 1 );
-
-has 'ldap_crud' => (is => 'rw');
 
 has_field 'givenname' => ( apply => [ NoSpaces ],
 			   label => 'First Name',
@@ -25,7 +22,7 @@ has_field 'sn' => ( apply => [ NoSpaces ],
 		       required => 1 );
 
 has_field 'avatar' => ( type => 'Upload',
-			label => 'Avatar',
+			label => 'Photo User ID',
 			element_class => [ 'btn', 'btn-default', 'btn-sm' ],
 			max_size => '20000' );
 
@@ -85,7 +82,7 @@ has_field 'password1' => ( type => 'Password',
 			   apply => [ NoSpaces, NotAllDigits, Printable ],
 			   element_attr => 
 			   { placeholder => 'Password',
-			     title => 'leave empty password fields to autogenerate password',
+#			     title => 'leave empty password fields to autogenerate password',
 			   },
 			 );
 
@@ -96,14 +93,14 @@ has_field 'password2' => ( type => 'Password',
 			   apply => [ NoSpaces, NotAllDigits, Printable ],
 			   element_attr => 
 			   { placeholder => 'Confirm Password',
-			     title => 'leave empty password fields to autogenerate password',
+#			     title => 'leave empty password fields to autogenerate password',
 			   },
 			 );
 
 has_field 'pwdcomment' => ( type => 'Display',
-			    html => '<p class="text-warning"><small><em>' .
+			    html => '<p class="text-muted"><small><em>' .
 			    'leave empty password fields to autogenerate password</em></small></p>',
-			    element_class => 'text-warning'
+#			    element_class => 'text-muted'
 			  );
 
 has_field 'descr' => ( type => 'TextArea',
@@ -142,34 +139,34 @@ has_field 'reset' => ( type => 'Reset',
 has_field 'submit' => ( type => 'Submit',
 			wrapper_class => [ 'pull-right' ],
 			element_class => [ 'btn', 'btn-default', 'pull-right' ],
-			value => 'Create Account' );
+			value => 'Submit' );
 
 
 
 has_block 'person' => ( tag => 'fieldset',
-			render_list => [ 'givenname', 'sn', 'avatar', 'telephonenumber'],
-			label => '<span class="icon_id" aria-hidden="true"></span>',
+			render_list => [ 'givenname', 'sn', 'telephonenumber', 'avatar' ],
+			label => '<abbr title="Personal Data" class="initialism"><span class="icon_id" aria-hidden="true"></span></abbr>',
 			label_class => [ 'pull-left' ],
 			class => [ 'form-inline' ]
 		      );
 
 has_block 'job' => ( tag => 'fieldset',
 		     render_list => [ 'title', 'office' ],
-		     label => '<span class="icon_building" aria-hidden="true"></span>',
+#		     label => '<abbr title="Job Related Details" class="initialism"><span class="icon_building" aria-hidden="true"></span></abbr>',
 		     label_class => [ 'pull-left' ],
 		     class => [ 'form-inline' ]
 		   );
 
 has_block 'account' => ( tag => 'fieldset',
 			 render_list => [ 'login', 'password1', 'password2', 'pwdcomment' ],
-			 label => '<span class="icon_key_alt" aria-hidden="true"></span>',
+			 label => '<abbr title="User Accounts (Management and Srvice/s) Credentials" class="initialism"><span class="icon_key_alt" aria-hidden="true"></span></abbr>',
 			 label_class => [ 'pull-left' ],
 			 class => [ 'form-inline' ],
 		       );
 
 has_block 'services' => ( tag => 'fieldset',
 			  render_list => [ 'associateddomain', 'service', 'descr' ],
-			  label => '<span class="icon_cloud_alt" aria-hidden="true"></span>',
+			  label => '<abbr title="Services Assigned" class="initialism"><span class="icon_cloud_alt" aria-hidden="true"></span></abbr>',
 			  # label => '<span class="icon_menu-square_alt2" aria-hidden="true"></span>',
 			  label_class => [ 'pull-left' ],
 			  class => [ 'form-inline' ]
@@ -181,7 +178,7 @@ has_block 'submitit' => ( tag => 'fieldset',
 			class => [ 'form-inline' ]
 		      );
 
-sub build_render_list {[ 'person', 'account', 'services', 'job', 'submitit' ]}
+sub build_render_list {[ 'person', 'job', 'account', 'services', 'submitit' ]}
 
 sub html_attributes {
   my ( $self, $field, $type, $attr ) = @_;

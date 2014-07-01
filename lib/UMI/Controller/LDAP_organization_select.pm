@@ -1,3 +1,6 @@
+# -*- mode: cperl -*-
+#
+
 package UMI::Controller::LDAP_organization_select;
 use Moose;
 use namespace::autoclean;
@@ -5,6 +8,7 @@ use namespace::autoclean;
 BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 
 use UMI::Form::LDAP_organization_select;
+use UMI::LDAP_CRUD;
 
 has 'form' => ( isa => 'UMI::Form::LDAP_organization_select', is => 'rw',
 		lazy => 1, default => sub { UMI::Form::LDAP_organization_select->new },
@@ -32,11 +36,15 @@ sub index :Path :Args(0) {
     my ( $self, $c, $ldap_org_id ) = @_;
     if ( $c->check_user_roles('umi-admin')) {
       $c->stash(
-		template => 'ldapact/ldapact_o_wrap.tt',
+		template => 'ldapact/ldapact_o_node.tt',
 		form => $self->form
 	       );
 
-      my $ldap_crud = $c->model('LDAP_CRUD');
+      my $ldap_crud =
+	$c->model('LDAP_CRUD',
+		  uid => $c->session->{umi_ldap_uid},
+		  pwd => $c->session->{umi_ldap_password}
+		 );
 
       # Validate and insert/update database
       return unless $self->form->process( item_id => $ldap_org_id,
@@ -99,22 +107,23 @@ sub index :Path :Args(0) {
 
 
 sub add :Path(add) :Args(0) {
-    my ( $self, $c, $ldap_org_id ) = @_;
-    if ( $c->check_user_roles('umi-admin')) {
-      # use Data::Dumper;
+  my ( $self, $c, $ldap_org_id ) = @_;
+  if ( $c->check_user_roles('umi-admin')) {
+    # use Data::Dumper;
 
-      $c->stash( template => 'ldapact/ldapact_o_add_wrap.tt',
-		 form => $self->form );
+    $c->stash( template => 'ldapact/ldapact_o_add_node.tt',
+	       form => $self->form );
 
-      # Validate and insert/update database
-      return unless $self->form->process( item_id => $ldap_org_id,
-					  posted => ($c->req->method eq 'POST'),
-					  params => $c->req->parameters,
-					  ldap_crud => $c->model('LDAP_CRUD'),
-					);
-    } else {
-      $c->response->body('Unauthorized!');
-    }
+    # Validate and insert/update database
+    return unless
+      $self->form->process( item_id => $ldap_org_id,
+			    posted => ($c->req->method eq 'POST'),
+			    params => $c->req->parameters,
+			    ldap_crud => $c->model('LDAP_CRUD'),
+			  );
+  } else {
+    $c->response->body('Unauthorized!');
+  }
 }
 
 =head1 AUTHOR

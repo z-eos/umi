@@ -1,3 +1,6 @@
+# -*- mode: cperl -*-
+#
+
 package UMI::Form::LDAP_organization_select;
 
 use HTML::FormHandler::Moose;

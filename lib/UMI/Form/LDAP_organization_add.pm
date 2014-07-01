@@ -1,3 +1,6 @@
+# -*- mode: cperl -*-
+#
+
 package UMI::Form::LDAP_organization_add;
 
 use HTML::FormHandler::Moose;
@@ -96,16 +99,19 @@ sub options_parent {
   $ldap_crud->unbind;
 }
 
-has_field 'ou' => ( label => 'Organizational Unit', label_class => [ 'col-sm-3' ],
-		    label_attr => { title => 'top level name of the organization as it is used in physicalDeliveryOfficeName value of users' },
-		    element_wrapper_class => 'col-sm-8',
-		    element_attr => { placeholder => 'fo01' },
-		    required => 1 );
+has_field 'ou' => (
+		   label => 'Organizational Unit', label_class => [ 'col-sm-3' ],
+		   label_attr => { title => 'top level name of the organization as it is used in physicalDeliveryOfficeName value of users' },
+		   element_wrapper_class => 'col-sm-8',
+		   element_attr => { placeholder => 'fo01' },
+		   required => 1,
+		  );
 
 has_field 'businessCategory' => ( type => 'Select',
 				  label => 'Business Category', label_class => [ 'col-sm-3' ],
 				  element_wrapper_class => 'col-sm-8',
-				  options => [{ value => 'it', label => 'IT', selected => 'on'},
+				  options => [
+					      { value => 'it', label => 'IT', selected => 'on'},
 					      { value => 'trade', label => 'Trade',},
 					      { value => 'telephony', label => 'Telephony',},
 					      { value => 'fin', label => 'Financial',},
@@ -120,17 +126,22 @@ has_field 'description' => ( type => 'TextArea',
 		       element_attr => { placeholder => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed dapibus nulla. Mauris vehicula vehicula ligula ac dapibus. Fusce vehicula a turpis sed. ' },
 		       cols => 30, rows => 2);
 
-has_field 'l' => ( label => 'Location', label_class => [ 'col-sm-3' ],
-		   label_attr => { title => 'location, commonly the city the office situated at' },
-		   element_wrapper_class => 'col-sm-8',
-		   element_attr => { placeholder => 'Donetsk' },
+has_field 'l' => (
+		  label => 'Location', label_class => [ 'col-sm-3' ],
+		  label_attr => { title => 'location, commonly the city the office situated at' },
+		  element_wrapper_class => 'col-sm-8',
+		  element_attr => { placeholder => 'Donetsk' },
+		  required => 1,
 		 );
 
-has_field 'physicalDeliveryOfficeName' => ( label => 'physicalDeliveryOfficeName',
-					    label_attr => { title => 'official office name as it is known to the world' },
-					    label_class => [ 'col-sm-3' ],
-					    element_wrapper_class => 'col-sm-8',
-					    element_attr => { placeholder => 'Horns & Hooves LLC' });
+has_field 'physicalDeliveryOfficeName' => (
+					   label => 'physicalDeliveryOfficeName',
+					   label_attr => { title => 'official office name as it is known to the world' },
+					   label_class => [ 'col-sm-3' ],
+					   element_wrapper_class => 'col-sm-8',
+					   element_attr => { placeholder => 'Horns & Hooves LLC' },
+					   required => 1,
+					  );
 
 has_field 'postOfficeBox' => ( label => 'Postoffice Box', label_class => [ 'col-sm-3' ],
 			    element_wrapper_class => 'col-sm-8',

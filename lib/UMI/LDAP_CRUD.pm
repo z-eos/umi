@@ -1,3 +1,6 @@
+# -*- cperl -*-
+#
+
 package LDAP_CRUD;
 
 use Data::Dumper;
@@ -32,24 +35,29 @@ sub _build_ldap {
 	};
 
 	return $ldap;
-} ## end sub _build_ldap
-around 'ldap' => sub {
-	my $orig = shift;
-	my $self = shift;
+}
 
-	my $ldap = $self->$orig(@_);
+around 'ldap' =>
+  sub {
+    my $orig = shift;
+    my $self = shift;
 
-	my $mesg = $ldap->bind(
-		sprintf( 'uid=%s,ou=People,dc=ibs', $self->uid ),
-		password => $self->pwd,
-		version  => 3,
-	);
-	if ( $mesg->is_error ) {
-		warn "Net::LDAP->bind error_desc: " . $mesg->error_desc . "; server_error: " . $mesg->server_error;
-	}
+    my $ldap = $self->$orig(@_);
 
-	return $ldap;
-};
+    my $mesg = $ldap->bind(
+			   sprintf( 'uid=%s,ou=People,dc=ibs', $self->uid ),
+			   password => $self->pwd,
+			   version  => 3,
+			  );
+    if ( $mesg->is_error ) {
+      warn "Net::LDAP->bind error_desc: " .
+	$mesg->error_desc .
+	  "; server_error: " .
+	    $mesg->server_error;
+    }
+    return $ldap;
+  };
+
 # sub ldap {
 # 	my $self = shift;
 # 
@@ -78,7 +86,20 @@ Net::LDAP::Message is expected as single input argument
 
 sub err {
   my ($self, $mesg) = @_;
-  return sprintf( "code: %s; error_name: %s; error_text: %s; error_desc: %s; server_error: %s",
+
+# to finish #   use Data::Dumper;
+# to finish #   use Log::Contextual qw( :log :dlog set_logger with_logger );
+# to finish #   use Log::Contextual::SimpleLogger;
+# to finish # 
+# to finish #   my $logger = Log::Contextual::SimpleLogger->new({
+# to finish # 						   levels => [qw( trace debug )]
+# to finish # 						  });
+# to finish # 
+# to finish #   set_logger $logger;
+# to finish # 
+# to finish #   log_debug { Dumper($self) . "\n" . $self->err( $mesg ) };
+
+  return sprintf( "<dl class=\"dl-horizontal\"><dt>code</dt><dd>%s</dd><dt>error_name</dt><dd>%s</dd><dt>error_text</dt><dd>%s</dd><dt>error_desc</dt><dd>%s</dd><dt>server_error</dt><dd>%s</dd></dl>",
 		  $mesg->code,
 		  $mesg->error_name,
 		  $mesg->error_text,
@@ -131,8 +152,9 @@ sub add {
   if ( ! $self->dry_run ) {
     $msg = $self->ldap->add ( $dn, attrs => $attrs, );
     if ($msg->is_error()) {
-      $return = "error_descr: " . $msg->error_desc();
-      $return .= "; server_error: " . $msg->server_error() if defined $msg->server_error();
+      # $return = "error_descr: " . $msg->error_desc();
+      # $return .= "; server_error: " . $msg->server_error() if defined $msg->server_error();
+      $return .= $self->err( $msg );
     } else {
       $return = 0;
     }
@@ -208,18 +230,6 @@ sub last_uidNumber {
 		       );
 
   if ( $mesg->code ) {
-    use Data::Dumper;
-    use Log::Contextual qw( :log :dlog set_logger with_logger );
-    use Log::Contextual::SimpleLogger;
-
-    my $logger = Log::Contextual::SimpleLogger->new({
-						     levels => [qw( trace debug )]
-						    });
-
-    set_logger $logger;
-
-    log_debug { Dumper($self) . "\n" . $self->err( $mesg ) };
-
     $return .= $self->err( $mesg );
   } else {
     # my @uids_arr = sort { $a <=> $b } map { $_->get_value('uidNumber') } $mesg->entries;
@@ -380,6 +390,82 @@ sub select_key_val {
   }
   return \%results;
 }
+
+=head2 obj_add
+
+=cut
+
+sub obj_add {
+  my  ( $self, $args ) = @_;
+  my $type = $args->{'type'};
+  my $params = $args->{'params'};
+
+  use Data::Dumper;
+  # warn 'obj_add: ' . Dumper($params);
+
+  my $descr = 'description has to be here';
+  if (defined $params->{'descr'} && $params->{'descr'} ne '') {
+    $descr = join(' ', $params->{'descr'});
+  }
+
+  my $telephoneNumber = '666';
+  if (defined $params->{'telephonenumber'} && $params->{'telephonenumber'} ne '') {
+    $telephoneNumber = $params->{'telephonenumber'};
+  }
+
+#
+## HERE WE NEED TO SET FLAG TO CREATE BRANCH FOR LOCALIZED VERSION OF DATA
+## associatedService=localization-ru,uid=U...-user01,ou=People,dc=ibs
+## associatedService=localization-uk,uid=U...-user01,ou=People,dc=ibs
+## e.t.c.
+#
+
+  my $tr;
+  my $attr_defined = [];
+  foreach my $key (keys %{$params}) {
+    $tr = $self->is_ascii( $params->{$key} ) ?
+      $self->utf2lat( $params->{$key} ) : $params->{$key};
+    push @{$attr_defined}, $key => $tr
+      if defined $params->{$key} && $params->{$key} ne '' && $key ne 'submit' && $key ne 'parent';
+  }
+  push @{$attr_defined}, objectClass => [ 'top', 'organizationalUnit' ];
+
+  warn Dumper($attr_defined);
+
+  my $success_message;
+
+  ######################################################################
+  # ORGANIZATION Object
+  ######################################################################
+  my $base = $params->{'parent'} != 0 ? $params->{'parent'} : 'ou=Organizations,dc=ibs';
+  my $ldif =
+    $self->add(
+	       sprintf('ou=%s,%s', $params->{'ou'}, $base),
+	       $attr_defined,
+	      );
+  my $error_message;
+  if ( $ldif ) {
+    $error_message = 'Error during organization object creation occured: ' . $ldif;
+    warn sprintf('ou=%s,ou=Organizations,dc=ibs obj wasn not created: ', $params->{'ou'}, $ldif);
+  }
+
+  my $final_message;
+  $final_message = '<div class="alert alert-success">' .
+    '<span style="font-size: 140%" class="glyphicon glyphicon-ok-sign"></span>' .
+      '&nbsp;<em>Object for organization ' .
+	' &laquo;' . $self->utf2lat({ to_translate => $params->{'physicaldeliveryofficename'} }) .
+	  '&raquo;</em> successfully created.</div>' if $success_message;
+
+  $final_message .= '<div class="alert alert-danger">' .
+    '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span>&nbsp;' .
+      $error_message . '</div>' if $error_message;
+
+  $self->form->info_message( $final_message ) if $final_message;
+
+  $self->unbind;
+  return $ldif;
+}
+
 
 ######################################################################
 

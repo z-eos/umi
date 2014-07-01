@@ -1,3 +1,6 @@
+# -*- mode: cperl -*-
+#
+
 package UMI::Controller::LDAP_organization_add;
 use Moose;
 use namespace::autoclean;
@@ -21,7 +24,7 @@ Catalyst Controller.
 
 has 'form' => ( isa => 'UMI::Form::LDAP_organization_add', is => 'rw',
 		lazy => 1, 
-		default => sub { 
+		default => sub {
 		  UMI::Form::LDAP_organization_add->new('form_element_class' => 'form-horizontal')
 		  },
 		documentation => q{Form to add organization/s},
@@ -35,18 +38,32 @@ has 'form' => ( isa => 'UMI::Form::LDAP_organization_add', is => 'rw',
 sub index :Path :Args(0) {
     my ( $self, $c, $ldap_org_id ) = @_;
     if ( $c->check_user_roles('umi-admin')) {
-      $c->stash( template => 'ldapact/ldapact_o_add_wrap.tt',
+      $c->stash( template => 'ldapact/ldapact_o_add_node.tt',
 		 form => $self->form );
 
       # Validate and insert/update database
-      return unless $self->form->process( item_id => $ldap_org_id,
-					  posted => ($c->req->method eq 'POST'),
-					  params => $c->req->parameters,
-					  ldap_crud => $c->model('LDAP_CRUD'),
+      return unless $self->form->process(
+					 item => $c->model('LDAP_CRUD')
+					 ->obj_add(
+						   {
+						    'type' => 'org',
+						    'params' => $c->req->parameters 
+						   }
+						  ),
+#					 item_id => $ldap_org_id,
+					 posted => ($c->req->method eq 'POST'),
+					 params => $c->req->parameters,
+					 ldap_crud => $c->model('LDAP_CRUD'),
 					);
 
-      my $res = $self->create_object( $c );
-      $c->log->debug( "create_object (from umi_o_add) error: " . $res) if $res;
+      # my $res = $c->model('LDAP_CRUD')->obj_add(
+      # 						{
+      # 						 'type' => 'org',
+      # 						 'params' => $c->req->parameters 
+      # 						}
+      # 					       );
+      # # my $res = $self->create_object( $c );
+      # $c->log->debug( "create_object (from umi_o_add) error: " . $res) if $res;
 
     } else {
       $c->response->body('Unauthorized!');
@@ -67,12 +84,12 @@ sub create_object {
   my $ldap_crud = $c->model('LDAP_CRUD');
 
   my $descr = 'description has to be here';
-  if (defined $attrs->{'descr'} and $attrs->{'descr'} ne '') {
+  if (defined $attrs->{'descr'} && $attrs->{'descr'} ne '') {
     $descr = join(' ', $attrs->{'descr'});
   }
 
   my $telephoneNumber = '666';
-  if (defined $attrs->{'telephonenumber'} and $attrs->{'telephonenumber'} ne '') {
+  if (defined $attrs->{'telephonenumber'} && $attrs->{'telephonenumber'} ne '') {
     $telephoneNumber = $attrs->{'telephonenumber'};
   }
 
@@ -83,20 +100,18 @@ sub create_object {
 ## e.t.c.
 #
 
-  my ( $givenName, $sn, $cn, $o, $pwd );
+  my ( $givenName, $l, $o, $pwd, $tr );
   if ($self->is_ascii($attrs->{'fname'})) {
     $givenName = $self->cyr2lat({ to_translate => $attrs->{'fname'} });
   } else {
     $givenName = $attrs->{'fname'};
   };
-  $cn = $givenName;
 
-  if ($self->is_ascii($attrs->{'lname'})) {
-    $sn = $self->cyr2lat({ to_translate => $attrs->{'lname'} });
+  if ($self->is_ascii($attrs->{'l'})) {
+    $l = $self->utf2lat({ to_translate => $attrs->{'l'} });
   } else {
-    $sn = $attrs->{'lname'};
+    $l = $attrs->{'l'};
   };
-  $cn .= ' ' . $sn;
 
   if ($self->is_ascii($attrs->{'org'})) {
     $o = $self->cyr2lat({ to_translate => $attrs->{'org'} });
@@ -106,8 +121,10 @@ sub create_object {
 
   my $attr_defined = [];
   foreach my $key (keys %{$attrs}) {
-    push @{$attr_defined}, $key => $self->cyr2lat({ to_translate => $attrs->{$key}})
-      if defined $attrs->{$key} and $attrs->{$key} ne '' and $key ne 'submit' and $key ne 'parent';
+    $tr = $self->is_ascii( $attrs->{$key} ) ?
+      $self->utf2lat( $attrs->{$key} ) : $attrs->{$key};
+    push @{$attr_defined}, $key => $tr
+      if defined $attrs->{$key} && $attrs->{$key} ne '' && $key ne 'submit' && $key ne 'parent';
   }
   push @{$attr_defined}, objectClass => [ 'top', 'organizationalUnit' ];
 
@@ -117,11 +134,10 @@ sub create_object {
   ######################################################################
   # ORGANIZATION Object
   ######################################################################
-  my $base = defined $attrs->{'parent'} ? $attrs->{'parent'} : 'ou=Organizations,dc=ibs';
+  my $base = $attrs->{'parent'} != 0 ? $attrs->{'parent'} : 'ou=Organizations,dc=ibs';
   my $ldif =
     $ldap_crud->add(
-		    'ou=' . $attrs->{'ou'} . ',' .
-		    $base,
+		    sprintf('ou=%s,%s', $attrs->{'ou'}, $base),
 		    $attr_defined,
 		   );
   my $error_message;

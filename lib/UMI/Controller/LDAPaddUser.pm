@@ -1,3 +1,6 @@
+# -*- mode: cperl -*-
+#
+
 package UMI::Controller::LDAPaddUser;
 use Moose;
 use namespace::autoclean;
@@ -70,7 +73,8 @@ sub create_account {
     use Data::Dumper;
     # $c->log->debug( "\$args:\n" . Dumper($args));
 
-    my $ldap_crud = $c->model('LDAP_CRUD');
+    my $ldap_crud =
+      $c->model('LDAP_CRUD');
 
     # $c->log->debug( "ldap_crud: " . Dumper($ldap_crud) . "\n");
     my $uidNumber = $ldap_crud->last_uidNumber;
