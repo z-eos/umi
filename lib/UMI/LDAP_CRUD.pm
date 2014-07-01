@@ -13,32 +13,60 @@ has 'uid' => ( is => 'ro', isa => 'Str', required => 1 );
 has 'pwd' => ( is => 'ro', isa => 'Str', required => 1 );
 has 'dry_run' => ( is => 'ro', isa => 'Bool', default => 0 );
 
-has 'ldap'  => ( is => 'rw',
-		 isa => 'Net::LDAP',
-		 required => 0, lazy => 1,
-		 builder => '_build_ldap',
-		 clearer => 'reset_ldap',
-	       );
-
+has '_ldap' => (
+	is       => 'rw',
+	isa      => 'Net::LDAP',
+	required => 0, lazy => 1,
+	builder  => '_build_ldap',
+	clearer  => 'reset_ldap',
+	reader   => 'ldap',
+);
 sub _build_ldap {
-  my $self = shift;
+	my $self = shift;
 
-  my $ldap = try {
-    Net::LDAP->new ( $self->host, async => 1 );
-  } catch {
-    warn "Net::LDAP->new problem, error: $_"; # not $@
-  };
+	my $ldap = try {
+		Net::LDAP->new( $self->host, async => 1 );
+	}
+	catch {
+		warn "Net::LDAP->new problem, error: $_";    # not $@
+	};
 
-  my $mesg =  $ldap->bind (
-			   sprintf('uid=%s,ou=People,dc=ibs', $self->uid),
-			   password => $self->pwd,
-			   version => 3,
-			  );
-  if ( $mesg->is_error ) {
-    warn "Net::LDAP->bind error_desc: " . $mesg->error_desc . "; server_error: " . $mesg->server_error;
-  }
-  return $ldap;
-}
+	return $ldap;
+} ## end sub _build_ldap
+around 'ldap' => sub {
+	my $orig = shift;
+	my $self = shift;
+
+	my $ldap = $self->$orig(@_);
+
+	my $mesg = $ldap->bind(
+		sprintf( 'uid=%s,ou=People,dc=ibs', $self->uid ),
+		password => $self->pwd,
+		version  => 3,
+	);
+	if ( $mesg->is_error ) {
+		warn "Net::LDAP->bind error_desc: " . $mesg->error_desc . "; server_error: " . $mesg->server_error;
+	}
+
+	return $ldap;
+};
+# sub ldap {
+# 	my $self = shift;
+# 
+# 	my $ldap = $self->_ldap; # get our private attribute
+# 
+# 	my $mesg = $ldap->bind(
+# 		sprintf( 'uid=%s,ou=People,dc=ibs', $self->uid ),
+# 		password => $self->pwd,
+# 		version  => 3,
+# 	);
+# 	if ( $mesg->is_error ) {
+# 		warn "Net::LDAP->bind error_desc: " . $mesg->error_desc . "; server_error: " . $mesg->server_error;
+# 	}
+# 
+# 	return $ldap;
+# } ## end sub ldap
+
 
 =head2 err
 
