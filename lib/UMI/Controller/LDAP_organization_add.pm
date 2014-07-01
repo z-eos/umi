@@ -42,11 +42,7 @@ sub index :Path :Args(0) {
       return unless $self->form->process( item_id => $ldap_org_id,
 					  posted => ($c->req->method eq 'POST'),
 					  params => $c->req->parameters,
-					  ldap_crud => $c->model(
-								 'LDAP_CRUD',
-								 uid => $c->session->{umi_ldap_uid},
-								 pwd => $c->session->{umi_ldap_password},
-								),
+					  ldap_crud => $c->model('LDAP_CRUD'),
 					);
 
       my $res = $self->create_object( $c );
@@ -68,12 +64,7 @@ sub create_object {
   use Data::Dumper;
   # $c->log->debug( "\$attrs:\n" . Dumper($attrs));
 
-  my $ldap_crud =
-    $c->model(
-	      'LDAP_CRUD',
-	      uid => $c->session->{umi_ldap_uid},
-	      pwd => $c->session->{umi_ldap_password}
-	     );
+  my $ldap_crud = $c->model('LDAP_CRUD');
 
   my $descr = 'description has to be here';
   if (defined $attrs->{'descr'} and $attrs->{'descr'} ne '') {

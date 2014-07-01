@@ -46,11 +46,7 @@ sub index :Path :Args(0) {
       return unless $self->form->process( item_id => $ldapadduser_id,
 					  posted => ($c->req->method eq 'POST'),
 					  params => $params,
-					  ldap_crud => $c->model(
-								 'LDAP_CRUD',
-								 uid => $c->session->{umi_ldap_uid},
-								 pwd => $c->session->{umi_ldap_password},
-								),
+					  ldap_crud => $c->model('LDAP_CRUD'),
 					);
 
       # $c->log->debug("Moose::Role test:\n" . $self->is_ascii("latin1"));
@@ -74,12 +70,7 @@ sub create_account {
     use Data::Dumper;
     # $c->log->debug( "\$args:\n" . Dumper($args));
 
-    my $ldap_crud =
-      $c->model(
-		'LDAP_CRUD',
-		uid => $c->session->{umi_ldap_uid},
-		pwd => $c->session->{umi_ldap_password},
-	       );
+    my $ldap_crud = $c->model('LDAP_CRUD');
 
     # $c->log->debug( "ldap_crud: " . Dumper($ldap_crud) . "\n");
     my $uidNumber = $ldap_crud->last_uidNumber;

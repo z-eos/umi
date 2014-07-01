@@ -5,7 +5,6 @@ use namespace::autoclean;
 BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 
 use UMI::Form::LDAP_organization_select;
-use UMI::LDAP_CRUD;
 
 has 'form' => ( isa => 'UMI::Form::LDAP_organization_select', is => 'rw',
 		lazy => 1, default => sub { UMI::Form::LDAP_organization_select->new },
@@ -37,11 +36,7 @@ sub index :Path :Args(0) {
 		form => $self->form
 	       );
 
-      my $ldap_crud =
-	$c->model('LDAP_CRUD',
-		  uid => $c->session->{umi_ldap_uid},
-		  pwd => $c->session->{umi_ldap_password}
-		 );
+      my $ldap_crud = $c->model('LDAP_CRUD');
 
       # Validate and insert/update database
       return unless $self->form->process( item_id => $ldap_org_id,
@@ -115,11 +110,7 @@ sub add :Path(add) :Args(0) {
       return unless $self->form->process( item_id => $ldap_org_id,
 					  posted => ($c->req->method eq 'POST'),
 					  params => $c->req->parameters,
-					  ldap_crud => $c->model(
-								 'LDAP_CRUD',
-								 uid => $c->session->{umi_ldap_uid},
-								 pwd => $c->session->{umi_ldap_password}
-								),
+					  ldap_crud => $c->model('LDAP_CRUD'),
 					);
     } else {
       $c->response->body('Unauthorized!');
