@@ -200,7 +200,7 @@ sub pwdgen {
 		num => $args->{'num'} || 3,
 		cap => $args->{'cap'} || 4,
 		cnt => $args->{'cnt'} || 1,
-		salt => $args->{'salt'} || 'wX3deUY/y!7g%gW%',
+		salt => $args->{'salt'} || '************',
 		pronounceable => $args->{'pronounceable'} || 1,
 	       };
 
