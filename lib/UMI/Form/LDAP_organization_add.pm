@@ -44,9 +44,9 @@ use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printabl
 #       has_field $mustAttr => ( type => $self->equality2type
 # 			       ->{$obj_schema->{$dn}->{$objectClass}->{'must'}->{$mustAttr}->{'equality'}}
 # 			       ->{field_type},
-# 			       label => $mustAttr, label_class => [ 'col-sm-3' ],
+# 			       label => $mustAttr, label_class => [ 'col-md-3' ],
 # 			       label_attr => { title => $obj_schema->{$dn}->{$objectClass}->{'must'}->{$mustAttr}->{'desc'}},
-# 			       element_wrapper_class => 'col-sm-8',
+# 			       element_wrapper_class => 'col-md-8',
 # 			       );
 #     }
 #   }
@@ -61,13 +61,15 @@ use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printabl
 # 4. other not obvious stuff here ...
 ######################################################################
 
-has_field 'parent' => ( type => 'Select',
-			label => 'Parent Office', label_class => [ 'col-sm-3' ],
-			label_attr => { title => 'parent office, the one to be created belong' },
-			element_wrapper_class => 'col-sm-8',
-		      );
+# bl-0 ----------------------------------------------------------------------
 
-sub options_parent {
+has_field 'aux_parent' => ( type => 'Select',
+			    label => 'Parent Office',
+			    wrapper_class => [ 'col-md-5' ],
+			    label_attr => { title => 'parent office, the one to be created belongs' },
+			  );
+
+sub options_aux_parent {
   my $self = shift;
 
   return unless $self->ldap_crud;
@@ -99,19 +101,29 @@ sub options_parent {
   $ldap_crud->unbind;
 }
 
+# bl-1 ----------------------------------------------------------------------
+
+has_field 'physicalDeliveryOfficeName' => (
+					   label => 'physicalDeliveryOfficeName',
+					   label_attr => { title => 'official office name as it is known to the world' },
+					   wrapper_class => 'col-md-4',
+					   element_attr => { placeholder => 'Horns & Hooves LLC' },
+					   required => 1,
+					  );
+
 has_field 'ou' => (
-		   label => 'Organizational Unit', label_class => [ 'col-sm-3' ],
+		   label => 'Org Unit',
 		   label_attr => { title => 'top level name of the organization as it is used in physicalDeliveryOfficeName value of users' },
-		   element_wrapper_class => 'col-sm-8',
+		   wrapper_class => 'col-md-2',
 		   element_attr => { placeholder => 'fo01' },
 		   required => 1,
 		  );
 
 has_field 'businessCategory' => ( type => 'Select',
-				  label => 'Business Category', label_class => [ 'col-sm-3' ],
-				  element_wrapper_class => 'col-sm-8',
+				  label => 'Business Category',
+				  wrapper_class => 'col-md-2',
 				  options => [
-					      { value => 'it', label => 'IT', selected => 'on'},
+					      { value => 'it', label => 'IT',},
 					      { value => 'trade', label => 'Trade',},
 					      { value => 'telephony', label => 'Telephony',},
 					      { value => 'fin', label => 'Financial',},
@@ -120,75 +132,117 @@ has_field 'businessCategory' => ( type => 'Select',
 					     ],
 				);
 
-has_field 'description' => ( type => 'TextArea',
-		       label => 'Description', label_class => [ 'col-sm-3' ],
-		       element_wrapper_class => 'col-sm-8',
-		       element_attr => { placeholder => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed dapibus nulla. Mauris vehicula vehicula ligula ac dapibus. Fusce vehicula a turpis sed. ' },
-		       cols => 30, rows => 2);
+has_field 'telephoneNumber' => (
+				label => 'telephoneNumber',
+				wrapper_class => 'col-md-3',
+				element_attr => { placeholder => '666' },
+			       );
+
+# bl-2 ----------------------------------------------------------------------
+
+has_field 'postOfficeBox' => ( label => 'PB',
+			    wrapper_class => 'col-md-1',
+			    element_attr => { placeholder => '121' },
+			     );
+
+has_field 'street' => ( label => 'Street',
+			wrapper_class => 'col-md-3',
+			element_attr => { placeholder => 'Artema' },
+		      );
+
+has_field 'postalCode' => ( label => 'Postalcode',
+			    wrapper_class => 'col-md-2',
+			    element_attr => { placeholder => '83100' },
+			  );
 
 has_field 'l' => (
-		  label => 'Location', label_class => [ 'col-sm-3' ],
+		  label => 'Location',
 		  label_attr => { title => 'location, commonly the city the office situated at' },
-		  element_wrapper_class => 'col-sm-8',
+		  wrapper_class => 'col-md-2',
 		  element_attr => { placeholder => 'Donetsk' },
 		  required => 1,
 		 );
 
-has_field 'physicalDeliveryOfficeName' => (
-					   label => 'physicalDeliveryOfficeName',
-					   label_attr => { title => 'official office name as it is known to the world' },
-					   label_class => [ 'col-sm-3' ],
-					   element_wrapper_class => 'col-sm-8',
-					   element_attr => { placeholder => 'Horns & Hooves LLC' },
-					   required => 1,
-					  );
-
-has_field 'postOfficeBox' => ( label => 'Postoffice Box', label_class => [ 'col-sm-3' ],
-			    element_wrapper_class => 'col-sm-8',
-			    element_attr => { placeholder => '121' },
-			     );
-
-has_field 'postalAddress' => ( label => 'PostalAdress', label_class => [ 'col-sm-3' ],
-			       element_wrapper_class => 'col-sm-8',
-			       element_attr => { placeholder => '121, 4th floor' },
-			     );
-
-has_field 'postalCode' => ( label => 'Postalcode', label_class => [ 'col-sm-3' ],
-			    element_wrapper_class => 'col-sm-8',
-			    element_attr => { placeholder => '83100' },
-			  );
-
-has_field 'registeredAddress' => ( label => 'Registered Adress', label_class => [ 'col-sm-3' ],
-				   element_wrapper_class => 'col-sm-8',
-				   element_attr => { placeholder => '121, 4th floor' },
-				 );
-
-has_field 'st' => ( label => 'State', label_class => [ 'col-sm-3' ],
+has_field 'st' => ( label => 'State',
 		    label_attr => { title => 'state, commonly short form of the city' },
-		    element_wrapper_class => 'col-sm-8',
+		    wrapper_class => 'col-md-1',
 		    element_attr => { placeholder => 'DN' },
 		  );
 
-has_field 'street' => ( label => 'Street', label_class => [ 'col-sm-3' ],
-			element_wrapper_class => 'col-sm-8',
-			element_attr => { placeholder => 'Artema' },
-		      );
+# bl-3 ----------------------------------------------------------------------
 
-has_field 'telephoneNumber' => ( label => 'telephoneNumber', label_class => [ 'col-sm-3' ],
-				 element_wrapper_class => 'col-sm-8',
-				 element_attr => { placeholder => '666' },
-			       );
+has_field 'postalAddress' => ( label => 'PostalAdress',
+			       wrapper_class => 'col-md-3',
+			       element_attr => { placeholder => '121, 4th floor' },
+			     );
 
-has_field 'reset' => ( type => 'Reset',
-		       element_wrapper_class => 'col-sm-offset-3 col-sm-8',
-		       element_class => [ 'btn', 'btn-default', 'pull-left' ],
-		       value => 'Reset' );
+has_field 'registeredAddress' => ( label => 'Registered Adress',
+				   wrapper_class => 'col-md-3',
+				   element_attr => { placeholder => '121, 4th floor' },
+				 );
 
-has_field 'submit' => ( type => 'Submit',
-#			wrapper_class => [ 'float-right' ],
-			element_wrapper_class => 'col-sm-offset-3 col-sm-8',
-			element_class => [ 'btn', 'btn-default', 'pull-right' ],
-			value => 'Submit' );
+has_field 'description' => ( type => 'TextArea',
+			     label => 'Description',
+			     wrapper_class => 'col-md-5',
+			     element_attr => { placeholder => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed dapibus nulla. Mauris vehicula vehicula ligula ac dapibus. Fusce vehicula a turpis sed. ' },
+			     cols => 30, rows => 2);
+
+# bl-4 ----------------------------------------------------------------------
+
+
+has_field 'aux_reset' => ( type => 'Reset',
+#			   wrapper_class => [ 'col-md-offset-3', 'col-md-2' ],
+			   element_class => [ 'btn', 'btn-default' ],
+			   value => 'Reset' );
+
+has_field 'aux_submit' => (
+			   type => 'Submit',
+			   wrapper_class => [ 'pull-right' ],
+			   element_class => [ 'btn', 'btn-default', ],
+			   # label_no_filter => 1,
+			   value => '<span class="glyphicon glyphicon-plus-sign"></span> Submit',
+			   # value => 'Submit'
+			  );
+
+# FIELDSETs -----------------------------------------------------------------
+
+has_block 'bl-0' => ( tag => 'fieldset',
+		      render_list => [ 'aux_parent' ],
+		      label => '<abbr title="Head office" class="initialism"><span class="icon_building_alt" aria-hidden="true"></span></abbr>',
+		      class => [ 'row', ]
+		    );
+
+has_block 'bl-1' => ( tag => 'fieldset',
+		      render_list => [ 'physicalDeliveryOfficeName', 'ou', 'businessCategory', 'telephoneNumber' ],
+		      label => '<abbr title="Geografical Address Related Data" class="initialism"><span class="icon_building" aria-hidden="true"></span></abbr>',
+		      class => [ 'row', ]
+		    );
+
+has_block 'bl-2' => ( tag => 'fieldset',
+		      render_list => [ 'postOfficeBox', 'street', 'l', 'st', 'postalCode', ],
+		      # label => '&nbsp;',
+		      class => [ 'row', ]
+		    );
+
+has_block 'bl-3' => ( tag => 'fieldset',
+		      render_list => [ 'registeredAddress', 'postalAddress', 'description' ],
+		      # label => '&nbsp;',
+		      class => [ 'row', ]
+		    );
+
+has_block 'bl-4' => ( tag => 'fieldset',
+		      render_list => [ 'aux_reset', 'aux_submit'],
+		      # label => '&nbsp;',
+		      class => [ 'form-inline', ]
+		    );
+
+sub build_render_list {[
+			'bl-0',
+			'bl-1',
+			'bl-2',
+			'bl-3',
+			'bl-4',
+		       ]}
 
 sub validate {
   my $self = shift;

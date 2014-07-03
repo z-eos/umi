@@ -200,20 +200,20 @@ sub pwdgen {
 		num => $args->{'num'} || 3,
 		cap => $args->{'cap'} || 4,
 		cnt => $args->{'cnt'} || 1,
-		salt => $args->{'salt'} || '************',
+		salt => $args->{'salt'} || '123456789',
 		pronounceable => $args->{'pronounceable'} || 1,
 	       };
 
   use Crypt::GeneratePassword qw(word word3 chars);
 
-  if ( not defined $pwdgen->{'pwd'} and defined $pwdgen->{'pronounceable'} ) {
+  if ( ! defined $pwdgen->{'pwd'} && defined $pwdgen->{'pronounceable'} ) {
     $pwdgen->{'pwd'} = word3( $pwdgen->{'len'},
 			    $pwdgen->{'len'},
 			    'en',
 			    $pwdgen->{'num'},
 			    $pwdgen->{'cap'}
 			  );
-  } elsif ( not defined $pwdgen->{'pwd'} ) {
+  } elsif ( ! defined $pwdgen->{'pwd'} ) {
     $pwdgen->{'pwd'} = chars( $pwdgen->{'len'}, $pwdgen->{'len'} );
   }
 
@@ -226,6 +226,18 @@ sub pwdgen {
 	  clear => $pwdgen->{'pwd'},
 	  ssha => '{SSHA}' . encode_base64( $sha1->digest . $pwdgen->{'salt'}, '' )
 	 };
+
+# to be removed #   use Digest::SHA1;
+# to be removed #   my $sha1 = Digest::SHA1->new;
+# to be removed #   $sha1->add(
+# to be removed # 	     $pwdgen->{'pwd'},
+# to be removed # 	     $pwdgen->{'salt'},
+# to be removed # 	    );
+# to be removed # 
+# to be removed #   return {
+# to be removed # 	  clear => $pwdgen->{'pwd'},
+# to be removed # 	  ssha => '{SSHA}' . $sha1->b64digest
+# to be removed # 	 };
 }
 
 ## !!! to adapt !!!

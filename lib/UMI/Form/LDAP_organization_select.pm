@@ -12,9 +12,10 @@ has '+item_class' => ( default =>'LDAP_organization_select' );
 
 has_field 'org' => ( type => 'Select',
 		     label => 'Organization',
+		     wrapper_class => [ 'col-md-5' ],
 		     empty_select => '--- new office ---',
-		     size => 3,
-#		     required => 1 
+#		     size => 3,
+#		     required => 1,
 );
 
 sub options_org {
@@ -47,27 +48,29 @@ sub options_org {
 }
 
 has_field 'act' => ( type => 'Select',
+		     wrapper_class => [ 'col-md-2' ],
 #		     wrapper_class => [ 'float-left' ],
 		     label => 'Action',
 		     options => [{ value => '0', label => 'create', selected => 'on'},
 				 { value => '1', label => 'modify',},
 				 { value => '2', label => 'delete'},
 				],
-		     size => 3,
+#		     size => 3,
 		     required => 1 );
 
 has_field 'submit' => ( type => 'Submit',
-			label => '&nbsp;', label_class => [ 'control-label' ],
-#			wrapper_class => [ 'pull-right' ],
+#			wrapper_class => [ 'col-md-4', 'pull-right' ],
+			wrapper_class => [ 'col-md-2', 'col-md-offset-10' ],
 			element_class => [ 'btn', 'btn-default' ],
 			value => 'Submit' );
 
 has_block 'bl-all' => ( tag => 'fieldset',
-			class => [ 'form-inline' ],
+			class => [ 'row' ],
 			render_list => [ 'org', 'act' ],
 		      );
 
 has_block 'bl-submit' => ( tag => 'fieldset',
+			class => [ 'row' ],
 			render_list => [ 'submit' ],
 		      );
 
