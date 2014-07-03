@@ -16,6 +16,52 @@ has 'uid' => ( is => 'ro', isa => 'Str', required => 1 );
 has 'pwd' => ( is => 'ro', isa => 'Str', required => 1 );
 has 'dry_run' => ( is => 'ro', isa => 'Bool', default => 0 );
 
+has 'cfg' => ( traits => ['Hash'],
+	       is => 'ro',
+	       isa => 'HashRef',
+	       builder => '_build_cfg',
+	     );
+
+sub _build_cfg {
+  return {
+	  exclude_prefix => 'aux_',
+	  base => {
+		   org => 'ou=Organizations,dc=ibs',
+		   acc => 'ou=People,dc=ibs',
+		  },
+	  objectClass => {
+			  org => [ qw(
+				       top
+				       organizationalUnit
+				    )
+				 ],
+			  acc_root => [ qw(
+					    top
+					    posixAccount
+					    inetOrgPerson
+					    organizationalPerson
+					    person
+					    inetLocalMailRecipient
+					 )
+				      ],
+			  acc_svc_branch => [ qw(
+						  account
+						  authorizedServiceObject
+					       )
+					    ],
+			  acc_svc_common => [ qw(
+						  posixAccount
+						  shadowAccount
+						  inetOrgPerson
+						  authorizedServiceObject
+						  domainRelatedObject
+					       )
+					    ],
+
+			 },
+	 };
+}
+
 has '_ldap' => (
 	is       => 'rw',
 	isa      => 'Net::LDAP',
@@ -57,23 +103,6 @@ around 'ldap' =>
     }
     return $ldap;
   };
-
-# sub ldap {
-# 	my $self = shift;
-# 
-# 	my $ldap = $self->_ldap; # get our private attribute
-# 
-# 	my $mesg = $ldap->bind(
-# 		sprintf( 'uid=%s,ou=People,dc=ibs', $self->uid ),
-# 		password => $self->pwd,
-# 		version  => 3,
-# 	);
-# 	if ( $mesg->is_error ) {
-# 		warn "Net::LDAP->bind error_desc: " . $mesg->error_desc . "; server_error: " . $mesg->server_error;
-# 	}
-# 
-# 	return $ldap;
-# } ## end sub ldap
 
 
 =head2 err
@@ -201,6 +230,26 @@ modify method
 
 sub mod {
   my ($self, $dn) = @_;
+  # replace => { ATTR => VALUE, ... }
+
+  # Replace any existing values in each given attribute with
+  # VALUE. VALUE should be a string if only a single value is wanted
+  # in the attribute, or a reference to an array of strings if
+  # multiple values are wanted. A reference to an empty array will
+  # remove the entire attribute. If the attribute does not already
+  # exist in the entry, it will be created.
+
+  # $mesg = $ldap
+  #   ->modify( $dn,
+  # 	      replace => {
+  # 			  description => 'New List of members', # Change the description
+  # 			  member      => [ # Replace whole list with these
+  # 					  'cn=member1,ou=people,dc=example,dc=com',
+  # 					  'cn=member2,ou=people,dc=example,dc=com',
+  # 					 ],
+  # 			  seeAlso => [], # Remove attribute
+  # 			 }
+  # 	    );
 
 }
 
@@ -396,76 +445,100 @@ sub select_key_val {
 =cut
 
 sub obj_add {
-  my  ( $self, $args ) = @_;
+  my ( $self, $args ) = @_;
   my $type = $args->{'type'};
   my $params = $args->{'params'};
+  my $form = $args->{'form'};
 
-  use Data::Dumper;
-  # warn 'obj_add: ' . Dumper($params);
+  return '' unless %{$params};
 
   my $descr = 'description has to be here';
   if (defined $params->{'descr'} && $params->{'descr'} ne '') {
     $descr = join(' ', $params->{'descr'});
   }
 
-  my $telephoneNumber = '666';
-  if (defined $params->{'telephonenumber'} && $params->{'telephonenumber'} ne '') {
-    $telephoneNumber = $params->{'telephonenumber'};
-  }
-
 #
+## TODO
 ## HERE WE NEED TO SET FLAG TO CREATE BRANCH FOR LOCALIZED VERSION OF DATA
 ## associatedService=localization-ru,uid=U...-user01,ou=People,dc=ibs
 ## associatedService=localization-uk,uid=U...-user01,ou=People,dc=ibs
 ## e.t.c.
 #
 
-  my $tr;
-  my $attr_defined = [];
-  foreach my $key (keys %{$params}) {
-    $tr = $self->is_ascii( $params->{$key} ) ?
-      $self->utf2lat( $params->{$key} ) : $params->{$key};
-    push @{$attr_defined}, $key => $tr
-      if defined $params->{$key} && $params->{$key} ne '' && $key ne 'submit' && $key ne 'parent';
-  }
-  push @{$attr_defined}, objectClass => [ 'top', 'organizationalUnit' ];
+  my $attr_defined = $self
+    ->attrs_crawl({
+		   type => $type,
+		   params => $params,
+		  });
 
-  warn Dumper($attr_defined);
-
-  my $success_message;
-
-  ######################################################################
-  # ORGANIZATION Object
-  ######################################################################
-  my $base = $params->{'parent'} != 0 ? $params->{'parent'} : 'ou=Organizations,dc=ibs';
+  my $base = $params->{'aux_parent'} ne "0" ? $params->{'aux_parent'} : $self->{'cfg'}->{'base'}->{$type};
   my $ldif =
     $self->add(
 	       sprintf('ou=%s,%s', $params->{'ou'}, $base),
 	       $attr_defined,
 	      );
-  my $error_message;
+  my $message;
   if ( $ldif ) {
-    $error_message = 'Error during organization object creation occured: ' . $ldif;
-    warn sprintf('ou=%s,ou=Organizations,dc=ibs obj wasn not created: ', $params->{'ou'}, $ldif);
+#    $error_message = 'Error during organization object creation occured: ' . $ldif;
+    $message .= '<div class="alert alert-danger">' .
+      '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span>&nbsp;' .
+	'Error during organization object creation occured: ' . $ldif . '</div>';
+
+    warn sprintf('object dn: ou=%s,%s wasn not created! errors: %s', $params->{'ou'}, $base, $ldif);
+  } else {
+    $message .= '<div class="alert alert-success">' .
+      '<span style="font-size: 140%" class="glyphicon glyphicon-ok-sign"></span>' .
+	'&nbsp;<em>Object for organization ' .
+	  ' &laquo;' . $self->utf2lat( $params->{'physicalDeliveryOfficeName'} ) .
+	    '&raquo;</em> successfully created.</div>';
   }
 
-  my $final_message;
-  $final_message = '<div class="alert alert-success">' .
-    '<span style="font-size: 140%" class="glyphicon glyphicon-ok-sign"></span>' .
-      '&nbsp;<em>Object for organization ' .
-	' &laquo;' . $self->utf2lat({ to_translate => $params->{'physicaldeliveryofficename'} }) .
-	  '&raquo;</em> successfully created.</div>' if $success_message;
+  # warn 'FORM ERROR' . $final_message if $final_message;
+  $form->info_message( $message );
 
-  $final_message .= '<div class="alert alert-danger">' .
-    '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span>&nbsp;' .
-      $error_message . '</div>' if $error_message;
+  # $self->unbind;
 
-  $self->form->info_message( $final_message ) if $final_message;
+  warn 'LDAP ERROR' . $ldif if $ldif;
 
-  $self->unbind;
-  return $ldif;
+  return { info_message => $message };
+#  return $ldif;
 }
 
+=head2 attrs_crawl
+
+crawls all $c->req->params and prepares attrs array ref to be fed to
+->add for object creation
+
+=cut
+
+sub attrs_crawl {
+  my ( $self, $args ) = @_;
+
+my $arg = {
+	   type => $args->{'type'},
+	   params => $args->{'params'},
+	  };
+
+  my ( $val, $result );
+
+  push @{$result}, objectClass => $self->{'cfg'}->{'objectClass'}->{$arg->{'type'}};
+
+  foreach my $key (keys %{$arg->{'params'}}) {
+    next if $key =~ /^$self->{'cfg'}->{'exclude_prefix'}/;
+    next if $arg->{'params'}->{$key} eq '';
+
+    #
+    ## TODO
+    ## to add multivalue fields processing
+    $val = $self->is_ascii( $arg->{'params'}->{$key} ) ?
+      $self->utf2lat( $arg->{'params'}->{$key} ) :
+	$arg->{'params'}->{$key};
+
+    push @{$result}, $key => $val;
+  }
+  # warn 'attributes prepared $result:' . Dumper($result);
+  return $result;
+}
 
 ######################################################################
 

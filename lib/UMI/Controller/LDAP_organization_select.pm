@@ -11,7 +11,10 @@ use UMI::Form::LDAP_organization_select;
 use UMI::LDAP_CRUD;
 
 has 'form' => ( isa => 'UMI::Form::LDAP_organization_select', is => 'rw',
-		lazy => 1, default => sub { UMI::Form::LDAP_organization_select->new },
+		lazy => 1,
+		default => sub {
+		    UMI::Form::LDAP_organization_select->new('form_element_class' => 'form-horizontal') 
+		},
 		documentation => q{Form to add/mod/del organization/s},
 	      );
 
