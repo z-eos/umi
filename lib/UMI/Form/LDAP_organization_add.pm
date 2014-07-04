@@ -198,10 +198,10 @@ has_field 'aux_reset' => ( type => 'Reset',
 has_field 'aux_submit' => (
 			   type => 'Submit',
 			   wrapper_class => [ 'pull-right' ],
-			   element_class => [ 'btn', 'btn-default', ],
+			   element_class => [ 'btn', 'btn-default' ],
 			   # label_no_filter => 1,
-			   value => '<span class="glyphicon glyphicon-plus-sign"></span> Submit',
-			   # value => 'Submit'
+			   # value => '<span class="glyphicon glyphicon-plus-sign"></span> Submit',
+			   value => 'Submit'
 			  );
 
 # FIELDSETs -----------------------------------------------------------------

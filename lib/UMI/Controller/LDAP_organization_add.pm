@@ -42,15 +42,15 @@ sub index :Path :Args(0) {
       # Validate and insert/update database
       return unless
 	$self->form->process(
-			     item => $c->model('LDAP_CRUD')
-			     ->obj_add(
-			     	       {
-			     		'type' => 'org',
-			     		'params' => $c->req->parameters,
-					'form' => $self->form,
-			     	       }
-			     	      ),
-			     # item_id => $ldap_org_id,
+			     # item => $c->model('LDAP_CRUD')
+			     # ->obj_add(
+			     # 	       {
+			     # 		'type' => 'org',
+			     # 		'params' => $c->req->parameters,
+			     # 		'form' => $self->form,
+			     # 	       }
+			     # 	      ),
+			     item_id => $ldap_org_id,
 			     posted => ($c->req->method eq 'POST'),
 			     params => $c->req->parameters,
 			     ldap_crud => $c->model('LDAP_CRUD'),
@@ -60,12 +60,13 @@ sub index :Path :Args(0) {
 					 },
 			    );
       ## $c->response->redirect($c->uri_for('/ldap_organization_add'));
-      # my $res = $c->model('LDAP_CRUD')->obj_add(
-      # 						{
-      # 						 'type' => 'org',
-      # 						 'params' => $c->req->parameters
-      # 						}
-      # 					       );
+      my $res = $c->model('LDAP_CRUD')->obj_add(
+      						{
+      						 'type' => 'org',
+      						 'params' => $c->req->parameters
+      						}
+      					       );
+      $self->form->info_message( $res ) if $res;
 # moved to LDAP_CRUD # my $res = $self->create_object( $c );
       # $c->log->debug( "create_object (from umi_o_add) error: " . $res) if $res;
     } else {

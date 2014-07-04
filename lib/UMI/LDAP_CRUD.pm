@@ -494,13 +494,13 @@ sub obj_add {
   }
 
   # warn 'FORM ERROR' . $final_message if $final_message;
-  $form->info_message( $message );
+  # $form->info_message( $message );
 
   # $self->unbind;
 
   warn 'LDAP ERROR' . $ldif if $ldif;
 
-  return { info_message => $message };
+  return $message ;
 #  return $ldif;
 }
 
