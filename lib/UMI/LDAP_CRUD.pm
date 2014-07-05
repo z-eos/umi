@@ -29,6 +29,10 @@ sub _build_cfg {
 		   org => 'ou=Organizations,dc=ibs',
 		   acc => 'ou=People,dc=ibs',
 		  },
+	  rdn => {
+		   org => 'ou',
+		   acc => 'uid',
+		  },
 	  objectClass => {
 			  org => [ qw(
 				       top
@@ -104,6 +108,47 @@ around 'ldap' =>
     return $ldap;
   };
 
+=head2 last_uidNumber
+
+Last uidNumber for base ou=People,dc=ibs
+
+to add error correction
+
+=cut
+
+has 'last_uidNumber' => (
+	is       => 'ro',
+	isa      => 'Str',
+	required => 0, lazy => 1,
+	builder  => 'build_last_uidNumber',
+);
+
+sub build_last_uidNumber {
+  my $self = shift;
+
+  my $callername = (caller(1))[3];
+  $callername = 'main' if ! defined $callername;
+  my $return = 'call to LDAP_CRUD->last_uidNumber from ' . $callername . ': ';
+
+  $self->reset_ldap;
+  my $mesg =
+    $self->ldap->search(
+			base   => 'ou=People,dc=ibs',
+			scope  => 'one',
+			filter => '(uidNumber=*)',
+			attrs  => [ 'uidNumber' ],
+			deref => 'never',
+		       );
+
+  if ( $mesg->code ) {
+    $return .= $self->err( $mesg );
+  } else {
+    # my @uids_arr = sort { $a <=> $b } map { $_->get_value('uidNumber') } $mesg->entries;
+    my @uids_arr = $mesg->sorted ( 'uidNumber' );
+    $return = $uids_arr[$#uids_arr]->get_value( 'uidNumber' );
+  }
+  return $return;
+}
 
 =head2 err
 
@@ -128,7 +173,7 @@ sub err {
 # to finish # 
 # to finish #   log_debug { Dumper($self) . "\n" . $self->err( $mesg ) };
 
-  return sprintf( "<dl class=\"dl-horizontal\"><dt>code</dt><dd>%s</dd><dt>error_name</dt><dd>%s</dd><dt>error_text</dt><dd>%s</dd><dt>error_desc</dt><dd>%s</dd><dt>server_error</dt><dd>%s</dd></dl>",
+  return sprintf( "<dl class=\"dl-horizontal\"><dt>code</dt><dd>%s</dd><dt>error_name</dt><dd>%s</dd><dt>error_text</dt><dd><b><i><pre class=\"alert-danger\">%s</pre></i></b></dd><dt>error_desc</dt><dd>%s</dd><dt>server_error</dt><dd>%s</dd></dl>",
 		  $mesg->code,
 		  $mesg->error_name,
 		  $mesg->error_text,
@@ -166,6 +211,7 @@ sub search {
   			      sizelimit => $arg->{sizelimit},
   			    );
 }
+
 
 =head2 add
 
@@ -211,8 +257,7 @@ sub del {
   if ( ! $self->dry_run ) {
     my $msg = $self->ldap->delete ( $dn );
     if ($msg->code) {
-      $return .= "error_descr: " . $msg->error_desc;
-      $return .= "; server_error: " . $msg->server_error if defined $msg->server_error;
+      $return .= $self->err( $msg );
     } else {
       $return = 0;
     }
@@ -251,41 +296,6 @@ sub mod {
   # 			 }
   # 	    );
 
-}
-
-=head2 last_uidNumber
-
-Last uidNumber for base ou=People,dc=ibs
-
-to add error correction
-
-=cut
-
-sub last_uidNumber {
-  my $self = shift;
-
-  my $callername = (caller(1))[3];
-  $callername = 'main' if ! defined $callername;
-  my $return = 'call to LDAP_CRUD->last_uidNumber from ' . $callername . ': ';
-
-  $self->reset_ldap;
-  my $mesg =
-    $self->ldap->search(
-			base   => 'ou=People,dc=ibs',
-			scope  => 'one',
-			filter => '(uidNumber=*)',
-			attrs  => [ 'uidNumber' ],
-			deref => 'never',
-		       );
-
-  if ( $mesg->code ) {
-    $return .= $self->err( $mesg );
-  } else {
-    # my @uids_arr = sort { $a <=> $b } map { $_->get_value('uidNumber') } $mesg->entries;
-    my @uids_arr = $mesg->sorted ( 'uidNumber' );
-    $return = $uids_arr[$#uids_arr]->get_value( 'uidNumber' );
-  }
-  return $return;
 }
 
 =head2 obj_schema
@@ -448,70 +458,58 @@ sub obj_add {
   my ( $self, $args ) = @_;
   my $type = $args->{'type'};
   my $params = $args->{'params'};
-  my $form = $args->{'form'};
 
   return '' unless %{$params};
 
-  my $descr = 'description has to be here';
-  if (defined $params->{'descr'} && $params->{'descr'} ne '') {
-    $descr = join(' ', $params->{'descr'});
-  }
-
 #
 ## TODO
-## HERE WE NEED TO SET FLAG TO CREATE BRANCH FOR LOCALIZED VERSION OF DATA
+## HERE, MAY BE, WE NEED TO SET FLAG TO CREATE BRANCH FOR LOCALIZED
+## VERSION OF DATA
 ## associatedService=localization-ru,uid=U...-user01,ou=People,dc=ibs
 ## associatedService=localization-uk,uid=U...-user01,ou=People,dc=ibs
-## e.t.c.
-#
 
-  my $attr_defined = $self
-    ->attrs_crawl({
-		   type => $type,
-		   params => $params,
-		  });
+  my $attrs = $self->params2attrs({
+				   type => $type,
+				   params => $params,
+				  });
 
-  my $base = $params->{'aux_parent'} ne "0" ? $params->{'aux_parent'} : $self->{'cfg'}->{'base'}->{$type};
-  my $ldif =
-    $self->add(
-	       sprintf('ou=%s,%s', $params->{'ou'}, $base),
-	       $attr_defined,
-	      );
+  my $mesg = $self->add(
+			$attrs->{'dn'},
+			$attrs->{'attrs'}
+		       );
   my $message;
-  if ( $ldif ) {
-#    $error_message = 'Error during organization object creation occured: ' . $ldif;
+  if ( $mesg ) {
     $message .= '<div class="alert alert-danger">' .
       '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span>&nbsp;' .
-	'Error during organization object creation occured: ' . $ldif . '</div>';
+	'Error during ' . $type . ' object creation occured: ' . $mesg . '</div>';
 
-    warn sprintf('object dn: ou=%s,%s wasn not created! errors: %s', $params->{'ou'}, $base, $ldif);
+    warn sprintf('object dn: %s wasn not created! errors: %s', $attrs->{'dn'}, $mesg);
   } else {
     $message .= '<div class="alert alert-success">' .
       '<span style="font-size: 140%" class="glyphicon glyphicon-ok-sign"></span>' .
-	'&nbsp;<em>Object for organization ' .
-	  ' &laquo;' . $self->utf2lat( $params->{'physicalDeliveryOfficeName'} ) .
-	    '&raquo;</em> successfully created.</div>';
+	'&nbsp;Object <em>&laquo;' . $self->utf2lat( $params->{'physicalDeliveryOfficeName'} ) .
+	    '&raquo;</em> of type <em>&laquo;' . $type .
+	      '&raquo;</em> was successfully created.</div>';
   }
 
   # warn 'FORM ERROR' . $final_message if $final_message;
-  # $form->info_message( $message );
 
   # $self->unbind;
 
-  warn 'LDAP ERROR' . $ldif if $ldif;
+  warn 'LDAP ERROR' . $mesg if $mesg;
 
   return $message ;
-#  return $ldif;
 }
 
-=head2 attrs_crawl
 
-crawls all $c->req->params and prepares attrs array ref to be fed to
-->add for object creation
+=head2 params2attrs
+
+crawls all $c->req->params and prepares attrs hash ref of dn and attrs
+to be fed to ->add for object creation
 
 =cut
 
-sub attrs_crawl {
+sub params2attrs {
   my ( $self, $args ) = @_;
 
 my $arg = {
@@ -519,9 +517,14 @@ my $arg = {
 	   params => $args->{'params'},
 	  };
 
-  my ( $val, $result );
+  my ( $key, $val, $dn, $base, $attrs );
 
-  push @{$result}, objectClass => $self->{'cfg'}->{'objectClass'}->{$arg->{'type'}};
+  $base = ( defined $arg->{'params'}->{'aux_parent'} &&
+	    $arg->{'params'}->{'aux_parent'} ne "0" ) ?
+    $arg->{'params'}->{'aux_parent'} :
+      $self->{'cfg'}->{'base'}->{$arg->{'type'}};
+
+  push @{$attrs}, objectClass => $self->{'cfg'}->{'objectClass'}->{$arg->{'type'}};
 
   foreach my $key (keys %{$arg->{'params'}}) {
     next if $key =~ /^$self->{'cfg'}->{'exclude_prefix'}/;
@@ -534,10 +537,18 @@ my $arg = {
       $self->utf2lat( $arg->{'params'}->{$key} ) :
 	$arg->{'params'}->{$key};
 
-    push @{$result}, $key => $val;
+    # build DN for org
+    if ( $arg->{'type'} eq 'org' && $key eq 'ou' ) {
+      $dn = sprintf('%s=%s,%s', $key, $val, $base);
+    }
+
+    push @{$attrs}, $key => $val;
   }
-  # warn 'attributes prepared $result:' . Dumper($result);
-  return $result;
+  # warn 'attributes prepared, dn: ' . $dn . '; $attrs:' . Dumper($attrs);
+  return {
+	  dn => $dn,
+	  attrs => $attrs
+	 };
 }
 
 ######################################################################

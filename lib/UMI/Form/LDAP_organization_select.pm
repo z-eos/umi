@@ -8,8 +8,6 @@ extends 'UMI::Form::LDAP';
 
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable' );
 
-has '+item_class' => ( default =>'LDAP_organization_select' );
-
 has_field 'org' => ( type => 'Select',
 		     label => 'Organization',
 		     wrapper_class => [ 'col-md-5' ],
@@ -49,7 +47,6 @@ sub options_org {
 
 has_field 'act' => ( type => 'Select',
 		     wrapper_class => [ 'col-md-2' ],
-#		     wrapper_class => [ 'float-left' ],
 		     label => 'Action',
 		     options => [{ value => '0', label => 'create', selected => 'on'},
 				 { value => '1', label => 'modify',},
@@ -60,7 +57,7 @@ has_field 'act' => ( type => 'Select',
 
 has_field 'submit' => ( type => 'Submit',
 #			wrapper_class => [ 'col-md-4', 'pull-right' ],
-			wrapper_class => [ 'col-md-2', 'col-md-offset-10' ],
+#			wrapper_class => [ 'col-md-2', 'col-md-offset-6' ],
 			element_class => [ 'btn', 'btn-default' ],
 			value => 'Submit' );
 
