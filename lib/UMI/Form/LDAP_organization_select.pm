@@ -52,8 +52,9 @@ has_field 'act' => ( type => 'Select',
 				 { value => '1', label => 'modify',},
 				 { value => '2', label => 'delete'},
 				],
-#		     size => 3,
-		     required => 1 );
+		     # size => 3,
+		     # required => 1
+		   );
 
 has_field 'submit' => ( type => 'Submit',
 #			wrapper_class => [ 'col-md-4', 'pull-right' ],

@@ -498,7 +498,7 @@ sub obj_add {
 
   warn 'LDAP ERROR' . $mesg if $mesg;
 
-  return $message ;
+  return { message => $message };
 }
 
 

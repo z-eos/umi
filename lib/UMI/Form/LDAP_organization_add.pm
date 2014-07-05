@@ -8,27 +8,11 @@ extends 'UMI::Form::LDAP';
 
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable' );
 
-    # businessCategory
-    # description
-    # destinationIndicator
-    # facsimileTelephoneNumber
-    # internationaliSDNNumber
-    # l
-    # physicalDeliveryOfficeName
-    # postOfficeBox
-    # postalAddress
-    # postalCode
-    # preferredDeliveryMethod
-    # registeredAddress
-    # searchGuide
-    # seeAlso
-    # st
-    # street
-    # telephoneNumber
-    # teletexTerminalIdentifier
-    # telexNumber
-    # userPassword
-    # x121Address
+sub html_attributes {
+  my ( $self, $field, $type, $attr ) = @_;
+  push @{$attr->{'class'}}, 'required'
+    if $type eq 'label' && $field->required;
+}
 
 ######################################################################
 #
@@ -290,10 +274,19 @@ sub validate {
   # $ldap->unbind;
 }
 
-sub html_attributes {
-  my ( $self, $field, $type, $attr ) = @_;
-  push @{$attr->{'class'}}, 'required'
-    if $type eq 'label' && $field->required;
+sub update_model {
+    my $self = shift;
+
+    my $item = $self->item;
+
+    $self->add_form_error( $item->{'message'} ) if $item->{'message'};
+
+    # return unless $item;
+    # foreach my $field ( $self->all_fields ) {
+    #     my $name = $field->name;
+    #     next unless $item->can($name);
+    #     $item->$name( $field->value );
+    # }
 }
 
 ######################################################################
