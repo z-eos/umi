@@ -1,4 +1,4 @@
-# -*- mode: cperl -*-
+# -*- cperl -*-
 #
 
 package UMI::Form::LDAP_organization_add;
@@ -14,44 +14,25 @@ sub html_attributes {
     if $type eq 'label' && $field->required;
 }
 
-######################################################################
-#
-# AUTOGENERATOR IDEA
-#
-######################################################################
-# # take schema for the object to manipulate
-# $obj_schema = $self->ldap_crud->obj_schema('ou=People, dc=ibs', 'uid=user01');
-
-# foreach my $dn (keys %{$obj_schema} ) {
-#   foreach my $objectClass (keys %{$obj_schema->{$dn}} ) {
-#     foreach my $mustAttr (keys %{$obj_schema->{$dn}->{$objectClass}->{'must'}}) {
-#       has_field $mustAttr => ( type => $self->equality2type
-# 			       ->{$obj_schema->{$dn}->{$objectClass}->{'must'}->{$mustAttr}->{'equality'}}
-# 			       ->{field_type},
-# 			       label => $mustAttr, label_class => [ 'col-md-3' ],
-# 			       label_attr => { title => $obj_schema->{$dn}->{$objectClass}->{'must'}->{$mustAttr}->{'desc'}},
-# 			       element_wrapper_class => 'col-md-8',
-# 			       );
-#     }
-#   }
-# }
-
-# but the difficulties to my mind are in these:
-# 1. we need to know where to use Select (static or dynamic) instead of Text
-# 2. for $obj_schema->{$dn}->{$objectClass}->{'must'}->{$mustAttr}->{'max_length'} 
-#    longer than, lets say 128 bytes, to use TextArea instead of Text
-# 3. for $obj_schema->{$dn}->{$objectClass}->{'must'}->{$mustAttr}->{'single-value'} == undef 
-#    to set possibility to add another value to the field (multivalued)
-# 4. other not obvious stuff here ...
-######################################################################
-
 # bl-0 ----------------------------------------------------------------------
 
 has_field 'aux_parent' => ( type => 'Select',
 			    label => 'Parent Office',
-			    wrapper_class => [ 'col-md-5' ],
+			    wrapper_class => [ 'col-md-6' ],
 			    label_attr => { title => 'parent office, the one to be created belongs' },
 			  );
+
+=head2 options_aux_parent
+
+returns array of hash refs { value => ... , label => ... } like:
+
+'ou=foo,ou=Organizations,dc=ibs',
+'foo (Foo @ City1)',
+...
+'ou=br04,ou=br03,ou=br02,ou=br01,ou=bar,ou=Organizations,dc=WeAre',
+'br04 (Bar @ CityN) branch of  -> br03 -> br02 -> br01 -> bar'
+
+=cut
 
 sub options_aux_parent {
   my $self = shift;
@@ -61,7 +42,7 @@ sub options_aux_parent {
   my $ldap_crud = $self->ldap_crud;
   my $mesg = $ldap_crud->search(
 				{
-				 base => 'ou=Organizations,dc=ibs',
+				 base => $ldap_crud->{'cfg'}->{'base'}->{'org'},
 				 scope => 'children',
 				 filter => 'ou=*',
 				 attrs => [ qw(ou physicaldeliveryofficename l) ],
@@ -70,14 +51,38 @@ sub options_aux_parent {
 			       );
   my @orgs = ( { value => '0', label => '--- no parent office ---', selected => 'on' } );
   my @entries = $mesg->entries;
+  my ( $a, $i, @dn_arr, $dn, $label );
   foreach my $entry ( @entries ) {
+    @dn_arr = split(',',$entry->dn);
+    if ( scalar @dn_arr < 4 ) {
+      $label = sprintf("%s (head office %s @ %s)",
+		       $entry->get_value ('ou'),
+		       $entry->get_value ('physicaldeliveryofficename'),
+		       $entry->get_value ('l'),
+		      );
+    } elsif ( scalar @dn_arr == 4 ) {
+      $label = sprintf("%s (%s @ %s) branch of %s",
+		       $entry->get_value ('ou'),
+		       $entry->get_value ('physicaldeliveryofficename'),
+		       $entry->get_value ('l'),
+		       substr($dn_arr[1],3)
+		      );
+    } else {
+      for ( $i = 1, $dn = ''; $i < scalar @dn_arr - 2; $i++ ) {
+	$dn .= $dn_arr[$i];
+      }
+      $a = $dn =~ s/ou=/ -> /g;
+      $label = sprintf("%s (%s @ %s) branch of %s",
+		       $entry->get_value ('ou'),
+		       $entry->get_value ('physicaldeliveryofficename'),
+		       $entry->get_value ('l'),
+		       $dn
+		      );
+    }
+
     push @orgs, {
-		 value => $entry->dn, 
-		 label => sprintf("- %s -, %s @ %s",
-				  $entry->get_value ('ou'),
-				  $entry->get_value ('physicaldeliveryofficename'),
-				  $entry->get_value ('l')
-				 )
+		 value => $entry->dn,
+		 label => $label
 		};
   }
   return \@orgs;
@@ -168,9 +173,11 @@ has_field 'registeredAddress' => ( label => 'Registered Adress',
 
 has_field 'description' => ( type => 'TextArea',
 			     label => 'Description',
-			     wrapper_class => 'col-md-5',
+			     wrapper_class => 'col-md-6',
 			     element_attr => { placeholder => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed dapibus nulla. Mauris vehicula vehicula ligula ac dapibus. Fusce vehicula a turpis sed. ' },
-			     cols => 30, rows => 2);
+			     # cols => 30,
+			     rows => 2
+			   );
 
 # bl-4 ----------------------------------------------------------------------
 
@@ -198,19 +205,19 @@ has_block 'bl-0' => ( tag => 'fieldset',
 		    );
 
 has_block 'bl-1' => ( tag => 'fieldset',
-		      render_list => [ 'physicalDeliveryOfficeName', 'ou', 'businessCategory', 'telephoneNumber' ],
+		      render_list => [ 'physicalDeliveryOfficeName', 'ou', 'businessCategory', 'postOfficeBox', 'street' ],
 		      label => '<abbr title="Geografical Address Related Data" class="initialism"><span class="icon_building" aria-hidden="true"></span></abbr>',
 		      class => [ 'row', ]
 		    );
 
 has_block 'bl-2' => ( tag => 'fieldset',
-		      render_list => [ 'postOfficeBox', 'street', 'l', 'st', 'postalCode', ],
+		      render_list => [ 'l', 'st', 'postalCode', 'registeredAddress', 'postalAddress' ],
 		      # label => '&nbsp;',
 		      class => [ 'row', ]
 		    );
 
 has_block 'bl-3' => ( tag => 'fieldset',
-		      render_list => [ 'registeredAddress', 'postalAddress', 'description' ],
+		      render_list => [ 'telephoneNumber', 'description' ],
 		      # label => '&nbsp;',
 		      class => [ 'row', ]
 		    );
@@ -279,9 +286,10 @@ sub update_model {
 
     my $item = $self->item;
 
+    return unless $item;
+
     $self->add_form_error( $item->{'message'} ) if $item->{'message'};
 
-    # return unless $item;
     # foreach my $field ( $self->all_fields ) {
     #     my $name = $field->name;
     #     next unless $item->can($name);

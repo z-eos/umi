@@ -227,8 +227,6 @@ sub add {
   if ( ! $self->dry_run ) {
     $msg = $self->ldap->add ( $dn, attrs => $attrs, );
     if ($msg->is_error()) {
-      # $return = "error_descr: " . $msg->error_desc();
-      # $return .= "; server_error: " . $msg->server_error() if defined $msg->server_error();
       $return .= $self->err( $msg );
     } else {
       $return = 0;
@@ -274,28 +272,23 @@ modify method
 =cut
 
 sub mod {
-  my ($self, $dn) = @_;
-  # replace => { ATTR => VALUE, ... }
+  my ($self, $dn, $replace) = @_;
 
-  # Replace any existing values in each given attribute with
-  # VALUE. VALUE should be a string if only a single value is wanted
-  # in the attribute, or a reference to an array of strings if
-  # multiple values are wanted. A reference to an empty array will
-  # remove the entire attribute. If the attribute does not already
-  # exist in the entry, it will be created.
-
-  # $mesg = $ldap
-  #   ->modify( $dn,
-  # 	      replace => {
-  # 			  description => 'New List of members', # Change the description
-  # 			  member      => [ # Replace whole list with these
-  # 					  'cn=member1,ou=people,dc=example,dc=com',
-  # 					  'cn=member2,ou=people,dc=example,dc=com',
-  # 					 ],
-  # 			  seeAlso => [], # Remove attribute
-  # 			 }
-  # 	    );
-
+  my $callername = (caller(1))[3];
+  $callername = 'main' if ! defined $callername;
+  my $return = 'call to LDAP_CRUD->add from ' . $callername . ': ';
+  my $msg;
+  if ( ! $self->dry_run ) {
+    $msg = $self->ldap->modify ( $dn, replace => $replace, );
+    if ($msg->is_error()) {
+      $return .= $self->err( $msg );
+    } else {
+      $return = 0;
+    }
+  } else {
+    $return = $msg->ldif;
+  }
+  return $return;
 }
 
 =head2 obj_schema
@@ -502,6 +495,49 @@ sub obj_add {
 }
 
 
+=head2 obj_mod
+
+=cut
+
+sub obj_mod {
+  my ( $self, $args ) = @_;
+  my $type = $args->{'type'};
+  my $params = $args->{'params'};
+
+  return '' unless %{$params};
+
+  my $attrs = $self->params2attrs({
+				   type => $type,
+				   params => $params,
+				  });
+
+  my $mesg = $self->mod(
+			$attrs->{'dn'},
+			$attrs->{'attrs'}
+		       );
+  my $message;
+  if ( $mesg ) {
+    $message .= '<div class="alert alert-danger">' .
+      '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span>&nbsp;' .
+	'Error during ' . $type . ' object modify occured: ' . $mesg . '</div>';
+
+    warn sprintf('object dn: %s wasn notmodified! errors: %s', $attrs->{'dn'}, $mesg);
+  } else {
+    $message .= '<div class="alert alert-success">' .
+      '<span style="font-size: 140%" class="glyphicon glyphicon-ok-sign"></span>' .
+	'&nbsp;Object <em>&laquo;' . $self->utf2lat( $params->{'physicalDeliveryOfficeName'} ) .
+	    '&raquo;</em> of type <em>&laquo;' . $type .
+	      '&raquo;</em> was successfully modified.</div>';
+  }
+
+  # warn 'FORM ERROR' . $final_message if $final_message;
+  # $self->unbind;
+
+  warn 'LDAP ERROR' . $mesg if $mesg;
+  return { message => $message };
+}
+
+
 =head2 params2attrs
 
 crawls all $c->req->params and prepares attrs hash ref of dn and attrs
@@ -529,6 +565,7 @@ my $arg = {
   foreach my $key (keys %{$arg->{'params'}}) {
     next if $key =~ /^$self->{'cfg'}->{'exclude_prefix'}/;
     next if $arg->{'params'}->{$key} eq '';
+    next if $key eq ( 'org' || 'act' );
 
     #
     ## TODO

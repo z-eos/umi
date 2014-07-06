@@ -250,6 +250,59 @@ sub pwdgen {
 #     exists $hash{$member} ? return 1 : return 0;
 # }
 
+# sub meta_options {
+#   my ( $self, $args ) = @_;
+#   my $arg = {
+# 	     dn => $args->[0],
+# 	     root => $args->[1],
+# 	     root_suffix => $args->[2],
+# 	     attr1 => $args->[3],
+# 	     attr1_suffix => $args->[4],
+# 	     attr2 => $args->[5],
+# 	     attr2_suffix => $args->[6],
+# 	     attr3 => $args->[5],
+# 	     attr3_suffix => $args->[6],
+# 	    };
+
+#     @dn_arr = split(',',$arg-{'dn'});
+#     if ( scalar @dn_arr < 4 ) {
+#       $label = sprintf("%s %s %s %s %s %s)",
+# 		       $arg->{'root'},
+# 		       $arg->{'root_suffix'},
+# 		       $arg->{'attr2'},
+# 		       $arg->{'attr2_suffix'},
+# 		       $arg->{'attr3'},
+# 		       $arg->{'attr3_suffix'},
+# 		      );
+#     } elsif ( scalar @dn_arr == 4 ) {
+#       $label = sprintf("%s %s %s %s %s %s) branch of %s",
+# 		       $arg->{'attr1'},
+# 		       $arg->{'attr1_suffix'},
+# 		       $arg->{'attr2'},
+# 		       $arg->{'attr2_suffix'},
+# 		       $arg->{'attr3'},
+# 		       $arg->{'attr3_suffix'},
+
+# 		       $entry->get_value ('ou'),
+# 		       $entry->get_value ('physicaldeliveryofficename'),
+# 		       $entry->get_value ('l'),
+# 		       substr($dn_arr[1],3)
+# 		      );
+#     } else {
+#       for ( $i = 1, $dn = ''; $i < scalar @dn_arr - 2; $i++ ) {
+# 	$dn .= $dn_arr[$i];
+#       }
+#       $a = $dn =~ s/ou=/ -> /g;
+#       $label = sprintf("%s (%s @ %s) branch of %s",
+# 		       $entry->get_value ('ou'),
+# 		       $entry->get_value ('physicaldeliveryofficename'),
+# 		       $entry->get_value ('l'),
+# 		       $dn
+# 		      );
+#     }
+
+# }
+
 ######################################################################
 
 1;
