@@ -44,13 +44,7 @@ sub index :Path :Args(0) {
 
       return unless
 	$self->form->process(
-			     item => $c->model('LDAP_CRUD')
-			     ->obj_add(
-			     	       {
-			     		'type' => 'org',
-			     		'params' => $c->req->parameters,
-			     	       }
-			     	      ),
+			     item_id => $ldap_org_id,
 			     posted => ($c->req->method eq 'POST'),
 			     params => $c->req->parameters,
 			     ldap_crud => $c->model('LDAP_CRUD'),
@@ -93,11 +87,8 @@ sub modify :Path(/ldap_organization_modify) :Args(0) {
 	  next if $attr =~ /^$c->model('LDAP_CRUD')->{'cfg'}->{'exclude_prefix'}/;
 	  next if $attr eq ( 'org' || 'act' );
 	  $params->{$attr} = $entry->get_value ( $attr );
-	  warn 'EACH ATTR: ' . $attr . '; IS: ' . $params->{$attr} . "\n";
 	}
       }
-      use Data::Dumper;
-      warn '$params: ' . Dumper($params);
       if ( $base eq $c->model('LDAP_CRUD')->{'cfg'}->{'base'}->{'org'} ) {
 	$params->{'aux_parent'} = 0;
       } else {
@@ -109,13 +100,7 @@ sub modify :Path(/ldap_organization_modify) :Args(0) {
 
       return unless
 	$self->form->process(
-			     item => $c->model('LDAP_CRUD')
-			     ->obj_mod(
-			     	       {
-			     		'type' => 'org',
-			     		'params' => $params,
-			     	       }
-			     	      ),
+			     item => { act => 'modify' },
 			     posted => ($c->req->method eq 'POST'),
 			     params => $params,
 			     ldap_crud => $c->model('LDAP_CRUD'),

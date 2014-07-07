@@ -283,8 +283,31 @@ sub validate {
 
 sub update_model {
     my $self = shift;
+    use Data::Printer colored => 1, caller_info => 1;
+    p($self->{'params'});
 
-    my $item = $self->item;
+    my $item = undef;
+    if ( ! $self->item ) {
+      $item = $self->ldap_crud
+	->obj_add(
+		  {
+		   'type' => 'org',
+		   'params' => $self->{'params'},
+		  }
+		 );
+    } else {
+      $item = $self->item;
+      # item => $c->model('LDAP_CRUD')
+      # 	->obj_mod(
+      # 		  {
+      # 		   'type' => 'org',
+      # 		   'params' => $params,
+      # 		  }
+      # 		 ),
+
+    }
+
+    p($item);
 
     return unless $item;
 

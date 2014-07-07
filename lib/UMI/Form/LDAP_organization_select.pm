@@ -126,7 +126,11 @@ sub build_render_list {[ 'bl-all', 'bl-submit' ]}
 sub validate {
   my $self = shift;
 
-  if ( $self->field('org')->value && ! $self->field('act')->value ) {
+  if ( ! $self->field('org')->value && ! $self->field('act')->value ) {
+    $self->add_form_error('<div class="alert alert-danger">' .
+			  '<span class="glyphicon glyphicon-exclamation-sign">' .
+			  '</span>&nbsp;You need choose what to do!</div>');
+  } elsif ( $self->field('org')->value && ! $self->field('act')->value ) {
     $self->field('org')->add_error('<span class="glyphicon glyphicon-exclamation-sign">' .
 				   '</span>&nbsp;You can not create an existent object!');
   } elsif ( ! $self->field('org')->value && $self->field('act')->value > 0 ) {
