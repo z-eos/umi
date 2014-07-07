@@ -58,7 +58,7 @@ sub index :Path :Args(0) {
 
 	$c->log->debug( "we will modify object " . $c->req->param('org'));
 	## $c->controller('LDAP_organization_mod')->index($c, ( org => $c->req->param('org') ));
-	$c->controller('LDAP_organization_add')->modify($c, ( org => $c->req->param('org') ));
+	$c->detach('LDAP_organization_add', 'modify', org => $c->req->param('org') );
 	##$c->res->redirect($c->uri_for('/ldap_organization_modify'));
       } elsif ( $c->req->param('act') == 2 ) { # DELETE
 	## TODO recursive delete
