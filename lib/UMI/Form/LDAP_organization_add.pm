@@ -183,14 +183,14 @@ has_field 'description' => ( type => 'TextArea',
 
 
 has_field 'aux_reset' => ( type => 'Reset',
-#			   wrapper_class => [ 'col-md-offset-3', 'col-md-2' ],
-			   element_class => [ 'btn', 'btn-default' ],
+			   wrapper_class => [ 'col-md-2' ],
+			   element_class => [ 'btn', 'btn-default', 'btn-block', ],
 			   value => 'Reset' );
 
 has_field 'aux_submit' => (
 			   type => 'Submit',
-			   wrapper_class => [ 'pull-right', ],
-			   element_class => [ 'btn', 'btn-default', ],
+			   wrapper_class => [ 'pull-right', 'col-md-10'],
+			   element_class => [ 'btn', 'btn-default', 'btn-block', ],
 			   # label_no_filter => 1,
 			   # value => '<span class="glyphicon glyphicon-plus-sign"></span> Submit',
 			   value => 'Submit'
@@ -225,7 +225,7 @@ has_block 'bl-3' => ( tag => 'fieldset',
 has_block 'bl-4' => ( tag => 'fieldset',
 		      render_list => [ 'aux_reset', 'aux_submit'],
 		      # label => '&nbsp;',
-		      class => [ 'form-inline', ]
+		      class => [ 'row', ]
 		    );
 
 sub build_render_list {[
@@ -282,12 +282,16 @@ sub validate {
 }
 
 sub update_model {
-    my $self = shift;
     use Data::Printer colored => 1, caller_info => 1;
-    p($self->{'params'});
+    p(@_);
+
+    my $self = shift;
 
     my $item = undef;
     if ( ! $self->item ) {
+      warn '$$$$$$$$$$$$$$$$$$$$$$$$$$$$ add $$$$$$$$$$$$$$$$$$$$$$$$$$$$' . "\n";
+      $self->add_form_error('<span class="glyphicon glyphicon-exclamation-sign">' .
+			    '</span>&nbsp;first if');
       $item = $self->ldap_crud
 	->obj_add(
 		  {
@@ -295,8 +299,10 @@ sub update_model {
 		   'params' => $self->{'params'},
 		  }
 		 );
-    } else {
+    } elsif ( defined $self->{'item'}->{'act'} ) {
       $item = $self->item;
+      warn '$$$$$$$$$$$$$$$$$$$$$$$$$$$$ modify $$$$$$$$$$$$$$$$$$$$$$$$$$$$' . "\n";
+      # $self->add_form_error('middle elsif');
       # item => $c->model('LDAP_CRUD')
       # 	->obj_mod(
       # 		  {
@@ -305,9 +311,12 @@ sub update_model {
       # 		  }
       # 		 ),
 
-    }
+    } else  {
+      warn '$$$$$$$$$$$$$$$$$$$$$$$$$$$$ other $$$$$$$$$$$$$$$$$$$$$$$$$$$$' . "\n";
 
-    p($item);
+      $item = $self->item;
+      $self->add_form_error('Final else');
+    }
 
     return unless $item;
 

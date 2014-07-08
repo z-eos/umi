@@ -56,12 +56,22 @@ sub index :Path :Args(0) {
 
       } elsif ( $c->req->param('act') == 1 ) { # MODIFY
 
-	$c->log->debug( "we will modify object " . $c->req->param('org'));
-	## $c->controller('LDAP_organization_mod')->index($c, ( org => $c->req->param('org') ));
+	$c->log->debug( "we were asked to modify object " . $c->req->param('org'));
+
+	$c->stash(
+		  template => 'ldapact/ldapact_o_node.tt',
+		  # form => $self->form
+		 );
+
+
+	##$c->controller('LDAP_organization_add')->modify($c, ( act => $c->req->param('act') ));
+	# $c->detach;
 	$c->detach('LDAP_organization_add', 'modify', org => $c->req->param('org') );
-	##$c->res->redirect($c->uri_for('/ldap_organization_modify'));
+	# $c->res->redirect($c->uri_for_action('/ldap_organization_add/modify'), { org => $c->req->param('org') } );
+	# $c->detach;
       } elsif ( $c->req->param('act') == 2 ) { # DELETE
 	## TODO recursive delete
+	## TODO organizations select list refresh after deletion
 	my $delete_result = $c->model('LDAP_CRUD')->del( $c->req->param('org') );
 	if ($delete_result) {
 	  $error_message = '<div class="alert alert-danger">' .
@@ -75,7 +85,7 @@ sub index :Path :Args(0) {
 	    '</strong>&raquo; <em>was successfully deleted.</em></li>';
 	  warn 'delete complete: ' . $success_message;
 	  # $self->form->info_message( $success_message );
-	  # $c->res->redirect($c->uri_for('/ldap_organization_select'));
+	  $c->res->redirect($c->uri_for('/ldap_organization_select'));
 	}
       }
 

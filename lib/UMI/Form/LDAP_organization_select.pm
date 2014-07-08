@@ -10,7 +10,7 @@ use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printabl
 
 has_field 'org' => ( type => 'Select',
 		     label => 'Organization',
-		     wrapper_class => [ 'col-md-5' ],
+		     wrapper_class => [ 'col-md-10' ],
 #		     empty_select => '--- new office ---',
 #		     size => 3,
 #		     required => 1,
@@ -68,28 +68,6 @@ sub options_org {
 		};
   }
 
-
-  # my $mesg = $ldap_crud->search({
-  # 				 base => $ldap_crud->{'cfg'}->{'base'}->{'org'},
-  # 				 scope => 'children',
-  # 				 filter => 'ou=*',
-  # 				 attrs => [ qw(ou physicaldeliveryofficename l) ],
-  # 				 sizelimit => 0
-  # 				});
-  # my @entries = $mesg->entries;
-  # my @orgs; # = ( { value => '0', label => '--- new office ---' } );
-  # foreach my $entry ( @entries ) {
-  #   push @orgs, {
-  # 		 value => $entry->dn,
-  # 		 label => sprintf("- %s -, %s @ %s",
-  # 				  $entry->get_value ('ou'),
-  # 				  $entry->get_value ('physicaldeliveryofficename'),
-  # 				  $entry->get_value ('l')
-  # 				 )
-  # 		};
-  # }
-
-
   return \@orgs;
   $ldap_crud->unbind;
 }
@@ -106,9 +84,8 @@ has_field 'act' => ( type => 'Select',
 		   );
 
 has_field 'aux_submit' => ( type => 'Submit',
-#			wrapper_class => [ 'col-md-4', 'pull-right' ],
-			wrapper_class => [ 'col-md-7' ],
-			element_class => [ 'btn', 'btn-lg', 'btn-default', 'btn-block' ],
+			wrapper_class => [ 'col-md-12' ],
+			element_class => [ 'btn', 'btn-default', 'btn-block' ],
 			value => 'Submit' );
 
 has_block 'bl-all' => ( tag => 'fieldset',
@@ -126,14 +103,17 @@ sub build_render_list {[ 'bl-all', 'bl-submit' ]}
 sub validate {
   my $self = shift;
 
-  if ( ! $self->field('org')->value && ! $self->field('act')->value ) {
-    $self->add_form_error('<div class="alert alert-danger">' .
-			  '<span class="glyphicon glyphicon-exclamation-sign">' .
-			  '</span>&nbsp;You need choose what to do!</div>');
-  } elsif ( $self->field('org')->value && ! $self->field('act')->value ) {
+  # if ( ! $self->field('org')->value && ! $self->field('act')->value ) {
+  #   $self->add_form_error('<div class="alert alert-danger">' .
+  # 			  '<span class="glyphicon glyphicon-exclamation-sign">' .
+  # 			  '</span>&nbsp;You need choose what to do!</div>');
+  # } els
+
+  if ( $self->field('org')->value && ! $self->field('act')->value ) {
     $self->field('org')->add_error('<span class="glyphicon glyphicon-exclamation-sign">' .
 				   '</span>&nbsp;You can not create an existent object!');
-  } elsif ( ! $self->field('org')->value && $self->field('act')->value > 0 ) {
+  } elsif ( ! $self->field('org')->value && defined $self->field('act')->value &&
+	    $self->field('act')->value > 0 ) {
     $self->field('org')->add_error('<span class="glyphicon glyphicon-exclamation-sign">' .
 				   '</span>&nbsp;You can not manipulate an unexistent object!');
   }

@@ -62,15 +62,18 @@ sub index :Path :Args(0) {
 
 =cut
 
-sub modify :Path(/ldap_organization_modify) :Args(0) {
-    my ( $self, $c, $ldap_org_id ) = @_;
+sub modify :Path(/ldap_organization_add/modify) :Args(0) {
+    use Data::Printer colored => 1, caller_info => 1;
+    warn "########## \@_ ##########\n" . p(@_);
+
+    my ( $self, $c, $key, $val ) = @_;
+
     if ( $c->check_user_roles('umi-admin')) {
       my $selected = $c->req->parameters;
 
-      my @dn_parts = split(/,/,$selected->{'org'});
+      my @dn_parts = split(/,/, $selected->{'org'});
       my $filter = splice(@dn_parts, 0, 1);
       my $base = join(',',@dn_parts);
-
       my $mesg =
 	$c->model('LDAP_CRUD')->search(
 				       {
@@ -105,6 +108,7 @@ sub modify :Path(/ldap_organization_modify) :Args(0) {
 			     params => $params,
 			     ldap_crud => $c->model('LDAP_CRUD'),
 			    );
+      # $c->detach('LDAP_organization_add', 'modify', org => $c->req->param('org') );
     } else {
       $c->response->body('Unauthorized!');
     }

@@ -452,7 +452,7 @@ sub obj_add {
   my $type = $args->{'type'};
   my $params = $args->{'params'};
 
-  return '' unless %{$params};
+  # return '' unless %{$params};
 
 #
 ## TODO
