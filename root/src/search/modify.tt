@@ -18,8 +18,14 @@
 # my $entry = shift @{$stash->{entries}};
 my $entry = $stash->{entries};
 use Data::Printer;
-p $stash->{rdn};
-my ($attr, $val);
+# p $stash->{rdn};
+my ($attr, $val, $rdn, $rest);
+# $rest = (split ',', $entry->dn) [0];
+# $rest =~ /(.+)=(.+)/;
+
+(split ',', $entry->dn) [0] =~ /(.+)=(.+)/;
+$rdn = $1;
+p $rdn;
 foreach $attr ( sort $entry->attributes ) {
   # skip binary we can't handle
   next if ( $attr =~ /;binary$/ );
@@ -42,7 +48,7 @@ class="img-thumbnail" title="', $entry->dn, '" />';
     foreach my $i (@{$val}) {
       if ( $attr eq "grayPublicKey" ) {
 	print "<textarea name=\"$attr\" class=\"form-control\" rows=2> $i </textarea></br>";
-      } elsif ( $attr eq 'cn' ) { # need to use $ldap_crud->{cfg}->{rdn}->{acc}
+      } elsif ( $attr eq $rdn ) { # need to use $ldap_crud->{cfg}->{rdn}->{acc}
 	print "<input type=text value=\"$i\" name=\"$attr\" disabled=\"\" class=\"form-control\">";
       } else {
 	print "<input type=text value=\"$i\" name=\"$attr\" class=\"form-control\"></br>";

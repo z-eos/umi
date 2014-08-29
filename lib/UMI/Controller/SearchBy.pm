@@ -158,6 +158,7 @@ sub proc :Path(proc) :Args(0) {
 		# entries => \@entries,
 		entries => $c->session->{modify_entries},
 		err => $err_message,
+		rdn => $ldap_crud->{cfg}->{rdn}->{acc},
 	       );
     } elsif (defined $params->{'ldap_modify_password'} &&
 	     $params->{'ldap_modify_password'} ne '') {

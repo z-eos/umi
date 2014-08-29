@@ -17,6 +17,12 @@ has 'uid' => ( is => 'ro', isa => 'Str', required => 1 );
 has 'pwd' => ( is => 'ro', isa => 'Str', required => 1 );
 has 'dry_run' => ( is => 'ro', isa => 'Bool', default => 0 );
 
+=head2 cfg
+
+attribute to predefine the structure of possible objects
+
+=cut
+
 has 'cfg' => ( traits => ['Hash'],
 	       is => 'ro',
 	       isa => 'HashRef',
@@ -28,12 +34,18 @@ sub _build_cfg {
 	  exclude_prefix => 'aux_',
 	  base => {
 		   org => 'ou=Organizations,dc=umidb',
-		   acc => 'ou=People,dc=umidb',
+		   acc_root => 'ou=People,dc=umidb',
+		   acc_svc_branch => 'ou=People,dc=umidb',
+		   acc_svc_common => 'ou=People,dc=umidb',
+		   gitacl => 'ou=GitACL,dc=umidb',
 		  },
 	  rdn => {
-		   org => 'ou',
-		   acc => 'cn',
-		  },
+		  org => 'ou',
+		  acc_root => 'uid',
+		  acc_svc_branch => 'authorizedService',
+		  acc_svc_common => 'uid',
+		  gitacl => 'cn',
+		 },
 	  objectClass => {
 			  org => [ qw(
 				       top
