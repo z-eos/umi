@@ -1,0 +1,22 @@
+[% META title = 'UNAUTHORIZED' %]
+
+<div class="panel panel-danger">
+  <div class="panel-heading">
+    <h1 class="panel-title">
+    	<span class="glyphicon glyphicon-exclamation-sign"></span>
+    	Unauthorized access attempt number XXX!</h1>
+  </div>
+  <div class="panel-body">
+    <p>Dear <strong class="text-info"><em>[% c.user.username %]</em></strong>, it is your attempt number
+    [% c.session.unauthorized.$unauth_action %] to access 
+    <strong class="text-info">&laquo;[% unauth_action %]&raquo;</strong>, page!</p>
+    [% IF c.session.unauthorized.$unauth_action < 6 %]
+        <p class="text-warning"><span class="glyphicon glyphicon-eye-close">&nbsp;</span>
+	We hope it is mistake and you have got here unintentionaly, so no persecution will be arisen.</p>
+    [% ELSE %]
+       <p class="text-danger"><span class="glyphicon glyphicon-eye-open">&nbsp;</span>
+       It looks not a mistake and you have got here rather intentionaly, so the issue will be reported.</p>
+    [% END %]
+    </dl>
+  </div>
+</div>

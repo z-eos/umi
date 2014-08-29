@@ -1,0 +1,44 @@
+<!-- BEGIN site/footer -->
+
+  </div> <!-- /container -->
+
+  <div class="footer navbar-inverse">
+    <div class="container">
+      [% IF c.session.auth_uid %]
+      <div class=col-sm-4>
+	<small><em>
+	    <ul>
+	      <li><a href="#"> footer col №1 item №1 </a></li>
+	      <li><a href="#"> footer col №1 item №2 </a></li>
+	      <li><a href="#"> footer col №1 item №3 </a></li>
+	      <li><a href="#"> footer col №1 item №4 </a></li>
+	    </ul>
+	</em></small>
+      </div>
+      <div class=col-sm-4>
+	<small><em>
+	    <ul>
+	      <li><a href="#"> footer col №2 item №1 </a></li>
+	      <li><a href="#"> footer col №2 item №2 </a></li>
+	      <li><a href="#"> footer col №2 item №3 </a></li>
+	      <li><a href="#"> footer col №2 item №4 </a></li>
+	    </ul>
+	</em></small>
+      </div>
+      <div class=col-sm-4>
+	<small><em>
+	    <ul>
+	      <li><a href="#"> footer col №3 item №1 </a></li>
+	      <li><a href="#"> footer col №3 item №2 </a></li>
+	      <li><a href="#"> footer col №3 item №3 </a></li>
+	      <li><a href="#"> footer col №3 item №4 </a></li>
+	    </ul>
+	</em></small>
+      </div>
+    </div>
+    [% END %]
+  </div>
+
+  <script src="/static/js/bootstrap.min.js"></script>
+
+<!-- END site/footer -->

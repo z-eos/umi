@@ -1,0 +1,6 @@
+[% META title = 'Search Advanced Results' %]
+
+<div class="page-header">
+<h2>Search Advanced <small><em>( advanced search form)</em></small></h2>
+</div>
+[% form.render %]

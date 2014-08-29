@@ -1,0 +1,7 @@
+[% META title = 'Search Simple Results' %]
+
+<h2>Search Simple Results <small><em>base: [% params.ldapsearch_base %]; &nbsp;&nbsp; filter: [% params.ldapsearch_filter %]</em></small></h2>
+
+<pre>
+  [% ldif %]
+</pre>

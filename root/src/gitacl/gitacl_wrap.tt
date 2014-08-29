@@ -1,0 +1,50 @@
+[% META title = 'User root' %]
+
+<div class="row">
+  <div class="col-md-10">
+    <div class="page-header">
+      <h2>New GitACL Creation Form <small><em>all stuff</em></small></h2>
+    </div>
+
+    [% form.render %]
+
+  <script type="text/javascript">
+    
+    $(function(){
+	var $master = $('#gitAclUser_user'),
+	    $slave = $('#gitAclUser_group'),
+	    change = function(event) {
+		var $this = $(this),
+		    target = ($this.prop("id") == "gitAclUser_user") ? $slave : $master;
+		
+		target
+		    .prop("disabled", $this.val() != "0")
+		    .val("0");
+	    };
+
+	$.each([$master, $slave],function(id, item){
+	    item.val("0").prop("disabled", false).on("change", change);
+	});
+    });
+
+  </script>
+
+
+  </div>
+  <div class="col-md-2">
+    <ul class="nav nav-pills nav-stacked">
+      <li><a href="[% c.uri_for('/gitacl') %]">
+	  <span class="glyphicon glyphicon-plus-sign text-success"></span>
+	  create</a>
+      </li>
+      <li><a href="#">
+	  <span class="glyphicon glyphicon-edit text-info"></span>
+	  update</a>
+      </li>
+      <li><a href="#">
+	  <span class="glyphicon glyphicon-remove-sign text-danger"></span>
+	  delete</a>
+      </li>
+    </ul>
+  </div>
+</div>

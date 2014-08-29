@@ -1,0 +1,68 @@
+[% META title = 'Search Simple Modify' %]
+
+<div class="page-header">
+  <h2>Search Simple Modify Page <small><em> </em></small></h2>
+</div>
+
+<form method="POST"
+      enctype="multipart/form-data"
+      class="form-horizontal"
+      action="[% c.uri_for_action('/searchby/modify') %]">
+
+    [% err %]
+
+<table class="table table-striped">
+
+    [% PERL %]
+
+# my $entry = shift @{$stash->{entries}};
+my $entry = $stash->{entries};
+use Data::Printer;
+p $stash->{rdn};
+my ($attr, $val);
+foreach $attr ( sort $entry->attributes ) {
+  # skip binary we can't handle
+  next if ( $attr =~ /;binary$/ );
+
+  print "<div class=\"form-group\">
+   <label class=\"col-sm-2 control-label\">$attr</label>
+   <div class=\"col-sm-10\">";
+
+  $val = $entry->get_value ( $attr, asref => 1  );
+  if ( $attr eq "userPassword" ) {
+    print "<input type=password name=\"$attr.0\" class=\"form-control\" placeholder=\"password is here\"></br>";
+    print "<input type=password name=\"$attr.1\" class=\"form-control\" placeholder=\"confirm password\">";
+  } elsif ( $attr eq "jpegPhoto" ) {
+    use MIME::Base64;
+    print '<img alt="jpegPhoto of "', $entry->dn,' src="data:image/jpg;base64,',encode_base64(join('',@{$val})),'"
+class="img-thumbnail" title="', $entry->dn, '" />';
+
+    print "<input type=\"file\" class=\"btn btn-default\" name=\"$attr\" accept=\"image/jpeg, image/png\"></input>";
+  } elsif ( ref $val eq "ARRAY" ) {
+    foreach my $i (@{$val}) {
+      if ( $attr eq "grayPublicKey" ) {
+	print "<textarea name=\"$attr\" class=\"form-control\" rows=2> $i </textarea></br>";
+      } elsif ( $attr eq 'cn' ) { # need to use $ldap_crud->{cfg}->{rdn}->{acc}
+	print "<input type=text value=\"$i\" name=\"$attr\" disabled=\"\" class=\"form-control\">";
+      } else {
+	print "<input type=text value=\"$i\" name=\"$attr\" class=\"form-control\"></br>";
+      }
+    }
+  } else {
+    print "<input type=text value=\"$val\" name=\"$attr\" class=\"form-control\">";
+  }
+
+  print '</div></div>';
+}
+
+    [% END %]
+
+
+<div class="form-group">
+  <label class="col-sm-2 control-label"></label>
+  <div class="col-sm-10">
+  <input type="submit" value="Submit" name="aux_submit" class="btn btn-default btn-block">
+  </div>
+</div>
+
+</form>

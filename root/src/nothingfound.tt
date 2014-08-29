@@ -1,0 +1,5 @@
+[% META title = 'Nothing Found Page' %] 
+
+<div class="page-header">
+  <h1>Nothing Found Page <small><em>(just the stub to show search zerro result)</em></small></h1>
+</div>

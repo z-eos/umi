@@ -1,0 +1,247 @@
+
+<!-- BEGIN site/header -->
+
+<!-- Fixed navbar -->
+<!-- <nav class="navbar navbar-default navbar-fixed-top navbar-inverse navbar-collapse collapse navbar-inverse-collapse" role="navigation"> -->
+
+<nav class="navbar navbar-default navbar-fixed-top navbar-collapse collapse" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="logo" href="/"><img class="pull-left logo" src="/static/images/umi-logo.50x50.png" exify_initialized="true" style="margin-top: 5px;"></a>
+      <a class="navbar-brand" href="/">&nbsp;Unified Management Interface</a>
+    </div>
+    <div class="collapse navbar-collapse">
+      <ul class="nav navbar-nav">
+        <li>
+	  <a href="/">
+	    <span class="glyphicon glyphicon-home"></span>
+	  </a>
+	</li>
+	[% IF c.session.auth_uid %]
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+	    <span class="glyphicon glyphicon-th"></span>
+	    <span class="caret"></span>
+	  </a>
+          <ul class="dropdown-menu" role="menu">
+            <li>
+	      <a href="[% c.uri_for_action('user_root') %]">
+		<span class="glyphicon glyphicon-user"></span>
+		User
+	      </a>
+	    </li>
+            <li>
+	      <a href="[% c.uri_for_action('org_root') %]">
+		<span class="glyphicon glyphicon-briefcase"></span>
+		Org
+	      </a>
+	    </li>
+            <li>
+	      <a href="[% c.uri_for_action('gitacl_root') %]">
+		<span class="glyphicon glyphicon-random"></span>
+		GitACL
+	      </a>
+	    </li>
+            <li>
+	      <a href="#">
+		<span class="glyphicon glyphicon-globe"></span>
+		DNS
+	      </a>
+	    </li>
+            <li>
+	      <a href="#">
+		<span class="glyphicon glyphicon-fullscreen"></span>
+		DHCP
+	      </a>
+	    </li>
+            <li class="divider"></li>
+            <li>
+	      <a href="#">
+		<span style="color: red;" class="glyphicon glyphicon-bell"></span>
+		Test
+	      </a>
+	    </li>
+            <li class="divider"></li>
+            <li class="dropdown-header">All what the user can see</li>
+	    [% IF c.check_user_roles('skiioo-dev') %]
+            <li>
+	      <a href="#">
+		<span style="color: green;" class="glyphicon glyphicon-leaf"></span>
+		skiioo-dev && setup && logserv
+	      </a>
+	    </li>
+	    [% END %]
+	    [% IF c.check_user_roles('wheel') %]
+            <li>
+	      <a href="#">
+		<span style="color: red;" class="glyphicon glyphicon-fire"></span>
+		logserv && setup
+	      </a>
+	    </li>
+	    [% END %]
+	    [% IF c.check_user_roles('setup') %]
+            <li>
+	      <a href="#">
+		<span style="color: blue;" class="glyphicon glyphicon-cutlery"></span>
+		setup
+	      </a>
+	    </li>
+	    [% END %]
+          </ul>
+        </li>
+	[% END %]
+      </ul>
+      [% IF c.user_exists %]
+      <form class="navbar-form navbar-left"
+	    role="form" 
+	    id="searchby"
+	    method="POST"
+	    action="[% c.uri_for_action('/searchby/index') %]">
+
+	<div class="input-group">
+	  <input type="text"
+		 class="form-control"
+		 name="ldapsearch_filter"
+		 placeholder="Search-Simple Filter"
+		 title="ldapserch filter WITHOUT external brackets"></input>
+	  <div class="input-group-btn">
+	    <button type="submit"
+		    class="btn btn-default dropdown-toggle"
+		    tabindex="-1"
+		    data-toggle="dropdown"
+		    title="LDAP Select Base For Search-Simple Filter">
+	      <span class="glyphicon glyphicon-search"></span>
+	      <span class="caret"></span>
+	    </button>
+	    <ul class="dropdown-menu dropdown-menu-right" role="menu" name="ldapsearch_base">
+	      <li><a href="[% c.uri_for('/searchadvanced') %]">
+		  <span class="glyphicon glyphicon-filter"></span>
+		  Advanced Search</a>
+	      </li>
+	      <li class="dropdown-header">Predefined Search</li>
+	      <li class="bg-primary">
+		<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_name">
+		  <span class="glyphicon glyphicon-user"></span> by name
+		</button>
+	      </li>
+	      <li class="bg-primary">
+		<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_email">
+		  <span class="glyphicon glyphicon-envelope"></span> by email
+		</button>
+	      </li>
+	      </li>
+	      <li class="bg-primary"><a href="#">
+		  <span class="glyphicon glyphicon-comment"></span>
+		  by JID</a>
+	      </li>
+	      <li class="bg-primary"><a href="#">
+		  <span class="glyphicon glyphicon-fullscreen"></span>
+		  by IP</a>
+	      </li>
+	      <li class="bg-primary"><a href="#">
+		  <span class="glyphicon glyphicon-barcode"></span>
+		  by MAC</a>
+	      </li>
+	      <li class="bg-primary">
+		<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_telephone">
+		  <span class="glyphicon glyphicon-phone-alt"></span> by telephone
+		</button>
+	      </li>
+              <li class="dropdown-header">Search-Simple With Base By</li>
+	      <li class="bg-primary"><button type="submit" class="btn btn-link btn-sm" value="ou=group,dc=umidb" name="ldapsearch_base">group</button></li>
+	      <li class="bg-primary"><button type="submit" class="btn btn-link btn-sm" value="ou=People,dc=umidb" name="ldapsearch_base">People</button></li>
+	      <li class="bg-primary"><button type="submit" class="btn btn-link btn-sm" value="ou=machines,dc=umidb" name="ldapsearch_base">machines</button></li>
+	      <li class="bg-primary"><button type="submit" class="btn btn-link btn-sm" value="ou=alias,dc=umidb" name="ldapsearch_base">alias</button></li>
+	      <li class="bg-primary"><button type="submit" class="btn btn-link btn-sm" value="ou=workstations,dc=umidb" name="ldapsearch_base">workstations</button></li>
+	      <li class="bg-primary"><button type="submit" class="btn btn-link btn-sm" value="ou=dhcp,dc=umidb" name="ldapsearch_base">dhcp</button></li>
+	      <li class="bg-primary"><button type="submit" class="btn btn-link btn-sm" value="ou=GitACL,dc=umidb" name="ldapsearch_base">GitACL</button></li>
+	    </ul>
+	  </div>
+	</div>
+      </form>
+      [% END %]
+      <ul class="nav navbar-nav">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+	    <span class="glyphicon glyphicon-info-sign"></span>
+	    <span class="caret"></span>
+	  </a>
+          <ul class="dropdown-menu" role="menu">
+            <li>
+	      <a href="about">
+		<span class="glyphicon glyphicon-question-sign"></span>
+		Help
+	      </a>
+	    </li>
+            <li class="divider"></li>
+            <li>
+	      <a href="#">
+		<span class="glyphicon glyphicon-comment"></span>
+		Chat
+	      </a>
+	    </li>
+            <li>
+	      <a href="#">
+		<span class="glyphicon glyphicon-envelope"></span>
+		Email
+	      </a>
+	    </li>
+            <li>
+	      <a href="#">
+		<span class="glyphicon glyphicon-phone"></span>
+		Phone
+	      </a>
+	    </li>
+          </ul>
+        </li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+	[% IF c.session.auth_uid %]
+        <li class="dropdown float-right">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+	    <span class="glyphicon glyphicon-user"></span>
+	    [% c.user() %]
+	    <span class="caret"></span>
+	  </a>
+          <ul class="dropdown-menu" role="menu">
+            <li>
+	      <a href="[% c.uri_for_action('accinfo') %]">
+		<span class="glyphicon glyphicon-credit-card"></span>
+		Account Info
+	      </a>
+	    </li>
+            <li>
+	      <a href="#">
+		<span class="glyphicon glyphicon-cog"></span>
+		Preferences
+	      </a>
+	    </li>
+          </ul>
+        </li>
+        <li>
+	  <a href="[% c.uri_for('/auth/signout') %]" title="Sign Out">
+	    <span class="glyphicon glyphicon-log-out"></span>
+	  </a>
+	</li>
+	[% ELSE %]
+        <li>
+	  <a href="[% c.uri_for('/auth/signin') %]" title="Sign In">
+	    <span class="glyphicon glyphicon-log-in"></span>
+	  </a>
+	</li>
+	[% END %]
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- END site/header -->
+

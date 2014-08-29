@@ -1,0 +1,189 @@
+[% META title = 'Search Simple Results' %]
+
+[% stash.name %]
+
+<h2>Search Simple Results &nbsp; <small>base: [% params.ldapsearch_base %]; &nbsp;&nbsp; filter: [% params.filter %]</small></h2>
+
+<form role="form"
+      method="POST"
+      action="[% c.uri_for_action('searchby/proc') %]">
+
+[% info %]
+[% err %]
+
+<table class="table table-striped">
+[% PERL %]
+
+  # use Data::Printer;
+  # print "<pre>",p($stash->{entries}, colored => 0),"</pre>";
+
+my $modal_index = 0;
+foreach my $entry ( @{$stash->{entries}} ) {
+  # use Data::Printer;
+  # p $entry->{userPassword};
+  print ' <thead class="bg-primary">
+  <tr>
+   <td>
+
+     <div class="dropdown pull-left">
+       <button class="btn btn-link btn-xs dropdown-toggle" 
+	       type="button" id="dropdownMenuActions" 
+	       data-toggle="dropdown"
+	       title="Possible Actions Upon the Object">
+	 <span class="glyphicon glyphicon-cog"></span><span class="caret"></span>
+       </button>
+	 <ul class="dropdown-menu dropdown-menu-left" aria-labelledby="dropdownMenuActions" role="menu">
+	   <li class="bg-primary">
+	     <button type="button" title="delete object" class="btn btn-link" value="',
+	       $entry->dn, '" name="ldap_delete" data-toggle="modal" data-target="#deleteModal', $modal_index,'">
+	       <span class="glyphicon glyphicon-remove-circle text-danger"></span>
+	       delete
+	     </button>
+	   </li>
+	   <li class="bg-primary">
+	     <button type="button" title="export LDIF of the object" class="btn btn-link" value="',
+	       $entry->dn, '" name="ldap_ldif" data-toggle="modal" data-target="#ldifModal', $modal_index,'">
+	       <span class="glyphicon glyphicon-export text-info"></span>
+	       LDIF
+	     </button>
+	   </li>';
+
+  print '	   <li class="bg-primary">
+	     <button type="submit" title="edit object" class="btn btn-link" value="',
+	       $entry->dn, '" name="ldap_modify">
+	       <span class="glyphicon glyphicon-edit text-warning"></span>
+	       edit (all)
+	     </button>
+	   </li>';
+
+  if ( $entry->exists('userPassword') ) {
+    print '	   <li class="bg-primary">
+	     <button type="submit" title="modify password" class="btn btn-link" value="',
+	       $entry->dn, '" name="ldap_modify_password">
+	       <span class="glyphicon glyphicon-lock text-warning"></span>
+	       password
+	     </button>
+	   </li>';
+  }
+
+  if ( $entry->exists('jpegPhoto') ) {
+    print '	   <li class="bg-primary">
+	     <button type="submit" title="modify jpegPhoto" class="btn btn-link" value="',
+	       $entry->dn, '" name="ldap_modify_jpegphoto">
+	       <span class="glyphicon glyphicon-picture text-warning"></span>
+	       image
+	     </button>
+	   </li>';
+  }
+
+  if ( $entry->exists('gitAclProject') ) {
+    print '	   <li class="bg-primary">
+	     <button type="submit" title="reorder gitAcl" class="btn btn-link" value="',
+	       $entry->dn, '" name="ldap_modify_reorder">
+	       <span class="glyphicon glyphicon-sort text-warning"></span>
+	       reorder
+	     </button>
+	   </li>';
+  }
+
+   print '	 </ul>
+     </div>
+       <b class="pull-right">DN:</b>
+   </td>
+   <td><b>', $entry->dn, '</b>
+
+     <!-- #### Modal: Delete start -->
+     <div class="modal" id="deleteModal', $modal_index,
+	'" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel', $modal_index,
+	'" aria-hidden="true">
+       <div class="modal-dialog">
+	 <div class="modal-content">
+	   <div class="modal-header">
+	     <h4 class="modal-title alert alert-danger" id="deleteModalLabel', $modal_index, '">
+	       <span class="glyphicon glyphicon-remove-circle"></span>
+	       You are about to perform deletion of DN: <b>', $entry->dn, '</b>
+	     </h4>
+	   </div>
+	   <div class="modal-body text-primary">
+	     <input type="checkbox" name="ldap_delete_recursive">
+	     Recursive deletion of all children of this object as well
+	      </input>
+	   </div>
+	   <div class="modal-footer">
+	     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+	     <button type="submit" class="btn btn-primary"  name="ldap_delete" value="',
+		$entry->dn, '">
+	       Yes, I really want to delete it and yes, I understand all consequences!
+	     </button>
+	   </div>
+	 </div>
+       </div>
+     </div>
+     <!-- #### Modal: Delete end -->
+
+     <!-- #### Modal: LDIF start -->
+     <div class="modal" id="ldifModal', $modal_index,
+	'" tabindex="-1" role="dialog" aria-labelledby="ldifModalLabel', $modal_index,
+	'" aria-hidden="true">
+       <div class="modal-dialog">
+	 <div class="modal-content">
+	   <div class="modal-header">
+	     <h4 class="modal-title alert alert-info" id="ldifModalLabel', $modal_index, '">
+	       <span class="glyphicon glyphicon-info-sign"></span>
+	       LDIF of DN: <b>', $entry->dn, '</b>
+	     </h4>
+	   </div>
+	   <div class="modal-body text-primary">
+	     <input type="checkbox" name="ldap_ldif_recursive">
+	     Get LDIFs for all children as well
+	             </input>
+	   </div>
+	   <div class="modal-footer">
+	     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+	     <button type="submit" class="btn btn-primary"  name="ldap_ldif" value="',
+		$entry->dn, '">
+	       Yes, to get LDIF
+	     </button>
+	   </div>
+	 </div>
+       </div>
+     </div>
+     <!-- #### Modal: LDIF end -->
+
+   </td>
+  </tr>
+ </thead>
+ <tbody>';
+  my ($attr, $val);
+  foreach $attr ( sort $entry->attributes ) {
+    # skip binary we can't handle
+    next if ( $attr =~ /;binary$/ );
+    print '<tr><th class="text-right">',$attr,':</th><td>';
+    $val = $entry->get_value ( $attr, asref => 1  );
+    if ( $attr eq "userPassword" ) {
+      print '<span class="glyphicon glyphicon-asterisk"></span>' x 8;
+    } elsif ( $attr eq "jpegPhoto" ) {
+      use MIME::Base64;
+      print '<img alt="jpegPhoto of "', $entry->dn,' src="data:image/jpg;base64,',encode_base64(join('',@{$val})),'"
+class="img-thumbnail" title="', $entry->dn, '" />';
+    } elsif ( ref $val eq "ARRAY" ) {
+      foreach my $i (@{$val}) {
+	if ( $attr eq "grayPublicKey" ) {
+	  print '<div class="panel panel-default">
+  <div class="panel-body"><small>', $i, '</small></div></div>';
+	} else {
+	  print $i,'<br>';
+	}
+      }
+    } else {
+      print $val;
+    }
+
+    print '</td></tr>';
+  }
+  $modal_index++;
+}
+[% END %]
+ </tbody>
+</table>
+</form>

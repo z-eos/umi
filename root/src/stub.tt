@@ -1,0 +1,14 @@
+[% META title = 'Page the Stub' %] 
+
+<div class="page-header">
+  <h1>Page the Stub <small><em>(just the stub to wait for the real page to appear)</em></small></h1>
+</div>
+
+[% err %]
+
+[% PERL %]
+
+use Data::Printer;
+print "<pre>",p($stash->{params}, colored => 0),"</pre>";
+
+[% END %]
