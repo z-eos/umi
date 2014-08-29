@@ -159,18 +159,18 @@ transliterated correctly for default translit table!
 
 =cut
 
-sub cyr2lat {
-  my ($self, $args) = @_;
+# sub cyr2lat {
+#   my ($self, $args) = @_;
 
-  my $arg = {
-	      to_translate => $args->{'to_translate'},
-	      translit_table => $args->{'translit_table'} || 'GOST 7.79 RUS',
-	     };
+#   my $arg = {
+# 	      to_translate => $args->{'to_translate'},
+# 	      translit_table => $args->{'translit_table'} || 'GOST 7.79 RUS',
+# 	     };
 
-  use Lingua::Translit;
-  my $tr = new Lingua::Translit($arg->{'translit_table'});
-  return $tr->translit($arg->{'to_translate'});
-}
+#   use Lingua::Translit;
+#   my $tr = new Lingua::Translit($arg->{'translit_table'});
+#   return $tr->translit($arg->{'to_translate'});
+# }
 
 sub utf2lat {
   my ($self, $to_translit) = @_;

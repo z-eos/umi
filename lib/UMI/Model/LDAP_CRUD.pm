@@ -17,8 +17,8 @@ sub prepare_arguments {
 	my $args = $self->next::method($c, {});
 	return {
 		%{$args},
-		uid => $c->session->{umi_ldap_uid},
-		pwd => $c->session->{umi_ldap_password},
+		uid => $c->session->{auth_uid},
+		pwd => $c->session->{auth_pwd},
 	};
 }
 
