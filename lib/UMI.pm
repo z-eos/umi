@@ -62,9 +62,9 @@ __PACKAGE__->config(
 		},
 		store => {
 		    binddn              => 'uid=bind@umi,ou=bind,ou=system,dc=umidb',
-		    bindpw              => 'qwerty',
+		    bindpw              => '*****',
 		    class               => 'LDAP',
-		    ldap_server         => 'ns.lan.nxc.od.ua',
+		    ldap_server         => 'umi.foo.bar',
 		    ldap_server_options => { timeout => 30 },
 		    use_roles           => 1,
 		    role_basedn         => "ou=group,dc=umidb",
