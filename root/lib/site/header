@@ -156,6 +156,7 @@
               <li class="dropdown-header">Search-Simple With Base By</li>
 	      <li class="bg-primary"><button type="submit" class="btn btn-link btn-sm" value="ou=group,dc=umidb" name="ldapsearch_base">group</button></li>
 	      <li class="bg-primary"><button type="submit" class="btn btn-link btn-sm" value="ou=People,dc=umidb" name="ldapsearch_base">People</button></li>
+	      <li class="bg-primary"><button type="submit" class="btn btn-link btn-sm" value="ou=Organizations,dc=umidb" name="ldapsearch_base">Organizations</button></li>
 	      <li class="bg-primary"><button type="submit" class="btn btn-link btn-sm" value="ou=machines,dc=umidb" name="ldapsearch_base">machines</button></li>
 	      <li class="bg-primary"><button type="submit" class="btn btn-link btn-sm" value="ou=alias,dc=umidb" name="ldapsearch_base">alias</button></li>
 	      <li class="bg-primary"><button type="submit" class="btn btn-link btn-sm" value="ou=workstations,dc=umidb" name="ldapsearch_base">workstations</button></li>

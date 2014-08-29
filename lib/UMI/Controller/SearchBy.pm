@@ -46,10 +46,10 @@ sub index :Path :Args(0) {
       $base = 'ou=People,dc=umidb';
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_telephone'} ) {
-      $filter = sprintf("|(telephoneNumber=%s)(mobile=%s)",
-			$filter_meta, $filter_meta);
-      $filter_show = sprintf("|(telephoneNumber=<kbd>%s</kbd>)(mobile=<kbd>%s</kbd>)",
-			     $filter_meta, $filter_meta);
+      $filter = sprintf("|(telephoneNumber=%s)(mobile=%s)(homePhone=%s)",
+			$filter_meta, $filter_meta, $filter_meta);
+      $filter_show = sprintf("|(telephoneNumber=<kbd>%s</kbd>)(mobile=<kbd>%s</kbd>)(homePhone=<kbd>%s</kbd>)",
+			     $filter_meta, $filter_meta, $filter_meta);
       $base = 'ou=People,dc=umidb';
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_filter'} &&
