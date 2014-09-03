@@ -138,6 +138,7 @@ sub proc :Path(proc) :Args(0) {
       my $ldap_crud =
 	$c->model('LDAP_CRUD');
       my $mesg = $ldap_crud->search( { dn => $params->{ldap_modify} } );
+      my $schema = $ldap_crud->obj_schema( { dn => $params->{ldap_modify} } );
       my $err_message = '';
       if ( ! $mesg->count ) {
 	$err_message = '<div class="alert alert-danger">' .
@@ -145,18 +146,33 @@ sub proc :Path(proc) :Args(0) {
 	    $ldap_crud->err($mesg) . '</ul></div>';
       }
 
-      ## here we work with the only one, single entry!!
-      $c->session->{modify_entries} = $mesg->entry(0);
-      $c->session->{modify_dn} = $params->{ldap_modify};
+      use Data::Printer;
+      my ($is_single, $attr);
+      foreach my $objectClass (sort (keys $schema->{"$params->{'ldap_modify'}"})) {
+	foreach $attr (sort (keys %{$schema->{"$params->{'ldap_modify'}"}->{$objectClass}->{'must'}} )) {
+	  next if $attr eq "objectClass";
+	  $is_single->{$attr} =
+	    $schema->{$params->{'ldap_modify'}}->{$objectClass}->{'must'}->{$attr}->{'single-value'};
+	}
+	foreach $attr (sort (keys %{$schema->{"$params->{'ldap_modify'}"}->{$objectClass}->{'may'}} )) {
+	  next if $attr eq "objectClass";
+	  $is_single->{$attr} =
+	    $schema->{$params->{'ldap_modify'}}->{$objectClass}->{'may'}->{$attr}->{'single-value'};
+	}
+      }
 
-      # use Data::Printer;
-      # p $c->session;
+      ## here we work with the only one, single entry!!
+      # $c->session->{modify_entries} = $mesg->entry(0);
+      $c->session->{modify_dn} = $params->{ldap_modify};
+      $c->session->{modify_schema} = $is_single;
 
       $c->stash(
 		template => 'search/modify.tt',
 		modify => $params->{'ldap_modify'},
 		# entries => \@entries,
-		entries => $c->session->{modify_entries},
+		## entries => $c->session->{modify_entries},
+		entries => $mesg->entry(0),
+		schema => $c->session->{modify_schema},
 		err => $err_message,
 		rdn => $ldap_crud->{cfg}->{rdn}->{acc},
 	       );
@@ -232,6 +248,77 @@ sub proc :Path(proc) :Args(0) {
 					 params => $params,
 					);
 
+    } elsif ( defined $params->{'ldap_modify_jpegphoto'} &&
+	      $params->{'ldap_modify_jpegphoto'} ne '') {
+
+      use UMI::Form::ModJpegPhoto;
+      has 'form_jpegphoto' => ( isa => 'UMI::Form::ModJpegPhoto', is => 'rw',
+		      lazy => 1, default => sub { UMI::Form::ModJpegPhoto->new },
+		      documentation => q{Form to add/modify jpegPhoto},
+		    );
+      $params->{'avatar'} = $c->req->upload('avatar') if defined $params->{'avatar'};
+      use Data::Printer;
+      p $params;
+      my ($file, $jpeg);
+      if (defined $params->{'avatar'}) {
+	$file = $params->{'avatar'}->{'tempname'};
+      } else {
+	$file = $c->path_to('root','static','images','user-6-128x128.jpg');
+      }
+      local $/ = undef;
+      open(my $fh, "<", $file) or $c->log->debug("Can not open $file: $!" );
+      $jpeg = <$fh>;
+      close($fh) or $c->log->debug($!);
+
+      my ( $error_message, $success_message, $final_message );
+      if ( defined $params->{'avatar'} ) {
+	my $ldap_crud =
+	  $c->model('LDAP_CRUD');
+	my $mesg = $ldap_crud->mod( $params->{ldap_modify_jpegphoto},
+				    {
+				     'jpegPhoto' => [ $jpeg ],
+				    }
+				  );
+
+	if ( $mesg ne '0' ) {
+	  $error_message = '<li>Error during jpegPhoto add/change occured: ' . $mesg . '</li>';
+	} else {
+	  $success_message .= $params->{'avatar'}->{'filename'} .
+	    '</kbd> of type ' . $params->{'avatar'}->{'type'};
+	}
+      }
+      if ( $self->form_jpegphoto->validated ) {
+	$final_message = '<div class="alert alert-success" role="alert">' .
+	  '<span style="font-size: 140%" class="glyphicon glyphicon-ok-sign">&nbsp;</span>' .
+	    '<em>jpegPhoto attribute is added/changed from file: </em>&nbsp;' .
+	      '<kbd style="font-size: 120%; font-family: monospace;">' .
+		$success_message . '</div>' if $success_message;
+      } else {
+	$final_message = '<div class="alert alert-warning" role="alert">' .
+	  '<span style="font-size: 140%" class="glyphicon glyphicon-warning-sign">&nbsp;</span>' .
+	    '<em>jpegPhoto was not added/changed from file:</em>&nbsp;' .
+	      '<kbd style="font-size: 120%; font-family: monospace;">' .
+		$error_message . '</div>' if $error_message;
+      }
+
+      $final_message .= '<div class="alert alert-danger" role="alert">' .
+	'<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
+	  $error_message . '</ul></div>' if $error_message;
+
+      # $self->form->info_message( $final_message ) if $final_message && defined $params->{password_gen}->{clear};
+      p $final_message;
+
+
+      $c->stash( template => 'user/user_modjpegphoto.tt',
+		 form => $self->form_jpegphoto,
+		 final_message => $final_message,
+		 ldap_modify_jpegphoto => $params->{'ldap_modify_jpegphoto'},
+	       );
+      # Validate and insert/update database
+      return unless $self->form_jpegphoto->process( # item_id => $searchby_id,
+						   posted => ($c->req->method eq 'POST'),
+						   params => $params,
+						  );
     }
   } else {
     $c->stash( template => 'signin.tt', );

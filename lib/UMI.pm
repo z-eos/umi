@@ -51,6 +51,7 @@ __PACKAGE__->config(
     # Disable deprecated behavior needed by old applications
     disable_component_resolution_regex_fallback => 1,
     enable_catalyst_header => 1, # Send X-Catalyst header
+    # session => { num_pages => 198, },
     'authentication' => {
 	default_realm => "ldap",
 	realms => {
@@ -62,7 +63,7 @@ __PACKAGE__->config(
 		},
 		store => {
 		    binddn              => 'uid=bind@umi,ou=bind,ou=system,dc=umidb',
-		    bindpw              => '*****',
+		    bindpw              => '********',
 		    class               => 'LDAP',
 		    ldap_server         => 'umi.foo.bar',
 		    ldap_server_options => { timeout => 30 },

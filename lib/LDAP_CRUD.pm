@@ -485,18 +485,28 @@ to add error correction
 
 sub obj_schema {
   my ($self, $args) = @_;
+
+  if ( defined $args->{dn} &&
+       $args->{dn} ne '' ) {
+    my @args_arr = split(/,/, $args->{dn});
+    $args->{filter} = shift @args_arr;
+    $args->{base} = join(',', @args_arr);
+    $args->{scope} = 'one';
+  }
+
   my $arg = {
   	     base   => $args->{base},
   	     scope  => $args->{scope} || 'one',
   	     filter => $args->{filter},
   	    };
 
-  my $mesg =
+  my $mesg  =
     $self->ldap->search(
 			base   => $arg->{base},
 			scope  => $arg->{scope},
 			filter => $arg->{filter},
 		       );
+
   my @entries = $mesg->entries;
 
   my ( $must, $may, $obj_schema );
@@ -512,6 +522,7 @@ sub obj_schema {
 	     'single-value' => $must->{'single-value'} || undef,
 	     'max_length' => $must->{'max_length'} || undef,
 	     'equality' => $must->{'equality'} || undef,
+#	     'attribute' => $self->schema->attribute($must->{'name'}) || undef,
 	    };
       }
 
@@ -524,6 +535,7 @@ sub obj_schema {
 	     'single-value' => $may->{'single-value'} || undef ,
 	     'max_length' => $may->{'max_length'} || undef ,
 	     'equality' => $may->{'equality'} || undef ,
+#	     'attribute' => $self->schema->attribute($may->{'name'}) || undef,
 	    };
       }
     }

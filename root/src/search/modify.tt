@@ -19,19 +19,23 @@
 my $entry = $stash->{entries};
 use Data::Printer;
 # p $stash->{rdn};
-my ($attr, $val, $rdn, $rest);
+my ($attr_meta, $attr, $val, $rdn, $rest);
 # $rest = (split ',', $entry->dn) [0];
 # $rest =~ /(.+)=(.+)/;
 
 (split ',', $entry->dn) [0] =~ /(.+)=(.+)/;
 $rdn = $1;
-p $rdn;
+
 foreach $attr ( sort $entry->attributes ) {
   # skip binary we can't handle
   next if ( $attr =~ /;binary$/ );
 
+  if ( ! $stash->{'schema'}->{$attr} ) {
+    $attr_meta = '<a href="#">' . $attr . '&nbsp;<span class="glyphicon glyphicon-plus-sign"></span></a>';
+  } else { $attr_meta = $attr; }
+
   print "<div class=\"form-group\">
-   <label class=\"col-sm-2 control-label\">$attr</label>
+   <label class=\"col-sm-2 control-label\">$attr_meta</label>
    <div class=\"col-sm-10\">";
 
   $val = $entry->get_value ( $attr, asref => 1  );
@@ -61,14 +65,19 @@ class="img-thumbnail" title="', $entry->dn, '" />';
   print '</div></div>';
 }
 
-    [% END %]
-
-
-<div class="form-group">
+print '<div class="form-group">
   <label class="col-sm-2 control-label"></label>
   <div class="col-sm-10">
   <input type="submit" value="Submit" name="aux_submit" class="btn btn-default btn-block">
   </div>
 </div>
 
-</form>
+</table>
+</form>';
+
+# print '<pre>';
+# use Data::Printer  colored => 0, caller_info => 1;
+# print(p $stash->{'schema'});
+# print '</pre>';
+
+[% END %]

@@ -66,7 +66,7 @@ foreach my $entry ( @{$stash->{entries}} ) {
 	   </li>';
   }
 
-  if ( $entry->exists('jpegPhoto') ) {
+  if ( $entry->dn =~ /.*,ou=People,dc=umidb/ ) { # $entry->exists('jpegPhoto') && 
     print '	   <li class="bg-primary">
 	     <button type="submit" title="modify jpegPhoto" class="btn btn-link" value="',
 	       $entry->dn, '" name="ldap_modify_jpegphoto">

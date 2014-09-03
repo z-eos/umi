@@ -48,8 +48,8 @@ sub signin :Path Global {
 	  $c->session->{"auth_uid"} = $c->_user->{user}->{attributes}->{$key};
       }
     }
-    use Data::Printer;
-    p($c->session, colored => 1);
+    # use Data::Printer;
+    # p($c->session, colored => 1);
 
     $c->stash( template => 'welcome.tt', );
   } else {
