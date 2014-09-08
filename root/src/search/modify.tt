@@ -31,7 +31,7 @@ foreach $attr ( sort $entry->attributes ) {
   next if ( $attr =~ /;binary$/ );
 
   if ( ! $stash->{'schema'}->{$attr} ) {
-    $attr_meta = '<a href="#">' . $attr . '&nbsp;<span class="glyphicon glyphicon-plus-sign"></span></a>';
+    $attr_meta = $attr . '<a href="#">&nbsp;<span class="glyphicon glyphicon-plus-sign"></span></a>';
   } else { $attr_meta = $attr; }
 
   print "<div class=\"form-group\">

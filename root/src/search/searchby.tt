@@ -32,8 +32,27 @@ foreach my $entry ( @{$stash->{entries}} ) {
 	       title="Possible Actions Upon the Object">
 	 <span class="glyphicon glyphicon-cog"></span><span class="caret"></span>
        </button>
-	 <ul class="dropdown-menu dropdown-menu-left" aria-labelledby="dropdownMenuActions" role="menu">
+	 <ul class="dropdown-menu dropdown-menu-left" aria-labelledby="dropdownMenuActions" role="menu">';
+
+  # global management available only for top/management account only
+  if ( scalar split(',', $entry->dn) == 3 ) {
+    print '	   <li class="bg-primary">
+	     <button type="button" title="account global management page" class="btn btn-link" value="',
+	       $entry->dn, '" name="accmgmnt" data-toggle="modal" data-target="#accmgmntModal', $modal_index,'">
+	       <span class="glyphicon glyphicon-retweet text-danger"></span>
+	       mgmnt all
+	     </button>
+	   </li>
 	   <li class="bg-primary">
+	     <button type="submit" title="add service account" class="btn btn-link" value="',
+	       $entry->dn, '" name="add_svc_acc">
+	       <span class="glyphicon glyphicon-plus-sign text-warning"></span>
+	       service account
+	     </button>
+	   </li>';
+  }
+
+  print '	   <li class="bg-primary">
 	     <button type="button" title="delete object" class="btn btn-link" value="',
 	       $entry->dn, '" name="ldap_delete" data-toggle="modal" data-target="#deleteModal', $modal_index,'">
 	       <span class="glyphicon glyphicon-remove-circle text-danger"></span>
@@ -91,6 +110,35 @@ foreach my $entry ( @{$stash->{entries}} ) {
        <b class="pull-right">DN:</b>
    </td>
    <td><b>', $entry->dn, '</b>
+
+     <!-- #### Modal: Account Global Management start -->
+     <div class="modal" id="globmgmntModal', $modal_index,
+	'" tabindex="-1" role="dialog" aria-labelledby="globmgmntModalLabel', $modal_index,
+	'" aria-hidden="true">
+       <div class="modal-dialog">
+	 <div class="modal-content">
+	   <div class="modal-header">
+	     <h4 class="modal-title alert alert-danger" id="globmgmntModalLabel', $modal_index, '">
+	       <span class="glyphicon glyphicon-remove-circle"></span>
+	       You are about to perform deletion of DN: <b>', $entry->dn, '</b>
+	     </h4>
+	   </div>
+	   <div class="modal-body text-primary">
+	     <input type="checkbox" name="ldap_delete_recursive">
+	     Recursive deletion of all children of this object as well
+	      </input>
+	   </div>
+	   <div class="modal-footer">
+	     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+	     <button type="submit" class="btn btn-primary"  name="ldap_delete" value="',
+		$entry->dn, '">
+	       Yes, I really want to delete it and yes, I understand all consequences!
+	     </button>
+	   </div>
+	 </div>
+       </div>
+     </div>
+     <!-- #### Modal: Account Global Management end -->
 
      <!-- #### Modal: Delete start -->
      <div class="modal" id="deleteModal', $modal_index,

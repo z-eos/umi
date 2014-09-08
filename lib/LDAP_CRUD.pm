@@ -38,6 +38,7 @@ sub _build_cfg {
 		   acc_svc_branch => 'ou=People,dc=umidb',
 		   acc_svc_common => 'ou=People,dc=umidb',
 		   gitacl => 'ou=GitACL,dc=umidb',
+		   group => 'ou=group,dc=umidb',
 		  },
 	  rdn => {
 		  org => 'ou',
@@ -45,6 +46,7 @@ sub _build_cfg {
 		  acc_svc_branch => 'authorizedService',
 		  acc_svc_common => 'uid',
 		  gitacl => 'cn',
+		  group => 'cn',
 		 },
 	  objectClass => {
 			  org => [ qw(

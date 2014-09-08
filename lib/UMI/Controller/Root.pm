@@ -63,6 +63,12 @@ sub user_root :Path(user_root) :Args(0) {
     $c->stash( template => 'user/user_root.tt', );
 }
 
+sub user_preferences :Path(user_prefs) :Args(0) {
+    my ( $self, $c ) = @_;
+    $c->stash( template => 'user/user_preferences.tt',
+	       auth_obj => $c->session->{auth_obj},);
+}
+
 sub org_root :Path(org_root) :Args(0) {
     my ( $self, $c ) = @_;
     $c->stash( template => 'org/org_root.tt', );

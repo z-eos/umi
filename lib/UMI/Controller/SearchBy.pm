@@ -319,6 +319,19 @@ sub proc :Path(proc) :Args(0) {
 						   posted => ($c->req->method eq 'POST'),
 						   params => $params,
 						  );
+    } elsif ( defined $params->{'add_svc_acc'} &&
+	      $params->{'add_svc_acc'} ne '') {
+      use UMI::Form::AddServiceAccount;
+      has 'form_add_svc_acc' => ( isa => 'UMI::Form::AddServiceAccount', is => 'rw',
+		      lazy => 1, default => sub { UMI::Form::AddServiceAccount->new },
+		      documentation => q{Form to add service account},
+		    );
+
+      $c->stash( template => 'user/user_add_svc.tt',
+		 form => $self->form_add_svc_acc,
+#		 final_message => $final_message,
+		 add_svc_acc => $params->{'add_svc_acc'},
+	       );
     }
   } else {
     $c->stash( template => 'signin.tt', );
