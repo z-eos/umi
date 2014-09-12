@@ -1,3 +1,3 @@
 # Unified Management Interface
 
-**UMI** is planned as "high level" (for use by not qualified personell) though much flexible, LDAP stored data, UI.
+**UMI** is intended to be rather flexible, though still "high level" (for use by not qualified personell), LDAP stored data UI.
