@@ -183,8 +183,13 @@ foreach my $entry ( @{$stash->{entries}} ) {
 	   </div>
 	   <div class="modal-body text-primary">
 	     <input type="checkbox" name="ldap_ldif_recursive">
-	     Get LDIFs for all children as well
-	             </input>
+	       Get LDIFs for all children as well
+	     </input>
+	   </div>
+	   <div class="modal-body text-primary">
+	     <input type="checkbox" name="ldap_ldif_sysinfo">
+	       Get system info as well
+	     </input>
 	   </div>
 	   <div class="modal-footer">
 	     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

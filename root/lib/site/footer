@@ -8,18 +8,30 @@
       <div class=col-sm-4>
 	<small><em>
 	    <ul>
-	      <li><a href="#"> footer col №1 item №1 </a></li>
-	      <li><a href="#"> footer col №1 item №2 </a></li>
-	      <li><a href="#"> footer col №1 item №3 </a></li>
-	      <li><a href="#"> footer col №1 item №4 </a></li>
+	      <li><a href="https://metacpan.org/release/Catalyst-Runtime">
+		  Catalyst::Runtime
+	      </a></li>
+	      <li><a href="https://metacpan.org/pod/Catalyst::Authentication::Store::LDAP">
+		  Catalyst::Authentication::Store::LDAP
+	      </a></li>
+	      <li><a href="https://metacpan.org/release/HTML-FormHandler">
+		  HTML::FormHandler
+	      </a></li>
+	      <li><a href="https://metacpan.org/pod/distribution/HTML-FormHandler/lib/HTML/FormHandler/Manual/Reference.pod">
+		  HTML::FormHandler::Manual::Reference
+	      </a></li>
 	    </ul>
 	</em></small>
       </div>
       <div class=col-sm-4>
 	<small><em>
 	    <ul>
-	      <li><a href="#"> footer col №2 item №1 </a></li>
-	      <li><a href="#"> footer col №2 item №2 </a></li>
+	      <li><a href="https://metacpan.org/release/perl-ldap">
+		  Net::LDAP
+	      </a></li>
+	      <li><a href="https://metacpan.org/pod/Net::LDAP::Control::PreRead">
+		  Net::LDAP::Control::PreRead
+	      </a></li>
 	      <li><a href="#"> footer col №2 item №3 </a></li>
 	      <li><a href="#"> footer col №2 item №4 </a></li>
 	    </ul>

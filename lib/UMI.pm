@@ -51,7 +51,7 @@ __PACKAGE__->config(
     # Disable deprecated behavior needed by old applications
     disable_component_resolution_regex_fallback => 1,
     enable_catalyst_header => 1, # Send X-Catalyst header
-    # session => { num_pages => 198, },
+    session => { cache_size => '1m', },
     'authentication' => {
 	default_realm => "ldap",
 	realms => {

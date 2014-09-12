@@ -112,10 +112,12 @@ sub proc :Path(proc) :Args(0) {
 	$params->{'ldap_ldif'} ne '') {
       my $recursive = defined $params->{'ldap_ldif_recursive'} &&
 	$params->{'ldap_ldif_recursive'} eq 'on' ? 1 : 0;
+      my $sysinfo = defined $params->{'ldap_ldif_sysinfo'} &&
+	$params->{'ldap_ldif_sysinfo'} eq 'on' ? 1 : 0;
 
       $c->stash(
 		template => 'search/ldif.tt',
-		ldif => $c->model('LDAP_CRUD')->ldif($params->{ldap_ldif}, $recursive),
+		ldif => $c->model('LDAP_CRUD')->ldif($params->{ldap_ldif}, $recursive, $sysinfo),
 	       );
     } elsif (defined $params->{'ldap_delete'} &&
 	     $params->{'ldap_delete'} ne '') {
@@ -146,7 +148,6 @@ sub proc :Path(proc) :Args(0) {
 	    $ldap_crud->err($mesg) . '</ul></div>';
       }
 
-      use Data::Printer;
       my ($is_single, $attr);
       foreach my $objectClass (sort (keys $schema->{"$params->{'ldap_modify'}"})) {
 	foreach $attr (sort (keys %{$schema->{"$params->{'ldap_modify'}"}->{$objectClass}->{'must'}} )) {
@@ -161,8 +162,9 @@ sub proc :Path(proc) :Args(0) {
 	}
       }
 
+      p $mesg->entry(0);
       ## here we work with the only one, single entry!!
-      # $c->session->{modify_entries} = $mesg->entry(0);
+      $c->session->{modify_entries} = $mesg->entry(0);
       $c->session->{modify_dn} = $params->{ldap_modify};
       $c->session->{modify_schema} = $is_single;
 
@@ -257,7 +259,6 @@ sub proc :Path(proc) :Args(0) {
 		      documentation => q{Form to add/modify jpegPhoto},
 		    );
       $params->{'avatar'} = $c->req->upload('avatar') if defined $params->{'avatar'};
-      use Data::Printer;
       p $params;
       my ($file, $jpeg);
       if (defined $params->{'avatar'}) {
@@ -327,11 +328,37 @@ sub proc :Path(proc) :Args(0) {
 		      documentation => q{Form to add service account},
 		    );
 
+      my ( $error_message, $success_message, $final_message );
+      if ( $self->form_add_svc_acc->validated ) {
+	$final_message = '<div class="alert alert-success" role="alert">' .
+	  '<span style="font-size: 140%" class="glyphicon glyphicon-ok-sign">&nbsp;</span>' .
+	    '<em>service is added</em>' .
+		$success_message . '</div>' if $success_message;
+      } else {
+	$final_message = '<div class="alert alert-warning" role="alert">' .
+	  '<span style="font-size: 140%" class="glyphicon glyphicon-warning-sign">&nbsp;</span>' .
+	    '<em>service was not added</em>' .
+		$error_message . '</div>' if $error_message;
+      }
+
+      $final_message .= '<div class="alert alert-danger" role="alert">' .
+	'<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
+	  $error_message . '</ul></div>' if $error_message;
+
+      # $self->form->info_message( $final_message ) if $final_message && defined $params->{password_gen}->{clear};
+      p $final_message;
+
       $c->stash( template => 'user/user_add_svc.tt',
 		 form => $self->form_add_svc_acc,
-#		 final_message => $final_message,
+		 final_message => $final_message,
 		 add_svc_acc => $params->{'add_svc_acc'},
 	       );
+
+      return unless $self->form_add_svc_acc->process( # item_id => $searchby_id,
+						     posted => ($c->req->method eq 'POST'),
+						     params => $params,
+						     ldap_crud => $c->model('LDAP_CRUD'),
+						    );
     }
   } else {
     $c->stash( template => 'signin.tt', );
@@ -347,21 +374,25 @@ sub modify :Path(modify) :Args(0) {
   my $params = $c->req->parameters;
   # p $params;
 
-  $params->{jpegPhoto} = $c->req->upload('jpegPhoto');
-
-  # p $params;
   my ($attr, $val, $mod, $orig);
-  # foreach $attr ( sort $c->session->{modify_entries}->attributes ) {
-  #   $val = $c->session->{modify_entries}->get_value ( $attr, asref => 1  );
-  #   $orig->{$attr} = scalar @{$val} == 1 ? $val->[0] : $val;
-  # }
   foreach $attr ( sort ( keys %{$params} )) {
     next if ( $attr =~ /$ldap_crud->{cfg}->{exclude_prefix}/ ||
 	      $attr =~ /userPassword/ );
+    if ( $attr eq "jpegPhoto" ) {
+      $params->{jpegPhoto} = $c->req->upload('jpegPhoto');
+    }
+
     $val = $c->session->{modify_entries}->get_value ( $attr, asref => 1  );
-    # if ref ARRAY needed
+
     $orig = ref($val) eq "ARRAY" && scalar @{$val} == 1 ? $val->[0] : $val;
     $val = $params->{$attr};
+    # removing all empty array elements if any
+    if ( ref($val) eq "ARRAY" ) {
+      @{$val} = grep { $_ ne '' } @{$val};
+    }
+
+    # SMARTMATCH: recurse on paired elements of ARRAY1 and ARRAY2
+    # if identical then next
     next if $val ~~ $orig;
 
     if ( $attr eq 'jpegPhoto' && $val ne "" ) {
@@ -372,12 +403,11 @@ sub modify :Path(modify) :Args(0) {
       $jpeg = <$fh>;
       close($fh) or $c->log->debug($!);
       $mod->{$attr} = [ $jpeg ];
-    } elsif ( $val ne "" &&
-	      $val ne $orig ) {
+    } elsif ( $val ne "" or $val ne "0" ) { # && $val ne $orig ) {
       $mod->{$attr} = $val;
     }
   }
-
+  p $mod;
   my $mesg = $ldap_crud->mod( $c->session->{modify_dn},
 			      $mod );
 
@@ -396,7 +426,7 @@ sub modify :Path(modify) :Args(0) {
 	    err => $err_message,
 	    rdn => $ldap_crud->{cfg}->{rdn}->{acc},
 	   );
-  
+
 }
 
 =head1 AUTHOR

@@ -81,6 +81,12 @@ sub _build_cfg {
 				       )
 				    ],
 			 },
+	  authorizedService => {
+				'mail' => 'Email',
+				'xmpp' => 'Jabber',
+				'802.1x-wire' => '802.1x RG45',
+				'802.1x-wifi' => '802.1x WiFi',
+			       },
 	 };
 }
 
@@ -392,7 +398,7 @@ LDIF export
 =cut
 
 sub ldif {
-  my ($self, $dn, $recursive) = @_;
+  my ($self, $dn, $recursive, $sysinfo) = @_;
 
   use POSIX qw(strftime);
   my $ts = strftime "%Y-%m-%d %H:%M:%S", localtime;
@@ -405,22 +411,41 @@ sub ldif {
 		       $dn,
 		       $ts);
 
+  # my $attrs;
+  # if ( $sysinfo ) {
+  #   $attrs = [ '*',
+  # 	       'createTimestamp',
+  # 	       'creatorsName',
+  # 	       'entryCSN',
+  # 	       'entryDN',
+  # 	       'entryUUID',
+  # 	       'hasSubordinates',
+  # 	       'modifiersName',
+  # 	       'modifyTimestamp',
+  # 	       'structuralobjectclass',
+  # 	       'subschemaSubentry',
+  # 	     ];
+  # }
+  # elase {
+  #   $attrs = [ '*' ];
+  # }
+
 
   my $msg = $self->ldap->search ( base => $dn,
 				  scope => $recursive ? 'sub' : 'base',
 				  filter => 'objectClass=*',
-				  attrs => [ '*',
-					     'createTimestamp',
-					     'creatorsName',
-					     'entryCSN',
-					     'entryDN',
-					     'entryUUID',
-					     'hasSubordinates',
-					     'modifiersName',
-					     'modifyTimestamp',
-					     'structuralobjectclass',
-					     'subschemaSubentry',
-					   ], );
+				  attrs => $sysinfo ? [ '*',
+							'createTimestamp',
+							'creatorsName',
+							'entryCSN',
+							'entryDN',
+							'entryUUID',
+							'hasSubordinates',
+							'modifiersName',
+							'modifyTimestamp',
+							'structuralobjectclass',
+							'subschemaSubentry',
+						      ] : [ '*' ], );
   if ($msg->is_error()) {
     $return .= $self->err( $msg );
   } else {

@@ -18,7 +18,7 @@
 # my $entry = shift @{$stash->{entries}};
 my $entry = $stash->{entries};
 use Data::Printer;
-# p $stash->{rdn};
+p $stash->{schema};
 my ($attr_meta, $attr, $val, $rdn, $rest);
 # $rest = (split ',', $entry->dn) [0];
 # $rest =~ /(.+)=(.+)/;
@@ -30,8 +30,9 @@ foreach $attr ( sort $entry->attributes ) {
   # skip binary we can't handle
   next if ( $attr =~ /;binary$/ );
 
-  if ( ! $stash->{'schema'}->{$attr} ) {
-    $attr_meta = $attr . '<a href="#">&nbsp;<span class="glyphicon glyphicon-plus-sign"></span></a>';
+  # draw element-add if element is multivalued and is not RDN
+  if ( ! $stash->{'schema'}->{$attr} && $attr ne $rdn ) {
+    $attr_meta = $attr . '<a class="element-add" href="#">&nbsp;<span class="glyphicon glyphicon-plus-sign"></span></a>';
   } else { $attr_meta = $attr; }
 
   print "<div class=\"form-group\">
@@ -40,7 +41,7 @@ foreach $attr ( sort $entry->attributes ) {
 
   $val = $entry->get_value ( $attr, asref => 1  );
   if ( $attr eq "userPassword" ) {
-    print "<input type=password name=\"$attr.0\" class=\"form-control\" placeholder=\"password is here\"></br>";
+    print "<p><input type=password name=\"$attr.0\" class=\"form-control\" placeholder=\"password is here\"></p>";
     print "<input type=password name=\"$attr.1\" class=\"form-control\" placeholder=\"confirm password\">";
   } elsif ( $attr eq "jpegPhoto" ) {
     use MIME::Base64;
@@ -51,11 +52,11 @@ class="img-thumbnail" title="', $entry->dn, '" />';
   } elsif ( ref $val eq "ARRAY" ) {
     foreach my $i (@{$val}) {
       if ( $attr eq "grayPublicKey" ) {
-	print "<textarea name=\"$attr\" class=\"form-control\" rows=2> $i </textarea></br>";
+	print "<p><textarea name=\"$attr\" class=\"form-control\" rows=2> $i </textarea></p>";
       } elsif ( $attr eq $rdn ) { # need to use $ldap_crud->{cfg}->{rdn}->{acc}
 	print "<input type=text value=\"$i\" name=\"$attr\" disabled=\"\" class=\"form-control\">";
       } else {
-	print "<input type=text value=\"$i\" name=\"$attr\" class=\"form-control\"></br>";
+	print "<p><input type=text value=\"$i\" name=\"$attr\" class=\"form-control\"></p>";
       }
     }
   } else {
@@ -73,7 +74,31 @@ print '<div class="form-group">
 </div>
 
 </table>
-</form>';
+</form>
+
+<script>
+	$(function(){
+	    var duplicateElement = function(event, undef){
+		var $origin = $(this).parents("label").next().find("p:first");
+		
+		if (!$origin.length) return !1;
+		
+		var $clone = $($origin[0].outerHTML),
+		types = ["INPUT", "TEXTAREA"];
+		
+		if (types.indexOf($clone.children()[0].nodeName) != -1) {
+		    $clone.children().val("");
+		}
+		
+		$origin.parent().prepend($clone);
+		$clone.children().focus();
+		
+		return false;
+
+	    };
+	    $(".element-add").on("click", duplicateElement);
+	});
+</script>';
 
 # print '<pre>';
 # use Data::Printer  colored => 0, caller_info => 1;
