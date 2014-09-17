@@ -324,16 +324,41 @@ sub proc :Path(proc) :Args(0) {
 	      $params->{'add_svc_acc'} ne '') {
       use UMI::Form::AddServiceAccount;
       has 'form_add_svc_acc' => ( isa => 'UMI::Form::AddServiceAccount', is => 'rw',
-		      lazy => 1, default => sub { UMI::Form::AddServiceAccount->new },
-		      documentation => q{Form to add service account},
+				  lazy => 1, default => sub { UMI::Form::AddServiceAccount->new },
+				  documentation => q{Form to add service account},
 		    );
 
-      my ( $error_message, $success_message, $final_message );
+      my ( $login, $error_message, $success_message, $final_message );
       if ( $self->form_add_svc_acc->validated ) {
+
+	if ( $params->{login} ne '' ) {
+	  $login = $params->{login};
+	} else {
+	  $login = $params->{'add_svc_acc_uid'};
+	}
+
+	$success_message = '<table class="table table-bordered table-responsive"><thead>' .
+	  '<th>service @ domain</th>' .
+	    '<th>uid</th>' .
+	    '<th>password</th>' .
+	      '</thead><tbody>';
+	if ( ref( $params->{'authorizedservice'} ) eq 'ARRAY' ) {
+	  foreach ( @{$params->{'authorizedservice'}} ) {
+	    $success_message .= '<tr class=mono><td><kbd>' . $_ . '@' . $params->{'associateddomain'} . '</kbd></td><td><kbd>' .
+	      $login . '-' . $_ . '</kbd></td><td></td></tr>';
+	  }
+	} else {
+	  $success_message .= '<tr class=mono><td><kbd>' .
+	    $params->{'authorizedservice'} . '@' . $params->{'associateddomain'} . '</kbd></td><td><kbd>' .
+	      $login . '-' . $params->{'authorizedservice'} . '</kbd></td></td><td></td></tr>';
+	}
+	$success_message .= '</tbody></table>' . '<p>successfully added to account: <span class=mono>' .
+	  $params->{'add_svc_acc'} . '</span></p>';
+
 	$final_message = '<div class="alert alert-success" role="alert">' .
 	  '<span style="font-size: 140%" class="glyphicon glyphicon-ok-sign">&nbsp;</span>' .
-	    '<em>service is added</em>' .
-		$success_message . '</div>' if $success_message;
+	    $success_message . '</div>' if $success_message;
+
       } else {
 	$final_message = '<div class="alert alert-warning" role="alert">' .
 	  '<span style="font-size: 140%" class="glyphicon glyphicon-warning-sign">&nbsp;</span>' .
@@ -346,12 +371,17 @@ sub proc :Path(proc) :Args(0) {
 	  $error_message . '</ul></div>' if $error_message;
 
       # $self->form->info_message( $final_message ) if $final_message && defined $params->{password_gen}->{clear};
-      p $final_message;
+      # p $final_message;
+
+      my @id = split(',', $params->{'add_svc_acc'});
+      $params->{'add_svc_acc_uid'} = substr($id[0], 4); # $params->{'login'} =  
+      # $params->{'associateddomain'} = $params->{'authorizedservice'} = 0;
 
       $c->stash( template => 'user/user_add_svc.tt',
 		 form => $self->form_add_svc_acc,
 		 final_message => $final_message,
 		 add_svc_acc => $params->{'add_svc_acc'},
+		 add_svc_acc_uid => $params->{'add_svc_acc_uid'},
 	       );
 
       return unless $self->form_add_svc_acc->process( # item_id => $searchby_id,

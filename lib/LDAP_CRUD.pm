@@ -32,6 +32,11 @@ has 'cfg' => ( traits => ['Hash'],
 sub _build_cfg {
   return {
 	  exclude_prefix => 'aux_',
+	  stub => {
+		   homeDirectory => '/nonexistent',
+		   loginShell => '/sbin/nologin',
+		   gidNumber => 10012,
+		  },
 	  base => {
 		   org => 'ou=Organizations,dc=umidb',
 		   acc_root => 'ou=People,dc=umidb',
@@ -49,43 +54,40 @@ sub _build_cfg {
 		  group => 'cn',
 		 },
 	  objectClass => {
-			  org => [ qw(
-				       top
-				       organizationalUnit
-				    )
-				 ],
-			  acc_root => [ qw(
-					    top
+			  org => [ qw( top
+				       organizationalUnit ) ],
+			  acc_root => [ qw( top
 					    posixAccount
 					    inetOrgPerson
-					    grayAccount
-					 )
-				      ],
-			  acc_svc_branch => [ qw(
-						  account
-						  authorizedServiceObject
-					       )
-					    ],
-			  acc_svc_common => [ qw(
-						  posixAccount
+					    grayAccount ) ],
+			  acc_svc_branch => [ qw( account
+						  authorizedServiceObject ) ],
+			  acc_svc_common => [ qw( posixAccount
 						  shadowAccount
 						  inetOrgPerson
 						  authorizedServiceObject
-						  domainRelatedObject
-					       )
-					    ],
+						  domainRelatedObject ) ],
 
-			  gitacl => [ qw(
-					  top
-					  gitACL
-				       )
-				    ],
+			  gitacl => [ qw( top
+					  gitACL ) ],
 			 },
 	  authorizedService => {
-				'mail' => 'Email',
-				'xmpp' => 'Jabber',
-				'802.1x-wire' => '802.1x RG45',
-				'802.1x-wifi' => '802.1x WiFi',
+				'mail' => {
+					   descr => 'Email',
+					   homeDirectory_prefix => '/var/mail/IMAP_HOMES/',
+					   gidNumber => 10006,
+					  },
+				'xmpp' => {
+					   descr => 'Jabber',
+					   gidNumber => 10106,
+					   jpegPhoto_filename => 'avatar-xmpp.png',
+					  },
+				'802.1x-wire' => {
+						  descr => '802.1x RG45',
+						 },
+				'802.1x-wifi' => {
+						  descr => '802.1x WiFi',
+						 },
 			       },
 	 };
 }
