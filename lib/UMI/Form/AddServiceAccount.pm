@@ -50,7 +50,7 @@ has_field 'password2' => ( type => 'Password',
 
 has_field 'pwdcomment' => ( type => 'Display',
 			    html => '<p class="text-muted"><small><em>' .
-			    'Leave login and password fields empty to autogenerate them. If empty, login will be equal to management account uid.</em></small></p>',
+			    'Leave login and password fields empty to autogenerate them. If empty, login will be equal to &laquo;personal&raquo; part of management account uid.</em></small></p>',
 #			    element_class => 'text-muted'
 			  );
 
@@ -111,7 +111,7 @@ sub options_authorizedservice {
 
   return unless $self->ldap_crud;
 
-  my @services = ( { value => '0', label => '--- select service ---', selected => 'on' } );
+  my @services = ( { value => '0', label => '--- select service ---', selected => '1' } );
 
   foreach my $key ( sort {$b cmp $a} keys %{$self->ldap_crud->{cfg}->{authorizedService}}) {
     push @services, {
@@ -166,7 +166,7 @@ sub html_attributes {
 
 sub validate {
   my $self = shift;
-  use Data::Printer;
+  use Data::Printer use_prototypes => 0;
 
   # p $self->field('associateddomain')->value;
   if ( $self->field('associateddomain')->value eq "0" ) {
@@ -174,44 +174,65 @@ sub validate {
       ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;associatedDomain is mandatory!');
   }
 
-  # p  $self->field('authorizedservice')->value->[0];
+  # p  $self->field('authorizedservice')->value;
   if ( $self->field('authorizedservice')->value->[0] eq "0" ) {
     $self->field('authorizedservice')
       ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;authorizedService is mandatory!');
   }
 
-#   my $ldap_crud = $self->ldap_crud;
-#   my $mesg =
-#     $ldap_crud->search(
-# 		       {
-# 			scope => 'one',
-# 			filter => '(&(givenname=' .
-# 			$self->utf2lat({ to_translate => $self->field('givenname')->value }) . ')(sn=' .
-# 			$self->utf2lat({ to_translate => $self->field('sn')->value }) . ')(uid=*-' .
-# 			$self->field('login')->value . '))',
-# 			base => 'ou=People,dc=umidb',
-# 			attrs => [ 'uid' ],
-# 		       }
-# 		      );
+  my $login;
+  if ( $self->field('login')->value eq '' ) {
+    my @id = split(',', $self->field('add_svc_acc')->value);
+    $login = substr($id[0], 21);
+  } else {
+    $login = $self->field('login')->value;
+  }
 
-#   if ($mesg->count) {
-#     my $err = '<span class="glyphicon glyphicon-exclamation-sign"></span> Fname+Lname+Login exists';
-#     $self->field('givenname')->add_error($err);
-#     $self->field('sn')->add_error($err);
-#     $self->field('login')->add_error($err);
+  foreach ( @{$self->field('authorizedservice')->value} ) {
+    # p [ '(uid=' . $login . '@' . $self->field('associateddomain')->value . ')',
+    # 	'authorizedService=' . $_ . '@' . $self->field('associateddomain')->value . ',' .
+    # 	$self->field('add_svc_acc')->value ];
 
-#     $err = '<div class="alert alert-danger">' .
-#       '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span>' .
-# 	'&nbsp;Account with the same fields &laquo;<strong>First Name&raquo;</strong>,' .
-# 	  ' &laquo;<strong>Last Name&raquo;</strong> and &laquo;<strong>Login&raquo;</strong>' .
-# 	    ' already exists!<br>Consider one of:<ul>' .
-# 	      '<li>change Login in case you need another account for the same person</li>' .
-# 		'<li>add service account to the existent one</li></ul></div>';
-#     my $error = $self->form->success_message;
-#     $self->form->error_message('');
-#     $self->form->add_form_error($error . $err);
-#   }
-#   $ldap_crud->unbind;
+    my $ldap_crud = $self->ldap_crud;
+    my $mesg =
+      $ldap_crud->search(
+			 {
+			  scope => 'one',
+			  filter => '(uid=' . $login . '@' . $self->field('associateddomain')->value . ')',
+			  base => 'authorizedService=' . $_ . '@' . $self->field('associateddomain')->value . ',' .
+			          $self->field('add_svc_acc')->value,
+			  attrs => [ 'uid' ],
+			 }
+			);
+    $ldap_crud->unbind;
+
+    if ($mesg->count) {
+      my $err_login = '<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;' .
+	'login <em class="text-primary">' . $login . '</em> is already used for service <em class="text-primary">' .
+	  $_ . '@' . $self->field('associateddomain')->value . '</em>';
+      $self->field('login')->add_error($err_login);
+
+      my $err_domain = '<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;' .
+	'domain <em class="text-primary">' . $self->field('associateddomain')->value . '</em> is already used for service <em class="text-primary">' .
+	  $_ . '@' . $self->field('associateddomain')->value . '</em> with login <em class="text-primary">' .
+	    $login . '</em>';
+      $self->field('associateddomain')->add_error($err_domain);
+
+      my $comment = '';
+      $comment = '<p>you have left field &laquo;Login&raquo; emty and I have used ' .
+	'&laquo;personal&raquo; part of the management account uid, in this case it is <em class="text-primary">' .
+	  $login . '</em></p>' if $self->field('login')->value eq '';
+
+      my $err = '<div class="alert alert-danger">' .
+	'<span style="font-size: 140%" class="glyphicon glyphicon-exclamation-sign"></span>' .
+	  '&nbsp;User <strong class="text-primary">' . $self->field('add_svc_acc')->value . '</strong> already has service account <em class="text-primary">' .
+	    $_ . '@' . $self->field('associateddomain')->value .
+	    '</em> with the same <em>uid</em>' . $comment . '</div>';
+      my $error = $self->form->success_message;
+      $self->form->error_message('');
+      $self->form->add_form_error($error . $err);
+    }
+  }
 }
 
 ######################################################################

@@ -103,7 +103,7 @@ sub index :Path :Args(0) {
 sub proc :Path(proc) :Args(0) {
   my ( $self, $c, $searchby_id ) = @_;
 
-  use Data::Printer;
+  use Data::Printer use_prototypes => 0;
 
   if ( defined $c->session->{"auth_uid"} ) {
     my $params = $c->req->parameters;
@@ -328,8 +328,9 @@ sub proc :Path(proc) :Args(0) {
 				  documentation => q{Form to add service account},
 		    );
 
-      my ( $login, $error_message, $success_message, $final_message );
-      if ( $self->form_add_svc_acc->validated ) {
+      my ( $arr, $login, $error_message, $success_message, $final_message );
+      p [ $self->form_add_svc_acc->has_errors, $self->form_add_svc_acc->ran_validation, $self->form_add_svc_acc->validated ];
+      if ( $self->form_add_svc_acc->validated ) { # not validates !
 
 	if ( $params->{login} ne '' ) {
 	  $login = $params->{login};
@@ -337,28 +338,37 @@ sub proc :Path(proc) :Args(0) {
 	  $login = $params->{'add_svc_acc_uid'};
 	}
 
-	$success_message = '<table class="table table-bordered table-responsive"><thead>' .
-	  '<th>service @ domain</th>' .
-	    '<th>uid</th>' .
-	    '<th>password</th>' .
+	$success_message = '<div class="table-responsive"><table class="table table-condenced table-hover"><thead>' .
+	  '<th>SERVICE</th>' .
+	    '<th>SERVICE UID</th>' .
+	    '<th>PASSWORD</th>' .
 	      '</thead><tbody>';
+
 	if ( ref( $params->{'authorizedservice'} ) eq 'ARRAY' ) {
-	  foreach ( @{$params->{'authorizedservice'}} ) {
-	    $success_message .= '<tr class=mono><td><kbd>' . $_ . '@' . $params->{'associateddomain'} . '</kbd></td><td><kbd>' .
-	      $login . '-' . $_ . '</kbd></td><td></td></tr>';
-	  }
+	  $arr = $params->{'authorizedservice'};
 	} else {
-	  $success_message .= '<tr class=mono><td><kbd>' .
-	    $params->{'authorizedservice'} . '@' . $params->{'associateddomain'} . '</kbd></td><td><kbd>' .
-	      $login . '-' . $params->{'authorizedservice'} . '</kbd></td></td><td></td></tr>';
+	  $arr->[0] = $params->{'authorizedservice'};
 	}
-	$success_message .= '</tbody></table>' . '<p>successfully added to account: <span class=mono>' .
-	  $params->{'add_svc_acc'} . '</span></p>';
+	foreach ( @{$arr} ) {
+	  next if ! $_;
+	  $success_message .= '<tr class=mono><td>' . $_ . '@' . $params->{'associateddomain'} . '</td><td>' .
+	    $login . '@' . $params->{'associateddomain'} . '</td><td></td></tr>';
+	}
 
-	$final_message = '<div class="alert alert-success" role="alert">' .
-	  '<span style="font-size: 140%" class="glyphicon glyphicon-ok-sign">&nbsp;</span>' .
-	    $success_message . '</div>' if $success_message;
+	$success_message .= '</tbody></table></div>';
 
+	$final_message = '<div class="panel panel-success">
+<div class="panel-heading">
+  <h4><span class="glyphicon glyphicon-ok-sign">&nbsp;</span>&nbsp;Service/s successfully added to account: <span class=mono>' .
+    $params->{'add_svc_acc'} .
+'     </span></h4>
+</div>
+<div class="panel-body text-right">
+  <em class="text-muted"><small><b class="text-uppercase">this</b>
+  is one time <b class="text-uppercase">information</b>, password info
+  <b class="text-uppercase">is not saved</b> anywhere anyhow, so it is the only chance to save it</small></em>
+</div>
+<!-- Table -->' . $success_message . '</div>';
       } else {
 	$final_message = '<div class="alert alert-warning" role="alert">' .
 	  '<span style="font-size: 140%" class="glyphicon glyphicon-warning-sign">&nbsp;</span>' .
@@ -370,11 +380,8 @@ sub proc :Path(proc) :Args(0) {
 	'<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
 	  $error_message . '</ul></div>' if $error_message;
 
-      # $self->form->info_message( $final_message ) if $final_message && defined $params->{password_gen}->{clear};
-      # p $final_message;
-
       my @id = split(',', $params->{'add_svc_acc'});
-      $params->{'add_svc_acc_uid'} = substr($id[0], 4); # $params->{'login'} =  
+      $params->{'add_svc_acc_uid'} = substr($id[0], 21); # $params->{'login'} =
       # $params->{'associateddomain'} = $params->{'authorizedservice'} = 0;
 
       $c->stash( template => 'user/user_add_svc.tt',
