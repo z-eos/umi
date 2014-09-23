@@ -83,10 +83,22 @@ sub _build_cfg {
 					   jpegPhoto_filename => 'avatar-xmpp.png',
 					  },
 				'802.1x-wire' => {
-						  descr => '802.1x RG45',
+						  descr => '802.1x RG45 _GLOBAL_',
+						 },
+				'802.1x-wire-vlan102' => {
+						  descr => '802.1x RG45 vlan102',
+						 },
+				'802.1x-wire-vlan1397' => {
+						  descr => '802.1x RG45 vlan1379',
 						 },
 				'802.1x-wifi' => {
-						  descr => '802.1x WiFi',
+						  descr => '802.1x WiFi _GLOBAL_',
+						 },
+				'802.1x-wifi-umi' => {
+						  descr => '802.1x WiFi SSID:UMI',
+						 },
+				'802.1x-wifi-test' => {
+						  descr => '802.1x WiFi SSID:TEST',
 						 },
 			       },
 	 };

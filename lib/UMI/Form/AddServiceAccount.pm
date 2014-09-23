@@ -63,7 +63,7 @@ has_field 'associateddomain' => ( type => 'Select',
 				  label => 'Domain Name', label_class => [ 'required' ],
 				  # options => [{ value => '0', label => '--- select domain ---', selected => 'on' }],
 				  wrapper_class => [ 'col-md-6' ],
-				  # required => 1 
+				  required => 1,
 				);
 
 sub options_associateddomain {
@@ -72,7 +72,11 @@ sub options_associateddomain {
 
   return unless $self->ldap_crud;
 
-  my @domains = ( { value => '0', label => '--- select domain ---', selected => 'on' } );
+  push my @domains, {
+		     value => '0',
+		     label => '--- select domain ---',
+		     selected => 'selected',
+		    };
 
   my $ldap_crud = $self->ldap_crud;
   my $mesg = $ldap_crud->search( { base => 'ou=Organizations,dc=umidb',
@@ -87,11 +91,12 @@ sub options_associateddomain {
   }
 
   my @entries = $mesg->sorted('associatedDomain');
+  my @i;
   foreach my $entry ( @entries ) {
-    push @domains, {
-		     value => $entry->get_value('associatedDomain'),
-		     label => $entry->get_value('associatedDomain'),
-		    };
+    @i = $entry->get_value('associatedDomain');
+    foreach (@i) {
+      push @domains, { value => $_, label => $_, };
+    }
   }
   # p @domains;
   return \@domains;
@@ -102,7 +107,7 @@ has_field 'authorizedservice' => ( type => 'Multiple',
 				   label => 'Service', label_class => [ 'required' ],
 				   wrapper_class => [ 'col-md-6' ],
 				   size => 5,
-				   # required => 1
+				   required => 1,
 				 );
 
 sub options_authorizedservice {
@@ -111,7 +116,7 @@ sub options_authorizedservice {
 
   return unless $self->ldap_crud;
 
-  my @services = ( { value => '0', label => '--- select service ---', selected => '1' } );
+  my @services = ( { value => '0', label => '--- select service ---', selected => 'selected' } );
 
   foreach my $key ( sort {$b cmp $a} keys %{$self->ldap_crud->{cfg}->{authorizedService}}) {
     push @services, {
@@ -168,14 +173,15 @@ sub validate {
   my $self = shift;
   use Data::Printer use_prototypes => 0;
 
-  # p $self->field('associateddomain')->value;
+  p $self->field('associateddomain')->value;
   if ( $self->field('associateddomain')->value eq "0" ) {
     $self->field('associateddomain')
       ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;associatedDomain is mandatory!');
   }
 
-  # p  $self->field('authorizedservice')->value;
-  if ( $self->field('authorizedservice')->value->[0] eq "0" ) {
+  p  $self->field('authorizedservice')->value;
+  if ( @{$self->field('authorizedservice')->value} < 1 ||
+       $self->field('authorizedservice')->value->[0] eq "0" ) {
     $self->field('authorizedservice')
       ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;authorizedService is mandatory!');
   }
@@ -188,12 +194,12 @@ sub validate {
     $login = $self->field('login')->value;
   }
 
+  my $ldap_crud = $self->ldap_crud;
   foreach ( @{$self->field('authorizedservice')->value} ) {
     # p [ '(uid=' . $login . '@' . $self->field('associateddomain')->value . ')',
     # 	'authorizedService=' . $_ . '@' . $self->field('associateddomain')->value . ',' .
     # 	$self->field('add_svc_acc')->value ];
 
-    my $ldap_crud = $self->ldap_crud;
     my $mesg =
       $ldap_crud->search(
 			 {
@@ -204,7 +210,6 @@ sub validate {
 			  attrs => [ 'uid' ],
 			 }
 			);
-    $ldap_crud->unbind;
 
     if ($mesg->count) {
       my $err_login = '<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;' .
@@ -233,6 +238,7 @@ sub validate {
       $self->form->add_form_error($error . $err);
     }
   }
+  $ldap_crud->unbind;
 }
 
 ######################################################################

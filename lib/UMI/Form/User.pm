@@ -23,7 +23,7 @@ has_field 'sn' => ( apply => [ NoSpaces ],
 
 has_field 'avatar' => ( type => 'Upload',
 			label => 'Photo User ID',
-			element_class => [ 'btn', 'btn-default', 'btn-sm' ],
+			element_class => [ 'btn', 'btn-default', ],
 			max_size => '30000' );
 
 has_field 'telephonenumber' => ( apply => [ NoSpaces ],
@@ -132,28 +132,91 @@ has_field 'pwdcomment' => ( type => 'Display',
 has_field 'descr' => ( type => 'TextArea',
 		       label => 'Description',
 		       element_attr => { placeholder => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed dapibus nulla. Mauris vehicula vehicula ligula ac dapibus. Fusce vehicula a turpis sed. ' },
-		       cols => 30, rows => 2);
+		       cols => 30, rows => 4);
 
 has_field 'associateddomain' => ( type => 'Select',
-		      label => 'Domain Name',
-		      options => [{ value => 'startrek.in', label => 'startrek.in'},
-				  { value => 'borg.startrek.in', label => 'borg.startrek.in'},
-				  { value => 'maquis.startrek.in', label => 'maquis.startrek.in'},
-				  { value => 'talax.startrek.in', label => 'talax.startrek.in'},
-				  { value => 'voyager.startrek.in', label => 'voyager.startrek.in'},
-				 ],
-		      size => 3,
-		      required => 1 );
+				  label => 'Domain Name',
+				  size => 5,
+				  required => 1 );
 
-has_field 'service' => ( type => 'Multiple',
-			 label => 'Service',
-			 options => [{ value => 'mail', label => 'Email', selected => 'on'},
-				     { value => 'xmpp', label => 'Jabber', selected => 'on'},
-				     { value => '802.1x-cable', label => 'LAN RG45'},
-				     { value => '802.1x-wifi', label => 'WiFi'},
-				    ],
-			 size => 3,
-			 required => 1 );
+sub options_associateddomain {
+  my $self = shift;
+  use Data::Printer;
+
+  return unless $self->ldap_crud;
+
+  my @domains = ( { value => '0', label => '--- select domain ---', selected => 'selected' } );
+
+  my $ldap_crud = $self->ldap_crud;
+  my $mesg = $ldap_crud->search( { base => 'ou=Organizations,dc=umidb',
+				   filter => 'associatedDomain=*',
+				   attrs => ['associatedDomain' ],
+				 } );
+  my $err_message = '';
+  if ( ! $mesg->count ) {
+    $err_message = '<div class="alert alert-danger">' .
+      '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
+	$ldap_crud->err($mesg) . '</ul></div>';
+  }
+
+  my @entries = $mesg->sorted('associatedDomain');
+  my @i;
+  foreach my $entry ( @entries ) {
+    @i = $entry->get_value('associatedDomain');
+    foreach (@i) {
+      push @domains, { value => $_, label => $_, };
+    }
+  }
+  # p @domains;
+  return \@domains;
+  $ldap_crud->unbind;
+}
+
+# has_field 'service' => ( type => 'Multiple',
+# 			 label => 'Service',
+# 			 options => [{ value => 'mail', label => 'Email', selected => 'on'},
+# 				     { value => 'xmpp', label => 'Jabber', selected => 'on'},
+# 				     { value => '802.1x-cable', label => 'LAN RG45'},
+# 				     { value => '802.1x-wifi', label => 'WiFi'},
+# 				    ],
+# 			 size => 3,
+# 			 required => 1 );
+
+has_field 'authorizedservice' => ( type => 'Multiple',
+				   label => 'Service', label_class => [ 'required' ],
+				   size => 5,
+				   required => 1,
+				 );
+
+sub options_authorizedservice {
+  my $self = shift;
+  use Data::Printer;
+
+  return unless $self->ldap_crud;
+
+  push my @services, {
+		      value => '0',
+		      label => '--- select service ---',
+		      selected => 'selected',
+		     };
+
+  foreach my $key ( sort {$b cmp $a} keys %{$self->ldap_crud->{cfg}->{authorizedService}}) {
+    # if ( $key eq 'mail' || $key eq 'xmpp' ) {
+    #   push @services, {
+    # 		       value => $key,
+    # 		       label => $self->ldap_crud->{cfg}->{authorizedService}->{$key}->{descr},
+    # 		       selected => 'on',
+    # 		      };
+    # } else {
+      push @services, {
+		       value => $key,
+		       label => $self->ldap_crud->{cfg}->{authorizedService}->{$key}->{descr},
+		      };
+    # }
+  }
+  # p @services;
+  return \@services;
+}
 
 
 has_field 'reset' => ( type => 'Reset',
@@ -190,7 +253,7 @@ has_block 'account' => ( tag => 'fieldset',
 		       );
 
 has_block 'services' => ( tag => 'fieldset',
-			  render_list => [ 'associateddomain', 'service', 'descr' ],
+			  render_list => [ 'associateddomain', 'authorizedservice', 'descr' ],
 			  label => '<abbr title="Services Assigned" class="initialism"><span class="icon_cloud_alt" aria-hidden="true"></span></abbr>',
 			  # label => '<span class="icon_menu-square_alt2" aria-hidden="true"></span>',
 			  label_class => [ 'pull-left' ],

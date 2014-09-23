@@ -330,7 +330,10 @@ sub proc :Path(proc) :Args(0) {
 
       my ( $arr, $login, $error_message, $success_message, $final_message );
       p [ $self->form_add_svc_acc->has_errors, $self->form_add_svc_acc->ran_validation, $self->form_add_svc_acc->validated ];
-      if ( $self->form_add_svc_acc->validated ) { # not validates !
+      if ( ! $self->form_add_svc_acc->has_errors &&
+	   $self->form_add_svc_acc->ran_validation &&
+	   $self->form_add_svc_acc->validated ) { # not validates !
+	p [ $self->form_add_svc_acc->has_errors, $self->form_add_svc_acc->ran_validation, $self->form_add_svc_acc->validated ];
 
 	if ( $params->{login} ne '' ) {
 	  $login = $params->{login};
@@ -338,11 +341,12 @@ sub proc :Path(proc) :Args(0) {
 	  $login = $params->{'add_svc_acc_uid'};
 	}
 
-	$success_message = '<div class="table-responsive"><table class="table table-condenced table-hover"><thead>' .
-	  '<th>SERVICE</th>' .
-	    '<th>SERVICE UID</th>' .
-	    '<th>PASSWORD</th>' .
-	      '</thead><tbody>';
+	$success_message = '<div class="table-responsive">' .
+	  '<table class="table table-condenced table-hover"><thead class="bg-success">' .
+	    '<th>SERVICE</th>' .
+	      '<th>SERVICE UID</th>' .
+		'<th>PASSWORD</th>' .
+		  '</thead><tbody>';
 
 	if ( ref( $params->{'authorizedservice'} ) eq 'ARRAY' ) {
 	  $arr = $params->{'authorizedservice'};
@@ -363,10 +367,10 @@ sub proc :Path(proc) :Args(0) {
     $params->{'add_svc_acc'} .
 '     </span></h4>
 </div>
-<div class="panel-body text-right">
-  <em class="text-muted"><small><b class="text-uppercase">this</b>
-  is one time <b class="text-uppercase">information</b>, password info
-  <b class="text-uppercase">is not saved</b> anywhere anyhow, so it is the only chance to save it</small></em>
+<div class="panel-body text-right"><span class="glyphicon glyphicon-ok-sign text-warning"></span>
+  <em class="text-muted text-warning"><b class="text-uppercase">bellow</b>
+  is the only one-time <b class="text-uppercase">information</b>! Password info
+  <b class="text-uppercase">is not saved anywhere anyhow</b>, so now it is the only chance to save it.</em>
 </div>
 <!-- Table -->' . $success_message . '</div>';
       } else {
