@@ -29,7 +29,7 @@ has_field 'add_svc_acc_uid' => ( type => 'Hidden', );
 has_field 'password1' => ( type => 'Password',
 			   minlength => 7, maxlength => 16,
 			   label => 'Password',
-			   ne_username => 'login',
+#			   ne_username => 'login',
 			   apply => [ NoSpaces, NotAllDigits, Printable ],
 			   element_attr => 
 			   { placeholder => 'Password',
@@ -40,7 +40,7 @@ has_field 'password1' => ( type => 'Password',
 has_field 'password2' => ( type => 'Password',
 			   minlength => 7, maxlength => 16,
 			   label => 'Confirm Password',
-			   ne_username => 'login',
+#			   ne_username => 'login',
 			   apply => [ NoSpaces, NotAllDigits, Printable ],
 			   element_attr => 
 			   { placeholder => 'Confirm Password',

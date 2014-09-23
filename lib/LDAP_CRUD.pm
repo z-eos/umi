@@ -62,12 +62,15 @@ sub _build_cfg {
 					    grayAccount ) ],
 			  acc_svc_branch => [ qw( account
 						  authorizedServiceObject ) ],
+			  acc_svc_802_1x => [ qw( account
+						  simpleSecurityObject
+						  authorizedServiceObject
+						  radiusprofile ) ],
 			  acc_svc_common => [ qw( posixAccount
 						  shadowAccount
 						  inetOrgPerson
 						  authorizedServiceObject
 						  domainRelatedObject ) ],
-
 			  gitacl => [ qw( top
 					  gitACL ) ],
 			 },
@@ -82,23 +85,11 @@ sub _build_cfg {
 					   gidNumber => 10106,
 					   jpegPhoto_filename => 'avatar-xmpp.png',
 					  },
-				'802.1x-wire' => {
-						  descr => '802.1x RG45 _GLOBAL_',
+				'802.1x-mac' => {
+						  descr => '802.1x MAC _GLOBAL_',
 						 },
-				'802.1x-wire-vlan102' => {
-						  descr => '802.1x RG45 vlan102',
-						 },
-				'802.1x-wire-vlan1397' => {
-						  descr => '802.1x RG45 vlan1379',
-						 },
-				'802.1x-wifi' => {
-						  descr => '802.1x WiFi _GLOBAL_',
-						 },
-				'802.1x-wifi-umi' => {
-						  descr => '802.1x WiFi SSID:UMI',
-						 },
-				'802.1x-wifi-test' => {
-						  descr => '802.1x WiFi SSID:TEST',
+				'802.1x-eap' => {
+						  descr => '802.1x EAP _GLOBAL_',
 						 },
 			       },
 	 };

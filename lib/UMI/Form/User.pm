@@ -24,7 +24,7 @@ has_field 'sn' => ( apply => [ NoSpaces ],
 has_field 'avatar' => ( type => 'Upload',
 			label => 'Photo User ID',
 			element_class => [ 'btn', 'btn-default', ],
-			max_size => '30000' );
+			max_size => '50000' );
 
 has_field 'telephonenumber' => ( apply => [ NoSpaces ],
 				 label => 'SIP/Cell',
@@ -201,6 +201,7 @@ sub options_authorizedservice {
 		     };
 
   foreach my $key ( sort {$b cmp $a} keys %{$self->ldap_crud->{cfg}->{authorizedService}}) {
+    next if $key =~ /^802.1x-.*/;
     # if ( $key eq 'mail' || $key eq 'xmpp' ) {
     #   push @services, {
     # 		       value => $key,

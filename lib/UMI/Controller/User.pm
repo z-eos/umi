@@ -201,18 +201,20 @@ sub create_account {
     # if it was choosen only one single service we have to be sure we
     # pass through the array, not the string
     my @services;
-    if ( ref( $args->{'service'} ) eq 'ARRAY' ) {
-      @services = @{$args->{'service'}};
+    if ( ref( $args->{'authorizedservice'} ) eq 'ARRAY' ) {
+      @services = @{$args->{'authorizedservice'}};
     } else {
-      push @services, $args->{'service'};
+      push @services, $args->{'authorizedservice'};
     }
     my ($create_account_branch_return, $create_account_branch_leaf_return);
     foreach my $service ( @services ) {
       $ldif = 0;
-      next if $service =~ /^802.1x-.*/;
+      # next if $service =~ /^802.1x-.*/;
 
       if ( ! defined $args->{'password1'} or $args->{'password1'} eq '' ) {
     	$pwd = { $service => $self->pwdgen };
+      } elsif ( $service =~ /^802.1x-.*/ ) {
+	$pwd->{service}->{clear} = $args->{login};
       } else {
     	$pwd = { $service => $self->pwdgen( { pwd => $args->{'password1'} } ) };
       }
@@ -382,11 +384,17 @@ sub create_account_branch_leaf {
 
   $arg->{basedn} = 'authorizedService=' . $args->{service} . '@' . $args->{associatedDomain} .
     ',' . $args->{basedn};
+
+  $arg->{uid} = $arg->{'login'} . '@' . $arg->{associatedDomain};
+
+  $arg->{dn} = 'uid=' . $arg->{uid} .
+    ',' . $arg->{basedn};
+
   my $authorizedService = [
 			   authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
 			   associatedDomain => $arg->{associatedDomain},
-			   uid => $arg->{'login'} . '@' . $arg->{associatedDomain},
-			   cn => $arg->{'login'} . '@' . $arg->{associatedDomain},
+			   uid => $arg->{uid},
+			   cn => $arg->{uid},
 			   givenName => $arg->{givenName},
 			   sn => $arg->{sn},
 			   uidNumber => $arg->{uidNumber},
@@ -405,10 +413,10 @@ sub create_account_branch_leaf {
       [
        homeDirectory => $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{homeDirectory_prefix} .
        $arg->{associatedDomain} . '/' .
-       $arg->{'login'} . '@' . $arg->{associatedDomain},
+       $arg->{uid},
        'mu-mailBox' => 'maildir:/var/mail/' .
        $arg->{associatedDomain} . '/' .
-       $arg->{'login'} . '@' . $arg->{associatedDomain},
+       $arg->{uid},
        gidNumber => $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{gidNumber},
        objectClass => [ 'mailutilsAccount' ],
       ];
@@ -429,12 +437,31 @@ sub create_account_branch_leaf {
        telephonenumber => $arg->{telephoneNumber},
        jpegPhoto => [ $jpeg ],
       ];
+  } elsif ( $arg->{service} eq '802.1x-mac' ||
+	    $arg->{service} eq '802.1x-eap' ) {
+    $arg->{uid} = $arg->{'login'};
+    $authorizedService_add =
+      [
+       authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
+       uid => $arg->{uid},
+       cn => $arg->{uid},
+       objectClass => $ldap_crud->{cfg}->{objectClass}->{acc_svc_802_1x},
+       userPassword => '!' . $arg->{password}->{clear},
+       description => uc($arg->{service}) . ': ' . $arg->{'login'},
+       radiusgroupname => 'STUB',
+       radiustunnelmediumtype => 6,
+       radiusservicetype => 'Framed-User',
+       radiustunnelprivategroupid => 666,
+       radiustunneltype => 13,
+      ];
+    undef $authorizedService;
+    $authorizedService = [];
+    $arg->{dn} = 'uid=' . $arg->{'login'} . ',' . $arg->{basedn};
   }
 
   my $mesg =
     $ldap_crud->add(
-		    'uid=' . $arg->{'login'} . '@' . $arg->{associatedDomain} .
-		    ',' . $arg->{basedn},
+		    $arg->{dn},
 		    [ @$authorizedService, @$authorizedService_add ],
 		   );
   my $return;
@@ -445,8 +472,7 @@ sub create_account_branch_leaf {
 
   } else {
     $return->[1] = '<li><em>' . uc( $arg->{service} ) . ' account login:</em> &laquo;<strong>' .
-      $arg->{'login'} . '@' . $arg->{associatedDomain} .
-	'</strong>&raquo; <em>password:</em> &laquo;<strong>' .
+      $arg->{uid} . '</strong>&raquo; <em>password:</em> &laquo;<strong>' .
 	  $arg->{password}->{'clear'} . '</strong>&raquo;</li>';
   }
   return $return;

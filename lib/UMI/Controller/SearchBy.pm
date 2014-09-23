@@ -328,7 +328,7 @@ sub proc :Path(proc) :Args(0) {
 				  documentation => q{Form to add service account},
 		    );
 
-      my ( $arr, $login, $error_message, $success_message, $final_message );
+      my ( $arr, $login, $uid, $error_message, $success_message, $final_message );
       p [ $self->form_add_svc_acc->has_errors, $self->form_add_svc_acc->ran_validation, $self->form_add_svc_acc->validated ];
       if ( ! $self->form_add_svc_acc->has_errors &&
 	   $self->form_add_svc_acc->ran_validation &&
@@ -355,8 +355,11 @@ sub proc :Path(proc) :Args(0) {
 	}
 	foreach ( @{$arr} ) {
 	  next if ! $_;
-	  $success_message .= '<tr class=mono><td>' . $_ . '@' . $params->{'associateddomain'} . '</td><td>' .
-	    $login . '@' . $params->{'associateddomain'} . '</td><td></td></tr>';
+	  $uid = $_ =~ /^802.1x-/ ? $login : sprintf('%s@%s', $login, $params->{'associateddomain'});
+	  $success_message .= sprintf('<tr class=mono><td>%s@%s</td><td>%s</td><td></td></tr>',
+				      $_,
+				      $params->{'associateddomain'},
+				      $uid);
 	}
 
 	$success_message .= '</tbody></table></div>';
