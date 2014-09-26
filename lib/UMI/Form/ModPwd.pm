@@ -107,21 +107,27 @@ sub validate {
       ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;password and confirmation does not match');
   }
 
-  if ( $self->field('password_init')->value eq '' ||
-       $self->field('password_cnfm')->value eq '' ) {
+  if ( ($self->field('password_init')->value ne '' &&
+	$self->field('password_cnfm')->value eq '' ) ||
+       ($self->field('password_init')->value eq '' &&
+	$self->field('password_cnfm')->value ne '' ) ) {
     $self->field('password_init')
-      ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;password and confirmation are mandatory');
+      ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;password mandatory if confirmation present');
+    $self->field('password_cnfm')
+      ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;confirmation is mandatory if password present');
   }
 
   # this realized with HTML::FormHandler::Types Printable
-  # if ( defined $self->field('password_init')->value &&
-  #      defined $self->field('password_cnfm')->value &&
-  #      ! $self->is_ascii($self->field('password_init')->value) == 1 &&
-  #      ! $self->is_ascii($self->field('password_cnfm')->value) == 1 
-  #    ) {
-  #   $self->field('password_init')
-  #     ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;password and confirmation has to be ASCII only!');
-  # }
+  if ( defined $self->field('password_init')->value &&
+       defined $self->field('password_cnfm')->value &&
+       ( $self->is_ascii($self->field('password_init')->value) ||
+	 $self->is_ascii($self->field('password_cnfm')->value) )
+     ) {
+    $self->field('password_init')
+      ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;password has to be ASCII only!');
+    $self->field('password_cnfm')
+      ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;confirmation has to be ASCII only!');
+  }
 
 
 #   my $ldap_crud = $self->ldap_crud;

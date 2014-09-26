@@ -21,7 +21,7 @@ has_field 'avatar' => ( type => 'Upload',
 			# label_class => [ 'form-group', 'col-md-4' ],
 			element_class => [ 'btn', 'btn-default', ],
 			# wrapper_class => [ 'col-md-12' ],
-			max_size => '30000',
+			max_size => '50000',
 			required => 1,);
 
 has_field 'reset' => ( type => 'Reset',

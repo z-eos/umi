@@ -10,8 +10,20 @@ BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 use UMI::Form::ModPwd;
 has 'form_mod_pwd' => ( isa => 'UMI::Form::ModPwd', is => 'rw',
 			lazy => 1, default => sub { UMI::Form::ModPwd->new },
-			documentation => q{Form to modify password},
+			documentation => q{Form to modify userPassword},
 		      );
+
+use UMI::Form::ModJpegPhoto;
+has 'form_jpegphoto' => ( isa => 'UMI::Form::ModJpegPhoto', is => 'rw',
+		      lazy => 1, default => sub { UMI::Form::ModJpegPhoto->new },
+		      documentation => q{Form to add/modify jpegPhoto},
+		    );
+
+use UMI::Form::AddServiceAccount;
+has 'form_add_svc_acc' => ( isa => 'UMI::Form::AddServiceAccount', is => 'rw',
+			    lazy => 1, default => sub { UMI::Form::AddServiceAccount->new },
+			    documentation => q{Form to add service account},
+			  );
 
 
 =head1 NAME
@@ -202,14 +214,7 @@ sub proc :Path(proc) :Args(0) {
       $c->stash(
 		template => 'user/user_modpwd.tt',
 		form => $self->form_mod_pwd,
-		# final_message => $self->mod_pwd(
-		# 				$c->model('LDAP_CRUD'),
-		# 				{
-		# 				 mod_pwd_dn => $params->{ldap_modify_password},
-		# 				 password_init => $params->{password_init},
-		# 				 password_cnfm => $params->{password_cnfm},
-		# 				}),
-		# ldap_modify_password => $params->{ldap_modify_password},
+		ldap_modify_password => $params->{ldap_modify_password},
 	       );
 
       return unless $self->form_mod_pwd->process(
@@ -218,8 +223,6 @@ sub proc :Path(proc) :Args(0) {
 						);
 
       $c->stash(
-		# template => 'user/user_modpwd.tt',
-		# form => $self->form_mod_pwd,
 		final_message => $self->mod_pwd(
 						$c->model('LDAP_CRUD'),
 						{
@@ -227,7 +230,6 @@ sub proc :Path(proc) :Args(0) {
 						 password_init => $params->{password_init},
 						 password_cnfm => $params->{password_cnfm},
 						}),
-		ldap_modify_password => $params->{ldap_modify_password},
 	       );
 
 ######################################################################
@@ -236,98 +238,58 @@ sub proc :Path(proc) :Args(0) {
     } elsif ( defined $params->{'ldap_modify_jpegphoto'} &&
 	      $params->{'ldap_modify_jpegphoto'} ne '') {
 
-      use UMI::Form::ModJpegPhoto;
-      has 'form_jpegphoto' => ( isa => 'UMI::Form::ModJpegPhoto', is => 'rw',
-		      lazy => 1, default => sub { UMI::Form::ModJpegPhoto->new },
-		      documentation => q{Form to add/modify jpegPhoto},
-		    );
-      $params->{'avatar'} = $c->req->upload('avatar') if defined $params->{'avatar'};
-      p $params;
-      my ($file, $jpeg);
-      if (defined $params->{'avatar'}) {
-	$file = $params->{'avatar'}->{'tempname'};
-      } else {
-	$file = $c->path_to('root','static','images','user-6-128x128.jpg');
-      }
-      local $/ = undef;
-      open(my $fh, "<", $file) or $c->log->debug("Can not open $file: $!" );
-      $jpeg = <$fh>;
-      close($fh) or $c->log->debug($!);
+     $params->{'avatar'} = $c->req->upload('avatar') if defined $params->{'avatar'};
 
-      my ( $error_message, $success_message, $final_message );
-      if ( defined $params->{'avatar'} ) {
-	my $ldap_crud =
-	  $c->model('LDAP_CRUD');
-	my $mesg = $ldap_crud->mod( $params->{ldap_modify_jpegphoto},
-				    {
-				     'jpegPhoto' => [ $jpeg ],
-				    }
-				  );
+     my $ldap_crud = $c->model('LDAP_CRUD');
 
-	if ( $mesg ne '0' ) {
-	  $error_message = '<li>Error during jpegPhoto add/change occured: ' . $mesg . '</li>';
-	} else {
-	  $success_message .= $params->{'avatar'}->{'filename'} .
-	    '</kbd> of type ' . $params->{'avatar'}->{'type'};
-	}
-      }
-      if ( $self->form_jpegphoto->validated ) {
-	$final_message = '<div class="alert alert-success" role="alert">' .
-	  '<span style="font-size: 140%" class="glyphicon glyphicon-ok-sign">&nbsp;</span>' .
-	    '<em>jpegPhoto attribute is added/changed from file: </em>&nbsp;' .
-	      '<kbd style="font-size: 120%; font-family: monospace;">' .
-		$success_message . '</div>' if $success_message;
-      } else {
-	$final_message = '<div class="alert alert-warning" role="alert">' .
-	  '<span style="font-size: 140%" class="glyphicon glyphicon-warning-sign">&nbsp;</span>' .
-	    '<em>jpegPhoto was not added/changed from file:</em>&nbsp;' .
-	      '<kbd style="font-size: 120%; font-family: monospace;">' .
-		$error_message . '</div>' if $error_message;
-      }
+     $c->stash(
+	       template => 'user/user_modjpegphoto.tt',
+	       form => $self->form_jpegphoto,
+	       ldap_modify_jpegphoto => $params->{'ldap_modify_jpegphoto'},
+	      );
 
-      $final_message .= '<div class="alert alert-danger" role="alert">' .
-	'<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
-	  $error_message . '</ul></div>' if $error_message;
+      return unless $self->form_jpegphoto->process(
+      						   posted => ($c->req->method eq 'POST'),
+      						   params => $params,
+      						  );
 
-      # $self->form->info_message( $final_message ) if $final_message && defined $params->{password_gen}->{clear};
-      p $final_message;
+      $c->stash( final_message => $self
+		 ->mod_jpegPhoto(
+				 $ldap_crud,
+				 {
+				  mod_jpegPhoto_dn => $params->{ldap_modify_jpegphoto},
+				  jpegPhoto => $params->{'avatar'},
+				  jpegPhoto_stub => $c->path_to('root',
+								'static',
+								'images',
+								$ldap_crud->{cfg}->{jpegPhoto}->{stub}),
+				 }
+				),
+      	       );
 
-
-      $c->stash( template => 'user/user_modjpegphoto.tt',
-		 form => $self->form_jpegphoto,
-		 final_message => $final_message,
-		 ldap_modify_jpegphoto => $params->{'ldap_modify_jpegphoto'},
-	       );
-      # Validate and insert/update database
-      return unless $self->form_jpegphoto->process( # item_id => $searchby_id,
-						   posted => ($c->req->method eq 'POST'),
-						   params => $params,
-						  );
 ######################################################################
 # Add Service Account
 ######################################################################
     } elsif ( defined $params->{'add_svc_acc'} &&
 	      $params->{'add_svc_acc'} ne '') {
-      use UMI::Form::AddServiceAccount;
-      has 'form_add_svc_acc' => ( isa => 'UMI::Form::AddServiceAccount', is => 'rw',
-				  lazy => 1, default => sub { UMI::Form::AddServiceAccount->new },
-				  documentation => q{Form to add service account},
-		    );
 
       my ( $arr, $login, $uid, $error_message, $success_message, $final_message );
+      my @id = split(',', $params->{'add_svc_acc'});
+      $params->{'add_svc_acc_uid'} = substr($id[0], 21); # $params->{'login'} =
+      $c->stash(
+		template => 'user/user_add_svc.tt',
+		form => $self->form_add_svc_acc,
+		add_svc_acc => $params->{'add_svc_acc'},
+		add_svc_acc_uid => $params->{'add_svc_acc_uid'},
+	       );
 
-      return unless $self->form_add_svc_acc->process( # item_id => $searchby_id,
-						     # posted => ($c->req->method eq 'POST'),
+      return unless $self->form_add_svc_acc->process(
+						     posted => ($c->req->method eq 'POST'),
 						     params => $params,
 						     ldap_crud => $c->model('LDAP_CRUD'),
 						    );
 
-      p [ $self->form_add_svc_acc->has_errors, $self->form_add_svc_acc->ran_validation, $self->form_add_svc_acc->validated ];
-      if ( ! $self->form_add_svc_acc->has_errors &&
-	   $self->form_add_svc_acc->ran_validation &&
-	   $self->form_add_svc_acc->validated ) { # not validates !
-	p [ $self->form_add_svc_acc->has_errors, $self->form_add_svc_acc->ran_validation, $self->form_add_svc_acc->validated ];
-
+      if ( $self->form_add_svc_acc->validated ) {
 	if ( $params->{login} ne '' ) {
 	  $login = $params->{login};
 	} else {
@@ -380,17 +342,9 @@ sub proc :Path(proc) :Args(0) {
 	'<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
 	  $error_message . '</ul></div>' if $error_message;
 
-      my @id = split(',', $params->{'add_svc_acc'});
-      $params->{'add_svc_acc_uid'} = substr($id[0], 21); # $params->{'login'} =
-      # $params->{'associateddomain'} = $params->{'authorizedservice'} = 0;
-
-      $c->stash( template => 'user/user_add_svc.tt',
-		 form => $self->form_add_svc_acc,
-		 final_message => $final_message,
-		 add_svc_acc => $params->{'add_svc_acc'},
-		 add_svc_acc_uid => $params->{'add_svc_acc_uid'},
+      $c->stash(
+		final_message => $final_message,
 	       );
-
 
     }
   } else {
@@ -398,11 +352,71 @@ sub proc :Path(proc) :Args(0) {
   }
 }
 
+
+=head1 mod_jpegPhoto
+
+modify jpegPhoto method
+
+=cut
+
+
+sub mod_jpegPhoto {
+  my ( $self, $ldap_crud, $args ) = @_;
+
+  my $arg = {
+	     mod_jpegPhoto_dn => $args->{mod_jpegPhoto_dn},
+	     jpegPhoto => $args->{jpegPhoto},
+	     jpegPhoto_stub => $args->{jpegPhoto_stub},
+	    };
+  p $arg;
+  my ($file, $jpeg);
+  if (defined $arg->{jpegPhoto}) {
+    $file = $arg->{jpegPhoto}->{'tempname'};
+  } else {
+    $file = $arg->{jpegPhoto_stub};
+  }
+  local $/ = undef;
+  open(my $fh, "<", $file) or p $!;
+  $jpeg = <$fh>;
+  close($fh);
+
+  my ( $error_message, $success_message, $final_message );
+  if ( defined $arg->{jpegPhoto} ) {
+    my $mesg = $ldap_crud->mod(
+			       $arg->{mod_jpegPhoto_dn},
+			       { 'jpegPhoto' => [ $jpeg ], }
+			      );
+
+    if ( $mesg ne '0' ) {
+      $error_message = '<li>Error during jpegPhoto add/change occured: ' . $mesg . '</li>';
+    } else {
+      $success_message .= $arg->{jpegPhoto}->{'filename'} .
+	'</kbd> of type ' . $arg->{jpegPhoto}->{'type'} . ' and ' .
+	  $arg->{jpegPhoto}->{'size'} . ' bytes size.';
+    }
+  }
+  if ( $self->form_jpegphoto->validated ) {
+    $final_message = '<div class="alert alert-success" role="alert">' .
+      '<span style="font-size: 140%" class="glyphicon glyphicon-ok-sign">&nbsp;</span>' .
+	'<em>jpegPhoto attribute is added/changed from file: </em>&nbsp;' .
+	  '<kbd style="font-size: 110%; font-family: monospace;">' .
+	    $success_message . '</div>' if $success_message;
+  }
+
+  $final_message .= '<div class="alert alert-danger" role="alert">' .
+    '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
+      $error_message . '</ul></div>' if $error_message;
+
+  return $final_message;
+}
+
+
 =head1 mod_pwd 
 
 modify password method
 
 =cut
+
 
 sub mod_pwd {
   my ( $self, $ldap_crud, $args ) = @_;
@@ -437,12 +451,6 @@ sub mod_pwd {
     $final_message = '<div class="alert alert-success" role="alert">' .
       '<span style="font-size: 140%" class="glyphicon glyphicon-ok-sign">&nbsp;</span>' .
 	'<em>Password is changed and is:</em>&nbsp;' .
-	  '<kbd style="font-size: 150%; font-family: monospace;">' .
-	    $success_message . '</kbd></div>' if $success_message;
-  } else {
-    $final_message = '<div class="alert alert-warning" role="alert">' .
-      '<span style="font-size: 140%" class="glyphicon glyphicon-warning-sign">&nbsp;</span>' .
-	'<em>Password was not changed, it was:</em>&nbsp;' .
 	  '<kbd style="font-size: 150%; font-family: monospace;">' .
 	    $success_message . '</kbd></div>' if $success_message;
   }

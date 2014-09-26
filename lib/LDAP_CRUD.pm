@@ -74,6 +74,9 @@ sub _build_cfg {
 			  gitacl => [ qw( top
 					  gitACL ) ],
 			 },
+	  jpegPhoto => {
+			'stub' => 'user-6-128x128.jpg',
+		       },
 	  authorizedService => {
 				'mail' => {
 					   descr => 'Email',

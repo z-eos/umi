@@ -72,16 +72,12 @@ sub options_associateddomain {
 
   return unless $self->ldap_crud;
 
-  push my @domains, {
-		     value => '0',
-		     label => '--- select domain ---',
-		     selected => 'selected',
-		    };
+  push my @domains, { value => '0', label => '--- select domain ---', selected => 'selected', };
 
   my $ldap_crud = $self->ldap_crud;
   my $mesg = $ldap_crud->search( { base => 'ou=Organizations,dc=umidb',
 				   filter => 'associatedDomain=*',
-				   attrs => ['associatedDomain' ],
+				   attrs => [ 'associatedDomain' ],
 				 } );
   my $err_message = '';
   if ( ! $mesg->count ) {
@@ -186,8 +182,10 @@ sub validate {
       ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;authorizedService is mandatory!');
   }
 
+  p $self->field('login')->value;
   my $login;
-  if ( $self->field('login')->value eq '' ) {
+  if ( ! defined $self->field('login')->value ||
+       $self->field('login')->value eq '' ) {
     my @id = split(',', $self->field('add_svc_acc')->value);
     $login = substr($id[0], 21);
   } else {
