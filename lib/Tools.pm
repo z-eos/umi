@@ -145,9 +145,24 @@ use Moose::Role;
 
 # }
 
+=head2 is_ascii
+
+checks whether the argument is ASCII
+
+returns 0 if it is and 1 if not
+
+=cut
+
+
 sub is_ascii {
   my ($self, $arg) = @_;
-  return $arg !~ /^[[:ascii:]]+$/ if defined $arg && $arg ne '';
+  if ( defined $arg &&
+       $arg ne '' &&
+       $arg !~ /^[[:ascii:]]+$/ ) {
+    return 1;
+  } else {
+    return 0;
+  }
 }
 
 =head2 cyr2lat

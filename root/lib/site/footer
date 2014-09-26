@@ -1,8 +1,10 @@
 <!-- BEGIN site/footer -->
 
-  </div> <!-- /container -->
+<!--   </div> --> 
+<!-- /container -->
 
-  <div class="footer navbar-inverse">
+<!-- 20140924  <div class="footer navbar-inverse"> -->
+  <div class="footer">
     <div class="container">
       [% IF c.session.auth_uid %]
       <div class=col-sm-4>

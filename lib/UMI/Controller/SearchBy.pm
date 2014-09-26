@@ -7,6 +7,13 @@ use namespace::autoclean;
 
 BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 
+use UMI::Form::ModPwd;
+has 'form_mod_pwd' => ( isa => 'UMI::Form::ModPwd', is => 'rw',
+			lazy => 1, default => sub { UMI::Form::ModPwd->new },
+			documentation => q{Form to modify password},
+		      );
+
+
 =head1 NAME
 
 UMI::Controller::SearchBy - Catalyst Controller
@@ -108,6 +115,9 @@ sub proc :Path(proc) :Args(0) {
   if ( defined $c->session->{"auth_uid"} ) {
     my $params = $c->req->parameters;
 
+######################################################################
+# LDIF generation
+######################################################################
     if (defined $params->{'ldap_ldif'} &&
 	$params->{'ldap_ldif'} ne '') {
       my $recursive = defined $params->{'ldap_ldif_recursive'} &&
@@ -135,6 +145,10 @@ sub proc :Path(proc) :Args(0) {
 		recursive => defined $params->{'ldap_delete_recursive'} && $params->{'ldap_delete_recursive'} eq 'on' ? '1' : '0',
 		err => $err,
 	       );
+
+######################################################################
+# Modify (all fields form)
+######################################################################
     } elsif (defined $params->{'ldap_modify'} &&
 	     $params->{'ldap_modify'} ne '') {
       my $ldap_crud =
@@ -178,78 +192,47 @@ sub proc :Path(proc) :Args(0) {
 		err => $err_message,
 		rdn => $ldap_crud->{cfg}->{rdn}->{acc},
 	       );
+
+######################################################################
+# Modify userPassword
+######################################################################
     } elsif (defined $params->{'ldap_modify_password'} &&
 	     $params->{'ldap_modify_password'} ne '') {
 
-      use UMI::Form::ModPwd;
-      has 'form' => ( isa => 'UMI::Form::ModPwd', is => 'rw',
-		      lazy => 1, default => sub { UMI::Form::ModPwd->new },
-		      documentation => q{Form to modify password},
-		    );
-
-      if ( defined $params->{'password_init'} &&
-	   defined $params->{'password_cnfm'} &&
-	   $params->{'password_init'} eq '' &&
-	   $params->{'password_cnfm'} eq '' ) {
-	$params->{password_gen} = $self->pwdgen;
-      } elsif ( defined $params->{'password_init'} &&
-		defined $params->{'password_cnfm'} &&
-		$params->{'password_init'} ne '' &&
-		$params->{'password_cnfm'} ne '' ) {
-	$params->{password_gen} = $self->pwdgen( { pwd => $params->{'password_init'} } );
-      }
-
-      my ( $error_message, $success_message, $final_message );
-      if ( defined $params->{password_gen} ) {
-	my $ldap_crud =
-	  $c->model('LDAP_CRUD');
-	my $mesg = $ldap_crud->mod( $params->{ldap_modify_password},
-				    {
-				     'userPassword' => $params->{password_gen}->{ssha}, }
-				  );
-
-	if ( $mesg ne '0' ) {
-	  $error_message = '<li>Error during password change occured: ' . $mesg . '</li>';
-	} else {
-	  $success_message .= $params->{password_gen}->{'clear'};
-	}
-      }
-      p $params;
-      p $self->form->validated;
-      if ( $self->form->validated ) {
-	$final_message = '<div class="alert alert-success" role="alert">' .
-	  '<span style="font-size: 140%" class="glyphicon glyphicon-ok-sign">&nbsp;</span>' .
-	    '<em>Password is changed and is:</em>&nbsp;' .
-	      '<kbd style="font-size: 150%; font-family: monospace;">' .
-		$success_message . '</kbd></div>' if $success_message;
-      } else {
-	$final_message = '<div class="alert alert-warning" role="alert">' .
-	  '<span style="font-size: 140%" class="glyphicon glyphicon-warning-sign">&nbsp;</span>' .
-	    '<em>Password was not changed, it was:</em>&nbsp;' .
-	      '<kbd style="font-size: 150%; font-family: monospace;">' .
-		$success_message . '</kbd></div>' if $success_message;
-      }
-
-      $final_message .= '<div class="alert alert-danger" role="alert">' .
-	'<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
-	  $error_message . '</ul></div>' if $error_message;
-
-      # $self->form->info_message( $final_message ) if $final_message && defined $params->{password_gen}->{clear};
-      p $final_message;
-
       $c->stash(
 		template => 'user/user_modpwd.tt',
-		form => $self->form,
-		final_message => $final_message,
-		ldap_modify_password => $params->{'ldap_modify_password'},
+		form => $self->form_mod_pwd,
+		# final_message => $self->mod_pwd(
+		# 				$c->model('LDAP_CRUD'),
+		# 				{
+		# 				 mod_pwd_dn => $params->{ldap_modify_password},
+		# 				 password_init => $params->{password_init},
+		# 				 password_cnfm => $params->{password_cnfm},
+		# 				}),
+		# ldap_modify_password => $params->{ldap_modify_password},
 	       );
 
-      # Validate and insert/update database
-      return unless $self->form->process( # item_id => $searchby_id,
-					 posted => ($c->req->method eq 'POST'),
-					 params => $params,
-					);
+      return unless $self->form_mod_pwd->process(
+						 posted => ($c->req->method eq 'POST'),
+						 params => $params,
+						);
 
+      $c->stash(
+		# template => 'user/user_modpwd.tt',
+		# form => $self->form_mod_pwd,
+		final_message => $self->mod_pwd(
+						$c->model('LDAP_CRUD'),
+						{
+						 mod_pwd_dn => $params->{ldap_modify_password},
+						 password_init => $params->{password_init},
+						 password_cnfm => $params->{password_cnfm},
+						}),
+		ldap_modify_password => $params->{ldap_modify_password},
+	       );
+
+######################################################################
+# Modify jpegPhoto
+######################################################################
     } elsif ( defined $params->{'ldap_modify_jpegphoto'} &&
 	      $params->{'ldap_modify_jpegphoto'} ne '') {
 
@@ -320,6 +303,9 @@ sub proc :Path(proc) :Args(0) {
 						   posted => ($c->req->method eq 'POST'),
 						   params => $params,
 						  );
+######################################################################
+# Add Service Account
+######################################################################
     } elsif ( defined $params->{'add_svc_acc'} &&
 	      $params->{'add_svc_acc'} ne '') {
       use UMI::Form::AddServiceAccount;
@@ -329,6 +315,13 @@ sub proc :Path(proc) :Args(0) {
 		    );
 
       my ( $arr, $login, $uid, $error_message, $success_message, $final_message );
+
+      return unless $self->form_add_svc_acc->process( # item_id => $searchby_id,
+						     # posted => ($c->req->method eq 'POST'),
+						     params => $params,
+						     ldap_crud => $c->model('LDAP_CRUD'),
+						    );
+
       p [ $self->form_add_svc_acc->has_errors, $self->form_add_svc_acc->ran_validation, $self->form_add_svc_acc->validated ];
       if ( ! $self->form_add_svc_acc->has_errors &&
 	   $self->form_add_svc_acc->ran_validation &&
@@ -398,15 +391,67 @@ sub proc :Path(proc) :Args(0) {
 		 add_svc_acc_uid => $params->{'add_svc_acc_uid'},
 	       );
 
-      return unless $self->form_add_svc_acc->process( # item_id => $searchby_id,
-						     posted => ($c->req->method eq 'POST'),
-						     params => $params,
-						     ldap_crud => $c->model('LDAP_CRUD'),
-						    );
+
     }
   } else {
     $c->stash( template => 'signin.tt', );
   }
+}
+
+=head1 mod_pwd 
+
+modify password method
+
+=cut
+
+sub mod_pwd {
+  my ( $self, $ldap_crud, $args ) = @_;
+
+  my $arg = {
+	     mod_pwd_dn => $args->{mod_pwd_dn},
+	     password_init => $args->{password_init} || '',
+	     password_cnfm => $args->{password_cnfm} || '',
+	    };
+
+  if ( $arg->{'password_init'} eq '' && $arg->{'password_cnfm'} eq '' ) {
+    $arg->{password_gen} = $self->pwdgen;
+  } elsif ( $arg->{'password_init'} ne '' && $arg->{'password_cnfm'} ne '' ) {
+    $arg->{password_gen} = $self->pwdgen({ pwd => $arg->{'password_cnfm'} });
+  }
+
+  # p $arg;
+
+  my ( $error_message, $success_message, $final_message );
+  my $mesg = $ldap_crud->mod(
+			     $arg->{mod_pwd_dn},
+			     { 'userPassword' => $arg->{password_gen}->{ssha}, },
+			    );
+
+  if ( $mesg ne '0' ) {
+    $error_message = '<li>Error during password change occured: ' . $mesg . '</li>';
+  } else {
+    $success_message .= $arg->{password_gen}->{'clear'};
+  }
+
+  if ( $self->form_mod_pwd->validated ) {
+    $final_message = '<div class="alert alert-success" role="alert">' .
+      '<span style="font-size: 140%" class="glyphicon glyphicon-ok-sign">&nbsp;</span>' .
+	'<em>Password is changed and is:</em>&nbsp;' .
+	  '<kbd style="font-size: 150%; font-family: monospace;">' .
+	    $success_message . '</kbd></div>' if $success_message;
+  } else {
+    $final_message = '<div class="alert alert-warning" role="alert">' .
+      '<span style="font-size: 140%" class="glyphicon glyphicon-warning-sign">&nbsp;</span>' .
+	'<em>Password was not changed, it was:</em>&nbsp;' .
+	  '<kbd style="font-size: 150%; font-family: monospace;">' .
+	    $success_message . '</kbd></div>' if $success_message;
+  }
+
+  $final_message .= '<div class="alert alert-danger" role="alert">' .
+    '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
+      $error_message . '</ul></div>' if $error_message;
+
+  return $final_message;
 }
 
 sub modify :Path(modify) :Args(0) {

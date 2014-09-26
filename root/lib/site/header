@@ -4,7 +4,8 @@
 <!-- Fixed navbar -->
 <!-- <nav class="navbar navbar-default navbar-fixed-top navbar-inverse navbar-collapse collapse navbar-inverse-collapse" role="navigation"> -->
 
-<nav class="navbar navbar-default navbar-fixed-top navbar-collapse collapse" role="navigation">
+<!-- 20140924 <nav class="navbar navbar-default navbar-fixed-top navbar-collapse collapse" role="navigation"> -->
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -63,33 +64,33 @@
             <li class="divider"></li>
             <li>
 	      <a href="#">
-		<span style="color: red;" class="glyphicon glyphicon-bell"></span>
+		<span class="glyphicon glyphicon-bell text-danger"></span>
 		Test
 	      </a>
 	    </li>
             <li class="divider"></li>
-            <li class="dropdown-header">All what the user can see</li>
-	    [% IF c.check_user_roles('skiioo-dev') %]
+            <li class="dropdown-header">Shown to the members of:</li>
+	    [% IF c.check_any_user_role( 'wheel', 'skiioo-dev' ) %]
             <li>
 	      <a href="#">
-		<span style="color: green;" class="glyphicon glyphicon-leaf"></span>
-		skiioo-dev && setup && logserv
+		<span class="glyphicon glyphicon-leaf text-success"></span>
+		wheel && skiioo-dev
 	      </a>
 	    </li>
 	    [% END %]
 	    [% IF c.check_user_roles('wheel') %]
             <li>
 	      <a href="#">
-		<span style="color: red;" class="glyphicon glyphicon-fire"></span>
-		logserv && setup
+		<span class="glyphicon glyphicon-fire text-danger"></span>
+		wheel
 	      </a>
 	    </li>
 	    [% END %]
-	    [% IF c.check_user_roles('setup') %]
+	    [% IF c.check_any_user_role( 'wheel', 'setup' ) %]
             <li>
 	      <a href="#">
-		<span style="color: blue;" class="glyphicon glyphicon-cutlery"></span>
-		setup
+		<span class="glyphicon glyphicon-cutlery text-info"></span>
+		wheel && setup
 	      </a>
 	    </li>
 	    [% END %]
@@ -121,10 +122,10 @@
 	    </button>
 	    <ul class="dropdown-menu dropdown-menu-right" role="menu" name="ldapsearch_base">
 	      <li><a href="[% c.uri_for('/searchadvanced') %]">
-		  <span class="glyphicon glyphicon-filter"></span>
+		  <span class="glyphicon glyphicon-filter text-success"></span>
 		  Advanced Search</a>
 	      </li>
-	      <li class="dropdown-header">Predefined Search</li>
+	      <li class="dropdown-header text-info">Predefined Search</li>
 	      <li class="bg-primary">
 		<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_name">
 		  <span class="glyphicon glyphicon-user"></span> by name
@@ -153,7 +154,7 @@
 		  <span class="glyphicon glyphicon-phone-alt"></span> by telephone
 		</button>
 	      </li>
-              <li class="dropdown-header">Search-Simple With Base By</li>
+              <li class="dropdown-header text-info">Search-Simple With Base By</li>
 	      <li class="bg-primary"><button type="submit" class="btn btn-link btn-sm" value="ou=group,dc=umidb" name="ldapsearch_base">group</button></li>
 	      <li class="bg-primary"><button type="submit" class="btn btn-link btn-sm" value="ou=People,dc=umidb" name="ldapsearch_base">People</button></li>
 	      <li class="bg-primary"><button type="submit" class="btn btn-link btn-sm" value="ou=Organizations,dc=umidb" name="ldapsearch_base">Organizations</button></li>
@@ -199,6 +200,15 @@
 		Phone
 	      </a>
 	    </li>
+	    [% IF c.check_user_roles('wheel') %]
+            <li class="divider"></li>
+            <li>
+	      <a href="#">
+		<span class="glyphicon glyphicon-info-sign text-info"></span>
+		system info
+	      </a>
+	    </li>
+	    [% END %]
           </ul>
         </li>
       </ul>

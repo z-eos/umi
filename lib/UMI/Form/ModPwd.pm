@@ -93,15 +93,35 @@ sub html_attributes {
 
 sub validate {
   my $self = shift;
+  # use Data::Printer use_prototypes => 0;
+  # p ({ 'password_init' => $self->field('password_init')->value,
+  # 	'password_init_is_ascii' => $self->is_ascii($self->field('password_init')->value),
+  # 	  'password_cnfm' => $self->field('password_cnfm')->value,
+  # 	    'password_cnfm_is_ascii' => $self->is_ascii($self->field('password_cnfm')->value), });
 
-  if ( defined $self->field('password_init')->value and defined $self->field('password_cnfm')->value
-       and ($self->field('password_init')->value ne $self->field('password_cnfm')->value) ) {
-    $self->field('password_cnfm')->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;password and its confirmation does not match');
+  if ( defined $self->field('password_init')->value &&
+       defined $self->field('password_cnfm')->value &&
+       ($self->field('password_init')->value ne $self->field('password_cnfm')->value)
+     ) {
+    $self->field('password_init')
+      ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;password and confirmation does not match');
   }
 
-# if ( not $self->field('office')->value ) {
-#     $self->field('office')->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;office is mandatory!');
-#   }
+  if ( $self->field('password_init')->value eq '' ||
+       $self->field('password_cnfm')->value eq '' ) {
+    $self->field('password_init')
+      ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;password and confirmation are mandatory');
+  }
+
+  # this realized with HTML::FormHandler::Types Printable
+  # if ( defined $self->field('password_init')->value &&
+  #      defined $self->field('password_cnfm')->value &&
+  #      ! $self->is_ascii($self->field('password_init')->value) == 1 &&
+  #      ! $self->is_ascii($self->field('password_cnfm')->value) == 1 
+  #    ) {
+  #   $self->field('password_init')
+  #     ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;password and confirmation has to be ASCII only!');
+  # }
 
 
 #   my $ldap_crud = $self->ldap_crud;
