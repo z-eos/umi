@@ -5,7 +5,7 @@ package UMI::Controller::SearchBy;
 use Moose;
 use namespace::autoclean;
 
-use UMI::Controller::User;
+# ABC # use UMI::Controller::User;
 
 BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 
@@ -367,7 +367,7 @@ sub proc :Path(proc) :Args(0) {
 	  $arr->[0] = $params->{'authorizedservice'};
 	}
 
-	my ($create_account_branch_return, $create_account_branch_leaf_return);
+	# ABC # my ($create_account_branch_return, $create_account_branch_leaf_return);
 	foreach ( @{$arr} ) {
 	  next if ! $_;
 	  $uid = $_ =~ /^802.1x-/ ? $login : sprintf('%s@%s', $login, $params->{'associateddomain'});
@@ -376,17 +376,17 @@ sub proc :Path(proc) :Args(0) {
 				      $params->{'associateddomain'},
 				      $uid);
 
-	  # $create_account_branch_return =
-	  #   UMI::Controller::User->create_account_branch ( $ldap_crud,
-	  # 			    {
-	  # 			     uid => $params->{'add_svc_acc_uid'},
-	  # 			     service => $_,
-	  # 			     associatedDomain => $params->{associateddomain},
-	  # 			    },
-	  # 			  );
+	  # ABC #  $create_account_branch_return =
+	  # ABC #    UMI::Controller::User->create_account_branch ( $ldap_crud,
+	  # ABC #  			    {
+	  # ABC #  			     uid => $params->{'add_svc_acc_uid'},
+	  # ABC #  			     service => $_,
+	  # ABC #  			     associatedDomain => $params->{associateddomain},
+	  # ABC #  			    },
+	  # ABC #  			  );
 
-	  # $success_message .= $create_account_branch_return->[1] if defined $create_account_branch_return->[1];
-	  # $error_message .= $create_account_branch_return->[0] if defined $create_account_branch_return->[0];
+	  # ABC # $success_message .= $create_account_branch_return->[1] if defined $create_account_branch_return->[1];
+	  # ABC # $error_message .= $create_account_branch_return->[0] if defined $create_account_branch_return->[0];
 
 	}
 
