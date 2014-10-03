@@ -308,11 +308,15 @@ sub create_account_branch {
   my $arg = {
 	     service => $args->{service},
 	     associatedDomain => $args->{associatedDomain},
-	     uid_prefix => $args->{uid_prefix},
-	     login => $args->{login},
+	     uid_prefix => $args->{uid_prefix} || undef,
+	     login => $args->{login} || undef,
+	     uid => $args->{uid} || undef,
 	    };
 
-  $arg->{dn} = sprintf("authorizedService=%s@%s,uid=%s%s,%s",
+  $arg->{dn} = $arg->{uid} ?
+    sprintf("authorizedService=%s@%s,uid=%s",
+	    $arg->{service}, $arg->{associatedDomain}, $arg->{uid}) :
+    sprintf("authorizedService=%s@%s,uid=%s%s,%s",
 		       $arg->{service},
 		       $arg->{associatedDomain},
 		       $arg->{uid_prefix},
@@ -324,7 +328,8 @@ sub create_account_branch {
 		    $arg->{dn},
 		    [
 		     'authorizedService' => $arg->{service} . '@' . $arg->{'associatedDomain'},
-		     'uid' => $arg->{uid_prefix} . $arg->{'login'} . '@' . $arg->{service},
+		     'uid' => $arg->{uid} ? $arg->{uid} . '@' . $arg->{service} :
+		     $arg->{uid_prefix} . $arg->{'login'} . '@' . $arg->{service},
 		     'objectClass' => [ qw(account authorizedServiceObject) ],
 		    ],
 		   );

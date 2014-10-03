@@ -407,7 +407,6 @@ LDIF export
 
 sub ldif {
   my ($self, $dn, $recursive, $sysinfo) = @_;
-
   use POSIX qw(strftime);
   my $ts = strftime "%Y-%m-%d %H:%M:%S", localtime;
   my $return = sprintf("

@@ -16,22 +16,22 @@ sub build_form_element_class { [ 'form-horizontal' ] }
 has_field 'ldap_modify_password' => ( type => 'Hidden', );
 
 has_field 'password_init' => ( type => 'Password',
-			   minlength => 7, maxlength => 16,
-			   label => 'New Password',
-			   label_class => [ 'col-md-5' ],
-			   apply => [ NoSpaces, NotAllDigits, Printable ],
-			   element_attr => { placeholder => 'Password', },
-			   wrapper_class => [ 'col-md-7' ],
+			       minlength => 7, maxlength => 16,
+			       label => 'New Password',
+			       label_class => [ 'col-md-5' ],
+			       apply => [ NoSpaces, NotAllDigits, Printable ],
+			       element_attr => { placeholder => 'Password', },
+			       wrapper_class => [ 'col-md-7' ],
 			 );
 
 has_field 'password_cnfm' => ( type => 'Password',
-			   minlength => 7, maxlength => 16,
-			   label => 'Confirm Password',
-			   label_class => [ 'col-md-5' ],
-			   apply => [ NoSpaces, NotAllDigits, Printable ],
-			   element_attr => { placeholder => 'Confirm Password', },
-			   wrapper_class => [ 'col-md-7' ],
-			 );
+			       minlength => 7, maxlength => 16,
+			       label => 'Confirm Password',
+			       label_class => [ 'col-md-5' ],
+			       apply => [ NoSpaces, NotAllDigits, Printable ],
+			       element_attr => { placeholder => 'Confirm Password', },
+			       wrapper_class => [ 'col-md-7' ],
+			     );
 
 has_field 'aux_pwdcomment' => ( type => 'Display',
 				html => '<p class="form-group help-block col-md-10 col-md-offset-4 text-center"><em>' .
@@ -107,10 +107,12 @@ sub validate {
       ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;password and confirmation does not match');
   }
 
-  if ( ($self->field('password_init')->value ne '' &&
-	$self->field('password_cnfm')->value eq '' ) ||
-       ($self->field('password_init')->value eq '' &&
-	$self->field('password_cnfm')->value ne '' ) ) {
+  if ( defined $self->field('password_init')->value &&
+       defined $self->field('password_cnfm')->value &&
+       (($self->field('password_init')->value ne '' &&
+	 $self->field('password_cnfm')->value eq '' ) ||
+	($self->field('password_init')->value eq '' &&
+	 $self->field('password_cnfm')->value ne '' )) ) {
     $self->field('password_init')
       ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;password mandatory if confirmation present');
     $self->field('password_cnfm')

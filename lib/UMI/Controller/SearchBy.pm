@@ -5,6 +5,8 @@ package UMI::Controller::SearchBy;
 use Moose;
 use namespace::autoclean;
 
+use UMI::Controller::User;
+
 BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 
 use UMI::Form::ModPwd;
@@ -39,6 +41,9 @@ Catalyst Controller.
 =cut
 
 
+######################################################################
+
+
 =head2 index
 
 =cut
@@ -47,29 +52,33 @@ sub index :Path :Args(0) {
   my ( $self, $c ) = @_;
 
   if ( defined $c->session->{"auth_uid"} ) {
-    my ( $params, $filter, $filter_meta, $filter_show, $base );
+    my ( $params, $ldap_crud, $filter, $filter_meta, $filter_show, $base );
 
     $params = $c->req->params;
+
+    $ldap_crud =
+      $c->model('LDAP_CRUD');
+
     $filter_meta = $params->{'ldapsearch_filter'} ne '' ? $params->{'ldapsearch_filter'} : '*';
 
     if ( defined $params->{'ldapsearch_by_email'} ) {
       $filter = sprintf("mail=%s", $filter_meta);
       $filter_show = sprintf("mail=<kbd>%s</kbd>", $filter_meta);
-      $base = 'ou=People,dc=umidb';
+      $base = $ldap_crud->{cfg}->{base}->{acc_root};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_name'} ) {
       $filter = sprintf("|(givenName=%s)(sn=%s)(uid=%s)",
 			$filter_meta, $filter_meta, $filter_meta);
       $filter_show = sprintf("|(givenName=<kbd>%s</kbd>)(sn=<kbd>%s</kbd>)(uid=<kbd>%s</kbd>)",
 			     $filter_meta, $filter_meta, $filter_meta);
-      $base = 'ou=People,dc=umidb';
+      $base = $ldap_crud->{cfg}->{base}->{acc_root};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_telephone'} ) {
       $filter = sprintf("|(telephoneNumber=%s)(mobile=%s)(homePhone=%s)",
 			$filter_meta, $filter_meta, $filter_meta);
       $filter_show = sprintf("|(telephoneNumber=<kbd>%s</kbd>)(mobile=<kbd>%s</kbd>)(homePhone=<kbd>%s</kbd>)",
 			     $filter_meta, $filter_meta, $filter_meta);
-      $base = 'ou=People,dc=umidb';
+      $base = $ldap_crud->{cfg}->{base}->{acc_root};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_filter'} &&
 	      $params->{'ldapsearch_filter'} ne '' ) {
@@ -80,9 +89,6 @@ sub index :Path :Args(0) {
       $filter_show = $filter;
       $base = $params->{'ldapsearch_base'};
     }
-
-    my $ldap_crud =
-      $c->model('LDAP_CRUD');
 
     $params->{'filter'} = '(' . $filter_show . ')';
     my $mesg = $ldap_crud->search(
@@ -97,8 +103,7 @@ sub index :Path :Args(0) {
 
     my $err_message = '';
     my $info_message = '';
-    if ( ! $mesg->is_error &&
-	 ! $mesg->count ) {
+    if ( ! $mesg->is_error && ! $mesg->count ) {
       $info_message = '<div class="alert alert-warning">' .
 	'<span style="font-size: 140%" class="glyphicon glyphicon-warning-sign"></span>&nbsp;Nothing was found by your request, we encourage you to inspect your search parameter/s</div>';
     } elsif ( $mesg->is_error ) {
@@ -107,10 +112,37 @@ sub index :Path :Args(0) {
 	  $ldap_crud->err($mesg) . '</ul></div>';
     }
 
+    use Data::Printer;
+    my ( $ttentries, $attr );
+    foreach (@entries) {
+      $ttentries->{$_->dn}->{'mgmnt'} =
+	{
+	 is_dn => scalar split(',', $_->dn) <= 3 ? 1 : 0,
+	 is_account => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
+	 jpegPhoto => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
+	 gitAclProject => $_->exists('gitAclProject') ? 1 : 0,
+	 userPassword => $_->exists('userPassword') ? 1 : 0,
+	};
+      foreach $attr (sort $_->attributes) {
+	$ttentries->{$_->dn}->{attrs}->{$attr} = $_->get_value( $attr, asref => 1 );
+	if ( $attr eq 'jpegPhoto' ) {
+	  use MIME::Base64;
+	  $ttentries->{$_->dn}->{attrs}->{$attr} =
+	    sprintf('img-thumbnail" alt="jpegPhoto of %s" src="data:image/jpg;base64,%s" title="%s" />',
+		    $_->dn,
+		    encode_base64(join('',@{$ttentries->{$_->dn}->{attrs}->{$attr}})),
+		    $_->dn);
+	} elsif (ref $ttentries->{$_->dn}->{attrs}->{$attr} eq 'ARRAY') {
+	  $ttentries->{$_->dn}->{is_arr}->{$attr} = 1;
+	}
+      }
+    }
+    # p $ttentries;
     $c->stash(
 	      template => 'search/searchby.tt',
 	      params => $c->req->params,
-	      entries => \@entries,
+	      entries => $ttentries,
+	      # entries => \@entries,
 	      err => $err_message,
 	      info => $info_message,
 	     );
@@ -119,28 +151,46 @@ sub index :Path :Args(0) {
   }
 }
 
+
+######################################################################
+# SearchBy main processing logics
+######################################################################
+
+
+=head1 proc
+
+SearchBy main processing logics
+
+=cut
+
+
 sub proc :Path(proc) :Args(0) {
-  my ( $self, $c, $searchby_id ) = @_;
+  my ( $self, $c ) = @_;
 
   use Data::Printer use_prototypes => 0;
 
   if ( defined $c->session->{"auth_uid"} ) {
     my $params = $c->req->parameters;
 
-######################################################################
+#=====================================================================
 # LDIF generation
-######################################################################
+#=====================================================================
     if (defined $params->{'ldap_ldif'} &&
-	$params->{'ldap_ldif'} ne '') {
-      my $recursive = defined $params->{'ldap_ldif_recursive'} &&
-	$params->{'ldap_ldif_recursive'} eq 'on' ? 1 : 0;
-      my $sysinfo = defined $params->{'ldap_ldif_sysinfo'} &&
-	$params->{'ldap_ldif_sysinfo'} eq 'on' ? 1 : 0;
+      	$params->{'ldap_ldif'} ne '') {
+	$self->ldif(
+		    $c,
+		    {
+		     ldif_dn => $params->{'ldap_ldif'},
+		     recursive => defined $params->{'ldap_ldif_recursive'} ?
+		                          $params->{'ldap_ldif_recursive'} : undef,
+		     sysinfo => defined $params->{'ldap_ldif_sysinfo'} ?
+		                        $params->{'ldap_ldif_sysinfo'} : undef,
+		    }
+		   );
 
-      $c->stash(
-		template => 'search/ldif.tt',
-		ldif => $c->model('LDAP_CRUD')->ldif($params->{ldap_ldif}, $recursive, $sysinfo),
-	       );
+#=====================================================================
+# Delete
+#=====================================================================
     } elsif (defined $params->{'ldap_delete'} &&
 	     $params->{'ldap_delete'} ne '') {
       my $err;
@@ -154,13 +204,14 @@ sub proc :Path(proc) :Args(0) {
       $c->stash(
 		template => 'search/delete.tt',
 		delete => $params->{'ldap_delete'},
-		recursive => defined $params->{'ldap_delete_recursive'} && $params->{'ldap_delete_recursive'} eq 'on' ? '1' : '0',
+		recursive => defined $params->{'ldap_delete_recursive'} &&
+		$params->{'ldap_delete_recursive'} eq 'on' ? '1' : '0',
 		err => $err,
 	       );
 
-######################################################################
+#=====================================================================
 # Modify (all fields form)
-######################################################################
+#=====================================================================
     } elsif (defined $params->{'ldap_modify'} &&
 	     $params->{'ldap_modify'} ne '') {
       my $ldap_crud =
@@ -205,9 +256,9 @@ sub proc :Path(proc) :Args(0) {
 		rdn => $ldap_crud->{cfg}->{rdn}->{acc},
 	       );
 
-######################################################################
+#=====================================================================
 # Modify userPassword
-######################################################################
+#=====================================================================
     } elsif (defined $params->{'ldap_modify_password'} &&
 	     $params->{'ldap_modify_password'} ne '') {
 
@@ -220,7 +271,9 @@ sub proc :Path(proc) :Args(0) {
       return unless $self->form_mod_pwd->process(
 						 posted => ($c->req->method eq 'POST'),
 						 params => $params,
-						);
+						) &&
+						  ( defined $params->{password_init} ||
+						    defined $params->{password_cnfm} );
 
       $c->stash(
 		final_message => $self->mod_pwd(
@@ -230,49 +283,52 @@ sub proc :Path(proc) :Args(0) {
 						 password_init => $params->{password_init},
 						 password_cnfm => $params->{password_cnfm},
 						}),
-	       );
+	       ) if $self->form_mod_pwd->ran_validation;
 
-######################################################################
+#=====================================================================
 # Modify jpegPhoto
-######################################################################
+#=====================================================================
     } elsif ( defined $params->{'ldap_modify_jpegphoto'} &&
 	      $params->{'ldap_modify_jpegphoto'} ne '') {
+      # p $params;
+      $params->{avatar} = $c->req->upload('avatar') if defined $params->{avatar};
+      # p $params;
 
-     $params->{'avatar'} = $c->req->upload('avatar') if defined $params->{'avatar'};
-
-     my $ldap_crud = $c->model('LDAP_CRUD');
-
-     $c->stash(
-	       template => 'user/user_modjpegphoto.tt',
-	       form => $self->form_jpegphoto,
-	       ldap_modify_jpegphoto => $params->{'ldap_modify_jpegphoto'},
-	      );
+      $c->stash(
+		template => 'user/user_modjpegphoto.tt',
+		form => $self->form_jpegphoto,
+		ldap_modify_jpegphoto => $params->{'ldap_modify_jpegphoto'},
+	       );
 
       return unless $self->form_jpegphoto->process(
-      						   posted => ($c->req->method eq 'POST'),
-      						   params => $params,
-      						  );
+						   posted => ($c->req->method eq 'POST'),
+						   params => $params,
+						  ) && defined $params->{avatar};
+
+      my $ldap_crud = $c->model('LDAP_CRUD');
 
       $c->stash( final_message => $self
 		 ->mod_jpegPhoto(
 				 $ldap_crud,
 				 {
 				  mod_jpegPhoto_dn => $params->{ldap_modify_jpegphoto},
-				  jpegPhoto => $params->{'avatar'},
-				  jpegPhoto_stub => $c->path_to('root',
-								'static',
-								'images',
-								$ldap_crud->{cfg}->{jpegPhoto}->{stub}),
+				  jpegPhoto => $params->{avatar},
+				  jpegPhoto_stub => $c
+				  ->path_to('root',
+					    'static',
+					    'images',
+					    $ldap_crud->{cfg}->{jpegPhoto}->{stub}),
 				 }
 				),
-      	       );
+	       );
 
-######################################################################
+#=====================================================================
 # Add Service Account
-######################################################################
+#=====================================================================
     } elsif ( defined $params->{'add_svc_acc'} &&
 	      $params->{'add_svc_acc'} ne '') {
 
+      my $ldap_crud = $c->model('LDAP_CRUD');
       my ( $arr, $login, $uid, $error_message, $success_message, $final_message );
       my @id = split(',', $params->{'add_svc_acc'});
       $params->{'add_svc_acc_uid'} = substr($id[0], 21); # $params->{'login'} =
@@ -286,8 +342,10 @@ sub proc :Path(proc) :Args(0) {
       return unless $self->form_add_svc_acc->process(
 						     posted => ($c->req->method eq 'POST'),
 						     params => $params,
-						     ldap_crud => $c->model('LDAP_CRUD'),
-						    );
+						     ldap_crud => $ldap_crud,
+						    ) &&
+						      defined $params->{'associateddomain'} &&
+							defined $params->{'authorizedservice'};
 
       if ( $self->form_add_svc_acc->validated ) {
 	if ( $params->{login} ne '' ) {
@@ -298,8 +356,8 @@ sub proc :Path(proc) :Args(0) {
 
 	$success_message = '<div class="table-responsive">' .
 	  '<table class="table table-condenced table-hover"><thead class="bg-success">' .
-	    '<th>SERVICE</th>' .
-	      '<th>SERVICE UID</th>' .
+	    '<th>SERVICE (branch)</th>' .
+	      '<th>SERVICE UID (leaf)</th>' .
 		'<th>PASSWORD</th>' .
 		  '</thead><tbody>';
 
@@ -308,6 +366,8 @@ sub proc :Path(proc) :Args(0) {
 	} else {
 	  $arr->[0] = $params->{'authorizedservice'};
 	}
+
+	my ($create_account_branch_return, $create_account_branch_leaf_return);
 	foreach ( @{$arr} ) {
 	  next if ! $_;
 	  $uid = $_ =~ /^802.1x-/ ? $login : sprintf('%s@%s', $login, $params->{'associateddomain'});
@@ -315,6 +375,19 @@ sub proc :Path(proc) :Args(0) {
 				      $_,
 				      $params->{'associateddomain'},
 				      $uid);
+
+	  # $create_account_branch_return =
+	  #   UMI::Controller::User->create_account_branch ( $ldap_crud,
+	  # 			    {
+	  # 			     uid => $params->{'add_svc_acc_uid'},
+	  # 			     service => $_,
+	  # 			     associatedDomain => $params->{associateddomain},
+	  # 			    },
+	  # 			  );
+
+	  # $success_message .= $create_account_branch_return->[1] if defined $create_account_branch_return->[1];
+	  # $error_message .= $create_account_branch_return->[0] if defined $create_account_branch_return->[0];
+
 	}
 
 	$success_message .= '</tbody></table></div>';
@@ -353,6 +426,8 @@ sub proc :Path(proc) :Args(0) {
 }
 
 
+#=====================================================================
+
 =head1 mod_jpegPhoto
 
 modify jpegPhoto method
@@ -368,7 +443,7 @@ sub mod_jpegPhoto {
 	     jpegPhoto => $args->{jpegPhoto},
 	     jpegPhoto_stub => $args->{jpegPhoto_stub},
 	    };
-  p $arg;
+
   my ($file, $jpeg);
   if (defined $arg->{jpegPhoto}) {
     $file = $arg->{jpegPhoto}->{'tempname'};
@@ -411,6 +486,8 @@ sub mod_jpegPhoto {
 }
 
 
+#=====================================================================
+
 =head1 mod_pwd 
 
 modify password method
@@ -423,31 +500,30 @@ sub mod_pwd {
 
   my $arg = {
 	     mod_pwd_dn => $args->{mod_pwd_dn},
-	     password_init => $args->{password_init} || '',
-	     password_cnfm => $args->{password_cnfm} || '',
+	     password_init => $args->{password_init},
+	     password_cnfm => $args->{password_cnfm},
 	    };
 
-  if ( $arg->{'password_init'} eq '' && $arg->{'password_cnfm'} eq '' ) {
-    $arg->{password_gen} = $self->pwdgen;
-  } elsif ( $arg->{'password_init'} ne '' && $arg->{'password_cnfm'} ne '' ) {
-    $arg->{password_gen} = $self->pwdgen({ pwd => $arg->{'password_cnfm'} });
-  }
-
-  # p $arg;
-
   my ( $error_message, $success_message, $final_message );
-  my $mesg = $ldap_crud->mod(
-			     $arg->{mod_pwd_dn},
-			     { 'userPassword' => $arg->{password_gen}->{ssha}, },
-			    );
+  if ( $self->form_mod_pwd->validated && $self->form_mod_pwd->ran_validation ) {
 
-  if ( $mesg ne '0' ) {
-    $error_message = '<li>Error during password change occured: ' . $mesg . '</li>';
-  } else {
-    $success_message .= $arg->{password_gen}->{'clear'};
-  }
+    if ( $arg->{'password_init'} eq '' && $arg->{'password_cnfm'} eq '' ) {
+      $arg->{password_gen} = $self->pwdgen;
+    } elsif ( $arg->{'password_init'} ne '' && $arg->{'password_cnfm'} ne '' ) {
+      $arg->{password_gen} = $self->pwdgen({ pwd => $arg->{'password_cnfm'} });
+    }
+    my $mesg = $ldap_crud->mod(
+			       $arg->{mod_pwd_dn},
+			       {
+				'userPassword' => $arg->{password_gen}->{ssha}, },
+			      );
 
-  if ( $self->form_mod_pwd->validated ) {
+    if ( $mesg ne '0' ) {
+      $error_message = '<li>Error during password change occured: ' . $mesg . '</li>';
+    } else {
+      $success_message .= $arg->{password_gen}->{'clear'};
+    }
+
     $final_message = '<div class="alert alert-success" role="alert">' .
       '<span style="font-size: 140%" class="glyphicon glyphicon-ok-sign">&nbsp;</span>' .
 	'<em>Password is changed and is:</em>&nbsp;' .
@@ -461,6 +537,63 @@ sub mod_pwd {
 
   return $final_message;
 }
+
+
+#=====================================================================
+
+=head1 ldif
+
+get LDIF, recursive or not, for the DN given
+
+=cut
+
+
+sub ldif {
+  my ( $self, $c, $args ) = @_;
+  my $arg = {
+	     ldif_dn => $args->{ldif_dn},
+	     recursive => $args->{recursive} eq 'on' ? 1 : 0,
+	     sysinfo => $args->{sysinfo} eq 'on' ? 1 : 0,
+	    };
+  $c->stash(
+	    template => 'search/ldif.tt',
+	    ldif => $c->model('LDAP_CRUD')->ldif(
+						 $arg->{ldif_dn},
+						 $arg->{recursive},
+						 $arg->{sysinfo}
+						),
+	  );
+}
+
+sub ldif_gen :Path(ldif_gen) :Args(0) {
+  my ( $self, $c ) = @_;
+  my $ldap_crud =
+    $c->model('LDAP_CRUD');
+  my $params = $c->req->parameters;
+  use Data::Printer;
+  p $params;
+  $c->stash(
+	    template => 'search/ldif.tt',
+	    ldif => $c->model('LDAP_CRUD')
+	    ->ldif(
+		   $params->{ldap_ldif},
+		   defined $params->{ldap_ldif_recursive}
+		   && $params->{ldap_ldif_recursive} ne '' ? 1 : 0,
+		   defined $params->{ldap_ldif_sysinfo}
+		   && $params->{ldap_ldif_sysinfo} ne '' ? 1 : 0
+		  ),
+	  );
+}
+
+
+#=====================================================================
+
+=head1 modify
+
+modify whole form (all present fields except RDN)
+
+=cut
+
 
 sub modify :Path(modify) :Args(0) {
   my ( $self, $c ) = @_;
@@ -523,8 +656,8 @@ sub modify :Path(modify) :Args(0) {
 	    err => $err_message,
 	    rdn => $ldap_crud->{cfg}->{rdn}->{acc},
 	   );
-
 }
+
 
 =head1 AUTHOR
 
@@ -537,6 +670,6 @@ it under the same terms as Perl itself.
 
 =cut
 
-#__PACKAGE__->meta->make_immutable;
+__PACKAGE__->meta->make_immutable;
 
 1;

@@ -63,7 +63,7 @@ has_field 'associateddomain' => ( type => 'Select',
 				  label => 'Domain Name', label_class => [ 'required' ],
 				  # options => [{ value => '0', label => '--- select domain ---', selected => 'on' }],
 				  wrapper_class => [ 'col-md-6' ],
-				  required => 1,
+				  # required => 1,
 				);
 
 sub options_associateddomain {
@@ -103,7 +103,7 @@ has_field 'authorizedservice' => ( type => 'Multiple',
 				   label => 'Service', label_class => [ 'required' ],
 				   wrapper_class => [ 'col-md-6' ],
 				   size => 5,
-				   required => 1,
+				   # required => 1,
 				 );
 
 sub options_authorizedservice {
@@ -170,14 +170,16 @@ sub validate {
   use Data::Printer use_prototypes => 0;
 
   p $self->field('associateddomain')->value;
-  if ( $self->field('associateddomain')->value eq "0" ) {
+  if ( defined $self->field('associateddomain')->value &&
+       $self->field('associateddomain')->value eq "0" ) {
     $self->field('associateddomain')
       ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;associatedDomain is mandatory!');
   }
-
-  p  $self->field('authorizedservice')->value;
-  if ( @{$self->field('authorizedservice')->value} < 1 ||
-       $self->field('authorizedservice')->value->[0] eq "0" ) {
+  use Data::Printer use_prototypes => 0;
+  p $self->field('authorizedservice')->value;
+  if ( $self->field('authorizedservice')->value &&
+      ( ! @{$self->field('authorizedservice')->value} ||
+	$self->field('authorizedservice')->value->[0] eq "0" )) {
     $self->field('authorizedservice')
       ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;authorizedService is mandatory!');
   }

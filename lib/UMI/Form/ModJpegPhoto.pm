@@ -22,7 +22,8 @@ has_field 'avatar' => ( type => 'Upload',
 			element_class => [ 'btn', 'btn-default', ],
 			# wrapper_class => [ 'col-md-12' ],
 			max_size => '50000',
-			required => 1,);
+			# required => 1,
+		      );
 
 has_field 'reset' => ( type => 'Reset',
 #			wrapper_class => [ 'pull-left', 'col-md-2' ],
@@ -51,10 +52,9 @@ sub html_attributes {
 sub validate {
   my $self = shift;
 
-#   if ( defined $self->field('password1')->value and defined $self->field('password2')->value
-#        and ($self->field('password1')->value ne $self->field('password2')->value) ) {
-#     $self->field('password2')->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;password and its confirmation does not match');
-#   }
+  if ( $self->field('avatar')->value eq '' ) {
+    $self->field('avatar')->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;File to be uploaded is mandatory!');
+  }
 
 # if ( not $self->field('office')->value ) {
 #     $self->field('office')->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;office is mandatory!');

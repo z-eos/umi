@@ -125,44 +125,44 @@
 		  <span class="glyphicon glyphicon-filter text-success"></span>
 		  Advanced Search</a>
 	      </li>
-	      <li class="dropdown-header text-info">Predefined Search</li>
-	      <li class="bg-primary">
+	      <li class="dropdown-header bg-primary"><b>Predefined Search</b></li>
+	      <li>
 		<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_name">
-		  <span class="glyphicon glyphicon-user"></span> by name
+		  <span class="text-success"><span class="glyphicon glyphicon-user text-success"></span> by name</span>
 		</button>
 	      </li>
-	      <li class="bg-primary">
+	      <li>
 		<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_email">
-		  <span class="glyphicon glyphicon-envelope"></span> by email
+		  <span class="text-success"><span class="glyphicon glyphicon-envelope"></span> by email</span>
 		</button>
 	      </li>
 	      </li>
-	      <li class="bg-primary"><a href="#">
+	      <li><a href="#">
 		  <span class="glyphicon glyphicon-comment"></span>
 		  by JID</a>
 	      </li>
-	      <li class="bg-primary"><a href="#">
+	      <li><a href="#">
 		  <span class="glyphicon glyphicon-fullscreen"></span>
 		  by IP</a>
 	      </li>
-	      <li class="bg-primary"><a href="#">
+	      <li><a href="#">
 		  <span class="glyphicon glyphicon-barcode"></span>
 		  by MAC</a>
 	      </li>
-	      <li class="bg-primary">
+	      <li>
 		<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_telephone">
-		  <span class="glyphicon glyphicon-phone-alt"></span> by telephone
+		  <span class="text-success"><span class="glyphicon glyphicon-phone-alt"></span> by telephone</span>
 		</button>
 	      </li>
-              <li class="dropdown-header text-info">Search-Simple With Base By</li>
-	      <li class="bg-primary"><button type="submit" class="btn btn-link btn-sm" value="ou=group,dc=umidb" name="ldapsearch_base">group</button></li>
-	      <li class="bg-primary"><button type="submit" class="btn btn-link btn-sm" value="ou=People,dc=umidb" name="ldapsearch_base">People</button></li>
-	      <li class="bg-primary"><button type="submit" class="btn btn-link btn-sm" value="ou=Organizations,dc=umidb" name="ldapsearch_base">Organizations</button></li>
-	      <li class="bg-primary"><button type="submit" class="btn btn-link btn-sm" value="ou=machines,dc=umidb" name="ldapsearch_base">machines</button></li>
-	      <li class="bg-primary"><button type="submit" class="btn btn-link btn-sm" value="ou=alias,dc=umidb" name="ldapsearch_base">alias</button></li>
-	      <li class="bg-primary"><button type="submit" class="btn btn-link btn-sm" value="ou=workstations,dc=umidb" name="ldapsearch_base">workstations</button></li>
-	      <li class="bg-primary"><button type="submit" class="btn btn-link btn-sm" value="ou=dhcp,dc=umidb" name="ldapsearch_base">dhcp</button></li>
-	      <li class="bg-primary"><button type="submit" class="btn btn-link btn-sm" value="ou=GitACL,dc=umidb" name="ldapsearch_base">GitACL</button></li>
+              <li class="dropdown-header bg-primary"><b>Search Base By</b></li>
+	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=group,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="glyphicon glyphicon-save"></span> group</span></button></li>
+	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=People,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="glyphicon glyphicon-save"></span> People</span></button></li>
+	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=Organizations,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="glyphicon glyphicon-save"></span> Organizations</span></button></li>
+	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=machines,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="glyphicon glyphicon-save"></span> machines</span></button></li>
+	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=alias,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="glyphicon glyphicon-save"></span> alias</span></button></li>
+	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=workstations,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="glyphicon glyphicon-save"></span> workstations</span></button></li>
+	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=dhcp,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="glyphicon glyphicon-save"></span> dhcp</span></button></li>
+	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=GitACL,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="glyphicon glyphicon-save"></span> GitACL</span></button></li>
 	    </ul>
 	  </div>
 	</div>

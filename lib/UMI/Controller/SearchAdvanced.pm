@@ -48,6 +48,8 @@ sub proc :Path(proc) :Args(0) {
 
     if ( $c->check_user_roles('wheel')) {
       my $params = $c->req->params;
+      # use Data::Printer use_prototypes => 0;
+      # p $params;
       my @attrs = split(/,/, $params->{'show_attrs'});
       my $ldap_crud =
 	$c->model('LDAP_CRUD');
@@ -69,13 +71,37 @@ sub proc :Path(proc) :Args(0) {
 
       my @entries = $mesg->entries;
 
-      # use Data::Printer;
       # p @entries;
+
+      my ( $ttentries, $attr );
+      foreach (@entries) {
+	$ttentries->{$_->dn}->{'mgmnt'} =
+	  {
+	   is_dn => scalar split(',', $_->dn) <= 3 ? 1 : 0,
+	   is_account => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
+	   jpegPhoto => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
+	   gitAclProject => $_->exists('gitAclProject') ? 1 : 0,
+	   userPassword => $_->exists('userPassword') ? 1 : 0,
+	  };
+	foreach $attr (sort $_->attributes) {
+	  $ttentries->{$_->dn}->{attrs}->{$attr} = $_->get_value( $attr, asref => 1 );
+	  if ( $attr eq 'jpegPhoto' ) {
+	    use MIME::Base64;
+	    $ttentries->{$_->dn}->{attrs}->{$attr} =
+	      sprintf('img-thumbnail" alt="jpegPhoto of %s" src="data:image/jpg;base64,%s" title="%s" />',
+		      $_->dn,
+		      encode_base64(join('',@{$ttentries->{$_->dn}->{attrs}->{$attr}})),
+		      $_->dn);
+	  } elsif (ref $ttentries->{$_->dn}->{attrs}->{$attr} eq 'ARRAY') {
+	    $ttentries->{$_->dn}->{is_arr}->{$attr} = 1;
+	  }
+	}
+      }
 
       $c->stash(
 		template => 'search/searchby.tt',
 		params => $c->req->params,
-		entries => \@entries,
+		entries => $ttentries,
 		err => $err_message,
 		form => $self->form,
 	       );
