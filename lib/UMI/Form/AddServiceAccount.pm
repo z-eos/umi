@@ -96,7 +96,7 @@ sub options_associateddomain {
   }
   # p @domains;
   return \@domains;
-  $ldap_crud->unbind;
+  # $ldap_crud->unbind;
 }
 
 has_field 'authorizedservice' => ( type => 'Multiple',
@@ -167,16 +167,17 @@ sub html_attributes {
 
 sub validate {
   my $self = shift;
-  use Data::Printer use_prototypes => 0;
 
-  p $self->field('associateddomain')->value;
+  # use Data::Printer use_prototypes => 0;
+  # p $self->field('associateddomain')->value;
+
   if ( defined $self->field('associateddomain')->value &&
        $self->field('associateddomain')->value eq "0" ) {
     $self->field('associateddomain')
       ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;associatedDomain is mandatory!');
   }
-  use Data::Printer use_prototypes => 0;
-  p $self->field('authorizedservice')->value;
+  # use Data::Printer use_prototypes => 0;
+  # p $self->field('authorizedservice')->value;
   if ( $self->field('authorizedservice')->value &&
       ( ! @{$self->field('authorizedservice')->value} ||
 	$self->field('authorizedservice')->value->[0] eq "0" )) {
@@ -184,7 +185,7 @@ sub validate {
       ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;authorizedService is mandatory!');
   }
 
-  p $self->field('login')->value;
+  # p $self->field('login')->value;
   my $login;
   if ( ! defined $self->field('login')->value ||
        $self->field('login')->value eq '' ) {
@@ -238,7 +239,7 @@ sub validate {
       $self->form->add_form_error($error . $err);
     }
   }
-  $ldap_crud->unbind;
+  # $ldap_crud->unbind;
 }
 
 ######################################################################

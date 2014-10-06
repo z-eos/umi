@@ -2,7 +2,7 @@
 
 [% stash.name %]
 
-<h2>Search Simple Results &nbsp; <small>base: [% params.ldapsearch_base %]; &nbsp;&nbsp; filter: [% params.filter %]</small></h2>
+<h2>Search Simple Results &nbsp; <small>base: [% base_dn %]; &nbsp;&nbsp; filter: [% filter %]</small></h2>
 
 <form role="form"
       method="POST"
@@ -27,18 +27,22 @@
       <!-- </button> -->
 
       <a href="#"
+	 class="btn btn-primary btn-sm" role="button"
       	 title="Legend"
 	 id="btnLegend"
-      	 class="btn btn-link"
 	 data-animation="false"
       	 data-trigger="focus"
 	 data-placement="left"
       	 data-html="true"
       	 data-toggle="popover"
       	 data-original-title="Legend"
-	 data-content="<p class=bg-danger>&nbsp;root objects&nbsp;</p><p class=bg-warning>&nbsp;child objects&nbsp;</p>"
+	 data-content="<ul class='list-unstyled'>
+<li><span class='label label-danger'>root objects</span></li>
+<li><span class='label label-warning'>child objects</span></li>
+<li><kbd>user input</kbd></li>
+</ul>"
       	 tabindex="0">
-      	<span class="glyphicon glyphicon-list-alt"></span>
+      	<span style="font-size: 150%;" class="glyphicon glyphicon-list-alt"></span>
       </a>
 
   </td></tr>

@@ -100,7 +100,8 @@ sub proc :Path(proc) :Args(0) {
 
       $c->stash(
 		template => 'search/searchby.tt',
-		params => $c->req->params,
+		base_dn => $params->{'base_dn'},
+		filter => '<kbd>' . $params->{'search_filter'} . '</kbd>',
 		entries => $ttentries,
 		err => $err_message,
 		form => $self->form,

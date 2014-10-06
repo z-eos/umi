@@ -93,7 +93,7 @@ sub options_office {
   }
   return \@orgs;
 
-  $ldap_crud->unbind;
+  # $ldap_crud->unbind;
 }
 
 has_field 'login' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
@@ -169,7 +169,7 @@ sub options_associateddomain {
   }
   # p @domains;
   return \@domains;
-  $ldap_crud->unbind;
+  # $ldap_crud->unbind;
 }
 
 # has_field 'service' => ( type => 'Multiple',
@@ -327,7 +327,7 @@ if ( not $self->field('office')->value ) {
     $self->form->error_message('');
     $self->form->add_form_error($error . $err);
   }
-  $ldap_crud->unbind;
+  # $ldap_crud->unbind;
 }
 
 ######################################################################

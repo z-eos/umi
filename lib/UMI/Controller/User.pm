@@ -229,7 +229,7 @@ sub create_account {
       # Account branch of ROOT Object
       ######################################################################
       $create_account_branch_return =
-	create_account_branch ( $ldap_crud,
+	$self->create_account_branch ( $ldap_crud,
 				{
 				 uid_prefix => $uid_prefix,
 				 login => $args->{login},
@@ -282,7 +282,7 @@ sub create_account {
 
     $self->form->info_message( $final_message ) if $final_message;
 
-    $ldap_crud->unbind;
+    # $ldap_crud->unbind;
     return $ldif;
 }
 
@@ -303,41 +303,36 @@ creates branch for service accounts like
 
 
 sub create_account_branch {
-  my  ( $ldap_crud, $args ) = @_;
+  my  ( $self, $ldap_crud, $args ) = @_;
 
   my $arg = {
 	     service => $args->{service},
 	     associatedDomain => $args->{associatedDomain},
 	     uid_prefix => $args->{uid_prefix} || undef,
 	     login => $args->{login} || undef,
-	     uid => $args->{uid} || undef,
+	     base_uid => $args->{base_uid},
 	    };
 
-  $arg->{dn} = $arg->{uid} ?
-    sprintf("authorizedService=%s@%s,uid=%s",
-	    $arg->{service}, $arg->{associatedDomain}, $arg->{uid}) :
-    sprintf("authorizedService=%s@%s,uid=%s%s,%s",
-		       $arg->{service},
-		       $arg->{associatedDomain},
-		       $arg->{uid_prefix},
-		       $arg->{'login'},
+  $arg->{dn} = sprintf("authorizedService=%s@%s,uid=%s,%s",
+		       $arg->{service}, $arg->{associatedDomain},
+		       $arg->{base_uid},
 		       $ldap_crud->{cfg}->{base}->{acc_root});
 
-  my $mesg =
-    $ldap_crud->add(
-		    $arg->{dn},
-		    [
-		     'authorizedService' => $arg->{service} . '@' . $arg->{'associatedDomain'},
-		     'uid' => $arg->{uid} ? $arg->{uid} . '@' . $arg->{service} :
-		     $arg->{uid_prefix} . $arg->{'login'} . '@' . $arg->{service},
-		     'objectClass' => [ qw(account authorizedServiceObject) ],
-		    ],
-		   );
+  $arg->{ldapadd_arg} = [
+			 'authorizedService' => $arg->{service} . '@' . $arg->{'associatedDomain'},
+			 'uid' => $arg->{base_uid} ? $arg->{base_uid} . '@' . $arg->{service} :
+			                             $arg->{uid_prefix} . $arg->{'login'} . '@' . $arg->{service},
+			 'objectClass' => [ qw(account authorizedServiceObject) ],
+			];
+
+  my $mesg = $ldap_crud->add( $arg->{dn}, $arg->{ldapadd_arg} );
+
   my $return;
   if ( $mesg ) {
     $return->[0] = '<li>error during ' . uc($arg->{service}) .
       ' branch creation occured: ' . $mesg . '</li>';
   } else { $return->[1] = undef; }
+  return $return;
 }
 
 
@@ -374,7 +369,7 @@ creates leaves for service account branch like
 
 
 sub create_account_branch_leaf {
-  my  ( $c, $ldap_crud, $args ) = @_;
+  my  ( $self, $ldap_crud, $args ) = @_;
 
   my $arg = {
 	     service => $args->{service},
@@ -426,14 +421,14 @@ sub create_account_branch_leaf {
        objectClass => [ 'mailutilsAccount' ],
       ];
   } elsif ( $arg->{service} eq 'xmpp') {
-    my $file = $c->path_to('root',
+    my $file = $self->path_to('root',
 			   'static',
 			   'images',
 			   $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{jpegPhoto_filename});
     local $/ = undef;
-    open(my $fh, "<", $file) or $c->log->debug("Can not open $file: $!" );
+    open(my $fh, "<", $file) or warn "Can not open $file: $!";
     my $jpeg = <$fh>;
-    close($fh) or $c->log->debug($!);
+    close($fh) or warn "Can not close $file: $!";
 
     $authorizedService_add =
       [

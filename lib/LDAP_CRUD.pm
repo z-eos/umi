@@ -110,7 +110,7 @@ sub _build_ldap {
 	my $self = shift;
 
 	my $ldap = try {
-		Net::LDAP->new( $self->host, async => 1 );
+		Net::LDAP->new( $self->host, async => 1, debug => 3 );
 	}
 	catch {
 		warn "Net::LDAP->new problem, error: $_";    # not $@
@@ -131,11 +131,13 @@ around 'ldap' =>
 			   password => $self->pwd,
 			   version  => 3,
 			  );
+
     if ( $mesg->is_error ) {
-      warn "Net::LDAP->bind error_desc: " .
-	$mesg->error_desc .
-	  "; server_error: " .
-	    $mesg->server_error;
+      warn '#' x 60 . "\nWARNING: Net::LDAP->bind related problem occured!" .
+	  "\nerror_name: " . $mesg->error_name .
+	    "\nerror_desc: " . $mesg->error_desc .
+	      "\nerror_text: " . $mesg->error_text .
+		"\nserver_error: " . $mesg->server_error;
     }
     return $ldap;
   };
@@ -366,7 +368,7 @@ sub delr {
       }
     }
     # $self->ldap->update;
-    $self->ldap->unbind;
+    # $self->ldap->unbind;
   } else {
     $return = 0;
   }

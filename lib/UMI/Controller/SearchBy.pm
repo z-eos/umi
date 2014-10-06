@@ -5,8 +5,6 @@ package UMI::Controller::SearchBy;
 use Moose;
 use namespace::autoclean;
 
-# ABC # use UMI::Controller::User;
-
 BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 
 use UMI::Form::ModPwd;
@@ -140,7 +138,8 @@ sub index :Path :Args(0) {
     # p $ttentries;
     $c->stash(
 	      template => 'search/searchby.tt',
-	      params => $c->req->params,
+	      base_dn => $base,
+	      filter => $filter_show,
 	      entries => $ttentries,
 	      # entries => \@entries,
 	      err => $err_message,
@@ -367,7 +366,7 @@ sub proc :Path(proc) :Args(0) {
 	  $arr->[0] = $params->{'authorizedservice'};
 	}
 
-	# ABC # my ($create_account_branch_return, $create_account_branch_leaf_return);
+	my ($create_account_branch_return, $create_account_branch_leaf_return);
 	foreach ( @{$arr} ) {
 	  next if ! $_;
 	  $uid = $_ =~ /^802.1x-/ ? $login : sprintf('%s@%s', $login, $params->{'associateddomain'});
@@ -376,17 +375,17 @@ sub proc :Path(proc) :Args(0) {
 				      $params->{'associateddomain'},
 				      $uid);
 
-	  # ABC #  $create_account_branch_return =
-	  # ABC #    UMI::Controller::User->create_account_branch ( $ldap_crud,
-	  # ABC #  			    {
-	  # ABC #  			     uid => $params->{'add_svc_acc_uid'},
-	  # ABC #  			     service => $_,
-	  # ABC #  			     associatedDomain => $params->{associateddomain},
-	  # ABC #  			    },
-	  # ABC #  			  );
+	   $create_account_branch_return =
+	     $c->controller('User')->create_account_branch ( $c->model('LDAP_CRUD'),
+							     {
+							      base_uid => substr($id[0], 4),
+							      service => $_,
+							      associatedDomain => $params->{associateddomain},
+							     },
+							   );
 
-	  # ABC # $success_message .= $create_account_branch_return->[1] if defined $create_account_branch_return->[1];
-	  # ABC # $error_message .= $create_account_branch_return->[0] if defined $create_account_branch_return->[0];
+	  $success_message .= $create_account_branch_return->[1] if defined $create_account_branch_return->[1];
+	  $error_message .= $create_account_branch_return->[0] if defined $create_account_branch_return->[0];
 
 	}
 
