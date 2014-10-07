@@ -15,17 +15,6 @@
 <table class="table table-striped table-hover">
  <thead>
   <tr class="bg-primary"><td colspan=2 class="text-right">
-      <!-- <button type="button" class="btn btn-link btnLegend" -->
-      <!-- 	      data-trigger="focus" -->
-      <!-- 	      data-container="body" -->
-      <!-- 	      data-animation="false" -->
-      <!-- 	      data-toggle="popover" -->
-      <!-- 	      data-placement="left" -->
-      <!-- 	      data-content="<ul class=text-muted><li class=text-danger>root objects</li><li class=text-warning>children objects</li></ul>" -->
-      <!-- 	      data-html="true"> -->
-      <!-- 	<span class="glyphicon glyphicon-list-alt"></span> -->
-      <!-- </button> -->
-
       <a href="#"
 	 class="btn btn-primary btn-sm" role="button"
       	 title="Legend"
@@ -51,14 +40,25 @@
 
 
 [% FOREACH entry IN entries %]
-
+ <tr>
+   <td>
+     <div class="panel-group" id="accordion[% loop.index %]">
  [% IF entry.value.mgmnt.is_dn %]
-  <tr class="danger">
+  <div class="panel panel-danger">
  [% ELSE %] 
-  <tr class="warning">
+  <div class="panel panel-warning">
  [% END %]
 
-   <td>
+   <div class="panel-heading">
+    <button class="btn btn-link btn-xs pull-left" 
+            type="button" 
+	    title="Collapse In/Out This Panel"
+            data-target="#collapse[% loop.index %]" 
+	    data-toggle="collapse"
+	    data-parent="#accordion[% loop.index %]">
+       <span class="glyphicon glyphicon-off text-primary"></span>
+    </button>
+
      <div class="dropdown pull-left">
        <button class="btn btn-link btn-xs dropdown-toggle" 
 	       type="button" id="dropdownMenuActions" 
@@ -89,7 +89,7 @@
 	     </button>
 	   </li>
   [% END %]
-	   <li>
+       <li>
 	     <button type="button" title="delete object" class="btn btn-link"
 		     value="[% entry.key %]"
 		     name="ldap_delete"
@@ -148,9 +148,8 @@
   [% END %]
 	 </ul>
      </div>
-       <b class="pull-right">DN:</b>
-   </td>
-   <td><b>[% entry.key %]</b>
+
+    <b class="col-sm-offset-1">DN:&nbsp;[% entry.key %]</b>
 
      <!-- #### Modal: Account Global Management start -->
      <div class="modal" id="globmgmntModal[% loop.index %]"
@@ -170,7 +169,7 @@
 	      </input>
 	   </div>
 	   <div class="modal-footer">
-	     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+	     <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
 	     <button type="submit" class="btn btn-primary"  name="ldap_delete"
                 value="[% entry.key %]">
 	       Yes, I really want to delete it and yes, I understand all consequences!
@@ -199,7 +198,7 @@
 	      </input>
 	   </div>
 	   <div class="modal-footer">
-	     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+	     <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
 	     <button type="submit" class="btn btn-primary"  name="ldap_delete"
                 value="[% entry.key %]">
 	       Yes, I really want to delete it and yes, I understand all consequences!
@@ -233,7 +232,7 @@
 	     </input>
 	   </div>
 	   <div class="modal-footer">
-	     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+	     <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
 	     <button type="submit"
 		     class="btn btn-primary umi-btn-event umi-btn-logic"
 		     data-umiact="/searchby/ldif_gen"
@@ -247,22 +246,16 @@
      </div>
      <!-- #### Modal: LDIF end -->
 
-   </td>
-  </tr>
-
+   </div>
+   <div id="collapse[% loop.index %]" class="panel-collapse collapse in">
+     <div class="panel-body">
+    <dl class="dl-horizontal">
   [% FOREACH hattr IN entry.value.attrs %]
     [% x=hattr.key %]
     [% NEXT IF hattr.key.match(';binary') %]
-  <tr><th class="text-right">[% hattr.key %]:</th><td>
+    <dt>[% hattr.key %]:</dt><dd>
     [% IF hattr.key == 'userPassword' %]
-      <span class="glyphicon glyphicon-certificate"></span>
-      <span class="glyphicon glyphicon-certificate"></span>
-      <span class="glyphicon glyphicon-certificate"></span>
-      <span class="glyphicon glyphicon-certificate"></span>
-      <span class="glyphicon glyphicon-certificate"></span>
-      <span class="glyphicon glyphicon-certificate"></span>
-      <span class="glyphicon glyphicon-certificate"></span>
-      <span class="glyphicon glyphicon-certificate"></span>
+      <span style="font-size: 130%">&#9899;&#9899;&#9899;&#9899;&#9899;&#9899;&#9899;&#9899;</span>
     [% ELSIF hattr.key == 'jpegPhoto' %]
       [% 
         # bellow, value of jpegPhoto attribute contains no  `<img class="' part
@@ -284,10 +277,16 @@
       [% END %]
     [% ELSE %]
       [% hattr.value %]
-    [% END %]
- </td></tr>
-  [% END %]
-[% END %]
+    [% END %] [% # IF hattr.key == 'userPassword' %]
+    </dd>
+  [% END %] [% # FOREACH hattr IN entry.value.attrs %]
+    </dl>
+   </div>
+  </div>
+ </div>
+</div>
+</td></tr>
+[% END %] [% # FOREACH entry IN entries %]
  </tbody>
 </table>
 </div>
@@ -306,6 +305,7 @@ $(function(){
   var options = {
         btnEvent: ".umi-btn-event",
         btnEventLogic: ".umi-btn-logic",
+        btnEventAjax: ".umi-btn-ajax",
         noActionEventMsg: "Cannot find action attribute for this button event!",
         noFormEventMsg: "Cannot find parent form for this button event!",
         noAjaxModeMsg: "Ajax mode not supported, yet..."
@@ -332,7 +332,9 @@ $(function(){
       },
       
       getLogicType = function(obj) {
-        return (obj.hasClass(options.btnEventLogic.substr(1,options.btnEventLogic.length))) ? "basic" : "ajax";
+        if (obj.hasClass(options.btnEventLogic.substr(1,options.btnEventLogic.length))) return "basic";
+        if (obj.hasClass(options.btnEventAjax.substr(1,options.btnEventAjax.length))) return "ajax";
+        return "close";
       },
       
       runAjaxLogic = function(obj) {
@@ -346,7 +348,13 @@ $(function(){
         console.log($form);
         if (!$form || !$form.length) return applyError(obj, options.noFormEventMsg), false;
         var hidden = createHiddenButton(obj);
+        clearPopupForm($(".modal:not(.in)"));
         $form.append(hidden).attr("action", action).submit();
+      },
+
+      clearPopupForm = function($class) {
+        if (!($class instanceof Object)) $class=$($class);
+        $class.find("input[type='checkbox']").prop("checked", false);
       },
       
       onBtnEventClick = function(event) {
@@ -355,6 +363,9 @@ $(function(){
         
         switch(getLogicType($this)) {
           default:
+          case "close":
+            clearPopupForm($this.parents(".modal"));
+            break;
           case "basic":
             runBasicLogic($this);
             break;

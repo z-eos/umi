@@ -313,10 +313,16 @@ sub create_account_branch {
 	     base_uid => $args->{base_uid},
 	    };
 
-  $arg->{dn} = sprintf("authorizedService=%s@%s,uid=%s,%s",
-		       $arg->{service}, $arg->{associatedDomain},
-		       $arg->{base_uid},
-		       $ldap_crud->{cfg}->{base}->{acc_root});
+  $arg->{dn} = $arg->{base_uid} ?
+    sprintf("authorizedService=%s@%s,uid=%s,%s",
+	    $arg->{service}, $arg->{associatedDomain},
+	    $arg->{base_uid},
+	    $ldap_crud->{cfg}->{base}->{acc_root}) :
+    sprintf("authorizedService=%s@%s,uid=%s%s,%s",
+	    $arg->{service}, $arg->{associatedDomain},
+	    $arg->{uid_prefix},
+	    $arg->{login},
+	    $ldap_crud->{cfg}->{base}->{acc_root});
 
   $arg->{ldapadd_arg} = [
 			 'authorizedService' => $arg->{service} . '@' . $arg->{'associatedDomain'},
@@ -390,6 +396,9 @@ sub create_account_branch_leaf {
   $arg->{dn} = 'uid=' . $arg->{uid} .
     ',' . $arg->{basedn};
 
+  use Data::Printer;
+  p $arg;
+
   my $authorizedService = [
 			   authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
 			   associatedDomain => $arg->{associatedDomain},
@@ -421,10 +430,7 @@ sub create_account_branch_leaf {
        objectClass => [ 'mailutilsAccount' ],
       ];
   } elsif ( $arg->{service} eq 'xmpp') {
-    my $file = $self->path_to('root',
-			   'static',
-			   'images',
-			   $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{jpegPhoto_filename});
+    my $file = $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{jpegPhoto_filename};
     local $/ = undef;
     open(my $fh, "<", $file) or warn "Can not open $file: $!";
     my $jpeg = <$fh>;

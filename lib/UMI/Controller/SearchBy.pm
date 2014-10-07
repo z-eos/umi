@@ -328,7 +328,7 @@ sub proc :Path(proc) :Args(0) {
 	      $params->{'add_svc_acc'} ne '') {
 
       my $ldap_crud = $c->model('LDAP_CRUD');
-      my ( $arr, $login, $uid, $error_message, $success_message, $final_message );
+      my ( $arr, $login, $uid, $pwd, $error_message, $success_message, $final_message );
       my @id = split(',', $params->{'add_svc_acc'});
       $params->{'add_svc_acc_uid'} = substr($id[0], 21); # $params->{'login'} =
       $c->stash(
@@ -376,7 +376,7 @@ sub proc :Path(proc) :Args(0) {
 				      $uid);
 
 	   $create_account_branch_return =
-	     $c->controller('User')->create_account_branch ( $c->model('LDAP_CRUD'),
+	     $c->controller('User')->create_account_branch ( $ldap_crud,
 							     {
 							      base_uid => substr($id[0], 4),
 							      service => $_,
@@ -386,6 +386,61 @@ sub proc :Path(proc) :Args(0) {
 
 	  $success_message .= $create_account_branch_return->[1] if defined $create_account_branch_return->[1];
 	  $error_message .= $create_account_branch_return->[0] if defined $create_account_branch_return->[0];
+
+	  my $mesg = $ldap_crud->search( { base => $params->{'add_svc_acc'},
+					   scope => 'base',
+					   attrs => [ 'uidNumber', 'givenName', 'sn' ],
+					 } );
+	  if ( ! $mesg->count ) {
+	    $error_message = '<div class="alert alert-danger">' .
+	      '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
+		$ldap_crud->err($mesg) . '</ul></div>';
+	  }
+
+	  my @entry = $mesg->entries;
+
+	  if ( ! defined $params->{'password1'} or $params->{'password1'} eq '' ) {
+	    $pwd = { $_ => $self->pwdgen };
+	  } elsif ( $_ =~ /^802.1x-.*/ ) {
+	    $pwd->{service}->{clear} = $params->{login};
+	  } else {
+	    $pwd = { $_ => $self->pwdgen( { pwd => $params->{'password1'} } ) };
+	  }
+
+	  my ($file, $jpeg);
+	  if (defined $params->{'avatar'}) {
+	    $params->{avatar} = $c->req->upload('avatar');
+	    $file = $params->{'avatar'}->{'tempname'};
+	  } else {
+	    $file = $c->path_to('root','static','images','avatar-mgmnt.png');
+	  }
+	  local $/ = undef;
+	  open(my $fh, "<", $file) or warn "Can not open $file: $!";
+	  $jpeg = <$fh>;
+	  close($fh) or warn "Can not close $file: $!";
+
+	  use Data::Printer;
+	  p $entry[0];
+
+	  $create_account_branch_leaf_return =
+	    $c->controller('User')->create_account_branch_leaf ( $ldap_crud,
+	  							 {
+	  							  basedn => $params->{'add_svc_acc'},
+	  							  service => $_,
+	  							  associatedDomain => $params->{associateddomain},
+	  							  uidNumber => $entry[0]->get_value('uidNumber'),
+	  							  givenName => $entry[0]->get_value('givenName'),
+	  							  sn => $entry[0]->get_value('sn'),
+	  							  login => $login,
+	  							  password => $pwd->{$_},
+	  							  telephoneNumber => $params->{telephoneNumber} ?
+								  $params->{telephoneNumber} : '666',
+	  							  jpegPhoto => [ $jpeg ],
+	  							 },
+	  						       );
+
+	  $success_message .= $create_account_branch_leaf_return->[1] if defined $create_account_branch_leaf_return->[1];
+	  $error_message .= $create_account_branch_leaf_return->[0] if defined $create_account_branch_leaf_return->[0];
 
 	}
 

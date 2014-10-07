@@ -3,12 +3,13 @@
 
 package LDAP_CRUD;
 
+use Moose;
+use Net::LDAP;
+use namespace::autoclean;
+
 use Data::Dumper;
 use Data::Printer;
-use Net::LDAP;
-use Moose;
 use Try::Tiny;
-use namespace::autoclean;
 
 with 'Tools';
 
@@ -16,6 +17,8 @@ has 'host' => ( is => 'ro', isa => 'Str', required => 1, default => 'ldap://ns.l
 has 'uid' => ( is => 'ro', isa => 'Str', required => 1 );
 has 'pwd' => ( is => 'ro', isa => 'Str', required => 1 );
 has 'dry_run' => ( is => 'ro', isa => 'Bool', default => 0 );
+has 'path_to_images' => ( is => 'ro', isa => 'Str', required => 1 );
+
 
 =head2 cfg
 
@@ -30,6 +33,8 @@ has 'cfg' => ( traits => ['Hash'],
 	     );
 
 sub _build_cfg {
+  my $self = shift;
+
   return {
 	  exclude_prefix => 'aux_',
 	  stub => {
@@ -86,7 +91,7 @@ sub _build_cfg {
 				'xmpp' => {
 					   descr => 'Jabber',
 					   gidNumber => 10106,
-					   jpegPhoto_filename => 'avatar-xmpp.png',
+					   jpegPhoto_filename => $self->path_to_images . '/avatar-xmpp.png',
 					  },
 				'802.1x-mac' => {
 						  descr => '802.1x MAC _GLOBAL_',
@@ -110,7 +115,7 @@ sub _build_ldap {
 	my $self = shift;
 
 	my $ldap = try {
-		Net::LDAP->new( $self->host, async => 1, debug => 3 );
+		Net::LDAP->new( $self->host, async => 1, debug => 0 );
 	}
 	catch {
 		warn "Net::LDAP->new problem, error: $_";    # not $@

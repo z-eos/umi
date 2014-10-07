@@ -19,6 +19,7 @@ sub prepare_arguments {
 		%{$args},
 		uid => $c->session->{auth_uid},
 		pwd => $c->session->{auth_pwd},
+		path_to_images => "__path_to('root', 'static', 'images')__",
 	};
 }
 
