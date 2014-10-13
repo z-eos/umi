@@ -331,13 +331,20 @@ sub create_account_branch {
 			 'objectClass' => [ qw(account authorizedServiceObject) ],
 			];
 
-  my $mesg = $ldap_crud->add( $arg->{dn}, $arg->{ldapadd_arg} );
-
+  my $if_exist = $ldap_crud->search( { base => $arg->{dn},
+				       scope => 'one',
+				       attrs => [ 'authorizedService' ],
+				     } );
   my $return;
-  if ( $mesg ) {
-    $return->[0] = '<li>error during ' . uc($arg->{service}) .
-      ' branch creation occured: ' . $mesg . '</li>';
-  } else { $return->[1] = undef; }
+  if ( $if_exist->count ) {
+    $return->[2] = '<li>branch DN: ' .	$arg->{dn} .' already exists, I will use it.</li>';
+  } else {
+    my $mesg = $ldap_crud->add( $arg->{dn}, $arg->{ldapadd_arg} );
+    if ( $mesg ) {
+      $return->[0] = '<li>error during ' . uc($arg->{service}) .
+	' branch creation occured: ' . $mesg . '</li>';
+    } else { $return->[1] = undef; }
+  }
   return $return;
 }
 
@@ -385,7 +392,8 @@ sub create_account_branch_leaf {
 	     sn => $args->{sn},
 	     login => $args->{login},
 	     password => $args->{password},
-	     telephoneNumber => $args->{telephoneNumber},
+	     telephoneNumber => $args->{telephoneNumber} || '666',
+	     jpegPhoto => $args->{jpegPhoto} || undef,
 	    };
 
   $arg->{basedn} = 'authorizedService=' . $args->{service} . '@' . $args->{associatedDomain} .
@@ -395,9 +403,6 @@ sub create_account_branch_leaf {
 
   $arg->{dn} = 'uid=' . $arg->{uid} .
     ',' . $arg->{basedn};
-
-  use Data::Printer;
-  p $arg;
 
   my $authorizedService = [
 			   authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
@@ -430,11 +435,13 @@ sub create_account_branch_leaf {
        objectClass => [ 'mailutilsAccount' ],
       ];
   } elsif ( $arg->{service} eq 'xmpp') {
-    my $file = $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{jpegPhoto_filename};
+    $arg->{jpegPhoto} =
+      $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{jpegPhoto_noavatar} if
+	! $arg->{jpegPhoto};
     local $/ = undef;
-    open(my $fh, "<", $file) or warn "Can not open $file: $!";
+    open(my $fh, "<", $arg->{jpegPhoto}) or warn "Can not open $arg->{jpegPhoto}: $!";
     my $jpeg = <$fh>;
-    close($fh) or warn "Can not close $file: $!";
+    close($fh) or warn "Can not close $arg->{jpegPhoto}: $!";
 
     $authorizedService_add =
       [

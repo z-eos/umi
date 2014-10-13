@@ -15,6 +15,9 @@
    <!-- <link href="/static/css/sticky-footer-navbar.css" rel="stylesheet"> -->
    <link href="/static/css/signin.css" rel="stylesheet">
    <link href="/static/css/umi.css" rel="stylesheet">
+
+   <link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">
+
    <script src="/static/js/jquery.min.js"></script>
  </head>
  <body>

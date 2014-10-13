@@ -6,7 +6,67 @@
       <h2>Service Account Add Form <small><em class="mono">for user: [% add_svc_acc %]</em></small></h2>
     </div>
 
-    [% final_message %]
+    [% IF message_error %]
+    <div class="panel panel-danger">
+      <div class="panel-heading">
+	<h4><span class="glyphicon glyphicon-exclamation-sign">&nbsp;</span>Error!</h4>
+      </div>
+      <div class="panel-body">
+	<ul>
+	  [% message_error %]
+	</ul>
+      </div>
+    </div>
+    [% ELSE %]    
+
+    [% IF message_warning %]    
+    <div class="alert alert-warning fade in" role="alert">
+      <button class="close pull-right" data-dismiss="alert" type="button">
+	<span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span>
+	<span class="sr-only">Close</span>
+      </button>
+      <h4><span class="glyphicon glyphicon-warning-sign">&nbsp;</span>Stay calm, it is just to inform you.</h4>
+      <ul>
+	[% message_warning %]
+      </ul>
+    </div>
+    [% END %]
+
+    [% IF message_success %]    
+    <div class="panel panel-success">
+      <div class="panel-heading">
+	<h4><span class="glyphicon glyphicon-ok-sign">&nbsp;</span>Service/s successfully added to account: <span class=mono>
+	    [% add_svc_acc %]
+	</span></h4>
+      </div>
+      <div class="panel-body">
+	<span class="glyphicon glyphicon-warning-sign text-warning"></span>
+	<em class="text-muted text-warning"><b class="text-uppercase">bellow</b>
+	  is the only one-time <b class="text-uppercase">information</b>! Password info
+	  <b class="text-uppercase">is not saved anywhere anyhow</b>, so now it is the only chance to save it.</em>
+	<!-- Table -->
+	<div class="table-responsive">
+	  <table class="table table-bordered table-hover">
+	    <thead class="bg-info">
+	      <th>SERVICE (branch)</th>
+	      <th>SERVICE UID (leaf)</th>
+	      <th>PASSWORD</th>
+	    </thead>
+	    <tbody>
+	      [% FOREACH i IN message_success %]
+	      <tr class=mono><td>[% i.authorizedservice %]@[% i.authorizeddomain %]</td>
+		<td>[% i.service_uid %]</td>
+		<td>[% i.service_pwd %]</td>
+	      </tr>
+	      [% END %]
+	    </tbody>
+	  </table>
+	</div>
+      </div>
+    </div>
+    [% END %]
+    [% END %]
+
     [% form.render %]
 
   </div>

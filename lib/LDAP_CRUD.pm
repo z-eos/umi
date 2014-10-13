@@ -17,7 +17,7 @@ has 'host' => ( is => 'ro', isa => 'Str', required => 1, default => 'ldap://ns.l
 has 'uid' => ( is => 'ro', isa => 'Str', required => 1 );
 has 'pwd' => ( is => 'ro', isa => 'Str', required => 1 );
 has 'dry_run' => ( is => 'ro', isa => 'Bool', default => 0 );
-has 'path_to_images' => ( is => 'ro', isa => 'Str', required => 1 );
+# has 'path_to_images' => ( is => 'ro', isa => 'Str', required => 1 );
 
 
 =head2 cfg
@@ -91,7 +91,7 @@ sub _build_cfg {
 				'xmpp' => {
 					   descr => 'Jabber',
 					   gidNumber => 10106,
-					   jpegPhoto_filename => $self->path_to_images . '/avatar-xmpp.png',
+					   jpegPhoto_noavatar => UMI->path_to('root', 'static', 'images', '/avatar-xmpp.png'),
 					  },
 				'802.1x-mac' => {
 						  descr => '802.1x MAC _GLOBAL_',
@@ -212,7 +212,7 @@ sub err {
 # to finish # 
 # to finish #   log_debug { Dumper($self) . "\n" . $self->err( $mesg ) };
 
-  return sprintf( "<dl class=\"dl-horizontal\"><dt>code</dt><dd>%s</dd><dt>error_name</dt><dd>%s</dd><dt>error_text</dt><dd><b><i><pre class=\"alert-danger\">%s</pre></i></b></dd><dt>error_desc</dt><dd>%s</dd><dt>server_error</dt><dd>%s</dd></dl>",
+  return sprintf( '<dl class="dl-horizontal"><dt>code</dt><dd>%s</dd><dt>error_name</dt><dd>%s</dd><dt>error_text</dt><dd><b><i><pre>%s</pre></i></b></dd><dt>error_desc</dt><dd>%s</dd><dt>server_error</dt><dd>%s</dd></dl>',
 		  $mesg->code,
 		  $mesg->error_name,
 		  $mesg->error_text,

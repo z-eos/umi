@@ -26,12 +26,13 @@
       	 data-toggle="popover"
       	 data-original-title="Legend"
 	 data-content="<ul class='list-unstyled'>
-<li><span class='label label-danger'>root objects</span></li>
-<li><span class='label label-warning'>child objects</span></li>
-<li><kbd>user input</kbd></li>
+<li><span class='glyphicon glyphicon-star label label-info'>&nbsp;root object</span></li>
+<li><span class='glyphicon glyphicon-tag label label-warning'>&nbsp;service branch</span></li>
+<li><span class='glyphicon glyphicon-leaf label label-success'>&nbsp;service account</span></li>
+<li><span class='label label-primary'>user input</span></li>
 </ul>"
       	 tabindex="0">
-      	<span style="font-size: 150%;" class="glyphicon glyphicon-list-alt"></span>
+      	<span style="font-size: 100%;" class="glyphicon glyphicon-list-alt"></span>
       </a>
 
   </td></tr>
@@ -44,7 +45,9 @@
    <td>
      <div class="panel-group" id="accordion[% loop.index %]">
  [% IF entry.value.mgmnt.is_dn %]
-  <div class="panel panel-danger">
+  <div class="panel panel-info">
+ [% ELSIF entry.key.match('^uid=.*,author') %]
+  <div class="panel panel-success">
  [% ELSE %] 
   <div class="panel panel-warning">
  [% END %]
@@ -56,7 +59,7 @@
             data-target="#collapse[% loop.index %]" 
 	    data-toggle="collapse"
 	    data-parent="#accordion[% loop.index %]">
-       <span class="glyphicon glyphicon-off text-primary"></span>
+       <span class="glyphicon glyphicon-expand text-primary"></span>
     </button>
 
      <div class="dropdown pull-left">
@@ -86,6 +89,13 @@
 		     name="add_svc_acc">
 	       <span class="glyphicon glyphicon-plus-sign text-warning"></span>
 	       service account
+	     </button>
+	   </li>
+	   <li>
+	     <button type="submit" title="modify group" class="btn btn-link"
+		     value="[% entry.key %]" name="ldap_modify_group">
+	       <span class="glyphicon glyphicon-transfer text-warning"></span>
+	       group
 	     </button>
 	   </li>
   [% END %]
@@ -149,7 +159,21 @@
 	 </ul>
      </div>
 
-    <b class="col-sm-offset-1">DN:&nbsp;[% entry.key %]</b>
+    <b class="col-sm-offset-1">
+      [% IF entry.key.match('^author') %]
+      <abbr title="Service Account Branch (the service to which all this service accounts will relate)">
+	<span class="glyphicon glyphicon-tag"></span>
+      </abbr>
+      [% ELSIF entry.key.match('^uid=.*,author') %]
+      <abbr title="Service Account Branch Leaf (the very service account - the credentials to use for the service)">
+	<span class="glyphicon glyphicon-leaf"></span>
+      </abbr>
+      [% ELSIF entry.value.mgmnt.is_dn %]
+      <abbr title="Root Account">
+	<span class="glyphicon glyphicon-star"></span>
+      </abbr>
+      [% END %]
+      DN:&nbsp;&nbsp;&nbsp;[% entry.key.replace(',', ',&nbsp;&nbsp;&nbsp;') %]</b>
 
      <!-- #### Modal: Account Global Management start -->
      <div class="modal" id="globmgmntModal[% loop.index %]"
@@ -247,7 +271,7 @@
      <!-- #### Modal: LDIF end -->
 
    </div>
-   <div id="collapse[% loop.index %]" class="panel-collapse collapse in">
+   <div id="collapse[% loop.index %]" class="panel-collapse collapse">
      <div class="panel-body">
     <dl class="dl-horizontal">
   [% FOREACH hattr IN entry.value.attrs %]

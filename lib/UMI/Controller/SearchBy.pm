@@ -19,6 +19,12 @@ has 'form_jpegphoto' => ( isa => 'UMI::Form::ModJpegPhoto', is => 'rw',
 		      documentation => q{Form to add/modify jpegPhoto},
 		    );
 
+use UMI::Form::ModUserGroup;
+has 'form_mod_groups' => ( isa => 'UMI::Form::ModUserGroup', is => 'rw',
+		      lazy => 1, default => sub { UMI::Form::ModUserGroup->new },
+		      documentation => q{Form to add/modify group/s of the user.},
+		    );
+
 use UMI::Form::AddServiceAccount;
 has 'form_add_svc_acc' => ( isa => 'UMI::Form::AddServiceAccount', is => 'rw',
 			    lazy => 1, default => sub { UMI::Form::AddServiceAccount->new },
@@ -256,6 +262,35 @@ sub proc :Path(proc) :Args(0) {
 	       );
 
 #=====================================================================
+# Modify Groups
+#=====================================================================
+    } elsif ( defined $params->{'ldap_modify_group'} &&
+	      $params->{'ldap_modify_group'} ne '') {
+
+      $c->stash(
+		template => 'user/user_mod_group.tt',
+		form => $self->form_mod_groups,
+		ldap_modify_group => $params->{'ldap_modify_group'},
+	       );
+      p $params;
+      return unless $self->form_mod_groups
+      	->process(
+      		  posted => ($c->req->method eq 'POST'),
+      		  params => $params,
+      		  ldap_crud => $c->model('LDAP_CRUD'),
+      		 ) && defined $params->{groups};
+
+      $c->stash( final_message => $self
+		 ->mod_groups(
+			      $c->model('LDAP_CRUD'),
+			      {
+			       mod_groups_dn => $params->{ldap_modify_group},
+			       groups => $params->{groups},
+			      }
+			     ),
+	       );
+
+#=====================================================================
 # Modify userPassword
 #=====================================================================
     } elsif (defined $params->{'ldap_modify_password'} &&
@@ -302,7 +337,7 @@ sub proc :Path(proc) :Args(0) {
       return unless $self->form_jpegphoto->process(
 						   posted => ($c->req->method eq 'POST'),
 						   params => $params,
-						  ) && defined $params->{avatar};
+						  ) && defined $params->{avatar} && $params->{avatar} ne '';
 
       my $ldap_crud = $c->model('LDAP_CRUD');
 
@@ -328,7 +363,7 @@ sub proc :Path(proc) :Args(0) {
 	      $params->{'add_svc_acc'} ne '') {
 
       my $ldap_crud = $c->model('LDAP_CRUD');
-      my ( $arr, $login, $uid, $pwd, $error_message, $success_message, $final_message );
+      my ( $arr, $login, $uid, $pwd, $error_message, $success_message, $warn_message );
       my @id = split(',', $params->{'add_svc_acc'});
       $params->{'add_svc_acc_uid'} = substr($id[0], 21); # $params->{'login'} =
       $c->stash(
@@ -353,126 +388,107 @@ sub proc :Path(proc) :Args(0) {
 	  $login = $params->{'add_svc_acc_uid'};
 	}
 
-	$success_message = '<div class="table-responsive">' .
-	  '<table class="table table-condenced table-hover"><thead class="bg-success">' .
-	    '<th>SERVICE (branch)</th>' .
-	      '<th>SERVICE UID (leaf)</th>' .
-		'<th>PASSWORD</th>' .
-		  '</thead><tbody>';
-
 	if ( ref( $params->{'authorizedservice'} ) eq 'ARRAY' ) {
 	  $arr = $params->{'authorizedservice'};
 	} else {
 	  $arr->[0] = $params->{'authorizedservice'};
 	}
 
-	my ($create_account_branch_return, $create_account_branch_leaf_return);
+	my ($create_account_branch_return, $create_account_branch_leaf_return, $create_account_branch_leaf_params );
 	foreach ( @{$arr} ) {
 	  next if ! $_;
+
 	  $uid = $_ =~ /^802.1x-/ ? $login : sprintf('%s@%s', $login, $params->{'associateddomain'});
-	  $success_message .= sprintf('<tr class=mono><td>%s@%s</td><td>%s</td><td></td></tr>',
-				      $_,
-				      $params->{'associateddomain'},
-				      $uid);
 
-	   $create_account_branch_return =
-	     $c->controller('User')->create_account_branch ( $ldap_crud,
-							     {
-							      base_uid => substr($id[0], 4),
-							      service => $_,
-							      associatedDomain => $params->{associateddomain},
-							     },
-							   );
+	  if ( ! defined $params->{'password1'} or $params->{'password1'} eq '' ) {
+	    $pwd = { $_ => $self->pwdgen };
+	  # } elsif ( $_ =~ /^802.1x-.*/ ) {
+	  #   $pwd->{service}->{clear} = $params->{login};
+	  } else {
+	    $pwd = { $_ => $self->pwdgen( { pwd => $params->{'password1'} } ) };
+	  }
 
-	  $success_message .= $create_account_branch_return->[1] if defined $create_account_branch_return->[1];
+	  # $success_message .= sprintf('<tr class=mono><td>%s@%s</td><td>%s</td><td>%s</td></tr>',
+	  # 			      $_,
+	  # 			      $params->{'associateddomain'},
+	  # 			      $uid,
+	  # 			      $pwd->{$_}->{clear});
+
+	  push @{$success_message}, {
+				     authorizedservice => $_,
+				     associateddomain => $params->{'associateddomain'},
+				     service_uid => $uid,
+				     service_pwd => $pwd->{$_}->{clear},
+				    };
+
+	  $create_account_branch_return =
+	    $c->controller('User')
+	      ->create_account_branch ( $ldap_crud,
+					{
+					 base_uid => substr($id[0], 4),
+					 service => $_,
+					 associatedDomain => $params->{associateddomain},
+					},
+				      );
+
+	  # $success_message .= $create_account_branch_return->[1] if defined $create_account_branch_return->[1];
 	  $error_message .= $create_account_branch_return->[0] if defined $create_account_branch_return->[0];
+	  $warn_message .= $create_account_branch_return->[2] if defined $create_account_branch_return->[2];
 
+	  # takingdata to be used in create_account_branch_leaf()
 	  my $mesg = $ldap_crud->search( { base => $params->{'add_svc_acc'},
 					   scope => 'base',
 					   attrs => [ 'uidNumber', 'givenName', 'sn' ],
 					 } );
 	  if ( ! $mesg->count ) {
-	    $error_message = '<div class="alert alert-danger">' .
-	      '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
-		$ldap_crud->err($mesg) . '</ul></div>';
+	    $error_message .= $ldap_crud->err($mesg);
 	  }
 
 	  my @entry = $mesg->entries;
-
-	  if ( ! defined $params->{'password1'} or $params->{'password1'} eq '' ) {
-	    $pwd = { $_ => $self->pwdgen };
-	  } elsif ( $_ =~ /^802.1x-.*/ ) {
-	    $pwd->{service}->{clear} = $params->{login};
-	  } else {
-	    $pwd = { $_ => $self->pwdgen( { pwd => $params->{'password1'} } ) };
-	  }
 
 	  my ($file, $jpeg);
 	  if (defined $params->{'avatar'}) {
 	    $params->{avatar} = $c->req->upload('avatar');
 	    $file = $params->{'avatar'}->{'tempname'};
 	  } else {
-	    $file = $c->path_to('root','static','images','avatar-mgmnt.png');
+	    $file = undef;
 	  }
-	  local $/ = undef;
-	  open(my $fh, "<", $file) or warn "Can not open $file: $!";
-	  $jpeg = <$fh>;
-	  close($fh) or warn "Can not close $file: $!";
 
-	  use Data::Printer;
-	  p $entry[0];
-
+	  $create_account_branch_leaf_params
+	    = {
+	       basedn => $params->{'add_svc_acc'},
+	       service => $_,
+	       associatedDomain => $params->{associateddomain},
+	       uidNumber => $entry[0]->get_value('uidNumber'),
+	       givenName => $entry[0]->get_value('givenName'),
+	       sn => $entry[0]->get_value('sn'),
+	       login => $login,
+	       password => $pwd->{$_},
+	       telephoneNumber => defined $params->{telephoneNumber} ? $params->{telephoneNumber} : undef,
+	       jpegPhoto => $file,
+	      };
+	  p $create_account_branch_leaf_params;
 	  $create_account_branch_leaf_return =
-	    $c->controller('User')->create_account_branch_leaf ( $ldap_crud,
-	  							 {
-	  							  basedn => $params->{'add_svc_acc'},
-	  							  service => $_,
-	  							  associatedDomain => $params->{associateddomain},
-	  							  uidNumber => $entry[0]->get_value('uidNumber'),
-	  							  givenName => $entry[0]->get_value('givenName'),
-	  							  sn => $entry[0]->get_value('sn'),
-	  							  login => $login,
-	  							  password => $pwd->{$_},
-	  							  telephoneNumber => $params->{telephoneNumber} ?
-								  $params->{telephoneNumber} : '666',
-	  							  jpegPhoto => [ $jpeg ],
-	  							 },
-	  						       );
+	    $c->controller('User')
+	      ->create_account_branch_leaf (
+					    $ldap_crud,
+					    $create_account_branch_leaf_params,
+					   );
 
-	  $success_message .= $create_account_branch_leaf_return->[1] if defined $create_account_branch_leaf_return->[1];
+	  # $success_message .= $create_account_branch_leaf_return->[1] if defined $create_account_branch_leaf_return->[1];
 	  $error_message .= $create_account_branch_leaf_return->[0] if defined $create_account_branch_leaf_return->[0];
 
 	}
-
-	$success_message .= '</tbody></table></div>';
-
-	$final_message = '<div class="panel panel-success">
-<div class="panel-heading">
-  <h4><span class="glyphicon glyphicon-ok-sign">&nbsp;</span>&nbsp;Service/s successfully added to account: <span class=mono>' .
-    $params->{'add_svc_acc'} .
-'     </span></h4>
-</div>
-<div class="panel-body text-right"><span class="glyphicon glyphicon-ok-sign text-warning"></span>
-  <em class="text-muted text-warning"><b class="text-uppercase">bellow</b>
-  is the only one-time <b class="text-uppercase">information</b>! Password info
-  <b class="text-uppercase">is not saved anywhere anyhow</b>, so now it is the only chance to save it.</em>
-</div>
-<!-- Table -->' . $success_message . '</div>';
-      } else {
-	$final_message = '<div class="alert alert-warning" role="alert">' .
-	  '<span style="font-size: 140%" class="glyphicon glyphicon-warning-sign">&nbsp;</span>' .
-	    '<em>service was not added</em>' .
-		$error_message . '</div>' if $error_message;
+      } else { # form was not validated
+	$error_message = '<em>service was not added</em>' .
+	  $error_message if $error_message;
       }
 
-      $final_message .= '<div class="alert alert-danger" role="alert">' .
-	'<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
-	  $error_message . '</ul></div>' if $error_message;
-
       $c->stash(
-		final_message => $final_message,
+		message_success => $success_message,
+		message_warning => $warn_message,
+		message_error => $error_message,
 	       );
-
     }
   } else {
     $c->stash( template => 'signin.tt', );
@@ -592,6 +608,75 @@ sub mod_pwd {
   return $final_message;
 }
 
+
+#=====================================================================
+
+=head1 mod_groups
+
+modify user's groups method
+
+=cut
+
+
+sub mod_groups {
+  my ( $self, $ldap_crud, $args ) = @_;
+
+  my $arg = {
+	     mod_groups_dn => $args->{mod_groups_dn},
+	     groups => $args->{groups},
+	     uid => substr( (split /,/, $args->{mod_groups_dn})[0], 4 ),
+	    };
+
+  # push @{$arg->{groups}}, $args->{groups};
+
+  my $return;
+  if ( $self->form_mod_groups->validated && $self->form_mod_groups->ran_validation ) {
+    my $mesg = $ldap_crud->search( { base => 'ou=group,dc=umidb',
+				     scope => 'one',
+				     attrs => ['cn'], } );
+
+    if ( ! $mesg->count ) {
+      push @{$return->{error}}, $ldap_crud->err($mesg);
+    }
+
+    my @groups_all = $mesg->sorted('cn');
+
+    foreach ( @groups_all ) {
+      $arg->{groups_mod}->{$_->get_value('cn')} = 0;
+    }
+
+    $mesg = $ldap_crud->search( { base => 'ou=group,dc=umidb',
+				  filter => 'memberUid=' . $arg->{uid},
+				  attrs => ['cn'], } );
+
+    if ( ! $mesg->count ) {
+      push @{$return->{error}}, $ldap_crud->err($mesg);
+    }
+
+    my @groups_usr = $mesg->sorted('cn');
+
+    foreach ( @groups_usr ) {
+      $arg->{groups_mod}->{$_->get_value('cn')}++;
+    }
+
+    foreach (@{$arg->{groups}}) {
+      $arg->{groups_mod}->{$_}++;
+    }
+
+    # $mesg = $ldap_crud->mod(
+    # 			    $arg->{mod_groups_dn},
+    # 			    { 'memberUid' => $arg->{groups}, },
+    # 			   );
+
+    # if ( $mesg ne '0' ) {
+    #   $return->{error} = $mesg;
+    # } else {
+    #   $return->{success} = $arg->{groups};
+    # }
+  }
+p $arg;
+  return $return;
+}
 
 #=====================================================================
 
