@@ -16,17 +16,15 @@ sub build_form_element_class { [ 'form-horizontal' ] }
 
 has_field 'ldap_modify_group' => ( type => 'Hidden', );
 
-has_field 'groups_user_belongs' => ( type => 'Hidden', );
-
 has_field 'groups' => ( type => 'Multiple',
-			label => 'User Groups',
+			label => '',
 			# element_class => [ 'multiselect' ],
 			# required => 1,
 		      );
 
 sub options_groups {
   my $self = shift;
-  my ( $grp_all, $grp_usr, @groups, $return );
+  my ( @groups, $return );
   use Data::Printer;
 
   return unless $self->ldap_crud;
@@ -43,45 +41,30 @@ sub options_groups {
   my @groups_all = $mesg->sorted('cn');
 
   foreach ( @groups_all ) {
-    $grp_all->{$_->get_value('cn')} = 0;
+    push @groups, { value => $_->get_value('cn'), label => $_->get_value('cn'), };
   }
-
-  $mesg = $ldap_crud->search( { base => 'ou=group,dc=umidb',
-				filter => 'memberUid=' .
-				substr( (split /,/, $self->field('ldap_modify_group')->input)[0], 4 ),
-				attrs => ['cn'], } );
-
-  if ( ! $mesg->count ) {
-    push @{$return->{error}}, $ldap_crud->err($mesg);
-  }
-
-  my @groups_usr = $mesg->sorted('cn');
-
-  foreach ( @groups_usr ) {
-    $grp_all->{$_->get_value('cn')} = 1;
-  }
-
-  foreach my $key (sort (keys %{$grp_all} )) {
-    if ( $grp_all->{$key} == 1 ) {
-      push @groups, { value => $key, label => $key, selected => 'selected' };
-    } else {
-      push @groups, { value => $key, label => $key, };
-    }
-  }
-  # my @groups_sorted = sort { $a->{'label'} <=> $b->{'label'} } @groups;
-  p $grp_all;
   return \@groups;
 }
 
+
 has_field 'reset' => ( type => 'Reset',
-#			wrapper_class => [ 'pull-left', 'col-md-2' ],
-			element_class => [ 'btn', 'btn-default', ],
-		        value => 'Reset' );
+		       label => '',
+		       wrapper_class => [ 'pull-left', 'col-md-2' ],
+		       element_class => [ 'btn', 'btn-default', 'btn-block', ],
+		       value => 'Reset' );
 
 has_field 'submit' => ( type => 'Submit',
-#			wrapper_class => [ 'pull-right', 'col-md-10' ],
-			element_class => [ 'btn', 'btn-default', ],
+			wrapper_class => [ 'pull-right', 'col-md-10' ],
+			element_class => [ 'btn', 'btn-default', 'btn-block', ],
 			value => 'Submit' );
+
+# has_block 'submitit' => ( tag => 'fieldset',
+#                         render_list => [ 'reset', 'submit'],
+#                         label => '&nbsp;',
+#                         class => [ 'row' ]
+#                       );
+
+# sub build_render_list {[ 'groups', 'submitit' ]}
 
 sub html_attributes {
   my ( $self, $field, $type, $attr ) = @_;
@@ -93,9 +76,9 @@ sub html_attributes {
 sub validate {
   my $self = shift;
 
-  if ( $self->field('groups')->value eq '' ) {
-    $self->field('groups')->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;File to be uploaded is mandatory!');
-  }
+  # if ( $self->field('groups')->value eq '' ) {
+  #   $self->field('groups')->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;File to be uploaded is mandatory!');
+  # }
 
 # if ( not $self->field('office')->value ) {
 #     $self->field('office')->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;office is mandatory!');

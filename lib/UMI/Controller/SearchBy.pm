@@ -267,18 +267,47 @@ sub proc :Path(proc) :Args(0) {
     } elsif ( defined $params->{'ldap_modify_group'} &&
 	      $params->{'ldap_modify_group'} ne '') {
 
+      # in general preselected options has to be fed via field value
+      # $params->{groups} = [ qw( group0 group1 ... groupN) ];
+      #
+      # no submit yet, it is first run
+      if ( ! defined $params->{groups} ) {
+	my ( @groups, $return );
+	my $ldap_crud =
+	  $c->model('LDAP_CRUD');
+	my $mesg = $ldap_crud
+	  ->search( {
+		     base => 'ou=group,dc=umidb',
+		     filter => 'memberUid=' .
+		     substr((split /,/, $params->{ldap_modify_group})[0], 4),
+		     attrs => ['cn'],
+		    } );
+
+	if ( ! $mesg->count ) {
+	  push @{$return->{error}}, $ldap_crud->err($mesg);
+	}
+
+	my @groups_usr = $mesg->sorted('cn');
+
+	foreach ( @groups_usr ) {
+	  push @{$params->{groups}}, $_->get_value('cn');
+	}
+      }
+
+      p $params;
+
       $c->stash(
 		template => 'user/user_mod_group.tt',
 		form => $self->form_mod_groups,
 		ldap_modify_group => $params->{'ldap_modify_group'},
 	       );
-      p $params;
+
       return unless $self->form_mod_groups
       	->process(
       		  posted => ($c->req->method eq 'POST'),
       		  params => $params,
       		  ldap_crud => $c->model('LDAP_CRUD'),
-      		 ) && defined $params->{groups};
+      		 );
 
       $c->stash( final_message => $self
 		 ->mod_groups(
@@ -623,14 +652,18 @@ sub mod_groups {
 
   my $arg = {
 	     mod_groups_dn => $args->{mod_groups_dn},
-	     groups => $args->{groups},
+	     groups => ref($args->{groups}) eq 'ARRAY' ? $args->{groups} : [ $args->{groups} ],
 	     uid => substr( (split /,/, $args->{mod_groups_dn})[0], 4 ),
 	    };
 
-  # push @{$arg->{groups}}, $args->{groups};
+  foreach (@{$arg->{groups}}) {
+    $arg->{groups_sel}->{$_} = 1;
+  }
+
+  p $arg;
 
   my $return;
-  if ( $self->form_mod_groups->validated && $self->form_mod_groups->ran_validation ) {
+  if ( $self->form_mod_groups->validated ) {
     my $mesg = $ldap_crud->search( { base => 'ou=group,dc=umidb',
 				     scope => 'one',
 				     attrs => ['cn'], } );
@@ -642,12 +675,12 @@ sub mod_groups {
     my @groups_all = $mesg->sorted('cn');
 
     foreach ( @groups_all ) {
-      $arg->{groups_mod}->{$_->get_value('cn')} = 0;
+      $arg->{groups_all}->{$_->get_value('cn')} = 0;
     }
 
     $mesg = $ldap_crud->search( { base => 'ou=group,dc=umidb',
-				  filter => 'memberUid=' . $arg->{uid},
-				  attrs => ['cn'], } );
+    				  filter => 'memberUid=' . $arg->{uid},
+    				  attrs => ['cn'], } );
 
     if ( ! $mesg->count ) {
       push @{$return->{error}}, $ldap_crud->err($mesg);
@@ -656,25 +689,37 @@ sub mod_groups {
     my @groups_usr = $mesg->sorted('cn');
 
     foreach ( @groups_usr ) {
-      $arg->{groups_mod}->{$_->get_value('cn')}++;
+      $arg->{groups_old}->{$_->get_value('cn')} = 1;
     }
 
-    foreach (@{$arg->{groups}}) {
-      $arg->{groups_mod}->{$_}++;
+    my @groups_chg;
+    foreach (keys %{$arg->{groups_all}}) {
+      next if defined $arg->{groups_old}->{$_} &&
+	defined $arg->{groups_sel}->{$_}; # user already belongs to the group
+
+      if ( $arg->{groups_old}->{$_} &&
+	   ! $arg->{groups_sel}->{$_} ) {
+	push @groups_chg, 'delete' => [ 'memberUid' => $arg->{uid} ];
+      } elsif ( ! $arg->{groups_old}->{$_} &&
+		$arg->{groups_sel}->{$_} ) {
+	push @groups_chg, 'add' => [ 'memberUid' => $arg->{uid} ];
+      }
+
+      if ( $#groups_chg >= 0) {
+	p [ $_, @groups_chg ];
+	$mesg = $ldap_crud->modify(
+				   'cn=' . $_ . ',ou=group,dc=umidb',
+				   \@groups_chg
+				  );
+	if ( $mesg ) {
+	  push @{$return->{error}}, $ldap_crud->err($mesg);
+	} else {
+	  $return->{success}->[0] = 1;
+	}
+	$#groups_chg = -1;
+      }
     }
-
-    # $mesg = $ldap_crud->mod(
-    # 			    $arg->{mod_groups_dn},
-    # 			    { 'memberUid' => $arg->{groups}, },
-    # 			   );
-
-    # if ( $mesg ne '0' ) {
-    #   $return->{error} = $mesg;
-    # } else {
-    #   $return->{success} = $arg->{groups};
-    # }
   }
-p $arg;
   return $return;
 }
 
