@@ -13,7 +13,13 @@
       </div>
       <div class="panel-body">
 	<ul>
-	  [% final_message.error %]
+	  [% # IF final_message.error.size > 1 %]
+	    [% FOREACH i IN final_message.error %]
+	     [% i %]
+	    [% END %]
+	  [% # ELSE %]
+	    [% # final_message.error %]
+	  [% # END %]
 	</ul>
       </div>
     </div>
@@ -57,13 +63,51 @@
 
 $(function(){
     $('#groups').multiSelect({
-	selectableHeader: '<button type="button" class="btn btn-block btn-info"><span class="glyphicon glyphicon-tags">&nbsp;</span><b>Available groups</b></button>',
-	selectionHeader: '<button type="button" class="btn btn-block btn-success"><span class="glyphicon glyphicon-tags">&nbsp;</span><b>Selected groups</b></button>',
-	selectableFooter: "<div class='text-info text-center'><em><small>@ first run: all available groups</em></small></div>",
-	selectionFooter: "<div class='text-success text-center'><em><small>@ first run: user belongs to</em></small></div>",
-	keepOrder: true 
+	keepOrder: true,
+
+	// selectableHeader: '<button type="button" class="btn btn-block btn-info"><span class="glyphicon glyphicon-tags">&nbsp;</span><b>Available groups</b></button>',
+	// selectionHeader: '<button type="button" class="btn btn-block btn-success"><span class="glyphicon glyphicon-tags">&nbsp;</span><b>Selected groups</b></button>',
+	// selectableFooter: "<div class='text-info text-center'><em><small>@ first run: all available groups</em></small></div>",
+	// selectionFooter: "<div class='text-success text-center'><em><small>@ first run: user belongs to</em></small></div>",
+
+	selectableHeader: "<button type='button' class='btn btn-block btn-info'><span class='glyphicon glyphicon-tags'>&nbsp;</span><b>Available Groups</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",
+	selectionHeader: "<button type='button' class='btn btn-block btn-success'><span class='glyphicon glyphicon-tags'>&nbsp;</span><b>Selected Groups</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",
+
+	afterInit: function(ms){
+	    var that = this,
+            $selectableSearch = that.$selectableUl.prev(),
+            $selectionSearch = that.$selectionUl.prev(),
+            selectableSearchString = '#'+that.$container.attr('id')+' .ms-elem-selectable:not(.ms-selected)',
+            selectionSearchString = '#'+that.$container.attr('id')+' .ms-elem-selection.ms-selected';
+
+	    that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
+		.on('keydown', function(e){
+		    if (e.which === 40){
+			that.$selectableUl.focus();
+			return false;
+		    }
+		});
+
+	    that.qs2 = $selectionSearch.quicksearch(selectionSearchString)
+		.on('keydown', function(e){
+		    if (e.which == 40){
+			that.$selectionUl.focus();
+			return false;
+		    }
+		});
+	},
+	afterSelect: function(){
+	    this.qs1.cache();
+	    this.qs2.cache();
+	},
+	afterDeselect: function(){
+	    this.qs1.cache();
+	    this.qs2.cache();
+	}
+
     });
 });
 
 </script>
 <script src="/static/js/jquery.multi-select.js" type="text/javascript"></script>
+<script src="/static/js/jquery.quicksearch.js" type="text/javascript"></script>

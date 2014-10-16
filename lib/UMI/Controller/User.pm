@@ -34,25 +34,29 @@ Catalyst Controller.
 sub index :Path :Args(0) {
     my ( $self, $c, $ldapadduser_id ) = @_;
     if ( $c->check_user_roles('wheel')) {
-      # use Data::Dumper;
+      my $params = $c->req->parameters;
+      $params->{'avatar'} = $c->req->upload('avatar') if $params->{'avatar'};
+
+      # if ( ! defined $params->{authorizedservice} ) {
+      # 	$params->{authorizedservice} = '0';
+      # }
+
+      # if ( ! defined $params->{associateddomain} ) {
+      # 	$params->{associateddomain} = '0';
+      # }
+
+
+      use Data::Printer;
+      p $params;
 
       $c->stash( template => 'user/user_wrap.tt',
 		 form => $self->form );
 
-      my $params = $c->req->parameters;
-      $params->{'avatar'} = $c->req->upload('avatar');
-
-      # use Data::Dumper;
-      # $c->log->debug( "\$params:\n" . Dumper($params));
-
-      # Validate and insert/update database
-      return unless $self->form->process( item_id => $ldapadduser_id,
+      return unless $self->form->process( # item_id => $ldapadduser_id,
 					  posted => ($c->req->method eq 'POST'),
 					  params => $params,
 					  ldap_crud => $c->model('LDAP_CRUD'),
 					);
-
-      # $c->log->debug("Moose::Role test:\n" . $self->is_ascii("latin1"));
 
       my $res = $self->create_account( $c );
       $c->log->debug( "create_account (from umi_add) error: " . $res) if $res;
@@ -78,7 +82,7 @@ sub create_account {
     my $args = $c->req->parameters;
 
     use Data::Printer;
-    # p $args;
+    p $args;
 
     my $ldap_crud =
       $c->model('LDAP_CRUD');
@@ -142,7 +146,8 @@ sub create_account {
     $jpeg = <$fh>;
     close($fh) or $c->log->debug($!);
 
-    my $uid_prefix = sprintf("U%sC%04d-", time(), int(rand(1000)));
+    # my $uid_prefix = sprintf("U%sC%04d-", time(), int(rand(1000)));
+    my $uid_prefix = '';
 
     my $success_message;
 
@@ -261,7 +266,7 @@ sub create_account {
 			       login => $args->{login},
 			       password => $pwd->{$service},
 			       telephoneNumber => $telephoneNumber,
-			       jpegPhoto => [ $jpeg ],
+			       jpegPhoto => $args->{avatar},
 			      },
 			    );
 
@@ -308,7 +313,7 @@ sub create_account_branch {
   my $arg = {
 	     service => $args->{service},
 	     associatedDomain => $args->{associatedDomain},
-	     uid_prefix => $args->{uid_prefix} || undef,
+	     uid_prefix => $args->{uid_prefix} || '',
 	     login => $args->{login} || undef,
 	     base_uid => $args->{base_uid},
 	    };
@@ -421,7 +426,7 @@ sub create_account_branch_leaf {
 			   $arg->{associatedDomain},
 			  ];
 
-  my ($authorizedService_add, $success_mesage, $error_message);
+  my ($authorizedService_add, $success_mesage, $error_message, $jpegPhoto_file);
   if ( $arg->{service} eq 'mail') {
     $authorizedService_add =
       [
@@ -435,11 +440,14 @@ sub create_account_branch_leaf {
        objectClass => [ 'mailutilsAccount' ],
       ];
   } elsif ( $arg->{service} eq 'xmpp') {
-    $arg->{jpegPhoto} =
-      $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{jpegPhoto_noavatar} if
-	! $arg->{jpegPhoto};
+    if ( $arg->{jpegPhoto} ) {
+      $jpegPhoto_file = $arg->{jpegPhoto}->{'tempname'};
+    } else {
+      $jpegPhoto_file = $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{jpegPhoto_noavatar};
+    }
+    p $arg->{jpegPhoto};
     local $/ = undef;
-    open(my $fh, "<", $arg->{jpegPhoto}) or warn "Can not open $arg->{jpegPhoto}: $!";
+    open(my $fh, "<", $jpegPhoto_file) or warn "Can not open $arg->{jpegPhoto}: $!";
     my $jpeg = <$fh>;
     close($fh) or warn "Can not close $arg->{jpegPhoto}: $!";
 

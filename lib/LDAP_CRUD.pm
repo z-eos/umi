@@ -189,6 +189,48 @@ sub build_last_uidNumber {
   return $return;
 }
 
+=head2 last_gidNumber
+
+Last gidNumber for base ou=group,dc=ibs
+
+to add error correction
+
+=cut
+
+has 'last_gidNumber' => (
+	is       => 'ro',
+	isa      => 'Str',
+	required => 0, lazy => 1,
+	builder  => 'build_last_gidNumber',
+);
+
+sub build_last_gidNumber {
+  my $self = shift;
+
+  my $callername = (caller(1))[3];
+  $callername = 'main' if ! defined $callername;
+  my $return = 'call to LDAP_CRUD->last_gidNumber from ' . $callername . ': ';
+
+  $self->reset_ldap;
+  my $mesg =
+    $self->ldap->search(
+			base   => 'ou=group,dc=umidb',
+			scope  => 'one',
+			filter => '(gidNumber=*)',
+			attrs  => [ 'gidNumber' ],
+			deref => 'never',
+		       );
+
+  if ( $mesg->code ) {
+    $return .= $self->err( $mesg );
+  } else {
+    # my @gids_arr = sort { $a <=> $b } map { $_->get_value('gidNumber') } $mesg->entries;
+    my @gids_arr = $mesg->sorted ( 'gidNumber' );
+    $return = $gids_arr[$#gids_arr]->get_value( 'gidNumber' );
+  }
+  return $return;
+}
+
 =head2 err
 
 Net::LDAP errors handling

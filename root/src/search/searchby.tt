@@ -39,6 +39,11 @@
  </thead>
  <tbody>
 
+[% IF entries.size == 1 %]
+  [% in='in' %]
+[% ELSE %]
+  [% in='' %]
+[% END %]
 
 [% FOREACH entry IN entries %]
  <tr>
@@ -94,7 +99,7 @@
 	   <li>
 	     <button type="submit" title="modify group" class="btn btn-link"
 		     value="[% entry.key %]" name="ldap_modify_group">
-	       <span class="glyphicon glyphicon-transfer text-warning"></span>
+	       <span class="glyphicon glyphicon-tags text-warning"></span>
 	       group
 	     </button>
 	   </li>
@@ -105,7 +110,7 @@
 		     name="ldap_delete"
 		     data-toggle="modal"
 		     data-target="#deleteModal[% loop.index %]">
-	       <span class="glyphicon glyphicon-remove-circle text-danger"></span>
+	       <span class="glyphicon glyphicon-remove-sign text-danger"></span>
 	       delete
 	     </button>
 	   </li>
@@ -128,6 +133,15 @@
 	       edit (all)
 	     </button>
 	   </li>
+  [% IF entry.value.mgmnt.is_group %]
+	   <li>
+	     <button type="submit" title="modify group members" class="btn btn-link"
+		     value="[% entry.key %]" name="ldap_modify_memberUid">
+	       <span class="glyphicon glyphicon-tags text-warning"></span>
+	       members
+	     </button>
+	   </li>
+  [% END %]
   [% IF entry.value.mgmnt.userPassword %]
 	   <li>
 	     <button type="submit" title="modify password" class="btn btn-link"
@@ -271,7 +285,7 @@
      <!-- #### Modal: LDIF end -->
 
    </div>
-   <div id="collapse[% loop.index %]" class="panel-collapse collapse">
+   <div id="collapse[% loop.index %]" class="panel-collapse collapse [% in %]">
      <div class="panel-body">
     <dl class="dl-horizontal">
   [% FOREACH hattr IN entry.value.attrs %]
@@ -286,9 +300,9 @@
 	# to set background class here according the object type: root or child 
       %]
       [% IF entry.value.mgmnt.is_dn %]
-      <img class="bg-danger [% hattr.value %]
+      <img class="bg-info [% hattr.value %]
       [% ELSE %] 
-      <img class="bg-warning [% hattr.value %]
+      <img class="bg-success [% hattr.value %]
       [% END %]
     [% ELSIF entry.value.is_arr.$x %]
       [% FOREACH i IN hattr.value %]

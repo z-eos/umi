@@ -63,6 +63,11 @@ sub user_root :Path(user_root) :Args(0) {
     $c->stash( template => 'user/user_root.tt', );
 }
 
+sub group_root :Path(group_root) :Args(0) {
+    my ( $self, $c ) = @_;
+    $c->stash( template => 'group/group_root.tt', );
+}
+
 sub user_preferences :Path(user_prefs) :Args(0) {
     my ( $self, $c ) = @_;
     $c->stash( template => 'user/user_preferences.tt',

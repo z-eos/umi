@@ -6,7 +6,7 @@ package UMI::Form::User;
 use HTML::FormHandler::Moose;
 BEGIN { extends 'UMI::Form::LDAP'; with 'Tools'; }
 
-use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable' );
+use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable', 'StrongPassword' );
 
 has '+item_class' => ( default =>'User' );
 has '+enctype' => ( default => 'multipart/form-data');
@@ -55,7 +55,7 @@ sub options_office {
 				 sizelimit => 0
 				}
 			       );
-  my @orgs = ( { value => '0', label => '--- no parent office ---', selected => 'on' } );
+  my @orgs = ( { value => '0', label => '--- select parent office ---', selected => 'on' } );
   my @entries = $mesg->entries;
   my ( $a, $i, @dn_arr, $dn, $label );
   foreach my $entry ( @entries ) {
@@ -102,10 +102,10 @@ has_field 'login' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
 		       required => 1 );
 
 has_field 'password1' => ( type => 'Password',
-			   minlength => 7, maxlength => 16,
+			   # minlength => 7, maxlength => 16,
 			   label => '',
 			   ne_username => 'login',
-			   apply => [ NoSpaces, NotAllDigits, Printable ],
+			   apply => [ NoSpaces, NotAllDigits, Printable, StrongPassword ],
 			   element_attr => 
 			   { placeholder => 'Password',
 #			     title => 'leave empty password fields to autogenerate password',
@@ -113,10 +113,10 @@ has_field 'password1' => ( type => 'Password',
 			 );
 
 has_field 'password2' => ( type => 'Password',
-			   minlength => 7, maxlength => 16,
+			   # minlength => 7, maxlength => 16,
 			   label => '',
 			   ne_username => 'login',
-			   apply => [ NoSpaces, NotAllDigits, Printable ],
+			   apply => [ NoSpaces, NotAllDigits, Printable, StrongPassword ],
 			   element_attr => 
 			   { placeholder => 'Confirm Password',
 #			     title => 'leave empty password fields to autogenerate password',
@@ -172,16 +172,6 @@ sub options_associateddomain {
   # $ldap_crud->unbind;
 }
 
-# has_field 'service' => ( type => 'Multiple',
-# 			 label => 'Service',
-# 			 options => [{ value => 'mail', label => 'Email', selected => 'on'},
-# 				     { value => 'xmpp', label => 'Jabber', selected => 'on'},
-# 				     { value => '802.1x-cable', label => 'LAN RG45'},
-# 				     { value => '802.1x-wifi', label => 'WiFi'},
-# 				    ],
-# 			 size => 3,
-# 			 required => 1 );
-
 has_field 'authorizedservice' => ( type => 'Multiple',
 				   label => 'Service', label_class => [ 'required' ],
 				   size => 5,
@@ -195,10 +185,10 @@ sub options_authorizedservice {
   return unless $self->ldap_crud;
 
   push my @services, {
-		      value => '0',
-		      label => '--- select service ---',
-		      selected => 'selected',
-		     };
+  		      value => '0',
+  		      label => '--- select service ---',
+  		      selected => 'selected',
+  		     };
 
   foreach my $key ( sort {$b cmp $a} keys %{$self->ldap_crud->{cfg}->{authorizedService}}) {
     next if $key =~ /^802.1x-.*/;
@@ -275,59 +265,84 @@ sub html_attributes {
     if ( $type eq 'label' && $field->required );
 }
 
-# working sample
-# sub validate_givenname {
-#   my ($self, $field) = @_;
-#   unless ( $field->value ne 'Вася' ) {
-#     $field->add_error('Such givenName+sn+uid user exists!');
-#   }
-# }
-
 sub validate {
   my $self = shift;
 
   if ( defined $self->field('password1')->value and defined $self->field('password2')->value
        and ($self->field('password1')->value ne $self->field('password2')->value) ) {
-    $self->field('password2')->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;password and its confirmation does not match');
+    $self->field('password2')->add_error('Password doesn\'t match Confirmation');
   }
 
-if ( not $self->field('office')->value ) {
-    $self->field('office')->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;office is mandatory!');
+if ( defined $self->field('associateddomain')->value &&
+     $self->field('associateddomain')->value eq '0' ) {
+    $self->field('associateddomain')->add_error('Domain Name is mandatory!');
   }
 
+if ( defined $self->field('authorizedservice')->value &&
+     $self->field('authorizedservice')->value->[0] eq '0') {
+    $self->field('authorizedservice')->add_error('At least one service is required!');
+  }
+
+if ( defined $self->field('office')->value &&
+     $self->field('office')->value eq '0' ) {
+    $self->field('office')->add_error('Office is mandatory!');
+  }
 
   my $ldap_crud = $self->ldap_crud;
   my $mesg =
-    $ldap_crud->search(
-		       {
+    $ldap_crud->search({
 			scope => 'one',
-			filter => '(&(givenname=' .
-			$self->utf2lat({ to_translate => $self->field('givenname')->value }) . ')(sn=' .
-			$self->utf2lat({ to_translate => $self->field('sn')->value }) . ')(uid=*-' .
-			$self->field('login')->value . '))',
+			filter => '(uid=' .
+			$self->field('login')->value . ')',
 			base => 'ou=People,dc=umidb',
 			attrs => [ 'uid' ],
-		       }
-		      );
-
+		       });
+  my ( $err, $error );
   if ($mesg->count) {
-    my $err = '<span class="glyphicon glyphicon-exclamation-sign"></span> Fname+Lname+Login exists';
-    $self->field('givenname')->add_error($err);
-    $self->field('sn')->add_error($err);
+    $err = '<span class="glyphicon glyphicon-exclamation-sign"></span> Root uid <em>&laquo;' .
+      $self->field('login')->value . '&raquo;</em> exists';
     $self->field('login')->add_error($err);
 
     $err = '<div class="alert alert-danger">' .
-      '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span>' .
-	'&nbsp;Account with the same fields &laquo;<strong>First Name&raquo;</strong>,' .
-	  ' &laquo;<strong>Last Name&raquo;</strong> and &laquo;<strong>Login&raquo;</strong>' .
-	    ' already exists!<br>Consider one of:<ul>' .
-	      '<li>change Login in case you need another account for the same person</li>' .
-		'<li>add service account to the existent one</li></ul></div>';
-    my $error = $self->form->success_message;
-    $self->form->error_message('');
-    $self->form->add_form_error($error . $err);
+      '<span style="font-size: 140%" class="glyphicon glyphicon-exclamation-sign"></span>' .
+	'&nbsp;Account with the same root uid <strong>&laquo;' . $self->field('login')->value . '&raquo;</strong>,' .
+	    ' already exists!</div>';
   }
-  # $ldap_crud->unbind;
+ # else {
+ #    $mesg =
+ #      $ldap_crud->search(
+ # 			 {
+ # 			  scope => 'one',
+ # 			  filter => '(&(givenname=' .
+ # 			  $self->utf2lat({ to_translate => $self->field('givenname')->value }) . ')(sn=' .
+ # 			  $self->utf2lat({ to_translate => $self->field('sn')->value }) . ')(uid=' .
+ # 			  $self->field('login')->value . '))',
+ # 			  base => 'ou=People,dc=umidb',
+ # 			  attrs => [ 'uid' ],
+ # 			 }
+ # 			);
+
+ #    if ($mesg->count) {
+ #      $err = '<span class="glyphicon glyphicon-exclamation-sign"></span> Fname+Lname+Login exists';
+ #      $self->field('givenname')->add_error($err);
+ #      $self->field('sn')->add_error($err);
+ #      $self->field('login')->add_error($err);
+
+ #      $err = '<div class="alert alert-danger">' .
+ # 	'<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span>' .
+ # 	  '&nbsp;Account with the same fields &laquo;<strong>First Name&raquo;</strong>,' .
+ # 	    ' &laquo;<strong>Last Name&raquo;</strong> and &laquo;<strong>Login&raquo;</strong>' .
+ # 	      ' already exists!<br>Consider one of:<ul>' .
+ # 		'<li>change Login in case you need another account for the same person</li>' .
+ # 		  '<li>add service account to the existent one</li></ul></div>';
+ #    }
+ #  }
+  # $error = $self->form->success_message & $self->form->success_message : '';
+  # $self->form->error_message('');
+  # $self->form->add_form_error(sprintf('%s%s',
+  # 				      $self->form->success_message ? $self->form->success_message : '',
+  # 				      $err ? $err : ''
+  # 				     ));
 }
 
 ######################################################################
