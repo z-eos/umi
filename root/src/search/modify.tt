@@ -1,7 +1,7 @@
 [% META title = 'Search Simple Modify' %]
 
 <div class="page-header">
-  <h2>Search Simple Modify Page <small><em> </em></small></h2>
+  <h2>Search Simple Modify Page <small><em>of DN: [% modify %]</em></small></h2>
 </div>
 
 <form method="POST"
@@ -17,8 +17,8 @@
 
 # my $entry = shift @{$stash->{entries}};
 my $entry = $stash->{entries};
-use Data::Printer;
-p $stash->{schema};
+# use Data::Printer;
+# p $stash->{schema};
 my ($attr_meta, $attr, $val, $rdn, $rest);
 # $rest = (split ',', $entry->dn) [0];
 # $rest =~ /(.+)=(.+)/;

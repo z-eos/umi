@@ -98,10 +98,15 @@ sub proc :Path(proc) :Args(0) {
 	}
       }
 
+      my $base_dn = $params->{'base_dn'} ne '' ?
+	sprintf('<kbd>%s</kbd>', $params->{'base_dn'}) : '';
+      my $search_filter = $params->{'search_filter'} ne '' ?
+	sprintf('<kbd>%s</kbd>', $params->{'search_filter'}) : '(objectClass=*)';
+
       $c->stash(
 		template => 'search/searchby.tt',
-		base_dn => $params->{'base_dn'},
-		filter => '<kbd>' . $params->{'search_filter'} . '</kbd>',
+		base_dn => $base_dn,
+		filter => $search_filter,
 		entries => $ttentries,
 		err => $err_message,
 		form => $self->form,

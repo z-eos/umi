@@ -19,54 +19,60 @@
     </div>
     <div class="collapse navbar-collapse">
       <ul class="nav navbar-nav">
-        <!-- <li> -->
-	<!--   <a href="/"> -->
-	<!--     <span class="glyphicon glyphicon-home"></span> -->
-	<!--   </a> -->
-	<!-- </li> -->
-	[% IF c.session.auth_uid %]
+[% IF c.user_exists && c.session.auth_uid %]
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">
 	    <span class="glyphicon glyphicon-th"></span>
 	    <span class="caret"></span>
 	  </a>
           <ul class="dropdown-menu" role="menu">
-            <li>
+  [% IF c.check_user_roles('wheel') || c.check_user_roles('email') || c.check_user_roles('xmpp') %]
+        <li>
 	      <a href="[% c.uri_for_action('user_root') %]">
 		<span class="glyphicon glyphicon-user"></span>
 		User
 	      </a>
 	    </li>
-            <li>
+  [% END %]
+  [% IF c.check_user_roles('wheel') %]
+        <li>
 	      <a href="[% c.uri_for_action('group_root') %]">
-		<span class="glyphicon glyphicon-tags"> </span>
-		Group
+        		<span class="glyphicon glyphicon-tags"> </span>
+        		Group
 	      </a>
 	    </li>
-            <li>
+  [% END %]
+  [% IF c.check_user_roles('wheel') || c.check_user_roles('email') || c.check_user_roles('xmpp') %]
+        <li>
 	      <a href="[% c.uri_for_action('org_root') %]">
-		<span class="glyphicon glyphicon-briefcase"></span>
-		Org
+        		<span class="glyphicon glyphicon-briefcase"></span>
+        		Org
 	      </a>
 	    </li>
-            <li>
+  [% END %]
+  [% IF c.check_user_roles('wheel') %]
+        <li>
 	      <a href="[% c.uri_for_action('gitacl_root') %]">
-		<span class="glyphicon glyphicon-random"></span>
-		GitACL
+        		<span class="glyphicon glyphicon-random"></span>
+        		GitACL
 	      </a>
 	    </li>
-            <li>
+  [% END %]
+  [% IF c.check_user_roles('wheel') %]
+        <li>
 	      <a href="#">
-		<span class="glyphicon glyphicon-globe"></span>
-		DNS
+        		<span class="glyphicon glyphicon-globe"></span>
+        		DNS
 	      </a>
-	    </li>
-            <li>
+	    </li>[% END %]
+  [% IF c.check_user_roles('wheel') || c.check_user_roles('dhcp') %]
+        <li>
 	      <a href="#">
-		<span class="glyphicon glyphicon-fullscreen"></span>
-		DHCP
+        		<span class="glyphicon glyphicon-fullscreen"></span>
+        		DHCP
 	      </a>
 	    </li>
+  [% END %]
             <li class="divider"></li>
             <li>
 	      <a href="#">
@@ -102,7 +108,7 @@
 	    [% END %]
           </ul>
         </li>
-	[% END %]
+[% END %]
       </ul>
       [% IF c.user_exists %]
       <form class="navbar-form navbar-left"
@@ -116,7 +122,7 @@
 		 class="form-control"
 		 name="ldapsearch_filter"
 		 placeholder="Search-Simple Filter"
-		 title="ldapserch filter WITHOUT external brackets"></input>
+		 title="ldapserch filter without external brackets"></input>
 	  <div class="input-group-btn">
 	    <button type="submit"
 		    class="btn btn-default dropdown-toggle"
@@ -219,7 +225,7 @@
         </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-	[% IF c.session.auth_uid %]
+	[% IF c.user %]
         <li class="dropdown float-right">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">
 	    <span class="glyphicon glyphicon-user"></span>

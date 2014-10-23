@@ -1,3 +1,6 @@
+#-*- cperl -*-
+#
+
 package UMI;
 use Moose;
 use namespace::autoclean;
@@ -51,7 +54,7 @@ __PACKAGE__->config(
     # Disable deprecated behavior needed by old applications
     disable_component_resolution_regex_fallback => 1,
     enable_catalyst_header => 1, # Send X-Catalyst header
-    session => { cache_size => '1m', },
+    session => { cache_size => '10m', }, # looks like value 100m helps with [error] Caught exception in engine "store_session: data too large"
     'authentication' => {
 	default_realm => "ldap",
 	realms => {
@@ -68,7 +71,7 @@ __PACKAGE__->config(
 		    ldap_server         => 'umi.foo.bar',
 		    ldap_server_options => { timeout => 30 },
 		    use_roles           => 1,
-		    role_basedn         => "ou=group,dc=umidb",
+		    role_basedn         => "ou=group,ou=system,dc=umidb",
 		    role_field          => "cn",
 		    role_filter         => "(memberUid=%s)",
 		    role_scope          => "sub",

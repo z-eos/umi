@@ -81,14 +81,22 @@ sub create_gitacl {
     # $c->log->debug( "\$args:\n" . Dumper($args));
     # p $args;
 
+    my $Op;
+    if ( ref($args->{gitAclOp}) ne 'ARRAY' ) {
+      push @{$Op}, $args->{gitAclOp};
+    } else {
+      $Op = $args->{gitAclOp};
+    }
+
     my $gitAcl = {
-		  Op => join('', @{$args->{gitAclOp}}),
+		  Op => join('', @{$Op}),
 		  Project => $args->{gitAclProject},
-		  Ref => $args->{gitAclRef},
+		  Order => $args->{gitAclOrder},
+		  Ref => $args->{gitAclRef} || '',
 		  Verb => $args->{gitAclVerb},
 		  User_user => $args->{gitAclUser_user} || '',
 		  User_group => $args->{gitAclUser_group} || '',
-		  User_cidr => '@' . $args->{gitAclUser_cidr} || '',
+		  User_cidr => $args->{gitAclUser_cidr} ne '' ? sprintf('@%s', $args->{gitAclUser_cidr}) : '',
 		 };
 
     if ( $gitAcl->{User_user} ne '' ) {
@@ -98,10 +106,31 @@ sub create_gitacl {
     }
     $gitAcl->{User} .= $gitAcl->{User_cidr};
 
-    p $gitAcl;
-
     my $ldap_crud =
       $c->model('LDAP_CRUD');
+
+    if ( ! $gitAcl->{Order} ) {
+      my $mesg = $ldap_crud->search(
+				    {
+				     base => $ldap_crud->{cfg}->{base}->{gitacl},
+				     scope => 'one',
+				     filter => 'gitAclProject=' . $gitAcl->{Project},
+				     attrs => [ qw(gitAclOrder) ]
+				    },
+				   );
+
+      if ( ! $mesg->count ) {
+	$gitAcl->{Order} = 10;
+      } else {
+	my @gitAclOrder_unsorted;
+	my @gitAclOrder_entries = $mesg->entries;
+	foreach ( @gitAclOrder_entries ) {
+	  push @gitAclOrder_unsorted, $_->get_value('gitAclOrder');
+	}
+	my @gitAclOrder = sort { $b <=> $a } @gitAclOrder_unsorted;
+	$gitAcl->{Order} = $gitAclOrder[0] + 10;
+      }
+    }
 
 #
 ## HERE WE NEED TO SET FLAG TO CREATE BRANCH FOR LOCALIZED VERSION OF DATA
@@ -113,19 +142,26 @@ sub create_gitacl {
     my $attrs_defined = [
 			 gitAclOp => $gitAcl->{Op},
 			 gitAclProject => $gitAcl->{Project},
-			 gitAclRef => $gitAcl->{Ref},
+			 gitAclOrder => $gitAcl->{Order},
 			 gitAclVerb => $gitAcl->{Verb},
-			 gitAclUser => $gitAcl->{User},
 			 objectClass => [ qw( gitACL ) ],
 			];
+
+    push @{$attrs_defined}, gitAclRef => $gitAcl->{Ref} if $gitAcl->{Ref};
+    push @{$attrs_defined}, gitAclUser => $gitAcl->{User} if $gitAcl->{User};
+
 
     ######################################################################
     # GitACL Object
     ######################################################################
+    my $dn = sprintf('cn=%s-%s,%s',
+		     $gitAcl->{Project},
+		     int(rand(99999)),
+		     $ldap_crud->{cfg}->{base}->{gitacl});
+
     my $ldif =
       $ldap_crud->add(
-		      'cn=' . $gitAcl->{Project} .
-		      ',ou=GitACL,dc=umidb',
+		      $dn,
 		      $attrs_defined,
 		     );
     # $c->log->debug( "\$args:\n" . Dumper($args));

@@ -6,7 +6,7 @@
 <!-- 20140924  <div class="footer navbar-inverse"> -->
   <div class="footer">
     <div class="container">
-      [% IF c.session.auth_uid %]
+      [% IF c.user_exists %]
       <div class=col-sm-4>
 	<small><em>
 	    <ul>
@@ -34,7 +34,9 @@
 	      <li><a href="https://metacpan.org/pod/Net::LDAP::Control::PreRead">
 		  Net::LDAP::Control::PreRead
 	      </a></li>
-	      <li><a href="#"> footer col №2 item №3 </a></li>
+	      <li><a href="https://metacpan.org/pod/Catalyst::Plugin::Authentication#c-user">
+		  Catalyst::Plugin::Authentication
+	      </a></li>
 	      <li><a href="#"> footer col №2 item №4 </a></li>
 	    </ul>
 	</em></small>

@@ -65,7 +65,7 @@ has_field 'submit' => ( type => 'Submit',
 			value => 'Submit' );
 
 has_block 'row1' => ( tag => 'fieldset',
-		      render_list => [ 'base_dn', 'display_format', 'search_scope' ],
+		      render_list => [ 'base_dn', 'search_scope', 'display_format' ],
 #		      label => '&nbsp;',
 		      class => [ 'row' ]
 		      );

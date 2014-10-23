@@ -189,16 +189,20 @@ sub proc :Path(proc) :Args(0) {
 #=====================================================================
     if (defined $params->{'ldap_ldif'} &&
       	$params->{'ldap_ldif'} ne '') {
-	$self->ldif(
-		    $c,
-		    {
-		     ldif_dn => $params->{'ldap_ldif'},
-		     recursive => defined $params->{'ldap_ldif_recursive'} ?
-		                          $params->{'ldap_ldif_recursive'} : undef,
-		     sysinfo => defined $params->{'ldap_ldif_sysinfo'} ?
-		                        $params->{'ldap_ldif_sysinfo'} : undef,
-		    }
-		   );
+
+      $c->stash(
+		template => 'search/ldif.tt',
+		ldif => $self->ldif(
+				    $c->model('LDAP_CRUD'),
+				    {
+				     ldif_dn => $params->{'ldap_ldif'},
+				     recursive => defined $params->{'ldap_ldif_recursive'} ?
+				     $params->{'ldap_ldif_recursive'} : undef,
+				     sysinfo => defined $params->{'ldap_ldif_sysinfo'} ?
+				     $params->{'ldap_ldif_sysinfo'} : undef,
+				    }
+				   ),
+	       );
 
 #=====================================================================
 # Delete
@@ -251,7 +255,7 @@ sub proc :Path(proc) :Args(0) {
 	}
       }
 
-      p $mesg->entry(0);
+      # p $mesg->entry(0);
       ## here we work with the only one, single entry!!
       $c->session->{modify_entries} = $mesg->entry(0);
       $c->session->{modify_dn} = $params->{ldap_modify};
@@ -381,6 +385,67 @@ sub proc :Path(proc) :Args(0) {
 	       );
 
 #=====================================================================
+# Modify GitACL order
+#=====================================================================
+    } elsif ( defined $params->{'ldap_gitacl_reorder'} &&
+	      $params->{'ldap_gitacl_reorder'} ne '') {
+
+###
+### NOT FINISHED
+###
+
+
+      # in general preselected options has to be fed via field value
+      # $params->{memberUid} = [ qw( memberUid0 ... memberUidN) ];
+      #
+      # no submit yet, it is first run
+      if ( ! defined $params->{memberUid} ) {
+	my ( @memberUid, $return );
+	my $ldap_crud =
+	  $c->model('LDAP_CRUD');
+	my $mesg = $ldap_crud
+	  ->search( {
+		     base => $params->{ldap_modify_memberUid},
+		     attrs => ['memberUid'],
+		    } );
+
+	if ( $mesg->code ne '0' ) {
+	  push @{$return->{error}}, $ldap_crud->err($mesg);
+	}
+
+	my @group_memberUids = $mesg->sorted('memberUid');
+
+	foreach ( @group_memberUids ) {
+	  push @{$params->{memberUid}}, $_->get_value('memberUid');
+	}
+      }
+
+      p $params;
+
+      $c->stash(
+		template => 'group/group_mod_memberUid.tt',
+		form => $self->form_mod_memberUid,
+		ldap_modify_memberUid => $params->{'ldap_modify_memberUid'},
+	       );
+
+      return unless $self->form_mod_memberUid
+      	->process(
+      		  posted => ($c->req->method eq 'POST'),
+      		  params => $params,
+      		  ldap_crud => $c->model('LDAP_CRUD'),
+      		 );
+
+      $c->stash( final_message => $self
+		 ->mod_memberUid(
+				 $c->model('LDAP_CRUD'),
+				 {
+				  mod_group_dn => $params->{ldap_modify_memberUid},
+				  memberUid => $params->{memberUid},
+				 }
+				),
+	       );
+
+#=====================================================================
 # Modify userPassword
 #=====================================================================
     } elsif (defined $params->{'ldap_modify_password'} &&
@@ -455,7 +520,7 @@ sub proc :Path(proc) :Args(0) {
       my $ldap_crud = $c->model('LDAP_CRUD');
       my ( $arr, $login, $uid, $pwd, $error_message, $success_message, $warn_message );
       my @id = split(',', $params->{'add_svc_acc'});
-      $params->{'add_svc_acc_uid'} = substr($id[0], 21); # $params->{'login'} =
+      $params->{'add_svc_acc_uid'} = substr($id[0], 4); # $params->{'login'} =
       $c->stash(
 		template => 'user/user_add_svc.tt',
 		form => $self->form_add_svc_acc,
@@ -525,7 +590,7 @@ sub proc :Path(proc) :Args(0) {
 	  $error_message .= $create_account_branch_return->[0] if defined $create_account_branch_return->[0];
 	  $warn_message .= $create_account_branch_return->[2] if defined $create_account_branch_return->[2];
 
-	  # takingdata to be used in create_account_branch_leaf()
+	  # taking data to be used in create_account_branch_leaf()
 	  my $mesg = $ldap_crud->search( { base => $params->{'add_svc_acc'},
 					   scope => 'base',
 					   attrs => [ 'uidNumber', 'givenName', 'sn' ],
@@ -557,7 +622,7 @@ sub proc :Path(proc) :Args(0) {
 	       telephoneNumber => defined $params->{telephoneNumber} ? $params->{telephoneNumber} : undef,
 	       jpegPhoto => $file,
 	      };
-	  p $create_account_branch_leaf_params;
+	  # p $create_account_branch_leaf_params;
 	  $create_account_branch_leaf_return =
 	    $c->controller('User')
 	      ->create_account_branch_leaf (
@@ -573,7 +638,7 @@ sub proc :Path(proc) :Args(0) {
 	$error_message = '<em>service was not added</em>' .
 	  $error_message if $error_message;
       }
-
+      # p $success_message;
       $c->stash(
 		message_success => $success_message,
 		message_warning => $warn_message,
@@ -848,22 +913,19 @@ get LDIF, recursive or not, for the DN given
 =cut
 
 
-sub ldif {
-  my ( $self, $c, $args ) = @_;
-  my $arg = {
-	     ldif_dn => $args->{ldif_dn},
-	     recursive => $args->{recursive} eq 'on' ? 1 : 0,
-	     sysinfo => $args->{sysinfo} eq 'on' ? 1 : 0,
-	    };
-  $c->stash(
-	    template => 'search/ldif.tt',
-	    ldif => $c->model('LDAP_CRUD')->ldif(
-						 $arg->{ldif_dn},
-						 $arg->{recursive},
-						 $arg->{sysinfo}
-						),
-	  );
-}
+# sub ldif {
+#   my ( $self, $ldap_crud, $args ) = @_;
+#   my $arg = {
+# 	     ldif_dn => $args->{ldif_dn},
+# 	     recursive => $args->{recursive} eq 'on' ? 1 : 0,
+# 	     sysinfo => $args->{sysinfo} eq 'on' ? 1 : 0,
+# 	    };
+#   return $ldap_crud->ldif(
+# 			  $arg->{ldif_dn},
+# 			  $arg->{recursive},
+# 			  $arg->{sysinfo}
+# 			 );
+# }
 
 sub ldif_gen :Path(ldif_gen) :Args(0) {
   my ( $self, $c ) = @_;
@@ -877,10 +939,8 @@ sub ldif_gen :Path(ldif_gen) :Args(0) {
 	    ldif => $c->model('LDAP_CRUD')
 	    ->ldif(
 		   $params->{ldap_ldif},
-		   defined $params->{ldap_ldif_recursive}
-		   && $params->{ldap_ldif_recursive} ne '' ? 1 : 0,
-		   defined $params->{ldap_ldif_sysinfo}
-		   && $params->{ldap_ldif_sysinfo} ne '' ? 1 : 0
+		   defined $params->{ldap_ldif_recursive} && $params->{ldap_ldif_recursive} ne '' ? 1 : 0,
+		   defined $params->{ldap_ldif_sysinfo} && $params->{ldap_ldif_sysinfo} ne '' ? 1 : 0
 		  ),
 	  );
 }

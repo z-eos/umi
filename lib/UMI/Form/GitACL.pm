@@ -45,7 +45,8 @@ has_field 'gitAclOp' => ( type => 'Multiple',
 				       value => 'D', label => 'DELETE', selected => 'on' },
 				     ],
 			  size => 4,
-			  required => 1 );
+			  required => 1,
+			);
 
 has_field 'gitAclVerb' => ( type => 'Select',
 			    label => 'Verb',
@@ -60,14 +61,15 @@ has_field 'gitAclRef' => (apply => [ NoSpaces ],
 			  label_attr => { title => 'gitAclRef field description' },
 			  wrapper_class => 'col-md-3',
 			  element_attr => { placeholder => 'Horns/Hooves/Super/Pooper' },
-			  required => 1,
+			  # required => 1,
 			 );
 
 # bl-1 ----------------------------------------------------------------------
 
 has_field 'gitAclUser_user' => ( type => 'Select',
 				 label => 'User',
-				 label_class => [ qw(requiredwhen control-label) ],
+				 # label_class => [ qw(requiredwhen control-label) ],
+				 label_class => [ qw( control-label ) ],
 				 label_attr => { title => 'gitAclUser field description' },
 				 wrapper_class => 'col-md-2',
 				 required_when => { gitAclUser_group => 0 },
@@ -102,12 +104,12 @@ sub options_gitAclUser_user {
   }
   return \@users;
 
-  $ldap_crud->unbind;
+  # $ldap_crud->unbind;
 }
 
 has_field 'gitAclUser_group' => ( type => 'Select',
 				  label => 'Group',
-				  label_class => [ 'requiredwhen' ],
+				  # label_class => [ 'requiredwhen' ],
 				  label_attr => { title => 'gitAclUser group' },
 				  wrapper_class => 'col-md-2',
 				  required_when => { gitAclUser_user => 0 },
@@ -141,7 +143,7 @@ sub options_gitAclUser_group {
   }
   return \@groups;
 
-  $ldap_crud->unbind;
+  # $ldap_crud->unbind;
 }
 
 has_field 'gitAclUser_cidr' => (apply => [ CIDR ],
@@ -200,11 +202,11 @@ sub build_render_list {[
 sub validate {
   my $self = shift;
 
-  if ( $self->field('gitAclUser_user')->value eq "0" &&
-       $self->field('gitAclUser_group')->value eq "0" ) {
-    $self->field('gitAclUser_user')->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;Either User or Group has to be defined!');
-    $self->field('gitAclUser_group')->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;Either Group or User has to be defined!');
-  }
+  # if ( $self->field('gitAclUser_user')->value eq "0" &&
+  #      $self->field('gitAclUser_group')->value eq "0" ) {
+  #   $self->field('gitAclUser_user')->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;Either User or Group has to be defined!');
+  #   $self->field('gitAclUser_group')->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;Either Group or User has to be defined!');
+  # }
 
 
   # my $ldap_crud = $self->ldap_crud;

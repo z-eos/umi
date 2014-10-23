@@ -25,7 +25,7 @@
 	<span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span>
 	<span class="sr-only">Close</span>
       </button>
-      <h4><span class="glyphicon glyphicon-warning-sign">&nbsp;</span>Stay calm, it is just to inform you.</h4>
+      <h4><span class="glyphicon glyphicon-warning-sign">&nbsp;</span>Stay calm, this warning is <em><b>just to inform you</b></em>.</h4>
       <ul>
 	[% message_warning %]
       </ul>
@@ -54,7 +54,7 @@
 	    </thead>
 	    <tbody>
 	      [% FOREACH i IN message_success %]
-	      <tr class=mono><td>[% i.authorizedservice %]@[% i.authorizeddomain %]</td>
+	      <tr class=mono><td>[% i.authorizedservice %]@[% i.associateddomain %]</td>
 		<td>[% i.service_uid %]</td>
 		<td>[% i.service_pwd %]</td>
 	      </tr>

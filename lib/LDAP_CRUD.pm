@@ -4,7 +4,16 @@
 package LDAP_CRUD;
 
 use Moose;
+
 use Net::LDAP;
+use Net::LDAP::Util qw(
+			ldap_error_text
+			ldap_error_name
+			ldap_error_desc
+			ldap_explode_dn
+			escape_filter_value
+		     );
+
 use namespace::autoclean;
 
 use Data::Dumper;
@@ -49,6 +58,7 @@ sub _build_cfg {
 		   acc_svc_common => 'ou=People,dc=umidb',
 		   gitacl => 'ou=GitACL,dc=umidb',
 		   group => 'ou=group,dc=umidb',
+		   dhcp => 'ou=DHCP,dc=umidb',
 		  },
 	  rdn => {
 		  org => 'ou',
@@ -254,13 +264,38 @@ sub err {
 # to finish # 
 # to finish #   log_debug { Dumper($self) . "\n" . $self->err( $mesg ) };
 
-  return sprintf( '<dl class="dl-horizontal"><dt>code</dt><dd>%s</dd><dt>error_name</dt><dd>%s</dd><dt>error_text</dt><dd><b><i><pre>%s</pre></i></b></dd><dt>error_desc</dt><dd>%s</dd><dt>server_error</dt><dd>%s</dd></dl>',
+  # return sprintf( '<dl class="dl-horizontal"><dt>code</dt><dd>%s</dd><dt>error_name</dt><dd>%s</dd><dt>error_text</dt><dd><b><i><pre>%s</pre></i></b></dd><dt>error_desc</dt><dd>%s</dd><dt>server_error</dt><dd>%s</dd></dl>',
+  # 		  $mesg->code,
+  # 		  $mesg->error_name,
+  # 		  $mesg->error_text,
+  # 		  $mesg->error_desc,
+  # 		  $mesg->server_error)
+  #   if $mesg->code;
+
+  return sprintf( '<dl class="dl-horizontal">
+  <dt>code</dt>
+  <dd>%s</dd>
+  <dt>error name</dt>
+  <dd>%s</dd>
+  <dt>error text</dt>
+  <dd>
+    <em>
+      <small>
+        <pre>%s</pre>
+      </small>
+    </em>
+  </dd>
+  <dt>error description</dt>
+  <dd>%s</dd>
+  <dt>server_error</dt>
+  <dd>%s</dd>
+</dl>',
 		  $mesg->code,
-		  $mesg->error_name,
-		  $mesg->error_text,
-		  $mesg->error_desc,
-		  $mesg->server_error)
-    if $mesg->code;
+  		  ldap_error_name($mesg),
+  		  ldap_error_text($mesg),
+  		  ldap_error_desc($mesg),
+  		  $mesg->server_error
+		) if $mesg->code;
 }
 
 sub unbind {
@@ -536,6 +571,11 @@ sub ldif {
       $return .= $entry->ldif;
     }
   }
+  use Data::Printer;
+  my $a = ldap_explode_dn($dn, casefold => 'none');
+  pop $a;
+  pop $a;
+  p $a;
   return $return;
 }
 

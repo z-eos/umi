@@ -43,19 +43,16 @@ sub signin :Path Global {
 			})) {
 
     foreach my $key (keys (%{$c->_user->{user}->{attributes}})) {
+      next if $key eq 'jpegphoto' || $key eq 'jpegPhoto';
       $c->session->{"auth_obj"}->{$key} = $c->_user->{user}->{attributes}->{$key};
-      if ( $key eq "uid" ) {
-	  $c->session->{"auth_uid"} = $c->_user->{user}->{attributes}->{$key};
-      }
+      $c->session->{"auth_uid"} = $c->_user->{user}->{attributes}->{$key} if $key eq 'uid';
     }
-    # use Data::Printer;
-    # p($c->session, colored => 1);
-
     $c->stash( template => 'welcome.tt', );
   } else {
     $c->stash( template => 'signin.tt', );
   }
-
+  use Data::Printer;
+  p($c->session, colored => 1);
 }
 
 sub signout :Path Global {

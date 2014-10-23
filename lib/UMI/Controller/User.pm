@@ -33,7 +33,11 @@ Catalyst Controller.
 
 sub index :Path :Args(0) {
     my ( $self, $c, $ldapadduser_id ) = @_;
-    if ( $c->check_user_roles('wheel')) {
+    if ( $c->check_user_roles('wheel') || 
+	 $c->check_user_roles('email') || 
+	 $c->check_user_roles('xmpp') ||
+	 $c->check_user_roles('802.1x-mac') ||
+	 $c->check_user_roles('802.1x-eap') ) {
       my $params = $c->req->parameters;
       $params->{'avatar'} = $c->req->upload('avatar') if $params->{'avatar'};
 
@@ -47,7 +51,7 @@ sub index :Path :Args(0) {
 
 
       use Data::Printer;
-      p $params;
+      # p $params;
 
       $c->stash( template => 'user/user_wrap.tt',
 		 form => $self->form );
@@ -82,7 +86,7 @@ sub create_account {
     my $args = $c->req->parameters;
 
     use Data::Printer;
-    p $args;
+    # p $args;
 
     my $ldap_crud =
       $c->model('LDAP_CRUD');
@@ -337,12 +341,12 @@ sub create_account_branch {
 			];
 
   my $if_exist = $ldap_crud->search( { base => $arg->{dn},
-				       scope => 'one',
+				       scope => 'base',
 				       attrs => [ 'authorizedService' ],
 				     } );
   my $return;
   if ( $if_exist->count ) {
-    $return->[2] = '<li>branch DN: ' .	$arg->{dn} .' already exists, I will use it.</li>';
+    $return->[2] = '<li>branch DN: <b>&laquo;' . $arg->{dn} .'&raquo;</b> was not created since it <b>already exists</b>, I will use it further.</li>';
   } else {
     my $mesg = $ldap_crud->add( $arg->{dn}, $arg->{ldapadd_arg} );
     if ( $mesg ) {
@@ -445,7 +449,7 @@ sub create_account_branch_leaf {
     } else {
       $jpegPhoto_file = $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{jpegPhoto_noavatar};
     }
-    p $arg->{jpegPhoto};
+    # p $arg->{jpegPhoto};
     local $/ = undef;
     open(my $fh, "<", $jpegPhoto_file) or warn "Can not open $arg->{jpegPhoto}: $!";
     my $jpeg = <$fh>;

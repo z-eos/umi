@@ -1,3 +1,6 @@
+#-*- cperl -*-
+#
+
 package UMI::Controller::Root;
 use Moose;
 use namespace::autoclean;
@@ -70,8 +73,74 @@ sub group_root :Path(group_root) :Args(0) {
 
 sub user_preferences :Path(user_prefs) :Args(0) {
     my ( $self, $c ) = @_;
+
+    my $physicalDeliveryOfficeName;
+    if ( ref($c->session->{auth_obj}->{physicaldeliveryofficename}) eq 'ARRAY' ) {
+      foreach ( @{$c->session->{auth_obj}->{physicaldeliveryofficename}} ) {
+	push @{$physicalDeliveryOfficeName}, $_;
+      }
+    } else {
+      push @{$physicalDeliveryOfficeName}, $c->session->{auth_obj}->{physicaldeliveryofficename};
+    }
+    use Data::Printer;
+    p $c->session->{auth_obj};
+
+    my ( $mesg, $return, $entries, $orgs, $dhcp );
+    my $ldap_crud = $c->model('LDAP_CRUD');
+    foreach ( @{$physicalDeliveryOfficeName} ) {
+      # here we need to fetch all org recursively to fill all data absent
+      # if current object has no attribute needed (postOfficeBox or postalAddress or
+      # any other, than we will use the one from it's ancestor
+      $mesg = $ldap_crud->search( { base => $_, scope => 'base', } );
+      if ( $mesg->code ) {
+	$return->[2] .= '<li>' . $ldap_crud->err($mesg) . '</li>';
+      } else {
+	$entries = $mesg->as_struct;
+	foreach (keys (%{$entries})) {
+	  $orgs->{$entries->{$_}->{physicaldeliveryofficename}->[0]} = 
+	    sprintf('%s, %s, %s, %s',
+		    $entries->{$_}->{postofficebox}->[0],
+		    $entries->{$_}->{postaladdress}->[0],
+		    $entries->{$_}->{l}->[0],
+		    $entries->{$_}->{st}->[0]
+		   );
+	}
+      }
+    }
+
+    $mesg = $ldap_crud->search( { base => 'uid=' . $c->session->{auth_uid} . ',' . $ldap_crud->{cfg}->{base}->{acc_root},
+				  scope => 'base', } );
+    if ( $mesg->code ) {
+      $return->[2] .= '<li>' . $ldap_crud->err($mesg) . '</li>';
+    }
+    my $entry = $mesg->entry(0);
+    my $jpegPhoto = sprintf('<img alt="jpegPhoto of %s" src="data:image/jpg;base64,%s" class="img-responsive img-thumbnail pull-left" title="%s"/>',
+			    $entry->dn,
+			    encode_base64(join('',$entry->get_value('jpegphoto'))),
+			    $entry->dn,
+			   );
+
+    # taking all DHCP stuff user relates to
+    $mesg = $ldap_crud->search( { base => $ldap_crud->{cfg}->{base}->{dhcp},
+				  filter => sprintf('uid=%s', $c->session->{auth_uid}), } );
+    if ( $mesg->code ) {
+      $return->[2] .= '<li>' . $ldap_crud->err($mesg) . '</li>';
+    }
+    $entries = $mesg->as_struct;
+    foreach (keys (%{$entries})) {
+      push @{$dhcp}, {
+		      cn => $entries->{$_}->{cn}->[0],
+		      ip => substr($entries->{$_}->{dhcpstatements}->[0], 14),
+		      mac => substr($entries->{$_}->{dhcphwaddress}->[0], 9),
+		     };
+    }
+
+    use MIME::Base64;
     $c->stash( template => 'user/user_preferences.tt',
-	       auth_obj => $c->session->{auth_obj},);
+	       auth_obj => $c->session->{auth_obj},
+	       jpegPhoto => $jpegPhoto,
+	       orgs => $orgs,
+	       dhcp => $dhcp, );
 }
 
 sub org_root :Path(org_root) :Args(0) {

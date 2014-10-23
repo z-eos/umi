@@ -12,7 +12,7 @@
 [% err %]
 
 <div class="table-responsive">
-<table class="table table-striped table-hover">
+<table class="table">
  <thead>
   <tr class="bg-primary"><td colspan=2 class="text-right">
       <a href="#"
@@ -164,7 +164,7 @@
   [% IF entry.value.mgmnt.gitAclProject %]
 	   <li>
 	     <button type="submit" title="reorder gitAcl" class="btn btn-link"
-		     value="[% entry.key %]" name="ldap_modify_reorder">
+		     value="[% entry.key %]" name="ldap_gitacl_reorder">
 	       <span class="glyphicon glyphicon-sort text-warning"></span>
 	       reorder
 	     </button>
@@ -310,7 +310,11 @@
 	  <div class="panel panel-default">
            <div class="panel-body"><small>[% i %]</small></div></div>
 	[% ELSE %]
-	  [% i %]<br>
+	  [% IF loop.last %]
+	    [% i %]
+	  [% ELSE %]
+	    [% i %]<br>
+	  [% END %]
 	[% END %]
       [% END %]
     [% ELSE %]
