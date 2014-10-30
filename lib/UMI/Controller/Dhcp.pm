@@ -81,14 +81,77 @@ creates branch for dhcp host configuration
 
 sub create_dhcp_host {
   my  ( $self, $ldap_crud, $args ) = @_;
+  my $return;
 
   my $arg = {
 	     dhcpHWAddress => $args->{dhcpHWAddress},
 	     uid => $args->{uid},
 	     net => $args->{net},
-	     dhcpStatements => $args->{dhcpStatements} || ($ldap_crud->dhcp_lease({ net => $args->{net}, }))->[0],
+	     dhcpStatements => $args->{dhcpStatements} || ($ldap_crud->dhcp_lease({ net => $args->{net} }))->[0],
 	     cn => $args->{cn} || $args->{dhcpHWAddress} =~ tr/://dr,
 	    };
+
+#   #=====================================================================
+#   use Data::Printer;
+
+#   my $mesg =
+#     $ldap_crud->search({
+# 			base => $ldap_crud->{cfg}->{base}->{dhcp},
+# 			filter => sprintf('dhcpOption=domain-name %s', $arg->{net}),
+# 			attrs => [ 'cn', 'dhcpNetMask', 'dhcpRange' ],
+# 		       });
+
+#   if (! $mesg->count) {
+#     $return->{error} = '<span class="glyphicon glyphicon-exclamation-sign">&nbsp;</span>' .
+#       'Net choosen, DHCP configuration looks absent.';
+#   } else {
+#     my ( $i, $net_addr, $addr_num, $range_left, $range_right, @leases, $lease, $ip, $mac, $hostname );
+#     my @net = $mesg->entries;
+
+#     foreach (@net) {
+#       $return->{net_dn} = $_->dn;
+#       $net_addr = unpack('N', pack ('C4', split('\.', $_->get_value('cn')))); # IPv4 to decimal
+#       $addr_num = 2 ** ( 32 - $_->get_value('dhcpNetMask'));
+#       ( $range_left, $range_right ) = split(" ", $_->get_value('dhcpRange'));
+#       $range_left = unpack('N', pack ('C4', split('\.', $range_left)));
+#       $range_right = unpack('N', pack ('C4', split('\.', $range_right)));
+
+#       $mesg =
+# 	$ldap_crud->search({
+# 			    base => $_->dn,
+# 			    scope => 'one',
+# 			    attrs => [ 'cn', 'dhcpStatements', 'dhcpHWAddress' ],
+# 			    sizelimit => 256,
+# 			   });
+
+#       @leases = $mesg->entries;
+#       foreach ( @leases ) {
+
+# 	$ip = unpack('N', pack ('C4', split('\.', (split(/\s+/, $_->get_value('dhcpStatements')))[1])));
+# 	$mac = (split(/\s+/, $_->get_value('dhcpHWAddress')))[1];
+
+# 	$return->{used}->{ip}->{$ip}->{mac} = $mac;
+# 	$return->{used}->{ip}->{$ip}->{hostname} = $_->get_value('cn');
+
+# 	$return->{used}->{mac}->{$mac}->{ip} = $ip;
+# 	$return->{used}->{mac}->{$mac}->{hostname} = $_->get_value('cn');
+
+# 	$return->{used}->{hostname}->{$_->get_value('cn')}->{ip} = $ip;
+# 	$return->{used}->{hostname}->{$_->get_value('cn')}->{mac} = $mac;
+#       }
+# p $return->{used}->{ip};
+#       for ($i = $net_addr + 1 + 1; $i < ($net_addr + $addr_num - 1); $i++) {
+# 	next if $return->{used}->{ip}->{$i}->{mac} || ( $i >= $range_left && $i <= $range_right );
+# 	# 123 # push @{$return->{available}}, join(".",unpack("C4", pack("N",$i)));
+# 	push @{$return->{available}}, $i;
+#       }
+#     }
+#   }
+
+#   $arg->{dhcpStatements} = $args->{dhcpStatements} || join(".",unpack("C4", pack("N", (sort (@{$return->{available}}))[0])));
+
+  #=====================================================================
+
 
   $arg->{ldapadd_arg} = [
 			 dhcpHWAddress => sprintf('ethernet %s', $arg->{dhcpHWAddress}),

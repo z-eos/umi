@@ -932,11 +932,12 @@ sub dhcp_lease {
 		       base => $_->dn,
 		       scope => 'children',
 		       attrs => [ 'cn', 'dhcpStatements', 'dhcpHWAddress' ],
+		       sizelimit => 256,
 		      });
 
       @leases = $mesg->sorted('dhcpStatements');
       foreach ( @leases ) {
-p $_;
+
 	$ip = unpack('N', pack ('C4', split('\.', (split(/\s+/, $_->get_value('dhcpstatements')))[1])));
 	$mac = (split(/\s+/, $_->get_value('dhcpHWAddress')))[1];
 

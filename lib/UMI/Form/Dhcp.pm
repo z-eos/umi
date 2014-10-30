@@ -18,8 +18,6 @@ sub html_attributes {
 
 has_field 'ldap_add_dhcp' => ( type => 'Hidden', );
 
-# bl-0 ----------------------------------------------------------------------
-
 has_field 'net' => ( type => 'Select',
 		     label => 'net',
 		     label_class => [ 'col-md-2' ],
@@ -76,9 +74,6 @@ sub options_net {
 
 }
 
-
-# bl-1 ----------------------------------------------------------------------
-
 has_field 'cn' => (
 		   label => 'Hostname',
 		   label_class => [ 'col-md-2' ],
@@ -107,9 +102,6 @@ has_field 'dhcpStatements' => (
 			       # required => 1,
 			      );
 
-# bl-4 ----------------------------------------------------------------------
-
-
 has_field 'aux_reset' => ( type => 'Reset',
 			   wrapper_class => [ 'col-md-offset-2', 'col-md-8' ],
 			   element_class => [ 'btn', 'btn-default', ],
@@ -125,30 +117,15 @@ has_field 'aux_submit' => (
 			   value => 'Submit'
 			  );
 
-# FIELDSETs -----------------------------------------------------------------
-
-# has_block 'bl-0' => ( tag => 'fieldset',
-# 		      render_list => [ 'cn', 'dhcpHWAddress', 'dhcpStatements', 'uid' ],
-# 		      label => '<abbr title="Geografical Address Related Data" class="initialism"><span class="icon_building" aria-hidden="true"></span></abbr>',
-# 		      class => [ 'row', ]
-# 		    );
-
-# has_block 'bl-4' => ( tag => 'fieldset',
-#                       render_list => [ 'aux_reset', 'aux_submit'],
-#                       # label => '&nbsp;',
-#                       class => [ 'row', ]
-#                     );
-
-# sub build_render_list {[
-# 			'cn', 'dhcpHWAddress', 'dhcpStatements', 'uid', 'aux_reset', 'aux_submit'
-# 		       ]}
-
 sub validate {
   my $self = shift;
 
+  my ( $mesg, $entry, $net );
+
+  ## is IP available
   if ( defined $self->field('dhcpStatements')->value &&
        $self->field('dhcpStatements')->value ne '' ) { # IP is set
-    my $mesg =
+    $mesg =
       $self->ldap_crud->search({
 			  base => $self->ldap_crud->{cfg}->{base}->{dhcp},
 			  filter => sprintf('dhcpStatements=*%s',
@@ -161,20 +138,54 @@ sub validate {
     }
   }
 
-  my $dhcp = $self->ldap_crud->dhcp_lease({ net => $self->field('net')->value,
-					    what => 'used', });
+  ## selecting net for the domain name choosen
+  $mesg =
+    $self->ldap_crud->search({
+			      base => $self->ldap_crud->{cfg}->{base}->{dhcp},
+			      filter => sprintf('dhcpOption=domain-name %s',
+						$self->field('net')->value),
+			     });
+  if ( !$mesg->count ) {
+    $self->field('net')
+      ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;This net is not DHCP configured!');
+  }
+  $net = $mesg->entry(0);
 
- p $dhcp;
-  $self->field('cn')
-    ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;Hostname is already used.')
-      if defined $self->field('cn')->value &&
-	$dhcp->{used}->{hostname}->{$self->field('cn')->value}->{ip};
+  ## is hostname uniq in net choosen?
+  if ( defined $self->field('cn')->value &&
+       $self->field('cn')->value ne '' ) {
 
-  $self->field('dhcpHWAddress')
-    ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;MAC address is already used.')
-      if defined $self->field('dhcpHWAddress')->value &&
-	$dhcp->{used}->{mac}->{$self->field('dhcpHWAddress')->value}->{ip};
+    $mesg =
+      $self->ldap_crud->search({
+				base => $net->dn,
+				scope => 'one',
+				filter => sprintf('cn=%s',
+						  $self->field('cn')->value),
+			       });
 
+    if ( $mesg->count ) {
+      $self->field('cn')
+	->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;Hostname is already used.');
+    }
+  }
+
+  ## is MAC uniq in net choosen?
+  if ( defined $self->field('dhcpHWAddress')->value &&
+       $self->field('dhcpHWAddress')->value ne '' ) {
+
+    $mesg =
+      $self->ldap_crud->search({
+				base => $net->dn,
+				scope => 'one',
+				filter => sprintf('dhcpHWAddress=ethernet %s',
+						  $self->field('dhcpHWAddress')->value),
+			       });
+
+    if ( $mesg->count ) {
+      $self->field('dhcpHWAddress')
+	->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;MAC address is already used.');
+    }
+  }
 }
 
 ######################################################################
