@@ -82,6 +82,8 @@ sub proc :Path(proc) :Args(0) {
 	   jpegPhoto => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
 	   gitAclProject => $_->exists('gitAclProject') ? 1 : 0,
 	   userPassword => $_->exists('userPassword') ? 1 : 0,
+	   userDhcp => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ &&
+	   scalar split(',', $_->dn) <= 3 ? 1 : 0,
 	  };
 	foreach $attr (sort $_->attributes) {
 	  $ttentries->{$_->dn}->{attrs}->{$attr} = $_->get_value( $attr, asref => 1 );

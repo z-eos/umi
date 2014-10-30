@@ -88,6 +88,9 @@ sub _build_cfg {
 						  domainRelatedObject ) ],
 			  gitacl => [ qw( top
 					  gitACL ) ],
+			  dhcp => [ qw( top
+					dhcpHost
+					uidObject ) ],
 			 },
 	  jpegPhoto => {
 			'stub' => 'user-6-128x128.jpg',
@@ -886,6 +889,91 @@ my $arg = {
 	  dn => $dn,
 	  attrs => $attrs
 	 };
+}
+
+=head2 dhcp_lease
+
+here we suppose each net relates to uniq domain-name
+
+=cut
+
+
+sub dhcp_lease {
+  my ( $self, $args ) = @_;
+  my $return;
+  my $arg = {
+	     net => $args->{net},
+	     what => $args->{what}, # used, ip, mac, hostname, all
+	    };
+
+  my $mesg =
+    $self->search({
+		   base => $self->{cfg}->{base}->{dhcp},
+		   filter => sprintf('dhcpOption=domain-name %s', $arg->{net}),
+		   attrs => [ 'cn', 'dhcpNetMask', 'dhcpRange' ],
+		  });
+
+  if (! $mesg->count) {
+    $return->{error} = '<span class="glyphicon glyphicon-exclamation-sign">&nbsp;</span>' .
+      'Net choosen, DHCP configuration looks absent.';
+  } else {
+    my ( $i, $net_addr, $addr_num, $range_left, $range_right, @leases, $lease, $ip, $mac, $hostname );
+    my @net = $mesg->entries;
+    foreach (@net) {
+      $return->{net_dn} = $_->dn;
+      $net_addr = unpack('N', pack ('C4', split('\.', $_->get_value('cn')))); # IPv4 to decimal
+      $addr_num = 2 ** ( 32 - $_->get_value('dhcpNetMask'));
+      ( $range_left, $range_right ) = split(" ", $_->get_value('dhcpRange'));
+      $range_left = unpack('N', pack ('C4', split('\.', $range_left)));
+      $range_right = unpack('N', pack ('C4', split('\.', $range_right)));
+
+      $mesg =
+	$self->search({
+		       base => $_->dn,
+		       scope => 'children',
+		       attrs => [ 'cn', 'dhcpStatements', 'dhcpHWAddress' ],
+		      });
+
+      @leases = $mesg->sorted('dhcpStatements');
+      foreach ( @leases ) {
+p $_;
+	$ip = unpack('N', pack ('C4', split('\.', (split(/\s+/, $_->get_value('dhcpstatements')))[1])));
+	$mac = (split(/\s+/, $_->get_value('dhcpHWAddress')))[1];
+
+	$return->{used}->{ip}->{$ip}->{mac} = $mac;
+	$return->{used}->{ip}->{$ip}->{hostname} = $_->get_value('cn');
+
+	$return->{used}->{mac}->{$mac}->{ip} = $ip;
+	$return->{used}->{mac}->{$mac}->{hostname} = $_->get_value('cn');
+
+	$return->{used}->{hostname}->{$_->get_value('cn')}->{ip} = $ip;
+	$return->{used}->{hostname}->{$_->get_value('cn')}->{mac} = $mac;
+      }
+      for ($i = $net_addr + 1 + 1; $i < ($net_addr + $addr_num - 1); $i++) {
+	next if $return->{used}->{ip}->{$i} || ( $i >= $range_left && $i <= $range_right );
+	# 123 # push @{$return->{available}}, join(".",unpack("C4", pack("N",$i)));
+	push @{$return->{available}}, $i;
+      }
+    }
+  }
+
+  if ( defined $arg->{what} && $arg->{what} eq 'ip' ) {
+    return $return->{used}->{ip};
+  } elsif ( defined $arg->{what} && $arg->{what} eq 'mac' ) {
+    return $return->{used}->{mac};
+  } elsif ( defined $arg->{what} && $arg->{what} eq 'hostname' ) {
+    return $return->{used}->{hostname};
+  } elsif ( defined $arg->{what} && $arg->{what} eq 'all' ) {
+    return $return;
+  } elsif ( defined $arg->{what} && $arg->{what} eq 'used' ) {
+    return $return->{used};
+  } else {
+    # 123 # return [ map substr($_, 4),
+    # 123 # 	     sort
+    # 123 # 	     map pack('C4a*', split(/\./), $_),
+    # 123 # 	     @{$return->{available}} ];
+    return [ map join(".",unpack("C4", pack("N",$_))), sort(@{$return->{available}}) ];
+  }
 }
 
 ######################################################################

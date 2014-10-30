@@ -67,7 +67,7 @@
 	    </li>[% END %]
   [% IF c.check_user_roles('wheel') || c.check_user_roles('dhcp') %]
         <li>
-	      <a href="#">
+	      <a href="[% c.uri_for_action('dhcp_root') %]">
         		<span class="glyphicon glyphicon-fullscreen"></span>
         		DHCP
 	      </a>

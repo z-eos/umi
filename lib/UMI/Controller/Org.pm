@@ -71,7 +71,7 @@ sub index :Path :Args(0) {
 =cut
 
 sub modify :Path(/ldap_organization_add/modify) :Args(0) {
-    use Data::Printer colored => 1, caller_info => 1;
+    use Data::Printer; # colored => 1, caller_info => 1;
     warn "########## \@_ ##########\n" . p(@_);
 
     my ( $self, $c, $key, $val ) = @_;

@@ -17,7 +17,7 @@
 
 # my $entry = shift @{$stash->{entries}};
 my $entry = $stash->{entries};
-# use Data::Printer;
+use Data::Printer;
 # p $stash->{schema};
 my ($attr_meta, $attr, $val, $rdn, $rest);
 # $rest = (split ',', $entry->dn) [0];

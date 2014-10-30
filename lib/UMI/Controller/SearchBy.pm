@@ -7,6 +7,12 @@ use namespace::autoclean;
 
 BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 
+use UMI::Form::Dhcp;
+has 'form_add_dhcp' => ( isa => 'UMI::Form::Dhcp', is => 'rw',
+			lazy => 1, default => sub { UMI::Form::Dhcp->new },
+			documentation => q{Form to add userDhcp},
+		      );
+
 use UMI::Form::ModPwd;
 has 'form_mod_pwd' => ( isa => 'UMI::Form::ModPwd', is => 'rw',
 			lazy => 1, default => sub { UMI::Form::ModPwd->new },
@@ -122,7 +128,7 @@ sub index :Path :Args(0) {
 	  $ldap_crud->err($mesg) . '</ul></div>';
     }
 
-    use Data::Printer;
+    use Data::Printer; # colored => 0;
     my ( $ttentries, $attr );
     foreach (@entries) {
       $ttentries->{$_->dn}->{'mgmnt'} =
@@ -133,6 +139,8 @@ sub index :Path :Args(0) {
 	 jpegPhoto => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
 	 gitAclProject => $_->exists('gitAclProject') ? 1 : 0,
 	 userPassword => $_->exists('userPassword') ? 1 : 0,
+	 userDhcp => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ &&
+	 scalar split(',', $_->dn) <= 3 ? 1 : 0,
 	};
       foreach $attr (sort $_->attributes) {
 	$ttentries->{$_->dn}->{attrs}->{$attr} = $_->get_value( $attr, asref => 1 );
@@ -473,6 +481,37 @@ sub proc :Path(proc) :Args(0) {
 						 password_cnfm => $params->{password_cnfm},
 						}),
 	       ) if $self->form_mod_pwd->ran_validation;
+
+#=====================================================================
+# Add userDhcp
+#=====================================================================
+    } elsif (defined $params->{'ldap_add_dhcp'} &&
+	     $params->{'ldap_add_dhcp'} ne '') {
+
+      $c->stash(
+		template => 'dhcp/dhcp_wrap.tt',
+		form => $self->form_add_dhcp,
+		ldap_add_dhcp => $params->{'ldap_add_dhcp'},
+	       );
+
+      return unless $self->form_add_dhcp->process(
+						  posted => ($c->req->method eq 'POST'),
+						  params => $params,
+						  ldap_crud => $c->model('LDAP_CRUD'),
+						 );
+
+      $c->stash(
+      		final_message => $c->controller('Dhcp')
+		->create_dhcp_host ( $c->model('LDAP_CRUD'),
+				     {
+				      dhcpHWAddress => $params->{dhcpHWAddress},
+				      uid => substr((split(',',$params->{ldap_add_dhcp}))[0],4),
+				      dhcpStatements => $params->{dhcpStatements},
+				      net => $params->{net},
+				      cn => $params->{cn},
+				     }
+				   ),
+      	       ) if $self->form_add_dhcp->validated;
 
 #=====================================================================
 # Modify jpegPhoto

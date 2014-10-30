@@ -151,6 +151,15 @@
 	     </button>
 	   </li>
   [% END %]
+  [% IF entry.value.mgmnt.userDhcp %]
+	   <li>
+	     <button type="submit" title="add DHCP (MAC to IP binding)" class="btn btn-link"
+		     value="[% entry.key %]" name="ldap_add_dhcp">
+	       <span class="glyphicon glyphicon-fullscreen text-warning"></span>
+	       DHCP (IP to MAC binding)
+	     </button>
+	   </li>
+  [% END %]
   [% IF entry.value.mgmnt.jpegPhoto %]
 	   <li>
 	     <button type="submit" title="modify jpegPhoto" class="btn btn-link"

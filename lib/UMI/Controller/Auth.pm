@@ -51,8 +51,8 @@ sub signin :Path Global {
   } else {
     $c->stash( template => 'signin.tt', );
   }
-  use Data::Printer;
-  p($c->session, colored => 1);
+  # use Data::Printer;
+  # p($c->session, colored => 1);
 }
 
 sub signout :Path Global {
