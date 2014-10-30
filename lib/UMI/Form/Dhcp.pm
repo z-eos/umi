@@ -138,54 +138,68 @@ sub validate {
     }
   }
 
-  ## selecting net for the domain name choosen
-  $mesg =
-    $self->ldap_crud->search({
-			      base => $self->ldap_crud->{cfg}->{base}->{dhcp},
-			      filter => sprintf('dhcpOption=domain-name %s',
-						$self->field('net')->value),
-			     });
-  if ( !$mesg->count ) {
-    $self->field('net')
-      ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;This net is not DHCP configured!');
-  }
-  $net = $mesg->entry(0);
+  # ## selecting net for the domain name choosen
+  # $mesg =
+  #   $self->ldap_crud->search({
+  # 			      base => $self->ldap_crud->{cfg}->{base}->{dhcp},
+  # 			      filter => sprintf('dhcpOption=domain-name %s',
+  # 						$self->field('net')->value),
+  # 			     });
+  # if ( !$mesg->count ) {
+  #   $self->field('net')
+  #     ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;This net is not DHCP configured!');
+  # }
+  # $net = $mesg->entry(0);
 
-  ## is hostname uniq in net choosen?
-  if ( defined $self->field('cn')->value &&
-       $self->field('cn')->value ne '' ) {
+  # ## is hostname uniq in net choosen?
+  # if ( defined $self->field('cn')->value &&
+  #      $self->field('cn')->value ne '' ) {
 
-    $mesg =
-      $self->ldap_crud->search({
-				base => $net->dn,
-				scope => 'one',
-				filter => sprintf('cn=%s',
-						  $self->field('cn')->value),
-			       });
+  #   $mesg =
+  #     $self->ldap_crud->search({
+  # 				base => $net->dn,
+  # 				scope => 'one',
+  # 				filter => sprintf('cn=%s',
+  # 						  $self->field('cn')->value),
+  # 			       });
 
-    if ( $mesg->count ) {
-      $self->field('cn')
-	->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;Hostname is already used.');
-    }
-  }
+  #   if ( $mesg->count ) {
+  #     $self->field('cn')
+  # 	->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;Hostname is already used.');
+  #   }
+  # }
 
-  ## is MAC uniq in net choosen?
-  if ( defined $self->field('dhcpHWAddress')->value &&
-       $self->field('dhcpHWAddress')->value ne '' ) {
+  # ## is MAC uniq in net choosen?
+  # if ( defined $self->field('dhcpHWAddress')->value &&
+  #      $self->field('dhcpHWAddress')->value ne '' ) {
 
-    $mesg =
-      $self->ldap_crud->search({
-				base => $net->dn,
-				scope => 'one',
-				filter => sprintf('dhcpHWAddress=ethernet %s',
-						  $self->field('dhcpHWAddress')->value),
-			       });
+  #   $mesg =
+  #     $self->ldap_crud->search({
+  # 				base => $net->dn,
+  # 				scope => 'one',
+  # 				filter => sprintf('dhcpHWAddress=ethernet %s',
+  # 						  $self->field('dhcpHWAddress')->value),
+  # 			       });
 
-    if ( $mesg->count ) {
-      $self->field('dhcpHWAddress')
-	->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;MAC address is already used.');
-    }
-  }
+  #   if ( $mesg->count ) {
+  #     $self->field('dhcpHWAddress')
+  # 	->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;MAC address is already used.');
+  #   }
+  # }
+
+  my $dhcp = $self->ldap_crud->dhcp_lease({ net => $self->field('net')->value,
+					    what => 'used', });
+  $self->field('cn')
+    ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;Hostname is already used.')
+      if defined $self->field('cn')->value &&
+	$dhcp->{hostname}->{$self->field('cn')->value}->{ip};
+
+  $self->field('dhcpHWAddress')
+    ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;MAC address is already used.')
+      if defined $self->field('dhcpHWAddress')->value &&
+	$dhcp->{mac}->{$self->field('dhcpHWAddress')->value}->{ip};
+
+
 }
 
 ######################################################################
