@@ -88,9 +88,9 @@ sub user_preferences :Path(user_prefs) :Args(0) {
       push @{$physicalDeliveryOfficeName}, $c->session->{auth_obj}->{physicaldeliveryofficename};
     }
     use Data::Printer;
-    p $c->session->{auth_obj};
+    # p $c->session->{auth_obj}->{title};
 
-    my ( $mesg, $return, $entries, $orgs, $dhcp );
+    my ( $mesg, $return, $entries, $orgs, $domains, $fqdn, $dhcp );
     my $ldap_crud = $c->model('LDAP_CRUD');
     foreach ( @{$physicalDeliveryOfficeName} ) {
       # here we need to fetch all org recursively to fill all data absent
@@ -102,13 +102,23 @@ sub user_preferences :Path(user_prefs) :Args(0) {
       } else {
 	$entries = $mesg->as_struct;
 	foreach (keys (%{$entries})) {
-	  $orgs->{$entries->{$_}->{physicaldeliveryofficename}->[0]} = 
+	  $orgs->{$entries->{$_}->{physicaldeliveryofficename}->[0]} =
 	    sprintf('%s, %s, %s, %s',
 		    $entries->{$_}->{postofficebox}->[0],
 		    $entries->{$_}->{postaladdress}->[0],
 		    $entries->{$_}->{l}->[0],
 		    $entries->{$_}->{st}->[0]
 		   );
+	  $mesg = $ldap_crud->search( { base => $_,
+					attrs => [ 'associatedDomain' ], } );
+	  if ( $mesg->code ) {
+	    $return->[2] .= '<li>' . $ldap_crud->err($mesg) . '</li>';
+	  } else {
+	    $domains = $mesg->as_struct;
+	    foreach (keys (%{$domains})) {
+	      push @{$fqdn->{$entries->{$_}->{physicaldeliveryofficename}->[0]}}, $domains->{$_}->{associateddomain}->[0];
+	    }
+	  }
 	}
       }
     }
@@ -119,6 +129,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
       $return->[2] .= '<li>' . $ldap_crud->err($mesg) . '</li>';
     }
     my $entry = $mesg->entry(0);
+    use MIME::Base64;
     my $jpegPhoto = sprintf('<img alt="jpegPhoto of %s" src="data:image/jpg;base64,%s" class="img-responsive img-thumbnail pull-left" title="%s"/>',
 			    $entry->dn,
 			    encode_base64(join('',$entry->get_value('jpegphoto'))),
@@ -140,11 +151,11 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 		     };
     }
 
-    use MIME::Base64;
     $c->stash( template => 'user/user_preferences.tt',
 	       auth_obj => $c->session->{auth_obj},
 	       jpegPhoto => $jpegPhoto,
 	       orgs => $orgs,
+	       fqdn => $fqdn,
 	       dhcp => $dhcp, );
   } else {
     $c->stash( template => 'signin.tt', );
@@ -155,6 +166,13 @@ sub org_root :Path(org_root) :Args(0) {
     my ( $self, $c ) = @_;
     $c->stash( template => 'org/org_root.tt', );
 }
+
+
+sub access_denied : Private {
+  my ( $self, $c ) = @_;
+  $c->stash( template => '403.tt', );
+}
+
 
 =head2 default
 

@@ -19,9 +19,19 @@
     <dl class="dl-horizontal">
       <dt>First & Last Names:</dt>
       <dd>[% auth_obj.givenname %] [% auth_obj.sn %]</dd>
-      <dt>title:</dt>
-      <dd>[% auth_obj.title %]</dd>
-      <dt>in organizations:</dt>
+      <dt>Title:</dt>
+      <dd>
+	[% IF auth_obj.title.size %]
+	 <ul class="list-unstyled">
+	  [% FOREACH i IN auth_obj.title %]
+	   <li>[% i %]
+	  [% END %]
+	 </ul>
+	[% ELSE %]
+	  [% auth_obj.title %]
+	[% END %]
+      </dd>
+      <dt>Organizations:</dt>
       <dd>
 	[% FOREACH org IN orgs %]
 	<div class="panel panel-info">
@@ -31,7 +41,18 @@
 	    </h3>
 	  </div>
 	  <div class="panel-body">
-	    [% org.value %]
+	    <address>
+	      <strong>address:</strong><br>
+	      [% org.value %]
+	    </address>
+	    <address>
+	      <strong>fqdn:</strong>
+	      <ul class="list-unstyled">
+		[% FOREACH x IN fqdn.item(org.key) %]
+		<li>[% x %]</li>
+		[% END %]
+	      </ul>
+	    </address>
 	  </div>
 	</div>
 	[% END %]
@@ -133,7 +154,7 @@
           <span class="glyphicon glyphicon-lock text-warning"></span>
           password</a>
       </li>
-      <li><a href="#">
+      <li><a class="disabled" href="#">
           <span class="glyphicon glyphicon-credit-card text-warning"></span>
           XMPP vCard</a>
       </li>

@@ -1,10 +1,22 @@
 [% META title = 'Catalyst/TT Error' %]
-<p>
-  An error has occurred.  We're terribly sorry about that, but it's
-  one of those things that happens from time to time.  Let's just
-  hope the developers test everything properly before release...
-</p>
-<p>
-  Here's the error message, on the off-chance that it means something
-  to you: <span class="error">[% error %]</span>
-</p>
+
+<div class="panel panel-warning">
+  <div class="panel-heading">
+    <h1 class="panel-title">
+    	<span class="glyphicon glyphicon-warning-sign">&nbsp;</span>
+    	<b>An error has occurred!</b>
+    </h1>
+  </div>
+  <div class="panel-body">
+    To talk to UMI admin concerning this case you'll have to provide 
+      (<abbr title="copy/paste error text when talk to admin">
+	<span class="glyphicon glyphicon-camera"></span>
+      </abbr>)
+      error text bellow:
+      <br>
+      <br>
+    <div class="well">
+      <em>[% error %]</em>
+    </div>
+  </div>
+</div>

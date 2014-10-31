@@ -52,45 +52,63 @@ sub _build_cfg {
 		   gidNumber => 10012,
 		  },
 	  base => {
-		   org => 'ou=Organizations,dc=umidb',
-		   acc_root => 'ou=People,dc=umidb',
+		   acc_root =>       'ou=People,dc=umidb',
 		   acc_svc_branch => 'ou=People,dc=umidb',
 		   acc_svc_common => 'ou=People,dc=umidb',
-		   gitacl => 'ou=GitACL,dc=umidb',
-		   group => 'ou=group,dc=umidb',
-		   dhcp => 'ou=DHCP,dc=umidb',
+		   dhcp =>           'ou=DHCP,dc=umidb',
+		   gitacl =>         'ou=GitACL,dc=umidb',
+		   group =>          'ou=group,dc=umidb',
+		   org =>            'ou=Organizations,dc=umidb',
 		  },
 	  rdn => {
-		  org => 'ou',
-		  acc_root => 'uid',
+		  org =>            'ou',
+		  acc_root =>       'uid',
 		  acc_svc_branch => 'authorizedService',
 		  acc_svc_common => 'uid',
-		  gitacl => 'cn',
-		  group => 'cn',
+		  gitacl =>         'cn',
+		  group =>          'cn',
 		 },
 	  objectClass => {
-			  org => [ qw( top
-				       organizationalUnit ) ],
-			  acc_root => [ qw( top
-					    posixAccount
-					    inetOrgPerson
-					    grayAccount ) ],
-			  acc_svc_branch => [ qw( account
-						  authorizedServiceObject ) ],
-			  acc_svc_802_1x => [ qw( account
+			  acc_root =>       [ qw(
+						  top
+						  posixAccount
+						  inetOrgPerson
+						  grayAccount
+					       ) ],
+			  acc_svc_branch => [ qw(
+						  account
+						  authorizedServiceObject
+					       ) ],
+			  acc_svc_802_1x => [ qw(
+						  account
 						  simpleSecurityObject
 						  authorizedServiceObject
-						  radiusprofile ) ],
-			  acc_svc_common => [ qw( posixAccount
+						  radiusprofile
+					       ) ],
+			  acc_svc_common => [ qw(
+						  posixAccount
 						  shadowAccount
 						  inetOrgPerson
 						  authorizedServiceObject
-						  domainRelatedObject ) ],
-			  gitacl => [ qw( top
-					  gitACL ) ],
-			  dhcp => [ qw( top
-					dhcpHost
-					uidObject ) ],
+						  domainRelatedObject
+					       ) ],
+			  gitacl =>         [ qw(
+						  top
+						  gitACL
+					       ) ],
+			  group =>          [ qw(
+						  top
+						  posixGroup
+					       ) ],
+			  dhcp =>           [ qw(
+						  top
+						  dhcpHost
+						  uidObject
+					       ) ],
+			  org =>            [ qw(
+						  top
+						  organizationalUnit
+					       ) ],
 			 },
 	  jpegPhoto => {
 			'stub' => 'user-6-128x128.jpg',
@@ -937,22 +955,22 @@ sub dhcp_lease {
 
       @leases = $mesg->sorted('dhcpStatements');
       foreach ( @leases ) {
-
-	$ip = unpack('N', pack ('C4', split('\.', (split(/\s+/, $_->get_value('dhcpstatements')))[1])));
+	$ip = unpack('N', pack ('C4', split('\.', (split(/\s+/, $_->get_value('dhcpStatements')))[1])));
 	$mac = (split(/\s+/, $_->get_value('dhcpHWAddress')))[1];
+	$hostname = $_->get_value('cn');
 
 	$return->{used}->{ip}->{$ip}->{mac} = $mac;
-	$return->{used}->{ip}->{$ip}->{hostname} = $_->get_value('cn');
-
+	$return->{used}->{ip}->{$ip}->{hostname} = $hostname;
 	$return->{used}->{mac}->{$mac}->{ip} = $ip;
-	$return->{used}->{mac}->{$mac}->{hostname} = $_->get_value('cn');
-
-	$return->{used}->{hostname}->{$_->get_value('cn')}->{ip} = $ip;
-	$return->{used}->{hostname}->{$_->get_value('cn')}->{mac} = $mac;
+	$return->{used}->{mac}->{$mac}->{hostname} = $hostname;
+	$return->{used}->{hostname}->{$hostname}->{ip} = $ip;
+	$return->{used}->{hostname}->{$hostname}->{mac} = $mac;
       }
+      ## ip counting starts from the *second* assignable (not the net
+      ## address and not broadcast) the first address is reserved for
+      ## the very DHCP server needs
       for ($i = $net_addr + 1 + 1; $i < ($net_addr + $addr_num - 1); $i++) {
 	next if $return->{used}->{ip}->{$i} || ( $i >= $range_left && $i <= $range_right );
-	# 123 # push @{$return->{available}}, join(".",unpack("C4", pack("N",$i)));
 	push @{$return->{available}}, $i;
       }
     }
@@ -969,11 +987,7 @@ sub dhcp_lease {
   } elsif ( defined $arg->{what} && $arg->{what} eq 'used' ) {
     return $return->{used};
   } else {
-    # 123 # return [ map substr($_, 4),
-    # 123 # 	     sort
-    # 123 # 	     map pack('C4a*', split(/\./), $_),
-    # 123 # 	     @{$return->{available}} ];
-    return [ map join(".",unpack("C4", pack("N",$_))), sort(@{$return->{available}}) ];
+    return [ map join(".",unpack("C4", pack("N",$_))), sort(@{$return->{available}}) ]; # decimal to IPv4
   }
 }
 

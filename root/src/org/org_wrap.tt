@@ -13,18 +13,6 @@
 	  <span class="glyphicon glyphicon-plus-sign text-success"></span>
 	  create</a>
       </li>
-      <li><a href="#">
-	  <span class="glyphicon glyphicon-edit text-warning"></span>
-	  update</a>
-      </li>
-      <li><a href="#">
-	  <span class="glyphicon glyphicon-edit text-warning"></span>
-	  password</a>
-      </li>
-      <li><a href="#">
-	  <span class="glyphicon glyphicon-remove-sign text-danger"></span>
-	  delete</a>
-      </li>
     </ul>
   </div>
 </div>

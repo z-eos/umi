@@ -28,6 +28,7 @@ use Catalyst qw/
 
     Authentication
     Authorization::Roles
+    Authorization::ACL
 
     Session
     Session::Store::FastMmap
@@ -96,6 +97,53 @@ __PACKAGE__->config(
 
 # Start the application
 __PACKAGE__->setup();
+
+# .-------------------------------------+--------------------------------------.
+# | Path                                | Private                              |
+# +-------------------------------------+--------------------------------------+
+# | /                                   | /index                               |
+# | /...                                | /default                             |
+# | /about/                             | /about                               |
+# | /accinfo/                           | /accinfo                             |
+# | /auth/                              | /auth/index                          |
+# | /auth/...                           | /auth/signout                        |
+# | /auth/...                           | /auth/signin                         |
+# | /dhcp/                              | /dhcp/index                          |
+# | /dhcp_root/                         | /dhcp_root                           |
+# | /gitacl/                            | /gitacl/index                        |
+# | /gitacl_root/                       | /gitacl_root                         |
+# | /group/                             | /group/index                         |
+# | /group_root/                        | /group_root                          |
+# | /ldap_organization_add/modify/      | /org/modify                          |
+# | /org/                               | /org/index                           |
+# | /org_root/                          | /org_root                            |
+# | /searchadvanced/                    | /searchadvanced/index                |
+# | /searchadvanced/proc/               | /searchadvanced/proc                 |
+# | /searchby/                          | /searchby/index                      |
+# | /searchby/ldif_gen/                 | /searchby/ldif_gen                   |
+# | /searchby/modify/                   | /searchby/modify                     |
+# | /searchby/proc/                     | /searchby/proc                       |
+# | /signin/...                         | /auth/signin                         |
+# | /signout/...                        | /auth/signout                        |
+# | /user/                              | /user/index                          |
+# | /user/modpwd/                       | /user/modpwd                         |
+# | /user_prefs/                        | /user_preferences                    |
+# | /user_root/                         | /user_root                           |
+# '-------------------------------------+--------------------------------------'
+
+__PACKAGE__->allow_access_if_any( "/", [ qw/wheel/ ]);
+
+__PACKAGE__->deny_access_unless_any( "/dhcp",           [ qw/wheel admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/dhcp_root",      [ qw/wheel admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/gitacl",         [ qw/wheel admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/gitacl_root",    [ qw/wheel admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/group",          [ qw/wheel admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/group_root",     [ qw/wheel admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/org",            [ qw/wheel admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/org_root",       [ qw/wheel admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/searchadvanced", [ qw/wheel admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/searchby",       [ qw/wheel admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/user",           [ qw/wheel admin coadmin/ ]);
 
 
 =head1 NAME

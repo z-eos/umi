@@ -5,6 +5,8 @@ package UMI::Controller::SearchBy;
 use Moose;
 use namespace::autoclean;
 
+use Data::Printer use_prototypes => 0;
+
 BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 
 use UMI::Form::Dhcp;
@@ -128,7 +130,6 @@ sub index :Path :Args(0) {
 	  $ldap_crud->err($mesg) . '</ul></div>';
     }
 
-    use Data::Printer; # colored => 0;
     my ( $ttentries, $attr );
     foreach (@entries) {
       $ttentries->{$_->dn}->{'mgmnt'} =
@@ -186,8 +187,6 @@ SearchBy main processing logics
 
 sub proc :Path(proc) :Args(0) {
   my ( $self, $c ) = @_;
-
-  use Data::Printer use_prototypes => 0;
 
   if ( defined $c->session->{"auth_uid"} ) {
     my $params = $c->req->parameters;
@@ -971,7 +970,7 @@ sub ldif_gen :Path(ldif_gen) :Args(0) {
   my $ldap_crud =
     $c->model('LDAP_CRUD');
   my $params = $c->req->parameters;
-  use Data::Printer;
+
   p $params;
   $c->stash(
 	    template => 'search/ldif.tt',
@@ -996,7 +995,6 @@ modify whole form (all present fields except RDN)
 
 sub modify :Path(modify) :Args(0) {
   my ( $self, $c ) = @_;
-  use Data::Printer;
 
   my $ldap_crud =
     $c->model('LDAP_CRUD');

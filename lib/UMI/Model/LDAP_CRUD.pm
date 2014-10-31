@@ -1,3 +1,6 @@
+#-*- cperl -*-
+#
+
 package UMI::Model::LDAP_CRUD;
 
 use base 'Catalyst::Model::Factory::PerRequest';

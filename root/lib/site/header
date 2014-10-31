@@ -59,7 +59,7 @@
 	    </li>
   [% END %]
   [% IF c.check_user_roles('wheel') %]
-        <li>
+        <li class="disabled">
 	      <a href="#">
         		<span class="glyphicon glyphicon-globe"></span>
         		DNS
@@ -110,7 +110,7 @@
         </li>
 [% END %]
       </ul>
-      [% IF c.user_exists %]
+      [% IF c.user_exists && c.user.roles.size > 0 %]
       <form class="navbar-form navbar-left"
 	    role="form" 
 	    id="searchby"

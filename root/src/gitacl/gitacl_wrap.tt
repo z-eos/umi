@@ -35,15 +35,7 @@
     <ul class="nav nav-pills nav-stacked">
       <li><a href="[% c.uri_for('/gitacl') %]">
 	  <span class="glyphicon glyphicon-plus-sign text-success"></span>
-	  create</a>
-      </li>
-      <li><a href="#">
-	  <span class="glyphicon glyphicon-edit text-info"></span>
-	  update</a>
-      </li>
-      <li><a href="#">
-	  <span class="glyphicon glyphicon-remove-sign text-danger"></span>
-	  delete</a>
+	  create new</a>
       </li>
     </ul>
   </div>
