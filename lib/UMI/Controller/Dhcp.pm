@@ -83,21 +83,29 @@ sub create_dhcp_host {
   my  ( $self, $ldap_crud, $args ) = @_;
   my $return;
 
+  use Data::Printer;
+  p $args;
+
   my $arg = {
 	     dhcpHWAddress => $args->{dhcpHWAddress},
 	     uid => $args->{uid},
 	     net => $args->{net},
 	     dhcpStatements => $args->{dhcpStatements} || ($ldap_crud->dhcp_lease({ net => $args->{net} }))->[0],
 	     cn => $args->{cn} || $args->{dhcpHWAddress} =~ tr/://dr,
+	     dhcpComments => join(' ', $args->{dhcpComments}) || undef,
 	    };
 
   $arg->{ldapadd_arg} = [
 			 dhcpHWAddress => sprintf('ethernet %s', $arg->{dhcpHWAddress}),
 			 uid => $arg->{uid},
 			 dhcpStatements => sprintf('fixed-address %s', $arg->{dhcpStatements}),
-			 cn => "$arg->{cn}",
+			 cn => $arg->{cn},
 			 objectClass => $ldap_crud->{cfg}->{objectClass}->{dhcp},
 			];
+
+  push @{$arg->{ldapadd_arg}}, dhcpComments => $arg->{dhcpComments} if defined $arg->{dhcpComments};
+
+  p $arg->{ldapadd_arg};
 
   my $nets = $ldap_crud->search( { base => $ldap_crud->{cfg}->{base}->{dhcp},
 				   filter => 'dhcpOption=domain-name ' . $arg->{net}, } );

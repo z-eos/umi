@@ -107,7 +107,7 @@ has_field 'dhcpComments' => (
 			     label => 'Comments',
 			     label_class => [ 'col-md-2' ],
 			     wrapper_class => 'col-md-8',
-			     element_attr => { placeholder => 'this static lease any comment (type/purpose/state of the device/user)' },
+			     element_attr => { placeholder => 'this static lease any comment (type/purpose/state of the device/user)', },
 			     rows => 2,
 			    );
 

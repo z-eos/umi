@@ -508,6 +508,7 @@ sub proc :Path(proc) :Args(0) {
 				      dhcpStatements => $params->{dhcpStatements},
 				      net => $params->{net},
 				      cn => $params->{cn},
+				      dhcpComments => $params->{dhcpComments},
 				     }
 				   ),
       	       ) if $self->form_add_dhcp->validated;
