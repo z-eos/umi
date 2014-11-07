@@ -79,7 +79,7 @@
 	     role="menu">
   [% IF entry.value.mgmnt.is_dn && entry.value.mgmnt.is_account %]
 	   <li>
-	     <button type="button" title="account global management page" class="btn btn-link"
+	     <button type="button" title="account global management page" class="btn btn-link disabled"
 		     value="[% entry.key %]"
 		     name="accmgmnt"
 		     data-toggle="modal"
@@ -246,8 +246,8 @@
 	   </div>
 	   <div class="modal-footer">
 	     <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
-	     <button type="submit" class="btn btn-primary"  name="ldap_delete"
-                value="[% entry.key %]">
+	     <button type="submit" class="btn btn-primary umi-btn-event umi-btn-ajax"  name="ldap_delete"
+                value="[% entry.key %]" data-action="delete" >
 	       Yes, I really want to delete it and yes, I understand all consequences!
 	     </button>
 	   </div>
@@ -359,7 +359,9 @@ $(function(){
         btnEventAjax: ".umi-btn-ajax",
         noActionEventMsg: "Cannot find action attribute for this button event!",
         noFormEventMsg: "Cannot find parent form for this button event!",
-        noAjaxModeMsg: "Ajax mode not supported, yet..."
+        noAjaxModeMsg: "Ajax mode not supported, yet...",
+        ajaxError: "Error on request: ",
+        ajaxSystemError: "Wrong response format from server!"
       },
       
       getErrorBlock = function(message) {
@@ -370,16 +372,19 @@ $(function(){
         item.parent().prepend(getErrorBlock(message));
       },
       
-      createHiddenButton = function(item) {
-        var input = $(item).parents("form").find("input[name='"+item.attr("name")+"'][type='hidden']");
-        if (input && input.length) {
-          return input.attr("value", item.val());
+      createHiddenButton = function(item, value) {
+        var simple = (typeof value !== "undefined");
+        if (!simple) {
+            var input = $(item).parents("form").find("input[name='"+item.attr("name")+"'][type='hidden']");
+            if (input && input.length) {
+              return input.attr("value", item.val());
+            }
         }
 
         return $("<input>")
           .attr("type","hidden")
-          .attr("name", item.attr("name"))
-          .attr("value", item.val());
+          .attr("name", (simple) ? item : item.attr("name"))
+          .attr("value", (simple) ? value : item.val());
       },
       
       getLogicType = function(obj) {
@@ -389,14 +394,45 @@ $(function(){
       },
       
       runAjaxLogic = function(obj) {
-        applyError(obj, options.noAjaxModeMsg);
+        var $form = obj.parents("form");
+        if (!$form || !$form.length) return applyError(obj, options.noFormEventMsg), false;
+        var hidden = createHiddenButton(obj);
+        var type = createHiddenButton("type", "json");
+        $form.append(hidden).append(type);
+        var data = $form.serialize();
+        var $tr = obj.parents("tr");
+        var action = obj.data("action");
+        var $modal = obj.parents(".modal.in");
+        $.ajax({
+            type: "POST",
+            url: $form.attr("action"),
+            data: data,
+            dataType: "json",
+            success: function(data) {
+                if (!data || typeof data.success === "undefined") return applyError(obj, options.ajaxSystemError), false;
+                if (data && data.success === false) return applyError(obj, data.message), false;
+                switch(action) {
+                   default:
+                   case "delete":
+                        if ($modal && $modal.length) $modal.modal("hide");
+                        $
+                        .when($tr.fadeOut("800"))
+                        .then(function(){
+                            $tr.remove();
+                        });
+                   break;
+                }
+            },
+            error: function(x, o, e){
+                applyError(obj, options.ajaxError+e);
+            }
+        });
       },
       
       runBasicLogic = function(obj) {
         var action = obj.data("umiact");
         if (!action || !action.length) return applyError(obj, options.noActionEventMsg), false;
         var $form = obj.parents("form");
-        console.log($form);
         if (!$form || !$form.length) return applyError(obj, options.noFormEventMsg), false;
         var hidden = createHiddenButton(obj);
         clearPopupForm($(".modal:not(.in)"));

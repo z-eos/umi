@@ -84,6 +84,25 @@ sub index :Path :Args(0) {
       $filter_show = sprintf("mail=<kbd>%s</kbd>", $filter_meta);
       $base = $ldap_crud->{cfg}->{base}->{acc_root};
       $params->{'ldapsearch_base'} = $base;
+    } elsif ( defined $params->{'ldapsearch_by_jid'} ) {
+      $filter = sprintf("&(authorizedService=xmpp@*)(uid=*%s*)", $filter_meta);
+      $filter_show = sprintf("&(authorizedService=xmpp@*)(uid=*<kbd>%s</kbd>*)", $filter_meta);
+      $base = $ldap_crud->{cfg}->{base}->{acc_root};
+      $params->{'ldapsearch_base'} = $base;
+    } elsif ( defined $params->{'ldapsearch_by_ip'} ) {
+      $filter = sprintf("dhcpStatements=fixed-address %s", $filter_meta);
+      $filter_show = sprintf("dhcpStatements=fixed-address <kbd>%s</kbd>", $filter_meta);
+      $base = $ldap_crud->{cfg}->{base}->{dhcp};
+      $params->{'ldapsearch_base'} = $base;
+    } elsif ( defined $params->{'ldapsearch_by_mac'} ) {
+      $filter = sprintf("|(dhcpHWAddress=ethernet %s)(&(uid=%s)(authorizedService=802.1x-mac@*))",
+			$filter_meta,
+			$filter_meta =~ tr/://dr);
+      $filter_show = sprintf("|(dhcpHWAddress=ethernet <kbd>%s</kbd>)(&(uid=<kbd>%s</kbd>)(authorizedService=802.1x-mac@*))",
+			     $filter_meta,
+			     $filter_meta =~ tr/://dr);
+      $base = $ldap_crud->{cfg}->{base}->{db};
+      $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_name'} ) {
       $filter = sprintf("|(givenName=%s)(sn=%s)(uid=%s)",
 			$filter_meta, $filter_meta, $filter_meta);
@@ -192,45 +211,33 @@ sub proc :Path(proc) :Args(0) {
     my $params = $c->req->parameters;
 
 #=====================================================================
-# LDIF generation
-#=====================================================================
-    if (defined $params->{'ldap_ldif'} &&
-      	$params->{'ldap_ldif'} ne '') {
-
-      $c->stash(
-		template => 'search/ldif.tt',
-		ldif => $self->ldif(
-				    $c->model('LDAP_CRUD'),
-				    {
-				     ldif_dn => $params->{'ldap_ldif'},
-				     recursive => defined $params->{'ldap_ldif_recursive'} ?
-				     $params->{'ldap_ldif_recursive'} : undef,
-				     sysinfo => defined $params->{'ldap_ldif_sysinfo'} ?
-				     $params->{'ldap_ldif_sysinfo'} : undef,
-				    }
-				   ),
-	       );
-
-#=====================================================================
 # Delete
 #=====================================================================
-    } elsif (defined $params->{'ldap_delete'} &&
-	     $params->{'ldap_delete'} ne '') {
+    if (defined $params->{'ldap_delete'} &&
+	$params->{'ldap_delete'} ne '') {
       my $err;
       if ( defined $params->{'ldap_delete_recursive'} &&
 	   $params->{'ldap_delete_recursive'} eq 'on' ) {
-		$err = $c->model('LDAP_CRUD')->delr($params->{ldap_delete});
+	$err = $c->model('LDAP_CRUD')->delr($params->{ldap_delete});
       } else {
-		$err = $c->model('LDAP_CRUD')->del($params->{ldap_delete});
+	$err = $c->model('LDAP_CRUD')->del($params->{ldap_delete});
       }
 
-      $c->stash(
-		template => 'search/delete.tt',
-		delete => $params->{'ldap_delete'},
-		recursive => defined $params->{'ldap_delete_recursive'} &&
-		$params->{'ldap_delete_recursive'} eq 'on' ? '1' : '0',
-		err => $err,
-	       );
+      if ( $params->{type} eq 'json' ) {
+	$c->stash->{current_view} = 'WebJSON';
+	$c->stash->{success} = 'true';
+	$c->stash->{message} = 'OK';
+	# $c->forward('View::JSON');
+      } else {
+	$c->stash(
+		  template => 'search/delete.tt',
+		  delete => $params->{'ldap_delete'},
+		  recursive => defined $params->{'ldap_delete_recursive'} &&
+		  $params->{'ldap_delete_recursive'} eq 'on' ? '1' : '0',
+		  err => $err,
+		  type => $params->{'type'},
+		 );
+      }
 
 #=====================================================================
 # Modify (all fields form)
@@ -560,6 +567,7 @@ sub proc :Path(proc) :Args(0) {
       my ( $arr, $login, $uid, $pwd, $error_message, $success_message, $warn_message );
       my @id = split(',', $params->{'add_svc_acc'});
       $params->{'add_svc_acc_uid'} = substr($id[0], 4); # $params->{'login'} =
+
       $c->stash(
 		template => 'user/user_add_svc.tt',
 		form => $self->form_add_svc_acc,
@@ -947,35 +955,21 @@ sub mod_memberUid {
 
 =head1 ldif
 
-get LDIF, recursive or not, for the DN given
+get LDIF (recursive or not, with or without system data) for the DN
+given
+
+Since it is separate action, it is poped out of action proc()
 
 =cut
 
 
-# sub ldif {
-#   my ( $self, $ldap_crud, $args ) = @_;
-#   my $arg = {
-# 	     ldif_dn => $args->{ldif_dn},
-# 	     recursive => $args->{recursive} eq 'on' ? 1 : 0,
-# 	     sysinfo => $args->{sysinfo} eq 'on' ? 1 : 0,
-# 	    };
-#   return $ldap_crud->ldif(
-# 			  $arg->{ldif_dn},
-# 			  $arg->{recursive},
-# 			  $arg->{sysinfo}
-# 			 );
-# }
-
 sub ldif_gen :Path(ldif_gen) :Args(0) {
   my ( $self, $c ) = @_;
-  my $ldap_crud =
-    $c->model('LDAP_CRUD');
   my $params = $c->req->parameters;
 
-  p $params;
   $c->stash(
 	    template => 'search/ldif.tt',
-	    ldif => $c->model('LDAP_CRUD')
+	    final_message => $c->model('LDAP_CRUD')
 	    ->ldif(
 		   $params->{ldap_ldif},
 		   defined $params->{ldap_ldif_recursive} && $params->{ldap_ldif_recursive} ne '' ? 1 : 0,

@@ -1,9 +1,49 @@
 [% META title = 'Account Info' %] 
 
+[% IF final_message.error %]
+<div class="panel panel-danger">
+  <div class="panel-heading">
+    <h4><span class="glyphicon glyphicon-exclamation-sign">&nbsp;</span>Error!</h4>
+  </div>
+  <div class="panel-body">
+    <ul>
+      [% # IF final_message.error.size > 1 %]
+      [% FOREACH i IN final_message.error %]
+      [% i %]
+      [% END %]
+      [% # ELSE %]
+      [% # final_message.error %]
+      [% # END %]
+    </ul>
+  </div>
+</div>
+[% END %]
+[% IF final_message.warning %]
+<div class="panel panel-warning">
+  <div class="panel-heading">
+    <h4><span class="glyphicon glyphicon-warning-sign">&nbsp;</span>Warning!</h4>
+  </div>
+  <div class="panel-body">
+    [% final_message.warning %]
+  </div>
+</div>
+[% END %]
+[% IF final_message.success %]
+<div class="panel panel-success">
+  <div class="panel-heading">
+    <h4><span class="glyphicon glyphicon-ok-sign">&nbsp;</span>User's data were successfully harvested.</h4>
+  </div>
+  <div class="panel-body mono">
+    [% final_message.success %]
+  </div>
+</div>
+[% END %]
+
+
 <div class="row">
   <div class="col-xs-5">
 
-    <h3>Greetings, <em><strong>[% c.user.username %]</strong></em> ! <small><em>bellow is your user-data</em></small></h3>
+    <h3>Greetings, <em><strong>[% c.user.username %]</strong></em> ! <small><em>bellow are user data</em></small></h3>
     <dl class="dl-horizontal">
       <dt>you are logged as:</dt>
       <dd class="text-info">[% c.user.username %]</dd>
@@ -18,7 +58,7 @@
     </dl>
     <dl class="dl-horizontal">
       <dt>First & Last Names:</dt>
-      <dd>[% auth_obj.givenname %] [% auth_obj.sn %]</dd>
+      <dd><em><b>[% auth_obj.givenname %] [% auth_obj.sn %]</b></em></dd>
       <dt>Title:</dt>
       <dd>
 	[% IF auth_obj.title.size %]
@@ -31,121 +71,135 @@
 	  [% auth_obj.title %]
 	[% END %]
       </dd>
+      <dt>Email:</dt>
+      <dd>[% auth_obj.mail %]</dd>
+      <dt>&nbsp;</dt>
+      <dd>&nbsp;</dd>
       <dt>Organizations:</dt>
       <dd>
-	[% FOREACH org IN orgs %]
+	[% IF orgs.size > 0 %]
+	  [% FOREACH org IN orgs %]
+	  <div class="panel panel-info">
+	    <div class="panel-heading">
+	      <h3 class="panel-title">
+	        [% org.key %]
+	      </h3>
+	    </div>
+	    <div class="panel-body">
+	      <address>
+	        <strong>address:</strong><br>
+	        [% org.value %]
+	      </address>
+	      <address>
+	        <strong>fqdn:</strong>
+	        <ul class="list-unstyled">
+	  	[% FOREACH x IN fqdn.item(org.key) %]
+	  	<li>[% x %]</li>
+	  	[% END %]
+	        </ul>
+	      </address>
+	    </div>
+	  </div>
+	  [% END %]
+	[% ELSE %]
+	  <div class="alert alert-danger" role="alert">
+	    <span class="glyphicon glyphicon-exclamation-sign">&nbsp;</span>
+	    Organization data missconfigured or absent!</div>
+	[% END %]
+      </dd>
+      <dt>DHCP stuff:</dt>
+      <dd>
+	[% IF dhcp.size > 0 %]
 	<div class="panel panel-info">
 	  <div class="panel-heading">
 	    <h3 class="panel-title">
-	      [% org.key %]
+	      <span class="glyphicon glyphicon-hdd">&nbsp;</span>
 	    </h3>
 	  </div>
 	  <div class="panel-body">
-	    <address>
-	      <strong>address:</strong><br>
-	      [% org.value %]
-	    </address>
-	    <address>
-	      <strong>fqdn:</strong>
-	      <ul class="list-unstyled">
-		[% FOREACH x IN fqdn.item(org.key) %]
-		<li>[% x %]</li>
+	    <table class="table table-striped table-condensed table-hover">
+	      <thead><th>Hostname</th><th>IP</th><th>MAC</th></thead>
+	      <tbody>
+		[% FOREACH x IN dhcp %]
+		<tr class=mono>
+		  <td>[% x.cn %]</td>
+		  <td>[% x.ip %]</td>
+		  <td>[% x.mac %]</td>
+		</tr>
 		[% END %]
-	      </ul>
-	    </address>
+	      </tbody>
+	    </table>
 	  </div>
 	</div>
 	[% END %]
       </dd>
-      <dt>Email:</dt>
-      <dd>[% auth_obj.mail %]</dd>
     </dl>
-    <div class="panel panel-info">
-      <div class="panel-heading">
-	<h3 class="panel-title">
-	  <span class="glyphicon glyphicon-hdd">&nbsp;</span>DHCP related stuff
-	</h3>
-      </div>
-      <div class="panel-body">
-	<table class="table table-striped table-condensed table-hover">
-	  <thead><th>Hostname</th><th>IP</th><th>MAC</th></thead>
-	  <tbody>
-	    [% FOREACH x IN dhcp %]
-	    <tr class=mono>
-	      <td>[% x.cn %]</td>
-	      <td>[% x.ip %]</td>
-	      <td>[% x.mac %]</td>
-	    </tr>
-	    [% END %]
-	  </tbody>
-	</table>
-      </div>
-    </div>
-    <p>
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc
-      vulputate odio in nunc consequat adipiscing. Fusce ultricies arcu at
-      auctor commodo. Suspendisse potenti. Curabitur adipiscing, libero id
-      bibendum ultricies, ipsum purus fermentum lorem, in mattis mauris
-      felis eget libero. Morbi aliquet tellus ac volutpat euismod. Quisque
-      sodales lobortis ante vitae commodo. Cum sociis natoque penatibus et
-      magnis dis parturient montes, nascetur ridiculus mus. Mauris
-      consectetur, est eu congue auctor, diam tellus facilisis felis, ac
-      bibendum nisl tellus nec orci. In a velit quam. Nunc tincidunt nulla
-      at aliquet fermentum. Donec tristique et magna non mollis. Vivamus in
-      ante at risus sollicitudin adipiscing quis sollicitudin urna. Cum
-      sociis natoque penatibus et magnis dis parturient montes, nascetur
-      ridiculus mus. Nulla porta neque elit, eget placerat quam ullamcorper
-      euismod.
-    </p> 
   </div>
   <div class="col-xs-4">
     [% jpegPhoto %]
 
-    <p>
-      Etiam semper aliquet justo, aliquet aliquam eros. Aenean lacinia
-      elementum augue vel rhoncus. Praesent dapibus felis non aliquet
-      commodo. Curabitur placerat convallis augue lacinia
-      accumsan. Phasellus pretium condimentum nisi mollis pharetra. Nam vel
-      malesuada magna, non accumsan elit. Suspendisse non pellentesque
-      nisi, quis tempor ipsum. In vitae consectetur purus. Etiam sed
-      vulputate tortor.
-    </p>
-    <p>
-      Morbi semper mi ut arcu dapibus auctor. Quisque semper sagittis
-      neque. Sed viverra nulla non porttitor interdum. Cras convallis
-      aliquet eros sed fermentum. Mauris vestibulum lacus auctor suscipit
-      dictum. Sed aliquet sapien porta blandit facilisis. Donec imperdiet
-      pretium turpis vitae gravida. Pellentesque sed ipsum massa. Aliquam
-      at vehicula eros. Nam mattis eget libero at pulvinar. Nulla erat dui,
-      commodo placerat volutpat quis, gravida eu lectus. Integer sit amet
-      iaculis lectus. Quisque ultricies, odio non hendrerit commodo, ante
-      nisl tincidunt tellus, id volutpat dui tellus vitae est.
-    </p>
-    <p>
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc
-      vulputate odio in nunc consequat adipiscing. Fusce ultricies arcu at
-      auctor commodo. Suspendisse potenti. Curabitur adipiscing, libero id
-      bibendum ultricies, ipsum purus fermentum lorem, in mattis mauris
-      felis eget libero. Morbi aliquet tellus ac volutpat euismod. Quisque
-      sodales lobortis ante vitae commodo. Cum sociis natoque penatibus et
-      magnis dis parturient montes, nascetur ridiculus mus. Mauris
-      consectetur, est eu congue auctor, diam tellus facilisis felis, ac
-      bibendum nisl tellus nec orci. In a velit quam. Nunc tincidunt nulla
-      at aliquet fermentum. Donec tristique et magna non mollis. Vivamus in
-      ante at risus sollicitudin adipiscing quis sollicitudin urna. Cum
-      sociis natoque penatibus et magnis dis parturient montes, nascetur
-      ridiculus mus. Nulla porta neque elit, eget placerat quam ullamcorper
-      euismod.
-    </p>
+    [% IF service.size > 0 %]
+    <div class="panel panel-info">
+      <div class="panel-heading">
+	<h3 class="panel-title">
+	  <span class="glyphicon glyphicon-stats">&nbsp;</span>
+	  Services
+	</h3>
+      </div>
+      <div class="panel-body">
+	<dl class="mono">
+	  [% FOREACH y IN service %]
+	  <dt class="bg-primary">
+	    <span class="glyphicon glyphicon-stats"></span>
+	    [% y.authorizedService %]
+	  </dt>
+	  <dd>
+	    [% FOREACH z IN y.leaf %]
+	      <button type="button" 
+		      title="DN of the service"
+		      class="btn btn-link btn-sm btn-default svcDN" 
+		      data-animation="false"
+		      data-container="body" 
+		      data-toggle="popover" 
+		      data-placement="bottom"
+		      data-html="true"
+		      data-content="<small>[% z.key.split(',').join(', ') %]</small>">
+		<b>DN:</b>
+	      </button>
 
-    <p>
-      Yay!  You're looking at a page generated by the Catalyst::View::TT plugin module.
-    </p>
+	      <div class="dropdown pull-left">
+		<button class="btn btn-link btn-xs dropdown-toggle" 
+			type="button" id="dropdownMenuActions" 
+			data-toggle="dropdown"
+			title="Possible Actions Upon the Object">
+		  <span class="glyphicon glyphicon-cog text-primary"></span>
+		  <span class="caret text-primary"></span>
+		</button>
+		<ul class="dropdown-menu dropdown-menu-left bg-primary"
+		    aria-labelledby="dropdownMenuActions"
+		    role="menu">
+		  <li>
+		    <button type="button" title="account global management page" class="btn btn-link disabled"
+			    value="[% entry.key %]"
+			    name="accmgmnt"
+			    data-toggle="modal"
+			    data-target="#accmgmntModal[% loop.index %]">
+		      <span class="glyphicon glyphicon-retweet text-danger"></span>
+		      mgmnt all
+		    </button>
+		  </li>
+		</ul>
+	      </div>
 
-    <p>
-      This is the welcome page.  Why not try the equally-exciting <a
-								     href="[% site.url.message %]">Message Page</a>?
-    </p>
+	      [% z.value %]<br>
+	    [% END %]
+	  </dd>
+	  [% END %]
+	</dl>
+      </div>
+    </div>
+    [% END %]
+
 
   </div>
   <div class="col-xs-3">
@@ -166,3 +220,9 @@
   </div>
 
 </div>
+
+<script>
+$(function(){
+  $('.svcDN').popover()
+});
+</script>

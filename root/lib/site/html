@@ -3,7 +3,7 @@
  <head>
    <meta charset="utf-8">
    <meta name="viewport" content="width=device-width, initial-scale=1">
-   <meta name="description" content="">
+   <meta name="description" content='UMI is intended to be rather flexible, though still "high level" (for use by not qualified personell), LDAP stored data, "simple" and "user-friendly" UI. https://github.com/z-eos/umi'>
    <meta name="author" content="">
    <link rel="icon" href="../../favicon.ico">
 

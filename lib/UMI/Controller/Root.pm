@@ -50,12 +50,6 @@ sub about :Path(about) :Args(0) {
     $c->stash( template => 'about.tt', );
 }
 
-
-sub accinfo :Path(accinfo) :Args(0) {
-    my ( $self, $c ) = @_;
-    $c->stash( template => 'acc_info.tt', );
-}
-
 sub gitacl_root :Path(gitacl_root) :Args(0) {
     my ( $self, $c ) = @_;
     $c->stash( template => 'gitacl/gitacl_root.tt', );
@@ -76,9 +70,51 @@ sub group_root :Path(group_root) :Args(0) {
     $c->stash( template => 'group/group_root.tt', );
 }
 
+sub accinfo :Path(accinfo) :Args(0) {
+    my ( $self, $c ) = @_;
+    $c->stash( template => 'acc_info.tt', );
+}
+
 sub user_preferences :Path(user_prefs) :Args(0) {
-  my ( $self, $c ) = @_;
+  my ( $self, $c, $args ) = @_;
   if ( $c->user_exists ) {
+    my $ldap_crud = $c->model('LDAP_CRUD');
+
+    use Data::Printer;
+    # p $c->session->{auth_obj}->{title};
+
+    my ( $arg, $mesg, $return, $entry, $entries, $orgs, $domains, $fqdn );
+    $entry = '';
+    if ( defined $args->{uid} && $args->{uid} ne '' ) {
+      $mesg = $ldap_crud->search( {
+				   base => split('uid=%s,%s',
+						 $args->{uid},
+						 $ldap_crud->{cfg}->{base}->{acc_root}),
+				   scope => 'base',
+				   attrs => [ qw(givenName sn title mail)],} );
+      if ( $mesg->code ) {
+	$return->{error} .= '<li>' . $ldap_crud->err($mesg) . '</li>';
+      }
+      $entry = $mesg->entry(0);
+      $arg = {
+	      uid => $args->{uid},
+	      givenname => $entry->get_value('givenname'),
+	      sn => $entry->get_value('sn'),
+	      title => $entry->get_value('title'),
+	     };
+    } else {
+      $arg = {
+	      uid => $c->session->{auth_uid},
+	      givenname => $c->session->{auth_obj}->{givenname},
+	      sn => $c->session->{auth_obj}->{sn},
+	      title => $c->session->{auth_obj}->{title},
+	      mail => $c->session->{auth_obj}->{mail},
+	     };
+    }
+
+    #=================================================================
+    # user organizations
+    #
     my $physicalDeliveryOfficeName;
     if ( ref($c->session->{auth_obj}->{physicaldeliveryofficename}) eq 'ARRAY' ) {
       foreach ( @{$c->session->{auth_obj}->{physicaldeliveryofficename}} ) {
@@ -87,18 +123,14 @@ sub user_preferences :Path(user_prefs) :Args(0) {
     } else {
       push @{$physicalDeliveryOfficeName}, $c->session->{auth_obj}->{physicaldeliveryofficename};
     }
-    use Data::Printer;
-    # p $c->session->{auth_obj}->{title};
 
-    my ( $mesg, $return, $entries, $orgs, $domains, $fqdn, $dhcp );
-    my $ldap_crud = $c->model('LDAP_CRUD');
     foreach ( @{$physicalDeliveryOfficeName} ) {
       # here we need to fetch all org recursively to fill all data absent
       # if current object has no attribute needed (postOfficeBox or postalAddress or
       # any other, than we will use the one from it's ancestor
       $mesg = $ldap_crud->search( { base => $_, scope => 'base', } );
       if ( $mesg->code ) {
-	$return->[2] .= '<li>' . $ldap_crud->err($mesg) . '</li>';
+	$return->{error} .= '<li>' . $ldap_crud->err($mesg) . '</li>';
       } else {
 	$entries = $mesg->as_struct;
 	foreach (keys (%{$entries})) {
@@ -112,35 +144,43 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	  $mesg = $ldap_crud->search( { base => $_,
 					attrs => [ 'associatedDomain' ], } );
 	  if ( $mesg->code ) {
-	    $return->[2] .= '<li>' . $ldap_crud->err($mesg) . '</li>';
+	    $return->{error} .= '<li>' . $ldap_crud->err($mesg) . '</li>';
 	  } else {
 	    $domains = $mesg->as_struct;
 	    foreach (keys (%{$domains})) {
-	      push @{$fqdn->{$entries->{$_}->{physicaldeliveryofficename}->[0]}}, $domains->{$_}->{associateddomain}->[0];
+	      push @{$fqdn->{$entries->{$_}->{physicaldeliveryofficename}->[0]}},
+		$domains->{$_}->{associateddomain}->[0];
 	    }
 	  }
 	}
       }
     }
 
-    $mesg = $ldap_crud->search( { base => 'uid=' . $c->session->{auth_uid} . ',' . $ldap_crud->{cfg}->{base}->{acc_root},
+    #=================================================================
+    # user jpegPhoto
+    #
+    $mesg = $ldap_crud->search( { base => 'uid=' . $c->session->{auth_uid} . ',' .
+				  $ldap_crud->{cfg}->{base}->{acc_root},
 				  scope => 'base', } );
     if ( $mesg->code ) {
-      $return->[2] .= '<li>' . $ldap_crud->err($mesg) . '</li>';
+      $return->{error} .= '<li>' . $ldap_crud->err($mesg) . '</li>';
     }
-    my $entry = $mesg->entry(0);
+    $entry = $mesg->entry(0);
     use MIME::Base64;
-    my $jpegPhoto = sprintf('<img alt="jpegPhoto of %s" src="data:image/jpg;base64,%s" class="img-responsive img-thumbnail pull-left" title="%s"/>',
+    my $jpegPhoto = sprintf('<img alt="jpegPhoto of %s" src="data:image/jpg;base64,%s" class="img-responsive img-thumbnail" title="%s"/>',
 			    $entry->dn,
 			    encode_base64(join('',$entry->get_value('jpegphoto'))),
 			    $entry->dn,
 			   );
 
-    # taking all DHCP stuff user relates to
+    #=================================================================
+    # user DHCP stuff
+    #
+    my $dhcp;
     $mesg = $ldap_crud->search( { base => $ldap_crud->{cfg}->{base}->{dhcp},
-				  filter => sprintf('uid=%s', $c->session->{auth_uid}), } );
+				  filter => sprintf('uid=%s', $arg->{uid}), } );
     if ( $mesg->code ) {
-      $return->[2] .= '<li>' . $ldap_crud->err($mesg) . '</li>';
+      $return->{error} .= '<li>' . $ldap_crud->err($mesg) . '</li>';
     }
     $entries = $mesg->as_struct;
     foreach (keys (%{$entries})) {
@@ -151,12 +191,50 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 		     };
     }
 
+    #=================================================================
+    # user services
+    #
+    my ( @service_arr, $service, $service_details );
+    $mesg = $ldap_crud->search( { base => 'uid=' . $arg->{uid} . ',' .
+				  $ldap_crud->{cfg}->{base}->{acc_root},
+				  scope => 'one',
+				  filter => 'authorizedService=*',
+				  attrs => [ 'authorizedService'],} );
+    if ( $mesg->code ) {
+      $return->{error} .= '<li>' . $ldap_crud->err($mesg) . '</li>';
+    }
+
+    foreach ($mesg->entries) {
+      $mesg = $ldap_crud->search( { base => $_->dn,
+				    scope => 'children',
+				  attrs => [ 'uid', 'cn' ], });
+      if ( $mesg->code ) {
+	$return->{error} .= '<li>' . $ldap_crud->err($mesg) . '</li>';
+      }
+      next if ! $mesg->count;
+      $service_details = {
+			  branch_dn => $_->dn,
+			  authorizedService => $_->get_value('authorizedService'),
+			 };
+
+      @service_arr = $mesg->entries;
+
+      foreach (@service_arr) {
+	$service_details->{leaf}->{$_->dn} = $_->get_value('uid');
+      }
+      push @{$service}, $service_details;
+      undef $service_details;
+    }
+
+    # p $arg;
     $c->stash( template => 'user/user_preferences.tt',
-	       auth_obj => $c->session->{auth_obj},
+	       auth_obj => $arg,
 	       jpegPhoto => $jpegPhoto,
 	       orgs => $orgs,
 	       fqdn => $fqdn,
-	       dhcp => $dhcp, );
+	       dhcp => $dhcp,
+	       service => $service,
+	       final_message => $return, );
   } else {
     $c->stash( template => 'signin.tt', );
   }

@@ -2,6 +2,24 @@
 
 <h2>Search Simple Results <small><em>base: [% params.ldapsearch_base %]; &nbsp;&nbsp; filter: [% params.ldapsearch_filter %]</em></small></h2>
 
+[% IF final_message.error %]
+<div class="panel panel-danger">
+  <div class="panel-heading">
+    <h4><span class="glyphicon glyphicon-exclamation-sign">&nbsp;</span>Error!</h4>
+  </div>
+  <div class="panel-body">
+    <ul>
+      [% FOREACH i IN final_message.error %]
+        [% i %]
+      [% END %]
+    </ul>
+  </div>
+</div>
+[% ELSIF final_message.success %]
 <pre>
-  [% ldif %]
+  [% final_message.success %]
 </pre>
+[% END %]
+
+
+

@@ -105,7 +105,7 @@ sub create_dhcp_host {
 
   push @{$arg->{ldapadd_arg}}, dhcpComments => $arg->{dhcpComments} if defined $arg->{dhcpComments};
 
-  p $arg->{ldapadd_arg};
+  # p $arg->{ldapadd_arg};
 
   my $nets = $ldap_crud->search( { base => $ldap_crud->{cfg}->{base}->{dhcp},
 				   filter => 'dhcpOption=domain-name ' . $arg->{net}, } );

@@ -134,8 +134,7 @@
 	    </button>
 	    <ul class="dropdown-menu dropdown-menu-right" role="menu" name="ldapsearch_base">
 	      <li><a href="[% c.uri_for('/searchadvanced') %]">
-		  <span class="glyphicon glyphicon-filter text-success"></span>
-		  Advanced Search</a>
+		  <span class="glyphicon glyphicon-filter text-success text-uppercase"><b>Advanced Search</b></span></a>
 	      </li>
 	      <li class="dropdown-header bg-primary"><b>Predefined Search</b></li>
 	      <li>
@@ -149,17 +148,20 @@
 		</button>
 	      </li>
 	      </li>
-	      <li><a href="#">
-		  <span class="glyphicon glyphicon-comment"></span>
-		  by JID</a>
+	      <li>
+		<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_jid">
+		  <span class="text-success"><span class="glyphicon glyphicon-comment"></span> by JID</span>
+		</button>
 	      </li>
-	      <li><a href="#">
-		  <span class="glyphicon glyphicon-fullscreen"></span>
-		  by IP</a>
+	      <li>
+		<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_ip">
+		  <span class="text-success"><span class="glyphicon glyphicon-fullscreen"></span> by IP</span>
+		</button>
 	      </li>
-	      <li><a href="#">
-		  <span class="glyphicon glyphicon-barcode"></span>
-		  by MAC</a>
+	      <li>
+		<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_mac">
+		  <span class="text-success"><span class="glyphicon glyphicon-barcode"></span> by MAC</span>
+		</button>
 	      </li>
 	      <li>
 		<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_telephone">

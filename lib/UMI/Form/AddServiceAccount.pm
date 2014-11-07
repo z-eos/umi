@@ -114,11 +114,12 @@ sub options_authorizedservice {
 
   my @services = ( { value => '0', label => '--- select service ---', selected => 'selected' } );
 
-  foreach my $key ( sort {$b cmp $a} keys %{$self->ldap_crud->{cfg}->{authorizedService}}) {
+  foreach my $key ( sort {$a cmp $b} keys %{$self->ldap_crud->{cfg}->{authorizedService}}) {
     push @services, {
 		     value => $key,
 		     label => $self->ldap_crud->{cfg}->{authorizedService}->{$key}->{descr},
 		    };
+p $key;
   }
   # p @services;
   return \@services;

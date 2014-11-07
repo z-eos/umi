@@ -52,6 +52,7 @@ sub _build_cfg {
 		   gidNumber => 10012,
 		  },
 	  base => {
+		   db => 'dc=umidb',
 		   acc_root =>       'ou=People,dc=umidb',
 		   acc_svc_branch => 'ou=People,dc=umidb',
 		   acc_svc_common => 'ou=People,dc=umidb',
@@ -120,16 +121,22 @@ sub _build_cfg {
 					   gidNumber => 10006,
 					  },
 				'xmpp' => {
-					   descr => 'Jabber',
+					   descr => 'XMPP (Jabber)',
 					   gidNumber => 10106,
 					   jpegPhoto_noavatar => UMI->path_to('root', 'static', 'images', '/avatar-xmpp.png'),
 					  },
 				'802.1x-mac' => {
-						  descr => '802.1x MAC _GLOBAL_',
+						  descr => '802.1x MAC',
 						 },
 				'802.1x-eap' => {
-						  descr => '802.1x EAP _GLOBAL_',
+						  descr => '802.1x EAP',
 						 },
+				'otrs' => {
+					   descr => 'OTRS',
+					  },
+				'sms' => {
+					   descr => 'SMSter',
+					  },
 			       },
 	 };
 }
@@ -540,7 +547,7 @@ sub ldif {
   my ($self, $dn, $recursive, $sysinfo) = @_;
   use POSIX qw(strftime);
   my $ts = strftime "%Y-%m-%d %H:%M:%S", localtime;
-  my $return = sprintf("
+  my $return->{success} = sprintf("
 ## LDIF export for  \"%s\"
 ## Search Scope: \"base\"
 ## Search Filter: \"(objectClass=*)\"
@@ -585,11 +592,11 @@ sub ldif {
 							'subschemaSubentry',
 						      ] : [ '*' ], );
   if ($msg->is_error()) {
-    $return .= $self->err( $msg );
+    $return->{error} .= $self->err( $msg );
   } else {
     my @entries = $msg->sorted;
     foreach my $entry ( @entries ) {
-      $return .= $entry->ldif;
+      $return->{success} .= $entry->ldif;
     }
   }
   use Data::Printer;
