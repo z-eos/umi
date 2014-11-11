@@ -144,6 +144,15 @@ __PACKAGE__->deny_access_unless_any( "/org_root",       [ qw/wheel admin coadmin
 __PACKAGE__->deny_access_unless_any( "/searchadvanced", [ qw/wheel admin coadmin/ ]);
 __PACKAGE__->deny_access_unless_any( "/searchby",       [ qw/wheel admin coadmin/ ]);
 __PACKAGE__->deny_access_unless_any( "/user",           [ qw/wheel admin coadmin/ ]);
+__PACKAGE__->allow_access_if( "/user/modpwd",
+			      sub {
+				my ( $c, $action ) = @_;
+				if ( $c->user_exists ) {
+				  die $Catalyst::Plugin::Authorization::ACL::Engine::ALLOWED;
+				} else {
+				  die $Catalyst::Plugin::Authorization::ACL::Engine::DENIED;
+				}
+			      } );
 
 
 =head1 NAME

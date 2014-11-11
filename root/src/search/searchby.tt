@@ -26,9 +26,9 @@
       	 data-toggle="popover"
       	 data-original-title="Legend"
 	 data-content="<ul class='list-unstyled'>
-<li><span class='glyphicon glyphicon-star label label-info'>&nbsp;root object</span></li>
-<li><span class='glyphicon glyphicon-tag label label-warning'>&nbsp;service branch</span></li>
-<li><span class='glyphicon glyphicon-leaf label label-success'>&nbsp;service account</span></li>
+<li><span class='fa fa-user label label-info'>&nbsp;root object</span></li>
+<li><span class='fa fa-code-fork label label-warning'>&nbsp;service branch</span></li>
+<li><span class='fa fa-leaf label label-success'>&nbsp;service account</span></li>
 <li><span class='label label-primary'>user input</span></li>
 </ul>"
       	 tabindex="0">
@@ -64,7 +64,7 @@
             data-target="#collapse[% loop.index %]" 
 	    data-toggle="collapse"
 	    data-parent="#accordion[% loop.index %]">
-       <span class="glyphicon glyphicon-expand text-primary"></span>
+       <span class="fa fa-toggle-down text-primary"></span>
     </button>
 
      <div class="dropdown pull-left">
@@ -72,19 +72,27 @@
 	       type="button" id="dropdownMenuActions" 
 	       data-toggle="dropdown"
 	       title="Possible Actions Upon the Object">
-	 <span class="glyphicon glyphicon-cog text-primary"></span><span class="caret text-primary"></span>
+	 <span class="fa fa-cog text-primary"></span><span class="caret text-primary"></span>
        </button>
 	 <ul class="dropdown-menu dropdown-menu-left bg-primary"
 	     aria-labelledby="dropdownMenuActions"
 	     role="menu">
   [% IF entry.value.mgmnt.is_dn && entry.value.mgmnt.is_account %]
 	   <li>
+	     <button type="submit" title="add service account" class="btn btn-link"
+		     value="[% entry.key %]"
+		     name="user_preferences">
+	       <span class="fa fa-list-alt text-info"></span>
+	       user prefs
+	     </button>
+	   </li>
+	   <li>
 	     <button type="button" title="account global management page" class="btn btn-link disabled"
 		     value="[% entry.key %]"
 		     name="accmgmnt"
 		     data-toggle="modal"
 		     data-target="#accmgmntModal[% loop.index %]">
-	       <span class="glyphicon glyphicon-retweet text-danger"></span>
+	       <span class="fa fa-retweet text-danger"></span>
 	       mgmnt all
 	     </button>
 	   </li>
@@ -92,14 +100,14 @@
 	     <button type="submit" title="add service account" class="btn btn-link"
 		     value="[% entry.key %]"
 		     name="add_svc_acc">
-	       <span class="glyphicon glyphicon-plus-sign text-warning"></span>
+	       <span class="fa fa-plus-circle text-warning"></span>
 	       service account
 	     </button>
 	   </li>
 	   <li>
 	     <button type="submit" title="modify group" class="btn btn-link"
 		     value="[% entry.key %]" name="ldap_modify_group">
-	       <span class="glyphicon glyphicon-tags text-warning"></span>
+	       <span class="fa fa-group text-warning"></span>
 	       group
 	     </button>
 	   </li>
@@ -110,7 +118,7 @@
 		     name="ldap_delete"
 		     data-toggle="modal"
 		     data-target="#deleteModal[% loop.index %]">
-	       <span class="glyphicon glyphicon-remove-sign text-danger"></span>
+	       <span class="fa fa-times-circle text-danger"></span>
 	       delete
 	     </button>
 	   </li>
@@ -121,7 +129,7 @@
 		     name="ldap_ldif"
 		     data-toggle="modal"
 		     data-target="#ldifModal[% loop.index %]">
-	       <span class="glyphicon glyphicon-export text-info"></span>
+	       <span class="fa fa-upload text-info"></span>
 	       LDIF
 	     </button>
 	   </li>
@@ -129,7 +137,7 @@
 	     <button type="submit" title="edit object" class="btn btn-link"
 		     value="[% entry.key %]"
 		     name="ldap_modify">
-	       <span class="glyphicon glyphicon-edit text-warning"></span>
+	       <span class="fa fa-edit text-warning"></span>
 	       edit (all)
 	     </button>
 	   </li>
@@ -137,7 +145,7 @@
 	   <li>
 	     <button type="submit" title="modify group members" class="btn btn-link"
 		     value="[% entry.key %]" name="ldap_modify_memberUid">
-	       <span class="glyphicon glyphicon-tags text-warning"></span>
+	       <span class="fa fa-group text-warning"></span>
 	       members
 	     </button>
 	   </li>
@@ -146,7 +154,7 @@
 	   <li>
 	     <button type="submit" title="modify password" class="btn btn-link"
 		     value="[% entry.key %]" name="ldap_modify_password">
-	       <span class="glyphicon glyphicon-lock text-warning"></span>
+	       <span class="fa fa-key text-warning"></span>
 	       password
 	     </button>
 	   </li>
@@ -155,7 +163,7 @@
 	   <li>
 	     <button type="submit" title="add DHCP (MAC to IP binding)" class="btn btn-link"
 		     value="[% entry.key %]" name="ldap_add_dhcp">
-	       <span class="glyphicon glyphicon-fullscreen text-warning"></span>
+	       <span class="fa fa-sitemap text-warning"></span>
 	       DHCP (IP to MAC binding)
 	     </button>
 	   </li>
@@ -164,7 +172,7 @@
 	   <li>
 	     <button type="submit" title="modify jpegPhoto" class="btn btn-link"
 		     value="[% entry.key %]" name="ldap_modify_jpegphoto">
-	       <span class="glyphicon glyphicon-picture text-warning"></span>
+	       <span class="fa fa-image text-warning"></span>
 	       image
 	     </button>
 	   </li>
@@ -174,7 +182,7 @@
 	   <li>
 	     <button type="submit" title="reorder gitAcl" class="btn btn-link"
 		     value="[% entry.key %]" name="ldap_gitacl_reorder">
-	       <span class="glyphicon glyphicon-sort text-warning"></span>
+	       <span class="fa fa-sort text-warning"></span>
 	       reorder
 	     </button>
 	   </li>
@@ -185,15 +193,15 @@
     <b class="col-sm-offset-1">
       [% IF entry.key.match('^author') %]
       <abbr title="Service Account Branch (the service to which all this service accounts will relate)">
-	<span class="glyphicon glyphicon-tag"></span>
+	<span class="fa fa-code-fork"></span>
       </abbr>
       [% ELSIF entry.key.match('^uid=.*,author') %]
       <abbr title="Service Account Branch Leaf (the very service account - the credentials to use for the service)">
-	<span class="glyphicon glyphicon-leaf"></span>
+	<span class="fa fa-leaf"></span>
       </abbr>
       [% ELSIF entry.value.mgmnt.is_dn %]
       <abbr title="Root Account">
-	<span class="glyphicon glyphicon-star"></span>
+	<span class="fa fa-user"></span>
       </abbr>
       [% END %]
       DN:&nbsp;&nbsp;&nbsp;[% entry.key.replace(',', ',&nbsp;&nbsp;&nbsp;') %]</b>
@@ -264,7 +272,7 @@
 	 <div class="modal-content">
 	   <div class="modal-header">
 	     <h4 class="modal-title alert alert-info" id="ldifModalLabel[% loop.index %]">
-	       <span class="glyphicon glyphicon-info-sign"></span>
+	       <span class="fa fa-info-circle"></span>
 	       LDIF of DN: <b>[% entry.key %]</b>
 	     </h4>
 	   </div>
@@ -302,7 +310,15 @@
     [% NEXT IF hattr.key.match(';binary') %]
     <dt>[% hattr.key %]:</dt><dd>
     [% IF hattr.key == 'userPassword' %]
-      <span style="font-size: 130%">&#9899;&#9899;&#9899;&#9899;&#9899;&#9899;&#9899;&#9899;</span>
+      <!-- <span style="font-size: 130%">&#9899;&#9899;&#9899;&#9899;&#9899;&#9899;&#9899;&#9899;</span> -->
+      <span class="fa fa-circle"></span>
+      <span class="fa fa-circle"></span>
+      <span class="fa fa-circle"></span>
+      <span class="fa fa-circle"></span>
+      <span class="fa fa-circle"></span>
+      <span class="fa fa-circle"></span>
+      <span class="fa fa-circle"></span>
+      <span class="fa fa-circle"></span>
     [% ELSIF hattr.key == 'jpegPhoto' %]
       [% 
         # bellow, value of jpegPhoto attribute contains no  `<img class="' part

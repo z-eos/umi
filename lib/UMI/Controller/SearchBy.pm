@@ -69,7 +69,8 @@ Catalyst Controller.
 sub index :Path :Args(0) {
   my ( $self, $c ) = @_;
 
-  if ( defined $c->session->{"auth_uid"} ) {
+  # if ( defined $c->session->{"auth_uid"} ) {
+  if ( defined $c->user_exists ) {
     my ( $params, $ldap_crud, $filter, $filter_meta, $filter_show, $base );
 
     $params = $c->req->params;
@@ -207,7 +208,8 @@ SearchBy main processing logics
 sub proc :Path(proc) :Args(0) {
   my ( $self, $c ) = @_;
 
-  if ( defined $c->session->{"auth_uid"} ) {
+  # if ( defined $c->session->{"auth_uid"} ) { 
+  if ( defined $c->user_exists ) {
     my $params = $c->req->parameters;
 
 #=====================================================================
@@ -238,6 +240,23 @@ sub proc :Path(proc) :Args(0) {
 		  type => $params->{'type'},
 		 );
       }
+
+#=====================================================================
+# User preferences
+#=====================================================================
+    } elsif (defined $params->{'user_preferences'} &&
+	     $params->{'user_preferences'} ne '') {
+
+      # $c->stash(
+      # 		template => 'user/user_preferences.tt',
+      # 		uid => $params->{'user_preferences'},
+      # 	       );
+      $c->controller('Root')
+	->user_preferences( $c,
+			    {
+			     uid => substr((split(',', $params->{'user_preferences'}))[0],4),
+			    }
+			  );
 
 #=====================================================================
 # Modify (all fields form)

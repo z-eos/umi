@@ -80,28 +80,37 @@ sub user_preferences :Path(user_prefs) :Args(0) {
   if ( $c->user_exists ) {
     my $ldap_crud = $c->model('LDAP_CRUD');
 
-    use Data::Printer;
+    use Data::Printer colored => 0;
     # p $c->session->{auth_obj}->{title};
 
     my ( $arg, $mesg, $return, $entry, $entries, $orgs, $domains, $fqdn );
     $entry = '';
     if ( defined $args->{uid} && $args->{uid} ne '' ) {
       $mesg = $ldap_crud->search( {
-				   base => split('uid=%s,%s',
-						 $args->{uid},
-						 $ldap_crud->{cfg}->{base}->{acc_root}),
+				   base => sprintf('uid=%s,%s',
+						   $args->{uid},
+						   $ldap_crud->{cfg}->{base}->{acc_root}),
 				   scope => 'base',
-				   attrs => [ qw(givenName sn title mail)],} );
+				   attrs => [ qw(givenName
+						 sn
+						 title
+						 mail
+						 physicalDeliveryOfficeName
+						 telephoneNumber) ],
+				  } );
       if ( $mesg->code ) {
 	$return->{error} .= '<li>' . $ldap_crud->err($mesg) . '</li>';
+      } else {
+	$entry = $mesg->entry(0);
+	$arg = {
+		uid => $args->{uid},
+		givenname => $entry->get_value('givenname'),
+		sn => $entry->get_value('sn'),
+		title => $entry->get_value('title'),
+		physicaldeliveryofficename => $entry->get_value('physicaldeliveryofficename'),
+		telephonenumber => $entry->get_value('telephonenumber'),
+	       };
       }
-      $entry = $mesg->entry(0);
-      $arg = {
-	      uid => $args->{uid},
-	      givenname => $entry->get_value('givenname'),
-	      sn => $entry->get_value('sn'),
-	      title => $entry->get_value('title'),
-	     };
     } else {
       $arg = {
 	      uid => $c->session->{auth_uid},
@@ -109,6 +118,8 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	      sn => $c->session->{auth_obj}->{sn},
 	      title => $c->session->{auth_obj}->{title},
 	      mail => $c->session->{auth_obj}->{mail},
+	      physicaldeliveryofficename => $c->session->{auth_obj}->{physicaldeliveryofficename},
+	      telephonenumber => $c->session->{auth_obj}->{telephonenumber},
 	     };
     }
 
@@ -116,12 +127,12 @@ sub user_preferences :Path(user_prefs) :Args(0) {
     # user organizations
     #
     my $physicalDeliveryOfficeName;
-    if ( ref($c->session->{auth_obj}->{physicaldeliveryofficename}) eq 'ARRAY' ) {
-      foreach ( @{$c->session->{auth_obj}->{physicaldeliveryofficename}} ) {
+    if ( ref($arg->{physicaldeliveryofficename}) eq 'ARRAY' ) {
+      foreach ( @{$arg->{physicaldeliveryofficename}} ) {
 	push @{$physicalDeliveryOfficeName}, $_;
       }
     } else {
-      push @{$physicalDeliveryOfficeName}, $c->session->{auth_obj}->{physicaldeliveryofficename};
+      push @{$physicalDeliveryOfficeName}, $arg->{physicaldeliveryofficename};
     }
 
     foreach ( @{$physicalDeliveryOfficeName} ) {
@@ -159,8 +170,9 @@ sub user_preferences :Path(user_prefs) :Args(0) {
     #=================================================================
     # user jpegPhoto
     #
-    $mesg = $ldap_crud->search( { base => 'uid=' . $c->session->{auth_uid} . ',' .
-				  $ldap_crud->{cfg}->{base}->{acc_root},
+    $mesg = $ldap_crud->search( { base => sprintf('uid=%s,%s',
+						  $arg->{uid},
+						  $ldap_crud->{cfg}->{base}->{acc_root}),
 				  scope => 'base', } );
     if ( $mesg->code ) {
       $return->{error} .= '<li>' . $ldap_crud->err($mesg) . '</li>';
@@ -234,6 +246,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	       fqdn => $fqdn,
 	       dhcp => $dhcp,
 	       service => $service,
+	       session => p($c->session),
 	       final_message => $return, );
   } else {
     $c->stash( template => 'signin.tt', );

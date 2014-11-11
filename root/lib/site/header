@@ -22,14 +22,14 @@
 [% IF c.user_exists && c.session.auth_uid %]
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-	    <span class="glyphicon glyphicon-th"></span>
+	    <span class="fa fa-th"></span>
 	    <span class="caret"></span>
 	  </a>
           <ul class="dropdown-menu" role="menu">
   [% IF c.check_user_roles('wheel') || c.check_user_roles('email') || c.check_user_roles('xmpp') %]
         <li>
 	      <a href="[% c.uri_for_action('user_root') %]">
-		<span class="glyphicon glyphicon-user"></span>
+		<span class="fa fa-user"></span>
 		User
 	      </a>
 	    </li>
@@ -37,7 +37,7 @@
   [% IF c.check_user_roles('wheel') %]
         <li>
 	      <a href="[% c.uri_for_action('group_root') %]">
-        		<span class="glyphicon glyphicon-tags"> </span>
+        		<span class="fa fa-group"> </span>
         		Group
 	      </a>
 	    </li>
@@ -45,7 +45,7 @@
   [% IF c.check_user_roles('wheel') || c.check_user_roles('email') || c.check_user_roles('xmpp') %]
         <li>
 	      <a href="[% c.uri_for_action('org_root') %]">
-        		<span class="glyphicon glyphicon-briefcase"></span>
+        		<span class="fa fa-institution"></span>
         		Org
 	      </a>
 	    </li>
@@ -53,7 +53,7 @@
   [% IF c.check_user_roles('wheel') %]
         <li>
 	      <a href="[% c.uri_for_action('gitacl_root') %]">
-        		<span class="glyphicon glyphicon-random"></span>
+        		<span class="fa fa-gavel"></span>
         		GitACL
 	      </a>
 	    </li>
@@ -61,14 +61,14 @@
   [% IF c.check_user_roles('wheel') %]
         <li class="disabled">
 	      <a href="#">
-        		<span class="glyphicon glyphicon-globe"></span>
+        		<span class="fa fa-globe"></span>
         		DNS
 	      </a>
 	    </li>[% END %]
   [% IF c.check_user_roles('wheel') || c.check_user_roles('dhcp') %]
         <li>
 	      <a href="[% c.uri_for_action('dhcp_root') %]">
-        		<span class="glyphicon glyphicon-fullscreen"></span>
+        		<span class="fa fa-sitemap"></span>
         		DHCP
 	      </a>
 	    </li>
@@ -76,7 +76,7 @@
             <li class="divider"></li>
             <li>
 	      <a href="#">
-		<span class="glyphicon glyphicon-bell text-danger"></span>
+		<span class="fa fa-bell text-danger"></span>
 		Test
 	      </a>
 	    </li>
@@ -85,7 +85,7 @@
 	    [% IF c.check_any_user_role( 'wheel', 'skiioo-dev' ) %]
             <li>
 	      <a href="#">
-		<span class="glyphicon glyphicon-leaf text-success"></span>
+		<span class="fa fa-leaf text-success"></span>
 		wheel && skiioo-dev
 	      </a>
 	    </li>
@@ -93,7 +93,7 @@
 	    [% IF c.check_user_roles('wheel') %]
             <li>
 	      <a href="#">
-		<span class="glyphicon glyphicon-fire text-danger"></span>
+		<span class="fa fa-fire text-danger"></span>
 		wheel
 	      </a>
 	    </li>
@@ -101,7 +101,7 @@
 	    [% IF c.check_any_user_role( 'wheel', 'setup' ) %]
             <li>
 	      <a href="#">
-		<span class="glyphicon glyphicon-cutlery text-info"></span>
+		<span class="fa fa-money text-info"></span>
 		wheel && setup
 	      </a>
 	    </li>
@@ -129,54 +129,54 @@
 		    tabindex="-1"
 		    data-toggle="dropdown"
 		    title="LDAP Select Base For Search-Simple Filter">
-	      <span class="glyphicon glyphicon-search"></span>
+	      <span class="fa fa-search"></span>
 	      <span class="caret"></span>
 	    </button>
 	    <ul class="dropdown-menu dropdown-menu-right" role="menu" name="ldapsearch_base">
 	      <li><a href="[% c.uri_for('/searchadvanced') %]">
-		  <span class="glyphicon glyphicon-filter text-success text-uppercase"><b>Advanced Search</b></span></a>
+		  <span class="fa fa-filter text-success text-uppercase"><b>Advanced Search</b></span></a>
 	      </li>
 	      <li class="dropdown-header bg-primary"><b>Predefined Search</b></li>
 	      <li>
 		<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_name">
-		  <span class="text-success"><span class="glyphicon glyphicon-user text-success"></span> by name</span>
+		  <span class="text-success"><span class="fa fa-user text-success"></span> by name</span>
 		</button>
 	      </li>
 	      <li>
 		<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_email">
-		  <span class="text-success"><span class="glyphicon glyphicon-envelope"></span> by email</span>
+		  <span class="text-success"><span class="fa fa-envelope-o"></span> by email</span>
 		</button>
 	      </li>
 	      </li>
 	      <li>
 		<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_jid">
-		  <span class="text-success"><span class="glyphicon glyphicon-comment"></span> by JID</span>
+		  <span class="text-success"><span class="fa fa-comments-o"></span> by JID</span>
 		</button>
 	      </li>
 	      <li>
 		<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_ip">
-		  <span class="text-success"><span class="glyphicon glyphicon-fullscreen"></span> by IP</span>
+		  <span class="text-success"><span class="fa fa-code-fork"></span> by IP</span>
 		</button>
 	      </li>
 	      <li>
 		<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_mac">
-		  <span class="text-success"><span class="glyphicon glyphicon-barcode"></span> by MAC</span>
+		  <span class="text-success"><span class="fa fa-barcode"></span> by MAC</span>
 		</button>
 	      </li>
 	      <li>
 		<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_telephone">
-		  <span class="text-success"><span class="glyphicon glyphicon-phone-alt"></span> by telephone</span>
+		  <span class="text-success"><span class="fa fa-phone"></span> by telephone</span>
 		</button>
 	      </li>
               <li class="dropdown-header bg-primary"><b>Search Base By</b></li>
-	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=group,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="glyphicon glyphicon-save"></span> group</span></button></li>
-	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=People,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="glyphicon glyphicon-save"></span> People</span></button></li>
-	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=Organizations,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="glyphicon glyphicon-save"></span> Organizations</span></button></li>
-	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=machines,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="glyphicon glyphicon-save"></span> machines</span></button></li>
-	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=alias,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="glyphicon glyphicon-save"></span> alias</span></button></li>
-	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=workstations,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="glyphicon glyphicon-save"></span> workstations</span></button></li>
-	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=dhcp,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="glyphicon glyphicon-save"></span> dhcp</span></button></li>
-	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=GitACL,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="glyphicon glyphicon-save"></span> GitACL</span></button></li>
+	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=group,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="fa fa-group">&nbsp;</span>group</span></button></li>
+	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=People,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="fa fa-user">&nbsp;</span>People</span></button></li>
+	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=Organizations,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="fa fa-institution">&nbsp;</span>Organizations</span></button></li>
+	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=machines,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="fa fa-laptop">&nbsp;</span>machines</span></button></li>
+	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=alias,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="fa fa-puzzle-piece">&nbsp;</span>mail alias</span></button></li>
+	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=workstations,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="fa fa-desktop">&nbsp;</span>workstations</span></button></li>
+	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=dhcp,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="fa fa-sitemap">&nbsp;</span>DHCP</span></button></li>
+	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=GitACL,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="fa fa-gavel">&nbsp;</span>GitACL</span></button></li>
 	    </ul>
 	  </div>
 	</div>
@@ -185,40 +185,31 @@
       <ul class="nav navbar-nav">
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-	    <span class="glyphicon glyphicon-info-sign"></span>
+	    <span class="fa fa-info-circle"></span>
 	    <span class="caret"></span>
 	  </a>
           <ul class="dropdown-menu" role="menu">
             <li>
-	      <a href="about">
-		<span class="glyphicon glyphicon-question-sign"></span>
-		Help
-	      </a>
+	      <a href="about"><span class="fa fa-question-circle">&nbsp;</span>help</a>
 	    </li>
             <li class="divider"></li>
             <li>
-	      <a href="#">
-		<span class="glyphicon glyphicon-comment"></span>
-		Chat
-	      </a>
+	      <a href="#"><span class="fa fa-comments-o">&nbsp;</span>chat</a>
 	    </li>
             <li>
-	      <a href="#">
-		<span class="glyphicon glyphicon-envelope"></span>
-		Email
-	      </a>
+	      <a href="#"><span class="fa fa-envelope-o">&nbsp;</span>email</a>
 	    </li>
             <li>
-	      <a href="#">
-		<span class="glyphicon glyphicon-phone"></span>
-		Phone
-	      </a>
+	      <a href="#"><span class="fa fa-mobile">&nbsp;</span>telephone</a>
+	    </li>
+            <li>
+	      <a href="#"><span class="fa fa-bug text-danger">&nbsp;</span>bug</a>
 	    </li>
 	    [% IF c.check_user_roles('wheel') %]
             <li class="divider"></li>
             <li>
 	      <a href="#">
-		<span class="glyphicon glyphicon-info-sign text-info"></span>
+		<span class="fa fa-info-circle text-info"></span>
 		system info
 	      </a>
 	    </li>
@@ -230,20 +221,20 @@
 	[% IF c.user %]
         <li class="dropdown float-right">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-	    <span class="glyphicon glyphicon-user"></span>
+	    <span class="fa fa-user"></span>
 	    [% c.user() %]
 	    <span class="caret"></span>
 	  </a>
           <ul class="dropdown-menu" role="menu">
             <li>
 	      <a href="[% c.uri_for_action('accinfo') %]">
-		<span class="glyphicon glyphicon-credit-card"></span>
+		<span class="fa fa-list-alt"></span>
 		Account Info
 	      </a>
 	    </li>
             <li>
 	      <a href="/user_prefs">
-		<span class="glyphicon glyphicon-cog"></span>
+		<span class="fa fa-cogs"></span>
 		Preferences
 	      </a>
 	    </li>
@@ -251,13 +242,13 @@
         </li>
         <li>
 	  <a href="[% c.uri_for('/auth/signout') %]" title="Sign Out">
-	    <span class="glyphicon glyphicon-log-out"></span>
+	    <span class="fa fa-sign-out"></span>
 	  </a>
 	</li>
 	[% ELSE %]
         <li>
 	  <a href="[% c.uri_for('/auth/signin') %]" title="Sign In">
-	    <span class="glyphicon glyphicon-log-in"></span>
+	    <span class="fa fa-sign-in"></span>
 	  </a>
 	</li>
 	[% END %]
