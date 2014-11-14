@@ -4,105 +4,100 @@
   <h2>Search Simple Modify Page <small><em>of DN: [% modify %]</em></small></h2>
 </div>
 
+[% IF final_message.error %]
+<div class="panel panel-danger">
+  <div class="panel-heading">
+    <h4><span class="fa fa-exclamation-circle">&nbsp;</span>Error!</h4>
+  </div>
+  <div class="panel-body">
+    <ul>
+      [% FOREACH i IN final_message.error %]
+      [% i %]
+      [% END %]
+    </ul>
+  </div>
+</div>
+[% ELSIF final_message.success %]
+<div class="panel panel-success">
+  <div class="panel-heading">
+    <h4><span class="fa fa-check-circle">&nbsp;</span>Success!</h4>
+  </div>
+  <div class="panel-body">
+  [% final_message.success %]
+  </div>
+</div>
+[% END %]
+
+
 <form method="POST"
       enctype="multipart/form-data"
       class="form-horizontal"
       action="[% c.uri_for_action('/searchby/modify') %]">
+<input type="hidden" name="dn" id="dn" value="[% modify %]">
 
-    [% err %]
+[% FOREACH attr IN entries %]
+<div class="form-group">
+  <label class="col-sm-2 control-label">
+  [% IF schema.item(attr.key) != 1 && 
+        attr.key != rdn &&
+        attr.key != 'userPassword' &&
+        attr.key != 'jpegPhoto' %]
+    [% attr.key %]&nbsp;<a class="element-add" href="#" title="add value"><span class="fa fa-plus-square"></span></a>
+  [% ELSE %]
+    [% attr.key %]
+  [% END %]
+  </label>
+  <div class="col-sm-10">
+    [% IF attr.key == 'jpegPhoto' %]
+      <img alt="jpegPhoto of [% modify %]" src="[% attr.value %]" class="img-thumbnail pull-left" title="[% modify %]">
+      <input type="file" class="btn btn-default" name="[% attr.key %]" accept="image/jpeg, image/png"></input>
+    [% ELSIF attr.key == 'userPassword' %]
+      <input type="password" name="[% attr.key %]0" class="form-control" placeholder="password is here">
+      <input type="password" name="[% attr.key %]1" class="form-control" placeholder="confirm password">
+    [% ELSE %]
+      [% FOREACH val IN attr.value %]
+        [% IF attr.key == rdn %]
+          <input type=text value="[% val %]" name="[% attr.key %]" disabled="" class="form-control">
+        [% ELSIF attr.key == 'grayPublicKey' %]
+	  <p><textarea name="[% attr.key %]" class="form-control" rows=2>[% val %]</textarea></p>
+	[% ELSE %]
+          <p><input type=text value="[% val %]" name="[% attr.key %]" class="form-control"></p>
+	[% END %]
+      [% END %]
+    [% END %]
+  </div>
+</div>
+[% END %]
 
-<table class="table table-striped">
-
-    [% PERL %]
-
-# my $entry = shift @{$stash->{entries}};
-my $entry = $stash->{entries};
-use Data::Printer;
-# p $stash->{schema};
-my ($attr_meta, $attr, $val, $rdn, $rest);
-# $rest = (split ',', $entry->dn) [0];
-# $rest =~ /(.+)=(.+)/;
-
-(split ',', $entry->dn) [0] =~ /(.+)=(.+)/;
-$rdn = $1;
-
-foreach $attr ( sort $entry->attributes ) {
-  # skip binary we can't handle
-  next if ( $attr =~ /;binary$/ );
-
-  # draw element-add if element is multivalued and is not RDN
-  if ( ! $stash->{'schema'}->{$attr} && $attr ne $rdn ) {
-    $attr_meta = $attr . '<a class="element-add" href="#">&nbsp;<span class="glyphicon glyphicon-plus-sign"></span></a>';
-  } else { $attr_meta = $attr; }
-
-  print "<div class=\"form-group\">
-   <label class=\"col-sm-2 control-label\">$attr_meta</label>
-   <div class=\"col-sm-10\">";
-
-  $val = $entry->get_value ( $attr, asref => 1  );
-  if ( $attr eq "userPassword" ) {
-    print "<p><input type=password name=\"$attr.0\" class=\"form-control\" placeholder=\"password is here\"></p>";
-    print "<input type=password name=\"$attr.1\" class=\"form-control\" placeholder=\"confirm password\">";
-  } elsif ( $attr eq "jpegPhoto" ) {
-    use MIME::Base64;
-    print '<img alt="jpegPhoto of "', $entry->dn,' src="data:image/jpg;base64,',encode_base64(join('',@{$val})),'"
-class="img-thumbnail" title="', $entry->dn, '" />';
-
-    print "<input type=\"file\" class=\"btn btn-default\" name=\"$attr\" accept=\"image/jpeg, image/png\"></input>";
-  } elsif ( ref $val eq "ARRAY" ) {
-    foreach my $i (@{$val}) {
-      if ( $attr eq "grayPublicKey" ) {
-	print "<p><textarea name=\"$attr\" class=\"form-control\" rows=2> $i </textarea></p>";
-      } elsif ( $attr eq $rdn ) { # need to use $ldap_crud->{cfg}->{rdn}->{acc}
-	print "<input type=text value=\"$i\" name=\"$attr\" disabled=\"\" class=\"form-control\">";
-      } else {
-	print "<p><input type=text value=\"$i\" name=\"$attr\" class=\"form-control\"></p>";
-      }
-    }
-  } else {
-    print "<input type=text value=\"$val\" name=\"$attr\" class=\"form-control\">";
-  }
-
-  print '</div></div>';
-}
-
-print '<div class="form-group">
+<div class="form-group">
   <label class="col-sm-2 control-label"></label>
   <div class="col-sm-10">
   <input type="submit" value="Submit" name="aux_submit" class="btn btn-default btn-block">
   </div>
 </div>
 
-</table>
 </form>
 
 <script>
 	$(function(){
 	    var duplicateElement = function(event, undef){
 		var $origin = $(this).parents("label").next().find("p:first");
-		
+
 		if (!$origin.length) return !1;
-		
+
 		var $clone = $($origin[0].outerHTML),
 		types = ["INPUT", "TEXTAREA"];
-		
+
 		if (types.indexOf($clone.children()[0].nodeName) != -1) {
 		    $clone.children().val("");
 		}
-		
+
 		$origin.parent().prepend($clone);
 		$clone.children().focus();
-		
+
 		return false;
 
 	    };
 	    $(".element-add").on("click", duplicateElement);
 	});
-</script>';
-
-# print '<pre>';
-# use Data::Printer  colored => 0, caller_info => 1;
-# print(p $stash->{'schema'});
-# print '</pre>';
-
-[% END %]
+</script>

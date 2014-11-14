@@ -175,7 +175,7 @@ sub validate {
   if ( defined $self->field('associateddomain')->value &&
        $self->field('associateddomain')->value eq "0" ) {
     $self->field('associateddomain')
-      ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;associatedDomain is mandatory!');
+      ->add_error('<span class="fa fa-exclamation-circle"></span>&nbsp;associatedDomain is mandatory!');
   }
   # use Data::Printer use_prototypes => 0;
   # p $self->field('authorizedservice')->value;
@@ -183,7 +183,7 @@ sub validate {
       ( ! @{$self->field('authorizedservice')->value} ||
 	$self->field('authorizedservice')->value->[0] eq "0" )) {
     $self->field('authorizedservice')
-      ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;authorizedService is mandatory!');
+      ->add_error('<span class="fa fa-exclamation-circle"></span>&nbsp;authorizedService is mandatory!');
   }
 
   # p $self->field('login')->value;
@@ -214,12 +214,12 @@ sub validate {
 			);
 
     if ($mesg->count) {
-      my $err_login = '<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;' .
+      my $err_login = '<span class="fa fa-exclamation-circle"></span>&nbsp;' .
 	'login <em class="text-primary">' . $login . '</em> is already used for service <em class="text-primary">' .
 	  $_ . '@' . $self->field('associateddomain')->value . '</em>';
       $self->field('login')->add_error($err_login);
 
-      my $err_domain = '<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;' .
+      my $err_domain = '<span class="fa fa-exclamation-circle"></span>&nbsp;' .
 	'domain <em class="text-primary">' . $self->field('associateddomain')->value . '</em> is already used for service <em class="text-primary">' .
 	  $_ . '@' . $self->field('associateddomain')->value . '</em> with login <em class="text-primary">' .
 	    $login . '</em>';
@@ -230,11 +230,17 @@ sub validate {
 	'&laquo;personal&raquo; part of the management account uid, in this case it is <em class="text-primary">' .
 	  $login . '</em></p>' if $self->field('login')->value eq '';
 
-      my $err = '<div class="alert alert-danger">' .
-	'<span style="font-size: 140%" class="glyphicon glyphicon-exclamation-sign"></span>' .
-	  '&nbsp;User <strong class="text-primary">' . $self->field('add_svc_acc')->value . '</strong> already has service account <em class="text-primary">' .
-	    $_ . '@' . $self->field('associateddomain')->value .
-	    '</em> with the same <em>uid</em>' . $comment . '</div>';
+      my $err = '<div class="panel panel-warning">
+  <div class="panel-heading">
+    <h4><span class="fa fa-warning">&nbsp;</span>Warning!</h4>
+  </div>
+  <div class="panel-body">
+    User <em class="text-warning mono">' .
+      $self->field('add_svc_acc')->value . '</em> already has service account <em class="text-warning mono">' .
+	$_ . '@' . $self->field('associateddomain')->value .
+	  '</em> with the same uid <em class="text-warning mono">' . $self->field('login')->value . '</em><br>' . $comment .
+	    '</div>
+</div>';
       my $error = $self->form->success_message;
       $self->form->error_message('');
       $self->form->add_form_error($error . $err);

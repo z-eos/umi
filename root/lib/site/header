@@ -133,50 +133,117 @@
 	      <span class="caret"></span>
 	    </button>
 	    <ul class="dropdown-menu dropdown-menu-right" role="menu" name="ldapsearch_base">
-	      <li><a href="[% c.uri_for('/searchadvanced') %]">
-		  <span class="fa fa-filter text-success text-uppercase"><b>Advanced Search</b></span></a>
-	      </li>
-	      <li class="dropdown-header bg-primary"><b>Predefined Search</b></li>
 	      <li>
-		<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_name">
-		  <span class="text-success"><span class="fa fa-user text-success"></span> by name</span>
-		</button>
+		<table class="table table-condensed table-responsive">
+		  <tbody>
+		    <tr>
+		      <th class="text-center warning">
+			<a href="[% c.uri_for('/searchadvanced') %]">
+			  <span class="fa fa-search-plus">&nbsp;<b>advanced search</b></span></a>
+		      </th>
+		      <th class="text-center warning">
+			<a href="[% c.uri_for('/searchadvanced') %]">
+			  <span class="fa fa-medkit">&nbsp;<b>audit</b></span></a>
+		      </th>
+		    </tr>
+		    <tr>
+		      <td class="success">
+			<button type="submit" class="menutab btn btn-link btn-sm" value="1" 
+				name="ldapsearch_by_name" title="search by name related fields">
+			  <span class="fa fa-user"> by name</span>
+			</button>
+		      </td>
+		      <td class="info">
+			<button type="submit" class="btn btn-link btn-sm" value="ou=group,dc=umidb" name="ldapsearch_base">
+			  <span class="fa fa-group"> group</span>
+			</button>
+		      </td>
+		    </tr>
+		    <tr>
+		      <td class="success">
+			<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_email">
+			  <span class="fa fa-envelope-o"> by email</span>
+			</button>
+		      </td>
+		      <td class="info">
+			<button type="submit" class="btn btn-link btn-sm" value="ou=People,dc=umidb" name="ldapsearch_base">
+			  <span class="fa fa-user"> People</span>
+			</button>
+		      </td>
+		    </tr>
+		    <tr>
+		      <td class="success">
+			<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_jid">
+			  <span class="fa fa-comments-o"> by JID</span>
+			</button>
+		      </td>
+		      <td class="info">
+			<button type="submit" class="btn btn-link btn-sm" value="ou=Organizations,dc=umidb" name="ldapsearch_base">
+			  <span class="fa fa-institution"> Organizations</span>
+			</button>
+		      </td>
+		    </tr>
+		    <tr>
+		      <td class="success">
+			<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_ip">
+			  <span class="fa fa-code-fork"> by IP</span>
+			</button>
+		      </td>
+		      <td class="info">
+			<button type="submit" class="btn btn-link btn-sm" value="ou=dhcp,dc=umidb" name="ldapsearch_base">
+			  <span class="fa fa-sitemap"> DHCP</span>
+			</button>
+		      </td>
+		    </tr>
+		    <tr>
+		      <td class="success">
+			<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_mac">
+			  <span class="fa fa-barcode"> by MAC</span>
+			</button>
+		      </td>
+		      <td class="info">
+			<button type="submit" class="btn btn-link btn-sm" value="ou=alias,dc=umidb" name="ldapsearch_base">
+			  <span class="fa fa-puzzle-piece"> mail alias</span>
+			</button>
+		      </td>
+		    </tr>
+		    <tr>
+		      <td class="success">
+			<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_telephone">
+			  <span class="fa fa-phone"> by telephone</span>
+			</button>
+		      </td>
+		      <td class="info">
+			<button type="submit" class="btn btn-link btn-sm" value="ou=workstations,dc=umidb" name="ldapsearch_base">
+			  <span class="fa fa-desktop"> workstations</span>
+			</button>
+		      </td>
+		    </tr>
+		    <tr>
+		      <td class="success"></td>
+		      <td class="info">
+			<button type="submit" class="btn btn-link btn-sm" value="ou=machines,dc=umidb" name="ldapsearch_base">
+			  <span class="fa fa-laptop"> machines</span>
+			</button>
+		      </td>
+		    </tr>
+		    <tr>
+		      <td class="success"></td>
+		      <td class="info">
+			<button type="submit" class="btn btn-link btn-sm" value="ou=GitACL,dc=umidb" name="ldapsearch_base">
+			  <span class="fa fa-gavel"> GitACL</span>
+			</button>
+		      </td>
+		    </tr>
+		  </tbody>
+		  <tfooter>
+		    <tr>
+		      <th class="text-center"><em>predefined</em></th>
+		      <th class="text-center"><em>base by</em></th>
+		    </tr>
+		  </tfooter>
+		</table>
 	      </li>
-	      <li>
-		<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_email">
-		  <span class="text-success"><span class="fa fa-envelope-o"></span> by email</span>
-		</button>
-	      </li>
-	      </li>
-	      <li>
-		<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_jid">
-		  <span class="text-success"><span class="fa fa-comments-o"></span> by JID</span>
-		</button>
-	      </li>
-	      <li>
-		<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_ip">
-		  <span class="text-success"><span class="fa fa-code-fork"></span> by IP</span>
-		</button>
-	      </li>
-	      <li>
-		<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_mac">
-		  <span class="text-success"><span class="fa fa-barcode"></span> by MAC</span>
-		</button>
-	      </li>
-	      <li>
-		<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_telephone">
-		  <span class="text-success"><span class="fa fa-phone"></span> by telephone</span>
-		</button>
-	      </li>
-              <li class="dropdown-header bg-primary"><b>Search Base By</b></li>
-	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=group,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="fa fa-group">&nbsp;</span>group</span></button></li>
-	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=People,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="fa fa-user">&nbsp;</span>People</span></button></li>
-	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=Organizations,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="fa fa-institution">&nbsp;</span>Organizations</span></button></li>
-	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=machines,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="fa fa-laptop">&nbsp;</span>machines</span></button></li>
-	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=alias,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="fa fa-puzzle-piece">&nbsp;</span>mail alias</span></button></li>
-	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=workstations,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="fa fa-desktop">&nbsp;</span>workstations</span></button></li>
-	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=dhcp,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="fa fa-sitemap">&nbsp;</span>DHCP</span></button></li>
-	      <li><button type="submit" class="btn btn-link btn-sm" value="ou=GitACL,dc=umidb" name="ldapsearch_base"><span class="text-success"><span class="fa fa-gavel">&nbsp;</span>GitACL</span></button></li>
 	    </ul>
 	  </div>
 	</div>
@@ -256,8 +323,5 @@
     </div><!--/.nav-collapse -->
   </div>
 </nav>
-
-<div class="container">
-
-  <!-- END site/header -->
+<!-- END site/header -->
 

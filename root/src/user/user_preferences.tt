@@ -1,22 +1,12 @@
 [% META title = 'Account Info' %] 
 
-<!-- <pre>[%# session %]</pre> -->
-
 [% IF final_message.error %]
 <div class="panel panel-danger">
   <div class="panel-heading">
     <h4><span class="fa fa-exclamation-circle">&nbsp;</span>Error!</h4>
   </div>
   <div class="panel-body">
-    <ul>
-      [% # IF final_message.error.size > 1 %]
-      [% FOREACH i IN final_message.error %]
-      [% i %]
-      [% END %]
-      [% # ELSE %]
-      [% # final_message.error %]
-      [% # END %]
-    </ul>
+    <ul>[% FOREACH i IN final_message.error %][% i %][% END %]</ul>
   </div>
 </div>
 [% END %]
@@ -25,9 +15,7 @@
   <div class="panel-heading">
     <h4><span class="fa fa-warning">&nbsp;</span>Warning!</h4>
   </div>
-  <div class="panel-body">
-    [% final_message.warning %]
-  </div>
+  <div class="panel-body">[% final_message.warning %]</div>
 </div>
 [% END %]
 [% IF final_message.success %]
@@ -35,424 +23,452 @@
   <div class="panel-heading">
     <h4><span class="fa fa-check-circle">&nbsp;</span>User's data were successfully harvested.</h4>
   </div>
-  <div class="panel-body mono">
-    [% final_message.success %]
-  </div>
+  <div class="panel-body mono">[% final_message.success %]</div>
 </div>
 [% END %]
 
-
 <div class="row">
-  <div class="col-xs-6">
+  <div class="col-sm-7"> <!-- LEFT COL start -->
+    <div class="row"> <!-- LC ROW1 start -->
+      <div class="col-sm-3">
+	[% jpegPhoto %]
+      </div>
 
-    <h3>Greetings, <em><strong>[% c.user.username %]</strong></em> ! <small><em>bellow are user data</em></small></h3>
-
-    <dl class="dl-horizontal">
-      <dt>signed in as:</dt>
-      <dd class="text-info">[% c.user.username %]</dd>
-      <dt>role/s posesd:</dt>
-      <dd class="text-info">
-	<ul class="list-unstyled">
-	  [% # Dump list of roles -%]
-	  [% # FOR role = c.user.roles.sort %]<li>[% # role %]</li>[% # END %]
-	  [% FOREACH role IN c.user.roles.sort %]<li>[% role %]</li>[% END %]
-	</ul>
-      </dd>
-    </dl>
-    <dl class="dl-horizontal">
-      <dt><span class="fa fa-user fa-lg">:</span></dt>
-      <dd><em><b>[% auth_obj.givenname %] [% auth_obj.sn %]</b></em></dd>
-      <dt><span class="fa fa-mortar-board">:</span></dt>
-      <dd>
-	[% IF auth_obj.title.size %]
-	 <ul class="list-unstyled">
-	  [% FOREACH i IN auth_obj.title %]
-	   <li>[% i %]
-	  [% END %]
-	 </ul>
-	[% ELSE %]
-	  [% auth_obj.title %]
-	[% END %]
-      </dd>
-      <dt><span class="fa fa-phone">:</span></dt>
-      <dd>
-	[% IF auth_obj.telephonenumber.size %]
-	 <ul class="list-unstyled">
-	  [% FOREACH i IN auth_obj.telephonenumber %]
-	   <li>[% i %]
-	  [% END %]
-	 </ul>
-	[% ELSE %]
-	  [% auth_obj.telephonenumber %]
-	[% END %]
-      </dd>
-      <dt><span class="fa fa-envelope">:</span></dt>
-      <dd>[% auth_obj.mail %]</dd>
-      <dt>&nbsp;</dt>
-      <dd>&nbsp;</dd>
-      <dt>Organizations:</dt>
-      <dd>
-	[% IF orgs.size > 0 %]
-	  [% FOREACH org IN orgs %]
-	  <div class="panel panel-info">
-	    <div class="panel-heading">
-	      <h3 class="panel-title">
-		<span class="fa fa-institution">&nbsp;</span>
-	        [% org.key %]
-	      </h3>
-	    </div>
-	    <div class="panel-body">
-	      <address>
-	        <strong>address:</strong><br>
-	        [% org.value %]
-	      </address>
-	      <address>
-	        <strong>fqdn:</strong>
-	        <ul class="list-unstyled">
-	  	[% FOREACH x IN fqdn.item(org.key) %]
-	  	<li>[% x %]</li>
-	  	[% END %]
-	        </ul>
-	      </address>
-	    </div>
-	  </div>
-	  [% END %]
-	[% ELSE %]
-	  <div class="alert alert-danger" role="alert">
-	    <span class="fa fa-exclamation-circle">&nbsp;</span>
-	    Organization data missconfigured or absent!</div>
-	[% END %]
-      </dd>
-      <dt>DHCP:</dt>
-      <dd>
-	[% IF dhcp.size > 0 %]
+      <div class="col-sm-4">
 	<div class="panel panel-info">
 	  <div class="panel-heading">
 	    <h3 class="panel-title">
-	      <span class="fa fa-sitemap">&nbsp;</span>
+	      <span class="fa fa-user">&nbsp;</span>Personal data
 	    </h3>
 	  </div>
 	  <div class="panel-body">
 	    <table class="table table-striped table-condensed table-hover">
-	      <thead><th>Hostname</th><th>IP</th><th>MAC</th></thead>
+	      <thead></thead>
 	      <tbody>
-		[% j=113 %]
-		[% FOREACH x IN dhcp %]
-		<tr class=mono>
-		  <td>
-		      <div class="dropdown pull-left">
-			<button class="btn btn-link btn-xs dropdown-toggle" 
-				type="button" id="dropdownMenuActions" 
-				data-toggle="dropdown"
-				title="Possible Actions Upon the Object">
-			  <span class="fa fa-wrench text-primary"></span><span class="caret text-primary"></span>
-			</button>
-			<ul class="dropdown-menu dropdown-menu-left bg-primary"
-			    aria-labelledby="dropdownMenuActions"
-			    role="menu">
-			  [% IF c.check_user_roles('wheel') || c.check_user_roles('wheel') %]
-			  <li>
-			    <button type="button" title="delete object" class="btn btn-link"
-				    value="[% z.key %]"
-				    name="ldap_delete"
-				    data-toggle="modal"
-				    data-target="#deleteModal[% i %]">
-			      <span class="fa fa-times-circle text-danger"></span>
-			      delete
-			    </button>
-			  </li>
-			  <li>
-			    <button type="button" title="export LDIF of the object"
-				    class="btn btn-link"
-				    value="[% z.key %]"
-				    name="ldap_ldif"
-				    data-toggle="modal"
-				    data-target="#ldifModal[% i %]">
-			      <span class="fa fa-upload text-info"></span>
-			      LDIF
-			    </button>
-			  </li>
-			  <li>
-			    <button type="submit" title="edit object" class="btn btn-link"
-				    value="[% z.key %]"
-				    name="ldap_modify">
-			      <span class="fa fa-edit text-warning"></span>
-			      edit (all)
-			    </button>
-			  </li>
-			  [% END %]
-			</ul>
-		      </div>
-		      <!-- #### Modal: Delete start -->
-		      <div class="modal" id="deleteModal[% i %]"
-			   tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel[% i %]"
-			   aria-hidden="true">
-			<div class="modal-dialog modal-lg">
-			  <div class="modal-content">
-			    <div class="modal-header">
-			      <h4 class="modal-title alert alert-danger" id="deleteModalLabel[% i %]">
-				<span class="fa fa-remove-circle"></span>
-				You are about to perform deletion of DN: <b>[% z.key %]</b>
-			      </h4>
-			    </div>
-			    <div class="modal-body text-primary">
-			      <input type="checkbox" name="ldap_delete_recursive">
-			      Recursive deletion of all children of this object as well
-	      </input>
-			    </div>
-			    <div class="modal-footer">
-			      <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">
-				Close
-			      </button>
-			      <button type="submit" class="btn btn-primary umi-btn-event umi-btn-ajax"
-				      name="ldap_delete" value="[% z.key %]" data-action="delete" >
-				Yes, I really want to delete it and yes, I understand all consequences!
-			      </button>
-			    </div>
-			  </div>
-			</div>
-		      </div>
-		      <!-- #### Modal: Delete end -->
-
-		      <!-- #### Modal: LDIF start -->
-		      <div class="modal" id="ldifModal[% i %]"
-			   tabindex="-1" role="dialog" aria-labelledby="ldifModalLabel[% i %]"
-			   aria-hidden="true">
-			<div class="modal-dialog modal-lg">
-			  <div class="modal-content">
-			    <div class="modal-header">
-			      <h4 class="modal-title alert alert-info" id="ldifModalLabel[% i %]">
-				<span class="fa fa-info-sign"></span>
-				LDIF of DN: <b>[% z.key %]</b>
-			      </h4>
-			    </div>
-			    <div class="modal-body text-primary">
-			      <input type="checkbox" name="ldap_ldif_recursive">
-			      Get LDIFs for all children as well
-	     </input>
-			    </div>
-			    <div class="modal-body text-primary">
-			      <input type="checkbox" name="ldap_ldif_sysinfo">
-			      Get system info as well
-	     </input>
-			    </div>
-			    <div class="modal-footer">
-			      <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">
-				Close
-			      </button>
-			      <button type="submit"
-				      class="btn btn-primary umi-btn-event umi-btn-logic"
-				      data-umiact="/searchby/ldif_gen"
-				      name="ldap_ldif"
-				      value="[% z.key %]">
-				Yes, to get LDIF
-			      </button>
-			    </div>
-			  </div>
-			</div>
-		      </div>
-		      <!-- #### Modal: LDIF end -->
-		      [% j=j+1 %]
-
-		  [% x.cn %]</td>
-		  <td>[% x.ip %]</td>
-		  <td>[% x.mac %]</td>
+		<tr>
+		  <th class="text-right">
+		    <span class="fa-stack fa-lg">
+		      <span class="fa fa-square fa-stack-2x text-info"></span>
+		      <span class="fa fa-user fa-stack-1x fa-inverse"></span>
+		    </span>
+		  </th>
+		  <td><em><b>[% auth_obj.givenname %] [% auth_obj.sn %]</b></em></td>
 		</tr>
-		[% END %]
+		<tr>
+		  <th class="text-right"><abbr title="login name"><span class="fa fa-sign-in"></span></abbr></th>
+		  <td class="text-info">[% c.user.username %]</td>
+		</tr>
+		<tr>
+		  <th class="text-right"><abbr title="title"><span class="fa fa-mortar-board"></span></abbr></th>
+		  <td>
+		    [% IF auth_obj.title.size %]
+		      [% FOREACH i IN auth_obj.title %][% i %]<br>[% END %]
+		    [% ELSE %]
+		    [% auth_obj.title %]
+		    [% END %]
+		  </td>
+		</tr>
+		<tr>
+		  <th class="text-right"><abbr title="roles"><span class="fa fa-cogs"></span></abbr></th>
+		  <td class="text-info">
+		      [% FOREACH role IN c.user.roles.sort %][% role %]<br>[% END %]
+		  </td>
+		</tr>
+		<tr>
+		  <th class="text-right"><span class="fa fa-phone"></span></th>
+		  <td>
+		    [% IF auth_obj.telephonenumber.size %]
+		    [% FOREACH i IN auth_obj.telephonenumber %][% i %]<br>[% END %]
+		    [% ELSE %][% auth_obj.telephonenumber %][% END %]
+		  </td>
+		</tr>
+		<tr>
+		  <th class="text-right"><span class="fa fa-at"></span></th>
+		  <td>
+		    [% IF auth_obj.mail.size %]
+		    [% FOREACH i IN auth_obj.mail %][% i %]<br>[% END %]
+		    [% ELSE %][% auth_obj.mail %][% END %]
+		  </td>
+		</tr>
 	      </tbody>
 	    </table>
 	  </div>
 	</div>
-	[% END %]
-      </dd>
-    </dl>
-  </div>
+      </div>
 
-  <div class="col-xs-6">
-    <dl class="dl-horizontal">
-      <dt><span class="fa fa-file-image-o">:</span></dt>
-      <dd>
-	[% jpegPhoto %]
-      </dd>
-      <dt><span class="fa fa-sliders">:</span></dt>
-      <dd>
-      [% IF service.size > 0 %]
-	<form role="form"
-	      method="POST"
-	      action="[% c.uri_for_action('searchby/proc') %]">
-	  <div class="panel panel-info">
-	    <div class="panel-heading">
-	      <h3 class="panel-title">
-		<span class="fa fa-sliders">&nbsp;</span>
-		Services
-	      </h3>
-	    </div>
-	    <div class="panel-body">
-	      <table class="table table-bordered table-hover">
-		<tbody>
-		  [% i=1 %]
-		  [% FOREACH y IN service %]
-		  <tr class="active mono">
-		    <th>
-		      [% y.authorizedService %]
-		    </th>
-		  </tr>
-		  [% FOREACH z IN y.leaf %]
-		  <tr>
-		    <td>
-		      <div class="dropdown pull-left">
-			<button class="btn btn-link btn-xs dropdown-toggle" 
-				type="button" id="dropdownMenuActions" 
-				data-toggle="dropdown"
-				title="Possible Actions Upon the Object">
-			  <span class="fa fa-cogs text-primary"></span><span class="caret text-primary"></span>
-			</button>
-			<ul class="dropdown-menu dropdown-menu-left bg-primary"
-			    aria-labelledby="dropdownMenuActions"
-			    role="menu">
-			  [% IF c.check_user_roles('wheel') || c.check_user_roles('wheel') %]
-			  <li>
-			    <button type="button" title="account global management page" class="btn btn-link disabled"
-				    value="[% z.key %]"
-				    name="accmgmnt"
-				    data-toggle="modal"
-				    data-target="#accmgmntModal[% i %]">
-			      <span class="fa fa-retweet text-danger"></span>
-			      mgmnt all
-			    </button>
-			  </li>
-			  <li>
-			    <button type="button" title="delete object" class="btn btn-link"
-				    value="[% z.key %]"
-				    name="ldap_delete"
-				    data-toggle="modal"
-				    data-target="#deleteModal[% i %]">
-			      <span class="fa fa-times-circle text-danger"></span>
-			      delete
-			    </button>
-			  </li>
-			  <li>
-			    <button type="button" title="export LDIF of the object"
-				    class="btn btn-link"
-				    value="[% z.key %]"
-				    name="ldap_ldif"
-				    data-toggle="modal"
-				    data-target="#ldifModal[% i %]">
-			      <span class="fa fa-upload text-info"></span>
-			      LDIF
-			    </button>
-			  </li>
-			  <li>
-			    <button type="submit" title="edit object" class="btn btn-link"
-				    value="[% z.key %]"
-				    name="ldap_modify">
-			      <span class="fa fa-edit text-warning"></span>
-			      edit (all)
-			    </button>
-			  </li>
-			  [% END %]
-			  <li>
-			    <button type="submit" title="modify password" class="btn btn-link"
-				    value="[% z.key %]" name="ldap_modify_password">
-			      <span class="fa fa-key text-warning"></span>
-			      password
-			    </button>
-			  </li>
-			  <li>
-			    <button type="submit" title="modify jpegPhoto" class="btn btn-link"
-				    value="[% z.key %]" name="ldap_modify_jpegphoto">
-			      <span class="fa fa-image text-warning"></span>
-			      image
-			    </button>
-			  </li>
-			</ul>
-		      </div>
-		      <!-- #### Modal: Delete start -->
-		      <div class="modal" id="deleteModal[% i %]"
-			   tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel[% i %]"
-			   aria-hidden="true">
-			<div class="modal-dialog modal-lg">
-			  <div class="modal-content">
-			    <div class="modal-header">
-			      <h4 class="modal-title alert alert-danger" id="deleteModalLabel[% i %]">
-				<span class="fa fa-remove-circle"></span>
-				You are about to perform deletion of DN: <b>[% z.key %]</b>
-			      </h4>
-			    </div>
-			    <div class="modal-body text-primary">
-			      <input type="checkbox" name="ldap_delete_recursive">
-			      Recursive deletion of all children of this object as well
-	      </input>
-			    </div>
-			    <div class="modal-footer">
-			      <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">
-				Close
-			      </button>
-			      <button type="submit" class="btn btn-primary umi-btn-event umi-btn-ajax"
-				      name="ldap_delete" value="[% z.key %]" data-action="delete" >
-				Yes, I really want to delete it and yes, I understand all consequences!
-			      </button>
-			    </div>
-			  </div>
-			</div>
-		      </div>
-		      <!-- #### Modal: Delete end -->
-
-		      <!-- #### Modal: LDIF start -->
-		      <div class="modal" id="ldifModal[% i %]"
-			   tabindex="-1" role="dialog" aria-labelledby="ldifModalLabel[% i %]"
-			   aria-hidden="true">
-			<div class="modal-dialog modal-lg">
-			  <div class="modal-content">
-			    <div class="modal-header">
-			      <h4 class="modal-title alert alert-info" id="ldifModalLabel[% i %]">
-				<span class="fa fa-info-sign"></span>
-				LDIF of DN: <b>[% z.key %]</b>
-			      </h4>
-			    </div>
-			    <div class="modal-body text-primary">
-			      <input type="checkbox" name="ldap_ldif_recursive">
-			      Get LDIFs for all children as well
-	     </input>
-			    </div>
-			    <div class="modal-body text-primary">
-			      <input type="checkbox" name="ldap_ldif_sysinfo">
-			      Get system info as well
-	     </input>
-			    </div>
-			    <div class="modal-footer">
-			      <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">
-				Close
-			      </button>
-			      <button type="submit"
-				      class="btn btn-primary umi-btn-event umi-btn-logic"
-				      data-umiact="/searchby/ldif_gen"
-				      name="ldap_ldif"
-				      value="[% z.key %]">
-				Yes, to get LDIF
-			      </button>
-			    </div>
-			  </div>
-			</div>
-		      </div>
-		      <!-- #### Modal: LDIF end -->
-		      [% z.value %]<br>
-		      [% i=i+1 %]
-		      [% END %]
-		    </td>
-		  </tr>
-		  [% END %]
-		</tbody>
-	      </table>
-	    </div>
+      [% IF orgs.size > 0 %]
+      <div class="col-sm-5">
+	<div class="panel panel-info">
+	  <div class="panel-heading">
+	    <h3 class="panel-title">
+	      <span class="fa fa-institution">&nbsp;</span>Organization/s
+	    </h3>
 	  </div>
+	  <div class="panel-body">
+	    [% FOREACH org IN orgs %]
+	    <table class="table table-striped table-condensed table-hover">
+	      <thead></thead>
+	      <tbody>
+		<tr>
+		  <th class="text-right">
+		    <span class="fa-stack fa-lg">
+		      <span class="fa fa-square fa-stack-2x text-info"></span>
+		      <span class="fa fa-institution fa-stack-1x fa-inverse"></span>
+		    </span>
+		  </th>
+		  <td class="text-info">[% org.key %]</td>
+		</tr>
+		<tr>
+		  <th class="text-right"><span class="fa fa-envelope"></span></th>
+		  <td>[% org.value %]</td>
+		</tr>
+		<tr>
+		  <th class="text-right"><span class="fa fa-globe"></span></th>
+		  <td>
+		    [% FOREACH x IN fqdn.item(org.key) %][% x %]<br>[% END %]
+		  </td>
+		</tr>
+	      </tbody>
+	    </table>
+	    [% END %]
+	  </div>
+	</div>
+      </div>
+      [% ELSE %]
+      <div class="col-sm-5">
+	<div class="alert alert-danger" role="alert">
+	  <span class="fa fa-exclamation-circle">&nbsp;</span>
+	  Organization data missconfigured or absent!
+	</div>
+      </div>
+      [% END %]
+
+    </div> <!-- LC ROW1 end -->
+
+  [% IF dhcp.size > 0 %]
+  <div class="row"> <!-- LC ROW2 start -->
+    <div class="col-sm-12">
+      <div class="panel panel-info">
+	<div class="panel-heading">
+	  <h3 class="panel-title">
+	    <span class="fa fa-sitemap">&nbsp;</span>DHCP
+	  </h3>
+	</div>
+	<div class="panel-body">
+	  [% IF c.check_user_roles('wheel') || c.check_user_roles('wheel') %]
+	  <form role="form" method="POST"
+		action="[% c.uri_for_action('searchby/proc') %]">
+	    [% END %]
+	    <table class="table table-striped table-condensed table-hover">
+	      <thead><th>Hostname</th><th>FQDN</th><th>IP</th><th>MAC</th></thead>
+	      <tbody>
+		[% j=113 %]
+		[% FOREACH x IN dhcp %]
+		<tr class="mono">
+		  <td>
+		    [% IF c.check_user_roles('wheel') || c.check_user_roles('wheel') %]
+		    <div class="dropdown pull-left">
+		      <button class="btn btn-link btn-sm dropdown-toggle" 
+			      type="button" id="dropdownMenuActions" 
+			      data-toggle="dropdown"
+			      title="Possible Actions Upon the Object">
+			<span class="fa fa-cog text-primary"></span><span class="caret text-primary"></span>
+		      </button>
+		      <ul class="dropdown-menu dropdown-menu-left bg-primary"
+			  aria-labelledby="dropdownMenuActions"
+			  role="menu">
+			<li>
+			  <button type="button" title="delete object" class="btn btn-link"
+				  value="[% x.dn %]"
+				  name="ldap_delete"
+				  data-toggle="modal"
+				  data-target="#deleteModal[% j %]">
+			    <span class="fa fa-times-circle text-danger"></span>
+			    delete
+			  </button>
+			</li>
+			<li>
+			  <button type="button" title="export LDIF of the object"
+				  class="btn btn-link"
+				  value="[% x.dn %]"
+				  name="ldap_ldif"
+				  data-toggle="modal"
+				  data-target="#ldifModal[% j %]">
+			    <span class="fa fa-upload text-info"></span>
+			    LDIF
+			  </button>
+			</li>
+			<li>
+			  <button type="submit" title="edit object" class="btn btn-link"
+				  value="[% x.dn %]"
+				  name="ldap_modify">
+			    <span class="fa fa-edit text-warning"></span>
+			    edit (all)
+			  </button>
+			</li>
+		      </ul>
+		    </div>
+		    <!-- #### Modal: Delete start -->
+		    <div class="modal" id="deleteModal[% j %]"
+			 tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel[% j %]"
+			 aria-hidden="true">
+		      <div class="modal-dialog modal-lg">
+			<div class="modal-content">
+			  <div class="modal-header">
+			    <h4 class="modal-title alert alert-danger" id="deleteModalLabel[% j %]">
+			      <span class="fa fa-remove-circle"></span>
+			      You are about to perform deletion of DN: <b>[% x.dn %]</b>
+			    </h4>
+			  </div>
+			  <div class="modal-body text-primary">
+			    <input type="checkbox" name="ldap_delete_recursive">
+			    Recursive deletion of all children of this object as well</input>
+			  </div>
+			  <div class="modal-footer">
+			    <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">
+			      Close
+			    </button>
+			    <button type="submit" class="btn btn-primary umi-btn-event umi-btn-ajax"
+				    name="ldap_delete" value="[% x.dn %]" data-action="delete" >
+			      Yes, I really want to delete it and yes, I understand all consequences!
+			    </button>
+			  </div>
+			</div>
+		      </div>
+		    </div>
+		    <!-- #### Modal: Delete end -->
+		    <!-- #### Modal: LDIF start -->
+		    <div class="modal" id="ldifModal[% j %]"
+			 tabindex="-1" role="dialog" aria-labelledby="ldifModalLabel[% j %]"
+			 aria-hidden="true">
+		      <div class="modal-dialog modal-lg">
+			<div class="modal-content">
+			  <div class="modal-header">
+			    <h4 class="modal-title alert alert-info" id="ldifModalLabel[% j %]">
+			      <span class="fa fa-info-sign"></span>
+			      LDIF of DN: <b>[% x.dn %]</b>
+			    </h4>
+			  </div>
+			  <div class="modal-body text-primary">
+			    <input type="checkbox" name="ldap_ldif_recursive">
+			    Get LDIFs for all children as well</input>
+			  </div>
+			  <div class="modal-body text-primary">
+			    <input type="checkbox" name="ldap_ldif_sysinfo">
+			    Get system info as well</input>
+			  </div>
+			  <div class="modal-footer">
+			    <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">
+			      Close
+			    </button>
+			    <button type="submit"
+				    class="btn btn-primary umi-btn-event umi-btn-logic"
+				    data-umiact="/searchby/ldif_gen"
+				    name="ldap_ldif"
+				    value="[% x.dn %]">
+			      Yes, to get LDIF
+			    </button>
+			  </div>
+			</div>
+		      </div>
+		    </div>
+		    <!-- #### Modal: LDIF end -->
+		    [% END %]
+		    [% x.cn %]
+		  </td>
+		  <td>[% x.fqdn %]</td><td>[% x.ip %]</td><td>[% x.mac %]</td>
+		</tr>
+		[% j=j+1 %]
+		[% END %]
+	      </tbody>
+	    </table>
+	    [% IF c.check_user_roles('wheel') || c.check_user_roles('wheel') %]
+	  </form>
+	  [% END %]
+	</div>
+      </div>
+    </div> <!-- LC ROW2 end -->
+    [% END %]
+  </div>
+  </div> <!-- LEFT COL end -->
+
+  <div class="col-sm-5"> <!-- RIGHT COL start -->
+    [% IF service.size > 0 %]
+    <div class="panel panel-info">
+      <div class="panel-heading">
+	<h3 class="panel-title">
+	  <span class="fa fa-sliders">&nbsp;</span>
+	  Services
+	</h3>
+      </div>
+      <div class="panel-body">
+	<form role="form" method="POST"
+	      action="[% c.uri_for_action('searchby/proc') %]">
+	  <table class="table table-bordered table-hover">
+	    <tbody>
+	      [% i=1 %]
+	      [% FOREACH y IN service %]
+	      <tr class="active mono">
+		<th>
+		    <span class="fa-stack fa-lg">
+		      <span class="fa fa-square fa-stack-2x text-info"></span>
+		      <span class="fa fa-sliders fa-stack-1x fa-inverse"></span>
+		    </span>
+		  [% y.authorizedService %]
+		</th>
+	      </tr>
+	      [% FOREACH z IN y.leaf %]
+	      <tr>
+		<td>
+		  <div class="dropdown pull-left">
+		    <button class="btn btn-link btn-sm dropdown-toggle" 
+			    type="button" id="dropdownMenuActions" 
+			    data-toggle="dropdown"
+			    title="Possible Actions Upon the Object">
+		      <span class="fa fa-cog text-primary"></span><span class="caret text-primary"></span>
+		    </button>
+		    <ul class="dropdown-menu dropdown-menu-left bg-primary"
+			aria-labelledby="dropdownMenuActions"
+			role="menu">
+		      [% IF c.check_user_roles('wheel') || c.check_user_roles('wheel') %]
+		      <li>
+			<button type="button" title="account global management page" class="btn btn-link disabled"
+				value="[% z.key %]"
+				name="accmgmnt"
+				data-toggle="modal"
+				data-target="#accmgmntModal[% i %]">
+			  <span class="fa fa-retweet text-danger"></span>
+			  mgmnt all
+			</button>
+		      </li>
+		      <li>
+			<button type="button" title="delete object" class="btn btn-link"
+				value="[% z.key %]"
+				name="ldap_delete"
+				data-toggle="modal"
+				data-target="#deleteModal[% i %]">
+			  <span class="fa fa-times-circle text-danger"></span>
+			  delete
+			</button>
+		      </li>
+		      <li>
+			<button type="button" title="export LDIF of the object"
+				class="btn btn-link"
+				value="[% z.key %]"
+				name="ldap_ldif"
+				data-toggle="modal"
+				data-target="#ldifModal[% i %]">
+			  <span class="fa fa-upload text-info"></span>
+			  LDIF
+			</button>
+		      </li>
+		      <li>
+			<button type="submit" title="edit object" class="btn btn-link"
+				value="[% z.key %]"
+				name="ldap_modify">
+			  <span class="fa fa-edit text-warning"></span>
+			  edit (all)
+			</button>
+		      </li>
+		      [% END %]
+		      <li>
+			<button type="submit" title="modify password" class="btn btn-link"
+				value="[% z.key %]" name="ldap_modify_password">
+			  <span class="fa fa-key text-warning"></span>
+			  password
+			</button>
+		      </li>
+		      <li>
+			<button type="submit" title="modify jpegPhoto" class="btn btn-link"
+				value="[% z.key %]" name="ldap_modify_jpegphoto">
+			  <span class="fa fa-image text-warning"></span>
+			  image
+			</button>
+		      </li>
+		    </ul>
+		  </div>
+		  <!-- #### Modal: Delete start -->
+		  <div class="modal" id="deleteModal[% i %]"
+		       tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel[% i %]"
+		       aria-hidden="true">
+		    <div class="modal-dialog modal-lg">
+		      <div class="modal-content">
+			<div class="modal-header">
+			  <h4 class="modal-title alert alert-danger" id="deleteModalLabel[% i %]">
+			    <span class="fa fa-remove-circle"></span>
+			    You are about to perform deletion of DN: <b>[% z.key %]</b>
+			  </h4>
+			</div>
+			<div class="modal-body text-primary">
+			  <input type="checkbox" name="ldap_delete_recursive">
+			  Recursive deletion of all children of this object as well</input>
+			</div>
+			<div class="modal-footer">
+			  <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">
+			    Close
+			  </button>
+			  <button type="submit" class="btn btn-primary umi-btn-event umi-btn-ajax"
+				  name="ldap_delete" value="[% z.key %]" data-action="delete" >
+			    Yes, I really want to delete it and yes, I understand all consequences!
+			  </button>
+			</div>
+		      </div>
+		    </div>
+		  </div>
+		  <!-- #### Modal: Delete end -->
+
+		  <!-- #### Modal: LDIF start -->
+		  <div class="modal" id="ldifModal[% i %]"
+		       tabindex="-1" role="dialog" aria-labelledby="ldifModalLabel[% i %]"
+		       aria-hidden="true">
+		    <div class="modal-dialog modal-lg">
+		      <div class="modal-content">
+			<div class="modal-header">
+			  <h4 class="modal-title alert alert-info" id="ldifModalLabel[% i %]">
+			    <span class="fa fa-info-sign"></span>
+			    LDIF of DN: <b>[% z.key %]</b>
+			  </h4>
+			</div>
+			<div class="modal-body text-primary">
+			  <input type="checkbox" name="ldap_ldif_recursive">
+			  Get LDIFs for all children as well</input>
+			</div>
+			<div class="modal-body text-primary">
+			  <input type="checkbox" name="ldap_ldif_sysinfo">
+			  Get system info as well</input>
+			</div>
+			<div class="modal-footer">
+			  <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">
+			    Close
+			  </button>
+			  <button type="submit"
+				  class="btn btn-primary umi-btn-event umi-btn-logic"
+				  data-umiact="/searchby/ldif_gen"
+				  name="ldap_ldif"
+				  value="[% z.key %]">
+			    Yes, to get LDIF
+			  </button>
+			</div>
+		      </div>
+		    </div>
+		  </div>
+		  <!-- #### Modal: LDIF end -->
+		  [% z.value %]<br>
+		  [% i=i+1 %]
+		  [% END %]
+		</td>
+	      </tr>
+	      [% END %]
+	    </tbody>
+	  </table>
 	</form>
-	[% END %]
-      </dd>
-    </dl>
+      </div>
+    </div>
+    [% END %]
   </div>
 </div>
-
+  </div>
+</div>
 <script>
 $(function(){
   $('.svcDN').popover()

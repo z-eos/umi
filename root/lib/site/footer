@@ -1,60 +1,54 @@
 <!-- BEGIN site/footer -->
 
-<!--   </div> --> 
-<!-- /container -->
-
-<!-- 20140924  <div class="footer navbar-inverse"> -->
-  <div class="footer">
-    <div class="container">
-      [% IF c.user_exists %]
-      <div class=col-sm-4>
-	<small><em>
-	    <ul>
-	      <li><a href="https://metacpan.org/release/Catalyst-Runtime">
-		  Catalyst::Runtime
-	      </a></li>
-	      <li><a href="https://metacpan.org/pod/Catalyst::Authentication::Store::LDAP">
-		  Catalyst::Authentication::Store::LDAP
-	      </a></li>
-	      <li><a href="https://metacpan.org/release/HTML-FormHandler">
-		  HTML::FormHandler
-	      </a></li>
-	      <li><a href="https://metacpan.org/pod/distribution/HTML-FormHandler/lib/HTML/FormHandler/Manual/Reference.pod">
-		  HTML::FormHandler::Manual::Reference
-	      </a></li>
-	    </ul>
-	</em></small>
-      </div>
-      <div class=col-sm-4>
-	<small><em>
-	    <ul>
-	      <li><a href="https://metacpan.org/release/perl-ldap">
-		  Net::LDAP
-	      </a></li>
-	      <li><a href="https://metacpan.org/pod/Net::LDAP::Control::PreRead">
-		  Net::LDAP::Control::PreRead
-	      </a></li>
-	      <li><a href="https://metacpan.org/pod/Catalyst::Plugin::Authentication#c-user">
-		  Catalyst::Plugin::Authentication
-	      </a></li>
-	      <li><a href="#"> footer col №2 item №4 </a></li>
-	    </ul>
-	</em></small>
-      </div>
-      <div class=col-sm-4>
-	<small><em>
-	    <ul>
-	      <li><a href="#"> footer col №3 item №1 </a></li>
-	      <li><a href="#"> footer col №3 item №2 </a></li>
-	      <li><a href="#"> footer col №3 item №3 </a></li>
-	      <li><a href="#"> footer col №3 item №4 </a></li>
-	    </ul>
-	</em></small>
-      </div>
-    </div>
-    [% END %]
+<div class="container">
+  [% IF c.user_exists %]
+  <div class=col-sm-4>
+    <small><em>
+	<ul>
+	  <li><a href="https://metacpan.org/release/Catalyst-Runtime">
+	      Catalyst::Runtime
+	  </a></li>
+	  <li><a href="https://metacpan.org/pod/Catalyst::Authentication::Store::LDAP">
+	      Catalyst::Authentication::Store::LDAP
+	  </a></li>
+	  <li><a href="https://metacpan.org/release/HTML-FormHandler">
+	      HTML::FormHandler
+	  </a></li>
+	  <li><a href="https://metacpan.org/pod/distribution/HTML-FormHandler/lib/HTML/FormHandler/Manual/Reference.pod">
+	      HTML::FormHandler::Manual::Reference
+	  </a></li>
+	</ul>
+    </em></small>
   </div>
+  <div class=col-sm-4>
+    <small><em>
+	<ul>
+	  <li><a href="https://metacpan.org/release/perl-ldap">
+	      Net::LDAP
+	  </a></li>
+	  <li><a href="https://metacpan.org/pod/Net::LDAP::Control::PreRead">
+	      Net::LDAP::Control::PreRead
+	  </a></li>
+	  <li><a href="https://metacpan.org/pod/Catalyst::Plugin::Authentication#c-user">
+	      Catalyst::Plugin::Authentication
+	  </a></li>
+	  <li><a href="#"> footer col №2 item №4 </a></li>
+	</ul>
+    </em></small>
+  </div>
+  <div class=col-sm-4>
+    <small><em>
+	<ul>
+	  <li><a href="#"> footer col №3 item №1 </a></li>
+	  <li><a href="#"> footer col №3 item №2 </a></li>
+	  <li><a href="#"> footer col №3 item №3 </a></li>
+	  <li><a href="#"> footer col №3 item №4 </a></li>
+	</ul>
+    </em></small>
+  </div>
+  [% END %]
+</div>
 
-  <script src="/static/js/bootstrap.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
 
 <!-- END site/footer -->

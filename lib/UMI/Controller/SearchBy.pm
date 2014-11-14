@@ -242,67 +242,66 @@ sub proc :Path(proc) :Args(0) {
       }
 
 #=====================================================================
-# User preferences
-#=====================================================================
-    } elsif (defined $params->{'user_preferences'} &&
-	     $params->{'user_preferences'} ne '') {
-
-      # $c->stash(
-      # 		template => 'user/user_preferences.tt',
-      # 		uid => $params->{'user_preferences'},
-      # 	       );
-      $c->controller('Root')
-	->user_preferences( $c,
-			    {
-			     uid => substr((split(',', $params->{'user_preferences'}))[0],4),
-			    }
-			  );
-
-#=====================================================================
 # Modify (all fields form)
 #=====================================================================
     } elsif (defined $params->{'ldap_modify'} &&
 	     $params->{'ldap_modify'} ne '') {
+
+      my ($return, $attr, $entry_tmp, $entry);
       my $ldap_crud =
 	$c->model('LDAP_CRUD');
       my $mesg = $ldap_crud->search( { dn => $params->{ldap_modify} } );
-      my $schema = $ldap_crud->obj_schema( { dn => $params->{ldap_modify} } );
-      my $err_message = '';
       if ( ! $mesg->count ) {
-	$err_message = '<div class="alert alert-danger">' .
-	  '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
-	    $ldap_crud->err($mesg) . '</ul></div>';
+	$return->{error} = $ldap_crud->err($mesg);
+      }
+      $entry_tmp = $mesg->entry(0);
+      foreach $attr ( $entry_tmp->attributes ) {
+	if ( $attr =~ /;binary$/ ) { ## !!! temporary stub !!!
+	  next;
+	} elsif ( $attr eq 'jpegPhoto' ) {
+	  use MIME::Base64;
+	  $entry->{$attr} = sprintf('data:image/jpg;base64,%s',
+				    encode_base64(join('',
+						       @{$entry_tmp->get_value($attr, asref => 1)})
+						 )
+				   );
+	} elsif ( $attr eq 'userPassword' ) {
+	  $entry->{$attr} = '*' x 8;
+	} else {
+	  $entry->{$attr} = $entry_tmp->get_value($attr, asref => 1);
+	}
       }
 
-      my ($is_single, $attr);
-      foreach my $objectClass (sort (keys $schema->{"$params->{'ldap_modify'}"})) {
-	foreach $attr (sort (keys %{$schema->{"$params->{'ldap_modify'}"}->{$objectClass}->{'must'}} )) {
+      my $schema = $ldap_crud->obj_schema( { dn => $params->{ldap_modify} } );
+      my ($is_single);
+      foreach my $objectClass (sort (keys $schema->{$params->{ldap_modify}})) {
+	foreach $attr (sort (keys %{$schema->{$params->{ldap_modify}}->{$objectClass}->{must}} )) {
 	  next if $attr eq "objectClass";
 	  $is_single->{$attr} =
-	    $schema->{$params->{'ldap_modify'}}->{$objectClass}->{'must'}->{$attr}->{'single-value'};
+	    $schema->{$params->{ldap_modify}}->{$objectClass}->{must}->{$attr}->{'single-value'};
 	}
-	foreach $attr (sort (keys %{$schema->{"$params->{'ldap_modify'}"}->{$objectClass}->{'may'}} )) {
+	foreach $attr (sort (keys %{$schema->{$params->{ldap_modify}}->{$objectClass}->{may}} )) {
 	  next if $attr eq "objectClass";
 	  $is_single->{$attr} =
-	    $schema->{$params->{'ldap_modify'}}->{$objectClass}->{'may'}->{$attr}->{'single-value'};
+	    $schema->{$params->{ldap_modify}}->{$objectClass}->{may}->{$attr}->{'single-value'};
 	}
       }
 
-      # p $mesg->entry(0);
+      p $is_single;
       ## here we work with the only one, single entry!!
-      $c->session->{modify_entries} = $mesg->entry(0);
-      $c->session->{modify_dn} = $params->{ldap_modify};
-      $c->session->{modify_schema} = $is_single;
+      # $c->session->{modify_entries} = $mesg->entry(0);
+      # $c->session->{modify_dn} = $params->{ldap_modify};
+      # $c->session->{modify_schema} = $is_single;
+
+
 
       $c->stash(
 		template => 'search/modify.tt',
 		modify => $params->{'ldap_modify'},
-		# entries => \@entries,
-		## entries => $c->session->{modify_entries},
-		entries => $mesg->entry(0),
-		schema => $c->session->{modify_schema},
-		err => $err_message,
-		rdn => $ldap_crud->{cfg}->{rdn}->{acc},
+		entries => $entry,
+		schema => $is_single,
+		final_message => $return,
+		rdn => (split('=', (split(',', $params->{ldap_modify}))[0]))[0],
 	       );
 
 #=====================================================================
@@ -583,7 +582,7 @@ sub proc :Path(proc) :Args(0) {
 	      $params->{'add_svc_acc'} ne '') {
 
       my $ldap_crud = $c->model('LDAP_CRUD');
-      my ( $arr, $login, $uid, $pwd, $error_message, $success_message, $warn_message );
+      my ( $arr, $login, $uid, $pwd, $return );
       my @id = split(',', $params->{'add_svc_acc'});
       $params->{'add_svc_acc_uid'} = substr($id[0], 4); # $params->{'login'} =
 
@@ -629,13 +628,7 @@ sub proc :Path(proc) :Args(0) {
 	    $pwd = { $_ => $self->pwdgen( { pwd => $params->{'password1'} } ) };
 	  }
 
-	  # $success_message .= sprintf('<tr class=mono><td>%s@%s</td><td>%s</td><td>%s</td></tr>',
-	  # 			      $_,
-	  # 			      $params->{'associateddomain'},
-	  # 			      $uid,
-	  # 			      $pwd->{$_}->{clear});
-
-	  push @{$success_message}, {
+	  push @{$return->{success}}, {
 				     authorizedservice => $_,
 				     associateddomain => $params->{'associateddomain'},
 				     service_uid => $uid,
@@ -652,9 +645,8 @@ sub proc :Path(proc) :Args(0) {
 					},
 				      );
 
-	  # $success_message .= $create_account_branch_return->[1] if defined $create_account_branch_return->[1];
-	  $error_message .= $create_account_branch_return->[0] if defined $create_account_branch_return->[0];
-	  $warn_message .= $create_account_branch_return->[2] if defined $create_account_branch_return->[2];
+	  $return->{error} .= $create_account_branch_return->[0] if defined $create_account_branch_return->[0];
+	  $return->{warning} .= $create_account_branch_return->[2] if defined $create_account_branch_return->[2];
 
 	  # taking data to be used in create_account_branch_leaf()
 	  my $mesg = $ldap_crud->search( { base => $params->{'add_svc_acc'},
@@ -662,7 +654,7 @@ sub proc :Path(proc) :Args(0) {
 					   attrs => [ 'uidNumber', 'givenName', 'sn' ],
 					 } );
 	  if ( ! $mesg->count ) {
-	    $error_message .= $ldap_crud->err($mesg);
+	    $return->{error} .= $ldap_crud->err($mesg);
 	  }
 
 	  my @entry = $mesg->entries;
@@ -697,18 +689,16 @@ sub proc :Path(proc) :Args(0) {
 					   );
 
 	  # $success_message .= $create_account_branch_leaf_return->[1] if defined $create_account_branch_leaf_return->[1];
-	  $error_message .= $create_account_branch_leaf_return->[0] if defined $create_account_branch_leaf_return->[0];
+	  $return->{error} .= $create_account_branch_leaf_return->[0] if defined $create_account_branch_leaf_return->[0];
 
 	}
       } else { # form was not validated
-	$error_message = '<em>service was not added</em>' .
-	  $error_message if $error_message;
+	$return->{error} = '<em>service was not added</em>' .
+	  $return->{error} if $return->{error};
       }
       # p $success_message;
       $c->stash(
-		message_success => $success_message,
-		message_warning => $warn_message,
-		message_error => $error_message,
+		final_message => $return,
 	       );
     }
   } else {
@@ -1010,20 +1000,25 @@ modify whole form (all present fields except RDN)
 sub modify :Path(modify) :Args(0) {
   my ( $self, $c ) = @_;
 
-  my $ldap_crud =
-    $c->model('LDAP_CRUD');
   my $params = $c->req->parameters;
-  # p $params;
+  my $ldap_crud = $c->model('LDAP_CRUD');
+  my $mesg = $ldap_crud->search( { base => $params->{dn}, scope => 'base' } );
+  my $return;
+  if ( $mesg->code ) {
+    $return->{error} .= '<li>' . $ldap_crud->err($mesg) . '</li>';
+  }
+  my $entry = $mesg->entry(0);
 
   my ($attr, $val, $mod, $orig);
   foreach $attr ( sort ( keys %{$params} )) {
-    next if ( $attr =~ /$ldap_crud->{cfg}->{exclude_prefix}/ ||
-	      $attr =~ /userPassword/ );
+    next if ( $attr eq 'dn' ||
+	      $attr =~ /$ldap_crud->{cfg}->{exclude_prefix}/ ||
+	      $attr =~ /userPassword/ ); ## !! stub, not processed yet !!
     if ( $attr eq "jpegPhoto" ) {
       $params->{jpegPhoto} = $c->req->upload('jpegPhoto');
     }
 
-    $val = $c->session->{modify_entries}->get_value ( $attr, asref => 1  );
+    $val = $entry->get_value ( $attr, asref => 1 );
 
     $orig = ref($val) eq "ARRAY" && scalar @{$val} == 1 ? $val->[0] : $val;
     $val = $params->{$attr};
@@ -1048,25 +1043,41 @@ sub modify :Path(modify) :Args(0) {
       $mod->{$attr} = $val;
     }
   }
-  p $mod;
-  my $mesg = $ldap_crud->mod( $c->session->{modify_dn},
-			      $mod );
 
-  my $err_message;
+  $mesg = $ldap_crud->mod( $params->{dn}, $mod );
   if ( $mesg ne "0" ) {
-    $err_message = '<div class="alert alert-danger">' .
-      '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
-	$mesg . '</ul></div>';
+    $return->{error} .= '<li>' . $mesg . '</li>';
   }
 
-  # p $ldap_crud->{cfg}->{rdn}->{acc};
-
+  $return->{success} = p($mod);
   $c->stash(
 	    template => 'stub.tt',
 	    params => $params,
-	    err => $err_message,
-	    rdn => $ldap_crud->{cfg}->{rdn}->{acc},
+	    final_message => $return,
 	   );
+}
+
+
+#=====================================================================
+
+=head1 user_preferences
+
+single page with all user data assembled to the convenient view
+
+=cut
+
+
+sub user_preferences :Path(user_preferences) :Args(0) {
+  my ( $self, $c ) = @_;
+  my $params = $c->req->parameters;
+
+  $c->controller('Root')
+    ->user_preferences( $c,
+			{
+			 uid => substr((split(',',
+					      $params->{'user_preferences'}))[0],4),
+			}
+		      );
 }
 
 

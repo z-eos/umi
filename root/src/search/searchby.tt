@@ -4,10 +4,6 @@
 
 <h2>Search Simple Results &nbsp; <small>base: [% base_dn %]; &nbsp;&nbsp; filter: [% filter %]</small></h2>
 
-<form role="form"
-      method="POST"
-      action="[% c.uri_for_action('searchby/proc') %]">
-
 [% info %]
 [% err %]
 
@@ -34,7 +30,6 @@
       	 tabindex="0">
       	<span style="font-size: 100%;" class="glyphicon glyphicon-list-alt"></span>
       </a>
-
   </td></tr>
  </thead>
  <tbody>
@@ -48,7 +43,7 @@
 [% FOREACH entry IN entries %]
  <tr>
    <td>
-     <div class="panel-group" id="accordion[% loop.index %]">
+       <div class="panel-group" id="accordion[% loop.index %]">
  [% IF entry.value.mgmnt.is_dn %]
   <div class="panel panel-info">
  [% ELSIF entry.key.match('^uid=.*,author') %]
@@ -58,7 +53,7 @@
  [% END %]
 
    <div class="panel-heading">
-    <button class="btn btn-link btn-xs pull-left" 
+       <button class="btn btn-link btn-xs pull-left" 
             type="button" 
 	    title="Collapse In/Out This Panel"
             data-target="#collapse[% loop.index %]" 
@@ -79,12 +74,14 @@
 	     role="menu">
   [% IF entry.value.mgmnt.is_dn && entry.value.mgmnt.is_account %]
 	   <li>
+	     <form role="form" method="POST" action="[% c.uri_for_action('searchby/user_preferences') %]">
 	     <button type="submit" title="add service account" class="btn btn-link"
 		     value="[% entry.key %]"
 		     name="user_preferences">
 	       <span class="fa fa-list-alt text-info"></span>
 	       user prefs
 	     </button>
+	   </form>
 	   </li>
 	   <li>
 	     <button type="button" title="account global management page" class="btn btn-link disabled"
@@ -97,19 +94,23 @@
 	     </button>
 	   </li>
 	   <li>
+	     <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 	     <button type="submit" title="add service account" class="btn btn-link"
 		     value="[% entry.key %]"
 		     name="add_svc_acc">
 	       <span class="fa fa-plus-circle text-warning"></span>
 	       service account
 	     </button>
+	     </form>
 	   </li>
 	   <li>
+	     <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 	     <button type="submit" title="modify group" class="btn btn-link"
 		     value="[% entry.key %]" name="ldap_modify_group">
 	       <span class="fa fa-group text-warning"></span>
 	       group
 	     </button>
+	     </form>
 	   </li>
   [% END %]
        <li>
@@ -134,57 +135,69 @@
 	     </button>
 	   </li>
            <li>
+	     <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 	     <button type="submit" title="edit object" class="btn btn-link"
 		     value="[% entry.key %]"
 		     name="ldap_modify">
 	       <span class="fa fa-edit text-warning"></span>
 	       edit (all)
 	     </button>
+	     </form>
 	   </li>
   [% IF entry.value.mgmnt.is_group %]
 	   <li>
+	     <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 	     <button type="submit" title="modify group members" class="btn btn-link"
 		     value="[% entry.key %]" name="ldap_modify_memberUid">
 	       <span class="fa fa-group text-warning"></span>
 	       members
 	     </button>
+	     </form>
 	   </li>
   [% END %]
   [% IF entry.value.mgmnt.userPassword %]
 	   <li>
+	     <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 	     <button type="submit" title="modify password" class="btn btn-link"
 		     value="[% entry.key %]" name="ldap_modify_password">
 	       <span class="fa fa-key text-warning"></span>
 	       password
 	     </button>
+	     </form>
 	   </li>
   [% END %]
   [% IF entry.value.mgmnt.userDhcp %]
 	   <li>
+	     <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 	     <button type="submit" title="add DHCP (MAC to IP binding)" class="btn btn-link"
 		     value="[% entry.key %]" name="ldap_add_dhcp">
 	       <span class="fa fa-sitemap text-warning"></span>
 	       DHCP (IP to MAC binding)
 	     </button>
+	     </form>
 	   </li>
   [% END %]
   [% IF entry.value.mgmnt.jpegPhoto %]
 	   <li>
+	     <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 	     <button type="submit" title="modify jpegPhoto" class="btn btn-link"
 		     value="[% entry.key %]" name="ldap_modify_jpegphoto">
 	       <span class="fa fa-image text-warning"></span>
 	       image
 	     </button>
+	     </form>
 	   </li>
   [% END %]
 
   [% IF entry.value.mgmnt.gitAclProject %]
 	   <li>
+	     <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 	     <button type="submit" title="reorder gitAcl" class="btn btn-link"
 		     value="[% entry.key %]" name="ldap_gitacl_reorder">
 	       <span class="fa fa-sort text-warning"></span>
 	       reorder
 	     </button>
+	     </form>
 	   </li>
   [% END %]
 	 </ul>
@@ -212,6 +225,7 @@
 	aria-hidden="true">
        <div class="modal-dialog modal-lg">
 	 <div class="modal-content">
+	   <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 	   <div class="modal-header">
 	     <h4 class="modal-title alert alert-danger" id="globmgmntModalLabel[% loop.index %]">
 	       <span class="glyphicon glyphicon-remove-circle"></span>
@@ -230,6 +244,7 @@
 	       Yes, I really want to delete it and yes, I understand all consequences!
 	     </button>
 	   </div>
+	   </form>
 	 </div>
        </div>
      </div>
@@ -241,24 +256,26 @@
 	aria-hidden="true">
        <div class="modal-dialog modal-lg">
 	 <div class="modal-content">
-	   <div class="modal-header">
-	     <h4 class="modal-title alert alert-danger" id="deleteModalLabel[% loop.index %]">
-	       <span class="glyphicon glyphicon-remove-circle"></span>
-	       You are about to perform deletion of DN: <b>[% entry.key %]</b>
-	     </h4>
-	   </div>
-	   <div class="modal-body text-primary">
-	     <input type="checkbox" name="ldap_delete_recursive">
-	     Recursive deletion of all children of this object as well
+	   <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+	     <div class="modal-header">
+	       <h4 class="modal-title alert alert-danger" id="deleteModalLabel[% loop.index %]">
+		 <span class="glyphicon glyphicon-remove-circle"></span>
+		 You are about to perform deletion of DN: <b>[% entry.key %]</b>
+	       </h4>
+	     </div>
+	     <div class="modal-body text-primary">
+	       <input type="checkbox" name="ldap_delete_recursive">
+	       Recursive deletion of all children of this object as well
 	      </input>
-	   </div>
-	   <div class="modal-footer">
-	     <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
-	     <button type="submit" class="btn btn-primary umi-btn-event umi-btn-ajax"  name="ldap_delete"
-                value="[% entry.key %]" data-action="delete" >
-	       Yes, I really want to delete it and yes, I understand all consequences!
-	     </button>
-	   </div>
+	     </div>
+	     <div class="modal-footer">
+	       <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
+	       <button type="submit" class="btn btn-primary umi-btn-event umi-btn-ajax"  name="ldap_delete"
+                       value="[% entry.key %]" data-action="delete" >
+		 Yes, I really want to delete it and yes, I understand all consequences!
+	       </button>
+	     </div>
+	   </form>
 	 </div>
        </div>
      </div>
@@ -270,6 +287,7 @@
 	aria-hidden="true">
        <div class="modal-dialog modal-lg">
 	 <div class="modal-content">
+	   <form role="form" method="POST">
 	   <div class="modal-header">
 	     <h4 class="modal-title alert alert-info" id="ldifModalLabel[% loop.index %]">
 	       <span class="fa fa-info-circle"></span>
@@ -296,6 +314,7 @@
 	       Yes, to get LDIF
 	     </button>
 	   </div>
+	   </form>
 	 </div>
        </div>
      </div>
@@ -357,7 +376,6 @@
  </tbody>
 </table>
 </div>
-</form>
 
 <script>
 $(function(){
@@ -409,6 +427,13 @@ $(function(){
         return "close";
       },
       
+      removeObjects = function(objects) {
+        if (!objects || !Array.isArray(objects) || !objects.length) return;
+        objects.forEach(function(object){
+          object.remove();
+        });
+      },
+
       runAjaxLogic = function(obj) {
         var $form = obj.parents("form");
         if (!$form || !$form.length) return applyError(obj, options.noFormEventMsg), false;
@@ -419,6 +444,9 @@ $(function(){
         var $tr = obj.parents("tr");
         var action = obj.data("action");
         var $modal = obj.parents(".modal.in");
+ 
+        //clearPopupForm($(".modal:not(.in)"));// REMOVE
+
         $.ajax({
             type: "POST",
             url: $form.attr("action"),
@@ -438,9 +466,11 @@ $(function(){
                         });
                    break;
                 }
+                removeObjects([hidden, type]);
             },
             error: function(x, o, e){
                 applyError(obj, options.ajaxError+e);
+                removeObjects([hidden, type]);
             }
         });
       },
@@ -451,8 +481,9 @@ $(function(){
         var $form = obj.parents("form");
         if (!$form || !$form.length) return applyError(obj, options.noFormEventMsg), false;
         var hidden = createHiddenButton(obj);
-        clearPopupForm($(".modal:not(.in)"));
+        //clearPopupForm($(".modal:not(.in)")); // REMOVE
         $form.append(hidden).attr("action", action).submit();
+        
       },
 
       clearPopupForm = function($class) {
@@ -478,6 +509,8 @@ $(function(){
         }
         return false;
       };
+
+  //clearPopupForm($(".modal:not(.in)")); // REMOVE
 
   $("body").on("click", options.btnEvent, onBtnEventClick);
 });

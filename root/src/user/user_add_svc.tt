@@ -1,93 +1,70 @@
 [% META title = 'Add Service Account' %]
 
-<!-- <div class="container"> -->
-  <div class="col-md-10">
     <div class="page-header">
       <h2>Service Account Add Form <small><em class="mono">for user: [% add_svc_acc %]</em></small></h2>
     </div>
 
-    [% IF message_error %]
+    [% IF final_message.error %]
     <div class="panel panel-danger">
       <div class="panel-heading">
-	<h4><span class="glyphicon glyphicon-exclamation-sign">&nbsp;</span>Error!</h4>
+	<h4><span class="fa fa-exclamation-circle">&nbsp;</span>Error!</h4>
       </div>
       <div class="panel-body">
 	<ul>
-	  [% message_error %]
+	  [% final_message.error %]
 	</ul>
       </div>
     </div>
     [% ELSE %]    
-
-    [% IF message_warning %]    
-    <div class="alert alert-warning fade in" role="alert">
-      <button class="close pull-right" data-dismiss="alert" type="button">
-	<span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span>
-	<span class="sr-only">Close</span>
-      </button>
-      <h4><span class="glyphicon glyphicon-warning-sign">&nbsp;</span>Stay calm, this warning is <em><b>just to inform you</b></em>.</h4>
-      <ul>
-	[% message_warning %]
-      </ul>
-    </div>
-    [% END %]
-
-    [% IF message_success %]    
-    <div class="panel panel-success">
-      <div class="panel-heading">
-	<h4><span class="glyphicon glyphicon-ok-sign">&nbsp;</span>Service/s successfully added to account: <span class=mono>
-	    [% add_svc_acc %]
-	</span></h4>
-      </div>
-      <div class="panel-body">
-	<span class="glyphicon glyphicon-warning-sign text-warning"></span>
-	<em class="text-muted text-warning"><b class="text-uppercase">bellow</b>
-	  is the only one-time <b class="text-uppercase">information</b>! Password info
-	  <b class="text-uppercase">is not saved anywhere anyhow</b>, so now it is the only chance to save it.</em>
-	<!-- Table -->
-	<div class="table-responsive">
-	  <table class="table table-bordered table-hover">
-	    <thead class="bg-info">
-	      <th>SERVICE (branch)</th>
-	      <th>SERVICE UID (leaf)</th>
-	      <th>PASSWORD</th>
-	    </thead>
-	    <tbody>
-	      [% FOREACH i IN message_success %]
-	      <tr class=mono><td>[% i.authorizedservice %]@[% i.associateddomain %]</td>
-		<td>[% i.service_uid %]</td>
-		<td>[% i.service_pwd %]</td>
-	      </tr>
-	      [% END %]
-	    </tbody>
-	  </table>
+      [% IF final_message.warning %]    
+        <div class="alert alert-warning fade in" role="alert">
+	  <button class="close pull-right" data-dismiss="alert" type="button">
+	    <span class="fa fa-remove-circle" aria-hidden="true"></span>
+	    <span class="sr-only">Close</span>
+	  </button>
+	  <h4><span class="fa fa-exclamation-triangle">&nbsp;</span>
+	    Stay calm, this warning is <em><b>just to inform you</b></em>.</h4>
+	  <ul>
+	    [% final_message.warning %]
+	  </ul>
 	</div>
-      </div>
-    </div>
-    [% END %]
+	[% END %]
+
+	[% IF final_message.success %]    
+	<div class="panel panel-success">
+	  <div class="panel-heading">
+	    <h4><span class="fa fa-check-circle">&nbsp;</span>Service/s successfully added to account: <span class=mono>
+		[% add_svc_acc %]
+	    </span></h4>
+	  </div>
+	  <div class="panel-body">
+	    <span class="fa fa-exclamation-triangle text-warning"></span>
+	    <em class="text-muted text-warning"><b class="text-uppercase">below</b>
+	      is the only one-time <b class="text-uppercase">information</b>! Password info
+	      <b class="text-uppercase">is not saved anywhere anyhow</b>, so now it is the only chance to save it.</em>
+	    <!-- Table -->
+	    <div class="table-responsive">
+	      <table class="table table-bordered table-hover">
+		<thead class="bg-info">
+		  <th><span class="fa fa-sliders">&nbsp;</span> Service (branch)</th>
+		  <th><span class="fa fa-user">&nbsp;</span> Service UID (leaf)</th>
+		  <th><span class="fa fa-key">&nbsp;</span> Password</th>
+		</thead>
+		<tbody>
+		  [% FOREACH i IN final_message.success %]
+		  <tr class=mono><td>[% i.authorizedservice %]@[% i.associateddomain %]</td>
+		    <td>[% i.service_uid %]</td>
+		    <td>[% i.service_pwd %]</td>
+		  </tr>
+		  [% END %]
+		</tbody>
+	      </table>
+	    </div>
+	  </div>
+	</div>
+      [% END %]
     [% END %]
 
     [% form.render %]
 
   </div>
-  <div class="col-md-2">
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="[% c.uri_for('/user') %]">
-	  <span class="glyphicon glyphicon-plus-sign text-success"></span>
-	  create</a>
-      </li>
-      <li><a href="#">
-	  <span class="glyphicon glyphicon-edit text-warning"></span>
-	  update</a>
-      </li>
-      <li><a href="#">
-	  <span class="glyphicon glyphicon-edit text-warning"></span>
-	  password</a>
-      </li>
-      <li><a href="#">
-	  <span class="glyphicon glyphicon-remove-sign text-danger"></span>
-	  delete</a>
-      </li>
-    </ul>
-  </div>
-<!-- </div> -->

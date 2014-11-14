@@ -491,9 +491,9 @@ sub create_account_branch_leaf {
 		   );
   my $return;
   if ( $mesg ) {
-    $return->[0] = '<li>Error during ' . uc($arg->{service}) .
-      ' account creation occured: &laquo;<strong><em>' . $mesg .
-	'</em></strong>&raquo;, service account was not created, you need take care of it!</li>';
+    $return->[0] = '<li><h4 class="text-danger">Error during ' . uc($arg->{service}) .
+      ' account creation occured:</h4><strong><em>' . $mesg .
+	'</em></strong>service account was not created, you need take care of it!</li>';
 
   } else {
     $return->[1] = '<li><em>' . uc( $arg->{service} ) . ' account login:</em> &laquo;<strong>' .
