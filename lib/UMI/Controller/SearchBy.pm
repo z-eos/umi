@@ -105,10 +105,10 @@ sub index :Path :Args(0) {
       $base = $ldap_crud->{cfg}->{base}->{db};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_name'} ) {
-      $filter = sprintf("|(givenName=%s)(sn=%s)(uid=%s)",
-			$filter_meta, $filter_meta, $filter_meta);
-      $filter_show = sprintf("|(givenName=<kbd>%s</kbd>)(sn=<kbd>%s</kbd>)(uid=<kbd>%s</kbd>)",
-			     $filter_meta, $filter_meta, $filter_meta);
+      $filter = sprintf("|(givenName=%s)(sn=%s)(uid=%s)(cn=%s)",
+			$filter_meta, $filter_meta, $filter_meta, $filter_meta);
+      $filter_show = sprintf("|(givenName=<kbd>%s</kbd>)(sn=<kbd>%s</kbd>)(uid=<kbd>%s</kbd>)(cn=<kbd>%s</kbd>)",
+			     $filter_meta, $filter_meta, $filter_meta, $filter_meta);
       $base = $ldap_crud->{cfg}->{base}->{acc_root};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_telephone'} ) {
@@ -147,7 +147,7 @@ sub index :Path :Args(0) {
     } elsif ( $mesg->is_error ) {
       $err_message = '<div class="alert alert-danger">' .
 	'<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
-	  $ldap_crud->err($mesg) . '</ul></div>';
+	  $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html} . '</ul></div>';
     }
 
     my ( $ttentries, $attr );
@@ -172,6 +172,8 @@ sub index :Path :Args(0) {
 		    $_->dn,
 		    encode_base64(join('',@{$ttentries->{$_->dn}->{attrs}->{$attr}})),
 		    $_->dn);
+	  } elsif ( $attr eq 'userCertificate;binary' ) {
+	    $ttentries->{$_->dn}->{attrs}->{$attr} = $self->cert_info({ cert => $_->get_value( $attr ) });
 	} elsif (ref $ttentries->{$_->dn}->{attrs}->{$attr} eq 'ARRAY') {
 	  $ttentries->{$_->dn}->{is_arr}->{$attr} = 1;
 	}
@@ -184,6 +186,7 @@ sub index :Path :Args(0) {
 	      filter => $filter_show,
 	      entries => $ttentries,
 	      # entries => \@entries,
+	      services => $ldap_crud->{cfg}->{authorizedService},
 	      err => $err_message,
 	      info => $info_message,
 	     );
@@ -213,38 +216,9 @@ sub proc :Path(proc) :Args(0) {
     my $params = $c->req->parameters;
 
 #=====================================================================
-# Delete
-#=====================================================================
-    if (defined $params->{'ldap_delete'} &&
-	$params->{'ldap_delete'} ne '') {
-      my $err;
-      if ( defined $params->{'ldap_delete_recursive'} &&
-	   $params->{'ldap_delete_recursive'} eq 'on' ) {
-	$err = $c->model('LDAP_CRUD')->delr($params->{ldap_delete});
-      } else {
-	$err = $c->model('LDAP_CRUD')->del($params->{ldap_delete});
-      }
-
-      if ( $params->{type} eq 'json' ) {
-	$c->stash->{current_view} = 'WebJSON';
-	$c->stash->{success} = 'true';
-	$c->stash->{message} = 'OK';
-	# $c->forward('View::JSON');
-      } else {
-	$c->stash(
-		  template => 'search/delete.tt',
-		  delete => $params->{'ldap_delete'},
-		  recursive => defined $params->{'ldap_delete_recursive'} &&
-		  $params->{'ldap_delete_recursive'} eq 'on' ? '1' : '0',
-		  err => $err,
-		  type => $params->{'type'},
-		 );
-      }
-
-#=====================================================================
 # Modify (all fields form)
 #=====================================================================
-    } elsif (defined $params->{'ldap_modify'} &&
+      if (defined $params->{'ldap_modify'} &&
 	     $params->{'ldap_modify'} ne '') {
 
       my ($return, $attr, $entry_tmp, $entry);
@@ -252,12 +226,13 @@ sub proc :Path(proc) :Args(0) {
 	$c->model('LDAP_CRUD');
       my $mesg = $ldap_crud->search( { dn => $params->{ldap_modify} } );
       if ( ! $mesg->count ) {
-	$return->{error} = $ldap_crud->err($mesg);
+	$return->{error} = $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html};
       }
       $entry_tmp = $mesg->entry(0);
       foreach $attr ( $entry_tmp->attributes ) {
-	if ( $attr =~ /;binary$/ ) { ## !!! temporary stub !!!
-	  next;
+	if ( $attr =~ /;binary/ or
+	   $attr eq "userPKCS12" ) { ## !!! temporary stub !!! 	  next;
+	  $entry->{$attr} = "BINARY DATA";
 	} elsif ( $attr eq 'jpegPhoto' ) {
 	  use MIME::Base64;
 	  $entry->{$attr} = sprintf('data:image/jpg;base64,%s',
@@ -327,7 +302,7 @@ sub proc :Path(proc) :Args(0) {
 		    } );
 
 	if ( $mesg->code != 0 ) {
-	  push @{$return->{error}}, $ldap_crud->err($mesg);
+	  push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html};
 	}
 
 	my @groups_usr = $mesg->sorted('cn');
@@ -381,7 +356,7 @@ sub proc :Path(proc) :Args(0) {
 		    } );
 
 	if ( $mesg->code ne '0' ) {
-	  push @{$return->{error}}, $ldap_crud->err($mesg);
+	  push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html};
 	}
 
 	my @group_memberUids = $mesg->sorted('memberUid');
@@ -442,7 +417,7 @@ sub proc :Path(proc) :Args(0) {
 		    } );
 
 	if ( $mesg->code ne '0' ) {
-	  push @{$return->{error}}, $ldap_crud->err($mesg);
+	  push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html};
 	}
 
 	my @group_memberUids = $mesg->sorted('memberUid');
@@ -476,35 +451,6 @@ sub proc :Path(proc) :Args(0) {
 				 }
 				),
 	       );
-
-#=====================================================================
-# Modify userPassword
-#=====================================================================
-    } elsif (defined $params->{'ldap_modify_password'} &&
-	     $params->{'ldap_modify_password'} ne '') {
-
-      $c->stash(
-		template => 'user/user_modpwd.tt',
-		form => $self->form_mod_pwd,
-		ldap_modify_password => $params->{ldap_modify_password},
-	       );
-
-      return unless $self->form_mod_pwd->process(
-						 posted => ($c->req->method eq 'POST'),
-						 params => $params,
-						) &&
-						  ( defined $params->{password_init} ||
-						    defined $params->{password_cnfm} );
-
-      $c->stash(
-		final_message => $self->mod_pwd(
-						$c->model('LDAP_CRUD'),
-						{
-						 mod_pwd_dn => $params->{ldap_modify_password},
-						 password_init => $params->{password_init},
-						 password_cnfm => $params->{password_cnfm},
-						}),
-	       ) if $self->form_mod_pwd->ran_validation;
 
 #=====================================================================
 # Add userDhcp
@@ -593,6 +539,9 @@ sub proc :Path(proc) :Args(0) {
 		add_svc_acc_uid => $params->{'add_svc_acc_uid'},
 	       );
 
+      $params->{usercertificate} = $c->req->upload('usercertificate') if defined $params->{usercertificate};
+      p $params->{usercertificate};
+
       return unless $self->form_add_svc_acc->process(
 						     posted => ($c->req->method eq 'POST'),
 						     params => $params,
@@ -601,13 +550,17 @@ sub proc :Path(proc) :Args(0) {
 						      defined $params->{'associateddomain'} &&
 							defined $params->{'authorizedservice'};
 
+      p $params;
+
       if ( $self->form_add_svc_acc->validated ) {
+
 	if ( $params->{login} ne '' ) {
 	  $login = $params->{login};
 	} else {
 	  $login = $params->{'add_svc_acc_uid'};
 	}
 
+	# fill $arr, all authorizedservice-s array
 	if ( ref( $params->{'authorizedservice'} ) eq 'ARRAY' ) {
 	  $arr = $params->{'authorizedservice'};
 	} else {
@@ -615,25 +568,27 @@ sub proc :Path(proc) :Args(0) {
 	}
 
 	my ($create_account_branch_return, $create_account_branch_leaf_return, $create_account_branch_leaf_params );
-	foreach ( @{$arr} ) {
+	foreach ( @{$arr} ) { # for each authorizedservice choosen
 	  next if ! $_;
 
 	  $uid = $_ =~ /^802.1x-/ ? $login : sprintf('%s@%s', $login, $params->{'associateddomain'});
 
-	  if ( ! defined $params->{'password1'} or $params->{'password1'} eq '' ) {
+	  if ( ( $_ eq 'mail' || $_ eq 'xmpp' ) &&
+	      ( ! defined $params->{'password1'} ||
+		$params->{'password1'} eq '' )) {
 	    $pwd = { $_ => $self->pwdgen };
-	  # } elsif ( $_ =~ /^802.1x-.*/ ) {
-	  #   $pwd->{service}->{clear} = $params->{login};
+	  } elsif ( $_ eq 'ssh' ) {
+	    $pwd->{$_}->{clear} = 'N/A';
 	  } else {
 	    $pwd = { $_ => $self->pwdgen( { pwd => $params->{'password1'} } ) };
 	  }
 
 	  push @{$return->{success}}, {
-				     authorizedservice => $_,
-				     associateddomain => $params->{'associateddomain'},
-				     service_uid => $uid,
-				     service_pwd => $pwd->{$_}->{clear},
-				    };
+				       authorizedservice => $_,
+				       associateddomain => $params->{'associateddomain'},
+				       service_uid => $uid,
+				       service_pwd => $pwd->{$_}->{clear},
+				      };
 
 	  $create_account_branch_return =
 	    $c->controller('User')
@@ -648,14 +603,13 @@ sub proc :Path(proc) :Args(0) {
 	  $return->{error} .= $create_account_branch_return->[0] if defined $create_account_branch_return->[0];
 	  $return->{warning} .= $create_account_branch_return->[2] if defined $create_account_branch_return->[2];
 
-	  # taking data to be used in create_account_branch_leaf()
-	  my $mesg = $ldap_crud->search( { base => $params->{'add_svc_acc'},
-					   scope => 'base',
-					   attrs => [ 'uidNumber', 'givenName', 'sn' ],
+	  # requesting data to be used in create_account_branch_leaf()
+	  my $mesg = $ldap_crud->search( {
+					  base => $params->{'add_svc_acc'},
+					  scope => 'base',
+					  attrs => [ 'uidNumber', 'givenName', 'sn' ],
 					 } );
-	  if ( ! $mesg->count ) {
-	    $return->{error} .= $ldap_crud->err($mesg);
-	  }
+	  if ( ! $mesg->count ) { $return->{error} .= $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}; }
 
 	  my @entry = $mesg->entries;
 
@@ -679,7 +633,19 @@ sub proc :Path(proc) :Args(0) {
 	       password => $pwd->{$_},
 	       telephoneNumber => defined $params->{telephoneNumber} ? $params->{telephoneNumber} : undef,
 	       jpegPhoto => $file,
+	       userCertificate => $params->{usercertificate},
 	      };
+
+	  if ( defined $params->{to_sshkeygen} ) {
+	    $create_account_branch_leaf_params->{to_sshkeygen} = 1;
+	  } elsif ( defined $params->{sshpublickey} &&
+		    $params->{sshpublickey} ne '' ) {
+	    $create_account_branch_leaf_params->{sshpublickey} = $params->{sshpublickey};
+	    $create_account_branch_leaf_params->{sshkeydescr} = $params->{sshkeydescr};
+	  }
+
+
+
 	  # p $create_account_branch_leaf_params;
 	  $create_account_branch_leaf_return =
 	    $c->controller('User')
@@ -769,7 +735,9 @@ sub mod_jpegPhoto {
 
 #=====================================================================
 
-=head1 mod_pwd 
+=head1 mod_pwd
+
+DEPRECATED?
 
 modify password method
 
@@ -822,6 +790,81 @@ sub mod_pwd {
 
 #=====================================================================
 
+=head1 modify_userpassword
+
+modify userPassword method
+
+if no password provided, then it will be auto-generated
+
+=cut
+
+
+sub modify_userpassword :Path(modify_userpassword) :Args(0) {
+  my ( $self, $c ) = @_;
+  my $params = $c->req->parameters;
+
+  $c->stash(
+	    template => 'user/user_modpwd.tt',
+	    form => $self->form_mod_pwd,
+	    ldap_modify_password => $params->{ldap_modify_password},
+	   );
+
+  return unless $self->form_mod_pwd->process(
+					     posted => ($c->req->method eq 'POST'),
+					     params => $params,
+					    ) &&
+					      ( defined $params->{password_init} ||
+						defined $params->{password_cnfm} );
+
+  my $arg = {
+	     mod_pwd_dn => $params->{ldap_modify_password},
+	     password_init => $params->{password_init},
+	     password_cnfm => $params->{password_cnfm},
+	    };
+
+  my $return;
+  if ( $self->form_mod_pwd->validated && $self->form_mod_pwd->ran_validation ) {
+
+    if ( $arg->{'password_init'} eq '' && $arg->{'password_cnfm'} eq '' ) {
+      $arg->{password_gen} = $self->pwdgen;
+    } elsif ( $arg->{'password_init'} ne '' && $arg->{'password_cnfm'} ne '' ) {
+      $arg->{password_gen} = $self->pwdgen({ pwd => $arg->{'password_cnfm'} });
+    }
+
+    my $mesg = $c->model('LDAP_CRUD')->mod(
+					   $arg->{mod_pwd_dn},
+					   {
+					    'userPassword' => $arg->{password_gen}->{ssha}, },
+					  );
+
+    if ( $mesg ne '0' ) {
+      $return->{error} = '<li>Error during password change occured: ' . $mesg . '</li>';
+    } else {
+      $return->{success} .= '<table class="table table-condensed table-vcenter"><tr><td><h1 class="mono text-right"><kbd>' .
+	$arg->{password_gen}->{'clear'} . '</kbd></h1></td><td class="text-center">';
+
+      use GD::Barcode::QRcode;
+      # binmode(STDOUT);
+      # print "Content-Type: image/png\n\n";
+      # print GD::Barcode::QRcode->new( $arg->{password_gen}->{'clear'} )->plot->png;
+
+      use MIME::Base64;
+      my $qr = sprintf('<img alt="password" src="data:image/jpg;base64,%s" class="img-responsive img-thumbnail" title="password"/>',
+		       encode_base64(GD::Barcode::QRcode
+				     ->new( $arg->{password_gen}->{'clear'},
+					    { Ecc => 'Q', Version => 6, ModuleSize => 8 } )
+				     ->plot()->png)
+		      );
+      $return->{success} .= $qr . '</td></tr></table>';
+    }
+  }
+
+  $c->stash( final_message => $return, );
+}
+
+
+#=====================================================================
+
 =head1 mod_groups
 
 modify user's groups method
@@ -851,7 +894,7 @@ sub mod_groups {
 				     attrs => ['cn'], } );
 
     if ( ! $mesg->count ) {
-      push @{$return->{error}}, $ldap_crud->err($mesg);
+      push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html};
     }
 
     my @groups_all = $mesg->sorted('cn');
@@ -865,7 +908,7 @@ sub mod_groups {
     				  attrs => ['cn'], } );
 
     if ( $mesg->code ne '0' ) {
-      push @{$return->{error}}, $ldap_crud->err($mesg);
+      push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html};
     }
 
     my @groups_usr = $mesg->sorted('cn');
@@ -894,7 +937,7 @@ sub mod_groups {
 				   \@groups_chg
 				  );
 	if ( $mesg ) {
-	  push @{$return->{error}}, $ldap_crud->err($mesg);
+	  push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html};
 	} else {
 	  $return->{success}->[0] = 1;
 	}
@@ -932,7 +975,7 @@ sub mod_memberUid {
 				     attrs => ['memberUid'], } );
 
     if ( ! $mesg->count ) {
-      push @{$return->{error}}, $ldap_crud->err($mesg);
+      push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html};
     }
 
     foreach ( $mesg->sorted('memberUid') ) {
@@ -951,7 +994,7 @@ sub mod_memberUid {
       				 [ replace => [ memberUid => \@a ] ],
       				);
       if ( $mesg ) {
-      	push @{$return->{error}}, $ldap_crud->err($mesg);
+      	push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html};
       } else {
       	$return->{success}->[0] = 1;
       }
@@ -1005,7 +1048,7 @@ sub modify :Path(modify) :Args(0) {
   my $mesg = $ldap_crud->search( { base => $params->{dn}, scope => 'base' } );
   my $return;
   if ( $mesg->code ) {
-    $return->{error} .= '<li>' . $ldap_crud->err($mesg) . '</li>';
+    $return->{error} .= '<li>' . $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html} . '</li>';
   }
   my $entry = $mesg->entry(0);
 
@@ -1079,6 +1122,89 @@ sub user_preferences :Path(user_preferences) :Args(0) {
 			}
 		      );
 }
+
+
+#=====================================================================
+
+=head1 delete
+
+deletion of the object
+
+=cut
+
+
+sub delete :Path(delete) :Args(0) {
+  my ( $self, $c ) = @_;
+  my $params = $c->req->parameters;
+
+  my $err;
+  if ( defined $params->{'ldap_delete_recursive'} &&
+       $params->{'ldap_delete_recursive'} eq 'on' ) {
+    $err = $c->model('LDAP_CRUD')->delr($params->{ldap_delete});
+  } else {
+    $err = $c->model('LDAP_CRUD')->del($params->{ldap_delete});
+  }
+
+  if ( $params->{type} eq 'json' ) {
+    $c->stash->{current_view} = 'WebJSON';
+    $c->stash->{success} = 'true';
+    $c->stash->{message} = 'OK';
+    # $c->forward('View::JSON');
+  } else {
+    $c->stash(
+	      template => 'search/delete.tt',
+	      delete => $params->{'ldap_delete'},
+	      recursive => defined $params->{'ldap_delete_recursive'} &&
+	      $params->{'ldap_delete_recursive'} eq 'on' ? '1' : '0',
+	      err => $err,
+	      type => $params->{'type'},
+	     );
+  }
+}
+
+
+
+#=====================================================================
+
+=head1 dhcp_add
+
+DHCP object binding to user
+
+=cut
+
+
+sub dhcp_add :Path(dhcp_add) :Args(0) {
+  my ( $self, $c ) = @_;
+  my $params = $c->req->parameters;
+
+  $c->stash(
+	    template => 'dhcp/dhcp_wrap.tt',
+	    form => $self->form_add_dhcp,
+	    ldap_add_dhcp => $params->{'ldap_add_dhcp'},
+	   );
+
+  return unless $self->form_add_dhcp->process(
+					      posted => ($c->req->method eq 'POST'),
+					      params => $params,
+					      ldap_crud => $c->model('LDAP_CRUD'),
+					     );
+
+  $c->stash(
+	    final_message => $c->controller('Dhcp')
+	    ->create_dhcp_host ( $c->model('LDAP_CRUD'),
+				 {
+				  dhcpHWAddress => $params->{dhcpHWAddress},
+				  uid => substr((split(',',$params->{ldap_add_dhcp}))[0],4),
+				  dhcpStatements => $params->{dhcpStatements},
+				  net => $params->{net},
+				  cn => $params->{cn},
+				  dhcpComments => $params->{dhcpComments},
+				 }
+			       ),
+	   ) if $self->form_add_dhcp->validated;
+}
+
+
 
 
 =head1 AUTHOR

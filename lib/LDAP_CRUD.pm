@@ -106,9 +106,18 @@ sub _build_cfg {
 						  dhcpHost
 						  uidObject
 					       ) ],
+			  ovpn =>       [ qw(
+					      top
+					      inetOrgPerson
+					   ) ],
 			  org =>            [ qw(
 						  top
 						  organizationalUnit
+					       ) ],
+			  ssh =>            [ qw(
+						  top
+						  account
+						  ldapPublicKey
 					       ) ],
 			 },
 	  jpegPhoto => {
@@ -117,25 +126,59 @@ sub _build_cfg {
 	  authorizedService => {
 				'mail' => {
 					   descr => 'Email',
+					   disabled => 0,
 					   homeDirectory_prefix => '/var/mail/IMAP_HOMES/',
 					   gidNumber => 10006,
+					   icon => 'fa fa-envelope-o',
+					   data_fields => 'login,password1,password2',
 					  },
 				'xmpp' => {
 					   descr => 'XMPP (Jabber)',
+					   disabled => 0,
 					   gidNumber => 10106,
 					   jpegPhoto_noavatar => UMI->path_to('root', 'static', 'images', '/avatar-xmpp.png'),
+					   icon => 'fa fa-lightbulb-o',
+					   data_fields => 'login,password1,password2',
 					  },
 				'802.1x-mac' => {
-						  descr => '802.1x MAC',
+						 descr => '802.1x MAC',
+						 disabled => 0,
+						 icon => 'fa fa-shield',
+						 data_fields => 'login,password1,password2',
 						 },
 				'802.1x-eap' => {
-						  descr => '802.1x EAP',
+						 descr => '802.1x EAP',
+						 disabled => 0,
+						 icon => 'fa fa-shield',
+						 data_fields => 'login,password1,password2',
 						 },
 				'otrs' => {
 					   descr => 'OTRS',
+					   disabled => 1,
+					   icon => 'fa fa-file-code-o',
+					   data_fields => 'login,password1,password2',
 					  },
 				'sms' => {
-					   descr => 'SMSter',
+					  descr => 'SMSter',
+					  disabled => 1,
+					  data_fields => 'login,password1,password2',
+					  },
+				'ssh' => {
+					  descr => 'SSH key',
+					  disabled => 0,
+					  icon => 'fa fa-key',
+					  data_fields => 'login',
+					  },
+				'gpg' => {
+					  descr => 'GPG key',
+					  disabled => 1,
+					  icon => 'fa fa-key',
+					  },
+				'ovpn' => {
+					   descr => 'OpenVPN',
+					   disabled => 0,
+					   icon => 'fa fa-certificate',
+					   data_fields => 'login',
 					  },
 			       },
 	 };
@@ -300,7 +343,7 @@ sub err {
   # 		  $mesg->server_error)
   #   if $mesg->code;
 
-  return sprintf( '<dl class="dl-horizontal">
+  return { html => sprintf( '<dl class="dl-horizontal">
   <dt>code</dt>
   <dd>%s</dd>
   <dt>error name</dt>
@@ -323,7 +366,12 @@ sub err {
   		  ldap_error_text($mesg),
   		  ldap_error_desc($mesg),
   		  $mesg->server_error
-		) if $mesg->code;
+		),
+	   code => $mesg->code,
+	   name => ldap_error_name($mesg),
+	   text => ldap_error_text($mesg),
+	   desc => ldap_error_desc($mesg),
+	   srv => $mesg->server_error, } if $mesg->code;
 }
 
 sub unbind {
@@ -353,7 +401,7 @@ sub search {
   	     filter => $args->{filter} || '(objectClass=*)',
   	     deref  => $args->{deref} || 'never',
   	     attrs  => $args->{attrs} || [ '*' ],
-  	     sizelimit => $args->{sizelimit} || 10,
+  	     sizelimit => $args->{sizelimit} || 20,
   	    };
 
   # use Data::Printer;
@@ -378,12 +426,13 @@ sub add {
 
   my $callername = (caller(1))[3];
   $callername = 'main' if ! defined $callername;
-  my $return = 'call to LDAP_CRUD->add from ' . $callername . ': ';
+  my $return;
   my $msg;
   if ( ! $self->dry_run ) {
     $msg = $self->ldap->add ( $dn, attrs => $attrs, );
     if ($msg->is_error()) {
-      $return .= $self->err( $msg );
+      $return = $self->err( $msg );
+      $return->{caller} = 'call to LDAP_CRUD->add from ' . $callername . ': ';
     } else {
       $return = 0;
     }
@@ -928,13 +977,13 @@ sub dhcp_lease {
   my $return;
   my $arg = {
 	     net => $args->{net},
-	     what => $args->{what}, # used, ip, mac, hostname, all
+	     what => $args->{what} || 'stub', # used, ip, mac, hostname, all
 	    };
 
   my $mesg =
     $self->search({
 		   base => $self->{cfg}->{base}->{dhcp},
-		   filter => sprintf('dhcpOption=domain-name %s', $arg->{net}),
+		   filter => sprintf('dhcpOption=domain-name "%s"', $arg->{net}),
 		   attrs => [ 'cn', 'dhcpNetMask', 'dhcpRange' ],
 		  });
 

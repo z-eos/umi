@@ -5,7 +5,7 @@ package UMI::Controller::Root;
 use Moose;
 use namespace::autoclean;
 
-BEGIN { extends 'Catalyst::Controller' }
+BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 
 #
 # Sets the actions in this controller to be registered with no prefix
@@ -75,6 +75,40 @@ sub accinfo :Path(accinfo) :Args(0) {
     $c->stash( template => 'acc_info.tt', );
 }
 
+sub download_from_ldap :Path(download_from_ldap) :Args(0) {
+  use Data::Printer;
+
+  my ( $self, $c ) = @_;
+  # application/x-x509-ca-cert
+  # application/x-x509-user-cert
+  # application/x-pem-file
+  my $params = $c->request->params;
+  my $arg = {
+	     dn => $params->{dn},
+	     attr => $params->{attr} || 'userPKCS12',
+	     content_type => $params->{content_type} || 'application/x-pkcs12',
+	    };
+
+  my ( $ldap_crud, $mesg, $entry, $file, $authorizedService, $return);
+  $ldap_crud = $c->model('LDAP_CRUD');
+  $mesg = $ldap_crud->search( {
+			       base => $arg->{dn},
+			       scope => 'base',
+			      } );
+  if ( $mesg->code ) {
+    $return->{error} .= '<li>file download info: ' . $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html} . '</li>';
+  } else {
+    $entry = $mesg->entry(0);
+    $file = join('', $entry->get_value( $arg->{attr} ));
+    $c->response->body($file);
+    $c->response->headers->content_type($arg->{content_type});
+    $c->response->header( 'Content-Disposition' => sprintf('attachment; filename=%s-%s.p12',
+							   (split('=',(split(',', $arg->{dn}))[1]))[1],
+							   $entry->get_value('cn')) );
+  }
+
+}
+
 sub user_preferences :Path(user_prefs) :Args(0) {
   my ( $self, $c, $args ) = @_;
   if ( $c->user_exists ) {
@@ -83,7 +117,10 @@ sub user_preferences :Path(user_prefs) :Args(0) {
     use Data::Printer colored => 0;
     # p $c->session->{auth_obj}->{title};
 
-    my ( $arg, $mesg, $return, $entry, $entries, $orgs, $domains, $fqdn );
+    my ( $arg, $mesg, $return, $entry, $entries, $orgs, $domains, $fqdn,
+	 @physicaldeliveryofficename, @telephonenumber, @title, @mail, @roles,
+	 $physicaldeliveryofficename, $telephonenumber, $title, $mail, $roles, );
+
     $entry = '';
     if ( defined $args->{uid} && $args->{uid} ne '' ) {
       $mesg = $ldap_crud->search( {
@@ -99,29 +136,44 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 						 telephoneNumber) ],
 				  } );
       if ( $mesg->code ) {
-	$return->{error} .= '<li>personal info' . $ldap_crud->err($mesg) . '</li>';
+	$return->{error} .= '<li>personal info' . $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html} . '</li>';
       } else {
 	$entry = $mesg->entry(0);
-	my @physicaldeliveryofficename = $entry->get_value('physicaldeliveryofficename');
+	@physicaldeliveryofficename = $entry->get_value('physicaldeliveryofficename');
+	@telephonenumber = defined $entry->get_value('telephonenumber') ? $entry->get_value('telephonenumber') : 'N/A';
+	@title = defined $entry->get_value('title');
+	@mail = $entry->get_value('mail');
 	$arg = {
 		uid => $args->{uid},
 		givenname => $entry->get_value('givenname'),
 		sn => $entry->get_value('sn'),
-		title => $entry->get_value('title'),
+		title => \@title,
 		physicaldeliveryofficename => \@physicaldeliveryofficename,
-		telephonenumber => $entry->get_value('telephonenumber'),
-		mail => $entry->get_value('mail'),
+		telephonenumber => \@telephonenumber,
+		mail => \@mail,
+		roles => '<span class="fa fa-exclamation-triangle text-warning">' .
+		'<h6><em>to fix roles for non system accounts ' .
+		(caller(1))[3] . ' L:' .
+		(caller(1))[2] . '</em></h6></span></li>',
 	       };
       }
     } else {
+      $physicaldeliveryofficename = $c->user->has_attribute('physicaldeliveryofficename') ?
+	$c->user->physicaldeliveryofficename : 'N/A';
+      $telephonenumber = $c->user->has_attribute('telephonenumber') ?
+	$c->user->telephonenumber : 'N/A';
+      $title = $c->user->has_attribute('title') ? $c->user->title : 'N/A';
+      $mail = $c->user->has_attribute('mail') ? $c->user->mail : 'N/A';
+      $roles = $c->user->roles;
       $arg = {
-	      uid => $c->session->{auth_uid},
-	      givenname => $c->session->{auth_obj}->{givenname},
-	      sn => $c->session->{auth_obj}->{sn},
-	      title => $c->session->{auth_obj}->{title},
-	      mail => $c->session->{auth_obj}->{mail},
-	      physicaldeliveryofficename => $c->session->{auth_obj}->{physicaldeliveryofficename},
-	      telephonenumber => $c->session->{auth_obj}->{telephonenumber},
+	      uid => $c->user->uid,
+	      givenname => $c->user->givenname || 'N/A',
+	      sn => $c->user->sn || 'N/A',
+	      title => $title,
+	      mail => $mail,
+	      physicaldeliveryofficename => $physicaldeliveryofficename,
+	      telephonenumber => $telephonenumber,
+	      roles => $roles || 'N/A',
 	     };
     }
 
@@ -143,7 +195,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
       # any other, than we will use the one from it's ancestor
       $mesg = $ldap_crud->search( { base => $_, scope => 'base', } );
       if ( $mesg->code ) {
-	$return->{error} .= '<li>organization/s<br>' . $ldap_crud->err($mesg) . 
+	$return->{error} .= '<li>organization/s<br>' . $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html} . 
 	  '<em>' . (caller(1))[3] . ' @ line:' . (caller(1))[2] . '</em></li>';
       } else {
 	$entries = $mesg->as_struct;
@@ -158,7 +210,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	  $mesg = $ldap_crud->search( { base => $_,
 					attrs => [ 'associatedDomain' ], } );
 	  if ( $mesg->code ) {
-	    $return->{error} .= '<li>associatedDomain/s' . $ldap_crud->err($mesg) . '</li>';
+	    $return->{error} .= '<li>associatedDomain/s' . $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html} . '</li>';
 	  } else {
 	    $domains = $mesg->entry(0);
 	    @{$fqdn->{$entries->{$_}->{physicaldeliveryofficename}->[0]}} =
@@ -176,7 +228,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 						  $ldap_crud->{cfg}->{base}->{acc_root}),
 				  scope => 'base', } );
     if ( $mesg->code ) {
-      $return->{error} .= '<li>jpegPhoto' . $ldap_crud->err($mesg) . '</li>';
+      $return->{error} .= '<li>jpegPhoto' . $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html} . '</li>';
     }
     $entry = $mesg->entry(0);
     use MIME::Base64;
@@ -192,7 +244,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
     my ( $dhcp, $dhcpOption, @dhcpOption_item, @x, $domain_name );
     $mesg = $ldap_crud->search( { base => $ldap_crud->{cfg}->{base}->{dhcp},
 				  filter => sprintf('uid=%s', $arg->{uid}), } );
-    if ( $mesg->code ) { $return->{error} .= '<li>DHCP' . $ldap_crud->err($mesg) . '</li>'; }
+    if ( $mesg->code ) { $return->{error} .= '<li>DHCP' . $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html} . '</li>'; }
     $entries = $mesg->as_struct;
     foreach (keys (%{$entries})) {
       @x = split(',', $_);
@@ -200,7 +252,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
       $mesg = $ldap_crud->search( { base => join(',', @x),
 				    scope => 'base',
 				    attrs => [ 'dhcpOption' ],} );
-      if ( $mesg->code ) { $return->{error} .= '<li>DHCP domain-name/s' . $ldap_crud->err($mesg) . '</li>'; }
+      if ( $mesg->code ) { $return->{error} .= '<li>DHCP domain-name/s' . $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html} . '</li>'; }
       $dhcpOption = $mesg->entry(0);
       @dhcpOption_item = $dhcpOption->get_value('dhcpOption');
       foreach ( @dhcpOption_item ) {
@@ -226,26 +278,37 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 				  filter => 'authorizedService=*',
 				  attrs => [ 'authorizedService'],} );
     if ( $mesg->code ) {
-      $return->{error} .= '<li>services list' . $ldap_crud->err($mesg) . '</li>';
+      $return->{error} .= '<li>services list' . $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html} . '</li>';
     }
 
     foreach ($mesg->entries) {
       $mesg = $ldap_crud->search( { base => $_->dn,
 				    scope => 'children',
-				    attrs => [ 'uid', 'cn' ], });
+				  });
       if ( $mesg->code ) {
-	$return->{error} .= '<li>each service children' . $ldap_crud->err($mesg) . '</li>';
+	$return->{error} .= '<li>each service children' . $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html} . '</li>';
       }
       next if ! $mesg->count;
       $service_details = {
 			  branch_dn => $_->dn,
 			  authorizedService => $_->get_value('authorizedService'),
+			  icon => $ldap_crud->{cfg}->{authorizedService}
+			  ->{(split('@', $_->get_value('authorizedService')))[0]}->{icon},
+			  descr => $ldap_crud->{cfg}->{authorizedService}
+			  ->{(split('@', $_->get_value('authorizedService')))[0]}->{descr},
 			 };
 
       @service_arr = $mesg->entries;
 
       foreach (@service_arr) {
-	$service_details->{leaf}->{$_->dn} = $_->get_value('uid');
+	$service_details->{leaf}->{$_->dn} = defined $_->get_value('uid') ? $_->get_value('uid') : $_->get_value('cn');
+
+	if ( (split('@', $service_details->{authorizedService}))[0] eq 'ovpn' ) {
+	  $service_details->{cert}->{$_->dn} =
+	    $self->cert_info({ cert => $_->get_value('userCertificate;binary') });
+	} elsif ( (split('@', $service_details->{authorizedService}))[0] eq 'ssh' ) {
+	  @{$service_details->{sshkey}->{$_->dn}} = $_->get_value('sshPublicKey');
+	}
       }
       push @{$service}, $service_details;
       undef $service_details;

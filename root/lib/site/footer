@@ -32,7 +32,9 @@
 	  <li><a href="https://metacpan.org/pod/Catalyst::Plugin::Authentication#c-user">
 	      Catalyst::Plugin::Authentication
 	  </a></li>
-	  <li><a href="#"> footer col №2 item №4 </a></li>
+	  <li><a href="https://metacpan.org/pod/Catalyst::Authentication::Store::LDAP::User#Special-Keywords">
+	      Catalyst::Authentication::Store::LDAP::User
+	  </a></li>
 	</ul>
     </em></small>
   </div>

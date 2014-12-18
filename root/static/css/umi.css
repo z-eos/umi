@@ -76,6 +76,7 @@
 
 .mono {
     font-family: "monospace";
+    word-break: break-all;
 }
 
 /* a.menutab:hover { */
@@ -84,3 +85,7 @@
 /* a.menutab:active { */
 /*     color: #FFFFFF; */
 /* } */
+
+.table-vcenter td {
+   vertical-align: middle!important;
+}

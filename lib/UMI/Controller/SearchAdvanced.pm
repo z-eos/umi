@@ -66,7 +66,7 @@ sub proc :Path(proc) :Args(0) {
       if ( ! $mesg->count ) {
 	$err_message = '<div class="alert alert-danger">' .
 	  '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
-	    $ldap_crud->err($mesg) . '</ul></div>';
+	    $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html} . '</ul></div>';
       }
 
       my @entries = $mesg->entries;
@@ -94,6 +94,8 @@ sub proc :Path(proc) :Args(0) {
 		      $_->dn,
 		      encode_base64(join('',@{$ttentries->{$_->dn}->{attrs}->{$attr}})),
 		      $_->dn);
+	  } elsif ( $attr eq 'userCertificate;binary' ) {
+	    $ttentries->{$_->dn}->{attrs}->{$attr} = $self->cert_info({ cert => $_->get_value( $attr ) });
 	  } elsif (ref $ttentries->{$_->dn}->{attrs}->{$attr} eq 'ARRAY') {
 	    $ttentries->{$_->dn}->{is_arr}->{$attr} = 1;
 	  }
@@ -110,6 +112,7 @@ sub proc :Path(proc) :Args(0) {
 		base_dn => $base_dn,
 		filter => $search_filter,
 		entries => $ttentries,
+		services => $ldap_crud->{cfg}->{authorizedService},
 		err => $err_message,
 		form => $self->form,
 	       );

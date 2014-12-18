@@ -255,6 +255,38 @@ sub pwdgen {
 # to be removed # 	 };
 }
 
+
+=head2 cert_info
+
+data taken, generally, from
+
+openssl x509 -in target.crt -text -noout
+
+=cut
+
+
+sub cert_info {
+  my ( $self, $args ) = @_;
+  my $arg = {
+	     cert => $args->{'cert'},
+	    };
+
+  use Crypt::X509;
+  my $x509 = Crypt::X509->new( cert => join('', $arg->{cert}) );
+  use POSIX qw(strftime);
+  return {
+	  'Subject' => join(',',@{$x509->Subject}),
+	  'Issuer' => join(',',@{$x509->Issuer}),
+	  'S/N' => $x509->serial,
+	  'Not Before' => strftime ("%a %b %e %H:%M:%S %Y", localtime($x509->not_before)),
+	  'Not  After' => strftime ("%a %b %e %H:%M:%S %Y", localtime( $x509->not_after)),
+	 };
+}
+
+
+
+
+
 ## !!! to adapt !!!
 # sub is_arr_member {
 #     my @arr = shift;

@@ -199,10 +199,18 @@ sub options_authorizedservice {
     # 		       selected => 'on',
     # 		      };
     # } else {
+    if ( $self->ldap_crud->{cfg}->{authorizedService}->{$key}->{disabled} ) {
+      push @services, {
+		       value => $key,
+		       label => $self->ldap_crud->{cfg}->{authorizedService}->{$key}->{descr},
+		       disabled => "disabled",
+		      };
+    } else {
       push @services, {
 		       value => $key,
 		       label => $self->ldap_crud->{cfg}->{authorizedService}->{$key}->{descr},
 		      };
+    }
     # }
   }
   # p @services;

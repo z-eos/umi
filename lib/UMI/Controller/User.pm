@@ -403,6 +403,10 @@ sub create_account_branch_leaf {
 	     password => $args->{password},
 	     telephoneNumber => $args->{telephoneNumber} || '666',
 	     jpegPhoto => $args->{jpegPhoto} || undef,
+	     to_sshkeygen => $args->{to_sshkeygen} || undef,
+	     sshpublickey => $args->{sshpublickey} || undef,
+	     sshkeydescr => $args->{sshkeydescr} || undef,
+	     userCertificate => $args->{userCertificate} || undef,
 	    };
 
   $arg->{basedn} = 'authorizedService=' . $args->{service} . '@' . $args->{associatedDomain} .
@@ -410,25 +414,33 @@ sub create_account_branch_leaf {
 
   $arg->{uid} = $arg->{'login'} . '@' . $arg->{associatedDomain};
 
-  $arg->{dn} = 'uid=' . $arg->{uid} .
-    ',' . $arg->{basedn};
+  $arg->{dn} = 'uid=' . $arg->{uid} . ',' . $arg->{basedn};
 
-  my $authorizedService = [
-			   authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
-			   associatedDomain => $arg->{associatedDomain},
-			   uid => $arg->{uid},
-			   cn => $arg->{uid},
-			   givenName => $arg->{givenName},
-			   sn => $arg->{sn},
-			   uidNumber => $arg->{uidNumber},
-			   loginShell => $ldap_crud->{cfg}->{stub}->{loginShell},
-			   objectClass => $ldap_crud->{cfg}->{objectClass}->{acc_svc_common},
-			   userPassword => $arg->{password}->{'ssha'},
-			   gecos => uc($arg->{service}) . ': ' . $arg->{'login'} . ' @ ' .
-			   $arg->{associatedDomain},
-			   description => uc($arg->{service}) . ': ' . $arg->{'login'} . ' @ ' .
-			   $arg->{associatedDomain},
-			  ];
+  my ($authorizedService, $sshkey);
+
+  if ( $arg->{service} eq 'ovpn' ) {
+  } elsif ( $arg->{service} eq 'ssh' ) {
+  } elsif ( $arg->{service} eq '802.1x-mac' ||
+	    $arg->{service} eq '802.1x-eap' ) {
+    $authorizedService = [];
+  } else {
+    $authorizedService = [
+			  authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
+			  associatedDomain => $arg->{associatedDomain},
+			  uid => $arg->{uid},
+			  cn => $arg->{uid},
+			  givenName => $arg->{givenName},
+			  sn => $arg->{sn},
+			  uidNumber => $arg->{uidNumber},
+			  loginShell => $ldap_crud->{cfg}->{stub}->{loginShell},
+			  objectClass => $ldap_crud->{cfg}->{objectClass}->{acc_svc_common},
+			  userPassword => $arg->{password}->{'ssha'},
+			  gecos => uc($arg->{service}) . ': ' . $arg->{'login'} . ' @ ' .
+			  $arg->{associatedDomain},
+			  description => uc($arg->{service}) . ': ' . $arg->{'login'} . ' @ ' .
+			  $arg->{associatedDomain},
+			 ];
+  }
 
   my ($authorizedService_add, $success_mesage, $error_message, $jpegPhoto_file);
   if ( $arg->{service} eq 'mail') {
@@ -482,6 +494,41 @@ sub create_account_branch_leaf {
     undef $authorizedService;
     $authorizedService = [];
     $arg->{dn} = 'uid=' . $arg->{'login'} . ',' . $arg->{basedn};
+  } elsif ( $arg->{service} eq 'ssh' ) {
+    ## I failed to figure out how to do that neither with Crypt::RSA nor with
+    ## Net::SSH::Perl::Key, so leaving it for better times
+    # if ( $arg->{to_sshkeygen} ) {
+    #   use Crypt::RSA;
+    #   $sshkey->{chain} = new Crypt::RSA::Key;
+    #   ($sshkey->{pub}, $sshkey->{pvt}) =
+    #   	$sshkey->{chain}->generate (
+    #   				KF => 'SSH',
+    #   				Identity  => 'Lord Macbeth <macbeth@glamis.com>',
+    #   				Size      => 2048,
+    #   				Verbosity => 1,
+    #   			       ) or die $sshkey->{chain}->errstr();
+    #   p $sshkey;
+    # } else {
+    # }
+    $authorizedService = [
+			  objectClass => $ldap_crud->{cfg}->{objectClass}->{ssh},
+			  sshPublicKey => $arg->{sshpublickey},
+			 ];
+    $authorizedService_add = [];
+  } elsif ( $arg->{service} eq 'ovpn' ) {
+    p $arg->{userCertificate};
+    local $/ = undef;
+    open(my $fh, "<", $arg->{userCertificate}->{'tempname'}) or warn "Can not open $arg->{userCertificate}: $!";
+    my $usercertificate = <$fh>;
+    close($fh) or warn "Can not close $arg->{userCertificate}: $!";
+    $arg->{dn} = 'cn=' . substr($arg->{userCertificate}->{filename},0,-4) . ',' . $arg->{basedn};
+    $authorizedService = [
+			  cn => substr($arg->{userCertificate}->{filename},0,-4),
+			  sn => '' . $self->cert_info({ cert => $usercertificate })->{'S/N'},
+			  objectClass => $ldap_crud->{cfg}->{objectClass}->{ovpn},
+			  'userCertificate;binary' => $usercertificate,
+			 ];
+    $authorizedService_add = [];
   }
 
   my $mesg =
@@ -492,7 +539,7 @@ sub create_account_branch_leaf {
   my $return;
   if ( $mesg ) {
     $return->[0] = '<li><h4 class="text-danger">Error during ' . uc($arg->{service}) .
-      ' account creation occured:</h4><strong><em>' . $mesg .
+      ' account creation occured:</h4><strong><em>' . $mesg->{caller} . $mesg->{html} .
 	'</em></strong>service account was not created, you need take care of it!</li>';
 
   } else {

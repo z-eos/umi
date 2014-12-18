@@ -1,0 +1,15 @@
+[% META title = 'UNAUTHORIZED' %]
+
+<div class="panel panel-danger">
+  <div class="panel-heading">
+    <h1 class="panel-title">
+    	<span class="glyphicon glyphicon-exclamation-sign">&nbsp;</span>
+    	<b>Access denied!</b>
+    </h1>
+  </div>
+  <div class="panel-body">
+    <p>Dear <strong class="text-info"><em>[% c.user.username %] [% c.user.session.auth_obj.sn %]</em></strong>,
+      you are not allowed to access this page.</p>
+    <p>Contact UMI administrator for any question.</p>
+  </div>
+</div>

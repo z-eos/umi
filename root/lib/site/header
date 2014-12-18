@@ -293,12 +293,12 @@
 	    <span class="caret"></span>
 	  </a>
           <ul class="dropdown-menu" role="menu">
-            <li>
-	      <a href="[% c.uri_for_action('accinfo') %]">
-		<span class="fa fa-list-alt"></span>
-		Account Info
-	      </a>
-	    </li>
+            <!-- <li> -->
+	    <!--   <a href="[% c.uri_for_action('accinfo') %]"> -->
+	    <!-- 	<span class="fa fa-list-alt disabled"></span> -->
+	    <!-- 	Account Info -->
+	    <!--   </a> -->
+	    <!-- </li> -->
             <li>
 	      <a href="/user_prefs">
 		<span class="fa fa-cogs"></span>

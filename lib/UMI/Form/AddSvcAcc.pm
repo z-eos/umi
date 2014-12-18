@@ -1,15 +1,14 @@
 # -*- mode: cperl -*-
 #
 
-package UMI::Form::AddServiceAccount;
+package UMI::Form::AddSvcAcc;
 
 use HTML::FormHandler::Moose;
 BEGIN { extends 'UMI::Form::LDAP'; with 'Tools'; }
 
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable' );
 
-# has '+item_class' => ( default =>'AddServiceAccount' );
-has '+enctype' => ( default => 'multipart/form-data');
+# has '+item_class' => ( default =>'AddSvcAcc' );
 has '+action' => ( default => '/searchby/proc' );
 
 has_field 'add_svc_acc' => ( type => 'Hidden', );
@@ -17,7 +16,6 @@ has_field 'add_svc_acc' => ( type => 'Hidden', );
 has_field 'login' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
 		       label => 'Login',
 		       size => 60,
-		       wrapper_class => [ 'col-xs-4' ],
 		       # element_attr => { disabled => '', },
 		       # element_class => [ 'disabled' ],
 		       # init_value => 'add_svc_acc' . '-<service choosen>',
@@ -31,7 +29,6 @@ has_field 'add_svc_acc_uid' => ( type => 'Hidden', );
 has_field 'password1' => ( type => 'Password',
 			   minlength => 7, maxlength => 16,
 			   label => 'Password',
-			   wrapper_class => [ 'col-xs-4' ],
 #			   ne_username => 'login',
 			   apply => [ NoSpaces, NotAllDigits, Printable ],
 			   element_attr => 
@@ -43,7 +40,6 @@ has_field 'password1' => ( type => 'Password',
 has_field 'password2' => ( type => 'Password',
 			   minlength => 7, maxlength => 16,
 			   label => 'Confirm Password',
-			   wrapper_class => [ 'col-xs-4' ],
 #			   ne_username => 'login',
 			   apply => [ NoSpaces, NotAllDigits, Printable ],
 			   element_attr => 
@@ -53,58 +49,20 @@ has_field 'password2' => ( type => 'Password',
 			 );
 
 has_field 'pwdcomment' => ( type => 'Display',
-			    html => '<small class="text-muted col-xs-12"><em>' .
-			    'Leave login and password fields empty to autogenerate them. If empty, login will be equal to &laquo;personal&raquo; part of management account uid.</em></small>',
+			    html => '<p class="text-muted"><small><em>' .
+			    'Leave login and password fields empty to autogenerate them. If empty, login will be equal to &laquo;personal&raquo; part of management account uid.</em></small></p>',
+#			    element_class => 'text-muted'
 			  );
 
 has_field 'descr' => ( type => 'TextArea',
 		       label => 'Description',
-		       element_attr =>
-		       { placeholder =>
-			 'Meaningfull, service related description to make it easy to understand who, when, where e.t.c.' },
-		       wrapper_class => [ 'col-xs-5' ],
-		       cols => 30, rows => 1);
-
-has_field 'sshpublickey' => ( type => 'TextArea',
-			      label => 'SSH Public Key',
-			      element_attr => { placeholder => 'Paste your key here.' },
-			      wrapper_class => [ 'col-lg-12' ],
-			      cols => 30, rows => 1);
-
-has_field 'to_sshkeygen' => ( type => 'Checkbox',
-			      label => 'Generate SSH Key',
-			      element_attr => { disabled => '', },
-			      wrapper_class => [ 'checkbox', 'col-xs-1' ],
-			    );
-
-has_field 'sshkeydescr' => ( apply => [ NotAllDigits, Printable ],
-			     label => 'SSH Key Description',
-			     wrapper_class => [ 'col-xs-11' ],
-			     element_attr =>
-			     {
-			      disabled => '',
-			      placeholder =>
-			      'Meaningfull key description like host name for which it is to be used, e.t.c.',
-			     },
-			   );
-
-has_field 'sshgenfooter' => ( type => 'Display',
-			      html => '<small class="text-muted col-xs-11 col-xs-offset-1"><em>' .
-			      'RSA, 2048 bit length key will be generated for you automatically.</em></small>',
-			      # wrapper_class => [ 'col-xs-11', 'col-xs-offset-1' ],
-			  );
-
-
-has_field 'usercertificate' => ( type => 'Upload',
-				 label => 'User Certificate in DER format',
-				 element_class => [ 'btn', 'btn-default', ],
-				 max_size => '50000', );
-
+		       element_attr => { placeholder => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed dapibus nulla. Mauris vehicula vehicula ligula ac dapibus. Fusce vehicula a turpis sed. ' },
+		       cols => 30, rows => 2);
 
 has_field 'associateddomain' => ( type => 'Select',
 				  label => 'Domain Name', label_class => [ 'required' ],
 				  # options => [{ value => '0', label => '--- select domain ---', selected => 'on' }],
-				  wrapper_class => [ 'col-xs-5' ],
+				  wrapper_class => [ 'col-md-6' ],
 				  # required => 1,
 				);
 
@@ -143,8 +101,8 @@ sub options_associateddomain {
 
 has_field 'authorizedservice' => ( type => 'Multiple',
 				   label => 'Service', label_class => [ 'required' ],
-				   wrapper_class => [ 'col-xs-3' ],
-				   size => 7,
+				   wrapper_class => [ 'col-md-6' ],
+				   size => 5,
 				   # required => 1,
 				 );
 
@@ -154,102 +112,53 @@ sub options_authorizedservice {
 
   return unless $self->ldap_crud;
 
-  my @services; # = ( { value => '0', label => '--- select service ---', selected => 'selected' } );
+  my @services = ( { value => '0', label => '--- select service ---', selected => 'selected' } );
 
   foreach my $key ( sort {$a cmp $b} keys %{$self->ldap_crud->{cfg}->{authorizedService}}) {
-    if ( defined $self->ldap_crud->{cfg}->{authorizedService}->{$key}->{data_fields} &&
-	 $self->ldap_crud->{cfg}->{authorizedService}->{$key}->{data_fields} ne '' ) {
-      push @services, {
-		       value => $key,
-		       label => $self->ldap_crud->{cfg}->{authorizedService}->{$key}->{descr},
-		       attributes =>
-		       { 'data-fields' => $self->ldap_crud->{cfg}->{authorizedService}->{$key}->{data_fields} },
-		      } if ! $self->ldap_crud->{cfg}->{authorizedService}->{$key}->{disabled};
-    } else {
-      push @services, {
-		       value => $key,
-		       label => $self->ldap_crud->{cfg}->{authorizedService}->{$key}->{descr},
-		      } if ! $self->ldap_crud->{cfg}->{authorizedService}->{$key}->{disabled};
-    }
+    push @services, {
+		     value => $key,
+		     label => $self->ldap_crud->{cfg}->{authorizedService}->{$key}->{descr},
+		    } if ! $self->ldap_crud->{cfg}->{authorizedService}->{$key}->{disabled};
+p $key;
   }
   # p @services;
   return \@services;
 }
 
 
+
 has_field 'reset' => ( type => 'Reset',
-		       do_wrapper => 0,
-		       element_class => [ 'btn', 'btn-default', 'col-xs-1', ],
-		       value => 'Reset' );
+			wrapper_class => [ 'pull-left', 'col-md-2' ],
+			element_class => [ 'btn', 'btn-default', 'col-md-4' ],
+		        value => 'Reset' );
 
 has_field 'submit' => ( type => 'Submit',
-			do_wrapper => 0,
-			element_class => [ 'btn', 'btn-default', 'col-xs-10', 'col-xs-offset-1' ],
+			wrapper_class => [ 'pull-right', 'col-md-10' ],
+			element_class => [ 'btn', 'btn-default', 'col-md-12' ],
 			value => 'Submit' );
 
-
-
 has_block 'account' => ( tag => 'fieldset',
-			 render_list => [
-					 'login',
-					 'password1',
-					 'password2',
-					 'pwdcomment'
-					],
-			 label => '<span class="fa fa-user"></span>&nbsp;account credentials',
-			 label_class => [ 'text-info' ],
-#			 class => [ 'form-inline' ],
+			 render_list => [ 'login', 'password1', 'password2', 'pwdcomment' ],
+			 label => '<abbr title="User Accounts (Management and Srvice/s) Credentials" class="initialism"><span class="icon_key_alt" aria-hidden="true"></span></abbr>',
+			 label_class => [ 'pull-left' ],
+			 class => [ 'form-inline' ],
 		       );
 
-has_block 'ssh' => ( tag => 'fieldset',
-		     render_list => [
-				     'to_sshkeygen',
-				     'sshkeydescr',
-				     'sshgenfooter',
-				     'sshpublickey',
-				    ],
-		     label => '<span class="fa fa-key"></span>&nbsp;ssh key/s',
-		     label_class => [ 'text-info' ],
-		   );
-
-has_block 'cert' => ( tag => 'fieldset',
-		      render_list => [
-				      'usercertificate',
-				     ],
-		      label => '<span class="fa fa-certificate"></span>&nbsp;certificate/s',
-		      label_class => [ 'text-info' ],
-		    );
-
 has_block 'services' => ( tag => 'fieldset',
-			  render_list => [
-					  'authorizedservice',
-					  'associateddomain',
-					  'descr',
-					 ],
-			  label => '<span class="fa fa-sliders"></span>&nbsp;services',
- 			  label_class => [ 'text-info' ],
-#			  class => [ 'row' ]
+			  render_list => [ 'associateddomain', 'authorizedservice' ],
+			  label => '<abbr title="Services Assigned" class="initialism"><span class="icon_cloud_alt" aria-hidden="true"></span></abbr>',
+			  # label => '<span class="icon_menu-square_alt2" aria-hidden="true"></span>',
+ 			  # label_class => [ 'pull-left' ],
+			  class => [ 'row' ]
 			);
 
 has_block 'submitit' => ( tag => 'fieldset',
-			  render_list => [
-					  'reset',
-					  'submit',
-					 ],
+			  render_list => [ 'reset', 'submit'],
 			  label => '&nbsp;',
-#			  class => [ 'row' ]
+			  class => [ 'row' ]
 			);
 
-# sub build_render_list {[ 'services', 'add_svc_acc', 'add_svc_acc_uid', 'account', 'descr', 'sshpublickey', 'usercertificate', 'submitit' ]}
-
-sub build_render_list {[
-			'add_svc_acc', 'add_svc_acc_uid',
-			'services',
-			'account',
-			'ssh',
-			'cert',
-			'submitit',
-		       ]}
+sub build_render_list {[ 'add_svc_acc', 'add_svc_acc_uid', 'account', 'services', 'descr', 'submitit' ]}
 
 sub html_attributes {
   my ( $self, $field, $type, $attr ) = @_;

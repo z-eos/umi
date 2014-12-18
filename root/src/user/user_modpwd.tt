@@ -1,33 +1,44 @@
 [% META title = 'Password Modify' %]
 
-<!-- <div class="container"> -->
-  <div class="col-md-10">
+  <!-- <div class="col-md-10"> -->
     <div class="page-header">
       <h2>Password Check or Modification Form <small><em class="mono">for user: [% ldap_modify_password %]</em></small></h2>
     </div>
 
-    [% final_message %]
+    [% IF final_message.error %]
+    <div class="panel panel-danger">
+      <div class="panel-heading">
+        <h4><span class="fa fa-exclamation-circle">&nbsp;</span>Error!</h4>
+      </div>
+      <div class="panel-body">
+        <ul>
+            [% FOREACH i IN final_message.error %]
+             [% i %]
+            [% END %]
+        </ul>
+      </div>
+    </div>
+    [% ELSIF final_message.warning %]
+    <div class="panel panel-warning">
+      <div class="panel-heading">
+        <h4><span class="fa fa-exclamation-triangle">&nbsp;</span>Warning!</h4>
+      </div>
+      <div class="panel-body">
+          [% final_message.warning %]
+      </div>
+    </div>
+    [% END %]
+    [% IF final_message.success %]
+    <div class="panel panel-success">
+      <div class="panel-heading">
+        <h4><span class="fa fa-check-circle">&nbsp;</span>Success!</h4>
+      </div>
+      <div class="panel-body mono">
+          [% final_message.success %]
+      </div>
+    </div>
+    [% END %]
+
     [% form.render %]
 
-  </div>
-  <div class="col-md-2">
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="[% c.uri_for('/user') %]">
-	  <span class="glyphicon glyphicon-plus-sign text-success"></span>
-	  create</a>
-      </li>
-      <li><a href="#">
-	  <span class="glyphicon glyphicon-edit text-warning"></span>
-	  update</a>
-      </li>
-      <li><a href="#">
-	  <span class="glyphicon glyphicon-edit text-warning"></span>
-	  password</a>
-      </li>
-      <li><a href="#">
-	  <span class="glyphicon glyphicon-remove-sign text-danger"></span>
-	  delete</a>
-      </li>
-    </ul>
-  </div>
-<!-- </div> -->
+  <!-- </div> -->

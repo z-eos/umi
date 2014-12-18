@@ -3,7 +3,7 @@
 [% stash.name %]
 
 <h2>Search Simple Results &nbsp; <small>base: [% base_dn %]; &nbsp;&nbsp; filter: [% filter %]</small></h2>
-
+<h6 class="text-muted"><span class="fa fa-exclamation-circle"></span><em> Please note, not all objects could be displaied if you are using predefined search items, all objects it is possible to get with &laquo;<span class="fa fa-search-plus"><span> advanced search&raquo; menu item!</em></h6>
 [% info %]
 [% err %]
 
@@ -41,12 +41,14 @@
 [% END %]
 
 [% FOREACH entry IN entries %]
+  [% dn = entry.key.split(',|=').hash %][% # preparing hash from each dn %]
+
  <tr>
    <td>
        <div class="panel-group" id="accordion[% loop.index %]">
  [% IF entry.value.mgmnt.is_dn %]
   <div class="panel panel-info">
- [% ELSIF entry.key.match('^uid=.*,author') %]
+ [% ELSIF entry.key.match('^[uid]|[cn]=.*,author' ) %]
   <div class="panel panel-success">
  [% ELSE %] 
   <div class="panel panel-warning">
@@ -95,11 +97,11 @@
 	   </li>
 	   <li>
 	     <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
-	     <button type="submit" title="add service account" class="btn btn-link"
+	     <button type="submit" title="add new service account" class="btn btn-link"
 		     value="[% entry.key %]"
 		     name="add_svc_acc">
 	       <span class="fa fa-plus-circle text-warning"></span>
-	       service account
+	       new service account
 	     </button>
 	     </form>
 	   </li>
@@ -113,7 +115,7 @@
 	     </form>
 	   </li>
   [% END %]
-       <li>
+           <li>
 	     <button type="button" title="delete object" class="btn btn-link"
 		     value="[% entry.key %]"
 		     name="ldap_delete"
@@ -131,7 +133,7 @@
 		     data-toggle="modal"
 		     data-target="#ldifModal[% loop.index %]">
 	       <span class="fa fa-upload text-info"></span>
-	       LDIF
+	       export LDIF
 	     </button>
 	   </li>
            <li>
@@ -144,6 +146,17 @@
 	     </button>
 	     </form>
 	   </li>
+  [% IF dn.authorizedService.match('^ovpn')  %]
+	   <li>
+	     <form role="form" method="POST" action="[% c.uri_for_action('/download_from_ldap') %]">
+	       <button type="submit" title="download OpenVPN .p12 certificate" class="btn btn-link"
+		       value="[% entry.key %]" name="dn">
+		 <span class="fa fa-download text-info"></span>
+		 get cert
+	       </button>
+	     </form>
+	   </li>
+  [% END %]
   [% IF entry.value.mgmnt.is_group %]
 	   <li>
 	     <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
@@ -157,7 +170,7 @@
   [% END %]
   [% IF entry.value.mgmnt.userPassword %]
 	   <li>
-	     <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+	     <form role="form" method="POST" action="[% c.uri_for_action('searchby/modify_userpassword') %]">
 	     <button type="submit" title="modify password" class="btn btn-link"
 		     value="[% entry.key %]" name="ldap_modify_password">
 	       <span class="fa fa-key text-warning"></span>
@@ -168,7 +181,7 @@
   [% END %]
   [% IF entry.value.mgmnt.userDhcp %]
 	   <li>
-	     <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+	     <form role="form" method="POST" action="[% c.uri_for_action('searchby/dhcp_add') %]">
 	     <button type="submit" title="add DHCP (MAC to IP binding)" class="btn btn-link"
 		     value="[% entry.key %]" name="ldap_add_dhcp">
 	       <span class="fa fa-sitemap text-warning"></span>
@@ -205,12 +218,38 @@
 
     <b class="col-sm-offset-1">
       [% IF entry.key.match('^author') %]
-      <abbr title="Service Account Branch (the service to which all this service accounts will relate)">
-	<span class="fa fa-code-fork"></span>
+	[% IF dn.authorizedService.match('mail')%]
+	  <abbr title="EMAIL Service Account Branch"><span class="[% services.mail.icon %] text-primary"></span>
+	[% ELSIF dn.authorizedService.match('xmpp')%]
+	  <abbr title="XMPP (Jabber) Service Account Branch"><span class="[% services.xmpp.icon %] text-primary"></span>
+	[% ELSIF dn.authorizedService.match('ovpn')%]
+	  <abbr title="OpenVPN Service Account Branch"><span class="[% services.ovpn.icon %] text-primary"></span>
+	[% ELSIF dn.authorizedService.match('ssh')%]
+	  <abbr title="SSH key Branch"><span class="[% services.ssh.icon %] text-primary"></span>
+	[% ELSIF dn.authorizedService.match('mac')%][% mac='802.1x-mac' %]
+	  <abbr title="802.1x MAC AUTH Service Account Branch"><span class="[% services.$mac.icon %] text-primary"></span>
+	[% ELSIF dn.authorizedService.match('eap')%][% eap='802.1x-eap' %]
+	  <abbr title="802.1x EAP AUTH Service Account Branch"><span class="[% services.$eap.icon %] text-primary"></span>
+	[% ELSE %]
+	  <abbr title="Service Account Branch"><span class="fa fa-code-fork text-primary"></span>
+	[% END %]
       </abbr>
-      [% ELSIF entry.key.match('^uid=.*,author') %]
-      <abbr title="Service Account Branch Leaf (the very service account - the credentials to use for the service)">
-	<span class="fa fa-leaf"></span>
+      [% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
+	[% IF dn.authorizedService.match('mail')%]
+	  <abbr title="EMAIL Service Account"><span class="[% services.mail.icon %] text-primary"></span>
+	[% ELSIF dn.authorizedService.match('xmpp')%]
+	  <abbr title="XMPP (Jabber) Service Account"><span class="[% services.xmpp.icon %] text-primary"></span>
+	[% ELSIF dn.authorizedService.match('ovpn')%]
+	  <abbr title="OpenVPN Service Account"><span class="[% services.ovpn.icon %] text-primary"></span>
+	[% ELSIF dn.authorizedService.match('ssh')%]
+	  <abbr title="SSH key"><span class="[% services.ssh.icon %] text-primary"></span>
+	[% ELSIF dn.authorizedService.match('mac')%][% mac='802.1x-mac' %]
+	  <abbr title="802.1x MAC AUTH Service Account"><span class="[% services.$mac.icon %] text-primary"></span>
+	[% ELSIF dn.authorizedService.match('eap')%][% eap='802.1x-eap' %]
+	  <abbr title="802.1x EAP AUTH Service Account"><span class="[% services.$eap.icon %] text-primary"></span>
+	[% ELSE %]
+	  <abbr title="Service Account"><span class="fa fa-user text-primary"></span>
+	[% END %]
       </abbr>
       [% ELSIF entry.value.mgmnt.is_dn %]
       <abbr title="Root Account">
@@ -256,7 +295,7 @@
 	aria-hidden="true">
        <div class="modal-dialog modal-lg">
 	 <div class="modal-content">
-	   <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+	   <form role="form" method="POST" action="[% c.uri_for_action('searchby/delete') %]">
 	     <div class="modal-header">
 	       <h4 class="modal-title alert alert-danger" id="deleteModalLabel[% loop.index %]">
 		 <span class="glyphicon glyphicon-remove-circle"></span>
@@ -326,10 +365,14 @@
     <dl class="dl-horizontal">
   [% FOREACH hattr IN entry.value.attrs %]
     [% x=hattr.key %]
-    [% NEXT IF hattr.key.match(';binary') %]
-    <dt>[% hattr.key %]:</dt><dd>
+    [% IF hattr.key.match(';binary') %]
+      <dt>[% hattr.key.substr(-7,7,'&nbsp;<abbr title="binary data"><span class="fa fa-file-zip-o text-info" title="binary data"></span></abbr>') %]:</dt><dd>
+    [% ELSIF hattr.key == 'userPKCS12' %]
+      <dt>[% hattr.key %]&nbsp;<abbr title="binary data"><span class="fa fa-file-zip-o text-info" title="binary data"></span></abbr>:</dt><dd>
+    [% ELSE %]
+      <dt>[% hattr.key %]:</dt><dd>
+    [% END %]
     [% IF hattr.key == 'userPassword' %]
-      <!-- <span style="font-size: 130%">&#9899;&#9899;&#9899;&#9899;&#9899;&#9899;&#9899;&#9899;</span> -->
       <span class="fa fa-circle"></span>
       <span class="fa fa-circle"></span>
       <span class="fa fa-circle"></span>
@@ -338,6 +381,14 @@
       <span class="fa fa-circle"></span>
       <span class="fa fa-circle"></span>
       <span class="fa fa-circle"></span>
+    [% ELSIF hattr.key.match('userCertificate;binary') %]
+      <br><small class="pull-left"><em><dl class="dl-horizontal">
+	[% FOREACH cert IN hattr.value %]
+	<dt>[% cert.key %]</dt><dd class="mono">[% cert.value %]</dd>
+	[% END %]
+      </dl></em></small>
+    [% ELSIF hattr.key == 'userPKCS12' %]
+	<kbd class="fa fa-file-o">&nbsp;Binary Data</kbd>
     [% ELSIF hattr.key == 'jpegPhoto' %]
       [% 
         # bellow, value of jpegPhoto attribute contains no  `<img class="' part
@@ -350,9 +401,9 @@
       [% END %]
     [% ELSIF entry.value.is_arr.$x %]
       [% FOREACH i IN hattr.value %]
-	[% IF hattr.key == 'grayPublicKey' %]
+	[% IF hattr.key == 'sshPublicKey' %]
 	  <div class="panel panel-default">
-           <div class="panel-body"><small>[% i %]</small></div></div>
+           <div class="panel-body mono"><small>[% i %]</small></div></div>
 	[% ELSE %]
 	  [% IF loop.last %]
 	    [% i %]

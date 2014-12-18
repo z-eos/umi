@@ -1,0 +1,58 @@
+[% META title = 'DHCP root' %]
+
+<div class="row">
+  <div class="col-md-10">
+    <div class="page-header">
+      <h2>New DHCP Host Creation Form <small><em>all stuff</em></small></h2>
+    </div>
+
+    [% IF final_message.error %]
+    <div class="panel panel-danger">
+      <div class="panel-heading">
+        <h4><span class="glyphicon glyphicon-exclamation-sign">&nbsp;</span>Error!</h4>
+      </div>
+      <div class="panel-body">
+        <ul>
+          [% # IF final_message.error.size > 1 %]
+            [% FOREACH i IN final_message.error %]
+             [% i %]
+            [% END %]
+          [% # ELSE %]
+            [% # final_message.error %]
+          [% # END %]
+        </ul>
+      </div>
+    </div>
+    [% ELSIF final_message.warning %]
+    <div class="panel panel-warning">
+      <div class="panel-heading">
+        <h4><span class="glyphicon glyphicon-warning-sign">&nbsp;</span>Warning!</h4>
+      </div>
+      <div class="panel-body">
+          [% final_message.warning %]
+      </div>
+    </div>
+    [% END %]
+    [% IF final_message.success %]
+    <div class="panel panel-success">
+      <div class="panel-heading">
+        <h4><span class="glyphicon glyphicon-ok-sign">&nbsp;</span>User was successfully assigned DHCP configuration.</h4>
+      </div>
+      <div class="panel-body mono">
+          [% final_message.success %]
+      </div>
+    </div>
+    [% END %]
+
+    [% form.render %]
+
+  </div>
+  <div class="col-md-2">
+    <ul class="nav nav-pills nav-stacked">
+      <li><a href="[% c.uri_for('/gitacl') %]">
+	  <span class="glyphicon glyphicon-plus-sign text-success"></span>
+	  create new</a>
+      </li>
+    </ul>
+  </div>
+</div>

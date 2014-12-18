@@ -9,7 +9,7 @@ BEGIN { extends 'UMI::Form::LDAP'; with 'Tools'; }
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable' );
 
 has '+item_class' => ( default =>'ModPwd' );
-has '+action' => ( default => '/searchby/proc' );
+# has '+action' => ( default => '/searchby/proc' );
 
 sub build_form_element_class { [ 'form-horizontal' ] }
 

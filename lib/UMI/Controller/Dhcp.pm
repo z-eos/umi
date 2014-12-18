@@ -84,7 +84,6 @@ sub create_dhcp_host {
   my $return;
 
   use Data::Printer;
-  p $args;
 
   my $arg = {
 	     dhcpHWAddress => $args->{dhcpHWAddress},
@@ -94,6 +93,7 @@ sub create_dhcp_host {
 	     cn => $args->{cn} || $args->{dhcpHWAddress} =~ tr/://dr,
 	     dhcpComments => join(' ', $args->{dhcpComments}) || undef,
 	    };
+  #p $arg;
 
   $arg->{ldapadd_arg} = [
 			 dhcpHWAddress => sprintf('ethernet %s', $arg->{dhcpHWAddress}),
@@ -108,7 +108,7 @@ sub create_dhcp_host {
   # p $arg->{ldapadd_arg};
 
   my $nets = $ldap_crud->search( { base => $ldap_crud->{cfg}->{base}->{dhcp},
-				   filter => 'dhcpOption=domain-name ' . $arg->{net}, } );
+				   filter => 'dhcpOption=domain-name "' . $arg->{net} . '"', } );
 
   if ( $nets->count > 1 ) {
     $return->{warning} = '<li>network <b>&laquo;' . $arg->{net} .'&raquo;</b> used more than one time in DHCP config!</li>';
