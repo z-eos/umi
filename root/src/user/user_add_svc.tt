@@ -67,3 +67,114 @@
 
     [% form.render %]
 
+<!-- <script type="text/javascript"> -->
+
+<!-- (function($, options, undef){ -->
+
+<!--     "use strict"; -->
+<!--     var me = {}; -->
+<!--     me.options = { -->
+<!-- 	selectBox: "#authorizedservice" -->
+<!--     }; -->
+<!--     me.staticFields = []; -->
+<!--     me.currentFields = []; -->
+    
+<!--     me.init = function(options) { -->
+<!-- 	$.extend(true, me.options, options); -->
+<!-- 	me.$selectBox = $(me.options.selectBox); -->
+<!-- 	me.initStaticFields(); -->
+<!-- 	me.attachEvents(); -->
+<!--     }; -->
+    
+<!--     me.initStaticFields = function() { -->
+<!-- 	me.$selectBox.find("options").each(function(key, option) { -->
+<!-- 	    var $option = $(option), -->
+<!--             fields = $option.data("fields").split(","); -->
+<!-- 	    for (var i = 0, l = fields.length; i < l; ++i) { -->
+<!-- 		if (me.staticFields.indexOf(fields[i]) != -1) continue; -->
+<!-- 		me.staticFields.push(fields[i]); -->
+<!-- 	    } -->
+<!-- 	}); -->
+<!--     }; -->
+
+<!--     me.attachEvents = function() { -->
+<!-- 	me.$selectBox.on("change", me.onSelectBoxChange); -->
+<!--     }; -->
+    
+<!--     me.onSelectBoxChange = function(event) { -->
+<!-- 	var $this = $(this), -->
+<!--         $options = $this.find("option:selected"); -->
+
+<!-- 	me.currentFields = []; -->
+	
+<!-- 	$.each($options, function(key, option){ -->
+<!--             var $option = $(option), -->
+<!--             fields = $option.data("fields").split(","); -->
+	    
+<!--             for (var i = 0, l = fields.length; i < l; ++i) { -->
+<!-- 		if (me.currentFields.indexOf(fields[i]) != -1) continue; -->
+<!-- 		me.currentFields.push(fields[i]); -->
+<!--             } -->
+<!-- 	}); -->
+
+<!-- 	me.updateFields(); -->
+<!--     }; -->
+
+<!--     me.updateFields = function() { -->
+<!-- 	if (!me.currentFields.length) return me.hideAll(); -->
+<!-- 	me.processFields(me.currentFields); -->
+<!-- 	me.processFieldsets(); -->
+<!--     }; -->
+    
+<!--     me.hideAll = function() { -->
+<!-- 	if (!me.staticFields.length) return; -->
+<!-- 	me.processFields(me.staticFields); -->
+<!-- 	me.processFieldsets(); -->
+<!--     }; -->
+
+<!--     me.processFields = function(fields) { -->
+<!-- 	$("#"+fields.join(",#")).each(function(key, field) {  -->
+<!-- 	    var $field = $(field); -->
+<!-- 	    $field.prop("disabled", true).hide(); -->
+	    
+<!-- 	    switch($field.prop("tagName")) { -->
+<!--             default: -->
+<!--             case "INPUT":  -->
+<!-- 		switch ($field.prop("type")) { -->
+<!-- 		case "checkbox": -->
+<!-- 		    $field.prop("checked", 0); -->
+<!-- 		    break; -->
+<!-- 		case "text": -->
+<!-- 		    $field.val(""); -->
+<!-- 		    break; -->
+<!-- 		case "file": -->
+<!-- 		    $field.replaceWith( $field = $field.clone( true ) ); -->
+<!-- 		    break; -->
+<!-- 		}; -->
+<!-- 		break; -->
+<!--             case "TEXTAREA": -->
+<!-- 		$field.val(""); -->
+<!-- 		break; -->
+<!-- 	    } -->
+<!-- 	}); -->
+<!--     }; -->
+
+<!--     me.processFieldsets = function() { -->
+<!-- 	$("fieldset").each(function(key, fieldset) { -->
+<!-- 	    var $fieldset = $(fieldset), -->
+<!--             foundUndisabled = $fieldset.find("input:not(:disabled), textarea:not(:disabled)").length > 0; -->
+<!-- 	    if (!foundUndisabled) { -->
+<!-- 		$fieldset.hide();  -->
+<!-- 	    } else { -->
+<!-- 		$fieldset.show(); -->
+<!-- 	    } -->
+<!-- 	}); -->
+<!--     }; -->
+
+<!--     $(function(){ -->
+<!-- 	me.init(options || {}); -->
+<!--     }); -->
+    
+<!-- })(jQuery); -->
+
+<!-- </script> -->

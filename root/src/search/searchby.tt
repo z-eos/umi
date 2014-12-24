@@ -1,568 +1,546 @@
 [% META title = 'Search Simple Results' %]
-
 [% stash.name %]
 
-<h2>Search Simple Results &nbsp; <small>base: [% base_dn %]; &nbsp;&nbsp; filter: [% filter %]</small></h2>
-<h6 class="text-muted"><span class="fa fa-exclamation-circle"></span><em> Please note, not all objects could be displaied if you are using predefined search items, all objects it is possible to get with &laquo;<span class="fa fa-search-plus"><span> advanced search&raquo; menu item!</em></h6>
+[% INCLUDE ldap_err.tt %]
+
+<h2>
+  Search Simple Results &nbsp; <small>base: [% base_dn %]; &nbsp;&nbsp; filter: [% filter %]</small>
+</h2>
+
+<h6 class="text-muted">
+  <span class="fa fa-exclamation-circle"></span> <em>Please note, not all objects could be found via predefined search items, to search for <strong>all</strong> objects use</em> &laquo;<span class="fa fa-search-plus"></span> advanced search&raquo; <em>menu item!</em>
+</h6>
+
 [% info %]
 [% err %]
 
 <div class="table-responsive">
-<table class="table">
- <thead>
-  <tr class="bg-primary"><td colspan=2 class="text-right">
-      <a href="#"
-	 class="btn btn-primary btn-sm" role="button"
-      	 title="Legend"
-	 id="btnLegend"
-	 data-animation="false"
-      	 data-trigger="focus"
-	 data-placement="left"
-      	 data-html="true"
-      	 data-toggle="popover"
-      	 data-original-title="Legend"
-	 data-content="<ul class='list-unstyled'>
-<li><span class='fa fa-user label label-info'>&nbsp;root object</span></li>
-<li><span class='fa fa-code-fork label label-warning'>&nbsp;service branch</span></li>
-<li><span class='fa fa-leaf label label-success'>&nbsp;service account</span></li>
-<li><span class='label label-primary'>user input</span></li>
-</ul>"
-      	 tabindex="0">
-      	<span style="font-size: 100%;" class="glyphicon glyphicon-list-alt"></span>
-      </a>
-  </td></tr>
- </thead>
- <tbody>
+  <table class="table">
+    <thead>
+      <tr class="bg-primary">
+	<td colspan=2 class="text-right">
+	  <a href="#"
+	     class="btn btn-primary btn-sm" role="button"
+	     title="Legend"
+	     id="btnLegend"
+	     data-animation="false"
+	     data-trigger="focus"
+	     data-placement="left"
+	     data-html="true"
+	     data-toggle="popover"
+	     data-original-title="Legend"
+	     data-content="<ul class='list-unstyled'>
+	     <li><span class='fa fa-user label label-info'>&nbsp;root object</span></li>
+	     <li><span class='fa fa-code-fork label label-warning'>&nbsp;service branch</span></li>
+	     <li><span class='fa fa-leaf label label-success'>&nbsp;service account</span></li>
+	     <li><span class='label label-primary'>user input</span></li>
+	     </ul>"
+	     tabindex="0">
+	    <span style="font-size: 100%;" class="glyphicon glyphicon-list-alt"></span>
+	  </a>
+	</td>
+      </tr>
+    </thead>
+    <tbody>
+      [% IF entries.size == 1 %][% in='in' %][% ELSE %][% in='' %][% END %]
+      [% FOREACH entry IN entries %]
+      [% dn = entry.key.split(',|=').hash %][% # preparing hash from each dn %]
+      <tr>
+	<td>
+	  <div class="panel-group" id="accordion[% loop.index %]">
+	    [% IF entry.value.mgmnt.is_dn %]
+	    <div class="panel panel-info">
+	      [% ELSIF entry.key.match('^[uid]|[cn]=.*,author' ) %]
+	      <div class="panel panel-success">
+		[% ELSE %]
+		<div class="panel panel-warning">
+		  [% END %]
 
-[% IF entries.size == 1 %]
-  [% in='in' %]
-[% ELSE %]
-  [% in='' %]
-[% END %]
+		  <div class="panel-heading">
+		    <button class="btn btn-link btn-xs pull-left"
+			    type="button"
+			    title="Collapse In/Out This Panel"
+			    data-target="#collapse[% loop.index %]"
+			    data-toggle="collapse"
+			    data-parent="#accordion[% loop.index %]">
+		      <span class="fa fa-toggle-down text-primary"></span>
+		    </button>
 
-[% FOREACH entry IN entries %]
-  [% dn = entry.key.split(',|=').hash %][% # preparing hash from each dn %]
+		    <div class="dropdown pull-left">
+		      <button class="btn btn-link btn-xs dropdown-toggle"
+			      type="button" id="dropdownMenuActions"
+			      data-toggle="dropdown"
+			      title="Possible Actions Upon the Object">
+			<span class="fa fa-cog text-primary"></span><span class="caret text-primary"></span>
+		      </button>
+		      <ul class="dropdown-menu dropdown-menu-left bg-primary"
+			  aria-labelledby="dropdownMenuActions"
+			  role="menu">
+			[% IF entry.value.mgmnt.is_dn && entry.value.mgmnt.is_account %]
+			<li>
+			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/user_preferences') %]">
+			    <button type="submit" title="add service account" class="btn btn-link"
+				    value="[% entry.key %]"
+				    name="user_preferences">
+			      <span class="fa fa-list-alt text-info"></span>
+			      user prefs
+			    </button>
+			  </form>
+			</li>
+			<li>
+			  <button type="button" title="account global management page" class="btn btn-link disabled"
+				  value="[% entry.key %]"
+				  name="accmgmnt"
+				  data-toggle="modal"
+				  data-target="#accmgmntModal[% loop.index %]">
+			    <span class="fa fa-retweet text-danger"></span>
+			    mgmnt all
+			  </button>
+			</li>
+			<li>
+			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+			    <button type="submit" title="add new service account" class="btn btn-link"
+				    value="[% entry.key %]"
+				    name="add_svc_acc">
+			      <span class="fa fa-plus-circle text-warning"></span>
+			      new service account
+			    </button>
+			  </form>
+			</li>
+			<li>
+			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+			    <button type="submit" title="modify group" class="btn btn-link"
+				    value="[% entry.key %]" name="ldap_modify_group">
+			      <span class="fa fa-group text-warning"></span>
+			      group
+			    </button>
+			  </form>
+			</li>
+			[% END %]
+			<li>
+			  <button type="button" title="delete object" class="btn btn-link"
+				  value="[% entry.key %]"
+				  name="ldap_delete"
+				  data-toggle="modal"
+				  data-target="#deleteModal[% loop.index %]">
+			    <span class="fa fa-times-circle text-danger"></span>
+			    delete
+			  </button>
+			</li>
+			<li>
+			  <button type="button" title="export LDIF of the object"
+				  class="btn btn-link"
+				  value="[% entry.key %]"
+				  name="ldap_ldif"
+				  data-toggle="modal"
+				  data-target="#ldifModal[% loop.index %]">
+			    <span class="fa fa-upload text-info"></span>
+			    export LDIF
+			  </button>
+			</li>
+			<li>
+			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+			    <button type="submit" title="edit object" class="btn btn-link"
+				    value="[% entry.key %]"
+				    name="ldap_modify">
+			      <span class="fa fa-edit text-warning"></span>
+			      edit (all)
+			    </button>
+			  </form>
+			</li>
+			[% IF entry.value.mgmnt.is_group %]
+			<li>
+			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+			    <button type="submit" title="modify group members" class="btn btn-link"
+				    value="[% entry.key %]" name="ldap_modify_memberUid">
+			      <span class="fa fa-group text-warning"></span>
+			      members
+			    </button>
+			  </form>
+			</li>
+			[% END %]
+			[% IF entry.value.mgmnt.userPassword %]
+			<li>
+			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/modify_userpassword') %]">
+			    <button type="submit" title="modify password" class="btn btn-link"
+				    value="[% entry.key %]" name="ldap_modify_password">
+			      <span class="fa fa-key text-warning"></span>
+			      password
+			    </button>
+			  </form>
+			</li>
+			[% END %]
+			[% IF entry.value.mgmnt.userDhcp %]
+			<li>
+			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/dhcp_add') %]">
+			    <button type="submit" title="add DHCP (MAC to IP binding)" class="btn btn-link"
+				    value="[% entry.key %]" name="ldap_add_dhcp">
+			      <span class="fa fa-sitemap text-warning"></span>
+			      DHCP (IP to MAC binding)
+			    </button>
+			  </form>
+			</li>
+			[% END %]
+			[% IF entry.value.mgmnt.jpegPhoto %]
+			<li>
+			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+			    <button type="submit" title="modify jpegPhoto" class="btn btn-link"
+				    value="[% entry.key %]" name="ldap_modify_jpegphoto">
+			      <span class="fa fa-image text-warning"></span>
+			      image
+			    </button>
+			  </form>
+			</li>
+			[% END %]
 
- <tr>
-   <td>
-       <div class="panel-group" id="accordion[% loop.index %]">
- [% IF entry.value.mgmnt.is_dn %]
-  <div class="panel panel-info">
- [% ELSIF entry.key.match('^[uid]|[cn]=.*,author' ) %]
-  <div class="panel panel-success">
- [% ELSE %] 
-  <div class="panel panel-warning">
- [% END %]
+			[% IF entry.value.mgmnt.gitAclProject %]
+			<li>
+			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+			    <button type="submit" title="reorder gitAcl" class="btn btn-link"
+				    value="[% entry.key %]" name="ldap_gitacl_reorder">
+			      <span class="fa fa-sort text-warning"></span>
+			      reorder
+			    </button>
+			  </form>
+			</li>
+			[% END %]
+		      </ul>
+		    </div>
 
-   <div class="panel-heading">
-       <button class="btn btn-link btn-xs pull-left" 
-            type="button" 
-	    title="Collapse In/Out This Panel"
-            data-target="#collapse[% loop.index %]" 
-	    data-toggle="collapse"
-	    data-parent="#accordion[% loop.index %]">
-       <span class="fa fa-toggle-down text-primary"></span>
-    </button>
+		    <b class="col-sm-offset-1">
+		      [% IF entry.key.match('^author') %]
+		      [% IF dn.authorizedService.match('mail')%]
+		      <abbr title="EMAIL Service Account Branch"><span class="[% services.mail.icon %] text-primary"></span></abbr>
+		      [% ELSIF dn.authorizedService.match('xmpp')%]
+		      <abbr title="XMPP (Jabber) Service Account Branch"><span class="[% services.xmpp.icon %] text-primary"></span></abbr>
+		      [% ELSIF dn.authorizedService.match('ovpn')%]
+		      <abbr title="OpenVPN Service Account Branch"><span class="[% services.ovpn.icon %] text-primary"></span></abbr>
+		      [% ELSIF dn.authorizedService.match('ssh')%]
+		      <abbr title="SSH key Branch"><span class="[% services.ssh.icon %] text-primary"></span></abbr>
+		      [% ELSIF dn.authorizedService.match('mac')%][% mac='802.1x-mac' %]
+		      <abbr title="802.1x MAC AUTH Service Account Branch"><span class="[% services.$mac.icon %] text-primary"></span></abbr>
+		      [% ELSIF dn.authorizedService.match('eap')%][% eap='802.1x-eap' %]
+		      <abbr title="802.1x EAP AUTH Service Account Branch"><span class="[% services.$eap.icon %] text-primary"></span></abbr>
+		      [% ELSE %]
+		      <abbr title="Service Account Branch"><span class="fa fa-code-fork text-primary"></span></abbr>
+		      [% END %]
+		      [% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
+		      [% IF dn.authorizedService.match('mail')%]
+		      <abbr title="EMAIL Service Account"><span class="[% services.mail.icon %] text-primary"></span></abbr>
+		      [% ELSIF dn.authorizedService.match('xmpp')%]
+		      <abbr title="XMPP (Jabber) Service Account"><span class="[% services.xmpp.icon %] text-primary"></span></abbr>
+		      [% ELSIF dn.authorizedService.match('ovpn')%]
+		      <abbr title="OpenVPN Service Account"><span class="[% services.ovpn.icon %] text-primary"></span></abbr>
+		      [% ELSIF dn.authorizedService.match('ssh')%]
+		      <abbr title="SSH key"><span class="[% services.ssh.icon %] text-primary"></span></abbr>
+		      [% ELSIF dn.authorizedService.match('mac')%][% mac='802.1x-mac' %]
+		      <abbr title="802.1x MAC AUTH Service Account"><span class="[% services.$mac.icon %] text-primary"></span></abbr>
+		      [% ELSIF dn.authorizedService.match('eap')%][% eap='802.1x-eap' %]
+		      <abbr title="802.1x EAP AUTH Service Account"><span class="[% services.$eap.icon %] text-primary"></span></abbr>
+		      [% ELSE %]
+		      <abbr title="Service Account"><span class="fa fa-user text-primary"></span></abbr>
+		      [% END %]
+		      [% ELSIF entry.value.mgmnt.is_dn %]
+		      <abbr title="Root Account">
+			<span class="fa fa-user"></span>
+		      </abbr>
+		      [% END %]
+		      DN:&nbsp;&nbsp;&nbsp;[% entry.key.replace(',', ',&nbsp;&nbsp;&nbsp;') %]</b>
 
-     <div class="dropdown pull-left">
-       <button class="btn btn-link btn-xs dropdown-toggle" 
-	       type="button" id="dropdownMenuActions" 
-	       data-toggle="dropdown"
-	       title="Possible Actions Upon the Object">
-	 <span class="fa fa-cog text-primary"></span><span class="caret text-primary"></span>
-       </button>
-	 <ul class="dropdown-menu dropdown-menu-left bg-primary"
-	     aria-labelledby="dropdownMenuActions"
-	     role="menu">
-  [% IF entry.value.mgmnt.is_dn && entry.value.mgmnt.is_account %]
-	   <li>
-	     <form role="form" method="POST" action="[% c.uri_for_action('searchby/user_preferences') %]">
-	     <button type="submit" title="add service account" class="btn btn-link"
-		     value="[% entry.key %]"
-		     name="user_preferences">
-	       <span class="fa fa-list-alt text-info"></span>
-	       user prefs
-	     </button>
-	   </form>
-	   </li>
-	   <li>
-	     <button type="button" title="account global management page" class="btn btn-link disabled"
-		     value="[% entry.key %]"
-		     name="accmgmnt"
-		     data-toggle="modal"
-		     data-target="#accmgmntModal[% loop.index %]">
-	       <span class="fa fa-retweet text-danger"></span>
-	       mgmnt all
-	     </button>
-	   </li>
-	   <li>
-	     <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
-	     <button type="submit" title="add new service account" class="btn btn-link"
-		     value="[% entry.key %]"
-		     name="add_svc_acc">
-	       <span class="fa fa-plus-circle text-warning"></span>
-	       new service account
-	     </button>
-	     </form>
-	   </li>
-	   <li>
-	     <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
-	     <button type="submit" title="modify group" class="btn btn-link"
-		     value="[% entry.key %]" name="ldap_modify_group">
-	       <span class="fa fa-group text-warning"></span>
-	       group
-	     </button>
-	     </form>
-	   </li>
-  [% END %]
-           <li>
-	     <button type="button" title="delete object" class="btn btn-link"
-		     value="[% entry.key %]"
-		     name="ldap_delete"
-		     data-toggle="modal"
-		     data-target="#deleteModal[% loop.index %]">
-	       <span class="fa fa-times-circle text-danger"></span>
-	       delete
-	     </button>
-	   </li>
-	   <li>
-	     <button type="button" title="export LDIF of the object"
-		     class="btn btn-link"
-		     value="[% entry.key %]"
-		     name="ldap_ldif"
-		     data-toggle="modal"
-		     data-target="#ldifModal[% loop.index %]">
-	       <span class="fa fa-upload text-info"></span>
-	       export LDIF
-	     </button>
-	   </li>
-           <li>
-	     <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
-	     <button type="submit" title="edit object" class="btn btn-link"
-		     value="[% entry.key %]"
-		     name="ldap_modify">
-	       <span class="fa fa-edit text-warning"></span>
-	       edit (all)
-	     </button>
-	     </form>
-	   </li>
-  [% IF dn.authorizedService.match('^ovpn')  %]
-	   <li>
-	     <form role="form" method="POST" action="[% c.uri_for_action('/download_from_ldap') %]">
-	       <button type="submit" title="download OpenVPN .p12 certificate" class="btn btn-link"
-		       value="[% entry.key %]" name="dn">
-		 <span class="fa fa-download text-info"></span>
-		 get cert
-	       </button>
-	     </form>
-	   </li>
-  [% END %]
-  [% IF entry.value.mgmnt.is_group %]
-	   <li>
-	     <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
-	     <button type="submit" title="modify group members" class="btn btn-link"
-		     value="[% entry.key %]" name="ldap_modify_memberUid">
-	       <span class="fa fa-group text-warning"></span>
-	       members
-	     </button>
-	     </form>
-	   </li>
-  [% END %]
-  [% IF entry.value.mgmnt.userPassword %]
-	   <li>
-	     <form role="form" method="POST" action="[% c.uri_for_action('searchby/modify_userpassword') %]">
-	     <button type="submit" title="modify password" class="btn btn-link"
-		     value="[% entry.key %]" name="ldap_modify_password">
-	       <span class="fa fa-key text-warning"></span>
-	       password
-	     </button>
-	     </form>
-	   </li>
-  [% END %]
-  [% IF entry.value.mgmnt.userDhcp %]
-	   <li>
-	     <form role="form" method="POST" action="[% c.uri_for_action('searchby/dhcp_add') %]">
-	     <button type="submit" title="add DHCP (MAC to IP binding)" class="btn btn-link"
-		     value="[% entry.key %]" name="ldap_add_dhcp">
-	       <span class="fa fa-sitemap text-warning"></span>
-	       DHCP (IP to MAC binding)
-	     </button>
-	     </form>
-	   </li>
-  [% END %]
-  [% IF entry.value.mgmnt.jpegPhoto %]
-	   <li>
-	     <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
-	     <button type="submit" title="modify jpegPhoto" class="btn btn-link"
-		     value="[% entry.key %]" name="ldap_modify_jpegphoto">
-	       <span class="fa fa-image text-warning"></span>
-	       image
-	     </button>
-	     </form>
-	   </li>
-  [% END %]
-
-  [% IF entry.value.mgmnt.gitAclProject %]
-	   <li>
-	     <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
-	     <button type="submit" title="reorder gitAcl" class="btn btn-link"
-		     value="[% entry.key %]" name="ldap_gitacl_reorder">
-	       <span class="fa fa-sort text-warning"></span>
-	       reorder
-	     </button>
-	     </form>
-	   </li>
-  [% END %]
-	 </ul>
-     </div>
-
-    <b class="col-sm-offset-1">
-      [% IF entry.key.match('^author') %]
-	[% IF dn.authorizedService.match('mail')%]
-	  <abbr title="EMAIL Service Account Branch"><span class="[% services.mail.icon %] text-primary"></span>
-	[% ELSIF dn.authorizedService.match('xmpp')%]
-	  <abbr title="XMPP (Jabber) Service Account Branch"><span class="[% services.xmpp.icon %] text-primary"></span>
-	[% ELSIF dn.authorizedService.match('ovpn')%]
-	  <abbr title="OpenVPN Service Account Branch"><span class="[% services.ovpn.icon %] text-primary"></span>
-	[% ELSIF dn.authorizedService.match('ssh')%]
-	  <abbr title="SSH key Branch"><span class="[% services.ssh.icon %] text-primary"></span>
-	[% ELSIF dn.authorizedService.match('mac')%][% mac='802.1x-mac' %]
-	  <abbr title="802.1x MAC AUTH Service Account Branch"><span class="[% services.$mac.icon %] text-primary"></span>
-	[% ELSIF dn.authorizedService.match('eap')%][% eap='802.1x-eap' %]
-	  <abbr title="802.1x EAP AUTH Service Account Branch"><span class="[% services.$eap.icon %] text-primary"></span>
-	[% ELSE %]
-	  <abbr title="Service Account Branch"><span class="fa fa-code-fork text-primary"></span>
-	[% END %]
-      </abbr>
-      [% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
-	[% IF dn.authorizedService.match('mail')%]
-	  <abbr title="EMAIL Service Account"><span class="[% services.mail.icon %] text-primary"></span>
-	[% ELSIF dn.authorizedService.match('xmpp')%]
-	  <abbr title="XMPP (Jabber) Service Account"><span class="[% services.xmpp.icon %] text-primary"></span>
-	[% ELSIF dn.authorizedService.match('ovpn')%]
-	  <abbr title="OpenVPN Service Account"><span class="[% services.ovpn.icon %] text-primary"></span>
-	[% ELSIF dn.authorizedService.match('ssh')%]
-	  <abbr title="SSH key"><span class="[% services.ssh.icon %] text-primary"></span>
-	[% ELSIF dn.authorizedService.match('mac')%][% mac='802.1x-mac' %]
-	  <abbr title="802.1x MAC AUTH Service Account"><span class="[% services.$mac.icon %] text-primary"></span>
-	[% ELSIF dn.authorizedService.match('eap')%][% eap='802.1x-eap' %]
-	  <abbr title="802.1x EAP AUTH Service Account"><span class="[% services.$eap.icon %] text-primary"></span>
-	[% ELSE %]
-	  <abbr title="Service Account"><span class="fa fa-user text-primary"></span>
-	[% END %]
-      </abbr>
-      [% ELSIF entry.value.mgmnt.is_dn %]
-      <abbr title="Root Account">
-	<span class="fa fa-user"></span>
-      </abbr>
+		    <!-- #### Modal: Account Global Management start -->
+		      <div class="modal" id="globmgmntModal[% loop.index %]"
+			   tabindex="-1" role="dialog" aria-labelledby="globmgmntModalLabel[% loop.index %]"
+			   aria-hidden="true">
+			<div class="modal-dialog modal-lg">
+			  <div class="modal-content">
+			    <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+			      <div class="modal-header">
+				<h4 class="modal-title alert alert-danger" id="globmgmntModalLabel[% loop.index %]">
+				  <span class="glyphicon glyphicon-remove-circle"></span>
+				  You are about to perform deletion of DN: <b>[% entry.key %]</b>
+				</h4>
+			      </div>
+			      <div class="modal-body text-primary">
+				<input type="checkbox" name="ldap_delete_recursive">
+				Recursive deletion of all children of this object as well
+				</input>
+			      </div>
+			      <div class="modal-footer">
+				<button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
+				<button type="submit" class="btn btn-primary"  name="ldap_delete"
+					value="[% entry.key %]">
+				  Yes, I really want to delete it and yes, I understand all consequences!
+				</button>
+			      </div>
+			    </form>
+			  </div>
+			</div>
+		      </div><!-- #### Modal: Account Global Management end -->
+		      <!-- #### Modal: Delete start -->
+		      <div class="modal" id="deleteModal[% loop.index %]"
+			   tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel[% loop.index %]"
+			   aria-hidden="true">
+			<div class="modal-dialog modal-lg">
+			  <div class="modal-content">
+			    <form role="form" method="POST" action="[% c.uri_for_action('searchby/delete') %]">
+			      <div class="modal-header">
+				<h4 class="modal-title alert alert-danger" id="deleteModalLabel[% loop.index %]">
+				  <span class="glyphicon glyphicon-remove-circle"></span>
+				  You are about to perform deletion of DN: <b>[% entry.key %]</b>
+				</h4>
+			      </div>
+			      <div class="modal-body text-primary">
+				<input type="checkbox" name="ldap_delete_recursive">
+				Recursive deletion of all children of this object as well
+				</input>
+			      </div>
+			      <div class="modal-footer">
+				<button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
+				<button type="submit" class="btn btn-primary umi-btn-event umi-btn-ajax"  name="ldap_delete"
+					value="[% entry.key %]" data-action="delete" >
+				  Yes, I really want to delete it and yes, I understand all consequences!
+				</button>
+			      </div>
+			    </form>
+			  </div>
+			</div>
+		      </div><!-- #### Modal: Delete end -->
+		      <!-- #### Modal: LDIF start -->
+		      <div class="modal" id="ldifModal[% loop.index %]"
+			   tabindex="-1" role="dialog" aria-labelledby="ldifModalLabel[% loop.index %]"
+			   aria-hidden="true">
+			<div class="modal-dialog modal-lg">
+			  <div class="modal-content">
+			    <form role="form" method="POST">
+			      <div class="modal-header">
+				<h4 class="modal-title alert alert-info" id="ldifModalLabel[% loop.index %]">
+				  <span class="fa fa-info-circle"></span>
+				  LDIF of DN: <b>[% entry.key %]</b>
+				</h4>
+			      </div>
+			      <div class="modal-body text-primary">
+				<input type="checkbox" name="ldap_ldif_recursive">
+				Get LDIFs for all children as well
+				</input>
+			      </div>
+			      <div class="modal-body text-primary">
+				<input type="checkbox" name="ldap_ldif_sysinfo">
+				Get system info as well
+				</input>
+			      </div>
+			      <div class="modal-footer">
+				<button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
+				<button type="submit"
+					class="btn btn-primary umi-btn-event umi-btn-logic"
+					data-umiact="/searchby/ldif_gen"
+					name="ldap_ldif"
+					value="[% entry.key %]">
+				  Yes, to get LDIF
+				</button>
+			      </div>
+			    </form>
+			  </div>
+			</div>
+		      </div><!-- #### Modal: LDIF end -->
+		  </div>
+		  <div id="collapse[% loop.index %]" class="panel-collapse collapse [% in %]">
+		    <div class="panel-body">
+		      <dl class="dl-horizontal">
+			[% FOREACH hattr IN entry.value.attrs %]
+			[% x=hattr.key %]
+			[% IF hattr.key.match(';binary') %]
+			<dt>[% hattr.key.substr(-7,7,'&nbsp;<abbr title="binary data"><span class="fa fa-file-zip-o text-info" title="binary data"></span></abbr>') %]:</dt><dd>
+			  [% ELSIF hattr.key == 'userPKCS12' %]
+			  <dt>[% hattr.key %]&nbsp;<abbr title="binary data"><span class="fa fa-file-zip-o text-info" title="binary data"></span></abbr>:</dt><dd>
+			    [% ELSE %]
+			    <dt>[% hattr.key %]:</dt><dd>
+			      [% END %]
+			      [% IF hattr.key == 'userPassword' %]
+			      <span class="fa fa-circle"></span>
+			      <span class="fa fa-circle"></span>
+			      <span class="fa fa-circle"></span>
+			      <span class="fa fa-circle"></span>
+			      <span class="fa fa-circle"></span>
+			      <span class="fa fa-circle"></span>
+			      <span class="fa fa-circle"></span>
+			      <span class="fa fa-circle"></span>
+			      [% ELSIF hattr.key.match('userCertificate;binary') %]
+			      <br><small class="pull-left"><em><dl class="dl-horizontal">
+				[% FOREACH cert IN hattr.value %]
+				<dt>[% cert.key %]</dt><dd class="mono">[% cert.value %]</dd>
+				[% END %]
+			      </dl></em></small>
+			      [% ELSIF hattr.key == 'userPKCS12' %]
+			      <kbd class="fa fa-file-o">&nbsp;Binary Data</kbd>
+			      [% ELSIF hattr.key == 'jpegPhoto' %]
+			      [%
+				 # bellow, value of jpegPhoto attribute contains no  `<img class="' part
+				 # to set background class here according the object type: root or child
+				 %]
+			      [% IF entry.value.mgmnt.is_dn %]
+			      <img class="bg-info [% hattr.value %]
+				   [% ELSE %]
+				   <img class="bg-success [% hattr.value %]
+				   [% END %]
+				   [% ELSIF entry.value.is_arr.$x %]
+				   [% FOREACH i IN hattr.value %]
+				   [% IF hattr.key == 'sshPublicKey' %]
+			      <div class="panel panel-default">
+				<div class="panel-body mono"><small>[% i %]</small></div></div>
+			      [% ELSE %]
+				[% IF loop.last %][% i %][% ELSE %][% i %]<br>[% END %]
+				[% END %]
+				[% END %]
+				[% ELSE %]
+				[% hattr.value %]
+				[% END %] [% # IF hattr.key == 'userPassword' %]
+			    </dd>
+			    [% END %] [% # FOREACH hattr IN entry.value.attrs %]
+		      </dl>
+		    </div>
+		  </div>
+		</div>
+	      </div>
+	</td></tr>
       [% END %]
-      DN:&nbsp;&nbsp;&nbsp;[% entry.key.replace(',', ',&nbsp;&nbsp;&nbsp;') %]</b>
-
-     <!-- #### Modal: Account Global Management start -->
-     <div class="modal" id="globmgmntModal[% loop.index %]"
-	tabindex="-1" role="dialog" aria-labelledby="globmgmntModalLabel[% loop.index %]"
-	aria-hidden="true">
-       <div class="modal-dialog modal-lg">
-	 <div class="modal-content">
-	   <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
-	   <div class="modal-header">
-	     <h4 class="modal-title alert alert-danger" id="globmgmntModalLabel[% loop.index %]">
-	       <span class="glyphicon glyphicon-remove-circle"></span>
-	       You are about to perform deletion of DN: <b>[% entry.key %]</b>
-	     </h4>
-	   </div>
-	   <div class="modal-body text-primary">
-	     <input type="checkbox" name="ldap_delete_recursive">
-	     Recursive deletion of all children of this object as well
-	      </input>
-	   </div>
-	   <div class="modal-footer">
-	     <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
-	     <button type="submit" class="btn btn-primary"  name="ldap_delete"
-                value="[% entry.key %]">
-	       Yes, I really want to delete it and yes, I understand all consequences!
-	     </button>
-	   </div>
-	   </form>
-	 </div>
-       </div>
-     </div>
-     <!-- #### Modal: Account Global Management end -->
-
-     <!-- #### Modal: Delete start -->
-     <div class="modal" id="deleteModal[% loop.index %]"
-	tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel[% loop.index %]"
-	aria-hidden="true">
-       <div class="modal-dialog modal-lg">
-	 <div class="modal-content">
-	   <form role="form" method="POST" action="[% c.uri_for_action('searchby/delete') %]">
-	     <div class="modal-header">
-	       <h4 class="modal-title alert alert-danger" id="deleteModalLabel[% loop.index %]">
-		 <span class="glyphicon glyphicon-remove-circle"></span>
-		 You are about to perform deletion of DN: <b>[% entry.key %]</b>
-	       </h4>
-	     </div>
-	     <div class="modal-body text-primary">
-	       <input type="checkbox" name="ldap_delete_recursive">
-	       Recursive deletion of all children of this object as well
-	      </input>
-	     </div>
-	     <div class="modal-footer">
-	       <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
-	       <button type="submit" class="btn btn-primary umi-btn-event umi-btn-ajax"  name="ldap_delete"
-                       value="[% entry.key %]" data-action="delete" >
-		 Yes, I really want to delete it and yes, I understand all consequences!
-	       </button>
-	     </div>
-	   </form>
-	 </div>
-       </div>
-     </div>
-     <!-- #### Modal: Delete end -->
-
-     <!-- #### Modal: LDIF start -->
-     <div class="modal" id="ldifModal[% loop.index %]"
-	tabindex="-1" role="dialog" aria-labelledby="ldifModalLabel[% loop.index %]"
-	aria-hidden="true">
-       <div class="modal-dialog modal-lg">
-	 <div class="modal-content">
-	   <form role="form" method="POST">
-	   <div class="modal-header">
-	     <h4 class="modal-title alert alert-info" id="ldifModalLabel[% loop.index %]">
-	       <span class="fa fa-info-circle"></span>
-	       LDIF of DN: <b>[% entry.key %]</b>
-	     </h4>
-	   </div>
-	   <div class="modal-body text-primary">
-	     <input type="checkbox" name="ldap_ldif_recursive">
-	       Get LDIFs for all children as well
-	     </input>
-	   </div>
-	   <div class="modal-body text-primary">
-	     <input type="checkbox" name="ldap_ldif_sysinfo">
-	       Get system info as well
-	     </input>
-	   </div>
-	   <div class="modal-footer">
-	     <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
-	     <button type="submit"
-		     class="btn btn-primary umi-btn-event umi-btn-logic"
-		     data-umiact="/searchby/ldif_gen"
-		     name="ldap_ldif"
-                     value="[% entry.key %]">
-	       Yes, to get LDIF
-	     </button>
-	   </div>
-	   </form>
-	 </div>
-       </div>
-     </div>
-     <!-- #### Modal: LDIF end -->
-
-   </div>
-   <div id="collapse[% loop.index %]" class="panel-collapse collapse [% in %]">
-     <div class="panel-body">
-    <dl class="dl-horizontal">
-  [% FOREACH hattr IN entry.value.attrs %]
-    [% x=hattr.key %]
-    [% IF hattr.key.match(';binary') %]
-      <dt>[% hattr.key.substr(-7,7,'&nbsp;<abbr title="binary data"><span class="fa fa-file-zip-o text-info" title="binary data"></span></abbr>') %]:</dt><dd>
-    [% ELSIF hattr.key == 'userPKCS12' %]
-      <dt>[% hattr.key %]&nbsp;<abbr title="binary data"><span class="fa fa-file-zip-o text-info" title="binary data"></span></abbr>:</dt><dd>
-    [% ELSE %]
-      <dt>[% hattr.key %]:</dt><dd>
-    [% END %]
-    [% IF hattr.key == 'userPassword' %]
-      <span class="fa fa-circle"></span>
-      <span class="fa fa-circle"></span>
-      <span class="fa fa-circle"></span>
-      <span class="fa fa-circle"></span>
-      <span class="fa fa-circle"></span>
-      <span class="fa fa-circle"></span>
-      <span class="fa fa-circle"></span>
-      <span class="fa fa-circle"></span>
-    [% ELSIF hattr.key.match('userCertificate;binary') %]
-      <br><small class="pull-left"><em><dl class="dl-horizontal">
-	[% FOREACH cert IN hattr.value %]
-	<dt>[% cert.key %]</dt><dd class="mono">[% cert.value %]</dd>
-	[% END %]
-      </dl></em></small>
-    [% ELSIF hattr.key == 'userPKCS12' %]
-	<kbd class="fa fa-file-o">&nbsp;Binary Data</kbd>
-    [% ELSIF hattr.key == 'jpegPhoto' %]
-      [% 
-        # bellow, value of jpegPhoto attribute contains no  `<img class="' part
-	# to set background class here according the object type: root or child 
-      %]
-      [% IF entry.value.mgmnt.is_dn %]
-      <img class="bg-info [% hattr.value %]
-      [% ELSE %] 
-      <img class="bg-success [% hattr.value %]
-      [% END %]
-    [% ELSIF entry.value.is_arr.$x %]
-      [% FOREACH i IN hattr.value %]
-	[% IF hattr.key == 'sshPublicKey' %]
-	  <div class="panel panel-default">
-           <div class="panel-body mono"><small>[% i %]</small></div></div>
-	[% ELSE %]
-	  [% IF loop.last %]
-	    [% i %]
-	  [% ELSE %]
-	    [% i %]<br>
-	  [% END %]
-	[% END %]
-      [% END %]
-    [% ELSE %]
-      [% hattr.value %]
-    [% END %] [% # IF hattr.key == 'userPassword' %]
-    </dd>
-  [% END %] [% # FOREACH hattr IN entry.value.attrs %]
-    </dl>
-   </div>
-  </div>
- </div>
-</div>
-</td></tr>
-[% END %] [% # FOREACH entry IN entries %]
- </tbody>
-</table>
+    </tbody>
+  </table>
 </div>
 
 <script>
-$(function(){
-  $('#btnLegend').popover()
-});
+ $(function(){
+   $('#btnLegend').popover()
+ });
 </script>
-
 <script>
-$(function(){
-  "use strict";
-  
-  var options = {
-        btnEvent: ".umi-btn-event",
-        btnEventLogic: ".umi-btn-logic",
-        btnEventAjax: ".umi-btn-ajax",
-        noActionEventMsg: "Cannot find action attribute for this button event!",
-        noFormEventMsg: "Cannot find parent form for this button event!",
-        noAjaxModeMsg: "Ajax mode not supported, yet...",
-        ajaxError: "Error on request: ",
-        ajaxSystemError: "Wrong response format from server!"
-      },
-      
-      getErrorBlock = function(message) {
-        return $("<div>").addClass("text-danger").html(message);
-      },
-      
-      applyError = function(item, message) {
-        item.parent().prepend(getErrorBlock(message));
-      },
-      
-      createHiddenButton = function(item, value) {
-        var simple = (typeof value !== "undefined");
-        if (!simple) {
-            var input = $(item).parents("form").find("input[name='"+item.attr("name")+"'][type='hidden']");
-            if (input && input.length) {
-              return input.attr("value", item.val());
-            }
-        }
+ $(function(){
+   "use strict";
 
-        return $("<input>")
-          .attr("type","hidden")
-          .attr("name", (simple) ? item : item.attr("name"))
-          .attr("value", (simple) ? value : item.val());
-      },
-      
-      getLogicType = function(obj) {
-        if (obj.hasClass(options.btnEventLogic.substr(1,options.btnEventLogic.length))) return "basic";
-        if (obj.hasClass(options.btnEventAjax.substr(1,options.btnEventAjax.length))) return "ajax";
-        return "close";
-      },
-      
-      removeObjects = function(objects) {
-        if (!objects || !Array.isArray(objects) || !objects.length) return;
-        objects.forEach(function(object){
-          object.remove();
-        });
-      },
+   var options = {
+     btnEvent: ".umi-btn-event",
+     btnEventLogic: ".umi-btn-logic",
+     btnEventAjax: ".umi-btn-ajax",
+     noActionEventMsg: "Cannot find action attribute for this button event!",
+     noFormEventMsg: "Cannot find parent form for this button event!",
+     noAjaxModeMsg: "Ajax mode not supported, yet...",
+     ajaxError: "Error on request: ",
+     ajaxSystemError: "Wrong response format from server!"
+   },
 
-      runAjaxLogic = function(obj) {
-        var $form = obj.parents("form");
-        if (!$form || !$form.length) return applyError(obj, options.noFormEventMsg), false;
-        var hidden = createHiddenButton(obj);
-        var type = createHiddenButton("type", "json");
-        $form.append(hidden).append(type);
-        var data = $form.serialize();
-        var $tr = obj.parents("tr");
-        var action = obj.data("action");
-        var $modal = obj.parents(".modal.in");
- 
-        //clearPopupForm($(".modal:not(.in)"));// REMOVE
+       getErrorBlock = function(message) {
+	 return $("<div>").addClass("text-danger").html(message);
+       },
 
-        $.ajax({
-            type: "POST",
-            url: $form.attr("action"),
-            data: data,
-            dataType: "json",
-            success: function(data) {
-                if (!data || typeof data.success === "undefined") return applyError(obj, options.ajaxSystemError), false;
-                if (data && data.success === false) return applyError(obj, data.message), false;
-                switch(action) {
-                   default:
-                   case "delete":
-                        if ($modal && $modal.length) $modal.modal("hide");
-                        $
-                        .when($tr.fadeOut("800"))
-                        .then(function(){
-                            $tr.remove();
-                        });
-                   break;
-                }
-                removeObjects([hidden, type]);
-            },
-            error: function(x, o, e){
-                applyError(obj, options.ajaxError+e);
-                removeObjects([hidden, type]);
-            }
-        });
-      },
-      
-      runBasicLogic = function(obj) {
-        var action = obj.data("umiact");
-        if (!action || !action.length) return applyError(obj, options.noActionEventMsg), false;
-        var $form = obj.parents("form");
-        if (!$form || !$form.length) return applyError(obj, options.noFormEventMsg), false;
-        var hidden = createHiddenButton(obj);
-        //clearPopupForm($(".modal:not(.in)")); // REMOVE
-        $form.append(hidden).attr("action", action).submit();
-        
-      },
+       applyError = function(item, message) {
+	 item.parent().prepend(getErrorBlock(message));
+       },
 
-      clearPopupForm = function($class) {
-        if (!($class instanceof Object)) $class=$($class);
-        $class.find("input[type='checkbox']").prop("checked", false);
-      },
-      
-      onBtnEventClick = function(event) {
-        event.preventDefault();
-        var $this = $(this);
-        
-        switch(getLogicType($this)) {
-          default:
-          case "close":
-            clearPopupForm($this.parents(".modal"));
-            break;
-          case "basic":
-            runBasicLogic($this);
-            break;
-          case "ajax":
-            runAjaxLogic($this);
-            break;
-        }
-        return false;
-      };
+       createHiddenButton = function(item, value) {
+	 var simple = (typeof value !== "undefined");
+	 if (!simple) {
+	   var input = $(item).parents("form").find("input[name='"+item.attr("name")+"'][type='hidden']");
+	   if (input && input.length) {
+	     return input.attr("value", item.val());
+	   }
+	 }
 
-  //clearPopupForm($(".modal:not(.in)")); // REMOVE
+	 return $("<input>")
+	       .attr("type","hidden")
+	       .attr("name", (simple) ? item : item.attr("name"))
+	       .attr("value", (simple) ? value : item.val());
+       },
 
-  $("body").on("click", options.btnEvent, onBtnEventClick);
-});
+       getLogicType = function(obj) {
+	 if (obj.hasClass(options.btnEventLogic.substr(1,options.btnEventLogic.length))) return "basic";
+	 if (obj.hasClass(options.btnEventAjax.substr(1,options.btnEventAjax.length))) return "ajax";
+	 return "close";
+       },
+
+       removeObjects = function(objects) {
+	 if (!objects || !Array.isArray(objects) || !objects.length) return;
+	 objects.forEach(function(object){
+	   object.remove();
+	 });
+       },
+
+       runAjaxLogic = function(obj) {
+	 var $form = obj.parents("form");
+	 if (!$form || !$form.length) return applyError(obj, options.noFormEventMsg), false;
+	 var hidden = createHiddenButton(obj);
+	 var type = createHiddenButton("type", "json");
+	 $form.append(hidden).append(type);
+	 var data = $form.serialize();
+	 var $tr = obj.parents("tr");
+	 var action = obj.data("action");
+	 var $modal = obj.parents(".modal.in");
+
+	 //clearPopupForm($(".modal:not(.in)"));// REMOVE
+
+	 $.ajax({
+	   type: "POST",
+	   url: $form.attr("action"),
+	   data: data,
+	   dataType: "json",
+	   success: function(data) {
+	     if (!data || typeof data.success === "undefined") return applyError(obj, options.ajaxSystemError), false;
+	     if (data && data.success === false) return applyError(obj, data.message), false;
+	     switch(action) {
+	       default:
+	       case "delete":
+		 if ($modal && $modal.length) $modal.modal("hide");
+		 $
+	       .when($tr.fadeOut("800"))
+	       .then(function(){
+		 $tr.remove();
+	       });
+		 break;
+	     }
+	     removeObjects([hidden, type]);
+	   },
+	   error: function(x, o, e){
+	     applyError(obj, options.ajaxError+e);
+	     removeObjects([hidden, type]);
+	   }
+	 });
+       },
+
+       runBasicLogic = function(obj) {
+	 var action = obj.data("umiact");
+	 if (!action || !action.length) return applyError(obj, options.noActionEventMsg), false;
+	 var $form = obj.parents("form");
+	 if (!$form || !$form.length) return applyError(obj, options.noFormEventMsg), false;
+	 var hidden = createHiddenButton(obj);
+	 //clearPopupForm($(".modal:not(.in)")); // REMOVE
+	 $form.append(hidden).attr("action", action).submit();
+
+       },
+
+       clearPopupForm = function($class) {
+	 if (!($class instanceof Object)) $class=$($class);
+	 $class.find("input[type='checkbox']").prop("checked", false);
+       },
+
+       onBtnEventClick = function(event) {
+	 event.preventDefault();
+	 var $this = $(this);
+
+	 switch(getLogicType($this)) {
+	   default:
+	   case "close":
+	     clearPopupForm($this.parents(".modal"));
+	     break;
+	   case "basic":
+	     runBasicLogic($this);
+	     break;
+	   case "ajax":
+	     runAjaxLogic($this);
+	     break;
+	 }
+	 return false;
+       };
+
+   //clearPopupForm($(".modal:not(.in)")); // REMOVE
+
+   $("body").on("click", options.btnEvent, onBtnEventClick);
+ });
 </script>

@@ -1,4 +1,4 @@
-
+[% dc="dc=umidb" %]
 <!-- BEGIN site/header -->
 
 <!-- Fixed navbar -->
@@ -19,60 +19,60 @@
     </div>
     <div class="collapse navbar-collapse">
       <ul class="nav navbar-nav">
-[% IF c.user_exists && c.session.auth_uid %]
+	[% IF c.user_exists && c.session.auth_uid %]
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">
 	    <span class="fa fa-th"></span>
 	    <span class="caret"></span>
 	  </a>
           <ul class="dropdown-menu" role="menu">
-  [% IF c.check_user_roles('wheel') || c.check_user_roles('email') || c.check_user_roles('xmpp') %]
-        <li>
+	    [% IF c.check_user_roles('wheel') || c.check_user_roles('email') || c.check_user_roles('xmpp') %]
+            <li>
 	      <a href="[% c.uri_for_action('user_root') %]">
 		<span class="fa fa-user"></span>
 		User
 	      </a>
 	    </li>
-  [% END %]
-  [% IF c.check_user_roles('wheel') %]
-        <li>
+	    [% END %]
+	    [% IF c.check_user_roles('wheel') %]
+            <li>
 	      <a href="[% c.uri_for_action('group_root') %]">
-        		<span class="fa fa-group"> </span>
-        		Group
+        	<span class="fa fa-group"> </span>
+        	Group
 	      </a>
 	    </li>
-  [% END %]
-  [% IF c.check_user_roles('wheel') || c.check_user_roles('email') || c.check_user_roles('xmpp') %]
-        <li>
+	    [% END %]
+	    [% IF c.check_user_roles('wheel') || c.check_user_roles('email') || c.check_user_roles('xmpp') %]
+            <li>
 	      <a href="[% c.uri_for_action('org_root') %]">
-        		<span class="fa fa-institution"></span>
-        		Org
+        	<span class="fa fa-institution"></span>
+        	Org
 	      </a>
 	    </li>
-  [% END %]
-  [% IF c.check_user_roles('wheel') %]
-        <li>
+	    [% END %]
+	    [% IF c.check_user_roles('wheel') %]
+            <li>
 	      <a href="[% c.uri_for_action('gitacl_root') %]">
-        		<span class="fa fa-gavel"></span>
-        		GitACL
+        	<span class="fa fa-gavel"></span>
+        	GitACL
 	      </a>
 	    </li>
-  [% END %]
-  [% IF c.check_user_roles('wheel') %]
-        <li class="disabled">
+	    [% END %]
+	    [% IF c.check_user_roles('wheel') %]
+            <li class="disabled">
 	      <a href="#">
-        		<span class="fa fa-globe"></span>
-        		DNS
+        	<span class="fa fa-globe"></span>
+        	DNS
 	      </a>
 	    </li>[% END %]
-  [% IF c.check_user_roles('wheel') || c.check_user_roles('dhcp') %]
-        <li>
+	    [% IF c.check_user_roles('wheel') || c.check_user_roles('dhcp') %]
+            <li>
 	      <a href="[% c.uri_for_action('dhcp_root') %]">
-        		<span class="fa fa-sitemap"></span>
-        		DHCP
+        	<span class="fa fa-sitemap"></span>
+        	DHCP
 	      </a>
 	    </li>
-  [% END %]
+	    [% END %]
             <li class="divider"></li>
             <li>
 	      <a href="#">
@@ -108,11 +108,11 @@
 	    [% END %]
           </ul>
         </li>
-[% END %]
+	[% END %]
       </ul>
       [% IF c.user_exists && c.user.roles.size > 0 %]
       <form class="navbar-form navbar-left"
-	    role="form" 
+	    role="form"
 	    id="searchby"
 	    method="POST"
 	    action="[% c.uri_for_action('/searchby/index') %]">
@@ -148,13 +148,13 @@
 		    </tr>
 		    <tr>
 		      <td class="success">
-			<button type="submit" class="menutab btn btn-link btn-sm" value="1" 
+			<button type="submit" class="menutab btn btn-link btn-sm" value="1"
 				name="ldapsearch_by_name" title="search by name related fields">
 			  <span class="fa fa-user"> by name</span>
 			</button>
 		      </td>
 		      <td class="info">
-			<button type="submit" class="btn btn-link btn-sm" value="ou=group,dc=umidb" name="ldapsearch_base">
+			<button type="submit" class="btn btn-link btn-sm" value="ou=group,[% dc %]" name="ldapsearch_base">
 			  <span class="fa fa-group"> group</span>
 			</button>
 		      </td>
@@ -166,7 +166,7 @@
 			</button>
 		      </td>
 		      <td class="info">
-			<button type="submit" class="btn btn-link btn-sm" value="ou=People,dc=umidb" name="ldapsearch_base">
+			<button type="submit" class="btn btn-link btn-sm" value="ou=People,[% dc %]" name="ldapsearch_base">
 			  <span class="fa fa-user"> People</span>
 			</button>
 		      </td>
@@ -178,7 +178,7 @@
 			</button>
 		      </td>
 		      <td class="info">
-			<button type="submit" class="btn btn-link btn-sm" value="ou=Organizations,dc=umidb" name="ldapsearch_base">
+			<button type="submit" class="btn btn-link btn-sm" value="ou=Organizations,[% dc %]" name="ldapsearch_base">
 			  <span class="fa fa-institution"> Organizations</span>
 			</button>
 		      </td>
@@ -190,7 +190,7 @@
 			</button>
 		      </td>
 		      <td class="info">
-			<button type="submit" class="btn btn-link btn-sm" value="ou=dhcp,dc=umidb" name="ldapsearch_base">
+			<button type="submit" class="btn btn-link btn-sm" value="ou=dhcp,[% dc %]" name="ldapsearch_base">
 			  <span class="fa fa-sitemap"> DHCP</span>
 			</button>
 		      </td>
@@ -202,7 +202,7 @@
 			</button>
 		      </td>
 		      <td class="info">
-			<button type="submit" class="btn btn-link btn-sm" value="ou=alias,dc=umidb" name="ldapsearch_base">
+			<button type="submit" class="btn btn-link btn-sm" value="ou=alias,[% dc %]" name="ldapsearch_base">
 			  <span class="fa fa-puzzle-piece"> mail alias</span>
 			</button>
 		      </td>
@@ -214,7 +214,7 @@
 			</button>
 		      </td>
 		      <td class="info">
-			<button type="submit" class="btn btn-link btn-sm" value="ou=workstations,dc=umidb" name="ldapsearch_base">
+			<button type="submit" class="btn btn-link btn-sm" value="ou=workstations,[% dc %]" name="ldapsearch_base">
 			  <span class="fa fa-desktop"> workstations</span>
 			</button>
 		      </td>
@@ -222,7 +222,7 @@
 		    <tr>
 		      <td class="success"></td>
 		      <td class="info">
-			<button type="submit" class="btn btn-link btn-sm" value="ou=machines,dc=umidb" name="ldapsearch_base">
+			<button type="submit" class="btn btn-link btn-sm" value="ou=machines,[% dc %]" name="ldapsearch_base">
 			  <span class="fa fa-laptop"> machines</span>
 			</button>
 		      </td>
@@ -230,7 +230,7 @@
 		    <tr>
 		      <td class="success"></td>
 		      <td class="info">
-			<button type="submit" class="btn btn-link btn-sm" value="ou=GitACL,dc=umidb" name="ldapsearch_base">
+			<button type="submit" class="btn btn-link btn-sm" value="ou=GitACL,[% dc %]" name="ldapsearch_base">
 			  <span class="fa fa-gavel"> GitACL</span>
 			</button>
 		      </td>
@@ -324,4 +324,3 @@
   </div>
 </nav>
 <!-- END site/header -->
-

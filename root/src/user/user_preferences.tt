@@ -1,4 +1,4 @@
-[% META title = 'Account Info' %] 
+[% META title = 'User Account Info' %] 
 
 [% IF final_message.error %]
 <div class="panel panel-danger">
@@ -30,16 +30,11 @@
 <div class="row">
   <div class="col-sm-7"> <!-- LEFT COL start -->
     <div class="row"> <!-- LC ROW1 start -->
-      <div class="col-sm-3">
-	[% jpegPhoto %]
-      </div>
-
+      <div class="col-sm-3">[% jpegPhoto %]</div>
       <div class="col-sm-4">
 	<div class="panel panel-info">
 	  <div class="panel-heading">
-	    <h3 class="panel-title">
-	      <span class="fa fa-user">&nbsp;</span>Personal data
-	    </h3>
+	    <h3 class="panel-title"><span class="fa fa-user">&nbsp;</span>Personal data</h3>
 	  </div>
 	  <div class="panel-body">
 	    <table class="table table-striped table-condensed table-hover">
@@ -62,7 +57,7 @@
 		  <th class="text-right"><abbr title="title"><span class="fa fa-mortar-board"></span></abbr></th>
 		  <td>
 		    [% IF auth_obj.title.size %]
-		      [% FOREACH i IN auth_obj.title %][% i %]<br>[% END %]
+		    [% FOREACH i IN auth_obj.title %][% i %]<br>[% END %]
 		    [% ELSE %]
 		    [% auth_obj.title %]
 		    [% END %]
@@ -71,7 +66,7 @@
 		<tr>
 		  <th class="text-right"><abbr title="roles"><span class="fa fa-cogs"></span></abbr></th>
 		  <td class="text-info">
-		      [% FOREACH role IN auth_obj.roles.sort %][% role %]<br>[% END %]
+		    [% FOREACH role IN auth_obj.roles.sort %][% role %]<br>[% END %]
 		  </td>
 		</tr>
 		<tr>
@@ -145,151 +140,149 @@
 
     </div> <!-- LC ROW1 end -->
 
-  [% IF dhcp.size > 0 %]
-  <div class="row"> <!-- LC ROW2 start -->
-    <div class="col-sm-12">
-      <div class="panel panel-info">
-	<div class="panel-heading">
-	  <h3 class="panel-title">
-	    <span class="fa fa-sitemap">&nbsp;</span>DHCP
-	  </h3>
-	</div>
-	<div class="panel-body">
-	  [% IF c.check_user_roles('wheel') || c.check_user_roles('wheel') %]
-	  <form role="form" method="POST"
-		action="[% c.uri_for_action('searchby/proc') %]">
-	    [% END %]
-	    <table class="table table-striped table-condensed table-hover">
-	      <thead><tr class="active"><th>Hostname</th><th>FQDN</th><th>IP</th><th>MAC</th></tr></thead>
-	      <tbody>
-		[% j=113 %]
-		[% FOREACH x IN dhcp %]
-		<tr class="mono">
-		  <td>
-		    [% IF c.check_user_roles('wheel') || c.check_user_roles('wheel') %]
-		    <div class="dropdown pull-left">
-		      <button class="btn btn-link btn-sm dropdown-toggle" 
-			      type="button" id="dropdownMenuActions" 
-			      data-toggle="dropdown"
-			      title="Possible Actions Upon the Object">
-			<span class="fa fa-cog text-primary"></span><span class="caret text-primary"></span>
-		      </button>
-		      <ul class="dropdown-menu dropdown-menu-left bg-primary"
-			  aria-labelledby="dropdownMenuActions"
-			  role="menu">
-			<li>
-			  <button type="button" title="delete object" class="btn btn-link"
-				  value="[% x.dn %]"
-				  name="ldap_delete"
-				  data-toggle="modal"
-				  data-target="#deleteModal[% j %]">
-			    <span class="fa fa-times-circle text-danger"></span>
-			    delete
-			  </button>
-			</li>
-			<li>
-			  <button type="button" title="export LDIF of the object"
-				  class="btn btn-link"
-				  value="[% x.dn %]"
-				  name="ldap_ldif"
-				  data-toggle="modal"
-				  data-target="#ldifModal[% j %]">
-			    <span class="fa fa-upload text-info"></span>
-			    LDIF
-			  </button>
-			</li>
-			<li>
-			  <button type="submit" title="edit object" class="btn btn-link"
-				  value="[% x.dn %]"
-				  name="ldap_modify">
-			    <span class="fa fa-edit text-warning"></span>
-			    edit (all)
-			  </button>
-			</li>
-		      </ul>
-		    </div>
-		    <!-- #### Modal: Delete start -->
-		    <div class="modal" id="deleteModal[% j %]"
-			 tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel[% j %]"
-			 aria-hidden="true">
-		      <div class="modal-dialog modal-lg">
-			<div class="modal-content">
-			  <div class="modal-header">
-			    <h4 class="modal-title alert alert-danger" id="deleteModalLabel[% j %]">
-			      <span class="fa fa-remove-circle"></span>
-			      You are about to perform deletion of DN: <b>[% x.dn %]</b>
-			    </h4>
-			  </div>
-			  <div class="modal-body text-primary">
-			    <input type="checkbox" name="ldap_delete_recursive">
-			    Recursive deletion of all children of this object as well</input>
-			  </div>
-			  <div class="modal-footer">
-			    <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">
-			      Close
-			    </button>
-			    <button type="submit" class="btn btn-primary umi-btn-event umi-btn-ajax"
-				    name="ldap_delete" value="[% x.dn %]" data-action="delete" >
-			      Yes, I really want to delete it and yes, I understand all consequences!
-			    </button>
-			  </div>
-			</div>
-		      </div>
-		    </div>
-		    <!-- #### Modal: Delete end -->
-		    <!-- #### Modal: LDIF start -->
-		    <div class="modal" id="ldifModal[% j %]"
-			 tabindex="-1" role="dialog" aria-labelledby="ldifModalLabel[% j %]"
-			 aria-hidden="true">
-		      <div class="modal-dialog modal-lg">
-			<div class="modal-content">
-			  <div class="modal-header">
-			    <h4 class="modal-title alert alert-info" id="ldifModalLabel[% j %]">
-			      <span class="fa fa-info-sign"></span>
-			      LDIF of DN: <b>[% x.dn %]</b>
-			    </h4>
-			  </div>
-			  <div class="modal-body text-primary">
-			    <input type="checkbox" name="ldap_ldif_recursive">
-			    Get LDIFs for all children as well</input>
-			  </div>
-			  <div class="modal-body text-primary">
-			    <input type="checkbox" name="ldap_ldif_sysinfo">
-			    Get system info as well</input>
-			  </div>
-			  <div class="modal-footer">
-			    <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">
-			      Close
-			    </button>
-			    <button type="submit"
-				    class="btn btn-primary umi-btn-event umi-btn-logic"
-				    data-umiact="/searchby/ldif_gen"
-				    name="ldap_ldif"
-				    value="[% x.dn %]">
-			      Yes, to get LDIF
-			    </button>
-			  </div>
-			</div>
-		      </div>
-		    </div>
-		    <!-- #### Modal: LDIF end -->
-		    [% END %]
-		    [% x.cn %]
-		  </td>
-		  <td>[% x.fqdn %]</td><td>[% x.ip %]</td><td>[% x.mac %]</td>
-		</tr>
-		[% j=j+1 %]
-		[% END %]
-	      </tbody>
-	    </table>
+    [% IF dhcp.size > 0 %]
+    <div class="row"> <!-- LC ROW2 start -->
+      <div class="col-sm-12">
+	<div class="panel panel-info">
+	  <div class="panel-heading">
+	    <h3 class="panel-title">
+	      <span class="fa fa-sitemap">&nbsp;</span>DHCP
+	    </h3>
+	  </div>
+	  <div class="panel-body">
 	    [% IF c.check_user_roles('wheel') || c.check_user_roles('wheel') %]
-	  </form>
-	  [% END %]
+	    <form role="form" method="POST"
+		  action="[% c.uri_for_action('searchby/proc') %]">
+	      [% END %]
+	      <table class="table table-striped table-condensed table-hover">
+		<thead><tr class="active"><th>Hostname</th><th>FQDN</th><th>IP</th><th>MAC</th></tr></thead>
+		<tbody>
+		  [% j=113 %]
+		  [% FOREACH x IN dhcp %]
+		  <tr class="mono">
+		    <td>
+		      [% IF c.check_user_roles('wheel') || c.check_user_roles('wheel') %]
+		      <div class="dropdown pull-left">
+			<button class="btn btn-link btn-sm dropdown-toggle" 
+				type="button" id="dropdownMenuActions" 
+				data-toggle="dropdown"
+				title="Possible Actions Upon the Object">
+			  <span class="fa fa-cog text-primary"></span><span class="caret text-primary"></span>
+			</button>
+			<ul class="dropdown-menu dropdown-menu-left bg-primary"
+			    aria-labelledby="dropdownMenuActions"
+			    role="menu">
+			  <li>
+			    <button type="button" title="delete object" class="btn btn-link"
+				    value="[% x.dn %]"
+				    name="ldap_delete"
+				    data-toggle="modal"
+				    data-target="#deleteModal[% j %]">
+			      <span class="fa fa-times-circle text-danger"></span>
+			      delete
+			    </button>
+			  </li>
+			  <li>
+			    <button type="button" title="export LDIF of the object"
+				    class="btn btn-link"
+				    value="[% x.dn %]"
+				    name="ldap_ldif"
+				    data-toggle="modal"
+				    data-target="#ldifModal[% j %]">
+			      <span class="fa fa-upload text-info"></span>
+			      LDIF
+			    </button>
+			  </li>
+			  <li>
+			    <button type="submit" title="edit object" class="btn btn-link"
+				    value="[% x.dn %]"
+				    name="ldap_modify">
+			      <span class="fa fa-edit text-warning"></span>
+			      edit (all)
+			    </button>
+			  </li>
+			</ul>
+		      </div>
+		      <!-- #### Modal: Delete start -->
+		      <div class="modal" id="deleteModal[% j %]"
+			   tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel[% j %]"
+			   aria-hidden="true">
+			<div class="modal-dialog modal-lg">
+			  <div class="modal-content">
+			    <div class="modal-header">
+			      <h4 class="modal-title alert alert-danger" id="deleteModalLabel[% j %]">
+				<span class="fa fa-remove-circle"></span>
+				You are about to perform deletion of DN: <b>[% x.dn %]</b>
+			      </h4>
+			    </div>
+			    <div class="modal-body text-primary">
+			      <input type="checkbox" name="ldap_delete_recursive">
+			      Recursive deletion of all children of this object as well</input>
+			    </div>
+			    <div class="modal-footer">
+			      <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">
+				Close
+			      </button>
+			      <button type="submit" class="btn btn-primary umi-btn-event umi-btn-ajax"
+				      name="ldap_delete" value="[% x.dn %]" data-action="delete" >
+				Yes, I really want to delete it and yes, I understand all consequences!
+			      </button>
+			    </div>
+			  </div>
+			</div>
+		      </div><!-- #### Modal: Delete end -->
+		      <!-- #### Modal: LDIF start -->
+		      <div class="modal" id="ldifModal[% j %]"
+			   tabindex="-1" role="dialog" aria-labelledby="ldifModalLabel[% j %]"
+			   aria-hidden="true">
+			<div class="modal-dialog modal-lg">
+			  <div class="modal-content">
+			    <div class="modal-header">
+			      <h4 class="modal-title alert alert-info" id="ldifModalLabel[% j %]">
+				<span class="fa fa-info-sign"></span>
+				LDIF of DN: <b>[% x.dn %]</b>
+			      </h4>
+			    </div>
+			    <div class="modal-body text-primary">
+			      <input type="checkbox" name="ldap_ldif_recursive">
+			      Get LDIFs for all children as well</input>
+			    </div>
+			    <div class="modal-body text-primary">
+			      <input type="checkbox" name="ldap_ldif_sysinfo">
+			      Get system info as well</input>
+			    </div>
+			    <div class="modal-footer">
+			      <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">
+				Close
+			      </button>
+			      <button type="submit"
+				      class="btn btn-primary umi-btn-event umi-btn-logic"
+				      data-umiact="/searchby/ldif_gen"
+				      name="ldap_ldif"
+				      value="[% x.dn %]">
+				Yes, to get LDIF
+			      </button>
+			    </div>
+			  </div>
+			</div>
+		      </div><!-- #### Modal: LDIF end -->
+		      [% END %]
+		      [% x.cn %]
+		    </td>
+		    <td>[% x.fqdn %]</td><td>[% x.ip %]</td><td>[% x.mac %]</td>
+		  </tr>
+		  [% j=j+1 %]
+		  [% END %]
+		</tbody>
+	      </table>
+	      [% IF c.check_user_roles('wheel') || c.check_user_roles('wheel') %]
+	    </form>
+	    [% END %]
+	  </div>
 	</div>
-      </div>
-    </div> <!-- LC ROW2 end -->
-    [% END %]
-  </div>
+      </div> <!-- LC ROW2 end -->
+      [% END %]
+    </div>
   </div> <!-- LEFT COL end -->
 
   <div class="col-sm-5"> <!-- RIGHT COL start -->
@@ -310,11 +303,11 @@
 	      [% FOREACH y IN service %]
 	      <tr class="active mono">
 		<th>
-		    <span class="fa-stack fa-lg" title="[% y.descr %]">
-		      <span class="fa fa-square fa-stack-2x text-info"></span>
-		      <span class="[% y.icon %] fa-stack-1x fa-inverse"></span>
-		    </span>
-		    [% y.authorizedService %]
+		  <span class="fa-stack fa-lg" title="[% y.descr %]">
+		    <span class="fa fa-square fa-stack-2x text-info"></span>
+		    <span class="[% y.icon %] fa-stack-1x fa-inverse"></span>
+		  </span>
+		  [% y.authorizedService %]
 		</th>
 	      </tr>
 	      [% FOREACH z IN y.leaf %]
@@ -414,9 +407,7 @@
 			</div>
 		      </div>
 		    </div>
-		  </div>
-		  <!-- #### Modal: Delete end -->
-
+		  </div><!-- #### Modal: Delete end -->
 		  <!-- #### Modal: LDIF start -->
 		  <div class="modal" id="ldifModal[% i %]"
 		       tabindex="-1" role="dialog" aria-labelledby="ldifModalLabel[% i %]"
@@ -451,19 +442,18 @@
 			</div>
 		      </div>
 		    </div>
-		  </div>
-		  <!-- #### Modal: LDIF end -->
+		  </div><!-- #### Modal: LDIF end -->
 		  [% z.value %]
 		  [% IF y.cert.${z.key} %]
-		    <br><small class="pull-left"><em><dl class="dl-horizontal">
-		      [% FOREACH cert IN y.cert.${z.key} %]
-		      <dt>[% cert.key %]</dt><dd class="mono">[% cert.value %]</dd>
-		      [% END %]
-		    </dl></em></small>
+		  <br><small class="pull-left"><em><dl class="dl-horizontal">
+		    [% FOREACH cert IN y.cert.${z.key} %]
+		    <dt>[% cert.key %]</dt><dd class="mono">[% cert.value %]</dd>
+		    [% END %]
+		  </dl></em></small>
 		  [% ELSIF y.sshkey.${z.key} %]
-		      [% FOREACH cert IN y.sshkey.${z.key} %]
-		        <h6 class="pull-left mono"><em>[% cert %]</em></h6>
-                      [% END %]
+		  [% FOREACH cert IN y.sshkey.${z.key} %]
+		  <h6 class="pull-left mono"><em>[% cert %]</em></h6>
+                  [% END %]
 		  [% END %]
 		  [% i=i+1 %]
 		  [% END %]
@@ -478,127 +468,130 @@
     [% END %]
   </div>
 </div>
-  </div>
-</div>
-<script>
-$(function(){
-  $('.svcDN').popover()
-});
-</script>
-<script>
-$(function(){
-  "use strict";
-  
-  var options = {
-        btnEvent: ".umi-btn-event",
-        btnEventLogic: ".umi-btn-logic",
-        btnEventAjax: ".umi-btn-ajax",
-        noActionEventMsg: "Cannot find action attribute for this button event!",
-        noFormEventMsg: "Cannot find parent form for this button event!",
-        noAjaxModeMsg: "Ajax mode not supported, yet...",
-        ajaxError: "Error on request: ",
-        ajaxSystemError: "Wrong response format from server!"
-      },
-      
-      getErrorBlock = function(message) {
-        return $("<div>").addClass("text-danger").html(message);
-      },
-      
-      applyError = function(item, message) {
-        item.parent().prepend(getErrorBlock(message));
-      },
-      
-      createHiddenButton = function(item, value) {
-        var simple = (typeof value !== "undefined");
-        if (!simple) {
-            var input = $(item).parents("form").find("input[name='"+item.attr("name")+"'][type='hidden']");
-            if (input && input.length) {
-              return input.attr("value", item.val());
-            }
-        }
 
-        return $("<input>")
+</div>
+</div>
+
+<script>
+ $(function(){
+   $('.svcDN').popover()
+ });
+</script>
+
+<script>
+ $(function(){
+   "use strict";
+   
+   var options = {
+     btnEvent: ".umi-btn-event",
+     btnEventLogic: ".umi-btn-logic",
+     btnEventAjax: ".umi-btn-ajax",
+     noActionEventMsg: "Cannot find action attribute for this button event!",
+     noFormEventMsg: "Cannot find parent form for this button event!",
+     noAjaxModeMsg: "Ajax mode not supported, yet...",
+     ajaxError: "Error on request: ",
+     ajaxSystemError: "Wrong response format from server!"
+   },
+       
+       getErrorBlock = function(message) {
+         return $("<div>").addClass("text-danger").html(message);
+       },
+       
+       applyError = function(item, message) {
+         item.parent().prepend(getErrorBlock(message));
+       },
+       
+       createHiddenButton = function(item, value) {
+         var simple = (typeof value !== "undefined");
+         if (!simple) {
+           var input = $(item).parents("form").find("input[name='"+item.attr("name")+"'][type='hidden']");
+           if (input && input.length) {
+             return input.attr("value", item.val());
+           }
+         }
+
+         return $("<input>")
           .attr("type","hidden")
           .attr("name", (simple) ? item : item.attr("name"))
           .attr("value", (simple) ? value : item.val());
-      },
-      
-      getLogicType = function(obj) {
-        if (obj.hasClass(options.btnEventLogic.substr(1,options.btnEventLogic.length))) return "basic";
-        if (obj.hasClass(options.btnEventAjax.substr(1,options.btnEventAjax.length))) return "ajax";
-        return "close";
-      },
-      
-      runAjaxLogic = function(obj) {
-        var $form = obj.parents("form");
-        if (!$form || !$form.length) return applyError(obj, options.noFormEventMsg), false;
-        var hidden = createHiddenButton(obj);
-        var type = createHiddenButton("type", "json");
-        $form.append(hidden).append(type);
-        var data = $form.serialize();
-        var $tr = obj.parents("tr");
-        var action = obj.data("action");
-        var $modal = obj.parents(".modal.in");
-        $.ajax({
-            type: "POST",
-            url: $form.attr("action"),
-            data: data,
-            dataType: "json",
-            success: function(data) {
-                if (!data || typeof data.success === "undefined") return applyError(obj, options.ajaxSystemError), false;
-                if (data && data.success === false) return applyError(obj, data.message), false;
-                switch(action) {
-                   default:
-                   case "delete":
-                        if ($modal && $modal.length) $modal.modal("hide");
-                        $
+       },
+       
+       getLogicType = function(obj) {
+         if (obj.hasClass(options.btnEventLogic.substr(1,options.btnEventLogic.length))) return "basic";
+         if (obj.hasClass(options.btnEventAjax.substr(1,options.btnEventAjax.length))) return "ajax";
+         return "close";
+       },
+       
+       runAjaxLogic = function(obj) {
+         var $form = obj.parents("form");
+         if (!$form || !$form.length) return applyError(obj, options.noFormEventMsg), false;
+         var hidden = createHiddenButton(obj);
+         var type = createHiddenButton("type", "json");
+         $form.append(hidden).append(type);
+         var data = $form.serialize();
+         var $tr = obj.parents("tr");
+         var action = obj.data("action");
+         var $modal = obj.parents(".modal.in");
+         $.ajax({
+           type: "POST",
+           url: $form.attr("action"),
+           data: data,
+           dataType: "json",
+           success: function(data) {
+             if (!data || typeof data.success === "undefined") return applyError(obj, options.ajaxSystemError), false;
+             if (data && data.success === false) return applyError(obj, data.message), false;
+             switch(action) {
+               default:
+               case "delete":
+                 if ($modal && $modal.length) $modal.modal("hide");
+                 $
                         .when($tr.fadeOut("800"))
                         .then(function(){
-                            $tr.remove();
+                          $tr.remove();
                         });
-                   break;
-                }
-            },
-            error: function(x, o, e){
-                applyError(obj, options.ajaxError+e);
-            }
-        });
-      },
-      
-      runBasicLogic = function(obj) {
-        var action = obj.data("umiact");
-        if (!action || !action.length) return applyError(obj, options.noActionEventMsg), false;
-        var $form = obj.parents("form");
-        if (!$form || !$form.length) return applyError(obj, options.noFormEventMsg), false;
-        var hidden = createHiddenButton(obj);
-        clearPopupForm($(".modal:not(.in)"));
-        $form.append(hidden).attr("action", action).submit();
-      },
+                 break;
+             }
+           },
+           error: function(x, o, e){
+             applyError(obj, options.ajaxError+e);
+           }
+         });
+       },
+       
+       runBasicLogic = function(obj) {
+         var action = obj.data("umiact");
+         if (!action || !action.length) return applyError(obj, options.noActionEventMsg), false;
+         var $form = obj.parents("form");
+         if (!$form || !$form.length) return applyError(obj, options.noFormEventMsg), false;
+         var hidden = createHiddenButton(obj);
+         clearPopupForm($(".modal:not(.in)"));
+         $form.append(hidden).attr("action", action).submit();
+       },
 
-      clearPopupForm = function($class) {
-        if (!($class instanceof Object)) $class=$($class);
-        $class.find("input[type='checkbox']").prop("checked", false);
-      },
-      
-      onBtnEventClick = function(event) {
-        event.preventDefault();
-        var $this = $(this);
-        
-        switch(getLogicType($this)) {
-          default:
-          case "close":
-            clearPopupForm($this.parents(".modal"));
-            break;
-          case "basic":
-            runBasicLogic($this);
-            break;
-          case "ajax":
-            runAjaxLogic($this);
-            break;
-        }
-        return false;
-      };
+       clearPopupForm = function($class) {
+         if (!($class instanceof Object)) $class=$($class);
+         $class.find("input[type='checkbox']").prop("checked", false);
+       },
+       
+       onBtnEventClick = function(event) {
+         event.preventDefault();
+         var $this = $(this);
+         
+         switch(getLogicType($this)) {
+           default:
+           case "close":
+             clearPopupForm($this.parents(".modal"));
+             break;
+           case "basic":
+             runBasicLogic($this);
+             break;
+           case "ajax":
+             runAjaxLogic($this);
+             break;
+         }
+         return false;
+       };
 
-  $("body").on("click", options.btnEvent, onBtnEventClick);
-});
+   $("body").on("click", options.btnEvent, onBtnEventClick);
+ });
 </script>

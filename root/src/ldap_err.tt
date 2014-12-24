@@ -1,0 +1,27 @@
+[% IF final_message.error %]
+<div class="panel panel-danger">
+  <div class="panel-heading">
+    <h4><span class="fa fa-exclamation-circle">&nbsp;</span>Error!</h4>
+  </div>
+  <div class="panel-body">
+    <ul>
+      [% FOREACH i IN final_message.error %]
+      [% i %]
+      [% END %]
+    </ul>
+  </div>
+</div>
+[% ELSIF final_message.warning %]
+<div class="panel panel-warning">
+  <div class="panel-heading">
+    <h4><span class="fa fa-exclamation-triangle">&nbsp;</span>Warning!</h4>
+  </div>
+  <div class="panel-body">
+    <ul>
+      [% FOREACH i IN final_message.warning %]
+      [% i %]
+      [% END %]
+    </ul>
+  </div>
+</div>
+[% END %]

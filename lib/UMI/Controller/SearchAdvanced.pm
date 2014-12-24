@@ -62,12 +62,8 @@ sub proc :Path(proc) :Args(0) {
 				     attrs => \@attrs,
 				    }
 				   );
-      my $err_message = '';
-      if ( ! $mesg->count ) {
-	$err_message = '<div class="alert alert-danger">' .
-	  '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
-	    $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html} . '</ul></div>';
-      }
+      my $return;
+      $return->{warning} = $ldap_crud->err($mesg)->{html} if ! $mesg->count;
 
       my @entries = $mesg->entries;
 
@@ -113,7 +109,7 @@ sub proc :Path(proc) :Args(0) {
 		filter => $search_filter,
 		entries => $ttentries,
 		services => $ldap_crud->{cfg}->{authorizedService},
-		err => $err_message,
+		final_message => $return,
 		form => $self->form,
 	       );
 

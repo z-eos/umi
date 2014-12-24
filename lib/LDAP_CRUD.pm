@@ -343,35 +343,33 @@ sub err {
   # 		  $mesg->server_error)
   #   if $mesg->code;
 
-  return { html => sprintf( '<dl class="dl-horizontal">
-  <dt>code</dt>
-  <dd>%s</dd>
-  <dt>error name</dt>
-  <dd>%s</dd>
+  my $err = {
+	     html => $mesg->{code} ?
+	     sprintf( '<dl class="dl-horizontal">
+  <dt>code</dt><dd>%s</dd>
+  <dt>error name</dt><dd>%s</dd>
   <dt>error text</dt>
   <dd>
-    <em>
-      <small>
-        <pre>%s</pre>
-      </small>
-    </em>
+    <em><small><pre>%s</pre></small></em>
   </dd>
-  <dt>error description</dt>
-  <dd>%s</dd>
-  <dt>server_error</dt>
-  <dd>%s</dd>
+  <dt>error description</dt><dd>%s</dd>
+  <dt>server_error</dt><dd>%s</dd>
 </dl>',
-		  $mesg->code,
-  		  ldap_error_name($mesg),
-  		  ldap_error_text($mesg),
-  		  ldap_error_desc($mesg),
-  		  $mesg->server_error
-		),
-	   code => $mesg->code,
-	   name => ldap_error_name($mesg),
-	   text => ldap_error_text($mesg),
-	   desc => ldap_error_desc($mesg),
-	   srv => $mesg->server_error, } if $mesg->code;
+		      $mesg->code,
+		      ldap_error_name($mesg),
+		      ldap_error_text($mesg),
+		      ldap_error_desc($mesg),
+		      $mesg->server_error
+		    ) : 'Your request returned no result. Try to change query paremeter/s.',
+	     code => $mesg->code,
+	     name => ldap_error_name($mesg),
+	     text => ldap_error_text($mesg),
+	     desc => ldap_error_desc($mesg),
+	     srv => $mesg->server_error,
+	    };
+  use Data::Printer;
+  p $err;
+  return $err; # if $mesg->code;
 }
 
 sub unbind {

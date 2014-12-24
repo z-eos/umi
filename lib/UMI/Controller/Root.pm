@@ -75,6 +75,15 @@ sub accinfo :Path(accinfo) :Args(0) {
     $c->stash( template => 'acc_info.tt', );
 }
 
+
+=head2 download_from_ldap
+
+action to retrieve PKCS12 certificate from LDAP
+now it is now used since we had not agreed yet on
+account of whether we wish it ...
+
+=cut
+
 sub download_from_ldap :Path(download_from_ldap) :Args(0) {
   use Data::Printer;
 
@@ -96,7 +105,8 @@ sub download_from_ldap :Path(download_from_ldap) :Args(0) {
 			       scope => 'base',
 			      } );
   if ( $mesg->code ) {
-    $return->{error} .= '<li>file download info: ' . $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html} . '</li>';
+    $return->{error} .= '<li>file download info: ' .
+      $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html} . '</li>';
   } else {
     $entry = $mesg->entry(0);
     $file = join('', $entry->get_value( $arg->{attr} ));
@@ -106,7 +116,6 @@ sub download_from_ldap :Path(download_from_ldap) :Args(0) {
 							   (split('=',(split(',', $arg->{dn}))[1]))[1],
 							   $entry->get_value('cn')) );
   }
-
 }
 
 sub user_preferences :Path(user_prefs) :Args(0) {

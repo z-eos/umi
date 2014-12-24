@@ -419,7 +419,9 @@ sub create_account_branch_leaf {
   my ($authorizedService, $sshkey);
 
   if ( $arg->{service} eq 'ovpn' ) {
+    # left empty for latter amendations
   } elsif ( $arg->{service} eq 'ssh' ) {
+    # left empty for latter amendations
   } elsif ( $arg->{service} eq '802.1x-mac' ||
 	    $arg->{service} eq '802.1x-eap' ) {
     $authorizedService = [];
@@ -510,9 +512,18 @@ sub create_account_branch_leaf {
     #   p $sshkey;
     # } else {
     # }
+    my $sshPublicKey;
+    if ( ref($arg->{sshpublickey}) eq 'ARRAY' ) {
+      foreach ( @{$arg->{sshpublickey}} ) {
+	push @{$sshPublicKey}, $_;
+      }
+    } else {
+      push @{$sshPublicKey}, $arg->{sshpublickey};
+    }
+
     $authorizedService = [
 			  objectClass => $ldap_crud->{cfg}->{objectClass}->{ssh},
-			  sshPublicKey => $arg->{sshpublickey},
+			  sshPublicKey => [ @$sshPublicKey ],
 			 ];
     $authorizedService_add = [];
   } elsif ( $arg->{service} eq 'ovpn' ) {
@@ -524,6 +535,9 @@ sub create_account_branch_leaf {
     $arg->{dn} = 'cn=' . substr($arg->{userCertificate}->{filename},0,-4) . ',' . $arg->{basedn};
     $authorizedService = [
 			  cn => substr($arg->{userCertificate}->{filename},0,-4),
+			  # here `sn' is "missused" since we use it as
+			  # Serial Number rather than last (family)
+			  # name(s) for which the entity is known by
 			  sn => '' . $self->cert_info({ cert => $usercertificate })->{'S/N'},
 			  objectClass => $ldap_crud->{cfg}->{objectClass}->{ovpn},
 			  'userCertificate;binary' => $usercertificate,
