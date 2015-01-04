@@ -1,4 +1,7 @@
-[% META title = 'Group Members' %]
+[% META
+   title = 'Group Members'
+   link = '<link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">'
+%]
 
 <!-- <div class="container"> -->
   <div class="col-md-10">

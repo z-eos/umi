@@ -139,16 +139,9 @@ sub index :Path :Args(0) {
 
     my @entries = $mesg->entries;
 
-    my $err_message = '';
-    my $info_message = '';
-    if ( ! $mesg->is_error && ! $mesg->count ) {
-      $info_message = '<div class="alert alert-warning">' .
-	'<span style="font-size: 140%" class="glyphicon glyphicon-warning-sign"></span>&nbsp;Nothing was found by your request, we encourage you to inspect your search parameter/s</div>';
-    } elsif ( $mesg->is_error ) {
-      $err_message = '<div class="alert alert-danger">' .
-	'<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
-	  $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html} . '</ul></div>';
-    }
+    my $return;
+    $return->{warning} = $ldap_crud->err($mesg)->{caller} .
+      ': ' . $ldap_crud->err($mesg)->{html} if ! $mesg->count;
 
     my ( $ttentries, $attr );
     foreach (@entries) {
@@ -187,8 +180,7 @@ sub index :Path :Args(0) {
 	      entries => $ttentries,
 	      # entries => \@entries,
 	      services => $ldap_crud->{cfg}->{authorizedService},
-	      err => $err_message,
-	      info => $info_message,
+	      final_message => $return,
 	     );
   } else {
     $c->stash( template => 'signin.tt', );
@@ -295,7 +287,7 @@ sub proc :Path(proc) :Args(0) {
 	  $c->model('LDAP_CRUD');
 	my $mesg = $ldap_crud
 	  ->search( {
-		     base => 'ou=group,dc=umidb',
+		     base => $ldap_crud->{cfg}->{base}->{group},
 		     filter => 'memberUid=' .
 		     substr((split /,/, $params->{ldap_modify_group})[0], 4),
 		     attrs => ['cn'],
@@ -889,7 +881,7 @@ sub mod_groups {
 
   my $return;
   if ( $self->form_mod_groups->validated ) {
-    my $mesg = $ldap_crud->search( { base => 'ou=group,dc=umidb',
+    my $mesg = $ldap_crud->search( { base => $ldap_crud->{cfg}->{base}->{group},
 				     scope => 'one',
 				     attrs => ['cn'], } );
 
@@ -903,7 +895,7 @@ sub mod_groups {
       $arg->{groups_all}->{$_->get_value('cn')} = 0;
     }
 
-    $mesg = $ldap_crud->search( { base => 'ou=group,dc=umidb',
+    $mesg = $ldap_crud->search( { base => $ldap_crud->{cfg}->{base}->{group},
     				  filter => 'memberUid=' . $arg->{uid},
     				  attrs => ['cn'], } );
 
@@ -933,7 +925,7 @@ sub mod_groups {
       if ( $#groups_chg >= 0) {
 	p [ $_, @groups_chg ];
 	$mesg = $ldap_crud->modify(
-				   'cn=' . $_ . ',ou=group,dc=umidb',
+				   'cn=' . $_ . $ldap_crud->{cfg}->{base}->{group},
 				   \@groups_chg
 				  );
 	if ( $mesg ) {

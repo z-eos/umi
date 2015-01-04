@@ -1,4 +1,7 @@
-[% META title = 'Search Simple Modify' %]
+[% META
+   title = 'Search Simple Modify'
+   link = '<link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">'
+%]
 
 <div class="page-header">
   <h2>Search Simple Modify Page <small><em>of DN: [% modify %]</em></small></h2>

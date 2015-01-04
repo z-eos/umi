@@ -11,9 +11,6 @@
   <span class="fa fa-exclamation-circle"></span> <em>Please note, not all objects could be found via predefined search items, to search for <strong>all</strong> objects use</em> &laquo;<span class="fa fa-search-plus"></span> advanced search&raquo; <em>menu item!</em>
 </h6>
 
-[% info %]
-[% err %]
-
 <div class="table-responsive">
   <table class="table">
     <thead>

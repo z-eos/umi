@@ -1,0 +1,157 @@
+[% META
+   title = 'Add Service Account (New)'
+   link = '<link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">'
+%]
+
+<div class="page-header">
+  <h2>New User Creation Form <small><em>complex form for all possible stuff (data and services)</em></small></h2>
+</div>
+
+<ul role="tablist" class="nav nav-tabs" id="myTab">
+  <li class="active">
+    <a aria-controls="person"
+       data-toggle="tab" role="tab"
+       id="person-tab"
+       href="#person"
+       title="Personal Data"
+       aria-expanded="true">
+      <span class="fa fa-user fa-lg"></span>
+    </a>
+  </li>
+
+  <li>
+    <a aria-controls="gensvc"
+       data-toggle="tab" role="tab"
+       id="gensvc-tab"
+       href="#gensvc"
+       title="Login/Password Dependent Services"
+       aria-expanded="false">
+      <!-- <span class="fa fa-plus-circle"></span> -->
+      <!-- <span class="fa-stack">
+	    <i class="fa fa-folder-o fa-stack-2x"></i>
+	    <i class="fa fa-user fa-stack-1x"></i>
+	    </span> -->
+      <span class="fa-stack">
+	<i class="fa fa-folder-o fa-stack-2x"></i>
+	<i class="fa fa-male fa-stack-1x"></i>
+      </span>
+    </a>
+  </li>
+
+  <li class="dropdown">
+    <a aria-controls="sec-contents"
+       data-toggle="dropdown"
+       class="dropdown-toggle"
+       id="umiSec"
+       href="#"
+       title="Services Without Login/Password"
+       aria-expanded="false">
+      <span class="fa-stack">
+	<i class="fa fa-folder-o fa-stack-2x"></i>
+	<i class="fa fa-cog fa-stack-1x"></i>
+      </span>
+      <span class="caret"></span>
+    </a>
+    <ul id="umiSec-contents"
+	aria-labelledby="umiSec"
+	role="menu"
+	class="dropdown-menu">
+      <li>
+	<a aria-controls="ovpn"
+	   data-toggle="tab"
+	   id="ovpn-tab"
+	   role="tab"
+	   tabindex="-1"
+	   href="#ovpn"
+	   aria-expanded="false">
+	  <span class="fa fa-certificate"></span>
+	  OpenVPN Certificate
+	</a>
+      </li>
+      <li>
+	<a aria-controls="ssh"
+	   data-toggle="tab"
+	   id="ssh-tab"
+	   role="tab"
+	   tabindex="-1"
+	   href="#ssh"
+	   aria-expanded="false">
+	  <span class="fa fa-key"></span>
+	  SSH Key
+	</a>
+      </li>
+    </ul>
+  </li>
+
+  <li>
+    <a aria-controls="groups"
+       data-toggle="tab"
+       id="groups-tab"
+       role="tab"
+       href="#ms-groups"
+       title="Group/s User Belongs to"
+       aria-expanded="false">
+      <span class="fa fa-group fa-lg"></span>
+    </a>
+  </li>
+</ul>
+<br>
+[% form.render %]
+
+<script>
+ $(function(){
+   $('#groups').multiSelect({
+     keepOrder: true,
+
+     selectableHeader: "<button type='button' class='btn btn-block btn-info'><span class='fa fa-group'>&nbsp;</span><b>Groups Available</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",
+     selectionHeader: "<button type='button' class='btn btn-block btn-success'><span class='fa fa-group'>&nbsp;</span><b>Groups Selected</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",
+
+     afterInit: function(ms){
+       var that = this,
+           $selectableSearch = that.$selectableUl.prev(),
+           $selectionSearch = that.$selectionUl.prev(),
+           selectableSearchString = '#'+that.$container.attr('id')+' .ms-elem-selectable:not(.ms-selected)',
+           selectionSearchString = '#'+that.$container.attr('id')+' .ms-elem-selection.ms-selected';
+
+       that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
+				   .on('keydown', function(e){
+				     if (e.which === 40){
+				       that.$selectableUl.focus();
+				       return false;
+				     }
+				   });
+
+       that.qs2 = $selectionSearch.quicksearch(selectionSearchString)
+				  .on('keydown', function(e){
+				    if (e.which == 40){
+				      that.$selectionUl.focus();
+				      return false;
+				    }
+				  });
+     },
+     afterSelect: function(){
+       this.qs1.cache();
+       this.qs2.cache();
+     },
+     afterDeselect: function(){
+       this.qs1.cache();
+       this.qs2.cache();
+     }
+
+     /* var element = document.getElementById("ms-groups");
+	element.classList.add("tab-pane"); */
+     
+   });
+ });
+</script>
+
+<script> [% # needed to put it in tab %]
+ $(function(){
+  var element = document.getElementById("ms-groups");
+  element.classList.add("tab-pane");
+  });
+</script>
+
+
+<script src="/static/js/jquery.multi-select.js" type="text/javascript"></script>
+<script src="/static/js/jquery.quicksearch.js" type="text/javascript"></script>

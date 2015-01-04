@@ -75,7 +75,7 @@
 	    [% END %]
             <li class="divider"></li>
             <li>
-	      <a href="#">
+	      <a href="user_add_svc_new">
 		<span class="fa fa-bell text-danger"></span>
 		Test
 	      </a>

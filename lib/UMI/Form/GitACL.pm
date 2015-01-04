@@ -83,7 +83,7 @@ sub options_gitAclUser_user {
   my $ldap_crud = $self->ldap_crud;
   my $mesg = $ldap_crud->search(
 				{
-				 base => 'ou=People,dc=umidb',
+				 base => $ldap_crud->{cfg}->{base}->{acc_root},
 				 scope => 'one',
 				 filter => 'uid=*',
 				 attrs => [ qw(uid givenName sn) ],
@@ -123,7 +123,7 @@ sub options_gitAclUser_group {
   my $ldap_crud = $self->ldap_crud;
   my $mesg = $ldap_crud->search(
 				{
-				 base => 'ou=group,dc=umidb',
+				 base => $ldap_crud->{cfg}->{base}->{group},
 				 scope => 'one',
 				 filter => 'cn=*',
 				 attrs => [ qw(cn description) ],

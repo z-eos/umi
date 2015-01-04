@@ -8,11 +8,17 @@ use namespace::autoclean;
 BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 
 use UMI::Form::User;
-
 has 'form' => ( isa => 'UMI::Form::User', is => 'rw',
 		lazy => 1, default => sub { UMI::Form::User->new },
 		documentation => q{Form to add new, nonexistent user account/s},
 	      );
+
+use UMI::Form::UserAll;
+has 'form_user_all' => ( isa => 'UMI::Form::UserAll', is => 'rw',
+		lazy => 1, default => sub { UMI::Form::UserAll->new },
+		documentation => q{Complex Form to add new, nonexistent user account/s},
+	      );
+
 
 =head1 NAME
 
@@ -592,6 +598,28 @@ sub modpwd :Path(modpwd) :Args(0) {
       $c->response->body('Unauthorized!');
     }
 
+}
+
+
+sub user_add_svc_new :Path(user_add_svc_new) :Args(0) {
+  my ( $self, $c ) = @_;
+
+  my $params = $c->req->parameters;
+
+  $c->stash(
+	    template => 'user/user_all.tt',
+	    form => $self->form_user_all,
+	   );
+
+  return unless $self->form_user_all->process(
+					      posted => ($c->req->method eq 'POST'),
+					      params => $params,
+					      ldap_crud => $c->model('LDAP_CRUD'),
+					     );
+
+  # $c->stash( template => 'user/user_add_svc_new.tt', );
+
+ $c->stash( final_message => '' );
 }
 
 

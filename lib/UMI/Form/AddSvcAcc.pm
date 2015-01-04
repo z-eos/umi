@@ -75,7 +75,7 @@ sub options_associateddomain {
   push my @domains, { value => '0', label => '--- select domain ---', selected => 'selected', };
 
   my $ldap_crud = $self->ldap_crud;
-  my $mesg = $ldap_crud->search( { base => 'ou=Organizations,dc=umidb',
+  my $mesg = $ldap_crud->search( { base => $ldap_crud->{cfg}->{base}->{org},
 				   filter => 'associatedDomain=*',
 				   attrs => [ 'associatedDomain' ],
 				 } );

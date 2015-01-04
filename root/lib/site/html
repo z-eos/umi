@@ -5,19 +5,15 @@
    <meta name="viewport" content="width=device-width, initial-scale=1">
    <meta name="description" content='UMI is intended to be rather flexible, though still "high level" (for use by not qualified personell), LDAP stored data, "simple" and "user-friendly" UI. https://github.com/z-eos/umi'>
    <meta name="author" content="">
-   <link rel="icon" href="../../favicon.ico">
 
    <title>[% template.title or site.title %]</title>
 
-   <link href="/static/css/font-awesome.min.css" rel="stylesheet">
-   <link href="/static/css/bootstrap.css" rel="stylesheet">
-   <link href="/static/css/bootstrap.min.css" rel="stylesheet">
-   <!-- <link href="/static/css/bootstrap-theme.css" rel="stylesheet"> -->
-   <!-- <link href="/static/css/sticky-footer-navbar.css" rel="stylesheet"> -->
-   <link href="/static/css/signin.css" rel="stylesheet">
+   <link rel="icon" href="../../favicon.ico">
+   <link href="/static/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+   <link href="/static/css/bootstrap.css" rel="stylesheet" type="text/css">
+   <link href="/static/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+   [% template.link %]
    <link href="/static/css/umi.css" rel="stylesheet">
-
-   <link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">
 
    <script src="/static/js/jquery.min.js"></script>
  </head>

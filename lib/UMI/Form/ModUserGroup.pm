@@ -30,7 +30,7 @@ sub options_groups {
   return unless $self->ldap_crud;
 
   my $ldap_crud = $self->ldap_crud;
-  my $mesg = $ldap_crud->search( { base => 'ou=group,dc=umidb',
+  my $mesg = $ldap_crud->search( { base => $ldap_crud->{cfg}->{base}->{group},
 				   scope => 'one',
 				   attrs => ['cn' ], } );
 

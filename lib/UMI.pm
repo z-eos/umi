@@ -55,6 +55,7 @@ __PACKAGE__->config(
     # Disable deprecated behavior needed by old applications
     disable_component_resolution_regex_fallback => 1,
     enable_catalyst_header => 1, # Send X-Catalyst header
+    default_view => "Web",
     session => { cache_size => '10m', }, # looks like value 100m helps with [error] Caught exception in engine "store_session: data too large"
     'authentication' => {
 	default_realm => "ldap",

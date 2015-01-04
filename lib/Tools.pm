@@ -4,146 +4,6 @@
 package Tools;
 use Moose::Role;
 
-# has 'equality2type' => ( traits => ['Hash'],
-# 			 is => 'ro',
-# 			 isa => 'HashRef',
-# 			 builder => '_build_equality2type',
-# 		       );
-
-# sub _build_equality2type {
-
-# return {
-# 	bitStringMatch => {
-# 			    field_type => 'Text',
-# 			    validationrule => [ '' ],
-# 			   },
-# 	booleanMatch  => {
-# 			  field_type => 'CheckBox',
-# 			  validationrule => [ '' ],
-# 			 },
-# 	caseExactIA5Match  => {
-# 			       field_type => 'Text',
-# 			       validationrule => [ '' ],
-# 			      },
-# 	caseExactIA5SubstringsMatch  => {
-# 					 field_type => 'Text',
-# 					 validationrule => [ '' ],
-# 					},
-# 	caseExactMatch  => {
-# 			    field_type => 'Text',
-# 			    validationrule => [ '' ],
-# 			   },
-# 	caseExactOrderingMatch  => {
-# 				    field_type => 'Text',
-# 				    validationrule => [ '' ],
-# 				   },
-# 	caseExactSubstringsMatch  => {
-# 				      field_type => 'Text',
-# 				      validationrule => [ '' ],
-# 				     },
-# 	caseIgnoreIA5Match  => {
-# 				field_type => 'Text',
-# 				validationrule => [ '' ],
-# 			       },
-# 	caseIgnoreIA5SubstringsMatch  => {
-# 					  field_type => 'Text',
-# 					  validationrule => [ '' ],
-# 					 },
-# 	caseIgnoreListMatch  => {
-# 				 field_type => 'Text',
-# 				 validationrule => [ '' ],
-# 				},
-# 	caseIgnoreMatch  => {
-# 			     field_type => 'Text',
-# 			     validationrule => [ '' ],
-# 			    },
-# 	caseIgnoreOrderingMatch  => {
-# 				     field_type => 'Text',
-# 				     validationrule => [ '' ],
-# 				    },
-# 	caseIgnoreSubstringsMatch  => {
-# 				       field_type => 'Text',
-# 				       validationrule => [ '' ],
-# 				      },
-# 	certificateExactMatch  => {
-# 				   field_type => 'File',
-# 				   validationrule => [ '' ],
-# 				  },
-# 	certificateListExactMatch  => {
-# 				       field_type => 'File',
-# 				       validationrule => [ '' ],
-# 				      },
-# 	distinguishedNameMatch  => {
-# 				    field_type => 'Text',
-# 				    validationrule => [ '' ],
-# 				   },
-# 	generalizedTimeMatch  => {
-# 				  field_type => 'DateTime',
-# 				  validationrule => [ 'YYYYmmDDHHMMSSZ' ],
-# 				 },
-# 	generalizedTimeOrderingMatch  => {
-# 					  field_type => 'DateTime',
-# 					  validationrule => [ 'YYYYmmDDHHMMSSZ' ],
-# 					 },
-# 	integerBitAndMatch  => {
-# 				field_type => 'Integer',
-# 				validationrule => [ '' ],
-# 			       },
-# 	integerBitOrMatch  => {
-# 			       field_type => 'Integer',
-# 			       validationrule => [ '' ],
-# 			      },
-# 	integerFirstComponentMatch  => {
-# 					field_type => 'Integer',
-# 					validationrule => [ '' ],
-# 				       },
-# 	integerMatch  => {
-# 			  field_type => 'Integer',
-# 			  validationrule => [ '' ],
-# 			 },
-# 	integerOrderingMatch  => {
-# 				  field_type => 'Integer',
-# 				  validationrule => [ '' ],
-# 				 },
-# 	numericStringMatch  => {
-# 				field_type => 'Integer',
-# 				validationrule => [ '' ],
-# 			       },
-# 	numericStringOrderingMatch  => {
-# 					field_type => 'Integer',
-# 					validationrule => [ '' ],
-# 				       },
-# 	numericStringSubstringsMatch  => {
-# 					  field_type => 'Integer',
-# 					  validationrule => [ '' ],
-# 					 },
-# 	octetStringMatch  => {
-# 			      field_type => '',
-# 			      validationrule => [ '' ],
-# 			     },
-# 	octetStringOrderingMatch  => {
-# 				      field_type => '',
-# 				      validationrule => [ '' ],
-# 				     },
-# 	octetStringSubstringsMatch  => {
-# 					field_type => '',
-# 					validationrule => [ '' ],
-# 				       },
-# 	telephoneNumberMatch  => {
-# 				  field_type => 'Text',
-# 				  validationrule => [ '' ],
-# 				 },
-# 	telephoneNumberSubstringsMatch  => {
-# 					    field_type => 'Text',
-# 					    validationrule => [ '' ],
-# 					   },
-# 	uniqueMemberMatch  => {
-# 			       field_type => 'Text',
-# 			       validationrule => [ '' ],
-# 			      },
-#        };
-
-# }
 
 =head2 is_ascii
 
@@ -156,8 +16,7 @@ returns 0 if it is and 1 if not
 
 sub is_ascii {
   my ($self, $arg) = @_;
-  if ( defined $arg &&
-       $arg ne '' &&
+  if ( defined $arg && $arg ne '' &&
        $arg !~ /^[[:ascii:]]+$/ ) {
     return 1;
   } else {
@@ -165,27 +24,11 @@ sub is_ascii {
   }
 }
 
-=head2 cyr2lat
+=head2 utf2lat
 
-cyrillic input transliteration to latin1
-
-works only for translit table set! so UK input will not be
-transliterated correctly for default translit table!
+utf8 input (particularly cyrillic) to latin1 transliteration
 
 =cut
-
-# sub cyr2lat {
-#   my ($self, $args) = @_;
-
-#   my $arg = {
-# 	      to_translate => $args->{'to_translate'},
-# 	      translit_table => $args->{'translit_table'} || 'GOST 7.79 RUS',
-# 	     };
-
-#   use Lingua::Translit;
-#   my $tr = new Lingua::Translit($arg->{'translit_table'});
-#   return $tr->translit($arg->{'to_translate'});
-# }
 
 sub utf2lat {
   my ($self, $to_translit) = @_;
@@ -198,14 +41,28 @@ sub utf2lat {
   return unidecode( $to_translit );
 }
 
-# sub if_cyr {
-
-# }
-
 sub is_int {
   my ($self, $arg) = @_;
   return $arg !~ /^\d+$/ ? 1 : 0;
 }
+
+
+=head2 pwdgen
+
+Prepares with Digest::SHA1, password provided or autogenerated, to be
+used as userPassword attribute value
+
+Password generated (with Crypt::GeneratePassword) is a random
+pronounceable word. The length of the returned word is 12 chars. It is
+up to 3 numbers and special characters will occur in the password. It
+is up to 4 characters will be upper case.
+
+If no password provided, then it will be automatically generated.
+
+Method returns hash with cleartext and ssha coded password.
+
+=cut
+
 
 sub pwdgen {
   my ( $self, $args ) = @_;
@@ -241,18 +98,6 @@ sub pwdgen {
 	  clear => $pwdgen->{'pwd'},
 	  ssha => '{SSHA}' . encode_base64( $sha1->digest . $pwdgen->{'salt'}, '' )
 	 };
-
-# to be removed #   use Digest::SHA1;
-# to be removed #   my $sha1 = Digest::SHA1->new;
-# to be removed #   $sha1->add(
-# to be removed # 	     $pwdgen->{'pwd'},
-# to be removed # 	     $pwdgen->{'salt'},
-# to be removed # 	    );
-# to be removed # 
-# to be removed #   return {
-# to be removed # 	  clear => $pwdgen->{'pwd'},
-# to be removed # 	  ssha => '{SSHA}' . $sha1->b64digest
-# to be removed # 	 };
 }
 
 
@@ -285,70 +130,25 @@ sub cert_info {
 
 
 
+=head2 fnorm
+
+HFH field value normalizator. Input is casted to ARRAY if it is
+SCALAR.
+
+=cut
 
 
-## !!! to adapt !!!
-# sub is_arr_member {
-#     my @arr = shift;
-#     my $member = shift;
-#     my %hash;
-#     @hash{@arr} = ();
-#     dbgmsg(5, Dumper(@arr));
-#     exists $hash{$member} ? return 1 : return 0;
-# }
+sub fnorm {
+  my ( $self, $field ) = @_;
+  my $field_arr;
+  if ( ref( $field ) ne 'ARRAY' ) {
+    push $field_arr, $field;
+    return $field_arr;
+  } else {
+    return $field;
+  }
+}
 
-# sub meta_options {
-#   my ( $self, $args ) = @_;
-#   my $arg = {
-# 	     dn => $args->[0],
-# 	     root => $args->[1],
-# 	     root_suffix => $args->[2],
-# 	     attr1 => $args->[3],
-# 	     attr1_suffix => $args->[4],
-# 	     attr2 => $args->[5],
-# 	     attr2_suffix => $args->[6],
-# 	     attr3 => $args->[5],
-# 	     attr3_suffix => $args->[6],
-# 	    };
-
-#     @dn_arr = split(',',$arg-{'dn'});
-#     if ( scalar @dn_arr < 4 ) {
-#       $label = sprintf("%s %s %s %s %s %s)",
-# 		       $arg->{'root'},
-# 		       $arg->{'root_suffix'},
-# 		       $arg->{'attr2'},
-# 		       $arg->{'attr2_suffix'},
-# 		       $arg->{'attr3'},
-# 		       $arg->{'attr3_suffix'},
-# 		      );
-#     } elsif ( scalar @dn_arr == 4 ) {
-#       $label = sprintf("%s %s %s %s %s %s) branch of %s",
-# 		       $arg->{'attr1'},
-# 		       $arg->{'attr1_suffix'},
-# 		       $arg->{'attr2'},
-# 		       $arg->{'attr2_suffix'},
-# 		       $arg->{'attr3'},
-# 		       $arg->{'attr3_suffix'},
-
-# 		       $entry->get_value ('ou'),
-# 		       $entry->get_value ('physicaldeliveryofficename'),
-# 		       $entry->get_value ('l'),
-# 		       substr($dn_arr[1],3)
-# 		      );
-#     } else {
-#       for ( $i = 1, $dn = ''; $i < scalar @dn_arr - 2; $i++ ) {
-# 	$dn .= $dn_arr[$i];
-#       }
-#       $a = $dn =~ s/ou=/ -> /g;
-#       $label = sprintf("%s (%s @ %s) branch of %s",
-# 		       $entry->get_value ('ou'),
-# 		       $entry->get_value ('physicaldeliveryofficename'),
-# 		       $entry->get_value ('l'),
-# 		       $dn
-# 		      );
-#     }
-
-# }
 
 ######################################################################
 

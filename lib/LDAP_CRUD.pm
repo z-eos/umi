@@ -31,7 +31,8 @@ has 'dry_run' => ( is => 'ro', isa => 'Bool', default => 0 );
 
 =head2 cfg
 
-attribute to predefine the structure of possible objects
+Related to LDAP DB objects configuration. Attempt to reach some sort of DB
+topology independence was undertaken.
 
 =cut
 
@@ -41,9 +42,15 @@ has 'cfg' => ( traits => ['Hash'],
 	       builder => '_build_cfg',
 	     );
 
+#=====================================================================
+##
+## CONFIGURATION STARTS HERE
+##
+#=====================================================================
 sub _build_cfg {
   my $self = shift;
 
+  my $db = 'dc=umidb'; # all your dc, like `dc=A,dc=B,...,dc=Z'
   return {
 	  exclude_prefix => 'aux_',
 	  stub => {
@@ -52,14 +59,14 @@ sub _build_cfg {
 		   gidNumber => 10012,
 		  },
 	  base => {
-		   db => 'dc=umidb',
-		   acc_root =>       'ou=People,dc=umidb',
-		   acc_svc_branch => 'ou=People,dc=umidb',
-		   acc_svc_common => 'ou=People,dc=umidb',
-		   dhcp =>           'ou=DHCP,dc=umidb',
-		   gitacl =>         'ou=GitACL,dc=umidb',
-		   group =>          'ou=group,dc=umidb',
-		   org =>            'ou=Organizations,dc=umidb',
+		   db => $db,
+		   acc_root =>       'ou=People,' . $db,
+		   acc_svc_branch => 'ou=People,' . $db,
+		   acc_svc_common => 'ou=People,' . $db,
+		   dhcp =>           'ou=DHCP,' . $db,
+		   gitacl =>         'ou=GitACL,' . $db,
+		   group =>          'ou=group,' . $db,
+		   org =>            'ou=Organizations,' . $db,
 		  },
 	  rdn => {
 		  org =>            'ou',
@@ -125,6 +132,7 @@ sub _build_cfg {
 		       },
 	  authorizedService => {
 				'mail' => {
+					   auth => 1,
 					   descr => 'Email',
 					   disabled => 0,
 					   homeDirectory_prefix => '/var/mail/IMAP_HOMES/',
@@ -133,6 +141,7 @@ sub _build_cfg {
 					   data_fields => 'login,password1,password2',
 					  },
 				'xmpp' => {
+					   auth => 1,
 					   descr => 'XMPP (Jabber)',
 					   disabled => 0,
 					   gidNumber => 10106,
@@ -141,48 +150,65 @@ sub _build_cfg {
 					   data_fields => 'login,password1,password2',
 					  },
 				'802.1x-mac' => {
-						 descr => '802.1x MAC',
+						 auth => 1,
+						 descr => 'auth 802.1x MAC',
 						 disabled => 0,
 						 icon => 'fa fa-shield',
 						 data_fields => 'login,password1,password2',
-						 },
+						},
 				'802.1x-eap' => {
-						 descr => '802.1x EAP',
+						 auth => 1,
+						 descr => 'auth 802.1x EAP',
 						 disabled => 0,
 						 icon => 'fa fa-shield',
 						 data_fields => 'login,password1,password2',
-						 },
+						},
 				'otrs' => {
+					   auth => 1,
 					   descr => 'OTRS',
 					   disabled => 1,
 					   icon => 'fa fa-file-code-o',
 					   data_fields => 'login,password1,password2',
 					  },
+				'noc' => {
+					   auth => 1,
+					   descr => 'NOC',
+					   disabled => 1,
+					   icon => 'fa fa-file-code-o',
+					   data_fields => 'login,password1,password2',
+					  },
 				'sms' => {
+					  auth => 1,
 					  descr => 'SMSter',
 					  disabled => 1,
 					  data_fields => 'login,password1,password2',
-					  },
+					 },
 				'ssh' => {
+					  auth => 0,
 					  descr => 'SSH key',
 					  disabled => 0,
 					  icon => 'fa fa-key',
-					  data_fields => 'login',
 					  },
 				'gpg' => {
+					  auth => 0,
 					  descr => 'GPG key',
 					  disabled => 1,
 					  icon => 'fa fa-key',
 					  },
 				'ovpn' => {
+					   auth => 0,
 					   descr => 'OpenVPN',
 					   disabled => 0,
 					   icon => 'fa fa-certificate',
-					   data_fields => 'login',
 					  },
 			       },
 	 };
 }
+#=====================================================================
+##
+## CONFIGURATION STOPS HERE
+##
+#=====================================================================
 
 has '_ldap' => (
 	is       => 'rw',
@@ -343,6 +369,7 @@ sub err {
   # 		  $mesg->server_error)
   #   if $mesg->code;
 
+  my $caller = (caller(1))[3];
   my $err = {
 	     html => $mesg->{code} ?
 	     sprintf( '<dl class="dl-horizontal">
@@ -360,12 +387,13 @@ sub err {
 		      ldap_error_text($mesg),
 		      ldap_error_desc($mesg),
 		      $mesg->server_error
-		    ) : 'Your request returned no result. Try to change query paremeter/s.',
+		    ) : 'Your request returned no result. Try to change query parameter/s.',
 	     code => $mesg->code,
 	     name => ldap_error_name($mesg),
 	     text => ldap_error_text($mesg),
 	     desc => ldap_error_desc($mesg),
 	     srv => $mesg->server_error,
+	     caller => $caller ? $caller : 'main',
 	    };
   use Data::Printer;
   p $err;

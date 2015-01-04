@@ -28,7 +28,7 @@ sub options_memberUid {
   return unless $self->ldap_crud;
 
   my $ldap_crud = $self->ldap_crud;
-  my $mesg = $ldap_crud->search( { base => 'ou=People,dc=umidb',
+  my $mesg = $ldap_crud->search( { base => $ldap_crud->{cfg}->{base}->{acc_root},
 				   scope => 'one',
 				   attrs => [ qw{uid givenName sn} ], } );
 

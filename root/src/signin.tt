@@ -1,4 +1,7 @@
-[% META title = 'UMI Log In' %] 
+[% META
+   title = 'UMI Log In'
+   link = '<link href="/static/css/signin.css" rel="stylesheet">'
+%] 
 
 <div class="container">
 
