@@ -8,6 +8,7 @@
 </div>
 
 <ul role="tablist" class="nav nav-tabs" id="myTab">
+  [% IF ! dn %]
   <li class="active">
     <a aria-controls="person"
        data-toggle="tab" role="tab"
@@ -18,12 +19,13 @@
       <span class="fa fa-user fa-lg"></span>
     </a>
   </li>
+  [% END %]
 
   <li>
-    <a aria-controls="gensvc"
+    <a aria-controls="auth"
        data-toggle="tab" role="tab"
-       id="gensvc-tab"
-       href="#gensvc"
+       id="auth-tab"
+       href="#auth"
        title="Login/Password Dependent Services"
        aria-expanded="false">
       <!-- <span class="fa fa-plus-circle"></span> -->
@@ -32,8 +34,8 @@
 	    <i class="fa fa-user fa-stack-1x"></i>
 	    </span> -->
       <span class="fa-stack">
-	<i class="fa fa-folder-o fa-stack-2x"></i>
-	<i class="fa fa-male fa-stack-1x"></i>
+	<i class="fa fa-file-o fa-stack-2x"></i>
+	<i class="fa fa-user fa-stack-1x"></i>
       </span>
     </a>
   </li>
@@ -47,8 +49,8 @@
        title="Services Without Login/Password"
        aria-expanded="false">
       <span class="fa-stack">
-	<i class="fa fa-folder-o fa-stack-2x"></i>
-	<i class="fa fa-cog fa-stack-1x"></i>
+	<i class="fa fa-file-o fa-stack-2x"></i>
+	<i class="fa fa-cogs fa-stack-1x"></i>
       </span>
       <span class="caret"></span>
     </a>
@@ -95,6 +97,7 @@
     </a>
   </li>
 </ul>
+
 <br>
 [% form.render %]
 
@@ -145,7 +148,7 @@
  });
 </script>
 
-<script> [% # needed to put it in tab %]
+<script> [% # needed to put multiselect related things into tab %]
  $(function(){
   var element = document.getElementById("ms-groups");
   element.classList.add("tab-pane");

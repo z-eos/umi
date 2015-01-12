@@ -51,6 +51,7 @@ sub _build_cfg {
   my $self = shift;
 
   my $db = 'dc=umidb'; # all your dc, like `dc=A,dc=B,...,dc=Z'
+  # another place to change it is root/lib/site/header
   return {
 	  exclude_prefix => 'aux_',
 	  stub => {
@@ -239,17 +240,17 @@ around 'ldap' =>
     my $ldap = $self->$orig(@_);
 
     my $mesg = $ldap->bind(
-			   sprintf( "uid=%s,ou=People,dc=umidb", $self->uid ),
+			   sprintf( "uid=%s,%s", $self->uid, $self->{cfg}->{base}->{acc_root} ),
 			   password => $self->pwd,
 			   version  => 3,
 			  );
 
     if ( $mesg->is_error ) {
-      warn '#' x 60 . "\nWARNING: Net::LDAP->bind related problem occured!" .
-	  "\nerror_name: " . $mesg->error_name .
-	    "\nerror_desc: " . $mesg->error_desc .
-	      "\nerror_text: " . $mesg->error_text .
-		"\nserver_error: " . $mesg->server_error;
+      warn '#' x 60 . "\nUMI WARNING: Net::LDAP->bind related problem occured!" .
+	"\nerror_name: " . $mesg->error_name .
+	"\nerror_desc: " . $mesg->error_desc .
+	"\nerror_text: " . $mesg->error_text .
+	"\nserver_error: " . $mesg->server_error;
     }
     return $ldap;
   };
@@ -427,7 +428,7 @@ sub search {
   	     filter => $args->{filter} || '(objectClass=*)',
   	     deref  => $args->{deref} || 'never',
   	     attrs  => $args->{attrs} || [ '*' ],
-  	     sizelimit => $args->{sizelimit} || 20,
+  	     sizelimit => defined $args->{sizelimit} ? $args->{sizelimit} : 20,
   	    };
 
   # use Data::Printer;
@@ -1072,6 +1073,8 @@ sub dhcp_lease {
     return [ map join(".",unpack("C4", pack("N",$_))), sort(@{$return->{available}}) ]; # decimal to IPv4
   }
 }
+
+
 
 ######################################################################
 
