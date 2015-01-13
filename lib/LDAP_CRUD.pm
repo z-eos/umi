@@ -1074,6 +1074,102 @@ sub dhcp_lease {
   }
 }
 
+has 'select_organizations' => ( traits => ['Array'],
+	       is => 'ro', isa => 'ArrayRef',
+	       builder => '_build_select_organizations',
+	     );
+
+sub _build_select_organizations {
+  my $self = shift;
+  my ( @office, @branches );
+
+  my $mesg = $self->search({
+			    base => $self->{'cfg'}->{'base'}->{'org'},
+			    scope => 'one',
+			    attrs => [ qw(ou physicaldeliveryofficename l) ],
+			    sizelimit => 0
+			   });
+  my @headOffices = $mesg->sorted('physicaldeliveryofficename');
+  foreach my $headOffice (@headOffices) {
+    $mesg = $self->search({
+			   base => $headOffice->dn,
+			   # filter => '*',
+			   attrs => [ qw(ou physicaldeliveryofficename l) ],
+			   sizelimit => 0
+			  });
+    my @branchOffices = $mesg->entries;
+    foreach my $branchOffice (@branchOffices) {
+      push @branches, {
+		       value => $branchOffice->dn,
+		       label => sprintf("%s (%s @ %s)",
+					$branchOffice->get_value ('ou'),
+					$branchOffice->get_value ('physicaldeliveryofficename'),
+					$branchOffice->get_value ('l')
+				       ),
+		      };
+    }
+    push @office, {
+		   group => $headOffice->get_value ('physicaldeliveryofficename'),
+		   options => [ @branches ],
+		  };
+    undef @branches;
+  }
+  return \@office;
+}
+
+has 'select_associateddomains' => ( traits => ['Array'],
+	       is => 'ro', isa => 'ArrayRef',
+	       builder => '_build_select_associateddomains',
+	     );
+
+sub _build_select_associateddomains {
+  my $self = shift;
+
+  my @domains = ( { value => '0', label => '--- select domain ---', selected => 'selected', } );
+
+  my $mesg = $self->search( { base => $self->{cfg}->{base}->{org},
+				   filter => 'associatedDomain=*',
+				   attrs => ['associatedDomain' ],
+				 } );
+  my $err_message = '';
+  if ( ! $mesg->count ) {
+    $err_message = '<div class="alert alert-danger">' .
+      '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
+	$self->err($mesg) . '</ul></div>';
+  }
+
+  my @entries = $mesg->sorted('associatedDomain');
+  my @i;
+  foreach my $entry ( @entries ) {
+    @i = $entry->get_value('associatedDomain');
+    foreach (@i) {
+      push @domains, { value => $_, label => $_, };
+    }
+  }
+  return \@domains;
+}
+
+has 'select_authorizedservice' => ( traits => ['Array'],
+	       is => 'ro', isa => 'ArrayRef',
+	       builder => '_build_select_authorizedservice',
+	     );
+
+sub _build_select_authorizedservice {
+  my $self = shift;
+
+  push my @services, { value => '0',
+		       label => '--- select service ---',
+		       selected => 'selected', };
+
+  foreach my $key ( sort {$a cmp $b} keys %{$self->{cfg}->{authorizedService}}) {
+    if ( $self->{cfg}->{authorizedService}->{$key}->{auth} ) {
+      push @services, { value => $key,
+			label => $self->{cfg}->{authorizedService}->{$key}->{descr}, };
+    }
+  }
+  return \@services;
+}
+
 
 
 ######################################################################

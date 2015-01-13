@@ -63,8 +63,12 @@
   <div class="col-md-2">
     <ul class="nav nav-pills nav-stacked">
       <li><a href="[% c.uri_for('user') %]">
-	  <span class="glyphicon glyphicon-plus-sign text-success"></span>
+	  <span class="fa fa-plus-circle"></span>
 	  create new</a>
+      </li>
+      <li><a href="[% c.uri_for('user/user_add_svc_new') %]" target="_top">
+	  <span class="fa fa-plus-circle"></span>
+	  create new alt</a>
       </li>
     </ul>
   </div>

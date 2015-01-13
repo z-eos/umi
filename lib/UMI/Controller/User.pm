@@ -605,40 +605,6 @@ sub user_add_svc_new :Path(user_add_svc_new) :Args(0) {
   my ( $self, $c ) = @_;
   my ( @office, @branches );
 
-  my $ldap_crud = $c->model('LDAP_CRUD');
-  my $mesg = $ldap_crud->search({
-				 base => $ldap_crud->{'cfg'}->{'base'}->{'org'},
-				 scope => 'one',
-				 # filter => 'ou=*',
-				 attrs => [ qw(ou physicaldeliveryofficename l) ],
-				 sizelimit => 0
-				});
-  my @headOffices = $mesg->sorted('physicaldeliveryofficename');
-  foreach my $headOffice (@headOffices) {
-    $mesg = $ldap_crud->search({
-				base => $headOffice->dn,
-				# filter => '*',
-				attrs => [ qw(ou physicaldeliveryofficename l) ],
-				sizelimit => 0
-			       });
-    my @branchOffices = $mesg->entries;
-    foreach my $branchOffice (@branchOffices) {
-      push @branches, {
-		   value => $branchOffice->dn,
-		   label => sprintf("%s (%s @ %s)",
-				    $branchOffice->get_value ('ou'),
-				    $branchOffice->get_value ('physicaldeliveryofficename'),
-				    $branchOffice->get_value ('l')
-				   ),
-		  };
-    }
-    push @office, {
-		   group => $headOffice->get_value ('physicaldeliveryofficename'),
-		   options => [ @branches ],
-		  };
-    undef @branches;
-  }
-p @office;
   my $params = $c->req->parameters;
 
   $c->stash(
@@ -653,6 +619,8 @@ p @office;
 					      ldap_crud => $c->model('LDAP_CRUD'),
 					     );
 
+  use Data::Dumper;
+  print Dumper( $params );
   # $c->stash( template => 'user/user_add_svc_new.tt', );
 
  $c->stash( final_message => '' );

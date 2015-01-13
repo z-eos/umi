@@ -102,6 +102,51 @@
 [% form.render %]
 
 <script>
+$(function(){
+  
+  $("a span.fa-plus-circle").on("click",function(e){
+    e.preventDefault();
+    var $this = $(this),
+        $a = $this.parent(),
+        counter = parseInt($a.data("counter")) || ($a.data("counter",0),0),
+        $fieldset = $a.parents("fieldset"),
+        $duplicate = $fieldset.find("div."+$a.data('duplicate')).first().clone();
+    
+    ++counter;
+    $duplicate.removeAttr("id").removeClass("duplicate").addClass("duplicated");
+    
+    $("input:text, input:password, input:file, select, textarea, input:radio, input:checkbox", $duplicate).each(function(id, element){
+      var $element = $(element),
+          name = $element.data("group")+"["+counter+"]["+$element.data('name')+"]";
+      $element
+        .removeAttr("id")
+        .prop("name", name)
+        .val('')
+        .removeAttr('checked')
+        .removeAttr('selected')
+        .children("option")
+        .first()
+        .prop("selected",true);
+      $element
+        .parents(".form-group")
+        .find("label")
+        .prop("for", name);
+      
+    });
+    
+    $duplicate.appendTo($fieldset);
+    $duplicate.find(".fa-times-circle").removeClass("hidden").click(function(){
+      $(this).parents(".duplicated").remove();
+    });
+    $('html, body').animate({
+        scrollTop: $duplicate.offset().top-80
+    }, 1000);
+    
+    $a.data("counter",counter);   
+  });
+ });
+</script>  
+<script>
  $(function(){
    $('#groups').multiSelect({
      keepOrder: true,

@@ -71,7 +71,6 @@ has_block 'group_person' => ( tag => 'div',
 					       'person[givenname]',
 					       'person[sn]',
 					       'person[office]',
-					       # 'office',
 					       'person[title]',
 					       'person[telephonenumber]',
 					       'person[telcomment]', ],
@@ -90,64 +89,87 @@ has_block 'person' => ( tag => 'div',
 ######################################################################
 #== SERVICES WITH LOGIN ==============================================
 ######################################################################
+has_field 'rm-duplicate' => ( type => 'Display',
+			      html => '<span class="fa fa-times-circle col-xs-offset-1 btn btn-link text-danger hidden" title="Delete this section."></span>',
+			    );
+
 has_field 'auth[0][login]' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
-		       label => 'Login',
-		       label_class => [ 'col-xs-2', ],
-		       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-		       element_attr => { placeholder => 'john.doe' },
-		     );
+				label => 'Login',
+				do_id => 'no',
+				label_class => [ 'col-xs-2', ],
+				element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+				element_attr => { placeholder => 'john.doe',
+						  'data-name' => 'login',
+						  'data-group' => 'auth', },
+			      );
 
 has_field 'auth[0][password1]' => ( type => 'Password',
-			   # minlength => 7, maxlength => 16,
-			   label => 'Password',
-			   label_class => [ 'col-xs-2', ],
-			   element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-			   ne_username => 'login',
-			   apply => [ NoSpaces, NotAllDigits, Printable, StrongPassword ],
-			   element_attr => { placeholder => 'Password', },
-			 );
+				    # minlength => 7, maxlength => 16,
+				    label => 'Password',
+				    label_class => [ 'col-xs-2', ],
+				    element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+				    ne_username => 'login',
+				    apply => [ NoSpaces, NotAllDigits, Printable, StrongPassword ],
+				    element_attr => { placeholder => 'Password',
+						      'data-name' => 'password1',
+						      'data-group' => 'auth',						    },
+				  );
 
 has_field 'auth[0][password2]' => ( type => 'Password',
-			   # minlength => 7, maxlength => 16,
-			   label => '',
-			   label_class => [ 'col-xs-2', ],
-			   element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-			   ne_username => 'login',
-			   apply => [ NoSpaces, NotAllDigits, Printable, StrongPassword ],
-			   element_attr => { placeholder => 'Confirm Password', },
-			 );
+				    # minlength => 7, maxlength => 16,
+				    label => '',
+				    label_class => [ 'col-xs-2', ],
+				    element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+				    ne_username => 'login',
+				    apply => [ NoSpaces, NotAllDigits, Printable, StrongPassword ],
+				    element_attr => { placeholder => 'Confirm Password',
+						      'data-name' => 'password2',
+						      'data-group' => 'auth',
+						    },
+				  );
 
 has_field 'auth[0][pwdcomment]' => ( type => 'Display',
-			    html => '<small class="text-muted col-xs-offset-2"><em>' .
-			    'leave empty password fields to autogenerate password</em></small><p>&nbsp;</p>',
-			  );
+				     html => '<small class="text-muted col-xs-offset-2"><em>' .
+				     'leave empty password fields to autogenerate password</em></small><p>&nbsp;</p>',
+				   );
 
 has_field 'auth[0][associateddomain]' => ( type => 'Select',
-				  label => 'Domain Name',
-				  label_class => [ 'col-xs-2', ],
-				  element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-				  options_method => \&associateddomains,
-				  required => 0 );
+					   label => 'Domain Name',
+					   label_class => [ 'col-xs-2', ],
+					   element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+					   options_method => \&associateddomains,
+					   element_attr => {
+							    'data-name' => 'associateddomain',
+							    'data-group' => 'auth',
+							   },
+					   required => 0 );
 
 has_field 'auth[0][authorizedservice]' => ( type => 'Select',
-				   label => 'Service', label_class => [ 'required' ],
-				   label_class => [ 'col-xs-2', ],
-				   element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-				   options_method => \&authorizedservice,
-				   required => 0,
-				 );
+					    label => 'Service', label_class => [ 'required' ],
+					    label_class => [ 'col-xs-2', ],
+					    element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+					    options_method => \&authorizedservice,
+					    element_attr => {
+							     'data-name' => 'authorizedservice',
+							     'data-group' => 'auth',
+							    },
+					    required => 0,
+					  );
 
 has_block 'group_auth' => ( tag => 'div',
-			    render_list => [ 'auth[0][associateddomain]',
+			    render_list => [ 'rm-duplicate',
+					     'auth[0][associateddomain]',
 					     'auth[0][authorizedservice]',
 					     'auth[0][login]',
 					     'auth[0][password1]',
 					     'auth[0][password2]',
 					     'auth[0][pwdcomment]' ],
-			    attr => { id => 'group_auth', },
+			    class => [ 'duplicate' ],
 			  );
 
-has_block 'auth' => ( tag => 'div',
+has_block 'auth' => ( tag => 'fieldset',
+		      label => '<a href="#" title="Add another Login/Password Dependent Service" data-duplicate="duplicate"><span class="fa fa-plus-circle"></span></a>',
+		      label_class => [ 'col-xs-offset-2', 'text-left'],
 		      render_list => [ 'group_auth', ],
 		      class => [ 'tab-pane', 'fade', ],
 		      attr => { id => 'auth',
@@ -159,72 +181,103 @@ has_block 'auth' => ( tag => 'div',
 ######################################################################
 #== SERVICES WITHOUT LOGIN ===========================================
 ######################################################################
+has_field 'rm-duplicate' => ( type => 'Display',
+			      html => '<span class="fa fa-times-circle col-xs-offset-1 btn btn-link text-danger hidden" title="Delete this section."></span>',
+			    );
+
 has_field 'ssh[0][associateddomain]' => ( type => 'Select',
-				      label => 'Domain Name',
-				      label_class => [ 'col-xs-2', ],
-				      element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-				      options_method => \&associateddomains,
-				    );
+					  label => 'Domain Name',
+					  label_class => [ 'col-xs-2', ],
+					  element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+					  options_method => \&associateddomains,
+					  element_attr => {
+							   'data-name' => 'associateddomain',
+							   'data-group' => 'ssh',
+							  },
+					);
 
 has_field 'ssh[0][key]' => ( type => 'TextArea',
-		     label => 'SSH Pub Key',
-		     label_class => [ 'col-xs-2', ],
-		     element_wrapper_class => [ 'col-xs-10', 'col-lg-8', ],
-		     element_attr => { placeholder => 'Paste SSH key' },
-		     cols => 30, rows => 4);
+			     label => 'SSH Pub Key',
+			     label_class => [ 'col-xs-2', ],
+			     element_wrapper_class => [ 'col-xs-10', 'col-lg-8', ],
+			     element_attr => { placeholder => 'Paste SSH key',
+					       'data-name' => 'key',
+					       'data-group' => 'ssh', },
+			     cols => 30, rows => 4);
 
 
 has_block 'group_ssh' => ( tag => 'div',
-			   render_list => [ 'ssh[0][associateddomain]', 'ssh[0][key]', ],
-			   attr => { id => 'group_ssh', },
+			   render_list => [ 'rm-duplicate',
+					    'ssh[0][associateddomain]',
+					    'ssh[0][key]', ],
+			   class => [ 'duplicate' ],
 			 );
 
-has_block 'ssh' => ( tag => 'div',
-		      render_list => [ 'group_ssh', ],
-		      class => [ 'tab-pane', 'fade', ],
-		      attr => { id => 'ssh',
-				'aria-labelledby' => "ssh-tab",
-				role => "tabpanel",
-			      },
-		    );
+has_block 'ssh' => ( tag => 'fieldset',
+		     label => '<a href="#" title="Add another SSH Key" data-duplicate="duplicate"><span class="fa fa-plus-circle"></span></a>',
+		     label_class => [ 'col-xs-offset-2', 'text-left'],
+		     render_list => [ 'group_ssh', ],
+		     class => [ 'tab-pane', 'fade', ],
+		     attr => { id => 'ssh',
+			       'aria-labelledby' => "ssh-tab",
+			       role => "tabpanel",
+			     },
+		   );
 
 #=====================================================================
 
+has_field 'rm-duplicate' => ( type => 'Display',
+			      html => '<span class="fa fa-times-circle col-xs-offset-1 btn btn-link text-danger hidden" title="Delete this section."></span>',
+			    );
+
 has_field 'ovpn[0][associateddomain]' => ( type => 'Select',
-				       label => 'Domain Name',
-				       label_class => [ 'col-xs-2', ],
-				       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-				       options_method => \&associateddomains,
-				     );
+					   label => 'Domain Name',
+					   label_class => [ 'col-xs-2', ],
+					   element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+					   options_method => \&associateddomains,
+					   element_attr => {
+							    'data-name' => 'associateddomain',
+							    'data-group' => 'ovpn',
+							   },
+					 );
 
 has_field 'ovpn[0][cert]' => ( type => 'Upload',
-		      label => 'OpenVPN Certificate',
-		      label_class => [ 'col-xs-2', ],
-		      element_wrapper_class => [ 'col-xs-2', 'col-lg-3', ],
-		      element_class => [ 'btn', 'btn-default', ],
-		    );
+			       label => 'OpenVPN Certificate',
+			       label_class => [ 'col-xs-2', ],
+			       element_wrapper_class => [ 'col-xs-2', 'col-lg-3', ],
+			       element_class => [ 'btn', 'btn-default', ],
+			       element_attr => {
+						'data-name' => 'cert',
+						'data-group' => 'ovpn',
+					       },
+			     );
 
 has_field 'ovpn[0][comment]' => ( type => 'Display',
-			    html => '<small class="text-muted col-xs-offset-2"><em>' .
-			    'certificate in DER format</em></small><p>&nbsp;</p>',
-			  );
+				  html => '<small class="text-muted col-xs-offset-2"><em>' .
+				  'certificate in DER format</em></small><p>&nbsp;</p>',
+				);
 
 has_field 'ovpn[0][device]' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
-		       label => 'Device',
-		       label_class => [ 'col-xs-2', ],
-		       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-		       element_attr => { placeholder => 'Lenovo P780' },
-		     );
+				 label => 'Device',
+				 label_class => [ 'col-xs-2', ],
+				 element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+				 element_attr => { placeholder => 'Lenovo P780',
+						   'data-name' => 'device',
+						   'data-group' => 'ovpn', },
+			       );
 
 has_block 'group_ovpn' => ( tag => 'div',
-			    render_list => [ 'ovpn[0][associateddomain]',
+			    render_list => [ 'rm-duplicate',
+					     'ovpn[0][associateddomain]',
 					     'ovpn[0][device]',
 					     'ovpn[0][cert]',
 					     'ovpn[0][comment]', ],
-			    attr => { id => 'group_ovpn', },
-			);
+			    class => [ 'duplicate' ],
+			  );
 
-has_block 'ovpn' => ( tag => 'div',
+has_block 'ovpn' => ( tag => 'fieldset',
+		      label => '<a href="#" title="Add another OpenVPN Certificate" data-duplicate="duplicate"><span class="fa fa-plus-circle"></span></a>',
+		      label_class => [ 'col-xs-offset-2', 'text-left'],
 		      render_list => [ 'group_ovpn', ],
 		      class => [ 'tab-pane', 'fade', ],
 		      attr => { id => 'ovpn',
@@ -254,15 +307,15 @@ sub options_groups {
 				   attrs => ['cn' ], } );
 
   if ( ! $mesg->count ) {
-    push @{$return->{error}}, $ldap_crud->err($mesg);
-  }
+  push @{$return->{error}}, $ldap_crud->err($mesg);
+}
 
-  my @groups_all = $mesg->sorted('cn');
+my @groups_all = $mesg->sorted('cn');
 
-  foreach ( @groups_all ) {
-    push @groups, { value => $_->get_value('cn'), label => $_->get_value('cn'), };
-  }
-  return \@groups;
+			       foreach ( @groups_all ) {
+			       push @groups, { value => $_->get_value('cn'), label => $_->get_value('cn'), };
+			     }
+return \@groups;
 }
 
 has_field 'groupspace' => ( type => 'Display',
@@ -278,76 +331,78 @@ has_field 'groupspace' => ( type => 'Display',
 
 
 has_field 'submit' => ( type => 'Submit',
-#			wrapper_class => [ 'pull-right', ],
+			#			wrapper_class => [ 'pull-right', ],
 			element_class => [ 'btn', 'btn-default', 'btn-block', ],
-			element_wrapper_class => [ 'col-xs-12' ],
-			value => 'Submit' );
+					   element_wrapper_class => [ 'col-xs-12' ],
+					   value => 'Submit' );
 
-has_block 'groupsselect' => ( tag => 'div',
-			render_list => [ 'groups', 'groupspace', ],
-			class => [ 'tab-pane', 'fade', ],
-			attr => { id => 'groups',
-				  'aria-labelledby' => "groups-tab",
-				  role => "tabpanel",
-				},
-		      );
+			has_block 'groupsselect' => ( tag => 'div',
+						      render_list => [ 'groups', 'groupspace', ],
+						      class => [ 'tab-pane', 'fade', ],
+						      attr => { id => 'groups',
+								'aria-labelledby' => "groups-tab",
+								role => "tabpanel",
+							      },
+						    );
 
-has_block 'submitit' => ( tag => 'div',
-			  render_list => [ 'groupspace', 'submit'],
-			  # class => [ '' ]
-			);
+			has_block 'submitit' => ( tag => 'div',
+						  render_list => [ 'groupspace', 'submit'],
+						  # class => [ '' ]
+						);
 
-sub build_render_list {[ 'person', 'auth', 'ssh', 'ovpn', 'groupsselect', 'submitit' ]}
+			sub build_render_list {[ 'person', 'auth', 'ssh', 'ovpn', 'groupsselect', 'submitit' ]}
 
-sub html_attributes {
-  my ( $self, $field, $type, $attr ) = @_;
-  push @{$attr->{class}}, 'required'
-    if ( $type eq 'label' && $field->required );
-}
+					       sub html_attributes {
+						 my ( $self, $field, $type, $attr ) = @_;
+						 push @{$attr->{class}}, 'required'
+						   if ( $type eq 'label' && $field->required );
+					       }
 
 sub validate {
   my $self = shift;
 
-  if ( defined $self->field('password1')->value and defined $self->field('password2')->value
-       and ($self->field('password1')->value ne $self->field('password2')->value) ) {
-    $self->field('password2')->add_error('Password doesn\'t match Confirmation');
-  }
+  # if ( defined $self->field('password1')->value and defined $self->field('password2')->value
+  #      and ($self->field('password1')->value ne $self->field('password2')->value) ) {
+  #   $self->field('password2')->add_error('Password doesn\'t match Confirmation');
+  # }
 
-  if ( defined $self->field('associateddomain')->value &&
-       $self->field('associateddomain')->value eq '0' ) {
-    $self->field('associateddomain')->add_error('Domain Name is mandatory!');
-  }
+  # if ( defined $self->field('associateddomain')->value &&
+  #      $self->field('associateddomain')->value eq '0' ) {
+  #   $self->field('associateddomain')->add_error('Domain Name is mandatory!');
+  # }
 
-  if ( defined $self->field('authorizedservice')->value &&
-       $self->field('authorizedservice')->value eq '0') {
-    $self->field('authorizedservice')->add_error('At least one service is required!');
-  }
+  # if ( defined $self->field('authorizedservice')->value &&
+  #      $self->field('authorizedservice')->value eq '0') {
+  #   $self->field('authorizedservice')->add_error('At least one service is required!');
+  # }
 
-  if ( defined $self->field('office')->value &&
-       $self->field('office')->value eq '0' ) {
-    $self->field('office')->add_error('Office is mandatory!');
-  }
+  # if ( defined $self->field('office')->value &&
+  #      $self->field('office')->value eq '0' ) {
+  #   $self->field('office')->add_error('Office is mandatory!');
+  # }
 
-  my $ldap_crud = $self->ldap_crud;
-  my $mesg =
-    $ldap_crud->search({
-			scope => 'one',
-			filter => '(uid=' .
-			$self->field('login')->value . ')',
-			base => $ldap_crud->{cfg}->{base}->{acc_root},
-			attrs => [ 'uid' ],
-		       });
-  my ( $err, $error );
-  if ($mesg->count) {
-    $err = '<span class="glyphicon glyphicon-exclamation-sign"></span> Root uid <em>&laquo;' .
-      $self->field('login')->value . '&raquo;</em> exists';
-    $self->field('login')->add_error($err);
+  # my $ldap_crud = $self->ldap_crud;
+  # my $mesg =
+  #   $ldap_crud->search({
+  # 			scope => 'one',
+  # 			filter => '(uid=' .
+  # 			$self->field('login')->value . ')',
+  # 			base => $ldap_crud->{cfg}->{base}->{acc_root},
+  # 			attrs => [ 'uid' ],
+  # 		       });
+  # my ( $err, $error );
+  # if ($mesg->count) {
+  #   $err = '<span class="glyphicon glyphicon-exclamation-sign"></span> Root uid <em>&laquo;' .
+  #     $self->field('login')->value . '&raquo;</em> exists';
+  #   $self->field('login')->add_error($err);
 
-    $err = '<div class="alert alert-danger">' .
-      '<span style="font-size: 140%" class="glyphicon glyphicon-exclamation-sign"></span>' .
-      '&nbsp;Account with the same root uid <strong>&laquo;' . $self->field('login')->value . '&raquo;</strong>,' .
-      ' already exists!</div>';
-  }
+  #   $err = '<div class="alert alert-danger">' .
+  #     '<span style="font-size: 140%" class="glyphicon glyphicon-exclamation-sign"></span>' .
+  #     '&nbsp;Account with the same root uid <strong>&laquo;' . $self->field('login')->value . '&raquo;</strong>,' .
+  #     ' already exists!</div>';
+  # }
+
+
   # else {
   #    $mesg =
   #      $ldap_crud->search(
@@ -389,91 +444,20 @@ sub validate {
 
 sub offices {
   my $self = shift;
-  my ( @office, @branches );
-
   return unless $self->form->ldap_crud;
-
-  my $ldap_crud = $self->form->ldap_crud;
-  my $mesg = $ldap_crud->search({
-				 base => $ldap_crud->{'cfg'}->{'base'}->{'org'},
-				 scope => 'one',
-				 # filter => 'ou=*',
-				 attrs => [ qw(ou physicaldeliveryofficename l) ],
-				 sizelimit => 0
-				});
-  my @headOffices = $mesg->sorted('physicaldeliveryofficename');
-  foreach my $headOffice (@headOffices) {
-    $mesg = $ldap_crud->search({
-				base => $headOffice->dn,
-				# filter => '*',
-				attrs => [ qw(ou physicaldeliveryofficename l) ],
-				sizelimit => 0
-			       });
-    my @branchOffices = $mesg->entries;
-    foreach my $branchOffice (@branchOffices) {
-      push @branches, {
-		   value => $branchOffice->dn,
-		   label => sprintf("%s (%s @ %s)",
-				    $branchOffice->get_value ('ou'),
-				    $branchOffice->get_value ('physicaldeliveryofficename'),
-				    $branchOffice->get_value ('l')
-				   ),
-		  };
-    }
-    push @office, {
-		   group => $headOffice->get_value ('physicaldeliveryofficename'),
-		   options => [ @branches ],
-		  };
-    undef @branches;
-  }
-  return @office;
+  return $self->form->ldap_crud->select_organizations;
 }
 
 sub associateddomains {
   my $self = shift;
-
   return unless $self->form->ldap_crud;
-
-  my @domains = ( { value => '0', label => '--- select domain ---', selected => 'selected', } );
-  my $ldap_crud = $self->form->ldap_crud;
-  my $mesg = $ldap_crud->search( { base => $ldap_crud->{cfg}->{base}->{org},
-				   filter => 'associatedDomain=*',
-				   attrs => ['associatedDomain' ],
-				 } );
-  my $err_message = '';
-  if ( ! $mesg->count ) {
-    $err_message = '<div class="alert alert-danger">' .
-      '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
-	$ldap_crud->err($mesg) . '</ul></div>';
-  }
-
-  my @entries = $mesg->sorted('associatedDomain');
-  my @i;
-  foreach my $entry ( @entries ) {
-    @i = $entry->get_value('associatedDomain');
-    foreach (@i) {
-      push @domains, { value => $_, label => $_, };
-    }
-  }
-  return @domains;
+  return $self->form->ldap_crud->select_associateddomains;
 }
 
 sub authorizedservice {
   my $self = shift;
-
   return unless $self->form->ldap_crud;
-
-  push my @services, { value => '0',
-		       label => '--- select service ---',
-		       selected => 'selected', };
-
-  foreach my $key ( sort {$a cmp $b} keys %{$self->form->ldap_crud->{cfg}->{authorizedService}}) {
-    if ( $self->form->ldap_crud->{cfg}->{authorizedService}->{$key}->{auth} ) {
-      push @services, { value => $key,
-			label => $self->form->ldap_crud->{cfg}->{authorizedService}->{$key}->{descr}, };
-    }
-  }
-  return @services;
+  return $self->form->ldap_crud->select_authorizedservice;
 }
 
 ######################################################################
