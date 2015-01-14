@@ -18,62 +18,66 @@ sub build_form_element_class { [ 'form-horizontal', 'tab-content' ] }
 ######################################################################
 #== PERSONAL DATA ====================================================
 ######################################################################
-has_field 'person[avatar]' => ( type => 'Upload',
+has_field 'person_avatar' => ( type => 'Upload',
 				label => 'Photo User ID',
 				label_class => [ 'col-xs-2', ],
 				element_wrapper_class => [ 'col-xs-2', 'col-lg-3', ],
-				element_class => [ 'btn', 'btn-default', ],
+				element_class => [ 'btn', 'btn-default', 'btn-sm', ],
 				max_size => '50000' );
 
-has_field 'person[givenname]' => ( apply => [ NoSpaces ],
+has_field 'person_givenname' => ( apply => [ NoSpaces ],
 				   label => 'First Name',
 				   label_class => [ 'col-xs-2', ],
 				   element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+					   element_class => [ 'input-sm', ],
 				   element_attr => { placeholder => 'John' },
 				   required => 1 );
 
-has_field 'person[sn]' => ( apply => [ NoSpaces ],
+has_field 'person_sn' => ( apply => [ NoSpaces ],
 			    label => 'Last Name',
 			    label_class => [ 'col-xs-2', ],
 			    element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+					   element_class => [ 'input-sm', ],
 			    element_attr => { placeholder => 'Doe' },
 			    required => 1 );
 
-has_field 'person[office]' => ( type => 'Select',
+has_field 'person_office' => ( type => 'Select',
 				label => 'Office',
 				label_class => [ 'col-xs-2' ],
 				element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-				# name => 'person[office]',
+					   element_class => [ 'input-sm', ],
 				options_method => \&offices,
 				required => 1 );
 
-has_field 'person[title]' => ( label => 'Position',
+has_field 'person_title' => ( label => 'Position',
 			       label_class => [ 'col-xs-2', ],
 			       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+					   element_class => [ 'input-sm', ],
 			       element_attr => { placeholder => 'manager' },
 			       required => 1 );
 
-has_field 'person[telephonenumber]' => ( apply => [ NoSpaces ],
+has_field 'person_telephonenumber' => ( apply => [ NoSpaces ],
 					 label => 'SIP/Cell',
 					 label_class => [ 'col-xs-2', ],
 					 element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+					   element_class => [ 'input-sm', ],
 					 wrapper_attr => { id => 'items' },
 					 element_attr => { name => 'telephonenumber\[\]',
 							   placeholder => '123@pbx0.ibs +380xxxxxxxxx' });
 
-has_field 'person[telcomment]' => ( type => 'Display',
+has_field 'person_telcomment' => ( type => 'Display',
 				    html => '<small class="text-muted col-xs-offset-2"><em>' .
 				    'comma or space delimited if many, international format for tel.</em></small>',
 				  );
 
 has_block 'group_person' => ( tag => 'div',
-			      render_list => [ 'person[avatar]',
-					       'person[givenname]',
-					       'person[sn]',
-					       'person[office]',
-					       'person[title]',
-					       'person[telephonenumber]',
-					       'person[telcomment]', ],
+			      render_list => [ 'person_avatar',
+					       'person_givenname',
+					       'person_sn',
+					       'person_office',
+					       'person_title',
+					       'person_telephonenumber',
+					       'person_telcomment', ],
 			      attr => { id => 'group_person', },
 			    );
 
@@ -90,80 +94,94 @@ has_block 'person' => ( tag => 'div',
 #== SERVICES WITH LOGIN ==============================================
 ######################################################################
 has_field 'rm-duplicate' => ( type => 'Display',
-			      html => '<span class="fa fa-times-circle col-xs-offset-1 btn btn-link text-danger hidden" title="Delete this section."></span>',
+			      html => '<span class="fa fa-times-circle col-xs-offset-2 btn btn-link text-danger hidden" title="Delete this section."></span>',
 			    );
 
-has_field 'auth[0][login]' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
+has_field 'account' => ( type => 'Repeatable',
+                         setup_for_js => 1,
+                         do_wrapper => 1,
+                         tags => { controls_div => 1 },
+                         init_contains => { wrapper_attr => { class => ['hfh', 'repinst'] } },
+                       );
+
+has_field 'account.login' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
 				label => 'Login',
 				do_id => 'no',
 				label_class => [ 'col-xs-2', ],
 				element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+					   element_class => [ 'input-sm', ],
 				element_attr => { placeholder => 'john.doe',
 						  'data-name' => 'login',
-						  'data-group' => 'auth', },
+						  'data-group' => 'account', },
 			      );
 
-has_field 'auth[0][password1]' => ( type => 'Password',
+has_field 'account.password1' => ( type => 'Password',
 				    # minlength => 7, maxlength => 16,
 				    label => 'Password',
 				    label_class => [ 'col-xs-2', ],
 				    element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+					   element_class => [ 'input-sm', ],
 				    ne_username => 'login',
 				    apply => [ NoSpaces, NotAllDigits, Printable, StrongPassword ],
 				    element_attr => { placeholder => 'Password',
 						      'data-name' => 'password1',
-						      'data-group' => 'auth',						    },
+						      'data-group' => 'account', },
 				  );
 
-has_field 'auth[0][password2]' => ( type => 'Password',
+has_field 'account.password2' => ( type => 'Password',
 				    # minlength => 7, maxlength => 16,
 				    label => '',
 				    label_class => [ 'col-xs-2', ],
 				    element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+					   element_class => [ 'input-sm', ],
 				    ne_username => 'login',
 				    apply => [ NoSpaces, NotAllDigits, Printable, StrongPassword ],
 				    element_attr => { placeholder => 'Confirm Password',
 						      'data-name' => 'password2',
-						      'data-group' => 'auth',
+						      'data-group' => 'account',
 						    },
 				  );
 
-has_field 'auth[0][pwdcomment]' => ( type => 'Display',
+has_field 'account.pwdcomment' => ( type => 'Display',
 				     html => '<small class="text-muted col-xs-offset-2"><em>' .
 				     'leave empty password fields to autogenerate password</em></small><p>&nbsp;</p>',
 				   );
 
-has_field 'auth[0][associateddomain]' => ( type => 'Select',
+has_field 'account.associateddomain' => ( type => 'Select',
 					   label => 'Domain Name',
 					   label_class => [ 'col-xs-2', ],
 					   element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+					   element_class => [ 'input-sm', ],
 					   options_method => \&associateddomains,
 					   element_attr => {
 							    'data-name' => 'associateddomain',
-							    'data-group' => 'auth',
+							    'data-group' => 'account',
 							   },
 					   required => 0 );
 
-has_field 'auth[0][authorizedservice]' => ( type => 'Select',
-					    label => 'Service', label_class => [ 'required' ],
-					    label_class => [ 'col-xs-2', ],
-					    element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-					    options_method => \&authorizedservice,
-					    element_attr => {
-							     'data-name' => 'authorizedservice',
-							     'data-group' => 'auth',
-							    },
-					    required => 0,
+has_field 'account.authorizedservice' => ( type => 'Select',
+					   label => 'Service', label_class => [ 'required' ],
+					   label_class => [ 'col-xs-2', ],
+					   element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+					   element_class => [ 'input-sm', ],
+					   options_method => \&authorizedservice,
+					   element_attr => {
+							    'data-name' => 'authorizedservice',
+							    'data-group' => 'account',
+							   },
+					   required => 0,
 					  );
 
 has_block 'group_auth' => ( tag => 'div',
 			    render_list => [ 'rm-duplicate',
-					     'auth[0][associateddomain]',
-					     'auth[0][authorizedservice]',
-					     'auth[0][login]',
-					     'auth[0][password1]',
-					     'auth[0][password2]',
-					     'auth[0][pwdcomment]' ],
+					     'account',
+					     # 'account.associateddomain',
+					     # 'account.authorizedservice',
+					     # 'account.login',
+					     # 'account.password1',
+					     # 'account.password2',
+					     # 'account.pwdcomment',
+					   ],
 			    class => [ 'duplicate' ],
 			  );
 
@@ -182,34 +200,44 @@ has_block 'auth' => ( tag => 'fieldset',
 #== SERVICES WITHOUT LOGIN ===========================================
 ######################################################################
 has_field 'rm-duplicate' => ( type => 'Display',
-			      html => '<span class="fa fa-times-circle col-xs-offset-1 btn btn-link text-danger hidden" title="Delete this section."></span>',
+			      html => '<span class="fa fa-times-circle col-xs-offset-2 btn btn-link text-danger hidden" title="Delete this section."></span>',
 			    );
 
-has_field 'ssh[0][associateddomain]' => ( type => 'Select',
+has_field 'loginless_ssh' => ( type => 'Repeatable',
+			  setup_for_js => 1,
+			  do_wrapper => 1,
+			  tags => { controls_div => 1 },
+			  init_contains => { wrapper_attr => { class => ['hfh', 'repinst'] } },
+			);
+
+has_field 'loginless_ssh.associateddomain' => ( type => 'Select',
 					  label => 'Domain Name',
 					  label_class => [ 'col-xs-2', ],
 					  element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+					   element_class => [ 'input-sm', ],
 					  options_method => \&associateddomains,
 					  element_attr => {
 							   'data-name' => 'associateddomain',
-							   'data-group' => 'ssh',
+							   'data-group' => 'loginless_ssh',
 							  },
 					);
 
-has_field 'ssh[0][key]' => ( type => 'TextArea',
+has_field 'loginless_ssh.key' => ( type => 'TextArea',
 			     label => 'SSH Pub Key',
 			     label_class => [ 'col-xs-2', ],
 			     element_wrapper_class => [ 'col-xs-10', 'col-lg-8', ],
+					   element_class => [ 'input-sm', ],
 			     element_attr => { placeholder => 'Paste SSH key',
 					       'data-name' => 'key',
-					       'data-group' => 'ssh', },
+					       'data-group' => 'loginless_ssh', },
 			     cols => 30, rows => 4);
 
 
 has_block 'group_ssh' => ( tag => 'div',
 			   render_list => [ 'rm-duplicate',
-					    'ssh[0][associateddomain]',
-					    'ssh[0][key]', ],
+					    'loginless_ssh',
+					    'loginless_ssh.associateddomain',
+					    'loginless_ssh.key', ],
 			   class => [ 'duplicate' ],
 			 );
 
@@ -227,51 +255,61 @@ has_block 'ssh' => ( tag => 'fieldset',
 #=====================================================================
 
 has_field 'rm-duplicate' => ( type => 'Display',
-			      html => '<span class="fa fa-times-circle col-xs-offset-1 btn btn-link text-danger hidden" title="Delete this section."></span>',
+			      html => '<span class="fa fa-times-circle col-xs-offset-2 btn btn-link text-danger hidden" title="Delete this section."></span>',
 			    );
 
-has_field 'ovpn[0][associateddomain]' => ( type => 'Select',
+has_field 'loginless_ovpn' => ( type => 'Repeatable',
+			      setup_for_js => 1,
+			      do_wrapper => 1,
+			      tags => { controls_div => 1 },
+			      init_contains => { wrapper_attr => { class => ['hfh', 'repinst'] } },
+			);
+
+has_field 'loginless_ovpn.associateddomain' => ( type => 'Select',
 					   label => 'Domain Name',
 					   label_class => [ 'col-xs-2', ],
 					   element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+					   element_class => [ 'input-sm', ],
 					   options_method => \&associateddomains,
 					   element_attr => {
 							    'data-name' => 'associateddomain',
-							    'data-group' => 'ovpn',
+							    'data-group' => 'loginless_ovpn',
 							   },
 					 );
 
-has_field 'ovpn[0][cert]' => ( type => 'Upload',
+has_field 'loginless_ovpn.cert' => ( type => 'Upload',
 			       label => 'OpenVPN Certificate',
 			       label_class => [ 'col-xs-2', ],
 			       element_wrapper_class => [ 'col-xs-2', 'col-lg-3', ],
-			       element_class => [ 'btn', 'btn-default', ],
+			       element_class => [ 'btn', 'btn-default', 'btn-sm',],
 			       element_attr => {
 						'data-name' => 'cert',
-						'data-group' => 'ovpn',
+						'data-group' => 'loginless_ovpn',
 					       },
 			     );
 
-has_field 'ovpn[0][comment]' => ( type => 'Display',
+has_field 'loginless_ovpn.comment' => ( type => 'Display',
 				  html => '<small class="text-muted col-xs-offset-2"><em>' .
 				  'certificate in DER format</em></small><p>&nbsp;</p>',
 				);
 
-has_field 'ovpn[0][device]' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
+has_field 'loginless_ovpn.device' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
 				 label => 'Device',
 				 label_class => [ 'col-xs-2', ],
 				 element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+					   element_class => [ 'input-sm', ],
 				 element_attr => { placeholder => 'Lenovo P780',
 						   'data-name' => 'device',
-						   'data-group' => 'ovpn', },
+						   'data-group' => 'loginless_ovpn', },
 			       );
 
 has_block 'group_ovpn' => ( tag => 'div',
 			    render_list => [ 'rm-duplicate',
-					     'ovpn[0][associateddomain]',
-					     'ovpn[0][device]',
-					     'ovpn[0][cert]',
-					     'ovpn[0][comment]', ],
+					     'loginless_ovpn',
+					     'loginless_ovpn.associateddomain',
+					     'loginless_ovpn.device',
+					     'loginless_ovpn.cert',
+					     'loginless_ovpn.comment', ],
 			    class => [ 'duplicate' ],
 			  );
 
@@ -291,7 +329,7 @@ has_block 'ovpn' => ( tag => 'fieldset',
 has_field 'groups' => ( type => 'Multiple',
 			label => '',
 			element_wrapper_class => [ 'col-xs-12', ],
-			element_class => [ 'multiselect', ],
+			element_class => [ 'multiselect', 'input-sm', ],
 			# required => 1,
 		      );
 

@@ -99,6 +99,8 @@
 </ul>
 
 <br>
+
+[% # form.render_repeatable_js %]
 [% form.render %]
 
 <script>
@@ -117,7 +119,7 @@ $(function(){
     
     $("input:text, input:password, input:file, select, textarea, input:radio, input:checkbox", $duplicate).each(function(id, element){
       var $element = $(element),
-          name = $element.data("group")+"["+counter+"]["+$element.data('name')+"]";
+          name = $element.data("group")+"."+counter+"."+$element.data('name');
       $element
         .removeAttr("id")
         .prop("name", name)
@@ -151,8 +153,8 @@ $(function(){
    $('#groups').multiSelect({
      keepOrder: true,
 
-     selectableHeader: "<button type='button' class='btn btn-block btn-info'><span class='fa fa-group'>&nbsp;</span><b>Groups Available</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",
-     selectionHeader: "<button type='button' class='btn btn-block btn-success'><span class='fa fa-group'>&nbsp;</span><b>Groups Selected</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",
+     selectableHeader: "<button type='button' class='btn btn-block btn-info btn-sm'><span class='fa fa-group'>&nbsp;</span><b>Groups Available</b></button><input type='text' class='form-control search-input input-sm' autocomplete='off' placeholder='type to search or clear all for default'>",
+     selectionHeader: "<button type='button' class='btn btn-block btn-success btn-sm'><span class='fa fa-group'>&nbsp;</span><b>Groups Selected</b></button><input type='text' class='form-control search-input input-sm' autocomplete='off' placeholder='type to search or clear all for default'>",
 
      afterInit: function(ms){
        var that = this,
