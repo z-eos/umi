@@ -81,7 +81,8 @@ has_block 'group_person' => ( tag => 'div',
 			      attr => { id => 'group_person', },
 			    );
 
-has_block 'person' => ( tag => 'div',
+has_block 'person' => ( tag => 'fieldset',
+			label => 'Personal Data',
 			render_list => [ 'group_person', ],
 			class => [ 'tab-pane', 'fade', 'in', 'active', ],
 			attr => { id => 'person',
@@ -91,12 +92,30 @@ has_block 'person' => ( tag => 'div',
 		      );
 
 ######################################################################
-#== SERVICES WITH LOGIN ==============================================
+#== SERVICES =========================================================
 ######################################################################
+# has_field 'rm-duplicate' => ( type => 'Display',
+# 			      html => '<span class="fa fa-times-circle col-xs-offset-2 btn btn-link text-danger hidden" title="Delete this section."></span>',
+# 			    );
+
 has_field 'rm-duplicate' => ( type => 'Display',
-			      html => '<span class="fa fa-times-circle col-xs-offset-2 btn btn-link text-danger hidden" title="Delete this section."></span>',
+			      html => '<div class="col-xs-12 rm-duplicate hidden"><div class="col-xs-1">' .
+			      '<button type="button" class="btn btn-danger btn-xs">' .
+			      '<span class="fa fa-times-circle"></span> Delete this section' .
+			      '</button></div></div>',
 			    );
 
+# has_field 'rm-duplicate' => ( type => 'Button',
+# 			      do_label => 0,
+# 			      element_class => [ 'btn', 'btn-danger', 'btn-xs', ],
+# 			      element_wrapper_class => [ 'col-xs-1', ],
+# 			      wrapper_class => [ 'col-xs-12', ' rm-duplicate', 'hidden' ],
+# 			      value => '<span class="fa fa-times-circle"></span>' );
+
+
+######################################################################
+#== SERVICES WITH LOGIN ==============================================
+######################################################################
 has_field 'account' => ( type => 'Repeatable',
                          setup_for_js => 1,
                          do_wrapper => 1,
@@ -186,8 +205,8 @@ has_block 'group_auth' => ( tag => 'div',
 			  );
 
 has_block 'auth' => ( tag => 'fieldset',
-		      label => '<a href="#" title="Add another Login/Password Dependent Service" data-duplicate="duplicate"><span class="fa fa-plus-circle"></span></a>',
-		      label_class => [ 'col-xs-offset-2', 'text-left'],
+		      label => 'Service Account <a href="#" title="Add another Login/Password Dependent Service" data-duplicate="duplicate"><span class="fa fa-plus-circle"></span></a>',
+		      # label_class => [ 'col-xs-offset-2', 'text-left'],
 		      render_list => [ 'group_auth', ],
 		      class => [ 'tab-pane', 'fade', ],
 		      attr => { id => 'auth',
@@ -199,9 +218,6 @@ has_block 'auth' => ( tag => 'fieldset',
 ######################################################################
 #== SERVICES WITHOUT LOGIN ===========================================
 ######################################################################
-has_field 'rm-duplicate' => ( type => 'Display',
-			      html => '<span class="fa fa-times-circle col-xs-offset-2 btn btn-link text-danger hidden" title="Delete this section."></span>',
-			    );
 
 has_field 'loginless_ssh' => ( type => 'Repeatable',
 			  setup_for_js => 1,
@@ -242,8 +258,8 @@ has_block 'group_ssh' => ( tag => 'div',
 			 );
 
 has_block 'ssh' => ( tag => 'fieldset',
-		     label => '<a href="#" title="Add another SSH Key" data-duplicate="duplicate"><span class="fa fa-plus-circle"></span></a>',
-		     label_class => [ 'col-xs-offset-2', 'text-left'],
+		     label => 'SSH Key <a href="#" title="Add another SSH Key" data-duplicate="duplicate"><span class="fa fa-plus-circle"></span></a>',
+		     # label_class => [ 'col-xs-offset-2', 'text-left'],
 		     render_list => [ 'group_ssh', ],
 		     class => [ 'tab-pane', 'fade', ],
 		     attr => { id => 'ssh',
@@ -253,10 +269,6 @@ has_block 'ssh' => ( tag => 'fieldset',
 		   );
 
 #=====================================================================
-
-has_field 'rm-duplicate' => ( type => 'Display',
-			      html => '<span class="fa fa-times-circle col-xs-offset-2 btn btn-link text-danger hidden" title="Delete this section."></span>',
-			    );
 
 has_field 'loginless_ovpn' => ( type => 'Repeatable',
 			      setup_for_js => 1,
@@ -278,7 +290,7 @@ has_field 'loginless_ovpn.associateddomain' => ( type => 'Select',
 					 );
 
 has_field 'loginless_ovpn.cert' => ( type => 'Upload',
-			       label => 'OpenVPN Certificate',
+			       label => 'OpenVPN Certificate (DER format)',
 			       label_class => [ 'col-xs-2', ],
 			       element_wrapper_class => [ 'col-xs-2', 'col-lg-3', ],
 			       element_class => [ 'btn', 'btn-default', 'btn-sm',],
@@ -288,10 +300,10 @@ has_field 'loginless_ovpn.cert' => ( type => 'Upload',
 					       },
 			     );
 
-has_field 'loginless_ovpn.comment' => ( type => 'Display',
-				  html => '<small class="text-muted col-xs-offset-2"><em>' .
-				  'certificate in DER format</em></small><p>&nbsp;</p>',
-				);
+# has_field 'loginless_ovpn.comment' => ( type => 'Display',
+# 				  html => '<small class="text-muted form-group"><em>' .
+# 				  'certificate in DER format</em></small><p>&nbsp;</p>',
+# 				);
 
 has_field 'loginless_ovpn.device' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
 				 label => 'Device',
@@ -303,19 +315,31 @@ has_field 'loginless_ovpn.device' => ( apply => [ NoSpaces, NotAllDigits, Printa
 						   'data-group' => 'loginless_ovpn', },
 			       );
 
+has_field 'loginless_ovpn.ip' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
+				   label => 'IP',
+				   label_class => [ 'col-xs-2', ],
+				   element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+				   element_class => [ 'input-sm', ],
+				   element_attr => { placeholder => '192.168.0.1',
+						   'data-name' => 'ip',
+						   'data-group' => 'loginless_ovpn', },
+			       );
+
 has_block 'group_ovpn' => ( tag => 'div',
 			    render_list => [ 'rm-duplicate',
 					     'loginless_ovpn',
 					     'loginless_ovpn.associateddomain',
 					     'loginless_ovpn.device',
+					     'loginless_ovpn.ip',
 					     'loginless_ovpn.cert',
-					     'loginless_ovpn.comment', ],
+					     # 'loginless_ovpn.comment',
+					   ],
 			    class => [ 'duplicate' ],
 			  );
 
 has_block 'ovpn' => ( tag => 'fieldset',
-		      label => '<a href="#" title="Add another OpenVPN Certificate" data-duplicate="duplicate"><span class="fa fa-plus-circle"></span></a>',
-		      label_class => [ 'col-xs-offset-2', 'text-left'],
+		      label => 'OpenVPN configuration <a href="#" title="Add another OpenVPN Certificate" data-duplicate="duplicate"><span class="fa fa-plus-circle"></span></a>',
+		      # label_class => [ 'col-xs-offset-2', 'text-left'],
 		      render_list => [ 'group_ovpn', ],
 		      class => [ 'tab-pane', 'fade', ],
 		      attr => { id => 'ovpn',
@@ -361,40 +385,45 @@ has_field 'groupspace' => ( type => 'Display',
 			  );
 
 
-# has_field 'reset' => ( type => 'Reset',
-# #			wrapper_class => [ 'pull-left', ],
-# 			element_class => [ 'btn', 'btn-default', 'btn-block', ],
-# 			element_wrapper_class => [ 'col-xs-2' ],
-# 		        value => 'Reset All Tabs' );
+has_block 'groupsselect' => ( tag => 'fieldset',
+			      label => 'Groups user belongs to',
+			      render_list => [ 'groups', ], # 'groupspace', ],
+			      class => [ 'tab-pane', 'fade', ],
+			      attr => { id => 'groups',
+					'aria-labelledby' => "groups-tab",
+					role => "tabpanel",
+				      },
+			    );
+
+######################################################################
+#== SERVICES WITHOUT LOGIN ===========================================
+######################################################################
+
+has_field 'aux_reset' => ( type => 'Reset',
+			   element_class => [ 'btn', 'btn-default', 'btn-block', ],
+			   element_wrapper_class => [ 'col-xs-12', ],
+			   wrapper_class => [ 'col-xs-1' ],
+			   value => 'Reset All' );
 
 
-has_field 'submit' => ( type => 'Submit',
-			#			wrapper_class => [ 'pull-right', ],
-			element_class => [ 'btn', 'btn-default', 'btn-block', ],
-					   element_wrapper_class => [ 'col-xs-12' ],
-					   value => 'Submit' );
+has_field 'aux_submit' => ( type => 'Submit',
+			    element_class => [ 'btn', 'btn-default', 'btn-block', ],
+			    # element_wrapper_class => [ 'col-xs-12', ],
+			    wrapper_class => [ 'col-xs-11', ], # 'pull-right' ],
+			    value => 'Submit' );
 
-			has_block 'groupsselect' => ( tag => 'div',
-						      render_list => [ 'groups', 'groupspace', ],
-						      class => [ 'tab-pane', 'fade', ],
-						      attr => { id => 'groups',
-								'aria-labelledby' => "groups-tab",
-								role => "tabpanel",
-							      },
-						    );
+has_block 'submitit' => ( tag => 'fieldset',
+			  render_list => [ 'groupspace', 'aux_reset', 'aux_submit'],
+			  class => [ 'container-fluid', ]
+			);
 
-			has_block 'submitit' => ( tag => 'div',
-						  render_list => [ 'groupspace', 'submit'],
-						  # class => [ '' ]
-						);
+sub build_render_list {[ 'person', 'auth', 'ssh', 'ovpn', 'groupsselect', 'submitit' ]}
 
-			sub build_render_list {[ 'person', 'auth', 'ssh', 'ovpn', 'groupsselect', 'submitit' ]}
-
-					       sub html_attributes {
-						 my ( $self, $field, $type, $attr ) = @_;
-						 push @{$attr->{class}}, 'required'
-						   if ( $type eq 'label' && $field->required );
-					       }
+sub html_attributes {
+  my ( $self, $field, $type, $attr ) = @_;
+  push @{$attr->{class}}, 'required'
+    if ( $type eq 'label' && $field->required );
+}
 
 sub validate {
   my $self = shift;

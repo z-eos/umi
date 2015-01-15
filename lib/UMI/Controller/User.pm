@@ -619,8 +619,8 @@ sub user_add_svc_new :Path(user_add_svc_new) :Args(0) {
 					      ldap_crud => $c->model('LDAP_CRUD'),
 					     );
 
-  use Data::Dumper;
-  print Dumper( $params );
+  use Data::Printer;
+  p $params;
   # $c->stash( template => 'user/user_add_svc_new.tt', );
 
  $c->stash( final_message => '' );

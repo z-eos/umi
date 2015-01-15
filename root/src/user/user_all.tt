@@ -137,7 +137,8 @@ $(function(){
     });
     
     $duplicate.appendTo($fieldset);
-    $duplicate.find(".fa-times-circle").removeClass("hidden").click(function(){
+    // $duplicate.find(".fa-times-circle").removeClass("hidden").click(function(){
+    $duplicate.find(".rm-duplicate").removeClass("hidden").click(function(){
       $(this).parents(".duplicated").remove();
     });
     $('html, body').animate({
