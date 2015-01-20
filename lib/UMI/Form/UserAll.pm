@@ -119,8 +119,8 @@ has_field 'rm-duplicate' => ( type => 'Display',
 ######################################################################
 has_field 'account' => ( type => 'Repeatable',
                          # setup_for_js => 1,
-                         do_wrapper => 1,
-                         tags => { controls_div => 1 },
+                         # do_wrapper => 1,
+                         # tags => { controls_div => 1 },
                          # init_contains => { wrapper_attr => { class => ['hfh', 'repinst'] } },
                        );
 
@@ -460,7 +460,8 @@ sub validate {
       }
       if ( defined $element->field('authorizedservice')->value &&
 	   ! defined $element->field('associateddomain')->value ) {
-	$self->field( sprintf('account.%s.associateddomain', $i) )->add_error('Domain Name is mandatory!');
+	$self->field('account')->field("$i")->field('associateddomain')->add_error('Domain Name is mandatory!');
+	p $self->field('account')->field("$i")->field('associateddomain');
       }
       if ( defined $element->field('associateddomain')->value &&
 	   ! defined $element->field('authorizedservice')->value ) {
