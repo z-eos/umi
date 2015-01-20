@@ -1081,7 +1081,7 @@ has 'select_organizations' => ( traits => ['Array'],
 
 sub _build_select_organizations {
   my $self = shift;
-  my ( @office, @branches );
+  my (@branches, @office);
 
   my $mesg = $self->search({
 			    base => $self->{'cfg'}->{'base'}->{'org'},
@@ -1124,13 +1124,11 @@ has 'select_associateddomains' => ( traits => ['Array'],
 
 sub _build_select_associateddomains {
   my $self = shift;
-
-  my @domains = ( { value => '0', label => '--- select domain ---', selected => 'selected', } );
-
+  my @domains;
   my $mesg = $self->search( { base => $self->{cfg}->{base}->{org},
-				   filter => 'associatedDomain=*',
-				   attrs => ['associatedDomain' ],
-				 } );
+			      filter => 'associatedDomain=*',
+			      attrs => ['associatedDomain' ],
+			    } );
   my $err_message = '';
   if ( ! $mesg->count ) {
     $err_message = '<div class="alert alert-danger">' .
@@ -1156,10 +1154,7 @@ has 'select_authorizedservice' => ( traits => ['Array'],
 
 sub _build_select_authorizedservice {
   my $self = shift;
-
-  push my @services, { value => '0',
-		       label => '--- select service ---',
-		       selected => 'selected', };
+  my @services;
 
   foreach my $key ( sort {$a cmp $b} keys %{$self->{cfg}->{authorizedService}}) {
     if ( $self->{cfg}->{authorizedService}->{$key}->{auth} ) {

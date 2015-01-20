@@ -43,11 +43,12 @@ has_field 'person_sn' => ( apply => [ NoSpaces ],
 
 has_field 'person_office' => ( type => 'Select',
 				label => 'Office',
-				label_class => [ 'col-xs-2' ],
-				element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-					   element_class => [ 'input-sm', ],
-				options_method => \&offices,
-				required => 1 );
+			       label_class => [ 'col-xs-2' ],
+			       empty_select => '--- Choose an Organization ---',
+			       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+			       element_class => [ 'input-sm', ],
+			       options_method => \&offices,
+			       required => 1 );
 
 has_field 'person_title' => ( label => 'Position',
 			       label_class => [ 'col-xs-2', ],
@@ -100,9 +101,9 @@ has_block 'person' => ( tag => 'fieldset',
 
 has_field 'rm-duplicate' => ( type => 'Display',
 			      html => '<div class="col-xs-12 rm-duplicate hidden"><div class="col-xs-1">' .
-			      '<button type="button" class="btn btn-danger btn-xs">' .
-			      '<span class="fa fa-times-circle"></span> Delete this section' .
-			      '</button></div></div>',
+			      '<a class="btn btn-danger btn-xs" href="#">' .
+			      '<span class="fa fa-trash-o"></span> Delete this section</a>' .
+			      '</div></div>',
 			    );
 
 # has_field 'rm-duplicate' => ( type => 'Button',
@@ -117,22 +118,23 @@ has_field 'rm-duplicate' => ( type => 'Display',
 #== SERVICES WITH LOGIN ==============================================
 ######################################################################
 has_field 'account' => ( type => 'Repeatable',
-                         setup_for_js => 1,
+                         # setup_for_js => 1,
                          do_wrapper => 1,
                          tags => { controls_div => 1 },
-                         init_contains => { wrapper_attr => { class => ['hfh', 'repinst'] } },
+                         # init_contains => { wrapper_attr => { class => ['hfh', 'repinst'] } },
                        );
 
 has_field 'account.login' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
-				label => 'Login',
-				do_id => 'no',
-				label_class => [ 'col-xs-2', ],
-				element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-					   element_class => [ 'input-sm', ],
-				element_attr => { placeholder => 'john.doe',
-						  'data-name' => 'login',
-						  'data-group' => 'account', },
-			      );
+			       label => 'Login',
+			       do_id => 'no',
+			       label_class => [ 'col-xs-2', ],
+			       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+			       element_class => [ 'input-sm', ],
+			       element_attr => { placeholder => 'john.doe',
+						 'autocomplete' => 'off',
+						 'data-name' => 'login',
+						 'data-group' => 'account', },
+			     );
 
 has_field 'account.password1' => ( type => 'Password',
 				    # minlength => 7, maxlength => 16,
@@ -143,51 +145,50 @@ has_field 'account.password1' => ( type => 'Password',
 				    ne_username => 'login',
 				    apply => [ NoSpaces, NotAllDigits, Printable, StrongPassword ],
 				    element_attr => { placeholder => 'Password',
+						      'autocomplete' => 'off',
 						      'data-name' => 'password1',
 						      'data-group' => 'account', },
 				  );
 
 has_field 'account.password2' => ( type => 'Password',
-				    # minlength => 7, maxlength => 16,
-				    label => '',
-				    label_class => [ 'col-xs-2', ],
-				    element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-					   element_class => [ 'input-sm', ],
-				    ne_username => 'login',
-				    apply => [ NoSpaces, NotAllDigits, Printable, StrongPassword ],
-				    element_attr => { placeholder => 'Confirm Password',
-						      'data-name' => 'password2',
-						      'data-group' => 'account',
-						    },
-				  );
+				   # minlength => 7, maxlength => 16,
+				   label => '',
+				   label_class => [ 'col-xs-2', ],
+				   element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+				   element_class => [ 'input-sm', ],
+				   ne_username => 'login',
+				   apply => [ NoSpaces, NotAllDigits, Printable, StrongPassword ],
+				   element_attr => { placeholder => 'Confirm Password',
+						     'autocomplete' => 'off',
+						     'data-name' => 'password2',
+						     'data-group' => 'account', },
+				 );
 
-has_field 'account.pwdcomment' => ( type => 'Display',
-				     html => '<small class="text-muted col-xs-offset-2"><em>' .
-				     'leave empty password fields to autogenerate password</em></small><p>&nbsp;</p>',
-				   );
+# has_field 'account.pwdcomment' => ( type => 'Display',
+# 				     html => '<small class="text-muted col-xs-offset-2"><em>' .
+# 				     'leave empty password fields to autogenerate password</em></small><p>&nbsp;</p>',
+# 				   );
 
 has_field 'account.associateddomain' => ( type => 'Select',
-					   label => 'Domain Name',
-					   label_class => [ 'col-xs-2', ],
-					   element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-					   element_class => [ 'input-sm', ],
-					   options_method => \&associateddomains,
-					   element_attr => {
-							    'data-name' => 'associateddomain',
-							    'data-group' => 'account',
-							   },
+					  label => 'Domain Name',
+					  label_class => [ 'col-xs-2', ],
+					  empty_select => '--- Choose Domain ---',
+					  element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+					  element_class => [ 'input-sm', ],
+					  options_method => \&associateddomains,
+					  element_attr => { 'data-name' => 'associateddomain',
+							    'data-group' => 'account', },
 					   required => 0 );
 
 has_field 'account.authorizedservice' => ( type => 'Select',
 					   label => 'Service', label_class => [ 'required' ],
 					   label_class => [ 'col-xs-2', ],
+					   empty_select => '--- Choose Service ---',
 					   element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
 					   element_class => [ 'input-sm', ],
 					   options_method => \&authorizedservice,
-					   element_attr => {
-							    'data-name' => 'authorizedservice',
-							    'data-group' => 'account',
-							   },
+					   element_attr => { 'data-name' => 'authorizedservice',
+							     'data-group' => 'account', },
 					   required => 0,
 					  );
 
@@ -205,7 +206,14 @@ has_block 'group_auth' => ( tag => 'div',
 			  );
 
 has_block 'auth' => ( tag => 'fieldset',
-		      label => 'Service Account <a href="#" title="Add another Login/Password Dependent Service" data-duplicate="duplicate"><span class="fa fa-plus-circle"></span></a>',
+		      label => 'Service Account&nbsp;<small class="text-muted"><em>(' .
+		      'leave empty login and password fields to autogenerate them all)</em></small>' .
+		      
+		      '<div class="col-xs-12"><div class="col-xs-1">' .
+		      '<a href="#" class="btn btn-success btn-xs" data-duplicate="duplicate">' .
+		      '<span class="fa fa-plus-circle rm-duplicate"></span> Duplicate this section</a>' .
+		      '</div></div>',
+		      
 		      # label_class => [ 'col-xs-offset-2', 'text-left'],
 		      render_list => [ 'group_auth', ],
 		      class => [ 'tab-pane', 'fade', ],
@@ -223,15 +231,16 @@ has_field 'loginless_ssh' => ( type => 'Repeatable',
 			  setup_for_js => 1,
 			  do_wrapper => 1,
 			  tags => { controls_div => 1 },
-			  init_contains => { wrapper_attr => { class => ['hfh', 'repinst'] } },
+			  # init_contains => { wrapper_attr => { class => ['hfh', 'repinst'] } },
 			);
 
 has_field 'loginless_ssh.associateddomain' => ( type => 'Select',
-					  label => 'Domain Name',
-					  label_class => [ 'col-xs-2', ],
-					  element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-					   element_class => [ 'input-sm', ],
-					  options_method => \&associateddomains,
+						label => 'Domain Name',
+						label_class => [ 'col-xs-2', ],
+						empty_select => '--- Choose Domain ---',
+						element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+						element_class => [ 'input-sm', ],
+						options_method => \&associateddomains,
 					  element_attr => {
 							   'data-name' => 'associateddomain',
 							   'data-group' => 'loginless_ssh',
@@ -258,7 +267,13 @@ has_block 'group_ssh' => ( tag => 'div',
 			 );
 
 has_block 'ssh' => ( tag => 'fieldset',
-		     label => 'SSH Key <a href="#" title="Add another SSH Key" data-duplicate="duplicate"><span class="fa fa-plus-circle"></span></a>',
+		     label => 'SSH Key&nbsp;<small class="text-muted"><em>()</em></small>' .
+		      
+		      '<div class="col-xs-12"><div class="col-xs-1">' .
+		      '<a href="#" class="btn btn-success btn-xs" data-duplicate="duplicate">' .
+		      '<span class="fa fa-plus-circle rm-duplicate"></span> Duplicate this section</a>' .
+		      '</div></div>',
+		      
 		     # label_class => [ 'col-xs-offset-2', 'text-left'],
 		     render_list => [ 'group_ssh', ],
 		     class => [ 'tab-pane', 'fade', ],
@@ -274,19 +289,18 @@ has_field 'loginless_ovpn' => ( type => 'Repeatable',
 			      setup_for_js => 1,
 			      do_wrapper => 1,
 			      tags => { controls_div => 1 },
-			      init_contains => { wrapper_attr => { class => ['hfh', 'repinst'] } },
+			      # init_contains => { wrapper_attr => { class => ['hfh', 'repinst'] } },
 			);
 
 has_field 'loginless_ovpn.associateddomain' => ( type => 'Select',
-					   label => 'Domain Name',
-					   label_class => [ 'col-xs-2', ],
-					   element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-					   element_class => [ 'input-sm', ],
-					   options_method => \&associateddomains,
-					   element_attr => {
-							    'data-name' => 'associateddomain',
-							    'data-group' => 'loginless_ovpn',
-							   },
+						 label => 'Domain Name',
+						 label_class => [ 'col-xs-2', ],
+						 empty_select => '--- Choose Domain ---',
+						 element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+						 element_class => [ 'input-sm', ],
+						 options_method => \&associateddomains,
+						 element_attr => { 'data-name' => 'associateddomain',
+								   'data-group' => 'loginless_ovpn', },
 					 );
 
 has_field 'loginless_ovpn.cert' => ( type => 'Upload',
@@ -338,7 +352,13 @@ has_block 'group_ovpn' => ( tag => 'div',
 			  );
 
 has_block 'ovpn' => ( tag => 'fieldset',
-		      label => 'OpenVPN configuration <a href="#" title="Add another OpenVPN Certificate" data-duplicate="duplicate"><span class="fa fa-plus-circle"></span></a>',
+		      label => 'OpenVPN configuration&nbsp;<small class="text-muted"><em>()</em></small>' .
+		      
+		      '<div class="col-xs-12"><div class="col-xs-1">' .
+		      '<a href="#" class="btn btn-success btn-xs" data-duplicate="duplicate">' .
+		      '<span class="fa fa-plus-circle rm-duplicate"></span> Duplicate this section</a>' .
+		      '</div></div>',
+		      
 		      # label_class => [ 'col-xs-offset-2', 'text-left'],
 		      render_list => [ 'group_ovpn', ],
 		      class => [ 'tab-pane', 'fade', ],
@@ -427,6 +447,27 @@ sub html_attributes {
 
 sub validate {
   my $self = shift;
+  my ( $element, $field );
+  # p $self->value;
+  # p $self->field('account.0');
+  my $i = 0;
+  foreach $element ( $self->field('account')->fields )
+    {
+      if ( ! defined $element->field('authorizedservice')->value &&
+	   ! defined $element->field('associateddomain')->value ) {
+	$element->field('associateddomain')->add_error('Domain Name is mandatory!');
+	$element->field('authorizedservice')->add_error('Service is mandatory!');
+      }
+      if ( defined $element->field('authorizedservice')->value &&
+	   ! defined $element->field('associateddomain')->value ) {
+	$self->field( sprintf('account.%s.associateddomain', $i) )->add_error('Domain Name is mandatory!');
+      }
+      if ( defined $element->field('associateddomain')->value &&
+	   ! defined $element->field('authorizedservice')->value ) {
+	$element->field('authorizedservice')->add_error('Service is mandatory!');
+      }
+      $i++;
+    }
 
   # if ( defined $self->field('password1')->value and defined $self->field('password2')->value
   #      and ($self->field('password1')->value ne $self->field('password2')->value) ) {

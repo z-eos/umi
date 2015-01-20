@@ -620,7 +620,9 @@ sub user_add_svc_new :Path(user_add_svc_new) :Args(0) {
 					     );
 
   use Data::Printer;
-  p $params;
+  # p $self->form_user_all->values;
+
+
   # $c->stash( template => 'user/user_add_svc_new.tt', );
 
  $c->stash( final_message => '' );

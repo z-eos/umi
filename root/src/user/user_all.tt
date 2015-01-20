@@ -105,11 +105,14 @@
 
 <script>
 $(function(){
+
+  // need this because HFH adds .has-error to whole hierarchy of objects
+  // $(".duplicate").children(".form-group.has-error").removeClass("has-error");
   
-  $("a span.fa-plus-circle").on("click",function(e){
+  // $("a span.rm-duplicate").on("click",function(e){
+  $("a.btn[data-duplicate]").on("click",function(e){
     e.preventDefault();
-    var $this = $(this),
-        $a = $this.parent(),
+    var $a = $(this),
         counter = parseInt($a.data("counter")) || ($a.data("counter",0),0),
         $fieldset = $a.parents("fieldset"),
         $duplicate = $fieldset.find("div."+$a.data('duplicate')).first().clone();
