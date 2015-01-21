@@ -1124,7 +1124,7 @@ has 'select_associateddomains' => ( traits => ['Array'],
 
 sub _build_select_associateddomains {
   my $self = shift;
-  my @domains;
+  my @domains; # = ( {value => '0', label => '--- select domain ---', selected => 'selected'} );
   my $mesg = $self->search( { base => $self->{cfg}->{base}->{org},
 			      filter => 'associatedDomain=*',
 			      attrs => ['associatedDomain' ],

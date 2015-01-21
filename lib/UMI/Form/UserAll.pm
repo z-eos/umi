@@ -124,6 +124,29 @@ has_field 'account' => ( type => 'Repeatable',
                          # init_contains => { wrapper_attr => { class => ['hfh', 'repinst'] } },
                        );
 
+has_field 'account.associateddomain' => ( type => 'Select',
+					  label => 'Domain Name',
+					  label_class => [ 'col-xs-2', ],
+					  empty_select => '--- Choose Domain ---',
+					  element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+					  element_class => [ 'input-sm', ],
+					  options_method => \&associateddomains,
+					  element_attr => { 'data-name' => 'associateddomain',
+							    'data-group' => 'account', },
+					   required => 0 );
+
+has_field 'account.authorizedservice' => ( type => 'Select',
+					   label => 'Service', label_class => [ 'required' ],
+					   label_class => [ 'col-xs-2', ],
+					   empty_select => '--- Choose Service ---',
+					   element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+					   element_class => [ 'input-sm', ],
+					   options_method => \&authorizedservice,
+					   element_attr => { 'data-name' => 'authorizedservice',
+							     'data-group' => 'account', },
+					   required => 0,
+					  );
+
 has_field 'account.login' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
 			       label => 'Login',
 			       do_id => 'no',
@@ -169,37 +192,14 @@ has_field 'account.password2' => ( type => 'Password',
 # 				     'leave empty password fields to autogenerate password</em></small><p>&nbsp;</p>',
 # 				   );
 
-has_field 'account.associateddomain' => ( type => 'Select',
-					  label => 'Domain Name',
-					  label_class => [ 'col-xs-2', ],
-					  empty_select => '--- Choose Domain ---',
-					  element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-					  element_class => [ 'input-sm', ],
-					  options_method => \&associateddomains,
-					  element_attr => { 'data-name' => 'associateddomain',
-							    'data-group' => 'account', },
-					   required => 0 );
-
-has_field 'account.authorizedservice' => ( type => 'Select',
-					   label => 'Service', label_class => [ 'required' ],
-					   label_class => [ 'col-xs-2', ],
-					   empty_select => '--- Choose Service ---',
-					   element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-					   element_class => [ 'input-sm', ],
-					   options_method => \&authorizedservice,
-					   element_attr => { 'data-name' => 'authorizedservice',
-							     'data-group' => 'account', },
-					   required => 0,
-					  );
-
 has_block 'group_auth' => ( tag => 'div',
 			    render_list => [ 'rm-duplicate',
+					     'account.associateddomain',
+					     'account.authorizedservice',
+					     'account.login',
+					     'account.password1',
+					     'account.password2',
 					     'account',
-					     # 'account.associateddomain',
-					     # 'account.authorizedservice',
-					     # 'account.login',
-					     # 'account.password1',
-					     # 'account.password2',
 					     # 'account.pwdcomment',
 					   ],
 			    class => [ 'duplicate' ],
@@ -460,8 +460,8 @@ sub validate {
       }
       if ( defined $element->field('authorizedservice')->value &&
 	   ! defined $element->field('associateddomain')->value ) {
-	$self->field('account')->field("$i")->field('associateddomain')->add_error('Domain Name is mandatory!');
-	p $self->field('account')->field("$i")->field('associateddomain');
+	$element->field('associateddomain')->add_error('Domain Name is mandatory!');
+	# p $self->field('account')->field("$i")->field('associateddomain');
       }
       if ( defined $element->field('associateddomain')->value &&
 	   ! defined $element->field('authorizedservice')->value ) {
