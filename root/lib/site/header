@@ -133,117 +133,76 @@
 	      <span class="caret"></span>
 	    </button>
 	    <ul class="dropdown-menu dropdown-menu-right" role="menu" name="ldapsearch_base">
-	      <li>
-		<table class="table table-condensed table-responsive">
-		  <tbody>
-		    <tr>
-		      <th class="text-center warning">
-			<a href="[% c.uri_for('/searchadvanced') %]">
-			  <span class="fa fa-search-plus">&nbsp;<b>advanced search</b></span></a>
-		      </th>
-		      <th class="text-center warning">
-			<a href="[% c.uri_for('/searchadvanced') %]">
-			  <span class="fa fa-medkit">&nbsp;<b>audit</b></span></a>
-		      </th>
-		    </tr>
-		    <tr>
-		      <td class="success">
-			<button type="submit" class="menutab btn btn-link btn-sm" value="1"
-				name="ldapsearch_by_name" title="search by name related fields">
-			  <span class="fa fa-user"> by name</span>
-			</button>
-		      </td>
-		      <td class="info">
-			<button type="submit" class="btn btn-link btn-sm" value="ou=group,[% dc %]" name="ldapsearch_base">
-			  <span class="fa fa-group"> group</span>
-			</button>
-		      </td>
-		    </tr>
-		    <tr>
-		      <td class="success">
-			<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_email">
-			  <span class="fa fa-envelope-o"> by email</span>
-			</button>
-		      </td>
-		      <td class="info">
-			<button type="submit" class="btn btn-link btn-sm" value="ou=People,[% dc %]" name="ldapsearch_base">
-			  <span class="fa fa-user"> People</span>
-			</button>
-		      </td>
-		    </tr>
-		    <tr>
-		      <td class="success">
-			<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_jid">
-			  <span class="fa fa-comments-o"> by JID</span>
-			</button>
-		      </td>
-		      <td class="info">
-			<button type="submit" class="btn btn-link btn-sm" value="ou=Organizations,[% dc %]" name="ldapsearch_base">
-			  <span class="fa fa-institution"> Organizations</span>
-			</button>
-		      </td>
-		    </tr>
-		    <tr>
-		      <td class="success">
-			<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_ip">
-			  <span class="fa fa-code-fork"> by IP</span>
-			</button>
-		      </td>
-		      <td class="info">
-			<button type="submit" class="btn btn-link btn-sm" value="ou=dhcp,[% dc %]" name="ldapsearch_base">
-			  <span class="fa fa-sitemap"> DHCP</span>
-			</button>
-		      </td>
-		    </tr>
-		    <tr>
-		      <td class="success">
-			<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_mac">
-			  <span class="fa fa-barcode"> by MAC</span>
-			</button>
-		      </td>
-		      <td class="info">
-			<button type="submit" class="btn btn-link btn-sm" value="ou=alias,[% dc %]" name="ldapsearch_base">
-			  <span class="fa fa-puzzle-piece"> mail alias</span>
-			</button>
-		      </td>
-		    </tr>
-		    <tr>
-		      <td class="success">
-			<button type="submit" class="btn btn-link btn-sm" value="1" name="ldapsearch_by_telephone">
-			  <span class="fa fa-phone"> by telephone</span>
-			</button>
-		      </td>
-		      <td class="info">
-			<button type="submit" class="btn btn-link btn-sm" value="ou=workstations,[% dc %]" name="ldapsearch_base">
-			  <span class="fa fa-desktop"> workstations</span>
-			</button>
-		      </td>
-		    </tr>
-		    <tr>
-		      <td class="success"></td>
-		      <td class="info">
-			<button type="submit" class="btn btn-link btn-sm" value="ou=machines,[% dc %]" name="ldapsearch_base">
-			  <span class="fa fa-laptop"> machines</span>
-			</button>
-		      </td>
-		    </tr>
-		    <tr>
-		      <td class="success"></td>
-		      <td class="info">
-			<button type="submit" class="btn btn-link btn-sm" value="ou=GitACL,[% dc %]" name="ldapsearch_base">
-			  <span class="fa fa-gavel"> GitACL</span>
-			</button>
-		      </td>
-		    </tr>
-		  </tbody>
-		  <tfooter>
-		    <tr>
-		      <th class="text-center"><em>predefined</em></th>
-		      <th class="text-center"><em>base by</em></th>
-		    </tr>
-		  </tfooter>
-		</table>
-	      </li>
+
+	      [% icon_class = "fa fa-fw" %]
+	      [% menu_item = "btn btn-block btn-xs umi-text-left btn-" %]
+	      [% color = "warning" %]
+
+	      <li class="bg-[% color %]">
+		<a href="[% c.uri_for('/searchadvanced') %]" class="[% menu_item %][% color %] btn-link">
+		  <span class="[% icon_class %] fa-search-plus">&nbsp;advanced search</span></a></li>
+	      <li class="bg-[% color %]">
+		<a href="[% c.uri_for('/searchadvanced') %]" class="[% menu_item %][% color %] btn-link">
+		<span class="[% icon_class %] fa-medkit">&nbsp;audit</span></a></li>
+
+	      [% color = "success" %]
+
+	      <li class="bg-[% color %]">
+		<button type="submit" class="[% menu_item %][% color %]"
+			value="1"
+			name="ldapsearch_by_name"
+			title="filter pattern in givenName or sn or uid or cn">
+		<span class="[% icon_class %] fa-user"></span>&nbsp;by name</button></li>
+	      <li class="bg-[% color %]">
+		<button type="submit" class="[% menu_item %][% color %]"
+			value="1"
+			name="ldapsearch_by_email"
+			title="filter pattern in mail">
+		<span class="[% icon_class %] fa-envelope-o"></span>&nbsp;by email</button></li>
+	      <li class="bg-[% color %]">
+		<button type="submit" class="[% menu_item %][% color %]"
+			value="1"
+			name="ldapsearch_by_jid"
+			title="filter pattern in mail">
+		<span class="[% icon_class %] fa-lightbulb-o"></span>&nbsp;by JID</button></li>
+	      <li class="bg-[% color %]">
+		<button type="submit" class="[% menu_item %][% color %]"
+			value="1"
+			name="ldapsearch_by_ip"
+			title="filter pattern in ip address">
+		<span class="[% icon_class %] fa-code-fork"></span>&nbsp;by IP</button></li>
+	      <li class="bg-[% color %]">
+		<button type="submit" class="[% menu_item %][% color %]"
+			value="1"
+			name="ldapsearch_by_mac"
+			title="filter pattern in MAC address">
+		<span class="[% icon_class %] fa-barcode"></span>&nbsp;by MAC</button></li>
+	      <li class="bg-[% color %]">
+		<button type="submit" class="[% menu_item %][% color %]"
+			value="1"
+			name="ldapsearch_by_telephone"
+			title="filter pattern in telephone number">
+		<span class="[% icon_class %] fa-phone"></span>&nbsp;by telephone</button></li>
+	      
+	      [% color = "info" %]
+
+	      <li class="bg-[% color %]"><button type="submit" class="[% menu_item %][% color %]" value="ou=group,[% dc %]" name="ldapsearch_base">
+		<span class="[% icon_class %] fa-group"></span>&nbsp;group</button></li>
+	      <li class="bg-[% color %]"><button type="submit" class="[% menu_item %][% color %]" value="ou=People,[% dc %]" name="ldapsearch_base">
+		<span class="[% icon_class %] fa-user"></span>&nbsp;People</button></li>
+	      <li class="bg-[% color %]"><button type="submit" class="[% menu_item %][% color %]" value="ou=Organizations,[% dc %]" name="ldapsearch_base">
+		<span class="[% icon_class %] fa-institution"></span>&nbsp;Organizations</button></li>
+	      <li class="bg-[% color %]"><button type="submit" class="[% menu_item %][% color %]" value="ou=dhcp,[% dc %]" name="ldapsearch_base">
+		<span class="[% icon_class %] fa-sitemap"></span>&nbsp;DHCP</button></li>
+	      <li class="bg-[% color %]"><button type="submit" class="[% menu_item %][% color %]" value="ou=alias,[% dc %]" name="ldapsearch_base">
+		<span class="[% icon_class %] fa-puzzle-piece"></span>&nbsp;mail alias</button></li>
+	      <li class="bg-[% color %]"><button type="submit" class="[% menu_item %][% color %]" value="ou=workstations,[% dc %]" name="ldapsearch_base">
+		<span class="[% icon_class %] fa-desktop"></span>&nbsp;workstations</button></li>
+	      <li class="bg-[% color %]"><button type="submit" class="[% menu_item %][% color %]" value="ou=machines,[% dc %]" name="ldapsearch_base">
+		<span class="[% icon_class %] fa-laptop"></span>&nbsp;machines</button></li>
+	      <li class="bg-[% color %]"><button type="submit" class="[% menu_item %][% color %]" value="ou=GitACL,[% dc %]" name="ldapsearch_base">
+		<span class="[% icon_class %] fa-gavel"></span>&nbsp;GitACL</button></li>
+
 	    </ul>
 	  </div>
 	</div>
@@ -257,26 +216,26 @@
 	  </a>
           <ul class="dropdown-menu" role="menu">
             <li>
-	      <a href="about"><span class="fa fa-question-circle">&nbsp;</span>help</a>
+	      <a href="about"><span class="fa fa-fw fa-question-circle">&nbsp;</span>help</a>
 	    </li>
             <li class="divider"></li>
             <li>
-	      <a href="#"><span class="fa fa-comments-o">&nbsp;</span>chat</a>
+	      <a href="#"><span class="fa fa-fw fa-comments-o">&nbsp;</span>chat</a>
 	    </li>
             <li>
-	      <a href="#"><span class="fa fa-envelope-o">&nbsp;</span>email</a>
+	      <a href="#"><span class="fa fa-fw fa-envelope-o">&nbsp;</span>email</a>
 	    </li>
             <li>
-	      <a href="#"><span class="fa fa-mobile">&nbsp;</span>telephone</a>
+	      <a href="#"><span class="fa fa-fw fa-mobile">&nbsp;</span>telephone</a>
 	    </li>
             <li>
-	      <a href="#"><span class="fa fa-bug text-danger">&nbsp;</span>bug</a>
+	      <a href="#"><span class="fa fa-fw fa-bug text-danger">&nbsp;</span>bug</a>
 	    </li>
 	    [% IF c.check_user_roles('wheel') %]
             <li class="divider"></li>
             <li>
 	      <a href="#">
-		<span class="fa fa-info-circle text-info"></span>
+		<span class="fa fa-fw fa-info-circle text-info"></span>
 		system info
 	      </a>
 	    </li>
@@ -323,4 +282,9 @@
     </div><!--/.nav-collapse -->
   </div>
 </nav>
+<script>
+  $( '.umi-navbar-menu-btn' ).click( function () {
+  $('.navbar-form').submit();	
+});
+</script>
 <!-- END site/header -->

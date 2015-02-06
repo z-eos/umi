@@ -4,7 +4,7 @@
 [% INCLUDE ldap_err.tt %]
 
 <h2>
-  Search Simple Results &nbsp; <small>base: [% base_dn %]; &nbsp;&nbsp; filter: [% filter %]</small>
+  Search Simple Results &nbsp; <small class="mono">base: [% base_dn %]; &nbsp;&nbsp; filter: [% filter %]</small>
 </h2>
 
 <h6 class="text-muted">
@@ -27,9 +27,9 @@
 	     data-toggle="popover"
 	     data-original-title="Legend"
 	     data-content="<ul class='list-unstyled'>
-	     <li><span class='fa fa-user label label-info'>&nbsp;root object</span></li>
-	     <li><span class='fa fa-code-fork label label-warning'>&nbsp;service branch</span></li>
-	     <li><span class='fa fa-leaf label label-success'>&nbsp;service account</span></li>
+	     <li><span class='fa fa-fw fa-user label label-info'>&nbsp;root object</span></li>
+	     <li><span class='fa fa-fw fa-code-fork label label-warning'>&nbsp;service branch</span></li>
+	     <li><span class='fa fa-fw fa-leaf label label-success'>&nbsp;service account</span></li>
 	     <li><span class='label label-primary'>user input</span></li>
 	     </ul>"
 	     tabindex="0">
@@ -79,7 +79,7 @@
 			    <button type="submit" title="add service account" class="btn btn-link"
 				    value="[% entry.key %]"
 				    name="user_preferences">
-			      <span class="fa fa-list-alt text-info"></span>
+			      <span class="fa fa-fw fa-list-alt text-info"></span>
 			      user prefs
 			    </button>
 			  </form>
@@ -90,7 +90,7 @@
 				  name="accmgmnt"
 				  data-toggle="modal"
 				  data-target="#accmgmntModal[% loop.index %]">
-			    <span class="fa fa-retweet text-danger"></span>
+			    <span class="fa fa-fw fa-retweet text-danger"></span>
 			    mgmnt all
 			  </button>
 			</li>
@@ -99,7 +99,7 @@
 			    <button type="submit" title="add new service account" class="btn btn-link"
 				    value="[% entry.key %]"
 				    name="add_svc_acc">
-			      <span class="fa fa-plus-circle text-warning"></span>
+			      <span class="fa fa-fw fa-plus-circle text-warning"></span>
 			      new service account
 			    </button>
 			  </form>
@@ -108,7 +108,7 @@
 			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 			    <button type="submit" title="modify group" class="btn btn-link"
 				    value="[% entry.key %]" name="ldap_modify_group">
-			      <span class="fa fa-group text-warning"></span>
+			      <span class="fa fa-fw fa-group text-warning"></span>
 			      group
 			    </button>
 			  </form>
@@ -120,7 +120,7 @@
 				  name="ldap_delete"
 				  data-toggle="modal"
 				  data-target="#deleteModal[% loop.index %]">
-			    <span class="fa fa-times-circle text-danger"></span>
+			    <span class="fa fa-fw fa-times-circle text-danger"></span>
 			    delete
 			  </button>
 			</li>
@@ -131,7 +131,7 @@
 				  name="ldap_ldif"
 				  data-toggle="modal"
 				  data-target="#ldifModal[% loop.index %]">
-			    <span class="fa fa-upload text-info"></span>
+			    <span class="fa fa-fw fa-upload text-info"></span>
 			    export LDIF
 			  </button>
 			</li>
@@ -140,7 +140,7 @@
 			    <button type="submit" title="edit object" class="btn btn-link"
 				    value="[% entry.key %]"
 				    name="ldap_modify">
-			      <span class="fa fa-edit text-warning"></span>
+			      <span class="fa fa-fw fa-edit text-warning"></span>
 			      edit (all)
 			    </button>
 			  </form>
@@ -150,7 +150,7 @@
 			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 			    <button type="submit" title="modify group members" class="btn btn-link"
 				    value="[% entry.key %]" name="ldap_modify_memberUid">
-			      <span class="fa fa-group text-warning"></span>
+			      <span class="fa fa-fw fa-group text-warning"></span>
 			      members
 			    </button>
 			  </form>
@@ -161,7 +161,7 @@
 			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/modify_userpassword') %]">
 			    <button type="submit" title="modify password" class="btn btn-link"
 				    value="[% entry.key %]" name="ldap_modify_password">
-			      <span class="fa fa-key text-warning"></span>
+			      <span class="fa fa-fw fa-user-secret text-warning"></span>
 			      password
 			    </button>
 			  </form>
@@ -172,7 +172,7 @@
 			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/dhcp_add') %]">
 			    <button type="submit" title="add DHCP (MAC to IP binding)" class="btn btn-link"
 				    value="[% entry.key %]" name="ldap_add_dhcp">
-			      <span class="fa fa-sitemap text-warning"></span>
+			      <span class="fa fa-fw fa-sitemap text-warning"></span>
 			      DHCP (IP to MAC binding)
 			    </button>
 			  </form>
@@ -183,7 +183,7 @@
 			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 			    <button type="submit" title="modify jpegPhoto" class="btn btn-link"
 				    value="[% entry.key %]" name="ldap_modify_jpegphoto">
-			      <span class="fa fa-image text-warning"></span>
+			      <span class="fa fa-fw fa-image text-warning"></span>
 			      image
 			    </button>
 			  </form>
@@ -195,7 +195,7 @@
 			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 			    <button type="submit" title="reorder gitAcl" class="btn btn-link"
 				    value="[% entry.key %]" name="ldap_gitacl_reorder">
-			      <span class="fa fa-sort text-warning"></span>
+			      <span class="fa fa-fw fa-sort text-warning"></span>
 			      reorder
 			    </button>
 			  </form>
@@ -204,45 +204,66 @@
 		      </ul>
 		    </div>
 
-		    <b class="col-sm-offset-1">
-		      [% IF entry.key.match('^author') %]
-		      [% IF dn.authorizedService.match('mail')%]
-		      <abbr title="EMAIL Service Account Branch"><span class="[% services.mail.icon %] text-primary"></span></abbr>
-		      [% ELSIF dn.authorizedService.match('xmpp')%]
-		      <abbr title="XMPP (Jabber) Service Account Branch"><span class="[% services.xmpp.icon %] text-primary"></span></abbr>
-		      [% ELSIF dn.authorizedService.match('ovpn')%]
-		      <abbr title="OpenVPN Service Account Branch"><span class="[% services.ovpn.icon %] text-primary"></span></abbr>
-		      [% ELSIF dn.authorizedService.match('ssh')%]
-		      <abbr title="SSH key Branch"><span class="[% services.ssh.icon %] text-primary"></span></abbr>
-		      [% ELSIF dn.authorizedService.match('mac')%][% mac='802.1x-mac' %]
-		      <abbr title="802.1x MAC AUTH Service Account Branch"><span class="[% services.$mac.icon %] text-primary"></span></abbr>
-		      [% ELSIF dn.authorizedService.match('eap')%][% eap='802.1x-eap' %]
-		      <abbr title="802.1x EAP AUTH Service Account Branch"><span class="[% services.$eap.icon %] text-primary"></span></abbr>
-		      [% ELSE %]
-		      <abbr title="Service Account Branch"><span class="fa fa-code-fork text-primary"></span></abbr>
-		      [% END %]
-		      [% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
-		      [% IF dn.authorizedService.match('mail')%]
-		      <abbr title="EMAIL Service Account"><span class="[% services.mail.icon %] text-primary"></span></abbr>
-		      [% ELSIF dn.authorizedService.match('xmpp')%]
-		      <abbr title="XMPP (Jabber) Service Account"><span class="[% services.xmpp.icon %] text-primary"></span></abbr>
-		      [% ELSIF dn.authorizedService.match('ovpn')%]
-		      <abbr title="OpenVPN Service Account"><span class="[% services.ovpn.icon %] text-primary"></span></abbr>
-		      [% ELSIF dn.authorizedService.match('ssh')%]
-		      <abbr title="SSH key"><span class="[% services.ssh.icon %] text-primary"></span></abbr>
-		      [% ELSIF dn.authorizedService.match('mac')%][% mac='802.1x-mac' %]
-		      <abbr title="802.1x MAC AUTH Service Account"><span class="[% services.$mac.icon %] text-primary"></span></abbr>
-		      [% ELSIF dn.authorizedService.match('eap')%][% eap='802.1x-eap' %]
-		      <abbr title="802.1x EAP AUTH Service Account"><span class="[% services.$eap.icon %] text-primary"></span></abbr>
-		      [% ELSE %]
-		      <abbr title="Service Account"><span class="fa fa-user text-primary"></span></abbr>
-		      [% END %]
-		      [% ELSIF entry.value.mgmnt.is_dn %]
-		      <abbr title="Root Account">
-			<span class="fa fa-user"></span>
-		      </abbr>
-		      [% END %]
-		      DN:&nbsp;&nbsp;&nbsp;[% entry.key.replace(',', ',&nbsp;&nbsp;&nbsp;') %]</b>
+		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/index') %]" class="col-xs-offset-1">
+		      <button type="submit" class="btn btn-link btn-xs umi-search"
+			      title="click to open this object subtree"
+			      name="ldap_subtree"
+			      value="[% entry.key %]">
+			<b>
+			  [% IF entry.key.match('^author') %]
+			  
+			  [% IF dn.authorizedService.match('mail')%]
+			  <abbr title="EMAIL Service Account Branch">
+			    <span class="[% services.mail.icon %]"></span>
+			  </abbr>
+			  [% ELSIF dn.authorizedService.match('xmpp')%]
+			  <abbr title="XMPP (Jabber) Service Account Branch">
+			    <span class="[% services.xmpp.icon %]"></span>
+			  </abbr>
+			  [% ELSIF dn.authorizedService.match('ovpn')%]
+			  <abbr title="OpenVPN Service Account Branch">
+			    <span class="[% services.ovpn.icon %]"></span>
+			  </abbr>
+			  [% ELSIF dn.authorizedService.match('ssh')%]
+			  <abbr title="SSH key Branch">
+			    <span class="[% services.ssh.icon %]"></span>
+			  </abbr>
+			  [% ELSIF dn.authorizedService.match('mac')%][% mac='802.1x-mac' %]
+			  <abbr title="802.1x MAC AUTH Service Account Branch">
+			    <span class="[% services.$mac.icon %]"></span>
+			  </abbr>
+			  [% ELSIF dn.authorizedService.match('eap')%][% eap='802.1x-eap' %]
+			  <abbr title="802.1x EAP AUTH Service Account Branch">
+			    <span class="[% services.$eap.icon %]"></span>
+			  </abbr>
+			  [% ELSE %]
+			  <abbr title="Service Account Branch"><span class="fa fa-code-fork"></span></abbr>
+			  [% END %]
+				    
+			  [% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
+			  [% IF dn.authorizedService.match('mail')%]
+			  <abbr title="EMAIL Service Account"><span class="[% services.mail.icon %]"></span></abbr>
+			  [% ELSIF dn.authorizedService.match('xmpp')%]
+			  <abbr title="XMPP (Jabber) Service Account"><span class="[% services.xmpp.icon %]"></span></abbr>
+			  [% ELSIF dn.authorizedService.match('ovpn')%]
+			  <abbr title="OpenVPN Service Account"><span class="[% services.ovpn.icon %]"></span></abbr>
+			  [% ELSIF dn.authorizedService.match('ssh')%]
+			  <abbr title="SSH key"><span class="[% services.ssh.icon %]"></span></abbr>
+			  [% ELSIF dn.authorizedService.match('mac')%][% mac='802.1x-mac' %]
+			  <abbr title="802.1x MAC AUTH Service Account"><span class="[% services.$mac.icon %]"></span></abbr>
+			  [% ELSIF dn.authorizedService.match('eap')%][% eap='802.1x-eap' %]
+			  <abbr title="802.1x EAP AUTH Service Account"><span class="[% services.$eap.icon %]"></span></abbr>
+			  [% ELSE %]
+			  <abbr title="Service Account"><span class="fa fa-user"></span></abbr>
+			  [% END %]
+			  [% ELSIF entry.value.mgmnt.is_dn %]
+			  <abbr title="Root Account"><span class="fa fa-user"></span></abbr>
+			  [% END %]
+			  &nbsp;&nbsp;&nbsp;[% entry.key.replace(',', ',&nbsp;') %]
+			</b>
+		      </button>
+		    </form>
+
 
 		    <!-- #### Modal: Account Global Management start -->
 		      <div class="modal" id="globmgmntModal[% loop.index %]"

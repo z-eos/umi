@@ -18,7 +18,7 @@ sub html_attributes {
 
 has_field 'aux_parent' => ( type => 'Select',
 			    label => 'Parent Office',
-			    wrapper_class => [ 'col-md-6' ],
+			    wrapper_class => [ 'col-xs-6' ],
 			    label_attr => { title => 'parent office, the one to be created belongs' },
 			  );
 
@@ -95,7 +95,7 @@ sub options_aux_parent {
 has_field 'physicalDeliveryOfficeName' => (
 					   label => 'physicalDeliveryOfficeName',
 					   label_attr => { title => 'official office name as it is known to the world' },
-					   wrapper_class => 'col-md-4',
+					   wrapper_class => 'col-xs-4',
 					   element_attr => { placeholder => 'Horns & Hooves LLC' },
 					   required => 1,
 					  );
@@ -103,14 +103,14 @@ has_field 'physicalDeliveryOfficeName' => (
 has_field 'ou' => (
 		   label => 'Org Unit',
 		   label_attr => { title => 'top level name of the organization as it is used in physicalDeliveryOfficeName value of users' },
-		   wrapper_class => 'col-md-2',
+		   wrapper_class => 'col-xs-2',
 		   element_attr => { placeholder => 'fo01' },
 		   required => 1,
 		  );
 
 has_field 'businessCategory' => ( type => 'Select',
 				  label => 'Business Category',
-				  wrapper_class => 'col-md-2',
+				  wrapper_class => 'col-xs-2',
 				  options => [
 					      { value => 'it', label => 'IT',},
 					      { value => 'trade', label => 'Trade',},
@@ -123,57 +123,57 @@ has_field 'businessCategory' => ( type => 'Select',
 
 has_field 'telephoneNumber' => (
 				label => 'telephoneNumber',
-				wrapper_class => 'col-md-3',
+				wrapper_class => 'col-xs-3',
 				element_attr => { placeholder => '666' },
 			       );
 
 # bl-2 ----------------------------------------------------------------------
 
 has_field 'postOfficeBox' => ( label => 'PB',
-			    wrapper_class => 'col-md-1',
+			    wrapper_class => 'col-xs-1',
 			    element_attr => { placeholder => '121' },
 			     );
 
 has_field 'street' => ( label => 'Street',
-			wrapper_class => 'col-md-3',
+			wrapper_class => 'col-xs-3',
 			element_attr => { placeholder => 'Artema' },
 		      );
 
 has_field 'postalCode' => (
 			   label => 'Postalcode',
-			    wrapper_class => 'col-md-2',
+			    wrapper_class => 'col-xs-2',
 			    element_attr => { placeholder => '83100' },
 			  );
 
 has_field 'l' => (
 		  label => 'Location',
 		  label_attr => { title => 'location, commonly the city the office situated at' },
-		  wrapper_class => 'col-md-2',
+		  wrapper_class => 'col-xs-2',
 		  element_attr => { placeholder => 'Donetsk' },
 		  required => 1,
 		 );
 
 has_field 'st' => ( label => 'State',
 		    label_attr => { title => 'state, commonly short form of the city' },
-		    wrapper_class => 'col-md-1',
+		    wrapper_class => 'col-xs-1',
 		    element_attr => { placeholder => 'DN' },
 		  );
 
 # bl-3 ----------------------------------------------------------------------
 
 has_field 'postalAddress' => ( label => 'PostalAdress',
-			       wrapper_class => 'col-md-3',
+			       wrapper_class => 'col-xs-3',
 			       element_attr => { placeholder => '121, 4th floor' },
 			     );
 
 has_field 'registeredAddress' => ( label => 'Registered Adress',
-				   wrapper_class => 'col-md-3',
+				   wrapper_class => 'col-xs-3',
 				   element_attr => { placeholder => '121, 4th floor' },
 				 );
 
 has_field 'description' => ( type => 'TextArea',
 			     label => 'Description',
-			     wrapper_class => 'col-md-6',
+			     wrapper_class => 'col-xs-6',
 			     element_attr => { placeholder => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed dapibus nulla. Mauris vehicula vehicula ligula ac dapibus. Fusce vehicula a turpis sed. ' },
 			     # cols => 30,
 			     rows => 2
@@ -183,14 +183,16 @@ has_field 'description' => ( type => 'TextArea',
 
 
 has_field 'aux_reset' => ( type => 'Reset',
-			   wrapper_class => [ 'col-md-2' ],
-			   element_class => [ 'btn', 'btn-default', 'btn-block', ],
-			   value => 'Reset' );
+			   wrapper_class => [ 'col-xs-2' ],
+			   element_class => [ 'btn', 'btn-danger', 'btn-block', ],
+			   element_wrapper_class => [ 'col-xs-12', ],
+			   # value => 'Reset'
+			 );
 
 has_field 'aux_submit' => (
 			   type => 'Submit',
-			   wrapper_class => [ 'pull-right', 'col-md-10'],
-			   element_class => [ 'btn', 'btn-default', 'btn-block', ],
+			   wrapper_class => [ 'col-xs-10'],
+			   element_class => [ 'btn', 'btn-success', 'btn-block', ],
 			   # label_no_filter => 1,
 			   # value => '<span class="glyphicon glyphicon-plus-sign"></span> Submit',
 			   value => 'Submit'
@@ -219,7 +221,7 @@ has_block 'bl-2' => ( tag => 'fieldset',
 has_block 'bl-3' => ( tag => 'fieldset',
 		      render_list => [ 'telephoneNumber', 'description' ],
 		      # label => '&nbsp;',
-		      class => [ 'row', ]
+		      class => [ 'container-fluid', ]
 		    );
 
 has_block 'bl-4' => ( tag => 'fieldset',

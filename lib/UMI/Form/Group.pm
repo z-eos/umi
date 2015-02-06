@@ -50,13 +50,14 @@ has_field 'descr' => ( type => 'TextArea',
 		       cols => 30, rows => 2);
 
 has_field 'reset' => ( type => 'Reset',
-			wrapper_class => [ 'pull-left', 'col-lg-2' ],
-			element_class => [ 'btn', 'btn-default', 'col-lg-6' ],
-		        value => 'Reset' );
+		       wrapper_class => [ 'col-xs-1' ],
+		       element_class => [ 'btn', 'btn-danger', 'btn-block' ],
+		       element_wrapper_class => [ 'col-xs-12', ],
+		       value => 'Reset' );
 
 has_field 'submit' => ( type => 'Submit',
-			wrapper_class => [ 'pull-right', 'col-lg-10' ],
-			element_class => [ 'btn', 'btn-default', 'col-lg-12' ],
+			wrapper_class => [ 'col-xs-11' ],
+			element_class => [ 'btn', 'btn-success', 'col-xs-12' ],
 			value => 'Submit' );
 
 has_block 'submitit' => ( tag => 'fieldset',

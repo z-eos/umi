@@ -19,7 +19,7 @@ sub html_attributes {
 has_field 'gitAclProject' => (apply => [ NoSpaces ],
 			      label => 'Project Name',
 			      label_attr => { title => 'gitAclProject field description' },
-			      wrapper_class => 'col-md-3',
+			      wrapper_class => 'col-xs-3',
 			      element_attr => { placeholder => 'Horns & Hooves LLC' },
 			      required => 1,
 			     );
@@ -27,13 +27,13 @@ has_field 'gitAclProject' => (apply => [ NoSpaces ],
 has_field 'gitAclOrder' => (apply => [ NoSpaces, PositiveNum ],
 			      label => 'Order',
 			      label_attr => { title => 'gitAcl order if many' },
-			      wrapper_class => 'col-md-1',
+			      wrapper_class => 'col-xs-1',
 			      element_attr => { placeholder => '321' },
 			     );
 
 has_field 'gitAclOp' => ( type => 'Multiple',
 			  label => 'Operation/s',
-			  wrapper_class => 'col-md-2',
+			  wrapper_class => 'col-xs-2',
 			  options => [
 				      {
 				       value => 'C', label => 'CREATE', selected => 'on' },
@@ -50,7 +50,7 @@ has_field 'gitAclOp' => ( type => 'Multiple',
 
 has_field 'gitAclVerb' => ( type => 'Select',
 			    label => 'Verb',
-			    wrapper_class => 'col-md-2',
+			    wrapper_class => 'col-xs-2',
 			    options => [{ value => 'allow', label => 'allow'},
 					{ value => 'deny', label => 'deny'},
 				       ],
@@ -59,7 +59,7 @@ has_field 'gitAclVerb' => ( type => 'Select',
 has_field 'gitAclRef' => (apply => [ NoSpaces ],
 			  label => 'Reference',
 			  label_attr => { title => 'gitAclRef field description' },
-			  wrapper_class => 'col-md-3',
+			  wrapper_class => 'col-xs-3',
 			  element_attr => { placeholder => 'Horns/Hooves/Super/Pooper' },
 			  # required => 1,
 			 );
@@ -71,7 +71,7 @@ has_field 'gitAclUser_user' => ( type => 'Select',
 				 # label_class => [ qw(requiredwhen control-label) ],
 				 label_class => [ qw( control-label ) ],
 				 label_attr => { title => 'gitAclUser field description' },
-				 wrapper_class => 'col-md-2',
+				 wrapper_class => 'col-xs-2',
 				 required_when => { gitAclUser_group => 0 },
 			       );
 
@@ -111,7 +111,7 @@ has_field 'gitAclUser_group' => ( type => 'Select',
 				  label => 'Group',
 				  # label_class => [ 'requiredwhen' ],
 				  label_attr => { title => 'gitAclUser group' },
-				  wrapper_class => 'col-md-2',
+				  wrapper_class => 'col-xs-2',
 				  required_when => { gitAclUser_user => 0 },
 				);
 
@@ -149,21 +149,22 @@ sub options_gitAclUser_group {
 has_field 'gitAclUser_cidr' => (apply => [ CIDR ],
 			  label => 'CIDR',
 			  label_attr => { title => 'gitAclUser CIDR' },
-			  wrapper_class => 'col-md-2',
+			  wrapper_class => 'col-xs-2',
 			  element_attr => { placeholder => '172.16.157.193/32' },
 			 );
 
 # bl-2 ----------------------------------------------------------------------
 
 has_field 'aux_reset' => ( type => 'Reset',
-			   wrapper_class => [ 'col-md-1' ],
-			   element_class => [ 'btn', 'btn-default', 'btn-block', ],
+			   wrapper_class => [ 'col-xs-1' ],
+			   element_class => [ 'btn', 'btn-danger', 'btn-block', ],
+			   element_wrapper_class => [ 'col-xs-12', ],
 			   value => 'Reset' );
 
 has_field 'aux_submit' => (
 			   type => 'Submit',
-			   wrapper_class => [ 'pull-right', 'col-md-11'],
-			   element_class => [ 'btn', 'btn-default', 'btn-block', ],
+			   wrapper_class => [ 'col-xs-11'],
+			   element_class => [ 'btn', 'btn-success', 'btn-block', ],
 			   # label_no_filter => 1,
 			   # value => '<span class="glyphicon glyphicon-plus-sign"></span> Submit',
 			   value => 'Submit'

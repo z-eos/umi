@@ -45,15 +45,16 @@ sub options_memberUid {
 }
 
 
-has_field 'reset' => ( type => 'Reset',
+has_field 'aux_reset' => ( type => 'Reset',
 		       label => '',
-		       wrapper_class => [ 'pull-left', 'col-md-2' ],
-		       element_class => [ 'btn', 'btn-default', 'btn-block', ],
+		       wrapper_class => [ 'col-xs-1' ],
+		       element_class => [ 'btn', 'btn-danger', 'btn-block', ],
+		       element_wrapper_class => [ 'col-xs-12', ],
 		       value => 'Reset' );
 
-has_field 'submit' => ( type => 'Submit',
-			wrapper_class => [ 'pull-right', 'col-md-10' ],
-			element_class => [ 'btn', 'btn-default', 'btn-block', ],
+has_field 'aux_submit' => ( type => 'Submit',
+			wrapper_class => [ 'col-xs-11' ],
+			element_class => [ 'btn', 'btn-success', 'btn-block', ],
 			value => 'Submit' );
 
 # has_block 'submitit' => ( tag => 'fieldset',

@@ -107,7 +107,7 @@
 $(function(){
 
   // need this because HFH adds .has-error to whole hierarchy of objects
-  // $(".duplicate").children(".form-group.has-error").removeClass("has-error");
+  $(".duplicate").children(".form-group.has-error").removeClass("has-error");
   
   // $("a span.rm-duplicate").on("click",function(e){
   $("a.btn[data-duplicate]").on("click",function(e){

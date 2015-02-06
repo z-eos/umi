@@ -52,15 +52,26 @@
 /* } */
 
 
+ // .required:after {
+ //   /* content: "\e146"; */
+ //   /* content: "\e034"; flag */
+ //   content: "\e044";
+ //   font-family: "Glyphicons Halflings";
+ //   font-size: 60%;
+ //   color: #E74C3C;
+ //   vertical-align: top;
+ //   margin: 0px 0px 0px 3px;
+ //   padding: 0 3px 0 0;
+ // }
+
 .required:after {
-    /* content: "\e146"; */
-    content: "\e034";
-    font-family: "Glyphicons Halflings";
-    font-size: 70%;
-    color: #E74C3C;
-    vertical-align: top;
-    margin: 0px 0px 0px 5px;
-    padding: 0 5px 0 0;
+  content: "\f06a";
+  font-family: "FontAwesome";
+  font-size: 70%;
+  color: #E74C3C;
+  vertical-align: top;
+  margin: 0px 0px 0px 3px;
+  padding: 0 3px 0 0;
 }
 
 .requiredwhen:after {
@@ -79,13 +90,28 @@
     word-break: break-all;
 }
 
-/* a.menutab:hover { */
-/*     color: #FFFFFF; */
-/* } */
-/* a.menutab:active { */
-/*     color: #FFFFFF; */
-/* } */
+.umi-search, .umi-search:active {
+  color: #FFFFFF;
+  text-decoration: none;
+}
+
+.umi-search:hover, .umi-search:focus {
+  background-color: #F0F0F0;
+  border-color: #F0F0F0;
+  text-decoration: none;
+}
+
+.umi-search:visited {
+  color: #FFFFFF;  
+  background-color: #8080FF;
+  border-color: #8080FF;
+  text-decoration: none;
+}
 
 .table-vcenter td {
    vertical-align: middle!important;
+}
+
+.umi-text-left {
+  text-align: left;
 }

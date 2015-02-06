@@ -18,22 +18,23 @@ has_field 'ldap_modify_jpegphoto' => ( type => 'Hidden', );
 
 has_field 'avatar' => ( type => 'Upload',
 			label => 'Photo User ID',
-			# label_class => [ 'form-group', 'col-md-4' ],
+			# label_class => [ 'form-group', 'col-xs-4' ],
 			element_class => [ 'btn', 'btn-default', ],
-			# wrapper_class => [ 'col-md-12' ],
+			# wrapper_class => [ 'col-xs-12' ],
 			max_size => '50000',
 			# required => 1,
 		      );
 
-has_field 'reset' => ( type => 'Reset',
-#			wrapper_class => [ 'pull-left', 'col-md-2' ],
-			element_class => [ 'btn', 'btn-default', ],
-		        value => 'Reset' );
+has_field 'aux_reset' => ( type => 'Reset',
+		       wrapper_class => [ 'col-xs-1' ],
+		       element_class => [ 'btn', 'btn-danger', 'btn-block', ],
+		       element_wrapper_class => [ 'col-xs-12', ],
+		       value => 'Reset' );
 
-has_field 'submit' => ( type => 'Submit',
-#			wrapper_class => [ 'pull-right', 'col-md-10' ],
-			element_class => [ 'btn', 'btn-default', ],
-			value => 'Submit' );
+has_field 'aux_submit' => ( type => 'Submit',
+			    wrapper_class => [ 'col-xs-11', ],
+			    element_class => [ 'btn', 'btn-success', 'btn-block', ],
+			    value => 'Submit' );
 
 sub html_attributes {
   my ( $self, $field, $type, $attr ) = @_;

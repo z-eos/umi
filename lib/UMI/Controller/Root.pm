@@ -75,6 +75,25 @@ sub accinfo :Path(accinfo) :Args(0) {
     $c->stash( template => 'acc_info.tt', );
 }
 
+## working sample
+# use UMI::Wizard::MultiPage;
+# has 'multiform' => ( isa => 'UMI::Wizard::MultiPage', is => 'rw',
+# 		     lazy => 1, default => sub { UMI::Wizard::MultiPage->new },
+# 		     documentation => q{MultiPage Form},
+# 		   );
+
+# sub multipage :Path(multipage) :Args(0) {
+#   my ( $self, $c ) = @_;
+#   $c->stash( template => 'multipage.tt',
+# 	     form => $self->multiform );
+
+#   return unless
+#     $self->multiform->process(
+# 			      posted => ($c->req->method eq 'POST'),
+# 			      params => $c->req->parameters,
+# 			     );
+# }
+
 
 =head2 download_from_ldap
 

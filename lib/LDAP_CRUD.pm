@@ -12,6 +12,7 @@ use Net::LDAP::Util qw(
 			ldap_error_desc
 			ldap_explode_dn
 			escape_filter_value
+			canonical_dn
 		     );
 
 use namespace::autoclean;
@@ -847,6 +848,8 @@ sub select_key_val {
   return \%results;
 }
 
+
+
 =head2 obj_add
 
 =cut
@@ -1165,6 +1168,15 @@ sub _build_select_authorizedservice {
   return \@services;
 }
 
+
+######################################################################
+# temporary stuff
+######################################################################
+
+sub canonical_dn_rev {
+  my ($self, $dn) = @_;
+  return canonical_dn($dn, reverse => 1);
+}
 
 
 ######################################################################

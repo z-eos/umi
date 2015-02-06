@@ -217,22 +217,26 @@ sub options_authorizedservice {
   return \@services;
 }
 
+has_field 'aux_hspace' => ( type => 'Display',
+			    html => '<p>&nbsp;</p>',
+			  );
 
-has_field 'reset' => ( type => 'Reset',
-			wrapper_class => [ 'pull-left', 'col-md-2' ],
-			element_class => [ 'btn', 'btn-default', 'col-md-4' ],
-		        value => 'Reset' );
+has_field 'aux_reset' => ( type => 'Reset',
+			   wrapper_class => [ 'col-xs-1' ],
+			   element_class => [ 'btn', 'btn-danger', 'btn-block' ],
+			   element_wrapper_class => [ 'col-xs-12', ],
+			   value => 'Reset' );
 
-has_field 'submit' => ( type => 'Submit',
-			wrapper_class => [ 'pull-right', 'col-md-10' ],
-			element_class => [ 'btn', 'btn-default', 'col-md-12' ],
-			value => 'Submit' );
+has_field 'aux_submit' => ( type => 'Submit',
+			    wrapper_class => [ 'col-xs-11', ],
+			    element_class => [ 'btn', 'btn-success', 'btn-block' ],
+			    value => 'Submit' );
 
 
 
 has_block 'person' => ( tag => 'fieldset',
 			render_list => [ 'givenname', 'sn', 'telephonenumber', 'avatar' ],
-			label => '<abbr title="Personal Data" class="initialism"><span class="icon_id" aria-hidden="true"></span></abbr>',
+			label => '<abbr title="Personal Data" class="initialism"><span class="fa fa-user"></span></abbr>',
 			label_class => [ 'pull-left' ],
 			class => [ 'form-inline' ]
 		      );
@@ -246,26 +250,26 @@ has_block 'job' => ( tag => 'fieldset',
 
 has_block 'account' => ( tag => 'fieldset',
 			 render_list => [ 'login', 'password1', 'password2', 'pwdcomment' ],
-			 label => '<abbr title="User Accounts (Management and Srvice/s) Credentials" class="initialism"><span class="icon_key_alt" aria-hidden="true"></span></abbr>',
+			 label => '<abbr title="User Accounts (Management and Srvice/s) Credentials" class="initialism"><span class="fa fa-key"></span></abbr>',
 			 label_class => [ 'pull-left' ],
 			 class => [ 'form-inline' ],
 		       );
 
 has_block 'services' => ( tag => 'fieldset',
 			  render_list => [ 'associateddomain', 'authorizedservice', 'descr' ],
-			  label => '<abbr title="Services Assigned" class="initialism"><span class="icon_cloud_alt" aria-hidden="true"></span></abbr>',
+			  label => '<abbr title="Services Assigned" class="initialism"><span class="fa fa-sliders"></span></abbr>',
 			  # label => '<span class="icon_menu-square_alt2" aria-hidden="true"></span>',
-			  label_class => [ 'pull-left' ],
+			  # label_class => [ 'pull-left' ],
 			  class => [ 'form-inline' ]
 			);
 
-has_block 'submitit' => ( tag => 'fieldset',
-			render_list => [ 'reset', 'submit'],
-			label => '&nbsp;',
-			class => [ 'row' ]
+has_block 'aux_submitit' => ( tag => 'fieldset',
+			render_list => [ 'aux_hspace', 'aux_reset', 'aux_submit'],
+			# label => '&nbsp;',
+			class => [ 'container-fluid' ]
 		      );
 
-sub build_render_list {[ 'person', 'job', 'account', 'services', 'submitit' ]}
+sub build_render_list {[ 'person', 'job', 'account', 'services', 'aux_submitit' ]}
 
 sub html_attributes {
   my ( $self, $field, $type, $attr ) = @_;

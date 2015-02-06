@@ -47,16 +47,17 @@ sub options_groups {
 }
 
 
-has_field 'reset' => ( type => 'Reset',
-		       label => '',
-		       wrapper_class => [ 'pull-left', 'col-md-2' ],
-		       element_class => [ 'btn', 'btn-default', 'btn-block', ],
-		       value => 'Reset' );
+has_field 'aux_reset' => ( type => 'Reset',
+			   label => '',
+			   wrapper_class => [ 'col-xs-1' ],
+			   element_class => [ 'btn', 'btn-danger', 'btn-block', ],
+			   element_wrapper_class => [ 'col-xs-12', ],
+			   value => 'Reset' );
 
-has_field 'submit' => ( type => 'Submit',
-			wrapper_class => [ 'pull-right', 'col-md-10' ],
-			element_class => [ 'btn', 'btn-default', 'btn-block', ],
-			value => 'Submit' );
+has_field 'aux_submit' => ( type => 'Submit',
+			    wrapper_class => [ 'col-xs-11' ],
+			    element_class => [ 'btn', 'btn-success', 'btn-block', ],
+			    value => 'Submit' );
 
 # has_block 'submitit' => ( tag => 'fieldset',
 #                         render_list => [ 'reset', 'submit'],

@@ -122,6 +122,10 @@ sub index :Path :Args(0) {
 	      $params->{'ldapsearch_filter'} ne '' ) {
       $filter = $params->{'ldapsearch_filter'};
       $base = $params->{'ldapsearch_base'};
+    } elsif ( defined $params->{'ldap_subtree'} &&
+	      $params->{'ldap_subtree'} ne '' ) {
+      $filter_show = $filter = 'objectClass=*';
+      $base = $params->{'ldap_subtree'};
     } else {
       $filter = 'objectClass=*';
       $filter_show = $filter;
@@ -137,38 +141,40 @@ sub index :Path :Args(0) {
 				  }
 				 );
 
-    my @entries = $mesg->entries;
+    my @entries = $mesg->sorted; # entries;
 
     my $return;
     $return->{warning} = $ldap_crud->err($mesg)->{caller} .
       ': ' . $ldap_crud->err($mesg)->{html} if ! $mesg->count;
 
-    my ( $ttentries, $attr );
+    my ( $ttentries, $attr, $tmp );
     foreach (@entries) {
-      $ttentries->{$_->dn}->{'mgmnt'} =
+      # $tmp = $ldap_crud->canonical_dn_rev ( $_->dn );
+      $tmp = $_->dn;
+      $ttentries->{$tmp}->{'mgmnt'} =
 	{
-	 is_dn => scalar split(',', $_->dn) <= 3 ? 1 : 0,
-	 is_account => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
-	 is_group => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{group}/ ? 1 : 0,
-	 jpegPhoto => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
+	 is_dn => scalar split(',', $tmp) <= 3 ? 1 : 0,
+	 is_account => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
+	 is_group => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{group}/ ? 1 : 0,
+	 jpegPhoto => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
 	 gitAclProject => $_->exists('gitAclProject') ? 1 : 0,
 	 userPassword => $_->exists('userPassword') ? 1 : 0,
-	 userDhcp => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ &&
-	 scalar split(',', $_->dn) <= 3 ? 1 : 0,
+	 userDhcp => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ &&
+	 scalar split(',', $tmp) <= 3 ? 1 : 0,
 	};
       foreach $attr (sort $_->attributes) {
-	$ttentries->{$_->dn}->{attrs}->{$attr} = $_->get_value( $attr, asref => 1 );
+	$ttentries->{$tmp}->{attrs}->{$attr} = $_->get_value( $attr, asref => 1 );
 	if ( $attr eq 'jpegPhoto' ) {
 	  use MIME::Base64;
-	  $ttentries->{$_->dn}->{attrs}->{$attr} =
+	  $ttentries->{$tmp}->{attrs}->{$attr} =
 	    sprintf('img-thumbnail" alt="jpegPhoto of %s" src="data:image/jpg;base64,%s" title="%s" />',
-		    $_->dn,
-		    encode_base64(join('',@{$ttentries->{$_->dn}->{attrs}->{$attr}})),
-		    $_->dn);
+		    $tmp,
+		    encode_base64(join('',@{$ttentries->{$tmp}->{attrs}->{$attr}})),
+		    $tmp);
 	  } elsif ( $attr eq 'userCertificate;binary' ) {
-	    $ttentries->{$_->dn}->{attrs}->{$attr} = $self->cert_info({ cert => $_->get_value( $attr ) });
-	} elsif (ref $ttentries->{$_->dn}->{attrs}->{$attr} eq 'ARRAY') {
-	  $ttentries->{$_->dn}->{is_arr}->{$attr} = 1;
+	    $ttentries->{$tmp}->{attrs}->{$attr} = $self->cert_info({ cert => $_->get_value( $attr ) });
+	} elsif (ref $ttentries->{$tmp}->{attrs}->{$attr} eq 'ARRAY') {
+	  $ttentries->{$tmp}->{is_arr}->{$attr} = 1;
 	}
       }
     }

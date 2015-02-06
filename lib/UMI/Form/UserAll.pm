@@ -420,14 +420,14 @@ has_block 'groupsselect' => ( tag => 'fieldset',
 ######################################################################
 
 has_field 'aux_reset' => ( type => 'Reset',
-			   element_class => [ 'btn', 'btn-default', 'btn-block', ],
+			   element_class => [ 'btn', 'btn-danger', 'btn-block', ],
 			   element_wrapper_class => [ 'col-xs-12', ],
 			   wrapper_class => [ 'col-xs-1' ],
-			   value => 'Reset All' );
-
+			   # value => 'Reset All'
+			 );
 
 has_field 'aux_submit' => ( type => 'Submit',
-			    element_class => [ 'btn', 'btn-default', 'btn-block', ],
+			    element_class => [ 'btn', 'btn-success', 'btn-block', ],
 			    # element_wrapper_class => [ 'col-xs-12', ],
 			    wrapper_class => [ 'col-xs-11', ], # 'pull-right' ],
 			    value => 'Submit' );

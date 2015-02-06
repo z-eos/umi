@@ -56,12 +56,12 @@ has_field 'search_results' => ( label => 'Search Results',
 
 has_field 'reset' => ( type => 'Reset',
 			wrapper_class => [ 'col-md-1' ],
-			element_class => [ 'btn', 'btn-default', 'btn-block' ],
+			element_class => [ 'btn', 'btn-danger', 'btn-block' ],
 		        value => 'Reset' );
 
 has_field 'submit' => ( type => 'Submit',
 			wrapper_class => [ 'col-md-11' ],
-			element_class => [ 'btn', 'btn-default', 'btn-block' ],
+			element_class => [ 'btn', 'btn-success', 'btn-block' ],
 			value => 'Submit' );
 
 has_block 'row1' => ( tag => 'fieldset',
