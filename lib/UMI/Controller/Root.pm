@@ -309,7 +309,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
       $return->{error} .= '<li>services list' . $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html} . '</li>';
     }
 
-    foreach ($mesg->entries) {
+    foreach ($mesg->sorted( 'authorizedService' )) {
       $mesg = $ldap_crud->search( { base => $_->dn,
 				    scope => 'children',
 				  });
@@ -326,7 +326,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 			  ->{(split('@', $_->get_value('authorizedService')))[0]}->{descr},
 			 };
 
-      @service_arr = $mesg->entries;
+      @service_arr = $mesg->sorted( 'authorizedService' );
 
       foreach (@service_arr) {
 	$service_details->{leaf}->{$_->dn} = defined $_->get_value('uid') ? $_->get_value('uid') : $_->get_value('cn');
