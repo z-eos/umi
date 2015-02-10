@@ -15,7 +15,7 @@
         <span class="icon-bar"></span>
       </button>
       <a class="logo" href="/"><img class="pull-left logo" src="/static/images/umi-logo.50x50.png" exify_initialized="true" style="margin-top: 5px;"></a>
-      <a class="navbar-brand" href="/">&nbsp;Unified Management Interface</a>
+      <a class="navbar-brand" href="/" tabindex="-1">&nbsp;Unified Management Interface</a>
     </div>
     <div class="collapse navbar-collapse">
       <ul class="nav navbar-nav">
@@ -223,7 +223,7 @@
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
 			value="ou=GitACL,[% dc %]"
-			name="ldapsearch_base"> tabindex="25
+			name="ldapsearch_base" tabindex="25">
 		<span class="[% icon_class %] fa-gavel"></span>&nbsp;GitACL</button></li>
 
 	      [% color = "warning" %]
