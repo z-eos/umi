@@ -23,7 +23,16 @@
     <h4><span class="fa fa-check-circle">&nbsp;</span>Success!</h4>
   </div>
   <div class="panel-body">
-  <pre>[% final_message.success %]</pre>
+    <pre>[% final_message.success %]</pre>
+  </div>
+</div>
+[% ELSIF final_message.warning %]
+<div class="panel panel-warning">
+  <div class="panel-heading">
+    <h4><span class="fa fa-exclamation-triangle">&nbsp;</span>Warning!</h4>
+  </div>
+  <div class="panel-body">
+    [% final_message.warning %]
   </div>
 </div>
 [% ELSE %]

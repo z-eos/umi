@@ -488,10 +488,10 @@ sub create_account_branch_leaf {
     $authorizedService_add =
       [
        authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
-       uid => $arg->{uid},
-       cn => $arg->{uid},
+       uid => $self->macnorm($arg->{uid}),
+       cn => $self->macnorm($arg->{uid}),
        objectClass => $ldap_crud->{cfg}->{objectClass}->{acc_svc_802_1x},
-       userPassword => '!' . $arg->{password}->{clear},
+       userPassword => $arg->{password}->{clear},
        description => uc($arg->{service}) . ': ' . $arg->{'login'},
        radiusgroupname => 'STUB',
        radiustunnelmediumtype => 6,
@@ -499,6 +499,7 @@ sub create_account_branch_leaf {
        radiustunnelprivategroupid => 666,
        radiustunneltype => 13,
       ];
+    p $authorizedService_add;
     undef $authorizedService;
     $authorizedService = [];
     $arg->{dn} = 'uid=' . $arg->{'login'} . ',' . $arg->{basedn};

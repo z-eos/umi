@@ -177,15 +177,15 @@ sub options_authorizedservice {
 }
 
 
-has_field 'reset' => ( type => 'Reset',
-		       do_wrapper => 0,
-		       element_class => [ 'btn', 'btn-default', 'col-xs-1', ],
-		       value => 'Reset' );
+has_field 'aux_reset' => ( type => 'Reset',
+			   wrapper_class => [ 'col-xs-2' ],
+			   element_class => [ 'btn', 'btn-danger', 'btn-block', ],
+			   element_wrapper_class => [ 'col-xs-12', ], );
 
-has_field 'submit' => ( type => 'Submit',
-			do_wrapper => 0,
-			element_class => [ 'btn', 'btn-default', 'col-xs-10', 'col-xs-offset-1' ],
-			value => 'Submit' );
+has_field 'aux_submit' => ( type => 'Submit',
+			    wrapper_class => [ 'col-xs-10'],
+			    element_class => [ 'btn', 'btn-success', 'btn-block' ],
+			    value => 'Submit' );
 
 
 
@@ -232,12 +232,8 @@ has_block 'services' => ( tag => 'fieldset',
 			);
 
 has_block 'submitit' => ( tag => 'fieldset',
-			  render_list => [
-					  'reset',
-					  'submit',
-					 ],
-			  label => '&nbsp;',
-#			  class => [ 'row' ]
+			  render_list => [ 'aux_reset', 'aux_submit', ],
+			  class => [ 'row' ]
 			);
 
 # sub build_render_list {[ 'services', 'add_svc_acc', 'add_svc_acc_uid', 'account', 'descr', 'sshpublickey', 'usercertificate', 'submitit' ]}
@@ -292,6 +288,10 @@ sub validate {
     # p [ '(uid=' . $login . '@' . $self->field('associateddomain')->value . ')',
     # 	'authorizedService=' . $_ . '@' . $self->field('associateddomain')->value . ',' .
     # 	$self->field('add_svc_acc')->value ];
+
+    $self->field('login')
+      ->add_error('<span class="fa fa-exclamation-circle"></span>&nbsp;MAC address is not valid')
+      if $_ =~ /^802.1x-mac$/ && ! $self->macnorm($login);
 
     my $mesg =
       $ldap_crud->search(

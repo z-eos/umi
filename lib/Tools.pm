@@ -150,6 +150,34 @@ sub fnorm {
 }
 
 
+=head2 macnorm
+
+MAC address field value normalizator.
+
+The standard (IEEE 802) format for printing MAC-48 addresses in
+human-friendly form is six groups of two hexadecimal digits, separated
+by hyphens (-) or colons (:), in transmission order
+(e.g. 01-23-45-67-89-ab or 01:23:45:67:89:ab ) is casted to the twelve
+hexadecimal digits without delimiter. For the examples above it will
+look: 0123456789ab
+
+=cut
+
+
+sub macnorm {
+  my ( $self, $mac ) = @_;
+  my $oct = '[0-9a-f]{2}';
+  if ( lc($mac) =~ /^$oct([.:-])$oct([.:-])$oct([.:-])$oct([.:-])$oct([.:-])$oct$/ &&
+	$1 x 4 eq "$2$3$4$5" ) {
+    return join('', split(/:|-/, lc($mac)));
+  } elsif ( lc($mac) =~ /^$oct$oct$oct$oct$oct$oct$/ ) {
+    return lc($mac);
+  } else {
+    return 0;
+  }
+}
+
+
 ######################################################################
 
 1;

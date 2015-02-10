@@ -239,7 +239,8 @@ sub proc :Path(proc) :Args(0) {
 						 )
 				   );
 	} elsif ( $attr eq 'userPassword' ) {
-	  $entry->{$attr} = '*' x 8;
+	  next;
+	#   $entry->{$attr} = '*' x 8;
 	} else {
 	  $entry->{$attr} = $entry_tmp->get_value($attr, asref => 1);
 	}
@@ -569,7 +570,7 @@ sub proc :Path(proc) :Args(0) {
 	foreach ( @{$arr} ) { # for each authorizedservice choosen
 	  next if ! $_;
 
-	  $uid = $_ =~ /^802.1x-/ ? $login : sprintf('%s@%s', $login, $params->{'associateddomain'});
+	  $uid = $_ =~ /^802.1x-/ ? $self->macnorm($login) : sprintf('%s@%s', $login, $params->{'associateddomain'});
 
 	  if ( ( $_ eq 'mail' || $_ eq 'xmpp' ) &&
 	      ( ! defined $params->{'password1'} ||
@@ -577,6 +578,11 @@ sub proc :Path(proc) :Args(0) {
 	    $pwd = { $_ => $self->pwdgen };
 	  } elsif ( $_ eq 'ssh' ) {
 	    $pwd->{$_}->{clear} = 'N/A';
+	  } elsif ( $_ =~ /^802.1x-/ &&
+		    $params->{'password0'} eq '' &&
+		    $params->{'password1'} eq '' ) {
+	    $pwd->{$_}->{clear} = $self->macnorm($params->{'login'});
+	    $login = $self->macnorm($login);
 	  } else {
 	    $pwd = { $_ => $self->pwdgen( { pwd => $params->{'password1'} } ) };
 	  }
@@ -1045,12 +1051,13 @@ sub modify :Path(modify) :Args(0) {
   my $ldap_crud = $c->model('LDAP_CRUD');
   my $mesg = $ldap_crud->search( { base => $params->{dn}, scope => 'base' } );
   my $return;
-  if ( $mesg->code ) {
-    $return->{error} .= '<li>' . $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html} . '</li>';
-  }
+  $return->{error} .= '<li>' . $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html} . '</li>'
+    if $mesg->code;
+
   my $entry = $mesg->entry(0);
 
-  my ($attr, $val, $mod, $orig);
+  my ($attr, $val, $orig);
+  my $mod = undef;
   foreach $attr ( sort ( keys %{$params} )) {
     next if ( $attr eq 'dn' ||
 	      $attr =~ /$ldap_crud->{cfg}->{exclude_prefix}/ ||
@@ -1058,6 +1065,8 @@ sub modify :Path(modify) :Args(0) {
     if ( $attr eq "jpegPhoto" ) {
       $params->{jpegPhoto} = $c->req->upload('jpegPhoto');
     }
+
+    p $attr;
 
     $val = $entry->get_value ( $attr, asref => 1 );
 
@@ -1085,12 +1094,16 @@ sub modify :Path(modify) :Args(0) {
     }
   }
 
-  $mesg = $ldap_crud->mod( $params->{dn}, $mod );
-  if ( $mesg ne "0" ) {
-    $return->{error} .= '<li>' . $mesg . '</li>';
+  if ( defined $mod ) {
+    $mesg = $ldap_crud->mod( $params->{dn}, $mod );
+    if ( $mesg ne "0" ) {
+      $return->{error} .= '<li>' . $mesg . '</li>';
+    }
+    $return->{success} = p($mod);
+  } else {
+    $return->{warning} = 'No change was performed!';
   }
 
-  $return->{success} = p($mod);
   $c->stash(
 	    template => 'stub.tt',
 	    params => $params,
