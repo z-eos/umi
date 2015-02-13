@@ -291,7 +291,7 @@ sub validate {
 
     $self->field('login')
       ->add_error('<span class="fa fa-exclamation-circle"></span>&nbsp;MAC address is not valid')
-      if $_ =~ /^802.1x-mac$/ && ! $self->macnorm($login);
+      if $_ =~ /^802.1x-mac$/ && ! $self->macnorm({ mac => $login });
 
     my $mesg =
       $ldap_crud->search(

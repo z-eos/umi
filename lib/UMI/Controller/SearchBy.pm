@@ -570,7 +570,7 @@ sub proc :Path(proc) :Args(0) {
 	foreach ( @{$arr} ) { # for each authorizedservice choosen
 	  next if ! $_;
 
-	  $uid = $_ =~ /^802.1x-/ ? $self->macnorm($login) : sprintf('%s@%s', $login, $params->{'associateddomain'});
+	  $uid = $_ =~ /^802.1x-/ ? $self->macnorm({ mac => $login }) : sprintf('%s@%s', $login, $params->{'associateddomain'});
 
 	  if ( ( $_ eq 'mail' || $_ eq 'xmpp' ) &&
 	      ( ! defined $params->{'password1'} ||
@@ -581,8 +581,8 @@ sub proc :Path(proc) :Args(0) {
 	  } elsif ( $_ =~ /^802.1x-/ &&
 		    $params->{'password0'} eq '' &&
 		    $params->{'password1'} eq '' ) {
-	    $pwd->{$_}->{clear} = $self->macnorm($params->{'login'});
-	    $login = $self->macnorm($login);
+	    $pwd->{$_}->{clear} = $self->macnorm({ mac => $params->{'login'} });
+	    $login = $self->macnorm({ mac => $login });
 	  } else {
 	    $pwd = { $_ => $self->pwdgen( { pwd => $params->{'password1'} } ) };
 	  }

@@ -488,15 +488,15 @@ sub create_account_branch_leaf {
     $authorizedService_add =
       [
        authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
-       uid => $self->macnorm($arg->{uid}),
-       cn => $self->macnorm($arg->{uid}),
+       uid => $self->macnorm({ mac => $arg->{uid} }),
+       cn => $self->macnorm({ mac => $arg->{uid}}),
        objectClass => $ldap_crud->{cfg}->{objectClass}->{acc_svc_802_1x},
        userPassword => $arg->{password}->{clear},
        description => uc($arg->{service}) . ': ' . $arg->{'login'},
-       radiusgroupname => 'STUB',
+       radiusgroupname => $arg->{service} eq '802.1x-mac' ? 'ip-phone' : 'auth-mac',
        radiustunnelmediumtype => 6,
        radiusservicetype => 'Framed-User',
-       radiustunnelprivategroupid => 666,
+       radiustunnelprivategroupid => $arg->{service} eq '802.1x-mac' ? 3 : '3495',
        radiustunneltype => 13,
       ];
     p $authorizedService_add;

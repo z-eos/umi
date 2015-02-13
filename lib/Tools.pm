@@ -165,13 +165,18 @@ look: 0123456789ab
 
 
 sub macnorm {
-  my ( $self, $mac ) = @_;
-  my $oct = '[0-9a-f]{2}';
-  if ( lc($mac) =~ /^$oct([.:-])$oct([.:-])$oct([.:-])$oct([.:-])$oct([.:-])$oct$/ &&
-	$1 x 4 eq "$2$3$4$5" ) {
-    return join('', split(/:|-/, lc($mac)));
-  } elsif ( lc($mac) =~ /^$oct$oct$oct$oct$oct$oct$/ ) {
-    return lc($mac);
+  my ( $self, $args ) = @_;
+  my $arg = {
+	     mac => lc($args->{mac}),
+	     delim => $args->{delim} || '',
+	     oct => $args->{oct} || '[0-9a-f]{2}',
+	     sep => $args->{sep} || '[.:-]',
+	    };
+  if ( (
+	( $arg->{mac} =~ /^$arg->{oct}($arg->{sep})$arg->{oct}($arg->{sep})$arg->{oct}($arg->{sep})$arg->{oct}($arg->{sep})$arg->{oct}($arg->{sep})$arg->{oct}$/ ) ||
+	( $arg->{mac} =~ /^$arg->{oct}$arg->{oct}$arg->{oct}$arg->{oct}$arg->{oct}$arg->{oct}$/ )
+       ) && ($1 x 4 eq "$2$3$4$5") ) {
+    return join( $arg->{delim}, split(/$arg->{sep}/, $arg->{mac}) );
   } else {
     return 0;
   }
