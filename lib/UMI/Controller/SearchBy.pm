@@ -96,12 +96,17 @@ sub index :Path :Args(0) {
       $base = $ldap_crud->{cfg}->{base}->{dhcp};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_mac'} ) {
-      $filter = sprintf("|(dhcpHWAddress=ethernet %s)(&(uid=%s)(authorizedService=802.1x-mac@*))",
-			$filter_meta,
-			$filter_meta =~ tr/://dr);
-      $filter_show = sprintf("|(dhcpHWAddress=ethernet <kbd>%s</kbd>)(&(uid=<kbd>%s</kbd>)(authorizedService=802.1x-mac@*))",
-			     $filter_meta,
-			     $filter_meta =~ tr/://dr);
+
+      $filter = sprintf("|(dhcpHWAddress=ethernet %s)(&(|(uid=%s)(cn=%s))(authorizedService=802.1x-mac@*))",
+			$self->macnorm({ mac => $filter_meta, dlm => ':', }),
+			$self->macnorm({ mac => $filter_meta }),
+			$self->macnorm({ mac => $filter_meta }) );
+
+      $filter_show = sprintf("|(dhcpHWAddress=ethernet <kbd>%s</kbd>)(&(|(uid=<kbd>%s</kbd>)(cn=<kbd>%s</kbd>))(authorizedService=802.1x-mac@*))",
+			     $self->macnorm({ mac => $filter_meta, dlm => ':', }),
+			     $self->macnorm({ mac => $filter_meta }),
+			     $self->macnorm({ mac => $filter_meta }) );
+
       $base = $ldap_crud->{cfg}->{base}->{db};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_name'} ) {

@@ -161,6 +161,26 @@ by hyphens (-) or colons (:), in transmission order
 hexadecimal digits without delimiter. For the examples above it will
 look: 0123456789ab
 
+=over
+
+=item mac
+
+MAC address to process
+
+=item oct
+
+regex pattern for group of two hexadecimal digits [0-9a-f]{2}
+
+=item sep
+
+pattern for acceptable separator [.:-]
+
+=item dlm
+
+delimiter for concatenation after splitting
+
+=back
+
 =cut
 
 
@@ -168,15 +188,23 @@ sub macnorm {
   my ( $self, $args ) = @_;
   my $arg = {
 	     mac => lc($args->{mac}),
-	     delim => $args->{delim} || '',
 	     oct => $args->{oct} || '[0-9a-f]{2}',
 	     sep => $args->{sep} || '[.:-]',
+	     dlm => $args->{dlm} || '',
 	    };
-  if ( (
-	( $arg->{mac} =~ /^$arg->{oct}($arg->{sep})$arg->{oct}($arg->{sep})$arg->{oct}($arg->{sep})$arg->{oct}($arg->{sep})$arg->{oct}($arg->{sep})$arg->{oct}$/ ) ||
-	( $arg->{mac} =~ /^$arg->{oct}$arg->{oct}$arg->{oct}$arg->{oct}$arg->{oct}$arg->{oct}$/ )
-       ) && ($1 x 4 eq "$2$3$4$5") ) {
-    return join( $arg->{delim}, split(/$arg->{sep}/, $arg->{mac}) );
+  if (( $arg->{mac} =~ /^$arg->{oct}($arg->{sep})$arg->{oct}($arg->{sep})$arg->{oct}($arg->{sep})$arg->{oct}($arg->{sep})$arg->{oct}($arg->{sep})$arg->{oct}$/ ) &&
+      ($1 x 4 eq "$2$3$4$5$6")) {
+    return join( $arg->{dlm}, split(/$arg->{sep}/, $arg->{mac}) );
+  } elsif (( $arg->{mac} =~ /^$arg->{oct}$arg->{oct}$arg->{oct}$arg->{oct}$arg->{oct}$arg->{oct}$/ ) &&
+	   ($1 x 4 eq "$2$3$4$5")) {
+    my @mac_arr = split('', $arg->{mac});
+    return join( $arg->{dlm},
+		 "$mac_arr[0]$mac_arr[1]",
+		 "$mac_arr[2]$mac_arr[3]",
+		 "$mac_arr[4]$mac_arr[5]",
+		 "$mac_arr[6]$mac_arr[7]",
+		 "$mac_arr[8]$mac_arr[9]",
+		 "$mac_arr[10]$mac_arr[11]" );
   } else {
     return 0;
   }
