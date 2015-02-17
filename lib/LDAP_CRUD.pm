@@ -190,6 +190,7 @@ sub _build_cfg {
 					  descr => 'SSH key',
 					  disabled => 0,
 					  icon => 'fa fa-key',
+					  data_fields => 'to_sshkeygen,sshkeydescr,sshpublickey',
 					  },
 				'gpg' => {
 					  auth => 0,
@@ -202,6 +203,7 @@ sub _build_cfg {
 					   descr => 'OpenVPN',
 					   disabled => 0,
 					   icon => 'fa fa-certificate',
+					   data_fields => 'usercertificate',
 					  },
 			       },
 	 };
