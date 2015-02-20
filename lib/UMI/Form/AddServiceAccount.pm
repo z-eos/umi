@@ -57,6 +57,31 @@ has_field 'pwdcomment' => ( type => 'Display',
 			    'Leave login and password fields empty to autogenerate them. If empty, login will be equal to &laquo;personal&raquo; part of management account uid.</em></small>',
 			  );
 
+
+has_field 'radiusgroupname' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
+		       label => 'RADIUS Group Name',
+		       size => 60,
+		       wrapper_class => [ 'col-xs-4' ],
+		       # element_attr => { disabled => '', },
+		       # element_class => [ 'disabled' ],
+		       # init_value => 'add_svc_acc' . '-<service choosen>',
+		       element_attr => {
+		       			placeholder => 'ip-phone, wifi-123',
+		       		       },
+		     );
+
+has_field 'radiustunnelprivategroup' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
+					  label => 'RADIUS Tunnel Private Group',
+					  size => 60,
+					  wrapper_class => [ 'col-xs-4' ],
+					  # element_attr => { disabled => '', },
+					  # element_class => [ 'disabled' ],
+					  # init_value => 'add_svc_acc' . '-<service choosen>',
+					  element_attr => {
+							   placeholder => 'VLAN this 802.1x authenticates to',
+							  },
+					);
+
 has_field 'descr' => ( type => 'TextArea',
 		       label => 'Description',
 		       element_attr =>
@@ -189,7 +214,8 @@ has_field 'aux_submit' => ( type => 'Submit',
 
 
 
-has_block 'account' => ( tag => 'fieldset',
+has_block 'block_acc' => ( tag => 'fieldset',
+			 attr => { id => 'block_acc', },
 			 render_list => [
 					 'login',
 					 'password1',
@@ -198,27 +224,40 @@ has_block 'account' => ( tag => 'fieldset',
 					],
 			 label => '<span class="fa fa-user"></span>&nbsp;account credentials',
 			 label_class => [ 'text-info' ],
-#			 class => [ 'form-inline' ],
+			 #			 class => [ 'form-inline' ],
 		       );
 
-has_block 'ssh' => ( tag => 'fieldset',
-		     render_list => [
-				     'to_sshkeygen',
-				     'sshkeydescr',
-				     'sshgenfooter',
-				     'sshpublickey',
-				    ],
-		     label => '<span class="fa fa-key"></span>&nbsp;ssh key/s',
-		     label_class => [ 'text-info' ],
-		   );
+has_block 'block_802' => ( tag => 'fieldset',
+			 attr => { id => 'block_802', },
+			 render_list => [
+					 'radiusgroupname',
+					 'radiustunnelprivategroup',
+					],
+			 label => '<span class="fa fa-shield"></span>&nbsp;802.1x details',
+			 label_class => [ 'text-info' ],
+			 #			 class => [ 'form-inline' ],
+		       );
 
-has_block 'cert' => ( tag => 'fieldset',
-		      render_list => [
-				      'usercertificate',
-				     ],
-		      label => '<span class="fa fa-certificate"></span>&nbsp;certificate/s',
-		      label_class => [ 'text-info' ],
-		    );
+has_block 'block_ssh' => ( tag => 'fieldset',
+			 attr => { id => 'block_ssh', },
+			 render_list => [
+					 'to_sshkeygen',
+					 'sshkeydescr',
+					 'sshgenfooter',
+					 'sshpublickey',
+					],
+			 label => '<span class="fa fa-key"></span>&nbsp;ssh key/s',
+			 label_class => [ 'text-info' ],
+		       );
+
+has_block 'block_crt' => ( tag => 'fieldset',
+			 attr => { id => 'block_crt', },
+			 render_list => [
+					 'usercertificate',
+					],
+			 label => '<span class="fa fa-certificate"></span>&nbsp;certificate/s',
+			 label_class => [ 'text-info' ],
+		       );
 
 has_block 'services' => ( tag => 'fieldset',
 			  render_list => [
@@ -228,7 +267,7 @@ has_block 'services' => ( tag => 'fieldset',
 					 ],
 			  label => '<span class="fa fa-sliders"></span>&nbsp;services',
  			  label_class => [ 'text-info' ],
-#			  class => [ 'row' ]
+			  #			  class => [ 'row' ]
 			);
 
 has_block 'submitit' => ( tag => 'fieldset',
@@ -241,9 +280,10 @@ has_block 'submitit' => ( tag => 'fieldset',
 sub build_render_list {[
 			'add_svc_acc', 'add_svc_acc_uid',
 			'services',
-			'account',
-			'ssh',
-			'cert',
+			'block_acc',
+			'block_802',
+			'block_ssh',
+			'block_crt',
 			'submitit',
 		       ]}
 

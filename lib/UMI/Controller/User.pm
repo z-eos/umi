@@ -413,6 +413,8 @@ sub create_account_branch_leaf {
 	     sshpublickey => $args->{sshpublickey} || undef,
 	     sshkeydescr => $args->{sshkeydescr} || undef,
 	     userCertificate => $args->{userCertificate} || undef,
+	     radiusgroupname => $args->{radiusgroupname} || 'ip-phone',
+	     radiustunnelprivategroup => $args->{radiustunnelprivategroup} || 3,
 	    };
 
   $arg->{basedn} = 'authorizedService=' . $args->{service} . '@' . $args->{associatedDomain} .
@@ -493,10 +495,10 @@ sub create_account_branch_leaf {
        objectClass => $ldap_crud->{cfg}->{objectClass}->{acc_svc_802_1x},
        userPassword => $arg->{password}->{clear},
        description => uc($arg->{service}) . ': ' . $arg->{'login'},
-       radiusgroupname => $arg->{service} eq '802.1x-mac' ? 'ip-phone' : 'auth-mac',
+       radiusgroupname => $arg->{radiusgroupname},
        radiustunnelmediumtype => 6,
        radiusservicetype => 'Framed-User',
-       radiustunnelprivategroupid => $arg->{service} eq '802.1x-mac' ? 3 : '3495',
+       radiustunnelprivategroupid => $arg->{radiustunnelprivategroupid},
        radiustunneltype => 13,
       ];
     p $authorizedService_add;

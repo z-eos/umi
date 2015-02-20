@@ -132,80 +132,83 @@ sub _build_cfg {
 	  jpegPhoto => {
 			'stub' => 'user-6-128x128.jpg',
 		       },
-	  authorizedService => {
-				'mail' => {
-					   auth => 1,
-					   descr => 'Email',
-					   disabled => 0,
-					   homeDirectory_prefix => '/var/mail/IMAP_HOMES/',
-					   gidNumber => 10006,
-					   icon => 'fa fa-envelope-o',
-					   data_fields => 'login,password1,password2',
-					  },
-				'xmpp' => {
-					   auth => 1,
-					   descr => 'XMPP (Jabber)',
-					   disabled => 0,
-					   gidNumber => 10106,
-					   jpegPhoto_noavatar => UMI->path_to('root', 'static', 'images', '/avatar-xmpp.png'),
-					   icon => 'fa fa-lightbulb-o',
-					   data_fields => 'login,password1,password2',
-					  },
-				'802.1x-mac' => {
-						 auth => 1,
-						 descr => 'auth 802.1x MAC',
-						 disabled => 0,
-						 icon => 'fa fa-shield',
-						 data_fields => 'login,password1,password2',
-						},
-				'802.1x-eap' => {
-						 auth => 1,
-						 descr => 'auth 802.1x EAP',
-						 disabled => 0,
-						 icon => 'fa fa-shield',
-						 data_fields => 'login,password1,password2',
-						},
-				'otrs' => {
-					   auth => 1,
-					   descr => 'OTRS',
-					   disabled => 1,
-					   icon => 'fa fa-file-code-o',
-					   data_fields => 'login,password1,password2',
-					  },
-				'noc' => {
-					   auth => 1,
-					   descr => 'NOC',
-					   disabled => 1,
-					   icon => 'fa fa-file-code-o',
-					   data_fields => 'login,password1,password2',
-					  },
-				'sms' => {
-					  auth => 1,
-					  descr => 'SMSter',
-					  disabled => 1,
-					  data_fields => 'login,password1,password2',
-					 },
-				'ssh' => {
-					  auth => 0,
-					  descr => 'SSH key',
-					  disabled => 0,
-					  icon => 'fa fa-key',
-					  data_fields => 'to_sshkeygen,sshkeydescr,sshpublickey',
-					  },
-				'gpg' => {
-					  auth => 0,
-					  descr => 'GPG key',
-					  disabled => 1,
-					  icon => 'fa fa-key',
-					  },
-				'ovpn' => {
-					   auth => 0,
-					   descr => 'OpenVPN',
-					   disabled => 0,
-					   icon => 'fa fa-certificate',
-					   data_fields => 'usercertificate',
-					  },
-			       },
+	  authorizedService =>
+	  {
+	   'mail' => {
+		      auth => 1,
+		      descr => 'Email',
+		      disabled => 0,
+		      homeDirectory_prefix => '/var/mail/IMAP_HOMES/',
+		      gidNumber => 10006,
+		      icon => 'fa fa-envelope-o',
+		      data_fields => 'login,password1,password2',
+		     },
+	   'xmpp' => {
+		      auth => 1,
+		      descr => 'XMPP (Jabber)',
+		      disabled => 0,
+		      gidNumber => 10106,
+		      jpegPhoto_noavatar => UMI->path_to('root', 'static', 'images', '/avatar-xmpp.png'),
+		      icon => 'fa fa-lightbulb-o',
+		      data_fields => 'login,password1,password2',
+		     },
+	   '802.1x-mac' => {
+			    auth => 1,
+			    descr => 'auth 802.1x MAC',
+			    disabled => 0,
+			    icon => 'fa fa-shield',
+			    data_fields => 'login,password1,password2,radiusgroupname,radiustunnelprivategroup',
+			    data_relation => '8021x',
+			   },
+	   '802.1x-eap' => {
+			    auth => 1,
+			    descr => 'auth 802.1x EAP',
+			    disabled => 0,
+			    icon => 'fa fa-shield',
+			    data_fields => 'login,password1,password2,radiusgroupname,radiustunnelprivategroup',
+			    data_relation => '8021x',
+			   },
+	   'otrs' => {
+		      auth => 1,
+		      descr => 'OTRS',
+		      disabled => 1,
+		      icon => 'fa fa-file-code-o',
+		      data_fields => 'login,password1,password2',
+		     },
+	   'noc' => {
+		     auth => 1,
+		     descr => 'NOC',
+		     disabled => 1,
+		     icon => 'fa fa-file-code-o',
+		     data_fields => 'login,password1,password2',
+		    },
+	   'sms' => {
+		     auth => 1,
+		     descr => 'SMSter',
+		     disabled => 1,
+		     data_fields => 'login,password1,password2',
+		    },
+	   'ssh' => {
+		     auth => 0,
+		     descr => 'SSH key',
+		     disabled => 0,
+		     icon => 'fa fa-key',
+		     # data_fields => 'block_ssh',
+		    },
+	   'gpg' => {
+		     auth => 0,
+		     descr => 'GPG key',
+		     disabled => 1,
+		     icon => 'fa fa-key',
+		    },
+	   'ovpn' => {
+		      auth => 0,
+		      descr => 'OpenVPN',
+		      disabled => 0,
+		      icon => 'fa fa-certificate',
+		      # data_fields => 'block_crt',
+		     },
+	  },
 	 };
 }
 #=====================================================================
@@ -1079,6 +1082,16 @@ sub dhcp_lease {
   }
 }
 
+######################################################################
+# SELECT elements options builders
+######################################################################
+
+=head2 select_organizations
+
+options builder for select element of organizations
+
+=cut
+
 has 'select_organizations' => ( traits => ['Array'],
 	       is => 'ro', isa => 'ArrayRef',
 	       builder => '_build_select_organizations',
@@ -1122,6 +1135,12 @@ sub _build_select_organizations {
   return \@office;
 }
 
+=head2 select_associateddomains
+
+options builder for select element of associateddomains
+
+=cut
+
 has 'select_associateddomains' => ( traits => ['Array'],
 	       is => 'ro', isa => 'ArrayRef',
 	       builder => '_build_select_associateddomains',
@@ -1152,6 +1171,17 @@ sub _build_select_associateddomains {
   return \@domains;
 }
 
+=head2 select_authorizedservice
+
+options builder for select element of authorizedservice
+
+only services with auth attribute set to 1 are considered
+
+if they have data_fields attribute, then it is added (to implement
+selective field de/activation in form
+
+=cut
+
 has 'select_authorizedservice' => ( traits => ['Array'],
 	       is => 'ro', isa => 'ArrayRef',
 	       builder => '_build_select_authorizedservice',
@@ -1162,10 +1192,22 @@ sub _build_select_authorizedservice {
   my @services;
 
   foreach my $key ( sort {$a cmp $b} keys %{$self->{cfg}->{authorizedService}}) {
-    if ( $self->{cfg}->{authorizedService}->{$key}->{auth} ) {
-      push @services, { value => $key,
-			label => $self->{cfg}->{authorizedService}->{$key}->{descr}, };
+    if ( $self->{cfg}->{authorizedService}->{$key}->{auth} &&
+	 defined $self->{cfg}->{authorizedService}->{$key}->{data_relation} &&
+	 $self->{cfg}->{authorizedService}->{$key}->{data_relation} ne '' ) {
+      push @services, {
+		       value => $key,
+		       label => $self->{cfg}->{authorizedService}->{$key}->{descr},
+		       attributes =>
+		       { 'data-relation' => $self->{cfg}->{authorizedService}->{$key}->{data_relation} },
+		      } if ! $self->{cfg}->{authorizedService}->{$key}->{disabled};
+    } elsif ( $self->{cfg}->{authorizedService}->{$key}->{auth} ) {
+      push @services, {
+		       value => $key,
+		       label => $self->{cfg}->{authorizedService}->{$key}->{descr},
+		      } if ! $self->{cfg}->{authorizedService}->{$key}->{disabled};
     }
+
   }
   return \@services;
 }

@@ -643,6 +643,8 @@ sub proc :Path(proc) :Args(0) {
 	       telephoneNumber => defined $params->{telephoneNumber} ? $params->{telephoneNumber} : undef,
 	       jpegPhoto => $file,
 	       userCertificate => $params->{usercertificate},
+	       radiusgroupname => $params->{radiusgroupname},
+	       radiustunnelprivategroup => $params->{radiustunnelprivategroup},
 	      };
 
 	  if ( defined $params->{to_sshkeygen} ) {

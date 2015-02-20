@@ -19,7 +19,7 @@ sub build_form_element_class { [ 'form-horizontal', 'tab-content' ] }
 #== PERSONAL DATA ====================================================
 ######################################################################
 has_field 'person_avatar' => ( type => 'Upload',
-				label => 'Photo User ID',
+				label => 'User Photo ID',
 				label_class => [ 'col-xs-2', ],
 				element_wrapper_class => [ 'col-xs-2', 'col-lg-3', ],
 				element_class => [ 'btn', 'btn-default', 'btn-sm', ],
@@ -64,7 +64,7 @@ has_field 'person_telephonenumber' => ( apply => [ NoSpaces ],
 					   element_class => [ 'input-sm', ],
 					 wrapper_attr => { id => 'items' },
 					 element_attr => { name => 'telephonenumber\[\]',
-							   placeholder => '123@pbx0.ibs +380xxxxxxxxx' });
+							   placeholder => '123@pbx0.ibs, +380xxxxxxxxx' });
 
 has_field 'person_telcomment' => ( type => 'Display',
 				    html => '<small class="text-muted col-xs-offset-2"><em>' .
@@ -72,11 +72,11 @@ has_field 'person_telcomment' => ( type => 'Display',
 				  );
 
 has_block 'group_person' => ( tag => 'div',
-			      render_list => [ 'person_avatar',
-					       'person_givenname',
+			      render_list => [ 'person_givenname',
 					       'person_sn',
 					       'person_office',
 					       'person_title',
+					       'person_avatar',
 					       'person_telephonenumber',
 					       'person_telcomment', ],
 			      attr => { id => 'group_person', },
@@ -187,6 +187,32 @@ has_field 'account.password2' => ( type => 'Password',
 						     'data-group' => 'account', },
 				 );
 
+has_field 'account.radiusgroupname' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
+					 label => 'RADIUS Group Name',
+					 do_id => 'no',
+					 label_class => [ 'col-xs-2', ],
+					 wrapper_class => [  'hidden', '8021x', 'relation', ],
+					 element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+					 element_class => [ 'input-sm', ],
+					 element_attr => { placeholder => 'ip-phone, wifi-123',
+							   'autocomplete' => 'off',
+							   'data-name' => 'radiusgroupname',
+							   'data-group' => 'account', },
+				       );
+
+has_field 'account.radiustunnelprivategroup' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
+						  label => 'RADIUS Tunnel Private Group',
+						  wrapper_class => [  'hidden', '8021x', 'relation', ],
+						  do_id => 'no',
+						  label_class => [ 'col-xs-2', ],
+						  element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+						  element_class => [ 'input-sm', ],
+						  element_attr => { placeholder => 'VLAN this 802.1x authenticates to',
+								    'autocomplete' => 'off',
+								    'data-name' => 'radiustunnelprivategroup',
+								    'data-group' => 'account', },
+						);
+
 # has_field 'account.pwdcomment' => ( type => 'Display',
 # 				     html => '<small class="text-muted col-xs-offset-2"><em>' .
 # 				     'leave empty password fields to autogenerate password</em></small><p>&nbsp;</p>',
@@ -199,6 +225,8 @@ has_block 'group_auth' => ( tag => 'div',
 					     'account.login',
 					     'account.password1',
 					     'account.password2',
+					     'account.radiusgroupname',
+					     'account.radiustunnelprivategroup',
 					     'account',
 					     # 'account.pwdcomment',
 					   ],
@@ -422,14 +450,14 @@ has_block 'groupsselect' => ( tag => 'fieldset',
 has_field 'aux_reset' => ( type => 'Reset',
 			   element_class => [ 'btn', 'btn-danger', 'btn-block', ],
 			   element_wrapper_class => [ 'col-xs-12', ],
-			   wrapper_class => [ 'col-xs-1' ],
+			   wrapper_class => [ 'col-xs-2' ],
 			   # value => 'Reset All'
 			 );
 
 has_field 'aux_submit' => ( type => 'Submit',
 			    element_class => [ 'btn', 'btn-success', 'btn-block', ],
 			    # element_wrapper_class => [ 'col-xs-12', ],
-			    wrapper_class => [ 'col-xs-11', ], # 'pull-right' ],
+			    wrapper_class => [ 'col-xs-10', ], # 'pull-right' ],
 			    value => 'Submit' );
 
 has_block 'submitit' => ( tag => 'fieldset',

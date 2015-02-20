@@ -41,9 +41,9 @@
   <div class=col-sm-4>
     <small><em>
 	<ul>
-	  <li><a href="#"> footer col №3 item №1 </a></li>
-	  <li><a href="#"> footer col №3 item №2 </a></li>
-	  <li><a href="#"> footer col №3 item №3 </a></li>
+	  <li><a href="#"> footer col No.3 item No.1 </a></li>
+	  <li><a href="#"> footer col No.3 item No.2 </a></li>
+	  <li><a href="#"> footer col No.3 item No.3 </a></li>
 	  <li><a href="#"> UMI @ <span class="fa fa-github"></span> </a></li>
 	</ul>
     </em></small>

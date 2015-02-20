@@ -7,7 +7,7 @@
   <h2>New User Creation Form <small><em>complex form for all possible stuff (data and services)</em></small></h2>
 </div>
 
-<ul role="tablist" class="nav nav-tabs" id="myTab">
+<ul role="tablist" class="nav nav-pills" id="myTab">
   [% IF ! dn %]
   <li class="active">
     <a aria-controls="person"
@@ -34,7 +34,7 @@
 	    <i class="fa fa-user fa-stack-1x"></i>
 	    </span> -->
       <span class="fa-stack">
-	<i class="fa fa-file-o fa-stack-2x"></i>
+	<i class="fa fa-circle-thin fa-stack-2x"></i>
 	<i class="fa fa-user fa-stack-1x"></i>
       </span>
     </a>
@@ -49,8 +49,8 @@
        title="Services Without Login/Password"
        aria-expanded="false">
       <span class="fa-stack">
-	<i class="fa fa-file-o fa-stack-2x"></i>
-	<i class="fa fa-cogs fa-stack-1x"></i>
+	<i class="fa fa-circle-thin fa-stack-2x"></i>
+	<i class="fa fa-th fa-stack-1x"></i>
       </span>
       <span class="caret"></span>
     </a>
@@ -103,55 +103,108 @@
 [% # form.render_repeatable_js %]
 [% form.render %]
 
-<script>
-$(function(){
 
-  // need this because HFH adds .has-error to whole hierarchy of objects
-  $(".duplicate").children(".form-group.has-error").removeClass("has-error");
-  
-  // $("a span.rm-duplicate").on("click",function(e){
-  $("a.btn[data-duplicate]").on("click",function(e){
-    e.preventDefault();
-    var $a = $(this),
-        counter = parseInt($a.data("counter")) || ($a.data("counter",0),0),
-        $fieldset = $a.parents("fieldset"),
-        $duplicate = $fieldset.find("div."+$a.data('duplicate')).first().clone();
-    
-    ++counter;
-    $duplicate.removeAttr("id").removeClass("duplicate").addClass("duplicated");
-    
-    $("input:text, input:password, input:file, select, textarea, input:radio, input:checkbox", $duplicate).each(function(id, element){
-      var $element = $(element),
-          name = $element.data("group")+"."+counter+"."+$element.data('name');
-      $element
-        .removeAttr("id")
-        .prop("name", name)
+
+<script>
+ $(function(){
+
+   // need this because HFH adds .has-error to whole hierarchy of objects
+   $(".duplicate").children(".form-group.has-error").removeClass("has-error");
+
+   // clean whole element (input:text, input:password, input:file, select, textarea, input:radio, input:checkbox) to default state
+   var resetElement = function($element) {
+     $element
         .val('')
         .removeAttr('checked')
         .removeAttr('selected')
         .children("option")
         .first()
         .prop("selected",true);
-      $element
-        .parents(".form-group")
+   },
+       currentRelation = false,
+       selectServiceAuthQuery = "select[data-name='authorizedservice']",
+       switchRelations = function(obj, newRelation) {
+	 var $formGroupsRelated = $(".form-group.relation", obj).addClass("hidden");
+	 
+	 if (newRelation)
+	   $formGroupsRelated.each(function(id, element) {
+	     var $el = $(element);
+	     if ($el.hasClass(newRelation)) {
+	       $el.toggleClass("hidden");
+	       $("input:text, input:password, input:file, select, textarea, input:radio, input:checkbox", $el).each(function(index, item){
+		 resetElement($(item));
+	       });
+	     }
+	   });
+	 
+	 currentRelation = newRelation;
+       },
+       onServiceChange = function(event){
+	 var $this = $(this),
+	     $option = $this.find("option:selected"),
+	     relation = $option.data("relation"),
+	     value = $this.val();
+	 
+	 switchRelations(
+	   $this.parents(".hfh-repinst.form-group"),
+	   !relation || !relation.length || !value.length
+         ? false
+         : relation
+	 );
+       },
+       serviceSelectAttachEvent = function($parent) {
+	 $(selectServiceAuthQuery, $parent).on("change", onServiceChange);
+       };
+   
+   // duplicating code
+   // $("a span.rm-duplicate").on("click",function(e){
+   $("a.btn[data-duplicate]").on("click",function(e){
+     e.preventDefault();
+     var $a = $(this),
+         counter = parseInt($a.data("counter")) || ($a.data("counter",0),0),
+         $fieldset = $a.parents("fieldset"),
+         $duplicate = $fieldset.find("div."+$a.data('duplicate')).first().clone();
+     
+   ++counter;
+     $duplicate.removeAttr("id").removeClass("duplicate").addClass("duplicated");
+
+     $("input:text, input:password, input:file, select, textarea, input:radio, input:checkbox", $duplicate).each(function(id, element){
+       var $element = $(element),
+           name = $element.data("group")+"."+counter+"."+$element.data('name');
+       $element
+        .removeAttr("id")
+        .prop("name", name);
+       resetElement($element);
+       
+       var $formGroups = $element.parents(".form-group");
+       $formGroups.each(function(index, formGroupElement){
+	 var $formGroup = $(formGroupElement);
+	 if ($formGroup.hasClass("relation")) $formGroup.addClass("hidden");
+	 $formGroup
         .find("label")
-        .prop("for", name);
-      
-    });
-    
-    $duplicate.appendTo($fieldset);
-    // $duplicate.find(".fa-times-circle").removeClass("hidden").click(function(){
-    $duplicate.find(".rm-duplicate").removeClass("hidden").click(function(){
-      $(this).parents(".duplicated").remove();
-    });
-    $('html, body').animate({
-        scrollTop: $duplicate.offset().top-80
-    }, 1000);
-    
-    $a.data("counter",counter);   
-  });
+        .prop("for", name);	
+       });
+     });
+     
+     $duplicate.appendTo($fieldset);
+     // $duplicate.find(".fa-times-circle").removeClass("hidden").click(function(){
+     $duplicate.find(".rm-duplicate").removeClass("hidden").click(function(){
+       $(this).parents(".duplicated").remove();
+     });
+     serviceSelectAttachEvent($duplicate);
+     
+     
+     $('html, body').animate({
+       scrollTop: $duplicate.offset().top-80
+     }, 1000);
+     
+     $a.data("counter",counter);   
+   });
+
+   serviceSelectAttachEvent($(document));
  });
 </script>  
+
 <script>
  $(function(){
    $('#groups').multiSelect({

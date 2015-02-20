@@ -66,7 +66,7 @@
     [% END %]
 
     [% form.render %]
-
+	
 <!-- <script type="text/javascript"> -->
 
 <!-- (function($, options, undef){ -->
@@ -133,13 +133,13 @@
 <!--     }; -->
 
 <!--     me.processFields = function(fields) { -->
-<!-- 	$("#"+fields.join(",#")).each(function(key, field) {  -->
+<!-- 	$("#"+fields.join(",#")).each(function(key, field) { -->
 <!-- 	    var $field = $(field); -->
 <!-- 	    $field.prop("disabled", true).hide(); -->
 	    
 <!-- 	    switch($field.prop("tagName")) { -->
 <!--             default: -->
-<!--             case "INPUT":  -->
+<!--             case "INPUT": -->
 <!-- 		switch ($field.prop("type")) { -->
 <!-- 		case "checkbox": -->
 <!-- 		    $field.prop("checked", 0); -->
@@ -164,7 +164,7 @@
 <!-- 	    var $fieldset = $(fieldset), -->
 <!--             foundUndisabled = $fieldset.find("input:not(:disabled), textarea:not(:disabled)").length > 0; -->
 <!-- 	    if (!foundUndisabled) { -->
-<!-- 		$fieldset.hide();  -->
+<!-- 		$fieldset.hide(); -->
 <!-- 	    } else { -->
 <!-- 		$fieldset.show(); -->
 <!-- 	    } -->

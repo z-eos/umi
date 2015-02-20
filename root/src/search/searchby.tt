@@ -124,6 +124,16 @@
 			  </button>
 			</li>
 			<li>
+			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+			    <button type="submit" title="move this object to another root account" class="btn btn-link"
+				    value="[% entry.key %]"
+				    name="chg_acc">
+			      <span class="fa fa-fw fa-exchange text-danger"></span>
+			      chg root account
+			    </button>
+			  </form>
+			</li>
+			<li>
 			  <button type="button" title="export LDIF of the object"
 				  class="btn btn-link"
 				  value="[% entry.key %]"
