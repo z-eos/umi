@@ -253,10 +253,10 @@ around 'ldap' =>
 
     if ( $mesg->is_error ) {
       warn '#' x 60 . "\nUMI WARNING: Net::LDAP->bind related problem occured!" .
-	"\nerror_name: " . $mesg->error_name .
-	"\nerror_desc: " . $mesg->error_desc .
-	"\nerror_text: " . $mesg->error_text .
-	"\nserver_error: " . $mesg->server_error;
+    	"\nerror_name: " . $mesg->error_name .
+    	"\nerror_desc: " . $mesg->error_desc .
+    	"\nerror_text: " . $mesg->error_text .
+    	"\nserver_error: " . $mesg->server_error;
     }
     return $ldap;
   };

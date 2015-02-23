@@ -39,8 +39,8 @@ Catalyst Controller.
 
 sub index :Path :Args(0) {
     my ( $self, $c, $ldapadduser_id ) = @_;
-    if ( $c->check_user_roles('wheel') || 
-	 $c->check_user_roles('email') || 
+    if ( $c->check_user_roles('wheel') ||
+	 $c->check_user_roles('email') ||
 	 $c->check_user_roles('xmpp') ||
 	 $c->check_user_roles('802.1x-mac') ||
 	 $c->check_user_roles('802.1x-eap') ) {
@@ -606,29 +606,28 @@ sub modpwd :Path(modpwd) :Args(0) {
 
 sub user_add_svc_new :Path(user_add_svc_new) :Args(0) {
   my ( $self, $c ) = @_;
-  my ( @office, @branches );
+  my ( @office, @branches, $final_message );
 
   my $params = $c->req->parameters;
 
   $c->stash(
 	    template => 'user/user_all.tt',
-	    # form => $self->form_user_all,
 	    form => $self->form_user_all,
 	   );
 
-  return unless $self->form_user_all->process(
-					      posted => ($c->req->method eq 'POST'),
-					      params => $params,
-					      ldap_crud => $c->model('LDAP_CRUD'),
-					     );
-
   use Data::Printer;
-  # p $self->form_user_all->values;
+  $final_message->{warning} = '<pre>' . p($params) . '</pre>';
 
+  return $self->form_user_all->process(
+				       posted => ($c->req->method eq 'POST'),
+				       params => $params,
+				       ldap_crud => $c->model('LDAP_CRUD'),
+				      ); # if ! $self->form_user_all->has_errors;
 
-  # $c->stash( template => 'user/user_add_svc_new.tt', );
+  # p $final_message->{danger} = join('<br>', $self->form_user_all->errors);
+  p $params;
+  # $c->stash( final_message => $final_message, );
 
- $c->stash( final_message => '' );
 }
 
 

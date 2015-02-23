@@ -200,7 +200,7 @@ has_field 'account.radiusgroupname' => ( apply => [ NoSpaces, NotAllDigits, Prin
 							   'data-group' => 'account', },
 				       );
 
-has_field 'account.radiustunnelprivategroup' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
+has_field 'account.radiustunnelprivategroup' => ( apply => [ NoSpaces, Printable ],
 						  label => 'RADIUS Tunnel Private Group',
 						  wrapper_class => [  'hidden', '8021x', 'relation', ],
 						  do_id => 'no',
@@ -475,55 +475,17 @@ sub html_attributes {
 
 sub validate {
   my $self = shift;
-  my ( $element, $field );
+  my ( $element, $field, $ldap_crud, $mesg, $autologin, $loginpfx, $logintmp );
   # p $self->value;
   # p $self->field('account.0');
-  my $i = 0;
-  foreach $element ( $self->field('account')->fields )
-    {
-      if ( ! defined $element->field('authorizedservice')->value &&
-	   ! defined $element->field('associateddomain')->value ) {
-	$element->field('associateddomain')->add_error('Domain Name is mandatory!');
-	$element->field('authorizedservice')->add_error('Service is mandatory!');
-      }
-      if ( defined $element->field('authorizedservice')->value &&
-	   ! defined $element->field('associateddomain')->value ) {
-	$element->field('associateddomain')->add_error('Domain Name is mandatory!');
-	# p $self->field('account')->field("$i")->field('associateddomain');
-      }
-      if ( defined $element->field('associateddomain')->value &&
-	   ! defined $element->field('authorizedservice')->value ) {
-	$element->field('authorizedservice')->add_error('Service is mandatory!');
-      }
-      $i++;
-    }
 
-  # if ( defined $self->field('password1')->value and defined $self->field('password2')->value
-  #      and ($self->field('password1')->value ne $self->field('password2')->value) ) {
-  #   $self->field('password2')->add_error('Password doesn\'t match Confirmation');
-  # }
-
-  # if ( defined $self->field('associateddomain')->value &&
-  #      $self->field('associateddomain')->value eq '0' ) {
-  #   $self->field('associateddomain')->add_error('Domain Name is mandatory!');
-  # }
-
-  # if ( defined $self->field('authorizedservice')->value &&
-  #      $self->field('authorizedservice')->value eq '0') {
-  #   $self->field('authorizedservice')->add_error('At least one service is required!');
-  # }
-
-  # if ( defined $self->field('office')->value &&
-  #      $self->field('office')->value eq '0' ) {
-  #   $self->field('office')->add_error('Office is mandatory!');
-  # }
-
-  # my $ldap_crud = $self->ldap_crud;
+  $ldap_crud = $self->ldap_crud;
   # my $mesg =
   #   $ldap_crud->search({
   # 			scope => 'one',
   # 			filter => '(uid=' .
-  # 			$self->field('login')->value . ')',
+  # 			$self->utf2lat({ to_translate => $self->field('givenname')->value }) . '.' .
+  # 			$self->utf2lat({ to_translate => $self->field('sn')->value }) . ')',
   # 			base => $ldap_crud->{cfg}->{base}->{acc_root},
   # 			attrs => [ 'uid' ],
   # 		       });
@@ -539,6 +501,114 @@ sub validate {
   #     ' already exists!</div>';
   # }
 
+  $autologin = lc($self->utf2lat( $self->field('person_givenname')->value ) . '.' .
+    $self->utf2lat( $self->field('person_sn')->value ));
+
+
+  my $i = 0;
+  foreach $element ( $self->field('account')->fields )
+    {
+      if ( ! defined $element->field('authorizedservice')->value &&
+	   ! defined $element->field('associateddomain')->value ) {
+	$element->field('associateddomain')->add_error('Domain Name is mandatory!');
+	$element->field('authorizedservice')->add_error('Service is mandatory!');
+      } elsif ( defined $element->field('authorizedservice')->value &&
+		! defined $element->field('associateddomain')->value ) {
+	$element->field('associateddomain')->add_error('Domain Name is mandatory!');
+      } elsif ( defined $element->field('associateddomain')->value &&
+		! defined $element->field('authorizedservice')->value ) {
+	$element->field('authorizedservice')->add_error('Service is mandatory!');
+      }
+
+      if ( ( defined $element->field('password1')->value &&
+	     ! defined $element->field('password2')->value ) ||
+	   ( defined $element->field('password2')->value &&
+	     ! defined $element->field('password1')->value ) ) {
+	$element->field('password1')->add_error('Both or none passwords have to be defined!');
+	$element->field('password2')->add_error('Both or none passwords have to be defined!');
+      }
+
+      $element->field('login')->add_error('MAC address is mandatory!')
+	if $element->field('authorizedservice')->value =~ /^802.1x-mac$/ &&
+	! defined $element->field('login')->value;
+
+      $element->field('login')->add_error('MAC address is not valid!')
+	if $element->field('authorizedservice')->value =~ /^802.1x-mac$/ &&
+	! $self->macnorm({ mac => $element->field('login')->value });
+
+      if ( $element->field('authorizedservice')->value !~ /^802.1x-mac$/) {
+	if ( ! defined $element->field('login')->value ) {
+	  $logintmp = $autologin;
+	  $loginpfx = 'Login (autogenerated, since empty)';
+	} else {
+	  $logintmp = $element->field('login')->value;
+	  $loginpfx = 'Login';
+	}
+
+	$mesg =
+	  $ldap_crud->search({
+			      filter => '(&(authorizedService=' .
+			      $element->field('authorizedservice')->value . '@' . $element->field('associateddomain')->value .
+			      ')(uid=' . $logintmp . '@' . $element->field('associateddomain')->value .'))',
+			      base => $ldap_crud->{cfg}->{base}->{acc_root},
+			      attrs => [ 'uid' ],
+			     });
+	$element->field('login')->add_error($loginpfx . ' <mark>' . $logintmp . '</mark> is not available!')
+	  if ($mesg->count);
+      }
+
+      $i++;
+    }
+
+  $i = 0;
+  foreach $element ( $self->field('loginless_ssh')->fields )
+    {
+      if ( defined $element->field('associateddomain')->value &&
+	   ! defined $element->field('key')->value ) {
+	$element->field('key')->add_error('<span class="fa-li fa fa-key"></span>Key field have to be defined!');
+      } elsif ( defined $element->field('key')->value &&
+		! defined $element->field('associateddomain')->value ) {
+	$element->field('associateddomain')->add_error('Domain field have to be defined!');
+      }
+
+      $i++;
+    }
+
+  $i = 0;
+  foreach $element ( $self->field('loginless_ovpn')->fields )
+    {
+      if ( defined $element->field('associateddomain')->value &&
+	   ! defined $element->field('cert')->value &&
+	   ! defined $element->field('device')->value &&
+	   ! defined $element->field('ip')->value ) {
+	$element->field('cert')->add_error('Cert field have to be defined!');
+	$element->field('device')->add_error('Device field have to be defined!');
+	$element->field('ip')->add_error('IP field have to be defined!');
+      } elsif ( ! defined $element->field('associateddomain')->value &&
+		defined $element->field('cert')->value &&
+		! defined $element->field('device')->value &&
+		! defined $element->field('ip')->value ) {
+	$element->field('associateddomain')->add_error('Domain field have to be defined!');
+	$element->field('device')->add_error('Device field have to be defined!');
+	$element->field('ip')->add_error('IP field have to be defined!');
+      } elsif ( ! defined $element->field('associateddomain')->value &&
+		! defined $element->field('cert')->value &&
+		defined $element->field('device')->value &&
+		! defined $element->field('ip')->value ) {
+	$element->field('cert')->add_error('Cert field have to be defined!');
+	$element->field('associateddomain')->add_error('Domain field have to be defined!');
+	$element->field('ip')->add_error('IP field have to be defined!');
+      } elsif ( ! defined $element->field('associateddomain')->value &&
+		! defined $element->field('cert')->value &&
+		! defined $element->field('device')->value &&
+		defined $element->field('ip')->value ) {
+	$element->field('cert')->add_error('Cert field have to be defined!');
+	$element->field('device')->add_error('Device field have to be defined!');
+	$element->field('associateddomain')->add_error('Domain field have to be defined!');
+      }
+
+      $i++;
+    }
 
   # else {
   #    $mesg =
@@ -575,6 +645,10 @@ sub validate {
   # 				      $self->form->success_message ? $self->form->success_message : '',
   # 				      $err ? $err : ''
   # 				     ));
+
+  $self->add_form_error('<div class="alert alert-danger" role="alert"><i class="fa fa-exclamation-circle"></i> Form contains error/s! Check all tabs!</div>') if $self->has_error_fields;
+
+
 }
 
 ######################################################################
