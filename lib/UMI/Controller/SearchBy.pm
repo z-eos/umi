@@ -575,7 +575,19 @@ sub proc :Path(proc) :Args(0) {
 	foreach ( @{$arr} ) { # for each authorizedservice choosen
 	  next if ! $_;
 
-	  $uid = $_ =~ /^802.1x-/ ? $self->macnorm({ mac => $login }) : sprintf('%s@%s', $login, $params->{'associateddomain'});
+	  # here we take care of the situations where XMPP domains differs from SMTP
+	  # like foo.bar for email and im.foo.bar for XMPP
+	  if ( $params->{'associateddomain'} eq 'ibs.dn.ua' ) {
+	    $params->{'associateddomain_prefix'} = 'im.';
+	  } else {
+	    $params->{'associateddomain_prefix'} = '';
+	  }
+
+	  $uid = $_ =~ /^802.1x-/ ?
+	    $self->macnorm({ mac => $login }) :
+	    sprintf('%s@%s',
+		    $login,
+		    $params->{'associateddomain_prefix'} . $params->{'associateddomain'});
 
 	  if ( ( $_ eq 'mail' || $_ eq 'xmpp' ) &&
 	      ( ! defined $params->{'password1'} ||
@@ -590,14 +602,6 @@ sub proc :Path(proc) :Args(0) {
 	    $login = $self->macnorm({ mac => $login });
 	  } else {
 	    $pwd = { $_ => $self->pwdgen( { pwd => $params->{'password1'} } ) };
-	  }
-
-	  # here we take care of the situations where XMPP domains differs from SMTP
-	  # like foo.bar for email and im.foo.bar for XMPP
-	  if ( $params->{'associateddomain'} eq 'ibs.dn.ua' ) {
-	    $params->{'associateddomain_prefix'} = 'im.';
-	  } else {
-	    $params->{'associateddomain_prefix'} = '';
 	  }
 
 	  push @{$return->{success}}, {
