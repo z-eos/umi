@@ -58,40 +58,40 @@ __PACKAGE__->config(
     default_view => "Web",
     session => { cache_size => '10m', }, # looks like value 100m helps with [error] Caught exception in engine "store_session: data too large"
     'authentication' => {
-	default_realm => "ldap",
-	realms => {
-	    ldap => {
-		credential => {
-		    class => "Password",
-		    password_field => "password",
-		    password_type => "self_check",
-		},
-		store => {
-		    binddn              => 'uid=bind@umi,ou=bind,ou=system,dc=umidb',
-		    bindpw              => '********',
-		    class               => 'LDAP',
-		    ldap_server         => 'umi.foo.bar',
-		    ldap_server_options => { timeout => 30 },
-		    use_roles           => 1,
-		    role_basedn         => "ou=group,ou=system,dc=umidb",
-		    role_field          => "cn",
-		    role_filter         => "(memberUid=%s)",
-		    role_scope          => "sub",
-		    # role_search_options => { deref => "always" },
-		    role_value          => "uid",
-		    # role_search_as_user => 0,
-		    start_tls           => 0,
-		    start_tls_options   => { verify => "none" },
-		    # entry_class         => "MyApp::LDAP::Entry",
-		    user_basedn         => 'ou=People,dc=umidb',
-		    user_field          => "uid",
-		    user_filter         => "(uid=%s)",
-		    user_scope          => "one", # or "sub" for Active Directory
-		    # user_search_options => { deref => "never" },
-		    user_results_filter => sub { return shift->pop_entry },
-		},
-	    },
-	},
+    	default_realm => "ldap",
+    	realms => {
+    	    ldap => {
+    		credential => {
+    		    class => "Password",
+    		    password_field => "password",
+    		    password_type => "self_check",
+    		},
+    		store => {
+    		    binddn              => 'uid=binddn,ou=system,dc=foo,dc=bar',
+    		    bindpw              => 'secret password',
+    		    class               => 'LDAP',
+    		    ldap_server         => 'ldap.host.org',
+    		    ldap_server_options => { timeout => 30 },
+    		    use_roles           => 1,
+    		    role_basedn         => "ou=group,ou=system,dc=foo,dc=bar",
+    		    role_field          => "cn",
+    		    role_filter         => "(memberUid=%s)",
+    		    role_scope          => "sub",
+    		    # role_search_options => { deref => "always" },
+    		    role_value          => "uid",
+    		    # role_search_as_user => 0,
+    		    start_tls           => 0,
+    		    start_tls_options   => { verify => "none" },
+    		    # entry_class         => "MyApp::LDAP::Entry",
+    		    user_basedn         => 'ou=People,dc=foo,dc=bar',
+    		    user_field          => "uid",
+    		    user_filter         => "(uid=%s)",
+    		    user_scope          => "one", # or "sub" for Active Directory
+    		    # user_search_options => { deref => "never" },
+    		    user_results_filter => sub { return shift->pop_entry },
+    		},
+    	    },
+    	},
     },
 );
 

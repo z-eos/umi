@@ -592,9 +592,17 @@ sub proc :Path(proc) :Args(0) {
 	    $pwd = { $_ => $self->pwdgen( { pwd => $params->{'password1'} } ) };
 	  }
 
+	  # here we take care of the situations where XMPP domains differs from SMTP
+	  # like foo.bar for email and im.foo.bar for XMPP
+	  if ( $params->{'associateddomain'} eq 'ibs.dn.ua' ) {
+	    $params->{'associateddomain_prefix'} = 'im.';
+	  } else {
+	    $params->{'associateddomain_prefix'} = '';
+	  }
+
 	  push @{$return->{success}}, {
 				       authorizedservice => $_,
-				       associateddomain => $params->{'associateddomain'},
+				       associateddomain => $params->{'associateddomain_prefix'} . $params->{'associateddomain'},
 				       service_uid => $uid,
 				       service_pwd => $pwd->{$_}->{clear},
 				      };
@@ -605,7 +613,7 @@ sub proc :Path(proc) :Args(0) {
 					{
 					 base_uid => substr($id[0], 4),
 					 service => $_,
-					 associatedDomain => $params->{associateddomain},
+					 associatedDomain => $params->{'associateddomain_prefix'} . $params->{associateddomain},
 					},
 				      );
 
@@ -634,7 +642,7 @@ sub proc :Path(proc) :Args(0) {
 	    = {
 	       basedn => $params->{'add_svc_acc'},
 	       service => $_,
-	       associatedDomain => $params->{associateddomain},
+	       associatedDomain => $params->{'associateddomain_prefix'} . $params->{associateddomain},
 	       uidNumber => $entry[0]->get_value('uidNumber'),
 	       givenName => $entry[0]->get_value('givenName'),
 	       sn => $entry[0]->get_value('sn'),

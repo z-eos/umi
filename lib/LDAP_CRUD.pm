@@ -23,7 +23,7 @@ use Try::Tiny;
 
 with 'Tools';
 
-has 'host' => ( is => 'ro', isa => 'Str', required => 1, default => 'ldap://ns.lan.nxc.od.ua');
+has 'host' => ( is => 'ro', isa => 'Str', required => 1, default => UMI->config->{ldap_crud_host});
 has 'uid' => ( is => 'ro', isa => 'Str', required => 1 );
 has 'pwd' => ( is => 'ro', isa => 'Str', required => 1 );
 has 'dry_run' => ( is => 'ro', isa => 'Bool', default => 0 );
@@ -51,8 +51,6 @@ has 'cfg' => ( traits => ['Hash'],
 sub _build_cfg {
   my $self = shift;
 
-  my $db = 'dc=umidb'; # all your dc, like `dc=A,dc=B,...,dc=Z'
-  # another place to change it is root/lib/site/header
   return {
 	  exclude_prefix => 'aux_',
 	  stub => {
@@ -61,14 +59,14 @@ sub _build_cfg {
 		   gidNumber => 10012,
 		  },
 	  base => {
-		   db => $db,
-		   acc_root =>       'ou=People,' . $db,
-		   acc_svc_branch => 'ou=People,' . $db,
-		   acc_svc_common => 'ou=People,' . $db,
-		   dhcp =>           'ou=DHCP,' . $db,
-		   gitacl =>         'ou=GitACL,' . $db,
-		   group =>          'ou=group,' . $db,
-		   org =>            'ou=Organizations,' . $db,
+		   db => UMI->config->{ldap_crud_db},
+		   acc_root =>       'ou=People,' . UMI->config->{ldap_crud_db},
+		   acc_svc_branch => 'ou=People,' . UMI->config->{ldap_crud_db},
+		   acc_svc_common => 'ou=People,' . UMI->config->{ldap_crud_db},
+		   dhcp =>           'ou=DHCP,' . UMI->config->{ldap_crud_db},
+		   gitacl =>         'ou=GitACL,' . UMI->config->{ldap_crud_db},
+		   group =>          'ou=group,' . UMI->config->{ldap_crud_db},
+		   org =>            'ou=Organizations,' . UMI->config->{ldap_crud_db},
 		  },
 	  rdn => {
 		  org =>            'ou',
@@ -1147,7 +1145,7 @@ has 'select_associateddomains' => ( traits => ['Array'],
 	     );
 
 sub _build_select_associateddomains {
-  my $self = shift;
+  p my $self = shift;
   my @domains; # = ( {value => '0', label => '--- select domain ---', selected => 'selected'} );
   my $mesg = $self->search( { base => $self->{cfg}->{base}->{org},
 			      filter => 'associatedDomain=*',
