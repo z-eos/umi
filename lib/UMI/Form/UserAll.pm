@@ -242,8 +242,7 @@ has_field 'account.radiustunnelprivategroup' => ( apply => [ NoSpaces, Printable
 
 sub wrap_account_elements {
   my ( $self, $input, $subfield ) = @_;
-  my $output = sprintf('%s%s%s',
-		       ! $subfield ? qq{\n<div class="duplicate">} : qq{\n<div class="duplicated">},
+  my $output = sprintf('%s%s%s', ! $subfield ? qq{\n<div class="duplicate">} : qq{\n<div class="duplicated">},
 		       $input,
 		       qq{</div>});
 }

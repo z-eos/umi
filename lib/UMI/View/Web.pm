@@ -15,17 +15,8 @@ __PACKAGE__->config(
 		    render_die   => 1,
 		    EVAL_PERL    => 1,
 		    ENCODING     => 'utf-8',
-		    expose_methods => [ qw{ ldap_crud_cfg } ],
+		    expose_methods => [ qw{ helper_cfg } ],
 		   );
-
-sub ldap_crud_cfg {
-  my ( $self, $c, @cfg_attributes ) = @_;
-  my $return = q{ $c->model('LDAP_CRUD')->{cfg} };
-  foreach ( @cfg_attributes ) {
-    $return .= "->{$_}";
-  }
-  return eval $return;
-}
 
 =head1 NAME
 
@@ -38,6 +29,33 @@ See L<UMI>
 =head1 DESCRIPTION
 
 Catalyst TTSite View.
+
+=head1 METHODS
+
+=head2 helper_cfg
+
+method to provide possibility to use configuration data from
+umi_local.pm and LDAP_CRUD class
+
+usage: helper_cfg('cfg_type','hash_key1',...,'hash_keyN')
+
+=cut
+
+sub helper_cfg {
+  my ( $self, $c, $cfg_type, @cfg_attributes ) = @_;
+  my $return;
+
+  if ( $cfg_type eq 'cfg_ldap_crud' ) {
+    $return = q{$c->model('LDAP_CRUD')->{cfg}};
+  } elsif ( $cfg_type eq 'cfg_local' ) {
+    $return = q{$c->config};
+  }
+  foreach ( @cfg_attributes ) {
+    $return .= "->{$_}";
+  }
+  return eval $return;
+}
+
 
 =head1 AUTHOR
 

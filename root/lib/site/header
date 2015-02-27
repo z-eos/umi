@@ -179,49 +179,49 @@
 
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
-			value="[% ldap_crud_cfg('base', 'group') %]"
+			value="[% helper_cfg('cfg_ldap_crud','base', 'group') %]"
 			name="ldapsearch_base"
 			title="filter pattern with base Groups">
 		<span class="[% icon_class %] fa-group"></span>&nbsp;group</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
-			value="[% ldap_crud_cfg('base', 'acc_root') %]"
+			value="[% helper_cfg('cfg_ldap_crud','base', 'acc_root') %]"
 			name="ldapsearch_base"
 			title="filter pattern with base People">
 		<span class="[% icon_class %] fa-user"></span>&nbsp;People</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
-			value="[% ldap_crud_cfg('base', 'org') %]"
+			value="[% helper_cfg('cfg_ldap_crud','base', 'org') %]"
 			name="ldapsearch_base" tabindex="20"
 			title="filter pattern with base Organizations">
 		<span class="[% icon_class %] fa-institution"></span>&nbsp;Organizations</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
-			value="[% ldap_crud_cfg('base', 'dhcp') %]"
+			value="[% helper_cfg('cfg_ldap_crud','base', 'dhcp') %]"
 			name="ldapsearch_base" tabindex="21"
 			title="filter pattern with base DHCP">
 		<span class="[% icon_class %] fa-sitemap"></span>&nbsp;DHCP</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
-			value="ou=[% ldap_crud_cfg('base', 'alias') %]"
+			value="ou=[% helper_cfg('cfg_ldap_crud','base', 'alias') %]"
 			name="ldapsearch_base" tabindex="22"
 			title="filter pattern with base Aliases">
 		<span class="[% icon_class %] fa-puzzle-piece"></span>&nbsp;mail alias</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
-			value="[% ldap_crud_cfg('base', 'workstation') %]"
+			value="[% helper_cfg('cfg_ldap_crud','base', 'workstation') %]"
 			name="ldapsearch_base" tabindex="23"
 			title="filter pattern with base Workstations">
 		<span class="[% icon_class %] fa-desktop"></span>&nbsp;workstations</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
-			value="[% ldap_crud_cfg('base', 'machines') %]"
+			value="[% helper_cfg('cfg_ldap_crud','base', 'machines') %]"
 			name="ldapsearch_base" tabindex="24"
 			title="filter pattern with base Machines">
 		<span class="[% icon_class %] fa-laptop"></span>&nbsp;machines</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
-			value="[% ldap_crud_cfg('base', 'gitacl') %]"
+			value="[% helper_cfg('cfg_ldap_crud','base', 'gitacl') %]"
 			name="ldapsearch_base" tabindex="25">
 		<span class="[% icon_class %] fa-gavel"></span>&nbsp;GitACL</button></li>
 
@@ -248,6 +248,11 @@
           <ul class="dropdown-menu" role="menu">
             <li>
 	      <a href="about"><span class="fa fa-fw fa-question-circle">&nbsp;</span>help</a>
+	    </li>
+            <li>
+	      <a href="[% helper_cfg('cfg_local','header','help', 'item2', 'url') %]">
+		<span class="fa fa-fw [% helper_cfg('cfg_local','header','help', 'item2', 'ico') %]">&nbsp;</span>
+		[% helper_cfg('cfg_local','header','help', 'item2', 'txt') %]</a>
 	    </li>
             <li class="divider"></li>
             <li>

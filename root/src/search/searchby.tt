@@ -98,7 +98,7 @@
 			    <button type="submit" title="add new service account" class="btn btn-link"
 				    value="[% entry.key %]"
 				    name="add_svc_acc">
-			      <span class="fa fa-fw fa-plus-circle text-warning"></span>
+			      <span class="fa fa-fw fa-plus-circle text-primary"></span>
 			      new service account
 			    </button>
 			  </form>
@@ -107,7 +107,7 @@
 			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 			    <button type="submit" title="modify group" class="btn btn-link"
 				    value="[% entry.key %]" name="ldap_modify_group">
-			      <span class="fa fa-fw fa-group text-warning"></span>
+			      <span class="fa fa-fw fa-group text-primary"></span>
 			      group
 			    </button>
 			  </form>
@@ -149,7 +149,7 @@
 			    <button type="submit" title="edit object" class="btn btn-link"
 				    value="[% entry.key %]"
 				    name="ldap_modify">
-			      <span class="fa fa-fw fa-edit text-warning"></span>
+			      <span class="fa fa-fw fa-pencil text-primary"></span>
 			      edit (all)
 			    </button>
 			  </form>
@@ -159,7 +159,7 @@
 			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 			    <button type="submit" title="modify group members" class="btn btn-link"
 				    value="[% entry.key %]" name="ldap_modify_memberUid">
-			      <span class="fa fa-fw fa-group text-warning"></span>
+			      <span class="fa fa-fw fa-group text-primary"></span>
 			      members
 			    </button>
 			  </form>
@@ -170,7 +170,7 @@
 			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/modify_userpassword') %]">
 			    <button type="submit" title="modify password" class="btn btn-link"
 				    value="[% entry.key %]" name="ldap_modify_password">
-			      <span class="fa fa-fw fa-user-secret text-warning"></span>
+			      <span class="fa fa-fw fa-user-secret text-primary"></span>
 			      password
 			    </button>
 			  </form>
@@ -181,7 +181,7 @@
 			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/dhcp_add') %]">
 			    <button type="submit" title="add DHCP (MAC to IP binding)" class="btn btn-link"
 				    value="[% entry.key %]" name="ldap_add_dhcp">
-			      <span class="fa fa-fw fa-sitemap text-warning"></span>
+			      <span class="fa fa-fw fa-sitemap text-primary"></span>
 			      DHCP (IP to MAC binding)
 			    </button>
 			  </form>
@@ -192,7 +192,7 @@
 			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 			    <button type="submit" title="modify jpegPhoto" class="btn btn-link"
 				    value="[% entry.key %]" name="ldap_modify_jpegphoto">
-			      <span class="fa fa-fw fa-image text-warning"></span>
+			      <span class="fa fa-fw fa-image text-primary"></span>
 			      image
 			    </button>
 			  </form>

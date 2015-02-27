@@ -51,7 +51,7 @@
        href="#person"
        title="Personal Data"
        aria-expanded="true">
-      <span class="fa fa-user fa-lg"></span>
+      <span class="fa fa-user fa-2x"></span>
     </a>
   </li>
   [% END %]
@@ -68,8 +68,8 @@
 	    <i class="fa fa-folder-o fa-stack-2x"></i>
 	    <i class="fa fa-user fa-stack-1x"></i>
 	    </span> -->
-      <span class="fa-stack">
-	<i class="fa fa-circle-thin fa-stack-2x"></i>
+      <span class="fa-stack fa-lg">
+	<i class="fa fa-square-o fa-stack-2x"></i>
 	<i class="fa fa-user-plus fa-stack-1x"></i>
       </span>
     </a>
@@ -83,9 +83,9 @@
        href="#"
        title="Services Without Login/Password"
        aria-expanded="false">
-      <span class="fa-stack">
-	<i class="fa fa-circle-thin fa-stack-2x"></i>
-	<i class="fa fa-th fa-stack-1x"></i>
+      <span class="fa-stack fa-lg">
+	<i class="fa fa-square-o fa-stack-2x"></i>
+	<i class="fa fa-user-times fa-stack-1x"></i>
       </span>
       <span class="caret"></span>
     </a>
@@ -128,7 +128,7 @@
        href="#ms-groups"
        title="Group/s User Belongs to"
        aria-expanded="false">
-      <span class="fa fa-group fa-lg"></span>
+      <span class="fa fa-group fa-2x"></span>
     </a>
   </li>
 </ul>
