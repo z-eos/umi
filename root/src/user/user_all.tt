@@ -149,6 +149,7 @@
    // ----------------------------------------------------------------------------
    $(".duplicate").children(".form-group.has-error").removeClass("has-error");
    $(".form-group.hfh-repinst.has-error").removeClass("has-error");
+   $(".no-has-error.has-error").removeClass("has-error");
    // ----------------------------------------------------------------------------
 
    
@@ -195,6 +196,19 @@
        },
        serviceSelectAttachEvent = function($parent) {
 	 $(selectServiceAuthQuery, $parent).on("change", onServiceChange);
+       },
+       duplicatedAttachEvent = function($parent, unhide) {
+	 var $rmDuplicate = $parent
+           .find(".rm-duplicate");
+	 $rmDuplicate
+	   .click(function(){
+	     $(this).parents(".duplicated").remove();
+	   });
+	 if (unhide) {
+	   $rmDuplicate.removeClass("hidden");
+	 } else {
+	   $(".duplicated .rm-duplicate", $parent).removeClass("hidden");
+	 }
        };
    
    // duplicating code
@@ -204,9 +218,17 @@
      var $a = $(this),
          counter = parseInt($a.data("counter")) || ($a.data("counter",0),0),
          $fieldset = $a.parents("fieldset"),
-         $duplicate = $fieldset.find("div."+$a.data('duplicate')).first().clone();
-     ++counter;
-     $duplicate.removeAttr("id").removeClass("duplicate").addClass("duplicated");
+         $duplicateOriginal = $fieldset.find("div."+$a.data('duplicate')),
+	 $duplicate = $duplicateOriginal.first().clone(),
+	 $parent = $duplicateOriginal.parent();
+    ++counter;
+     
+     $duplicate
+       .removeAttr("id")
+       .removeClass("duplicate")
+       .addClass("duplicated")
+       .children()
+       .prop("id",$duplicateOriginal.parents(".form-group").attr("id")+"."+counter);
 
      $("input:text, input:password, input:file, select, textarea, input:radio, input:checkbox", $duplicate).each(function(id, element){
        var $element = $(element),
@@ -226,13 +248,14 @@
        });
      });
      
-     $duplicate.appendTo($fieldset);
+     $duplicate.appendTo($parent);
      // $duplicate.find(".fa-times-circle").removeClass("hidden").click(function(){
-     $duplicate.find(".rm-duplicate").removeClass("hidden").click(function(){
+     /*$duplicate.find(".rm-duplicate").removeClass("hidden").click(function(){
        $(this).parents(".duplicated").remove();
-     });
+     });*/
+     duplicatedAttachEvent($duplicate, !0);
      serviceSelectAttachEvent($duplicate);
-     
+
      $('html, body').animate({
        scrollTop: $duplicate.offset().top-80
      }, 1000);
@@ -241,6 +264,7 @@
    });
 
    serviceSelectAttachEvent($(document));
+   duplicatedAttachEvent($(document));
  });
 </script>  
 

@@ -135,7 +135,7 @@ has_block 'person' => ( tag => 'fieldset',
 has_field 'account' => ( type => 'Repeatable',
                          # setup_for_js => 1,
                          do_wrapper => 1,
-			 # wrapper_attr => { class => 'hfhrep' },
+			 wrapper_attr => { class => 'no-has-error' },
 			 wrap_repeatable_element_method => \&wrap_account_elements,
                        );
 
