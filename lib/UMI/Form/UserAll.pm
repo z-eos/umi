@@ -14,7 +14,9 @@ has '+item_class' => ( default =>'UserAll' );
 has '+enctype' => ( default => 'multipart/form-data');
 
 sub build_form_element_class { [ 'form-horizontal', 'tab-content' ] }
-
+sub build_update_subfields {
+  by_flag => { repeatable => { do_wrapper => 1, do_label => 1 } }
+}
 ######################################################################
 #== PERSONAL DATA ====================================================
 ######################################################################
@@ -99,12 +101,12 @@ has_block 'person' => ( tag => 'fieldset',
 # 			      html => '<span class="fa fa-times-circle col-xs-offset-2 btn btn-link text-danger hidden" title="Delete this section."></span>',
 # 			    );
 
-has_field 'rm-duplicate' => ( type => 'Display',
-			      html => '<div class="col-xs-12 rm-duplicate hidden"><div class="col-xs-1">' .
-			      '<a class="btn btn-danger btn-xs" href="#">' .
-			      '<span class="fa fa-trash-o"></span> Delete this section</a>' .
-			      '</div></div>',
-			    );
+# need to be moved to rep # has_field 'rm-duplicate' => ( type => 'Display',
+# need to be moved to rep # 			      html => '<div class="col-xs-12 rm-duplicate hidden"><div class="col-xs-1">' .
+# need to be moved to rep # 			      '<a class="btn btn-danger btn-xs" href="#">' .
+# need to be moved to rep # 			      '<span class="fa fa-trash-o"></span> Delete this section</a>' .
+# need to be moved to rep # 			      '</div></div>',
+# need to be moved to rep # 			    );
 
 # has_field 'rm-duplicate' => ( type => 'Button',
 # 			      do_label => 0,
@@ -119,10 +121,17 @@ has_field 'rm-duplicate' => ( type => 'Display',
 ######################################################################
 has_field 'account' => ( type => 'Repeatable',
                          # setup_for_js => 1,
-                         # do_wrapper => 1,
-                         # tags => { controls_div => 1 },
-                         # init_contains => { wrapper_attr => { class => ['hfh', 'repinst'] } },
+                         do_wrapper => 1,
+			 # wrapper_attr => { class => 'hfhrep' },
+			 wrap_repeatable_element_method => \&wrap_account_elements,
                        );
+
+has_field 'account.rm-duplicate' => ( type => 'Display',
+				      html => '<div class="col-xs-12 rm-duplicate hidden"><div class="col-xs-1">' .
+				      '<a class="btn btn-danger btn-xs" href="#">' .
+				      '<span class="fa fa-trash-o"></span> Delete this section</a>' .
+				      '</div></div>',
+				    );
 
 has_field 'account.associateddomain' => ( type => 'Select',
 					  label => 'Domain Name',
@@ -218,20 +227,36 @@ has_field 'account.radiustunnelprivategroup' => ( apply => [ NoSpaces, Printable
 # 				     'leave empty password fields to autogenerate password</em></small><p>&nbsp;</p>',
 # 				   );
 
-has_block 'group_auth' => ( tag => 'div',
-			    render_list => [ 'rm-duplicate',
-					     'account.associateddomain',
-					     'account.authorizedservice',
-					     'account.login',
-					     'account.password1',
-					     'account.password2',
-					     'account.radiusgroupname',
-					     'account.radiustunnelprivategroup',
-					     'account',
-					     # 'account.pwdcomment',
-					   ],
-			    class => [ 'duplicate' ],
-			  );
+sub wrap_account_elements {
+  my ( $self, $input, $subfield ) = @_;
+  my $output = sprintf('%s%s%s',
+		       ! $subfield ? qq{\n<div class="duplicate">} : qq{\n<div class="duplicated">},
+		       $input,
+		       qq{</div>});
+}
+
+sub html_attributes {
+  my ( $self, $field, $type, $attr ) = @_;
+  if ( $type eq 'wrapper' && $field->has_flag('is_contains') ) {
+    $attr->{class} = ['hfh', 'repinst'];
+  }
+  return $attr;
+}
+    
+# has_block 'group_auth' => ( tag => 'div',
+# 			    render_list => [ 'rm-duplicate',
+# 					     # 'account.associateddomain',
+# 					     # 'account.authorizedservice',
+# 					     # 'account.login',
+# 					     # 'account.password1',
+# 					     # 'account.password2',
+# 					     # 'account.radiusgroupname',
+# 					     # 'account.radiustunnelprivategroup',
+# 					     'account',
+# 					     # 'account.pwdcomment',
+# 					   ],
+# 			    # class => [ 'duplicate' ],
+# 			  );
 
 has_block 'auth' => ( tag => 'fieldset',
 		      label => 'Service Account&nbsp;<small class="text-muted"><em>(' .
@@ -243,7 +268,7 @@ has_block 'auth' => ( tag => 'fieldset',
 		      '</div></div>',
 		      
 		      # label_class => [ 'col-xs-offset-2', 'text-left'],
-		      render_list => [ 'group_auth', ],
+		      render_list => [ 'account', ],
 		      class => [ 'tab-pane', 'fade', ],
 		      attr => { id => 'auth',
 				'aria-labelledby' => "auth-tab",
@@ -256,11 +281,19 @@ has_block 'auth' => ( tag => 'fieldset',
 ######################################################################
 
 has_field 'loginless_ssh' => ( type => 'Repeatable',
-			  setup_for_js => 1,
-			  do_wrapper => 1,
-			  tags => { controls_div => 1 },
-			  # init_contains => { wrapper_attr => { class => ['hfh', 'repinst'] } },
-			);
+			       #setup_for_js => 1,
+			       do_wrapper => 1,
+			       wrap_repeatable_element_method => \&wrap_loginless_ssh_elements,
+			       #tags => { controls_div => 1 },
+			       # init_contains => { wrapper_attr => { class => ['hfh', 'repinst'] } },
+			     );
+
+has_field 'loginless_ssh.rm-duplicate' => ( type => 'Display',
+				      html => '<div class="col-xs-12 rm-duplicate hidden"><div class="col-xs-1">' .
+				      '<a class="btn btn-danger btn-xs" href="#">' .
+				      '<span class="fa fa-trash-o"></span> Delete this section</a>' .
+				      '</div></div>',
+				    );
 
 has_field 'loginless_ssh.associateddomain' => ( type => 'Select',
 						label => 'Domain Name',
@@ -286,13 +319,20 @@ has_field 'loginless_ssh.key' => ( type => 'TextArea',
 			     cols => 30, rows => 4);
 
 
-has_block 'group_ssh' => ( tag => 'div',
-			   render_list => [ 'rm-duplicate',
-					    'loginless_ssh',
-					    'loginless_ssh.associateddomain',
-					    'loginless_ssh.key', ],
-			   class => [ 'duplicate' ],
-			 );
+sub wrap_loginless_ssh_elements {
+  my ( $self, $input, $subfield ) = @_;
+  my $output = sprintf('%s%s%s', ! $subfield ? qq{\n<div class="duplicate">} : qq{\n<div class="duplicated">},
+		       $input,
+		       qq{</div>});
+}
+
+# has_block 'group_ssh' => ( tag => 'div',
+# 			   render_list => [ 'rm-duplicate',
+# 					    'loginless_ssh',
+# 					    'loginless_ssh.associateddomain',
+# 					    'loginless_ssh.key', ],
+# 			   class => [ 'duplicate' ],
+# 			 );
 
 has_block 'ssh' => ( tag => 'fieldset',
 		     label => 'SSH Key&nbsp;<small class="text-muted"><em>()</em></small>' .
@@ -303,7 +343,7 @@ has_block 'ssh' => ( tag => 'fieldset',
 		      '</div></div>',
 		      
 		     # label_class => [ 'col-xs-offset-2', 'text-left'],
-		     render_list => [ 'group_ssh', ],
+		     render_list => [ 'loginless_ssh', ],
 		     class => [ 'tab-pane', 'fade', ],
 		     attr => { id => 'ssh',
 			       'aria-labelledby' => "ssh-tab",
@@ -314,11 +354,19 @@ has_block 'ssh' => ( tag => 'fieldset',
 #=====================================================================
 
 has_field 'loginless_ovpn' => ( type => 'Repeatable',
-			      setup_for_js => 1,
+			      #setup_for_js => 1,
 			      do_wrapper => 1,
-			      tags => { controls_div => 1 },
+				wrap_repeatable_element_method => \&wrap_loginless_ovpn_elements,
+			      #tags => { controls_div => 1 },
 			      # init_contains => { wrapper_attr => { class => ['hfh', 'repinst'] } },
 			);
+
+has_field 'loginless_ovpn.rm-duplicate' => ( type => 'Display',
+				      html => '<div class="col-xs-12 rm-duplicate hidden"><div class="col-xs-1">' .
+				      '<a class="btn btn-danger btn-xs" href="#">' .
+				      '<span class="fa fa-trash-o"></span> Delete this section</a>' .
+				      '</div></div>',
+				    );
 
 has_field 'loginless_ovpn.associateddomain' => ( type => 'Select',
 						 label => 'Domain Name',
@@ -367,17 +415,24 @@ has_field 'loginless_ovpn.ip' => ( apply => [ NoSpaces, NotAllDigits, Printable 
 						   'data-group' => 'loginless_ovpn', },
 			       );
 
-has_block 'group_ovpn' => ( tag => 'div',
-			    render_list => [ 'rm-duplicate',
-					     'loginless_ovpn',
-					     'loginless_ovpn.associateddomain',
-					     'loginless_ovpn.device',
-					     'loginless_ovpn.ip',
-					     'loginless_ovpn.cert',
-					     # 'loginless_ovpn.comment',
-					   ],
-			    class => [ 'duplicate' ],
-			  );
+sub wrap_loginless_ovpn_elements {
+  my ( $self, $subfield ) = @_;
+  my $output = sprintf('%s%s%s', ! $subfield ? qq{\n<div class="duplicate">} : qq{\n<div class="duplicated">},
+		       $input,
+		       qq{</div>});
+}
+
+# has_block 'group_ovpn' => ( tag => 'div',
+# 			    render_list => [ 'rm-duplicate',
+# 					     'loginless_ovpn',
+# 					     'loginless_ovpn.associateddomain',
+# 					     'loginless_ovpn.device',
+# 					     'loginless_ovpn.ip',
+# 					     'loginless_ovpn.cert',
+# 					     # 'loginless_ovpn.comment',
+# 					   ],
+# 			    class => [ 'duplicate' ],
+# 			  );
 
 has_block 'ovpn' => ( tag => 'fieldset',
 		      label => 'OpenVPN configuration&nbsp;<small class="text-muted"><em>()</em></small>' .
@@ -388,7 +443,7 @@ has_block 'ovpn' => ( tag => 'fieldset',
 		      '</div></div>',
 		      
 		      # label_class => [ 'col-xs-offset-2', 'text-left'],
-		      render_list => [ 'group_ovpn', ],
+		      render_list => [ 'loginless_ovpn', ],
 		      class => [ 'tab-pane', 'fade', ],
 		      attr => { id => 'ovpn',
 				'aria-labelledby' => "ovpn-tab",

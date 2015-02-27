@@ -1091,7 +1091,7 @@ options builder for select element of organizations
 =cut
 
 has 'select_organizations' => ( traits => ['Array'],
-	       is => 'ro', isa => 'ArrayRef',
+	       is => 'ro', isa => 'ArrayRef', required => 0, lazy => 1,
 	       builder => '_build_select_organizations',
 	     );
 
@@ -1140,12 +1140,12 @@ options builder for select element of associateddomains
 =cut
 
 has 'select_associateddomains' => ( traits => ['Array'],
-	       is => 'ro', isa => 'ArrayRef',
+	       is => 'ro', isa => 'ArrayRef', required => 0, lazy => 1,
 	       builder => '_build_select_associateddomains',
 	     );
 
 sub _build_select_associateddomains {
-  p my $self = shift;
+  my $self = shift;
   my @domains; # = ( {value => '0', label => '--- select domain ---', selected => 'selected'} );
   my $mesg = $self->search( { base => $self->{cfg}->{base}->{org},
 			      filter => 'associatedDomain=*',
@@ -1181,7 +1181,7 @@ selective field de/activation in form
 =cut
 
 has 'select_authorizedservice' => ( traits => ['Array'],
-	       is => 'ro', isa => 'ArrayRef',
+	       is => 'ro', isa => 'ArrayRef', required => 0, lazy => 1,
 	       builder => '_build_select_authorizedservice',
 	     );
 

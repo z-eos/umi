@@ -70,7 +70,7 @@ has_field 'radiusgroupname' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
 		       		       },
 		     );
 
-has_field 'radiustunnelprivategroup' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
+has_field 'radiustunnelprivategroup' => ( apply => [ NoSpaces, Printable ],
 					  label => 'RADIUS Tunnel Private Group',
 					  size => 60,
 					  wrapper_class => [ 'col-xs-4' ],
@@ -78,7 +78,7 @@ has_field 'radiustunnelprivategroup' => ( apply => [ NoSpaces, NotAllDigits, Pri
 					  # element_class => [ 'disabled' ],
 					  # init_value => 'add_svc_acc' . '-<service choosen>',
 					  element_attr => {
-							   placeholder => 'VLAN this 802.1x authenticates to',
+							   placeholder => 'VLAN, this 802.1x authenticates to',
 							  },
 					);
 
