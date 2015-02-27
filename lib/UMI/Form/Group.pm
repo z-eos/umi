@@ -30,6 +30,7 @@ sub options_memberUid {
   my $ldap_crud = $self->ldap_crud;
   my $mesg = $ldap_crud->search( { base => $ldap_crud->{cfg}->{base}->{acc_root},
 				   scope => 'one',
+				   sizelimit => 0,
 				   attrs => [ qw{uid givenName sn} ], } );
 
   if ( ! $mesg->count ) {
