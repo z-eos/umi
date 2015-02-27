@@ -14,9 +14,22 @@ has '+item_class' => ( default =>'UserAll' );
 has '+enctype' => ( default => 'multipart/form-data');
 
 sub build_form_element_class { [ 'form-horizontal', 'tab-content' ] }
+
 sub build_update_subfields {
   by_flag => { repeatable => { do_wrapper => 1, do_label => 1 } }
 }
+
+sub html_attributes {
+  my ( $self, $field, $type, $attr ) = @_;
+  push @{$attr->{class}}, 'required'
+    if ( $type eq 'label' && $field->required );
+
+  $attr->{class} = ['hfh', 'repinst']
+    if $type eq 'wrapper' && $field->has_flag('is_contains');
+
+  return $attr;
+}
+
 ######################################################################
 #== PERSONAL DATA ====================================================
 ######################################################################
@@ -513,19 +526,8 @@ has_block 'submitit' => ( tag => 'fieldset',
 			  class => [ 'container-fluid', ]
 			);
 
+
 sub build_render_list {[ 'person', 'auth', 'ssh', 'ovpn', 'groupsselect', 'submitit' ]}
-
-sub html_attributes {
-  my ( $self, $field, $type, $attr ) = @_;
-  push @{$attr->{class}}, 'required'
-    if ( $type eq 'label' && $field->required );
-
-  $attr->{class} = ['hfh', 'repinst']
-    if $type eq 'wrapper' && $field->has_flag('is_contains');
-
-  return $attr;
-}
-
 
 sub validate {
   my $self = shift;
