@@ -34,30 +34,30 @@ sub html_attributes {
 #== PERSONAL DATA ====================================================
 ######################################################################
 has_field 'person_avatar' => ( type => 'Upload',
-				label => 'User Photo ID',
-				label_class => [ 'col-xs-2', ],
-				element_wrapper_class => [ 'col-xs-2', 'col-lg-3', ],
-				element_class => [ 'btn', 'btn-default', 'btn-sm', ],
-				max_size => '50000' );
+			       label => 'User Photo ID',
+			       label_class => [ 'col-xs-2', ],
+			       element_wrapper_class => [ 'col-xs-2', 'col-lg-3', ],
+			       element_class => [ 'btn', 'btn-default', 'btn-sm', ],
+			       max_size => '50000' );
 
 has_field 'person_givenname' => ( apply => [ NoSpaces ],
-				   label => 'First Name',
-				   label_class => [ 'col-xs-2', ],
-				   element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-					   element_class => [ 'input-sm', ],
-				   element_attr => { placeholder => 'John' },
-				   required => 1 );
+				  label => 'First Name',
+				  label_class => [ 'col-xs-2', ],
+				  element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+				  element_class => [ 'input-sm', ],
+				  element_attr => { placeholder => 'John' },
+				  required => 1 );
 
 has_field 'person_sn' => ( apply => [ NoSpaces ],
-			    label => 'Last Name',
-			    label_class => [ 'col-xs-2', ],
-			    element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-					   element_class => [ 'input-sm', ],
-			    element_attr => { placeholder => 'Doe' },
-			    required => 1 );
+			   label => 'Last Name',
+			   label_class => [ 'col-xs-2', ],
+			   element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+			   element_class => [ 'input-sm', ],
+			   element_attr => { placeholder => 'Doe' },
+			   required => 1 );
 
 has_field 'person_office' => ( type => 'Select',
-				label => 'Office',
+			       label => 'Office',
 			       label_class => [ 'col-xs-2' ],
 			       empty_select => '--- Choose an Organization ---',
 			       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
@@ -66,25 +66,25 @@ has_field 'person_office' => ( type => 'Select',
 			       required => 1 );
 
 has_field 'person_title' => ( label => 'Position',
-			       label_class => [ 'col-xs-2', ],
-			       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-					   element_class => [ 'input-sm', ],
-			       element_attr => { placeholder => 'manager' },
-			       required => 1 );
+			      label_class => [ 'col-xs-2', ],
+			      element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+			      element_class => [ 'input-sm', ],
+			      element_attr => { placeholder => 'manager' },
+			      required => 1 );
 
 has_field 'person_telephonenumber' => ( apply => [ NoSpaces ],
-					 label => 'SIP/Cell',
-					 label_class => [ 'col-xs-2', ],
-					 element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-					   element_class => [ 'input-sm', ],
-					 wrapper_attr => { id => 'items' },
-					 element_attr => { name => 'telephonenumber\[\]',
-							   placeholder => '123@pbx0.ibs, +380xxxxxxxxx' });
+					label => 'SIP/Cell',
+					label_class => [ 'col-xs-2', ],
+					element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+					element_class => [ 'input-sm', ],
+					wrapper_attr => { id => 'items' },
+					element_attr => { name => 'telephonenumber\[\]',
+							  placeholder => '123@pbx0.ibs, +380xxxxxxxxx' });
 
 has_field 'person_telcomment' => ( type => 'Display',
-				    html => '<small class="text-muted col-xs-offset-2"><em>' .
-				    'comma or space delimited if many, international format for tel.</em></small>',
-				  );
+				   html => '<small class="text-muted col-xs-offset-2"><em>' .
+				   'comma or space delimited if many, international format for tel.</em></small>',
+				 );
 
 has_block 'group_person' => ( tag => 'div',
 			      render_list => [ 'person_givenname',
@@ -155,7 +155,7 @@ has_field 'account.associateddomain' => ( type => 'Select',
 					  options_method => \&associateddomains,
 					  element_attr => { 'data-name' => 'associateddomain',
 							    'data-group' => 'account', },
-					   required => 0 );
+					  required => 0 );
 
 has_field 'account.authorizedservice' => ( type => 'Select',
 					   label => 'Service', label_class => [ 'required' ],
@@ -167,7 +167,7 @@ has_field 'account.authorizedservice' => ( type => 'Select',
 					   element_attr => { 'data-name' => 'authorizedservice',
 							     'data-group' => 'account', },
 					   required => 0,
-					  );
+					 );
 
 has_field 'account.login' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
 			       label => 'Login',
@@ -182,18 +182,18 @@ has_field 'account.login' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
 			     );
 
 has_field 'account.password1' => ( type => 'Password',
-				    # minlength => 7, maxlength => 16,
-				    label => 'Password',
-				    label_class => [ 'col-xs-2', ],
-				    element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-					   element_class => [ 'input-sm', ],
-				    ne_username => 'login',
-				    apply => [ NoSpaces, NotAllDigits, Printable, StrongPassword ],
-				    element_attr => { placeholder => 'Password',
-						      'autocomplete' => 'off',
-						      'data-name' => 'password1',
-						      'data-group' => 'account', },
-				  );
+				   # minlength => 7, maxlength => 16,
+				   label => 'Password',
+				   label_class => [ 'col-xs-2', ],
+				   element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+				   element_class => [ 'input-sm', ],
+				   ne_username => 'login',
+				   apply => [ NoSpaces, NotAllDigits, Printable, StrongPassword ],
+				   element_attr => { placeholder => 'Password',
+						     'autocomplete' => 'off',
+						     'data-name' => 'password1',
+						     'data-group' => 'account', },
+				 );
 
 has_field 'account.password2' => ( type => 'Password',
 				   # minlength => 7, maxlength => 16,
@@ -295,11 +295,11 @@ has_field 'loginless_ssh' => ( type => 'Repeatable',
 			     );
 
 has_field 'loginless_ssh.rm-duplicate' => ( type => 'Display',
-				      html => '<div class="col-xs-12 rm-duplicate hidden"><div class="col-xs-1">' .
-				      '<a class="btn btn-danger btn-xs" href="#">' .
-				      '<span class="fa fa-trash-o"></span> Delete this section</a>' .
-				      '</div></div>',
-				    );
+					    html => '<div class="col-xs-12 rm-duplicate hidden"><div class="col-xs-1">' .
+					    '<a class="btn btn-danger btn-xs" href="#">' .
+					    '<span class="fa fa-trash-o"></span> Delete this section</a>' .
+					    '</div></div>',
+					  );
 
 has_field 'loginless_ssh.associateddomain' => ( type => 'Select',
 						label => 'Domain Name',
@@ -308,21 +308,21 @@ has_field 'loginless_ssh.associateddomain' => ( type => 'Select',
 						element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
 						element_class => [ 'input-sm', ],
 						options_method => \&associateddomains,
-					  element_attr => {
-							   'data-name' => 'associateddomain',
-							   'data-group' => 'loginless_ssh',
-							  },
-					);
+						element_attr => {
+								 'data-name' => 'associateddomain',
+								 'data-group' => 'loginless_ssh',
+								},
+					      );
 
 has_field 'loginless_ssh.key' => ( type => 'TextArea',
-			     label => 'SSH Pub Key',
-			     label_class => [ 'col-xs-2', ],
-			     element_wrapper_class => [ 'col-xs-10', 'col-lg-8', ],
-					   element_class => [ 'input-sm', ],
-			     element_attr => { placeholder => 'Paste SSH key',
-					       'data-name' => 'key',
-					       'data-group' => 'loginless_ssh', },
-			     cols => 30, rows => 4);
+				   label => 'SSH Pub Key',
+				   label_class => [ 'col-xs-2', ],
+				   element_wrapper_class => [ 'col-xs-10', 'col-lg-8', ],
+				   element_class => [ 'input-sm', ],
+				   element_attr => { placeholder => 'Paste SSH key',
+						     'data-name' => 'key',
+						     'data-group' => 'loginless_ssh', },
+				   cols => 30, rows => 4);
 
 
 sub wrap_loginless_ssh_elements {
@@ -343,10 +343,10 @@ sub wrap_loginless_ssh_elements {
 has_block 'ssh' => ( tag => 'fieldset',
 		     label => 'SSH Key&nbsp;<small class="text-muted"><em>()</em></small>' .
 		      
-		      '<div class="col-xs-12"><div class="col-xs-1">' .
-		      '<a href="#" class="btn btn-success btn-xs" data-duplicate="duplicate">' .
-		      '<span class="fa fa-plus-circle rm-duplicate"></span> Duplicate this section</a>' .
-		      '</div></div>',
+		     '<div class="col-xs-12"><div class="col-xs-1">' .
+		     '<a href="#" class="btn btn-success btn-xs" data-duplicate="duplicate">' .
+		     '<span class="fa fa-plus-circle rm-duplicate"></span> Duplicate this section</a>' .
+		     '</div></div>',
 		      
 		     # label_class => [ 'col-xs-offset-2', 'text-left'],
 		     render_list => [ 'loginless_ssh', ],
@@ -360,19 +360,19 @@ has_block 'ssh' => ( tag => 'fieldset',
 #=====================================================================
 
 has_field 'loginless_ovpn' => ( type => 'Repeatable',
-			      #setup_for_js => 1,
-			      do_wrapper => 1,
+				#setup_for_js => 1,
+				do_wrapper => 1,
 				wrap_repeatable_element_method => \&wrap_loginless_ovpn_elements,
-			      #tags => { controls_div => 1 },
-			      # init_contains => { wrapper_attr => { class => ['hfh', 'repinst'] } },
-			);
+				#tags => { controls_div => 1 },
+				# init_contains => { wrapper_attr => { class => ['hfh', 'repinst'] } },
+			      );
 
 has_field 'loginless_ovpn.rm-duplicate' => ( type => 'Display',
-				      html => '<div class="col-xs-12 rm-duplicate hidden"><div class="col-xs-1">' .
-				      '<a class="btn btn-danger btn-xs" href="#">' .
-				      '<span class="fa fa-trash-o"></span> Delete this section</a>' .
-				      '</div></div>',
-				    );
+					     html => '<div class="col-xs-12 rm-duplicate hidden"><div class="col-xs-1">' .
+					     '<a class="btn btn-danger btn-xs" href="#">' .
+					     '<span class="fa fa-trash-o"></span> Delete this section</a>' .
+					     '</div></div>',
+					   );
 
 has_field 'loginless_ovpn.associateddomain' => ( type => 'Select',
 						 label => 'Domain Name',
@@ -383,18 +383,18 @@ has_field 'loginless_ovpn.associateddomain' => ( type => 'Select',
 						 options_method => \&associateddomains,
 						 element_attr => { 'data-name' => 'associateddomain',
 								   'data-group' => 'loginless_ovpn', },
-					 );
+					       );
 
 has_field 'loginless_ovpn.cert' => ( type => 'Upload',
-			       label => 'OpenVPN Certificate (DER format)',
-			       label_class => [ 'col-xs-2', ],
-			       element_wrapper_class => [ 'col-xs-2', 'col-lg-3', ],
-			       element_class => [ 'btn', 'btn-default', 'btn-sm',],
-			       element_attr => {
-						'data-name' => 'cert',
-						'data-group' => 'loginless_ovpn',
-					       },
-			     );
+				     label => 'OpenVPN Certificate (DER format)',
+				     label_class => [ 'col-xs-2', ],
+				     element_wrapper_class => [ 'col-xs-2', 'col-lg-3', ],
+				     element_class => [ 'btn', 'btn-default', 'btn-sm',],
+				     element_attr => {
+						      'data-name' => 'cert',
+						      'data-group' => 'loginless_ovpn',
+						     },
+				   );
 
 # has_field 'loginless_ovpn.comment' => ( type => 'Display',
 # 				  html => '<small class="text-muted form-group"><em>' .
@@ -402,14 +402,14 @@ has_field 'loginless_ovpn.cert' => ( type => 'Upload',
 # 				);
 
 has_field 'loginless_ovpn.device' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
-				 label => 'Device',
-				 label_class => [ 'col-xs-2', ],
-				 element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-					   element_class => [ 'input-sm', ],
-				 element_attr => { placeholder => 'Lenovo P780',
-						   'data-name' => 'device',
-						   'data-group' => 'loginless_ovpn', },
-			       );
+				       label => 'Device',
+				       label_class => [ 'col-xs-2', ],
+				       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+				       element_class => [ 'input-sm', ],
+				       element_attr => { placeholder => 'Lenovo P780',
+							 'data-name' => 'device',
+							 'data-group' => 'loginless_ovpn', },
+				     );
 
 has_field 'loginless_ovpn.ip' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
 				   label => 'IP',
@@ -417,9 +417,9 @@ has_field 'loginless_ovpn.ip' => ( apply => [ NoSpaces, NotAllDigits, Printable 
 				   element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
 				   element_class => [ 'input-sm', ],
 				   element_attr => { placeholder => '192.168.0.1',
-						   'data-name' => 'ip',
-						   'data-group' => 'loginless_ovpn', },
-			       );
+						     'data-name' => 'ip',
+						     'data-group' => 'loginless_ovpn', },
+				 );
 
 sub wrap_loginless_ovpn_elements {
   my ( $self, $input, $subfield ) = @_;
@@ -478,15 +478,15 @@ sub options_groups {
 				   attrs => ['cn' ], } );
 
   if ( ! $mesg->count ) {
-  push @{$return->{error}}, $ldap_crud->err($mesg);
-}
+    push @{$return->{error}}, $ldap_crud->err($mesg);
+  }
 
-my @groups_all = $mesg->sorted('cn');
+  my @groups_all = $mesg->sorted('cn');
 
-			       foreach ( @groups_all ) {
-			       push @groups, { value => $_->get_value('cn'), label => $_->get_value('cn'), };
-			     }
-return \@groups;
+  foreach ( @groups_all ) {
+    push @groups, { value => $_->get_value('cn'), label => $_->get_value('cn'), };
+  }
+  return \@groups;
 }
 
 has_field 'groupspace' => ( type => 'Display',
@@ -558,113 +558,110 @@ sub validate {
   # }
 
   $autologin = lc($self->utf2lat( $self->field('person_givenname')->value ) . '.' .
-    $self->utf2lat( $self->field('person_sn')->value ));
+		  $self->utf2lat( $self->field('person_sn')->value ));
 
 
   my $i = 0;
-  foreach $element ( $self->field('account')->fields )
-    {
-      if ( ! defined $element->field('authorizedservice')->value &&
-	   ! defined $element->field('associateddomain')->value ) {
-	$element->field('associateddomain')->add_error('Domain Name is mandatory!');
-	$element->field('authorizedservice')->add_error('Service is mandatory!');
-      } elsif ( defined $element->field('authorizedservice')->value &&
-		! defined $element->field('associateddomain')->value ) {
-	$element->field('associateddomain')->add_error('Domain Name is mandatory!');
-      } elsif ( defined $element->field('associateddomain')->value &&
-		! defined $element->field('authorizedservice')->value ) {
-	$element->field('authorizedservice')->add_error('Service is mandatory!');
-      }
-
-      if ( ( defined $element->field('password1')->value &&
-	     ! defined $element->field('password2')->value ) ||
-	   ( defined $element->field('password2')->value &&
-	     ! defined $element->field('password1')->value ) ) {
-	$element->field('password1')->add_error('Both or none passwords have to be defined!');
-	$element->field('password2')->add_error('Both or none passwords have to be defined!');
-      }
-
-      $element->field('login')->add_error('MAC address is mandatory!')
-	if $element->field('authorizedservice')->value =~ /^802.1x-mac$/ &&
-	! defined $element->field('login')->value;
-
-      $element->field('login')->add_error('MAC address is not valid!')
-	if $element->field('authorizedservice')->value =~ /^802.1x-mac$/ &&
-	! $self->macnorm({ mac => $element->field('login')->value });
-
-      if ( $element->field('authorizedservice')->value !~ /^802.1x-mac$/) {
-	if ( ! defined $element->field('login')->value ) {
-	  $logintmp = $autologin;
-	  $loginpfx = 'Login (autogenerated, since empty)';
-	} else {
-	  $logintmp = $element->field('login')->value;
-	  $loginpfx = 'Login';
-	}
-
-	$mesg =
-	  $ldap_crud->search({
-			      filter => '(&(authorizedService=' .
-			      $element->field('authorizedservice')->value . '@' . $element->field('associateddomain')->value .
-			      ')(uid=' . $logintmp . '@' . $element->field('associateddomain')->value .'))',
-			      base => $ldap_crud->{cfg}->{base}->{acc_root},
-			      attrs => [ 'uid' ],
-			     });
-	$element->field('login')->add_error($loginpfx . ' <mark>' . $logintmp . '</mark> is not available!')
-	  if ($mesg->count);
-      }
-
-      $i++;
+  foreach $element ( $self->field('account')->fields ) {
+    if ( ! defined $element->field('authorizedservice')->value &&
+	 ! defined $element->field('associateddomain')->value ) {
+      $element->field('associateddomain')->add_error('Domain Name is mandatory!');
+      $element->field('authorizedservice')->add_error('Service is mandatory!');
+    } elsif ( defined $element->field('authorizedservice')->value &&
+	      ! defined $element->field('associateddomain')->value ) {
+      $element->field('associateddomain')->add_error('Domain Name is mandatory!');
+    } elsif ( defined $element->field('associateddomain')->value &&
+	      ! defined $element->field('authorizedservice')->value ) {
+      $element->field('authorizedservice')->add_error('Service is mandatory!');
     }
+
+    if ( ( defined $element->field('password1')->value &&
+	   ! defined $element->field('password2')->value ) ||
+	 ( defined $element->field('password2')->value &&
+	   ! defined $element->field('password1')->value ) ) {
+      $element->field('password1')->add_error('Both or none passwords have to be defined!');
+      $element->field('password2')->add_error('Both or none passwords have to be defined!');
+    }
+
+    $element->field('login')->add_error('MAC address is mandatory!')
+      if $element->field('authorizedservice')->value =~ /^802.1x-mac$/ &&
+      ! defined $element->field('login')->value;
+
+    $element->field('login')->add_error('MAC address is not valid!')
+      if $element->field('authorizedservice')->value =~ /^802.1x-mac$/ &&
+      ! $self->macnorm({ mac => $element->field('login')->value });
+
+    if ( $element->field('authorizedservice')->value !~ /^802.1x-mac$/) {
+      if ( ! defined $element->field('login')->value ) {
+	$logintmp = $autologin;
+	$loginpfx = 'Login (autogenerated, since empty)';
+      } else {
+	$logintmp = $element->field('login')->value;
+	$loginpfx = 'Login';
+      }
+
+      $mesg =
+	$ldap_crud->search({
+			    filter => '(&(authorizedService=' .
+			    $element->field('authorizedservice')->value . '@' . $element->field('associateddomain')->value .
+			    ')(uid=' . $logintmp . '@' . $element->field('associateddomain')->value .'))',
+			    base => $ldap_crud->{cfg}->{base}->{acc_root},
+			    attrs => [ 'uid' ],
+			   });
+      $element->field('login')->add_error($loginpfx . ' <mark>' . $logintmp . '</mark> is not available!')
+	if ($mesg->count);
+    }
+
+    $i++;
+  }
 
   $i = 0;
-  foreach $element ( $self->field('loginless_ssh')->fields )
-    {
-      if ( defined $element->field('associateddomain')->value &&
-	   ! defined $element->field('key')->value ) {
-	$element->field('key')->add_error('<span class="fa-li fa fa-key"></span>Key field have to be defined!');
-      } elsif ( defined $element->field('key')->value &&
-		! defined $element->field('associateddomain')->value ) {
-	$element->field('associateddomain')->add_error('Domain field have to be defined!');
-      }
-
-      $i++;
+  foreach $element ( $self->field('loginless_ssh')->fields ) {
+    if ( defined $element->field('associateddomain')->value &&
+	 ! defined $element->field('key')->value ) {
+      $element->field('key')->add_error('<span class="fa-li fa fa-key"></span>Key field have to be defined!');
+    } elsif ( defined $element->field('key')->value &&
+	      ! defined $element->field('associateddomain')->value ) {
+      $element->field('associateddomain')->add_error('Domain field have to be defined!');
     }
+
+    $i++;
+  }
 
   $i = 0;
-  foreach $element ( $self->field('loginless_ovpn')->fields )
-    {
-      if ( defined $element->field('associateddomain')->value &&
-	   ! defined $element->field('cert')->value &&
-	   ! defined $element->field('device')->value &&
-	   ! defined $element->field('ip')->value ) {
-	$element->field('cert')->add_error('Cert field have to be defined!');
-	$element->field('device')->add_error('Device field have to be defined!');
-	$element->field('ip')->add_error('IP field have to be defined!');
-      } elsif ( ! defined $element->field('associateddomain')->value &&
-		defined $element->field('cert')->value &&
-		! defined $element->field('device')->value &&
-		! defined $element->field('ip')->value ) {
-	$element->field('associateddomain')->add_error('Domain field have to be defined!');
-	$element->field('device')->add_error('Device field have to be defined!');
-	$element->field('ip')->add_error('IP field have to be defined!');
-      } elsif ( ! defined $element->field('associateddomain')->value &&
-		! defined $element->field('cert')->value &&
-		defined $element->field('device')->value &&
-		! defined $element->field('ip')->value ) {
-	$element->field('cert')->add_error('Cert field have to be defined!');
-	$element->field('associateddomain')->add_error('Domain field have to be defined!');
-	$element->field('ip')->add_error('IP field have to be defined!');
-      } elsif ( ! defined $element->field('associateddomain')->value &&
-		! defined $element->field('cert')->value &&
-		! defined $element->field('device')->value &&
-		defined $element->field('ip')->value ) {
-	$element->field('cert')->add_error('Cert field have to be defined!');
-	$element->field('device')->add_error('Device field have to be defined!');
-	$element->field('associateddomain')->add_error('Domain field have to be defined!');
-      }
-
-      $i++;
+  foreach $element ( $self->field('loginless_ovpn')->fields ) {
+    if ( defined $element->field('associateddomain')->value &&
+	 ! defined $element->field('cert')->value &&
+	 ! defined $element->field('device')->value &&
+	 ! defined $element->field('ip')->value ) {
+      $element->field('cert')->add_error('Cert field have to be defined!');
+      $element->field('device')->add_error('Device field have to be defined!');
+      $element->field('ip')->add_error('IP field have to be defined!');
+    } elsif ( ! defined $element->field('associateddomain')->value &&
+	      defined $element->field('cert')->value &&
+	      ! defined $element->field('device')->value &&
+	      ! defined $element->field('ip')->value ) {
+      $element->field('associateddomain')->add_error('Domain field have to be defined!');
+      $element->field('device')->add_error('Device field have to be defined!');
+      $element->field('ip')->add_error('IP field have to be defined!');
+    } elsif ( ! defined $element->field('associateddomain')->value &&
+	      ! defined $element->field('cert')->value &&
+	      defined $element->field('device')->value &&
+	      ! defined $element->field('ip')->value ) {
+      $element->field('cert')->add_error('Cert field have to be defined!');
+      $element->field('associateddomain')->add_error('Domain field have to be defined!');
+      $element->field('ip')->add_error('IP field have to be defined!');
+    } elsif ( ! defined $element->field('associateddomain')->value &&
+	      ! defined $element->field('cert')->value &&
+	      ! defined $element->field('device')->value &&
+	      defined $element->field('ip')->value ) {
+      $element->field('cert')->add_error('Cert field have to be defined!');
+      $element->field('device')->add_error('Device field have to be defined!');
+      $element->field('associateddomain')->add_error('Domain field have to be defined!');
     }
+
+    $i++;
+  }
 
   # else {
   #    $mesg =

@@ -1,4 +1,3 @@
-[% dc="dc=umidb" %]
 <!-- BEGIN site/header -->
 
 <!-- Fixed navbar -->
@@ -180,49 +179,49 @@
 
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
-			value="ou=group,[% dc %]"
+			value="[% ldap_crud_cfg('base', 'group') %]"
 			name="ldapsearch_base"
 			title="filter pattern with base Groups">
 		<span class="[% icon_class %] fa-group"></span>&nbsp;group</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
-			value="ou=People,[% dc %]"
+			value="[% ldap_crud_cfg('base', 'acc_root') %]"
 			name="ldapsearch_base"
 			title="filter pattern with base People">
 		<span class="[% icon_class %] fa-user"></span>&nbsp;People</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
-			value="ou=Organizations,[% dc %]"
+			value="[% ldap_crud_cfg('base', 'org') %]"
 			name="ldapsearch_base" tabindex="20"
 			title="filter pattern with base Organizations">
 		<span class="[% icon_class %] fa-institution"></span>&nbsp;Organizations</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
-			value="ou=dhcp,[% dc %]"
+			value="[% ldap_crud_cfg('base', 'dhcp') %]"
 			name="ldapsearch_base" tabindex="21"
 			title="filter pattern with base DHCP">
 		<span class="[% icon_class %] fa-sitemap"></span>&nbsp;DHCP</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
-			value="ou=alias,[% dc %]"
+			value="ou=[% ldap_crud_cfg('base', 'alias') %]"
 			name="ldapsearch_base" tabindex="22"
 			title="filter pattern with base Aliases">
 		<span class="[% icon_class %] fa-puzzle-piece"></span>&nbsp;mail alias</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
-			value="ou=workstations,[% dc %]"
+			value="[% ldap_crud_cfg('base', 'workstation') %]"
 			name="ldapsearch_base" tabindex="23"
 			title="filter pattern with base Workstations">
 		<span class="[% icon_class %] fa-desktop"></span>&nbsp;workstations</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
-			value="ou=machines,[% dc %]"
+			value="[% ldap_crud_cfg('base', 'machines') %]"
 			name="ldapsearch_base" tabindex="24"
 			title="filter pattern with base Machines">
 		<span class="[% icon_class %] fa-laptop"></span>&nbsp;machines</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
-			value="ou=GitACL,[% dc %]"
+			value="[% ldap_crud_cfg('base', 'gitacl') %]"
 			name="ldapsearch_base" tabindex="25">
 		<span class="[% icon_class %] fa-gavel"></span>&nbsp;GitACL</button></li>
 
