@@ -235,13 +235,6 @@ sub wrap_account_elements {
 		       qq{</div>});
 }
 
-sub html_attributes {
-  my ( $self, $field, $type, $attr ) = @_;
-  if ( $type eq 'wrapper' && $field->has_flag('is_contains') ) {
-    $attr->{class} = ['hfh', 'repinst'];
-  }
-  return $attr;
-}
     
 # has_block 'group_auth' => ( tag => 'div',
 # 			    render_list => [ 'rm-duplicate',
@@ -416,7 +409,7 @@ has_field 'loginless_ovpn.ip' => ( apply => [ NoSpaces, NotAllDigits, Printable 
 			       );
 
 sub wrap_loginless_ovpn_elements {
-  my ( $self, $subfield ) = @_;
+  my ( $self, $input, $subfield ) = @_;
   my $output = sprintf('%s%s%s', ! $subfield ? qq{\n<div class="duplicate">} : qq{\n<div class="duplicated">},
 		       $input,
 		       qq{</div>});
@@ -526,7 +519,13 @@ sub html_attributes {
   my ( $self, $field, $type, $attr ) = @_;
   push @{$attr->{class}}, 'required'
     if ( $type eq 'label' && $field->required );
+
+  $attr->{class} = ['hfh', 'repinst']
+    if $type eq 'wrapper' && $field->has_flag('is_contains');
+
+  return $attr;
 }
+
 
 sub validate {
   my $self = shift;
