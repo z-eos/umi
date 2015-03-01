@@ -613,6 +613,7 @@ sub user_add_svc_new :Path(user_add_svc_new) :Args(0) {
   $c->stash(
 	    template => 'user/user_all.tt',
 	    form => $self->form_user_all,
+	    params => $params,
 	   );
 
   use Data::Printer;
@@ -625,7 +626,7 @@ sub user_add_svc_new :Path(user_add_svc_new) :Args(0) {
 				      ); # if ! $self->form_user_all->has_errors;
 
   # p $final_message->{danger} = join('<br>', $self->form_user_all->errors);
-  p $params;
+  # p $params;
   # $c->stash( final_message => $final_message, );
 
 }
