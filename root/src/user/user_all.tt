@@ -42,7 +42,7 @@
 
 
 
-<ul role="tablist" class="nav nav-tabs" id="myTab">
+<ul role="tablist" class="nav nav-pills" id="myTab">
   [% IF ! dn %]
   <li class="active" role="presentation">
     <a aria-controls="person"
@@ -52,6 +52,7 @@
        title="Personal Data"
        aria-expanded="true">
       <span class="fa fa-credit-card"></span>
+      <span class="sr-only">Person</span>
     </a>
   </li>
   [% END %]
@@ -139,7 +140,7 @@
 [% # form.render_repeatable_js %]
 [% form.render %]
 
-[% IF params %]
+[% IF params.size %]
 <div class="panel panel-info">
   <div class="panel-heading">
     <h4><span class="fa fa-exclamation-triangle">&nbsp;</span>Parameters passed to form!</h4>
@@ -202,7 +203,7 @@
 	     value = $this.val();
 	 
 	 switchRelations(
-	   $this.parents(".hfh-repinst.form-group"),
+	   $this.parents(".hfh.repinst.form-group"),
 	   !relation || !relation.length || !value.length
          ? false
          : relation

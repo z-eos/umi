@@ -33,13 +33,6 @@ sub html_attributes {
 ######################################################################
 #== PERSONAL DATA ====================================================
 ######################################################################
-has_field 'person_avatar' => ( type => 'Upload',
-			       label => 'User Photo ID',
-			       label_class => [ 'col-xs-2', ],
-			       element_wrapper_class => [ 'col-xs-2', 'col-lg-3', ],
-			       element_class => [ 'btn', 'btn-default', 'btn-sm', ],
-			       max_size => '50000' );
-
 has_field 'person_givenname' => ( apply => [ NoSpaces ],
 				  label => 'First Name',
 				  label_class => [ 'col-xs-2', ],
@@ -55,6 +48,13 @@ has_field 'person_sn' => ( apply => [ NoSpaces ],
 			   element_class => [ 'input-sm', ],
 			   element_attr => { placeholder => 'Doe' },
 			   required => 1 );
+
+has_field 'person_avatar' => ( type => 'Upload',
+			       label => 'User Photo ID',
+			       label_class => [ 'col-xs-2', ],
+			       element_wrapper_class => [ 'col-xs-2', 'col-lg-3', ],
+			       element_class => [ 'btn', 'btn-default', 'btn-sm', ],
+			       max_size => '50000' );
 
 has_field 'person_office' => ( type => 'Select',
 			       label => 'Office',
@@ -87,9 +87,7 @@ has_field 'person_telcomment' => ( type => 'Display',
 				 );
 
 has_block 'group_person' => ( tag => 'div',
-			      render_list => [ 'person_givenname',
-					       'person_sn',
-					       'person_office',
+			      render_list => [ 'person_office',
 					       'person_title',
 					       'person_avatar',
 					       'person_telephonenumber',
@@ -526,7 +524,7 @@ has_block 'submitit' => ( tag => 'fieldset',
 			);
 
 
-sub build_render_list {[ 'person', 'auth', 'ssh', 'ovpn', 'groupsselect', 'submitit' ]}
+sub build_render_list {[ 'person_givenname', 'person_sn', 'person', 'auth', 'ssh', 'ovpn', 'groupsselect', 'submitit' ]}
 
 sub validate {
   my $self = shift;
