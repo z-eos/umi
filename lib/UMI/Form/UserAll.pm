@@ -35,19 +35,116 @@ sub html_attributes {
 ######################################################################
 has_field 'person_givenname' => ( apply => [ NoSpaces ],
 				  label => 'First Name',
-				  label_class => [ 'col-xs-2', ],
-				  element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+				  label_class => [ 'col-xs-1', ],
+				  element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
 				  element_class => [ 'input-sm', ],
 				  element_attr => { placeholder => 'John' },
 				  required => 1 );
 
 has_field 'person_sn' => ( apply => [ NoSpaces ],
 			   label => 'Last Name',
-			   label_class => [ 'col-xs-2', ],
-			   element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+			   label_class => [ 'col-xs-1', ],
+			   element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
 			   element_class => [ 'input-sm', ],
 			   element_attr => { placeholder => 'Doe' },
 			   required => 1 );
+
+has_field 'nav' => ( type => 'Display',
+			      html => '<nav class="navbar navbar-default">
+<ul role="tablist" class="nav navbar-nav" id="myTab">
+  <li role="presentation">&nbsp;</li>
+  <li class="active" role="presentation">
+    <a aria-controls="person"
+       data-toggle="tab" role="tab"
+       id="person-tab"
+       href="#person"
+       title="Personal Data"
+       aria-expanded="true">
+      <span class="fa fa-list"></span>
+      <span class="sr-only">Person</span>
+    </a>
+  </li>
+
+  <li role="presentation">
+    <a aria-controls="auth"
+       data-toggle="tab" role="tab"
+       id="auth-tab"
+       href="#auth"
+       title="Login/Password Dependent Services"
+       aria-expanded="false">
+      <span class="fa fa-user-plus"></span>
+      <!-- <span class="fa-stack">
+	    <i class="fa fa-folder-o fa-stack-2x"></i>
+	    <i class="fa fa-user fa-stack-1x"></i>
+	    </span> -->
+      <!-- <span class="fa-stack fa-lg">
+	<i class="fa fa-cog fa-stack-2x"></i>
+	<i class="fa fa-user-plus fa-stack-1x text-info"></i>
+      </span> -->
+    </a>
+  </li>
+
+  <li class="dropdown" role="presentation">
+    <a aria-controls="sec-contents"
+       data-toggle="dropdown"
+       class="dropdown-toggle"
+       id="umiSec"
+       href="#"
+       title="Services Without Login/Password"
+       aria-expanded="false">
+      <!-- <span class="fa-stack fa-lg">
+	<i class="fa fa-square-o fa-stack-2x"></i>
+	<i class="fa fa-user-times fa-stack-1x"></i>
+      </span> -->
+      <span class="fa fa-user-times"></span>
+      <span class="caret"></span>
+    </a>
+    <ul id="umiSec-contents"
+	aria-labelledby="umiSec"
+	role="menu"
+	class="dropdown-menu">
+      <li>
+	<a aria-controls="ovpn"
+	   data-toggle="tab"
+	   id="ovpn-tab"
+	   role="tab"
+	   tabindex="-1"
+	   href="#ovpn"
+	   aria-expanded="false">
+	  <span class="fa fa-certificate"></span>
+	  OpenVPN Certificate
+	</a>
+      </li>
+      <li>
+	<a aria-controls="ssh"
+	   data-toggle="tab"
+	   id="ssh-tab"
+	   role="tab"
+	   tabindex="-1"
+	   href="#ssh"
+	   aria-expanded="false">
+	  <span class="fa fa-key"></span>
+	  SSH Key
+	</a>
+      </li>
+    </ul>
+  </li>
+
+  <li role="presentation">
+    <a aria-controls="groups"
+       data-toggle="tab"
+       id="groups-tab"
+       role="tab"
+       href="#ms-groups"
+       title="Group/s User Belongs to"
+       aria-expanded="false">
+      <span class="fa fa-group"></span>
+    </a>
+  </li>
+</ul>
+</nav>', );
+
+
 
 has_field 'person_avatar' => ( type => 'Upload',
 			       label => 'User Photo ID',
@@ -137,11 +234,16 @@ has_field 'account' => ( type => 'Repeatable',
 			 wrap_repeatable_element_method => \&wrap_account_elements,
                        );
 
+# has_field 'account.rm-duplicate' => ( type => 'Display',
+# 				      html => '<div class="col-xs-12 rm-duplicate hidden"><div class="col-xs-1">' .
+# 				      '<a class="btn btn-danger btn-xs" href="#">' .
+# 				      '<span class="fa fa-trash-o"></span> Delete this section</a>' .
+# 				      '</div></div>',
+# 				    );
+
 has_field 'account.rm-duplicate' => ( type => 'Display',
-				      html => '<div class="col-xs-12 rm-duplicate hidden"><div class="col-xs-1">' .
-				      '<a class="btn btn-danger btn-xs" href="#">' .
-				      '<span class="fa fa-trash-o"></span> Delete this section</a>' .
-				      '</div></div>',
+				      html => '<div class="col-xs-offset-1 rm-duplicate hidden"><a class="btn btn-link text-danger" href="#" title="Delete this section">' .
+				      '<span class="fa fa-trash text-danger">Delete this section</span></a></div>',
 				    );
 
 has_field 'account.associateddomain' => ( type => 'Select',
@@ -262,13 +364,13 @@ sub wrap_account_elements {
 # 			  );
 
 has_block 'auth' => ( tag => 'fieldset',
-		      label => 'Service Account&nbsp;<small class="text-muted"><em>(' .
-		      'leave empty login and password fields to autogenerate them all)</em></small>' .
+		      label => '<a href="#" class="btn btn-link btn-lg" data-duplicate="duplicate"><span class="fa fa-plus-circle text-success"></span></a>Service Account&nbsp;<small class="text-muted"><em>(' .
+		      'leave empty login and password fields to autogenerate them all)</em></small>',
 		      
-		      '<div class="col-xs-12"><div class="col-xs-1">' .
-		      '<a href="#" class="btn btn-success btn-xs" data-duplicate="duplicate">' .
-		      '<span class="fa fa-plus-circle rm-duplicate"></span> Duplicate this section</a>' .
-		      '</div></div>',
+		      # '<div class="col-xs-12"><div class="col-xs-1">' .
+		      # '<a href="#" class="btn btn-success btn-xs" data-duplicate="duplicate">' .
+		      # '<span class="fa fa-plus-circle rm-duplicate"></span> Duplicate this section</a>' .
+		      # '</div></div>',
 		      
 		      # label_class => [ 'col-xs-offset-2', 'text-left'],
 		      render_list => [ 'account', ],
@@ -524,7 +626,7 @@ has_block 'submitit' => ( tag => 'fieldset',
 			);
 
 
-sub build_render_list {[ 'person_givenname', 'person_sn', 'person', 'auth', 'ssh', 'ovpn', 'groupsselect', 'submitit' ]}
+sub build_render_list {[ 'person_givenname', 'person_sn', 'nav', 'person', 'auth', 'ssh', 'ovpn', 'groupsselect', 'submitit' ]}
 
 sub validate {
   my $self = shift;
