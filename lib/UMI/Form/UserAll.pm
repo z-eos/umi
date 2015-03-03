@@ -50,8 +50,8 @@ has_field 'person_sn' => ( apply => [ NoSpaces ],
 			   required => 1 );
 
 has_field 'nav' => ( type => 'Display',
-			      html => '<nav class="navbar navbar-default">
-<ul role="tablist" class="nav navbar-nav" id="myTab">
+			      # html => '<br><nav class="navbar navbar-default">
+			      html => '<br><ul role="tablist" class="nav nav-pills" id="myTab">
   <li role="presentation">&nbsp;</li>
   <li class="active" role="presentation">
     <a aria-controls="person"
@@ -60,8 +60,8 @@ has_field 'nav' => ( type => 'Display',
        href="#person"
        title="Personal Data"
        aria-expanded="true">
-      <span class="fa fa-list"></span>
-      <span class="sr-only">Person</span>
+      <span class="fa fa-list fa-lg"></span>
+      <span class="visible-lg-inline">Person</span>
     </a>
   </li>
 
@@ -72,7 +72,8 @@ has_field 'nav' => ( type => 'Display',
        href="#auth"
        title="Login/Password Dependent Services"
        aria-expanded="false">
-      <span class="fa fa-user-plus"></span>
+      <span class="fa fa-user-plus fa-lg"></span>
+      <span class="visible-lg-inline">Login</span>
       <!-- <span class="fa-stack">
 	    <i class="fa fa-folder-o fa-stack-2x"></i>
 	    <i class="fa fa-user fa-stack-1x"></i>
@@ -96,7 +97,8 @@ has_field 'nav' => ( type => 'Display',
 	<i class="fa fa-square-o fa-stack-2x"></i>
 	<i class="fa fa-user-times fa-stack-1x"></i>
       </span> -->
-      <span class="fa fa-user-times"></span>
+      <span class="fa fa-user-times fa-lg"></span>
+      <span class="visible-lg-inline">No login</span>
       <span class="caret"></span>
     </a>
     <ul id="umiSec-contents"
@@ -138,11 +140,11 @@ has_field 'nav' => ( type => 'Display',
        href="#ms-groups"
        title="Group/s User Belongs to"
        aria-expanded="false">
-      <span class="fa fa-group"></span>
+      <span class="fa fa-group fa-lg"></span>
+      <span class="visible-lg-inline">Group</span>
     </a>
   </li>
-</ul>
-</nav>', );
+</ul><br>', );
 
 
 
