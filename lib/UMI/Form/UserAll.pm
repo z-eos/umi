@@ -69,16 +69,13 @@ has_field 'nav'
     <a aria-controls="auth" data-toggle="tab" role="tab"
        id="auth-tab" href="#auth" title="Login/Password Dependent Services"
        aria-expanded="false">
-      <span class="fa fa-user-plus fa-lg"></span>
+      <!-- <span class="fa fa-user-plus fa-lg"></span>
+      <span class="visible-lg-inline">Login</span> -->
+      <span class="fa-stack">
+	<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>
+	<i class="fa fa-user-plus pull-right fa-stack-1x"></i>
+      </span>
       <span class="visible-lg-inline">Login</span>
-      <!-- <span class="fa-stack">
-	    <i class="fa fa-folder-o fa-stack-2x"></i>
-	    <i class="fa fa-user fa-stack-1x"></i>
-	    </span> -->
-      <!-- <span class="fa-stack fa-lg">
-	<i class="fa fa-cog fa-stack-2x"></i>
-	<i class="fa fa-user-plus fa-stack-1x text-info"></i>
-      </span> -->
     </a>
   </li>
 
@@ -90,7 +87,11 @@ has_field 'nav'
 	<i class="fa fa-square-o fa-stack-2x"></i>
 	<i class="fa fa-user-times fa-stack-1x"></i>
       </span> -->
-      <span class="fa fa-user-times fa-lg"></span>
+      <span class="fa-stack">
+	<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>
+	<i class="fa fa-user-times pull-right fa-stack-1x"></i>
+      </span>
+      <!-- <span class="fa fa-user-times fa-lg"></span> -->
       <span class="visible-lg-inline">No login</span>
       <span class="caret"></span>
     </a>
@@ -736,7 +737,7 @@ sub validate {
   # 				      $err ? $err : ''
   # 				     ));
 
-  $self->add_form_error('<div class="alert alert-danger" role="alert"><i class="fa fa-exclamation-circle"></i> Form contains error/s! Check all tabs!</div>') if $self->has_error_fields;
+  $self->add_form_error('<div class="alert alert-danger" role="alert"><i class="fa fa-exclamation-circle"></i> Form contains error/s! Check all tabs, please!</div>') if $self->has_error_fields;
 
 
 }
