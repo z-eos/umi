@@ -51,82 +51,6 @@ has_field 'person_sn'
        element_attr => { placeholder => 'Doe' },
        required => 1 );
 
-has_field 'nav' 
-  => ( type => 'Display',
-       # html => '<br><nav class="navbar navbar-default">
-       html => '<br><ul role="tablist" class="nav nav-pills" id="myTab">
-  <li role="presentation">&nbsp;</li>
-  <li class="active" role="presentation">
-    <a aria-controls="person" data-toggle="tab" role="tab"
-       id="person-tab" href="#person"
-       title="Personal Data" aria-expanded="true">
-      <span class="fa fa-list fa-lg"></span>
-      <span class="visible-lg-inline">Person</span>
-    </a>
-  </li>
-
-  <li role="presentation">
-    <a aria-controls="auth" data-toggle="tab" role="tab"
-       id="auth-tab" href="#auth" title="Login/Password Dependent Services"
-       aria-expanded="false">
-      <!-- <span class="fa fa-user-plus fa-lg"></span>
-      <span class="visible-lg-inline">Login</span> -->
-      <span class="fa-stack">
-	<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>
-	<i class="fa fa-user-plus pull-right fa-stack-1x"></i>
-      </span>
-      <span class="visible-lg-inline">Login</span>
-    </a>
-  </li>
-
-  <li class="dropdown" role="presentation">
-    <a aria-controls="sec-contents" data-toggle="dropdown"
-       class="dropdown-toggle" id="umiSec" href="#"
-       title="Services Without Login/Password" aria-expanded="false">
-      <!-- <span class="fa-stack fa-lg">
-	<i class="fa fa-square-o fa-stack-2x"></i>
-	<i class="fa fa-user-times fa-stack-1x"></i>
-      </span> -->
-      <span class="fa-stack">
-	<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>
-	<i class="fa fa-user-times pull-right fa-stack-1x"></i>
-      </span>
-      <!-- <span class="fa fa-user-times fa-lg"></span> -->
-      <span class="visible-lg-inline">No login</span>
-      <span class="caret"></span>
-    </a>
-    <ul id="umiSec-contents" aria-labelledby="umiSec"
-	role="menu" class="dropdown-menu">
-      <li>
-	<a aria-controls="ovpn" data-toggle="tab" id="ovpn-tab"
-	   role="tab" tabindex="-1" href="#ovpn" aria-expanded="false">
-	  <span class="fa fa-certificate"></span>
-	  OpenVPN Certificate
-	</a>
-      </li>
-      <li>
-	<a aria-controls="ssh" data-toggle="tab"
-	   id="ssh-tab" role="tab" tabindex="-1"
-	   href="#ssh" aria-expanded="false">
-	  <span class="fa fa-key"></span>
-	  SSH Key
-	</a>
-      </li>
-    </ul>
-  </li>
-
-  <li role="presentation">
-    <a aria-controls="groups" data-toggle="tab" id="groups-tab"
-       role="tab" href="#ms-groups" title="Group/s User Belongs to"
-       aria-expanded="false">
-      <span class="fa fa-group fa-lg"></span>
-      <span class="visible-lg-inline">Group</span>
-    </a>
-  </li>
-</ul><br>', );
-
-
-
 has_field 'person_avatar'
   => ( type => 'Upload',
        label => 'User Photo ID',
@@ -181,7 +105,7 @@ has_block 'group_person'
 
 has_block 'person'
   => ( tag => 'fieldset',
-       label => 'Personal Data',
+       label => 'New User Personal Data',
        render_list => [ 'group_person', ],
        class => [ 'tab-pane', 'fade', 'in', 'active', ],
        attr => { id => 'person',
@@ -189,10 +113,6 @@ has_block 'person'
 		 role => "tabpanel",
 	       },
      );
-
-######################################################################
-#== SERVICES =========================================================
-######################################################################
 
 ######################################################################
 #== SERVICES WITH LOGIN ==============================================
@@ -214,7 +134,7 @@ has_field 'account.rm-duplicate'
 has_field 'account.associateddomain'
   => ( type => 'Select',
        label => 'Domain Name',
-       label_class => [ 'col-xs-2', ],
+       label_class => [ 'col-xs-2', 'required', ],
        empty_select => '--- Choose Domain ---',
        element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
        element_class => [ 'input-sm', ],
@@ -226,7 +146,7 @@ has_field 'account.associateddomain'
 has_field 'account.authorizedservice'
   => ( type => 'Select',
        label => 'Service', label_class => [ 'required' ],
-       label_class => [ 'col-xs-2', ],
+       label_class => [ 'col-xs-2', 'required', ],
        empty_select => '--- Choose Service ---',
        element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
        element_class => [ 'input-sm', ],
@@ -280,21 +200,22 @@ has_field 'account.password2'
      );
 
 has_field 'account.radiusgroupname'
-=> ( type => 'Select',
-     label => 'RADIUS Group Name',
-     do_id => 'no',
-     label_class => [ 'col-xs-2', ],
-     wrapper_class => [  'hidden', '8021x', 'relation', ],
-     element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-     element_class => [ 'input-sm', ],
-     element_attr => { placeholder => 'ip-phone, wifi-123',
-		       'autocomplete' => 'off',
-		       'data-name' => 'radiusgroupname',
-		       'data-group' => 'account', },
-     options => [{ value => 'ip-phone', label => 'ip-phone'},
-		 { value => 'auth-mac', label => 'auth-mac'},
-		 { value => 'auth-eap', label => 'auth-eap'}, ],
-   );
+  => ( type => 'Select',
+       label => 'RADIUS Group Name',
+       do_id => 'no',
+       label_class => [ 'col-xs-2', ],
+       wrapper_class => [  'hidden', '8021x', 'relation', ],
+       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+       element_class => [ 'input-sm', ],
+       element_attr => { placeholder => 'ip-phone, wifi-123',
+			 'autocomplete' => 'off',
+			 'data-name' => 'radiusgroupname',
+			 'data-group' => 'account', },
+       options => [{ value => '', label => '--- Choose Group ---'},
+		   { value => 'ip-phone', label => 'ip-phone'},
+		   { value => 'auth-mac', label => 'auth-mac'},
+		   { value => 'auth-eap', label => 'auth-eap'}, ],
+     );
 
 has_field 'account.radiustunnelprivategroup'
   => ( type => 'Select',
@@ -308,7 +229,8 @@ has_field 'account.radiustunnelprivategroup'
 			 'autocomplete' => 'off',
 			 'data-name' => 'radiustunnelprivategroup',
 			 'data-group' => 'account', },
-       options => [{ value => 'VLAN3', label => 'Voice (VLAN3)'},
+       options => [{ value => '', label => '--- Choose VLAN ---'},
+		   { value => 'VLAN3', label => 'Voice (VLAN3)'},
 		   { value => 'VLAN3498', label => 'Guest (VLAN3498)'},
 		   { value => 'VLAN3499', label => 'Bootp (VLAN3499)'}, ],
      );
@@ -324,19 +246,20 @@ has_block 'auth'
   => ( tag => 'fieldset',
        label => '<a href="#" class="btn btn-link btn-lg" data-duplicate="duplicate">' .
        '<span class="fa fa-plus-circle text-success"></span></a>' .
-       'Service Account&nbsp;<small class="text-muted"><em>(' .
-       'leave empty login and password fields to autogenerate them)</em></small>',
+       'Login and Password Dependent Service&nbsp;<small class="text-muted"><em>(' .
+       'login and password fields are autogenerated if empty)</em></small>',
        render_list => [ 'account', ],
        class => [ 'tab-pane', 'fade', ],
        attr => { id => 'auth',
 		 'aria-labelledby' => "auth-tab",
-		 role => "tabpanel",
-	       },
+		 role => "tabpanel", },
      );
 
 ######################################################################
 #== SERVICES WITHOUT LOGIN ===========================================
 ######################################################################
+
+#=== SSH =============================================================
 
 has_field 'loginless_ssh'
   => ( type => 'Repeatable',
@@ -349,16 +272,14 @@ has_field 'loginless_ssh'
 
 has_field 'loginless_ssh.rm-duplicate'
   => ( type => 'Display',
-       html => '<div class="col-xs-12 rm-duplicate hidden"><div class="col-xs-1">' .
-       '<a class="btn btn-danger btn-xs" href="#">' .
-       '<span class="fa fa-trash-o"></span> Delete this section</a>' .
-       '</div></div>',
+       html => '<div class="col-xs-offset-1 rm-duplicate hidden"><a class="btn btn-link text-danger" href="#" title="Delete this section">' .
+       '<span class="fa fa-trash text-danger"></span>Delete this section</a></div>',
      );
 
 has_field 'loginless_ssh.associateddomain'
   => ( type => 'Select',
        label => 'Domain Name',
-       label_class => [ 'col-xs-2', ],
+       label_class => [ 'col-xs-2', 'required', ],
        empty_select => '--- Choose Domain ---',
        element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
        element_class => [ 'input-sm', ],
@@ -392,39 +313,35 @@ has_block 'ssh'
   => ( tag => 'fieldset',
        label => '<a href="#" class="btn btn-link btn-lg" data-duplicate="duplicate">' .
        '<span class="fa fa-plus-circle text-success"></span></a>' .
-       'SSH Key&nbsp;<small class="text-muted"><em>()</em></small>',
-       # label_class => [ 'col-xs-offset-2', 'text-left'],
+       'SSH Key&nbsp;<small class="text-muted"><em>( <span class="fa fa-ellipsis-h"></span> )</em></small>',
        render_list => [ 'loginless_ssh', ],
        class => [ 'tab-pane', 'fade', ],
        attr => { id => 'ssh',
 		 'aria-labelledby' => "ssh-tab",
-		 role => "tabpanel",
-	       },
+		 role => "tabpanel", },
      );
 
-#=====================================================================
+#=== OpenVPN =========================================================
 
 has_field 'loginless_ovpn'
   => ( type => 'Repeatable',
-				#setup_for_js => 1,
+       #setup_for_js => 1,
        do_wrapper => 1,
        wrap_repeatable_element_method => \&wrap_loginless_ovpn_elements,
-				#tags => { controls_div => 1 },
-				# init_contains => { wrapper_attr => { class => ['hfh', 'repinst'] } },
+       #tags => { controls_div => 1 },
+       # init_contains => { wrapper_attr => { class => ['hfh', 'repinst'] } },
      );
 
 has_field 'loginless_ovpn.rm-duplicate'
   => ( type => 'Display',
-       html => '<div class="col-xs-12 rm-duplicate hidden"><div class="col-xs-1">' .
-       '<a class="btn btn-danger btn-xs" href="#">' .
-       '<span class="fa fa-trash-o"></span> Delete this section</a>' .
-       '</div></div>',
+       html => '<div class="col-xs-offset-1 rm-duplicate hidden"><a class="btn btn-link text-danger" href="#" title="Delete this section">' .
+       '<span class="fa fa-trash text-danger"></span>Delete this section</a></div>',
      );
 
 has_field 'loginless_ovpn.associateddomain'
   => ( type => 'Select',
-       label => 'Domain Name',
-       label_class => [ 'col-xs-2', ],
+       label => 'FQDN',
+       label_class => [ 'col-xs-2', 'required', ],
        empty_select => '--- Choose Domain ---',
        element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
        element_class => [ 'input-sm', ],
@@ -435,7 +352,7 @@ has_field 'loginless_ovpn.associateddomain'
 
 has_field 'loginless_ovpn.cert'
   => ( type => 'Upload',
-       label => 'OpenVPN Certificate (DER format)',
+       label => 'Cert (.DER)',
        label_class => [ 'col-xs-2', ],
        element_wrapper_class => [ 'col-xs-2', 'col-lg-3', ],
        element_class => [ 'btn', 'btn-default', 'btn-sm',],
@@ -476,11 +393,9 @@ sub wrap_loginless_ovpn_elements {
 
 has_block 'ovpn'
   => ( tag => 'fieldset',
-       label => 'OpenVPN configuration&nbsp;<small class="text-muted"><em>()</em></small>' .
-       '<div class="col-xs-12"><div class="col-xs-1">' .
-       '<a href="#" class="btn btn-success btn-xs" data-duplicate="duplicate">' .
-       '<span class="fa fa-plus-circle rm-duplicate"></span> Duplicate this section</a>' .
-       '</div></div>',
+       label => '<a href="#" class="btn btn-link btn-lg" data-duplicate="duplicate">' .
+       '<span class="fa fa-plus-circle text-success"></span></a>' .
+       'OpenVPN configuration&nbsp;<small class="text-muted"><em>( <span class="fa fa-ellipsis-h"></span> )</em></small>',
        render_list => [ 'loginless_ovpn', ],
        class => [ 'tab-pane', 'fade', ],
        attr => { id => 'ovpn',
@@ -489,7 +404,7 @@ has_block 'ovpn'
 	       },
      );
 
-#=====================================================================
+#=== GROUPS ==========================================================
 
 has_field 'groups'
   => ( type => 'Multiple',
@@ -540,38 +455,34 @@ has_block 'groupsselect'
      );
 
 ######################################################################
-#== SERVICES WITHOUT LOGIN ===========================================
+#== REST OF THE FORM =================================================
 ######################################################################
 
 has_field 'aux_reset'
-=> ( type => 'Reset',
-			   element_class => [ 'btn', 'btn-danger', 'btn-block', ],
-			   element_wrapper_class => [ 'col-xs-12', ],
-			   wrapper_class => [ 'col-xs-2' ],
-			   # value => 'Reset All'
-			 );
+  => ( type => 'Reset',
+       element_class => [ 'btn', 'btn-danger', 'btn-block', ],
+       element_wrapper_class => [ 'col-xs-12', ],
+       wrapper_class => [ 'col-xs-4' ],
+       # value => 'Reset All'
+     );
 
 has_field 'aux_submit'
-=> ( type => 'Submit',
-			    element_class => [ 'btn', 'btn-success', 'btn-block', ],
-			    # element_wrapper_class => [ 'col-xs-12', ],
-			    wrapper_class => [ 'col-xs-10', ], # 'pull-right' ],
-			    value => 'Submit' );
-
-has_block 'submitit'
-=> ( tag => 'fieldset',
-			  render_list => [ 'groupspace', 'aux_reset', 'aux_submit'],
-			  class => [ 'container-fluid', ]
-			);
+  => ( type => 'Submit',
+       element_class => [ 'btn', 'btn-success', 'btn-block', ],
+       # element_wrapper_class => [ 'col-xs-12', ],
+       wrapper_class => [ 'col-xs-8', ], # 'pull-right' ],
+       value => 'Submit' );
 
 
-sub build_render_list {[ 'person_givenname', 'person_sn', 'nav', 'person', 'auth', 'ssh', 'ovpn', 'groupsselect', 'submitit' ]}
+
+
+######################################################################
+#== VALIDATION =======================================================
+######################################################################
 
 sub validate {
   my $self = shift;
   my ( $element, $field, $ldap_crud, $mesg, $autologin, $loginpfx, $logintmp );
-  # p $self->value;
-  # p $self->field('account.0');
 
   $ldap_crud = $self->ldap_crud;
   # my $mesg =
@@ -737,7 +648,7 @@ sub validate {
   # 				      $err ? $err : ''
   # 				     ));
 
-  $self->add_form_error('<div class="alert alert-danger" role="alert"><i class="fa fa-exclamation-circle"></i> Form contains error/s! Check all tabs, please!</div>') if $self->has_error_fields;
+  # $self->add_form_error('<div class="alert alert-danger" role="alert"><i class="fa fa-exclamation-circle"></i> Form contains error/s! Check all tabs, please!</div>') if $self->has_error_fields;
 
 
 }

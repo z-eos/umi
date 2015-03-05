@@ -4,7 +4,14 @@
 %]
 
 <div class="page-header">
-  <h2>New User Creation Form <small><em>complex form for all possible stuff (data and services)</em></small></h2>
+  <h2>New Root Object Creation Form
+    <small>
+      <em>
+	complex form for all possible stuff (user's personal data and services),
+	sign &laquo;<span class="fa fa-exclamation-circle text-danger umi-opacity05"></span>&raquo; marks mandatory fields
+      </em>
+    </small>
+  </h2>
 </div>
 
 [% IF final_message.error %]
@@ -40,10 +47,114 @@
 </div>
 [% END %]
 
+[% IF form.has_errors %]
+<div class="panel panel-danger">
+  <div class="panel-heading">
+    <i class="fa fa-exclamation-circle"></i>
+    Form contains error/s! Check all tabs, please!
+  </div>
+  <div class="panel-body">
+    <ol>
+      [% FOREACH err IN form.errors %]
+      <li>[% err %]</li>
+      [% END %]
+    </ol>
+  </div>
+</div>
+[% END %]
 
-[% form.render %]
+<form id="[% form.name %]" class="form-horizontal tab-content" method="post" enctype="multipart/form-data">
+
+  [% form.field('person_givenname').render %]
+  [% form.field('person_sn').render %]
+  <hr>
+  
+  <ul role="tablist" class="col-xs-1 nav nav-pills nav-stacked" id="myTab">
+    <!-- <li role="presentation">&nbsp;</li> -->
+    <li class="active text-left" role="presentation">
+      <a aria-controls="person" data-toggle="tab" role="tab"
+	 id="person-tab" href="#person"
+	 title="Personal Data" aria-expanded="true">
+	<span class="fa fa-fw fa-user fa-lg"></span>
+	<span class="visible-lg-inline">Person</span>
+      </a>
+    </li>
+
+    <li class="text-left" role="presentation">
+      <a aria-controls="auth" data-toggle="tab" role="tab"
+	 id="auth-tab" href="#auth" title="Login/Password Dependent Services"
+	 aria-expanded="false">
+	<!-- <span class="fa fa-user-plus fa-lg"></span>
+		<span class="visible-lg-inline">Login</span> -->
+	<span class="fa-stack fa-fw">
+	  <i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>
+	  <i class="fa fa-user pull-right fa-stack-1x"></i>
+	</span>
+	<span class="visible-lg-inline">Pass</span>
+      </a>
+    </li>
+
+    <li class="dropdown text-left" role="presentation">
+      <a aria-controls="sec-contents" data-toggle="dropdown"
+	 class="dropdown-toggle" id="umiSec" href="#"
+	 title="Services Without Login/Password" aria-expanded="false">
+	<!-- <span class="fa-stack fa-lg">
+		<i class="fa fa-square-o fa-stack-2x"></i>
+		<i class="fa fa-user-times fa-stack-1x"></i>
+		</span> -->
+	<span class="fa-stack fa-fw">
+	  <i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>
+	  <i class="fa fa-user-times pull-right fa-stack-1x"></i>
+	</span>
+	<!-- <span class="fa fa-user-times fa-lg"></span> -->
+	<span class="caret"></span>
+	<span class="visible-lg-inline">NoPass</span>
+      </a>
+      <ul id="umiSec-contents" aria-labelledby="umiSec"
+	  role="menu" class="dropdown-menu">
+	<li>
+	  <a aria-controls="ovpn" data-toggle="tab" id="ovpn-tab"
+	     role="tab" tabindex="-1" href="#ovpn" aria-expanded="false">
+	    <span class="fa fa-certificate"></span>
+	    OpenVPN
+	  </a>
+	</li>
+	<li>
+	  <a aria-controls="ssh" data-toggle="tab"
+	     id="ssh-tab" role="tab" tabindex="-1"
+	     href="#ssh" aria-expanded="false">
+	    <span class="fa fa-key"></span>
+	    SSH
+	  </a>
+	</li>
+      </ul>
+    </li>
+
+    <li class="text-left" role="presentation">
+      <a aria-controls="groups" data-toggle="tab" id="groups-tab"
+	 role="tab" href="#ms-groups" title="Group/s User Belongs to"
+	 aria-expanded="false">
+	<span class="fa fa-fw fa-group fa-lg"></span>
+	<span class="visible-lg-inline">Group</span>
+      </a>
+    </li>
+  </ul>
+  [% # form.render %]
+  [% form.block('person').render %]
+  [% form.block('auth').render %]
+  [% form.block('ssh').render %]
+  [% form.block('ovpn').render %]
+  [% form.block('groupsselect').render %]
+
+  <hr>
+  <div class="row">
+  [% form.field('aux_reset').render %]
+  [% form.field('aux_submit').render %]
+  </div>
+</form>
 
 [% IF params.size %]
+<br><br><br>
 <div class="panel panel-info">
   <div class="panel-heading">
     <h4><span class="fa fa-exclamation-triangle">&nbsp;</span>Parameters passed to form!</h4>
