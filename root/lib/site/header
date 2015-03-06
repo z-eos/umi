@@ -117,12 +117,28 @@
 	    action="[% c.uri_for_action('/searchby/index') %]">
 
 	<div class="input-group">
+
+	  
 	  <input type="text"
-		 class="form-control"
-		 name="ldapsearch_filter"
-		 placeholder="Search-Simple Filter"
-		 title="ldapserch filter without external brackets"
-		  tabindex="12"></input>
+	  	 class="form-control"
+	  	 id="ldapsearch_filter"
+	  	 name="ldapsearch_filter"
+	  	 title="LDAP search filter"
+		 placeholder='*Vasya*Pupkin*'
+	  	 data-animation="false"
+	  	 data-trigger="hover"
+	  	 data-placement="bottom"
+	  	 data-html="true"
+	         data-toggle="popover"
+	  	 data-original-title="Legend"
+	  	 data-content="<ul>
+	          <li>default sort criteria is <i class='text-info'>by name</i> (First/Last Name, uid and cn)</li>
+	  	  <li>for each search criteria, <i class='text-info'>objectClass=<i class='fa fa-asterisk'></i></i> is used if empty</li>
+	  	  <li>use <i class='fa fa-asterisk text-info'></i> as substring</li>
+		  <li>narrow search results for non &laquo;by ...&raquo; presets, by providing attribute in filter, like: <i class='text-info'>uid=<i class='fa fa-asterisk'></i>dreii.<i class='fa fa-asterisk'></i></i></li>
+		  <li>to search in access log, use base <i class='text-info'>[% helper_cfg('cfg_local','ldap_crud_db_log') %]</i></li>
+	  	 </ul>"
+	  	 tabindex="12">
 	  <div class="input-group-btn">
 	    <button type="submit"
 		    class="btn btn-default dropdown-toggle"
@@ -318,9 +334,22 @@
     </div><!--/.nav-collapse -->
   </div>
 </nav>
+
+<script> $(function(){ $('#ldapsearch_filter').popover() }); </script>
+
 <script>
   $( '.umi-navbar-menu-btn' ).click( function () {
   $('.navbar-form').submit();	
 });
+
+$('[name=ldapsearch_filter]').on('keydown', function (event) {
+    if ( event.which === 13 ) {
+        $('[name=ldapsearch_by_name]').trigger('click');
+    }
+  });
+
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  });
 </script>
 <!-- END site/header -->
