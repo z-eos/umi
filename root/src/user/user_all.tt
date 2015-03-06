@@ -90,7 +90,8 @@
 	  <i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>
 	  <i class="fa fa-user pull-right fa-stack-1x"></i>
 	</span>
-	<span class="visible-lg-inline">Pass</span>
+	<span class="visible-lg-inline">&nbsp;&nbsp;</span>
+	<span class="visible-lg-inline">&nbsp;Pass</span>
       </a>
     </li>
 

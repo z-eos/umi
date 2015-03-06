@@ -21,7 +21,7 @@
 	     title="Legend"
 	     id="btnLegend"
 	     data-animation="false"
-	     data-trigger="focus"
+	     data-trigger="hover"
 	     data-placement="left"
 	     data-html="true"
 	     data-toggle="popover"
@@ -442,11 +442,7 @@
   </table>
 </div>
 
-<script>
- $(function(){
-   $('#btnLegend').popover()
- });
-</script>
+<script> $(function(){ $('#btnLegend').popover() }); </script>
 <script>
  $(function(){
    "use strict";
