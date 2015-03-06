@@ -482,7 +482,7 @@ has_field 'aux_submit'
 
 sub validate {
   my $self = shift;
-  my ( $i, $element, $field, $ldap_crud, $mesg, $autologin, $loginpfx, $logintmp, $accountcmp );
+  my ( $i, $element, $field, $ldap_crud, $mesg, $autologin, $loginpfx, $logintmp, $elementcmp );
 
   $ldap_crud = $self->ldap_crud;
   # my $mesg =
@@ -532,9 +532,9 @@ sub validate {
       $element->field('password2')->add_error('Both or none passwords have to be defined!');
     }
 
-    # prepare to know is login uniq?
-    if ( ! $i ) { $accountcmp->{$element->field('login')->value . $element->field('associateddomain')->value} = 1; }
-    else { $accountcmp->{$element->field('login')->value . $element->field('associateddomain')->value}++; }
+    # prepare to know if login+fqdn is uniq?
+    if ( ! $i ) { $elementcmp->{$element->field('login')->value . $element->field('associateddomain')->value} = 1; }
+    else { $elementcmp->{$element->field('login')->value . $element->field('associateddomain')->value}++; }
 
     # no mac
     $element->field('login')->add_error('MAC address is mandatory!')
@@ -570,7 +570,14 @@ sub validate {
 
     $i++;
   }
+  $i = 0;
+  foreach $element ( $self->field('account')->fields ) {
+    $element->field('login')->add_error($loginpfx . ' <mark>' . $logintmp . '</mark> defined more than once for the same FQDN')
+      if $elementcmp->{$element->field('login')->value . $element->field('associateddomain')->value} > 1;
+    $i++;
+  }
 
+  
   $i = 0;
   foreach $element ( $self->field('loginless_ssh')->fields ) {
     if ( defined $element->field('associateddomain')->value &&
@@ -581,13 +588,16 @@ sub validate {
       $element->field('associateddomain')->add_error('Domain field have to be defined!');
     }
 
+    # prepare to know if key+fqdn is uniq?
+    if ( ! $i ) { $elementcmp->{$element->field('key')->value . $element->field('associateddomain')->value} = 1; }
+    else { $elementcmp->{$element->field('key')->value . $element->field('associateddomain')->value}++; }
+
     $i++;
   }
-
   $i = 0;
-  foreach $element ( $self->field('account')->fields ) {
-    $element->field('login')->add_error($loginpfx . ' <mark>' . $logintmp . '</mark> defined more than once for the same FQDN')
-      if $accountcmp->{$element->field('login')->value . $element->field('associateddomain')->value} > 1;
+  foreach $element ( $self->field('loginless_ssh')->fields ) {
+    $element->field('key')->add_error('The same key is defined more than once for the same FQDN')
+      if $elementcmp->{$element->field('key')->value . $element->field('associateddomain')->value} > 1;
     $i++;
   }
 
