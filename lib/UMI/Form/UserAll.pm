@@ -532,9 +532,13 @@ sub validate {
       $element->field('password2')->add_error('Both or none passwords have to be defined!');
     }
 
-    # prepare to know if login+fqdn is uniq?
-    if ( ! $i ) { $elementcmp->{$element->field('login')->value . $element->field('associateddomain')->value} = 1; }
-    else { $elementcmp->{$element->field('login')->value . $element->field('associateddomain')->value}++; }
+    # prepare to know if login+service+fqdn is uniq?
+    if ( ! $i ) { $elementcmp->{$element->field('login')->value .
+				$element->field('authorizedservice')->value .
+				$element->field('associateddomain')->value} = 1; }
+    else { $elementcmp->{$element->field('login')->value .
+			 $element->field('authorizedservice')->value .
+			 $element->field('associateddomain')->value}++; }
 
     # no mac
     $element->field('login')->add_error('MAC address is mandatory!')
@@ -572,8 +576,10 @@ sub validate {
   }
   $i = 0;
   foreach $element ( $self->field('account')->fields ) {
-    $element->field('login')->add_error($loginpfx . ' <mark>' . $logintmp . '</mark> defined more than once for the same FQDN')
-      if $elementcmp->{$element->field('login')->value . $element->field('associateddomain')->value} > 1;
+    $element->field('login')->add_error($loginpfx . ' <mark>' . $logintmp . '</mark> defined more than once for the same service and FQDN')
+      if $elementcmp->{$element->field('login')->value .
+		       $element->field('authorizedservice')->value .
+		       $element->field('associateddomain')->value} > 1;
     $i++;
   }
 
