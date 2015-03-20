@@ -41,24 +41,18 @@ sub options_net {
 			      attrs => [ 'physicalDeliveryOfficeName' ],
 			     });
 
-  if ( ! $mesg->count ) {
-    push @{$return->{error}}, $ldap_crud->err($mesg);
-  }
+  push @{$return->{error}}, $ldap_crud->err($mesg) if ! $mesg->count;
 
   @org = $mesg->sorted('physicalDeliveryOfficeName');
 
-  foreach ( @org ) {
+  foreach ( @org ) { p $_;
     $mesg = $ldap_crud->search({
 				base => $_->get_value('physicalDeliveryOfficeName'),
 				scope => 'base',
 				attrs => [ 'associatedDomain', 'physicalDeliveryOfficeName' ],
 			       });
-    if ( ! $mesg->count ) {
-      push @{$return->{error}}, $ldap_crud->err($mesg);
-    }
-
+    push @{$return->{error}}, $ldap_crud->err($mesg) if ! $mesg->count;
     $domain = $mesg->as_struct;
-
     foreach $i ( @{$domain->{$_->get_value('physicalDeliveryOfficeName')}->{associateddomain}} ) {
        	push @domains,
 	  {
@@ -69,9 +63,7 @@ sub options_net {
 	  };
       }
   }
-
   return \@domains;
-
 }
 
 has_field 'cn' => (
@@ -116,14 +108,14 @@ has_field 'hspace' => ( type => 'Display',
 		      );
 
 has_field 'aux_reset' => ( type => 'Reset',
-			   wrapper_class => [ 'col-xs-1' ],
+			   wrapper_class => [ 'col-xs-3' ],
 			   element_class => [ 'btn', 'btn-danger', 'btn-block', ],
 			   element_wrapper_class => [ 'col-xs-12', ],
 			   value => 'Reset' );
 
 has_field 'aux_submit' => (
 			   type => 'Submit',
-			   wrapper_class => [ 'col-xs-11', ],
+			   wrapper_class => [ 'col-xs-9', ],
 			   element_class => [ 'btn', 'btn-success', 'btn-block', ],
 			   # label => '&nbsp;',
 			   # label_class => [ 'col-xs-2', ],
@@ -136,7 +128,14 @@ has_block 'submitit' => ( tag => 'div',
 			  class => [ 'row', ]
 			);
 
-sub build_render_list {[ 'net', 'cn', 'dhcpHWAddress', 'dhcpStatements', 'dhcpComments', 'hspace', 'submitit' ]}
+sub build_render_list {[ 'ldap_add_dhcp',
+			 'net',
+			 'cn',
+			 'dhcpHWAddress',
+			 'dhcpStatements',
+			 'dhcpComments',
+			 'hspace',
+			 'submitit' ]}
 
 sub validate {
   my $self = shift;

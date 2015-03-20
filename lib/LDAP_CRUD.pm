@@ -67,6 +67,7 @@ sub _build_cfg {
 		   gitacl =>         'ou=GitACL,' . UMI->config->{ldap_crud_db},
 		   group =>          'ou=group,' . UMI->config->{ldap_crud_db},
 		   org =>            'ou=Organizations,' . UMI->config->{ldap_crud_db},
+		   rad_profile =>    'ou=rad-profiles,' . UMI->config->{ldap_crud_db},
 		  },
 	  rdn => {
 		  org =>            'ou',
@@ -186,6 +187,20 @@ sub _build_cfg {
 		     disabled => 1,
 		     data_fields => 'login,password1,password2',
 		    },
+	   'comm-acc' => {
+			  auth => 1,
+			  descr => 'CISCO Commutators',
+			  disabled => 0,
+			  icon => 'fa fa-terminal',
+			  data_fields => 'login,password1,password2',
+			 },
+	   'ssh-acc' => {
+			 auth => 1,
+			 descr => 'SSH',
+			 disabled => 0,
+			 icon => 'fa fa-key',
+			 data_fields => 'login,password1,password2',
+			},
 	   'ssh' => {
 		     auth => 0,
 		     descr => 'SSH key',
@@ -1084,6 +1099,48 @@ sub dhcp_lease {
 # SELECT elements options builders
 ######################################################################
 
+=head2 select_authorizedservice
+
+options builder for select element of authorizedservice
+
+only services with auth attribute set to 1 are considered
+
+if they have data_fields attribute, then it is added (to implement
+selective field de/activation in form
+
+=cut
+
+has 'select_authorizedservice' => ( traits => ['Array'],
+	       is => 'ro', isa => 'ArrayRef', required => 0, lazy => 1,
+	       builder => '_build_select_authorizedservice',
+	     );
+
+sub _build_select_authorizedservice {
+  my $self = shift;
+  my @services;
+
+  foreach my $key ( sort {$a cmp $b} keys %{$self->{cfg}->{authorizedService}}) {
+    if ( $self->{cfg}->{authorizedService}->{$key}->{auth} &&
+	 defined $self->{cfg}->{authorizedService}->{$key}->{data_relation} &&
+	 $self->{cfg}->{authorizedService}->{$key}->{data_relation} ne '' ) {
+      push @services, {
+		       value => $key,
+		       label => $self->{cfg}->{authorizedService}->{$key}->{descr},
+		       attributes =>
+		       { 'data-relation' => $self->{cfg}->{authorizedService}->{$key}->{data_relation} },
+		      } if ! $self->{cfg}->{authorizedService}->{$key}->{disabled};
+    } elsif ( $self->{cfg}->{authorizedService}->{$key}->{auth} ) {
+      push @services, {
+		       value => $key,
+		       label => $self->{cfg}->{authorizedService}->{$key}->{descr},
+		      } if ! $self->{cfg}->{authorizedService}->{$key}->{disabled};
+    }
+
+  }
+  return \@services;
+}
+
+
 =head2 select_organizations
 
 options builder for select element of organizations
@@ -1169,45 +1226,39 @@ sub _build_select_associateddomains {
   return \@domains;
 }
 
-=head2 select_authorizedservice
+=head2 select_radprofile
 
-options builder for select element of authorizedservice
-
-only services with auth attribute set to 1 are considered
-
-if they have data_fields attribute, then it is added (to implement
-selective field de/activation in form
+options builder for select element of rad-profiles
 
 =cut
 
-has 'select_authorizedservice' => ( traits => ['Array'],
+has 'select_radprofile' => ( traits => ['Array'],
 	       is => 'ro', isa => 'ArrayRef', required => 0, lazy => 1,
-	       builder => '_build_select_authorizedservice',
+	       builder => '_build_select_radprofile',
 	     );
 
-sub _build_select_authorizedservice {
+sub _build_select_radprofile {
   my $self = shift;
-  my @services;
-
-  foreach my $key ( sort {$a cmp $b} keys %{$self->{cfg}->{authorizedService}}) {
-    if ( $self->{cfg}->{authorizedService}->{$key}->{auth} &&
-	 defined $self->{cfg}->{authorizedService}->{$key}->{data_relation} &&
-	 $self->{cfg}->{authorizedService}->{$key}->{data_relation} ne '' ) {
-      push @services, {
-		       value => $key,
-		       label => $self->{cfg}->{authorizedService}->{$key}->{descr},
-		       attributes =>
-		       { 'data-relation' => $self->{cfg}->{authorizedService}->{$key}->{data_relation} },
-		      } if ! $self->{cfg}->{authorizedService}->{$key}->{disabled};
-    } elsif ( $self->{cfg}->{authorizedService}->{$key}->{auth} ) {
-      push @services, {
-		       value => $key,
-		       label => $self->{cfg}->{authorizedService}->{$key}->{descr},
-		      } if ! $self->{cfg}->{authorizedService}->{$key}->{disabled};
-    }
-
+  my @rad_profiles;
+  my $mesg = $self->search( { base => $self->{cfg}->{base}->{rad_profile},
+			      attrs => ['cn' ],
+			    } );
+  my $err_message = '';
+  if ( ! $mesg->count ) {
+    $err_message = '<div class="alert alert-danger">' .
+      '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
+	$self->err($mesg) . '</ul></div>';
   }
-  return \@services;
+
+  my @entries = $mesg->sorted('cn');
+  my @i;
+  foreach my $entry ( @entries ) {
+    @i = $entry->get_value('cn');
+    foreach (@i) {
+      push @rad_profiles, { value => $_, label => $_, };
+    }
+  }
+  return \@rad_profiles;
 }
 
 

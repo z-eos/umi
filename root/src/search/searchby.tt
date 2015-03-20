@@ -169,7 +169,7 @@
 			<li>
 			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/modify_userpassword') %]">
 			    <button type="submit" title="modify password" class="btn btn-link"
-				    value="[% entry.key %]" name="ldap_modify_password">
+				    value="[% entry.key %]" name="ldap_modify_password" tabindex="1">
 			      <span class="fa fa-fw fa-user-secret text-primary"></span>
 			      password
 			    </button>
@@ -355,7 +355,7 @@
 			      </div>
 			      <div class="modal-body text-primary">
 				<input type="checkbox" name="ldap_ldif_recursive">
-				Get LDIFs for all children as well
+				Sub (entire subtree)
 				</input>
 			      </div>
 			      <div class="modal-body text-primary">

@@ -207,14 +207,10 @@ has_field 'account.radiusgroupname'
        wrapper_class => [  'hidden', '8021x', 'relation', ],
        element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
        element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'ip-phone, wifi-123',
-			 'autocomplete' => 'off',
-			 'data-name' => 'radiusgroupname',
+       element_attr => { 'data-name' => 'radiusgroupname',
 			 'data-group' => 'account', },
-       options => [{ value => '', label => '--- Choose Group ---'},
-		   { value => 'ip-phone', label => 'ip-phone'},
-		   { value => 'auth-mac', label => 'auth-mac'},
-		   { value => 'auth-eap', label => 'auth-eap'}, ],
+       empty_select => '--- Choose RADIUS Group ---',
+       options_method => \&radprofile,
      );
 
 has_field 'account.radiustunnelprivategroup'
@@ -701,6 +697,12 @@ sub authorizedservice {
   my $self = shift;
   return unless $self->form->ldap_crud;
   return $self->form->ldap_crud->select_authorizedservice;
+}
+
+sub radprofile {
+  my $self = shift;
+  return unless $self->form->ldap_crud;
+  return $self->form->ldap_crud->select_radprofile;
 }
 
 ######################################################################

@@ -473,7 +473,6 @@ sub proc :Path(proc) :Args(0) {
 						  params => $params,
 						  ldap_crud => $c->model('LDAP_CRUD'),
 						 );
-
       $c->stash(
       		final_message => $c->controller('Dhcp')
 		->create_dhcp_host ( $c->model('LDAP_CRUD'),
@@ -1198,7 +1197,7 @@ sub delete :Path(delete) :Args(0) {
 
 =head1 dhcp_add
 
-DHCP object binding to user
+DHCP object to user binding
 
 =cut
 
