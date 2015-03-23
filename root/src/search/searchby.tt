@@ -77,6 +77,7 @@
 			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/user_preferences') %]">
 			    <button type="submit" title="add service account" class="btn btn-link"
 				    value="[% entry.key %]"
+				    data-order="10"
 				    name="user_preferences">
 			      <span class="fa fa-fw fa-list-alt text-info"></span>
 			      user prefs
@@ -86,6 +87,7 @@
 			<li>
 			  <button type="button" title="account global management page" class="btn btn-link disabled"
 				  value="[% entry.key %]"
+				  data-order="110"
 				  name="accmgmnt"
 				  data-toggle="modal"
 				  data-target="#accmgmntModal[% loop.index %]">
@@ -97,6 +99,7 @@
 			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 			    <button type="submit" title="add new service account" class="btn btn-link"
 				    value="[% entry.key %]"
+				    data-order="20"
 				    name="add_svc_acc">
 			      <span class="fa fa-fw fa-plus-circle text-primary"></span>
 			      new service account
@@ -106,7 +109,7 @@
 			<li>
 			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 			    <button type="submit" title="modify group" class="btn btn-link"
-				    value="[% entry.key %]" name="ldap_modify_group">
+				    value="[% entry.key %]" data-order="90" name="ldap_modify_group">
 			      <span class="fa fa-fw fa-group text-primary"></span>
 			      group
 			    </button>
@@ -117,6 +120,7 @@
 			  <button type="button" title="delete object" class="btn btn-link"
 				  value="[% entry.key %]"
 				  name="ldap_delete"
+				  data-order="50"
 				  data-toggle="modal"
 				  data-target="#deleteModal[% loop.index %]">
 			    <span class="fa fa-fw fa-times-circle text-danger"></span>
@@ -127,6 +131,7 @@
 			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 			    <button type="submit" title="move this object to another root account" class="btn btn-link"
 				    value="[% entry.key %]"
+				    data-order="80"
 				    name="chg_acc">
 			      <span class="fa fa-fw fa-exchange text-danger"></span>
 			      chg root account
@@ -137,6 +142,7 @@
 			  <button type="button" title="export LDIF of the object"
 				  class="btn btn-link"
 				  value="[% entry.key %]"
+				  data-order="70"
 				  name="ldap_ldif"
 				  data-toggle="modal"
 				  data-target="#ldifModal[% loop.index %]">
@@ -148,6 +154,7 @@
 			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 			    <button type="submit" title="edit object" class="btn btn-link"
 				    value="[% entry.key %]"
+				    data-order="100"
 				    name="ldap_modify">
 			      <span class="fa fa-fw fa-pencil text-primary"></span>
 			      edit (all)
@@ -169,7 +176,7 @@
 			<li>
 			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/modify_userpassword') %]">
 			    <button type="submit" title="modify password" class="btn btn-link"
-				    value="[% entry.key %]" name="ldap_modify_password" tabindex="1">
+				    value="[% entry.key %]" data-order="30" name="ldap_modify_password" tabindex="1">
 			      <span class="fa fa-fw fa-user-secret text-primary"></span>
 			      password
 			    </button>
@@ -180,7 +187,7 @@
 			<li>
 			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/dhcp_add') %]">
 			    <button type="submit" title="add DHCP (MAC to IP binding)" class="btn btn-link"
-				    value="[% entry.key %]" name="ldap_add_dhcp">
+				    value="[% entry.key %]" data-order="40" name="ldap_add_dhcp">
 			      <span class="fa fa-fw fa-sitemap text-primary"></span>
 			      DHCP (IP to MAC binding)
 			    </button>
@@ -191,7 +198,7 @@
 			<li>
 			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 			    <button type="submit" title="modify jpegPhoto" class="btn btn-link"
-				    value="[% entry.key %]" name="ldap_modify_jpegphoto">
+				    value="[% entry.key %]" data-order="60" name="ldap_modify_jpegphoto">
 			      <span class="fa fa-fw fa-image text-primary"></span>
 			      image
 			    </button>
@@ -203,7 +210,7 @@
 			<li>
 			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 			    <button type="submit" title="reorder gitAcl" class="btn btn-link"
-				    value="[% entry.key %]" name="ldap_gitacl_reorder">
+				    value="[% entry.key %]" data-order="120" name="ldap_gitacl_reorder">
 			      <span class="fa fa-fw fa-sort text-warning"></span>
 			      reorder
 			    </button>
@@ -443,135 +450,6 @@
 </div>
 
 <script> $(function(){ $('#btnLegend').popover() }); </script>
-<script>
- $(function(){
-   "use strict";
 
-   var options = {
-     btnEvent: ".umi-btn-event",
-     btnEventLogic: ".umi-btn-logic",
-     btnEventAjax: ".umi-btn-ajax",
-     noActionEventMsg: "Cannot find action attribute for this button event!",
-     noFormEventMsg: "Cannot find parent form for this button event!",
-     noAjaxModeMsg: "Ajax mode not supported, yet...",
-     ajaxError: "Error on request: ",
-     ajaxSystemError: "Wrong response format from server!"
-   },
-
-       getErrorBlock = function(message) {
-	 return $("<div>").addClass("text-danger").html(message);
-       },
-
-       applyError = function(item, message) {
-	 item.parent().prepend(getErrorBlock(message));
-       },
-
-       createHiddenButton = function(item, value) {
-	 var simple = (typeof value !== "undefined");
-	 if (!simple) {
-	   var input = $(item).parents("form").find("input[name='"+item.attr("name")+"'][type='hidden']");
-	   if (input && input.length) {
-	     return input.attr("value", item.val());
-	   }
-	 }
-
-	 return $("<input>")
-	       .attr("type","hidden")
-	       .attr("name", (simple) ? item : item.attr("name"))
-	       .attr("value", (simple) ? value : item.val());
-       },
-
-       getLogicType = function(obj) {
-	 if (obj.hasClass(options.btnEventLogic.substr(1,options.btnEventLogic.length))) return "basic";
-	 if (obj.hasClass(options.btnEventAjax.substr(1,options.btnEventAjax.length))) return "ajax";
-	 return "close";
-       },
-
-       removeObjects = function(objects) {
-	 if (!objects || !Array.isArray(objects) || !objects.length) return;
-	 objects.forEach(function(object){
-	   object.remove();
-	 });
-       },
-
-       runAjaxLogic = function(obj) {
-	 var $form = obj.parents("form");
-	 if (!$form || !$form.length) return applyError(obj, options.noFormEventMsg), false;
-	 var hidden = createHiddenButton(obj);
-	 var type = createHiddenButton("type", "json");
-	 $form.append(hidden).append(type);
-	 var data = $form.serialize();
-	 var $tr = obj.parents("tr");
-	 var action = obj.data("action");
-	 var $modal = obj.parents(".modal.in");
-
-	 //clearPopupForm($(".modal:not(.in)"));// REMOVE
-
-	 $.ajax({
-	   type: "POST",
-	   url: $form.attr("action"),
-	   data: data,
-	   dataType: "json",
-	   success: function(data) {
-	     if (!data || typeof data.success === "undefined") return applyError(obj, options.ajaxSystemError), false;
-	     if (data && data.success === false) return applyError(obj, data.message), false;
-	     switch(action) {
-	       default:
-	       case "delete":
-		 if ($modal && $modal.length) $modal.modal("hide");
-		 $
-	       .when($tr.fadeOut("800"))
-	       .then(function(){
-		 $tr.remove();
-	       });
-		 break;
-	     }
-	     removeObjects([hidden, type]);
-	   },
-	   error: function(x, o, e){
-	     applyError(obj, options.ajaxError+e);
-	     removeObjects([hidden, type]);
-	   }
-	 });
-       },
-
-       runBasicLogic = function(obj) {
-	 var action = obj.data("umiact");
-	 if (!action || !action.length) return applyError(obj, options.noActionEventMsg), false;
-	 var $form = obj.parents("form");
-	 if (!$form || !$form.length) return applyError(obj, options.noFormEventMsg), false;
-	 var hidden = createHiddenButton(obj);
-	 //clearPopupForm($(".modal:not(.in)")); // REMOVE
-	 $form.append(hidden).attr("action", action).submit();
-
-       },
-
-       clearPopupForm = function($class) {
-	 if (!($class instanceof Object)) $class=$($class);
-	 $class.find("input[type='checkbox']").prop("checked", false);
-       },
-
-       onBtnEventClick = function(event) {
-	 event.preventDefault();
-	 var $this = $(this);
-
-	 switch(getLogicType($this)) {
-	   default:
-	   case "close":
-	     clearPopupForm($this.parents(".modal"));
-	     break;
-	   case "basic":
-	     runBasicLogic($this);
-	     break;
-	   case "ajax":
-	     runAjaxLogic($this);
-	     break;
-	 }
-	 return false;
-       };
-
-   //clearPopupForm($(".modal:not(.in)")); // REMOVE
-
-   $("body").on("click", options.btnEvent, onBtnEventClick);
- });
-</script>
+<script src="/static/js/umi-ddmenu-sort.js"></script>
+<script src="/static/js/umi-searchby-modals.js"></script>
