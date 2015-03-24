@@ -22,6 +22,18 @@ $(function(){
     },
 	currentRelation = false,
 	selectServiceAuthQuery = "select[data-name='authorizedservice']",
+	reinitRelations = function() {
+	    $(selectServiceAuthQuery).each(function(id, select){
+		var $select = $(select),
+		    $option = $select.find("option:selected"),
+		    relation = $option.data("relation");
+		
+		if (!relation || !relation.length) return;
+		$select.parents(".hfh.repinst.form-group").find(".form-group.relation."+relation).removeClass("hidden");
+	    });
+	    
+
+	},
 	switchRelations = function(obj, newRelation) {
 	    var $formGroupsRelated = $(".form-group.relation", obj).addClass("hidden");
 	    
@@ -122,4 +134,5 @@ $(function(){
 
     serviceSelectAttachEvent($(document));
     duplicatedAttachEvent($(document));
+    reinitRelations();
 });

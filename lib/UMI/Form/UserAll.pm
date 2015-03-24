@@ -59,9 +59,9 @@ has_field 'person_avatar'
        element_class => [ 'btn', 'btn-default', 'btn-sm', ],
        max_size => '50000' );
 
-has_field 'person_office'
+has_field 'person_org'
   => ( type => 'Select',
-       label => 'Office',
+       label => 'Organization',
        label_class => [ 'col-xs-2' ],
        empty_select => '--- Choose an Organization ---',
        element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
@@ -77,6 +77,16 @@ has_field 'person_title'
        element_attr => { placeholder => 'manager' },
        required => 1 );
 
+has_field 'person_office'
+  => ( type => 'Select',
+       label => 'Office',
+       label_class => [ 'col-xs-2' ],
+       empty_select => '--- Choose an Office ---',
+       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+       element_class => [ 'input-sm', ],
+       options_method => \&offices,
+       required => 1 );
+
 has_field 'person_telephonenumber'
   => ( apply => [ NoSpaces ],
        label => 'SIP/Cell',
@@ -85,7 +95,7 @@ has_field 'person_telephonenumber'
        element_class => [ 'input-sm', ],
        wrapper_attr => { id => 'items' },
        element_attr => { name => 'telephonenumber\[\]',
-			 placeholder => '123@pbx0.ibs, +380xxxxxxxxx' });
+			 placeholder => '123@pbx0.umi, +380xxxxxxxxx' });
 
 has_field 'person_telcomment'
   => ( type => 'Display',
@@ -95,8 +105,9 @@ has_field 'person_telcomment'
 
 has_block 'group_person'
   => ( tag => 'div',
-       render_list => [ 'person_office',
+       render_list => [ 'person_org',
 			'person_title',
+			'person_office',
 			'person_avatar',
 			'person_telephonenumber',
 			'person_telcomment', ],
@@ -380,6 +391,17 @@ has_field 'loginless_ovpn.ip'
 			 'data-group' => 'loginless_ovpn', },
      );
 
+has_field 'loginless_ovpn.os'
+  => ( apply => [ NotAllDigits, Printable ],
+       label => 'OS',
+       label_class => [ 'col-xs-2', ],
+       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+       element_class => [ 'input-sm', ],
+       element_attr => { placeholder => 'UNIX / Windows / iOS',
+			 'data-name' => 'os',
+			 'data-group' => 'loginless_ovpn', },
+     );
+
 sub wrap_loginless_ovpn_elements {
   my ( $self, $input, $subfield ) = @_;
   my $output = sprintf('%s%s%s', ! $subfield ? qq{\n<div class="duplicate">} : qq{\n<div class="duplicated">},
@@ -508,7 +530,8 @@ sub validate {
 
   $i = 0;
   foreach $element ( $self->field('account')->fields ) {
-    if ( ! defined $element->field('authorizedservice')->value &&
+    if ( $#{$self->field('account')->fields} > 0 &&
+	 ! defined $element->field('authorizedservice')->value &&
 	 ! defined $element->field('associateddomain')->value ) { # no svc no fqdn
       $element->field('associateddomain')->add_error('Domain Name is mandatory!');
       $element->field('authorizedservice')->add_error('Service is mandatory!');
@@ -536,7 +559,7 @@ sub validate {
 			 $element->field('authorizedservice')->value .
 			 $element->field('associateddomain')->value}++; }
 
-    # no mac
+    # 802.1x-mac but no mac
     $element->field('login')->add_error('MAC address is mandatory!')
       if $element->field('authorizedservice')->value =~ /^802.1x-mac$/ &&
       ! defined $element->field('login')->value;

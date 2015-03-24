@@ -117,13 +117,12 @@
 	    action="[% c.uri_for_action('/searchby/index') %]">
 
 	<div class="input-group">
-
 	  
 	  <input type="text"
 	  	 class="form-control"
 	  	 id="ldapsearch_filter"
 	  	 name="ldapsearch_filter"
-	  	 title="LDAP search filter"
+	  	 title="LDAP search filter input field"
 		 placeholder='*Vasya*Pupkin*'
 	  	 data-animation="false"
 	  	 data-trigger="hover"
@@ -337,19 +336,4 @@
 
 <script> $(function(){ $('#ldapsearch_filter').popover() }); </script>
 
-<script>
-  $( '.umi-navbar-menu-btn' ).click( function () {
-  $('.navbar-form').submit();	
-});
-
-$('[name=ldapsearch_filter]').on('keydown', function (event) {
-    if ( event.which === 13 ) {
-        $('[name=ldapsearch_by_name]').trigger('click');
-    }
-  });
-
-  $(function () {
-  $('[data-toggle="tooltip"]').tooltip()
-  });
-</script>
 <!-- END site/header -->
