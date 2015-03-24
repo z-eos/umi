@@ -140,11 +140,17 @@
 	  	 tabindex="12">
 	  <div class="input-group-btn">
 	    <button type="submit"
-		    class="btn btn-default dropdown-toggle"
-		    tabindex="13"
-		    data-toggle="dropdown"
-		    title="LDAP Select Base For Search-Simple Filter">
+		    class="btn btn-default"
+		    value="1" tabindex="13"
+		    name="ldapsearch_by_name"
+		    title="Search &laquo;by name&raquo;">
 	      <span class="fa fa-search"></span>
+	    </button>
+	    <button type="submit"
+		    class="btn btn-default dropdown-toggle"
+		    tabindex="14"
+		    data-toggle="dropdown"
+		    title="LDAP Select Bases">
 	      <span class="caret"></span>
 	    </button>
 	    <ul class="dropdown-menu dropdown-menu-right" role="menu" name="ldapsearch_base">
@@ -155,37 +161,37 @@
 
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
-			value="1" tabindex="14"
+			value="1" tabindex="15"
 			name="ldapsearch_by_name"
 			title="filter pattern in givenName or sn or uid or cn">
 		<span class="[% icon_class %] fa-user"></span>&nbsp;by name</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
-			value="1" tabindex="15"
+			value="1" tabindex="16"
 			name="ldapsearch_by_email"
 			title="filter pattern in mail">
 		<span class="[% icon_class %] fa-envelope-o"></span>&nbsp;by email</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
-			value="1" tabindex="16"
+			value="1" tabindex="17"
 			name="ldapsearch_by_jid"
 			title="filter pattern in mail">
 		<span class="[% icon_class %] fa-lightbulb-o"></span>&nbsp;by JID</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
-			value="1" tabindex="17"
+			value="1" tabindex="18"
 			name="ldapsearch_by_ip"
 			title="filter pattern in ip address">
 		<span class="[% icon_class %] fa-code-fork"></span>&nbsp;by IP</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
-			value="1" tabindex="18"
+			value="1" tabindex="19"
 			name="ldapsearch_by_mac"
 			title="filter pattern in MAC address">
 		<span class="[% icon_class %] fa-barcode"></span>&nbsp;by MAC</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
-			value="1" tabindex="19"
+			value="1" tabindex="20"
 			name="ldapsearch_by_telephone"
 			title="filter pattern in telephone number">
 		<span class="[% icon_class %] fa-phone"></span>&nbsp;by telephone</button></li>
@@ -334,6 +340,9 @@
   </div>
 </nav>
 
-<script> $(function(){ $('#ldapsearch_filter').popover() }); </script>
+<script>
+ $(function(){ $('#ldapsearch_filter').popover() });
+ $(function () { $('[data-toggle="tooltip"]').tooltip() });
+</script>
 
 <!-- END site/header -->
