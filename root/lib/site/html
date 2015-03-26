@@ -27,14 +27,16 @@
 
    
 
-   <script type="text/javascript">
+   <script type="text/javascript">  
     $('form').on('submit', function (){  $('#fakeLoader').show(200)  });
-    
+
     $("#fakeLoader").fakeLoader({
       spinner:"spinner6",
-      timeToHide:500,
+      timeToHide:200,
       bgColor:"#798D8F"
     });
+
+    window.onbeforeunload = function (e) { $('#fakeLoader').show(200) };
    </script>
 
  </body>
