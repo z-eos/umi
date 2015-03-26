@@ -29,7 +29,7 @@
     $('form').on('submit', function (){  $('#fakeLoader').show(200)  });
 
     $("#fakeLoader").fakeLoader({
-      spinner:"spinner1",
+      spinner:"spinner6",
       zIndex:"9999",
       timeToHide:1200,
       bgColor:"rgba(121,141,143,0.6)"
