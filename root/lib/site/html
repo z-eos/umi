@@ -28,6 +28,8 @@
    
 
    <script type="text/javascript">
+    $('form').on('submit', function (){  $('#fakeLoader').show(200)  });
+    
     $("#fakeLoader").fakeLoader({
       spinner:"spinner6",
       timeToHide:500,
