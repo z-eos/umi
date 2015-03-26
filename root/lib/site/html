@@ -31,9 +31,9 @@
     $('form').on('submit', function (){  $('#fakeLoader').show(200)  });
 
     $("#fakeLoader").fakeLoader({
-      spinner:"spinner6",
-      timeToHide:200,
-      bgColor:"#798D8F"
+      spinner:"spinner3",
+      timeToHide:1200,
+      bgColor:"rgba(72,182,255,0.6)"
     });
 
     window.onbeforeunload = function (e) { $('#fakeLoader').show(200) };
