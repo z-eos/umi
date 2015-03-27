@@ -26,8 +26,6 @@
    [% content %]
 
    <script type="text/javascript">  
-    $('form').on('submit', function (){  $('#fakeLoader').show(200)  });
-
     $("#fakeLoader").fakeLoader({
       spinner:"spinner3",
       zIndex:"9999",
@@ -35,7 +33,12 @@
       bgColor:"rgba(121,141,143,0.6)"
     });
 
-    window.onbeforeunload = function (e) { $('#fakeLoader').show(200) };
+    function showLoad () {$('#fakeLoader').show(200);}
+
+    $('form').on('submit', showLoad);
+    window.onbeforeunload = showLoad;
+    
+    // window.onbeforeunload = function (e) { $('#fakeLoader').show(200) };
    </script>
 
  </body>

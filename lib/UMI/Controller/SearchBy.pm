@@ -1145,8 +1145,7 @@ sub user_preferences :Path(user_preferences) :Args(0) {
   $c->controller('Root')
     ->user_preferences( $c,
 			{
-			 uid => substr((split(',',
-					      $params->{'user_preferences'}))[0],4),
+			 uid => substr((split(',', $params->{'user_preferences'}))[0],4),
 			}
 		      );
 }
