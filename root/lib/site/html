@@ -26,7 +26,7 @@
    [% content %]
 
    <script type="text/javascript">  
-    щ$('form').on('submit', function (){  $('#fakeLoader').show(200)  });
+    $('form').on('submit', function (){  $('#fakeLoader').show(200)  });
 
     $("#fakeLoader").fakeLoader({
       spinner:"spinner3",

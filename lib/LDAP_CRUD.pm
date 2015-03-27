@@ -276,7 +276,7 @@ around 'ldap' =>
 
 =head2 last_uidNumber
 
-Last uidNumber for base ou=People,dc=ibs
+Last uidNumber for base ou=People,dc=umidb
 
 to add error correction
 
@@ -299,7 +299,7 @@ sub build_last_uidNumber {
   $self->reset_ldap;
   my $mesg =
     $self->ldap->search(
-			base   => 'ou=People,dc=umidb',
+			base   => $self->{cfg}->{base}->{acc_root},
 			scope  => 'one',
 			filter => '(uidNumber=*)',
 			attrs  => [ 'uidNumber' ],
@@ -318,7 +318,7 @@ sub build_last_uidNumber {
 
 =head2 last_gidNumber
 
-Last gidNumber for base ou=group,dc=ibs
+Last gidNumber for base ou=group,dc=umidb
 
 to add error correction
 
@@ -341,7 +341,7 @@ sub build_last_gidNumber {
   $self->reset_ldap;
   my $mesg =
     $self->ldap->search(
-			base   => 'ou=group,dc=umidb',
+			base   => $self->{cfg}->{base}->{group},
 			scope  => 'one',
 			filter => '(gidNumber=*)',
 			attrs  => [ 'gidNumber' ],
@@ -883,8 +883,8 @@ sub obj_add {
 ## TODO
 ## HERE, MAY BE, WE NEED TO SET FLAG TO CREATE BRANCH FOR LOCALIZED
 ## VERSION OF DATA
-## associatedService=localization-ru,uid=U...-user01,ou=People,dc=ibs
-## associatedService=localization-uk,uid=U...-user01,ou=People,dc=ibs
+## associatedService=localization-ru,uid=U...-user01,ou=People,dc=umidb
+## associatedService=localization-uk,uid=U...-user01,ou=People,dc=umidb
 
   my $attrs = $self->params2attrs({
 				   type => $type,
