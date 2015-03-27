@@ -250,7 +250,6 @@ sub proc :Path(proc) :Args(0) {
 	  $entry->{$attr} = $entry_tmp->get_value($attr, asref => 1);
 	}
       }
-
       my $schema = $ldap_crud->obj_schema( { dn => $params->{ldap_modify} } );
       my ($is_single);
       foreach my $objectClass (sort (keys $schema->{$params->{ldap_modify}})) {
@@ -275,7 +274,7 @@ sub proc :Path(proc) :Args(0) {
 
 
       $c->stash(
-		template => 'search/modify.tt',
+		template => 'search/modify.tt', # look modify() bellow
 		modify => $params->{'ldap_modify'},
 		entries => $entry,
 		schema => $is_single,
@@ -1084,15 +1083,15 @@ sub modify :Path(modify) :Args(0) {
       $params->{jpegPhoto} = $c->req->upload('jpegPhoto');
     }
 
-    p $attr;
-
     $val = $entry->get_value ( $attr, asref => 1 );
 
     $orig = ref($val) eq "ARRAY" && scalar @{$val} == 1 ? $val->[0] : $val;
-    $val = $params->{$attr};
+    p $val = $params->{$attr};
     # removing all empty array elements if any
     if ( ref($val) eq "ARRAY" ) {
-      @{$val} = grep { $_ ne '' } @{$val};
+      @{$val} = map { $self->is_ascii($_) ? $self->utf2lat($_) : $_ } grep { $_ ne '' } @{$val};
+    } elsif ( $val ne '' ) {
+      $val = $self->utf2lat($val) if $self->is_ascii($val);
     }
 
     # SMARTMATCH: recurse on paired elements of ARRAY1 and ARRAY2

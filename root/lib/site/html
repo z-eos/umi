@@ -22,14 +22,14 @@
  </head>
  <body>
    <div id="fakeLoader"></div>
-   
+
    [% content %]
 
    <script type="text/javascript">  
-    $('form').on('submit', function (){  $('#fakeLoader').show(200)  });
+    щ$('form').on('submit', function (){  $('#fakeLoader').show(200)  });
 
     $("#fakeLoader").fakeLoader({
-      spinner:"spinner7",
+      spinner:"spinner3",
       zIndex:"9999",
       timeToHide:1200,
       bgColor:"rgba(121,141,143,0.6)"

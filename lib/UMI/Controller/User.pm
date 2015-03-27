@@ -110,6 +110,7 @@ sub create_account {
     my $descr = 'description has to be here';
     if (defined $args->{'descr'} && $args->{'descr'} ne '') {
       $descr = join(' ', $args->{'descr'});
+      $descr = $self->utf2lat( $descr ) if $self->is_ascii( $descr );
     }
 
     my $telephoneNumber = '666';
@@ -117,35 +118,28 @@ sub create_account {
       $telephoneNumber = $args->{'telephonenumber'};
     }
 
-#
-## HERE WE NEED TO SET FLAG TO CREATE BRANCH FOR LOCALIZED VERSION OF DATA
-## associatedService=localization-ru,uid=U...-user01,ou=People,dc=ibs
-## associatedService=localization-uk,uid=U...-user01,ou=People,dc=ibs
-## e.t.c.
-#
+    #
+    ## HERE WE NEED TO:
+    ### set flag to create branch for localized version of data
+    ###  associatedService=localization-ru,uid=U...-user01,ou=People,dc=ibs
+    ###  associatedService=localization-uk,uid=U...-user01,ou=People,dc=ibs
+    ### check value of each field to avoid non ASCII in ASCII dedicated fields
+    ### like `shell', `home' e.t.c.
+    ##
+    #
 
-    my ( $givenName, $sn, $cn, $o, $pwd );
-    if ($self->is_ascii($args->{'givenname'})) {
-      $givenName = $self->utf2lat({ to_translate => $args->{'givenname'} });
-    } else {
-      $givenName = $args->{'givenname'};
-    };
-    $cn = $givenName;
+    my $givenName = $self->is_ascii( $args->{'givenname'} ) ?
+      $self->utf2lat( $args->{'givenname'} ) : $args->{'givenname'};
 
-    if ($self->is_ascii($args->{'sn'})) {
-      $sn = $self->utf2lat({ to_translate => $args->{'sn'} });
-    } else {
-      $sn = $args->{'sn'};
-    };
-    $cn .= ' ' . $sn;
+    my $sn = $self->is_ascii( $args->{'sn'} ) ?
+      $self->utf2lat( $args->{'sn'} ) : $args->{'sn'};
 
-    if ($self->is_ascii($args->{'org'})) {
-      $o = $self->utf2lat({ to_translate => $args->{'org'} });
-    } else {
-      $o = $args->{'org'};
-    };
+    my $cn = $givenName . ' ' . $sn;
 
-    my ($file, $jpeg);
+    my $o = $self->is_ascii( $args->{'org'} ) ?
+      $self->utf2lat( $args->{'org'} ) : $args->{'org'};
+
+    my ( $pwd, $file, $jpeg);
     if (defined $args->{'avatar'}) {
       $file = $args->{'avatar'}->{'tempname'};
     } else {
@@ -190,7 +184,7 @@ sub create_account {
 		       homeDirectory => $ldap_crud->{cfg}->{stub}->{homeDirectory},
 		       jpegPhoto => [ $jpeg ],
 		       loginShell => $ldap_crud->{cfg}->{stub}->{loginShell},
-		       title => $args->{'title'},
+		       title => $self->is_ascii($args->{'title'}) ? $self->utf2lat($args->{'title'}) : $args->{'title'},
 		       objectClass => [ qw(top
 					   posixAccount
 					   inetOrgPerson
