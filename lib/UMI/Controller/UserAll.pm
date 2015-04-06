@@ -143,8 +143,10 @@ sub create_account {
   my $ldif = $ldap_crud->add( $root_add_dn, $root_add_options );
   if ( $ldif ) {
     push @{$final_message->{error}},
-      '<li>Error during management account creation occured: ' . $ldif->{html} . '</li>';
-    push @{$final_message->{error}}, "error during root obj creation: " . $ldif;
+      sprintf('Error during management account creation occured: %s<br><b>srv: </b>%s<br><b>text: </b>%s' .
+	      $ldif->{html},
+	      $ldif->{srv},
+	      $ldif->{text});
   } else {
     push @{$final_message->{success}},
       sprintf('<i class="fa fa-user fa-lg fa-fw"></i>&nbsp;<em>root account login:</em> &laquo;<strong class="text-success">%s</strong>&raquo; <em>password:</em> &laquo;<strong class="text-success mono">%s</strong>&raquo;',
@@ -297,7 +299,11 @@ sub create_account_branch {
   } else {
     my $mesg = $ldap_crud->add( $arg->{dn}, $arg->{add_attrs} );
     if ( $mesg ) {
-      $return->{error} = 'error during ' . uc($arg->{service}) . ' branch creation occured: ' . $mesg;
+      $return->{error} = sprintf('Error during %s branch creation occured: %s<br><b>srv: </b>%s<br><b>text: </b>%s',
+				 uc($arg->{service}),
+				 $mesg->{html},
+				 $mesg->{srv},
+				 $mesg->{text});
     } else { # $return->{success} = sprintf('<i class="%s fa-fw"></i> branch object &laquo;<b class="text-success">%s</b>&raquo; was successfully created',
 					  # $ldap_crud->{cfg}->{authorizedService}->{$arg->{authorizedservice}}->{icon},
 					  # $arg->{dn});
