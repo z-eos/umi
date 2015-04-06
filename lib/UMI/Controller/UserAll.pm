@@ -143,7 +143,7 @@ sub create_account {
   my $ldif = $ldap_crud->add( $root_add_dn, $root_add_options );
   if ( $ldif ) {
     push @{$final_message->{error}},
-      sprintf('Error during management account creation occured: %s<br><b>srv: </b>%s<br><b>text: </b>%s' .
+      sprintf('Error during management account creation occured: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s' .
 	      $ldif->{html},
 	      $ldif->{srv},
 	      $ldif->{text});
@@ -299,7 +299,7 @@ sub create_account_branch {
   } else {
     my $mesg = $ldap_crud->add( $arg->{dn}, $arg->{add_attrs} );
     if ( $mesg ) {
-      $return->{error} = sprintf('Error during %s branch creation occured: %s<br><b>srv: </b>%s<br><b>text: </b>%s',
+      $return->{error} = sprintf('Error during %s branch creation occured: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s',
 				 uc($arg->{service}),
 				 $mesg->{html},
 				 $mesg->{srv},
