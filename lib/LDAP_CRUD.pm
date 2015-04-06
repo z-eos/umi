@@ -57,6 +57,8 @@ sub _build_cfg {
 		   homeDirectory => '/nonexistent',
 		   loginShell => '/sbin/nologin',
 		   gidNumber => 10012,
+		   noavatar_mgmnt => UMI->path_to('root', 'static', 'images', '/avatar-mgmnt.png'),
+		   icon => 'fa fa-user',
 		  },
 	  base => {
 		   db => UMI->config->{ldap_crud_db},
@@ -82,6 +84,9 @@ sub _build_cfg {
 						  top
 						  posixAccount
 						  inetOrgPerson
+						  organizationalPerson
+						  person
+						  inetLocalMailRecipient
 						  grayAccount
 					       ) ],
 			  acc_svc_branch => [ qw(
@@ -391,7 +396,7 @@ sub err {
 
   my $caller = (caller(1))[3];
   my $err = {
-	     html => $mesg->{code} ?
+	     html => $mesg->{code} && ldap_error_name($mesg) ne 'LDAP_SUCCESS' ?
 	     sprintf( '<dl class="dl-horizontal">
   <dt>code</dt><dd>%s</dd>
   <dt>error name</dt><dd>%s</dd>
@@ -407,7 +412,8 @@ sub err {
 		      ldap_error_text($mesg),
 		      ldap_error_desc($mesg),
 		      $mesg->server_error
-		    ) : 'Your request returned no result. Try to change query parameter/s.',
+			    ) :
+	     'Your request returned no result. Try to change query parameter/s.',
 	     code => $mesg->code,
 	     name => ldap_error_name($mesg),
 	     text => ldap_error_text($mesg),
@@ -415,8 +421,8 @@ sub err {
 	     srv => $mesg->server_error,
 	     caller => $caller ? $caller : 'main',
 	    };
-  use Data::Printer;
-  p $err;
+  # use Data::Printer;
+  # p $err;
   return $err; # if $mesg->code;
 }
 

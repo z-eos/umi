@@ -70,6 +70,10 @@
 	  <span class="fa fa-plus-circle"></span>
 	  create new alt</a>
       </li>
+      <li><a href="[% c.uri_for('userall') %]" target="_top">
+	  <span class="fa fa-plus-circle"></span>
+	  create new alt (fin)</a>
+      </li>
     </ul>
   </div>
 </div>

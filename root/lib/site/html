@@ -20,25 +20,38 @@
    <script src="/static/js/fakeLoader.min.js"></script>
    
  </head>
- <body>
-   <div id="fakeLoader"></div>
+ <body class="js">
+   <!-- <div id="fakeLoader"></div> -->
 
+   <div id="preloader"></div>
+   
    [% content %]
 
    <script type="text/javascript">  
-    $("#fakeLoader").fakeLoader({
-      spinner:"spinner3",
-      zIndex:"9999",
-      timeToHide:1200,
-      bgColor:"rgba(121,141,143,0.6)"
-    });
+    /* $("#fakeLoader").fakeLoader({
+       spinner:"spinner3",
+       zIndex:"9999",
+       timeToHide:10,
+       bgColor:"rgba(121,141,143,0.6)"
+       });
 
-    function showLoad () {$('#fakeLoader').show(200);}
+       function showLoad () {$('#fakeLoader').show(200);}
 
-    $('form').on('submit', showLoad);
-    window.onbeforeunload = showLoad;
+       $('form').on('submit', showLoad);
+       window.onbeforeunload = showLoad; */
     
     // window.onbeforeunload = function (e) { $('#fakeLoader').show(200) };
+
+
+    //jQuery(document).ready(function($) {  
+
+      // site preloader -- also uncomment the div in the header and the css style for #preloader
+      $(window).load(function(){
+	$('#preloader').fadeOut('slow',function(){$(this).remove();});
+      });
+
+    //});
+
    </script>
 
  </body>

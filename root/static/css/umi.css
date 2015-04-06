@@ -120,3 +120,14 @@
   opacity: 0.5;
 }
 
+.js div#preloader {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 9999;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  opacity: .6;
+  background: #eee url('/static/images/spinner-preloader1.gif') no-repeat center center;
+}

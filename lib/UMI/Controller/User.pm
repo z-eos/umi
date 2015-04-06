@@ -47,15 +47,6 @@ sub index :Path :Args(0) {
       my $params = $c->req->parameters;
       $params->{'avatar'} = $c->req->upload('avatar') if $params->{'avatar'};
 
-      # if ( ! defined $params->{authorizedservice} ) {
-      # 	$params->{authorizedservice} = '0';
-      # }
-
-      # if ( ! defined $params->{associateddomain} ) {
-      # 	$params->{associateddomain} = '0';
-      # }
-
-
       use Data::Printer;
       # p $params;
 
@@ -91,13 +82,9 @@ sub create_account {
     my  ( $self, $c ) = @_;
     my $args = $c->req->parameters;
 
-    use Data::Printer;
-    # p $args;
-
     my $ldap_crud =
       $c->model('LDAP_CRUD');
 
-    # $c->log->debug( "ldap_crud: " . Dumper($ldap_crud) . "\n");
     my $uidNumber = $ldap_crud->last_uidNumber;
     $uidNumber++;
 

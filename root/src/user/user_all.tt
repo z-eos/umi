@@ -14,59 +14,13 @@
   </h2>
 </div>
 
-[% IF final_message.error %]
-<div class="panel panel-danger">
-  <div class="panel-heading">
-    <h4><span class="fa fa-exclamation-circle">&nbsp;</span>Error!</h4>
-  </div>
-  <div class="panel-body">
-    <ul>
-      [% FOREACH i IN final_message.error %]
-      [% i %]
-      [% END %]
-    </ul>
-  </div>
-</div>
-[% ELSIF final_message.success %]
-<div class="panel panel-success">
-  <div class="panel-heading">
-    <h4><span class="fa fa-check-circle">&nbsp;</span>Success!</h4>
-  </div>
-  <div class="panel-body">
-    [% final_message.success %]
-  </div>
-</div>
-[% ELSIF final_message.warning %]
-<div class="panel panel-warning">
-  <div class="panel-heading">
-    <h4><span class="fa fa-exclamation-triangle">&nbsp;</span>Warning!</h4>
-  </div>
-  <div class="panel-body">
-    [% final_message.warning %]
-  </div>
-</div>
-[% END %]
-
-[% IF form.has_errors %]
-<div class="panel panel-danger">
-  <div class="panel-heading">
-    <i class="fa fa-exclamation-circle"></i>
-    Form contains error/s! Check all tabs, please!
-  </div>
-  <div class="panel-body">
-    <ol>
-      [% FOREACH err IN form.errors %]
-      <li>[% err %]</li>
-      [% END %]
-    </ol>
-  </div>
-</div>
-[% END %]
+[% INCLUDE ldap_err.tt %]
 
 <form id="[% form.name %]" class="form-horizontal tab-content" method="post" enctype="multipart/form-data">
 
   [% form.field('person_givenname').render %]
   [% form.field('person_sn').render %]
+  [% form.field('person_namesake').render %]
   <hr>
   
   <ul role="tablist" class="col-xs-1 nav nav-pills nav-stacked" id="myTab">

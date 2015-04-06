@@ -10,8 +10,10 @@ use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printabl
 
 use Data::Printer;
 
-has '+item_class' => ( default =>'UserAll' );
+# has '+error_message' => ( default => 'There were errors in your form.' );has '+item_class' => ( default =>'UserAll' );
 has '+enctype' => ( default => 'multipart/form-data');
+has 'namesake' => ( is => 'rw', );
+has 'autologin' => ( is => 'rw', );
 
 sub build_form_element_class { [ 'form-horizontal', 'tab-content' ] }
 
@@ -42,7 +44,7 @@ has_field 'person_givenname'
        element_attr => { placeholder => 'John' },
        required => 1 );
 
-has_field 'person_sn' 
+has_field 'person_sn'
   => ( apply => [ NoSpaces ],
        label => 'LName',
        label_class => [ 'col-xs-1', ],
@@ -50,6 +52,13 @@ has_field 'person_sn'
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'Doe' },
        required => 1 );
+
+has_field 'person_namesake'
+  => ( type => 'Checkbox',
+       label => 'namesake (check it if sure the user doesn\'t exist)',
+       label_class => [ 'col-xs-1', ],
+       element_wrapper_class => [ 'col-xs-offset-1', 'col-xs-11', 'col-lg-5', 'text-muted', ],
+     );
 
 has_field 'person_avatar'
   => ( type => 'Upload',
@@ -97,11 +106,45 @@ has_field 'person_telephonenumber'
        element_attr => { name => 'telephonenumber\[\]',
 			 placeholder => '123@pbx0.umi, +380xxxxxxxxx' });
 
-has_field 'person_telcomment'
-  => ( type => 'Display',
-       html => '<small class="text-muted col-xs-offset-2"><em>' .
-       'comma or space delimited if many, international format for tel.</em></small>',
+# has_field 'person_telcomment'
+#   => ( type => 'Display',
+#        html => '<small class="text-muted col-xs-offset-2"><em>' .
+#        'comma or space delimited if many, international format for tel.</em></small>',
+#      );
+
+has_field 'person_login'
+  => ( apply => [ NoSpaces, NotAllDigits, Printable ],
+       label => 'Login',
+       label_class => [ 'col-xs-2', ],
+       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+       element_class => [ 'input-sm', ],
+       element_attr => { placeholder => 'john.doe', },
      );
+
+has_field 'person_password1'
+  => ( type => 'Password',
+       label => 'Password',
+       label_class => [ 'col-xs-2', ],
+       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+       element_class => [ 'input-sm', ],
+       ne_username => 'login',
+       apply => [ NoSpaces, NotAllDigits, Printable, StrongPassword ],
+       element_attr => { placeholder => 'Password',
+			 'autocomplete' => 'off', },
+     );
+
+has_field 'person_password2'
+  => ( type => 'Password',
+       label => '',
+       label_class => [ 'col-xs-2', ],
+       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+       element_class => [ 'input-sm', ],
+       ne_username => 'login',
+       apply => [ NoSpaces, NotAllDigits, Printable, StrongPassword ],
+       element_attr => { placeholder => 'Confirm Password',
+			 'autocomplete' => 'off', },
+     );
+
 
 has_block 'group_person'
   => ( tag => 'div',
@@ -110,7 +153,11 @@ has_block 'group_person'
 			'person_office',
 			'person_avatar',
 			'person_telephonenumber',
-			'person_telcomment', ],
+			# 'person_telcomment',
+			'person_login',
+			'person_password1',
+			'person_password2',
+		      ],
        attr => { id => 'group_person', },
      );
 
@@ -224,7 +271,7 @@ has_field 'account.radiusgroupname'
        options_method => \&radprofile,
      );
 
-has_field 'account.radiustunnelprivategroup'
+has_field 'account.radiustunnelprivategroupid'
   => ( type => 'Select',
        label => 'RADIUS Tunnel Private Group',
        wrapper_class => [  'hidden', '8021x', 'relation', ],
@@ -234,7 +281,7 @@ has_field 'account.radiustunnelprivategroup'
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'VLAN this 802.1x authenticates to',
 			 'autocomplete' => 'off',
-			 'data-name' => 'radiustunnelprivategroup',
+			 'data-name' => 'radiustunnelprivategroupid',
 			 'data-group' => 'account', },
        options => [{ value => '', label => '--- Choose VLAN ---'},
 		   { value => 'VLAN3', label => 'Voice (VLAN3)'},
@@ -332,10 +379,11 @@ has_block 'ssh'
 
 has_field 'loginless_ovpn'
   => ( type => 'Repeatable',
-       #setup_for_js => 1,
+       # setup_for_js => 1,
+       # num_when_empty => 0,
        do_wrapper => 1,
        wrap_repeatable_element_method => \&wrap_loginless_ovpn_elements,
-       #tags => { controls_div => 1 },
+       # tags => { controls_div => 1 },
        # init_contains => { wrapper_attr => { class => ['hfh', 'repinst'] } },
      );
 
@@ -500,35 +548,38 @@ has_field 'aux_submit'
 
 sub validate {
   my $self = shift;
-  my ( $i, $element, $field, $ldap_crud, $mesg, $autologin, $loginpfx, $logintmp, $elementcmp );
+  my ( $element, $field, $ldap_crud, $loginpfx, $logintmp, $elementcmp, $err, $error );
+
+  $self->autologin( lc($self->utf2lat( $self->field('person_givenname')->value ) . '.' .
+		     $self->utf2lat( $self->field('person_sn')->value )));
 
   $ldap_crud = $self->ldap_crud;
-  # my $mesg =
-  #   $ldap_crud->search({
-  # 			scope => 'one',
-  # 			filter => '(uid=' .
-  # 			$self->utf2lat({ to_translate => $self->field('givenname')->value }) . '.' .
-  # 			$self->utf2lat({ to_translate => $self->field('sn')->value }) . ')',
-  # 			base => $ldap_crud->{cfg}->{base}->{acc_root},
-  # 			attrs => [ 'uid' ],
-  # 		       });
-  # my ( $err, $error );
-  # if ($mesg->count) {
-  #   $err = '<span class="glyphicon glyphicon-exclamation-sign"></span> Root uid <em>&laquo;' .
-  #     $self->field('login')->value . '&raquo;</em> exists';
-  #   $self->field('login')->add_error($err);
+  my $mesg =
+    $ldap_crud->search({
+  			scope => 'one',
+  			filter => '(uid=' . $self->autologin . '*)',
+  			base => $ldap_crud->{cfg}->{base}->{acc_root},
+  			attrs => [ 'uid' ],
+  		       });
+  if ( $mesg->count == 1 &&
+       defined $self->field('person_namesake')->value &&
+       $self->field('person_namesake')->value == 1 ) {
+    $self->namesake(1);
+  } elsif ( $mesg->count &&
+	    defined $self->field('person_namesake')->value &&
+	    $self->field('person_namesake')->value eq '1' ) {
+    my @uids_namesake_suffixes;
+    foreach my $uid_namesake ( $mesg->entries ) {
+      push @uids_namesake_suffixes, 0+substr( $uid_namesake->get_value('uid'), length($self->autologin));
+    }
+    my @uids_namesake_suffixes_desc = sort {$b <=> $a} @uids_namesake_suffixes;
+    # @uids_namesake_suffixes_desc;
+    $self->namesake(++$uids_namesake_suffixes_desc[0]);
+  } elsif ( $mesg->count ) {
+    $self->field('person_login')->add_error('Auto-generaged variant for login exiscts!');
+  }
 
-  #   $err = '<div class="alert alert-danger">' .
-  #     '<span style="font-size: 140%" class="glyphicon glyphicon-exclamation-sign"></span>' .
-  #     '&nbsp;Account with the same root uid <strong>&laquo;' . $self->field('login')->value . '&raquo;</strong>,' .
-  #     ' already exists!</div>';
-  # }
-
-  $autologin = lc($self->utf2lat( $self->field('person_givenname')->value ) . '.' .
-		  $self->utf2lat( $self->field('person_sn')->value ));
-
-
-  $i = 0;
+  my $i = 0;
   foreach $element ( $self->field('account')->fields ) {
     if ( $#{$self->field('account')->fields} > 0 &&
 	 ! defined $element->field('authorizedservice')->value &&
@@ -551,14 +602,6 @@ sub validate {
       $element->field('password2')->add_error('Both or none passwords have to be defined!');
     }
 
-    # prepare to know if login+service+fqdn is uniq?
-    if ( ! $i ) { $elementcmp->{$element->field('login')->value .
-				$element->field('authorizedservice')->value .
-				$element->field('associateddomain')->value} = 1; }
-    else { $elementcmp->{$element->field('login')->value .
-			 $element->field('authorizedservice')->value .
-			 $element->field('associateddomain')->value}++; }
-
     # 802.1x-mac but no mac
     $element->field('login')->add_error('MAC address is mandatory!')
       if $element->field('authorizedservice')->value =~ /^802.1x-mac$/ &&
@@ -572,12 +615,25 @@ sub validate {
 
     if ( $element->field('authorizedservice')->value !~ /^802.1x-mac$/) {
       if ( ! defined $element->field('login')->value ) {
-	$logintmp = $autologin;
+	$logintmp = $self->autologin;
 	$loginpfx = 'Login (autogenerated, since empty)';
       } else {
 	$logintmp = $element->field('login')->value;
 	$loginpfx = 'Login';
       }
+
+    # prepare to know if login+service+fqdn is uniq?
+    if ( ! $i ) { # && defined $element->field('login')->value ) {
+      $elementcmp
+	->{$logintmp .
+	   $element->field('authorizedservice')->value .
+	   $element->field('associateddomain')->value} = 1;
+    } else { #if ( $i && defined $element->field('login')->value ) {
+      $elementcmp
+	->{$logintmp .
+	   $element->field('authorizedservice')->value .
+	   $element->field('associateddomain')->value}++;
+    }
 
       $mesg =
 	$ldap_crud->search({
@@ -590,19 +646,31 @@ sub validate {
       $element->field('login')->add_error($loginpfx . ' <mark>' . $logintmp . '</mark> is not available!')
 	if ($mesg->count);
     }
-
+    
+    $self->add_form_error('<span class="fa-stack fa-fw">' .
+			  '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
+			  '<i class="fa fa-user pull-right fa-stack-1x"></i>' .
+			  '</span>' .
+			  '<b class="visible-lg-inline">&nbsp;Pass&nbsp;</b>' .
+			  'Empty duplicatee! Fill it or remove, please')
+      if $self->field('account')->has_error_fields;
+    
     $i++;
   }
+  # p $elementcmp;
+  # error rising if login+service+fqdn not uniq
   $i = 0;
   foreach $element ( $self->field('account')->fields ) {
-    $element->field('login')->add_error($loginpfx . ' <mark>' . $logintmp . '</mark> defined more than once for the same service and FQDN')
-      if $elementcmp->{$element->field('login')->value .
+    $element->field('login')->add_error($loginpfx .
+					' <mark>' .
+					$logintmp .
+					'</mark> defined more than once for the same service and FQDN')
+      if $elementcmp->{$logintmp .
 		       $element->field('authorizedservice')->value .
 		       $element->field('associateddomain')->value} > 1;
     $i++;
   }
 
-  
   $i = 0;
   foreach $element ( $self->field('loginless_ssh')->fields ) {
     if ( defined $element->field('associateddomain')->value &&
@@ -611,6 +679,16 @@ sub validate {
     } elsif ( defined $element->field('key')->value &&
 	      ! defined $element->field('associateddomain')->value ) { # key but no fqdn
       $element->field('associateddomain')->add_error('Domain field have to be defined!');
+    } elsif ( ! defined $element->field('key')->value &&
+	      ! defined $element->field('associateddomain')->value &&
+	      $i > 0 ) { # empty duplicatee
+      $element->add_error('Empty duplicatee!');
+      $self->add_form_error('<span class="fa-stack fa-fw">' .
+			    '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
+			    '<i class="fa fa-user-times pull-right fa-stack-1x"></i>' .
+			    '</span>' .
+			    '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
+			    '<b> -> SSH:</b> Empty duplicatee! Fill it or remove, please');
     }
 
     # prepare to know if key+fqdn is uniq?
@@ -656,6 +734,18 @@ sub validate {
       $element->field('cert')->add_error('Cert field have to be defined!');
       $element->field('device')->add_error('Device field have to be defined!');
       $element->field('associateddomain')->add_error('Domain field have to be defined!');
+    } elsif ( ! defined $element->field('associateddomain')->value &&
+    	      ! defined $element->field('cert')->value &&
+    	      ! defined $element->field('device')->value &&
+    	      ! defined $element->field('ip')->value &&
+	      $i > 0 ) { # empty duplicatee
+      $element->add_error('Empty duplicatee!');
+      $self->add_form_error('<span class="fa-stack fa-fw">' .
+			    '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
+			    '<i class="fa fa-user-times pull-right fa-stack-1x"></i>' .
+			    '</span>' .
+			    '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
+			    '<b> -> OpenVPN:</b> Empty duplicatee! Fill it or remove, please');
     }
 
     $i++;
@@ -690,16 +780,14 @@ sub validate {
   # 		  '<li>add service account to the existent one</li></ul></div>';
   #    }
   #  }
-  # $error = $self->form->success_message & $self->form->success_message : '';
+  # $error = $self->form->success_message ? $self->form->success_message : '';
   # $self->form->error_message('');
   # $self->form->add_form_error(sprintf('%s%s',
   # 				      $self->form->success_message ? $self->form->success_message : '',
   # 				      $err ? $err : ''
   # 				     ));
 
-  # $self->add_form_error('<div class="alert alert-danger" role="alert"><i class="fa fa-exclamation-circle"></i> Form contains error/s! Check all tabs, please!</div>') if $self->has_error_fields;
-
-
+  # $self->add_form_error('<b class="text-danger">Form contains error/s! Check all tabs for fields constraints met, please!</b>') if $self->has_error_fields;
 }
 
 ######################################################################
@@ -729,6 +817,7 @@ sub radprofile {
 }
 
 ######################################################################
+
 
 no HTML::FormHandler::Moose;
 

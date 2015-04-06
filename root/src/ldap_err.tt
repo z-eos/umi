@@ -1,17 +1,28 @@
-[% IF final_message.error %]
+[% IF form.has_form_errors || final_message.error %]
 <div class="panel panel-danger">
   <div class="panel-heading">
     <h4><span class="fa fa-exclamation-circle">&nbsp;</span>Error!</h4>
   </div>
   <div class="panel-body">
+    [% IF form.has_form_errors %]
+    <b class="text-danger">Form contains error/s! Check all tabs for fields constraints met, please!</b>
     <ul>
-      [% FOREACH i IN final_message.error %]
-      [% i %]
+      [% FOREACH i IN form.form_errors.reverse %]
+      <li>[% i %]</li>
       [% END %]
     </ul>
+    [% END %]
+    [% IF final_message.error %]
+    <ul>
+      [% FOREACH i IN final_message.error %]
+      <li>[% i %]</li>
+      [% END %]
+    </ul>
+    [% END %]
   </div>
 </div>
-[% ELSIF final_message.warning %]
+[% END %]
+[% IF final_message.warning %]
 <div class="panel panel-warning">
   <div class="panel-heading">
     <h4><span class="fa fa-exclamation-triangle">&nbsp;</span>Warning!</h4>
@@ -19,7 +30,21 @@
   <div class="panel-body">
     <ul>
       [% FOREACH i IN final_message.warning %]
-      [% i %]
+      <li>[% i %]</li>
+      [% END %]
+    </ul>
+  </div>
+</div>
+[% END %]
+[% IF final_message.success %]
+<div class="panel panel-success">
+  <div class="panel-heading">
+    <h4><span class="fa fa-check-circle">&nbsp;</span>Success!</h4>
+  </div>
+  <div class="panel-body">
+    <ul>
+      [% FOREACH i IN final_message.success %]
+      <li>[% i %]</li>
       [% END %]
     </ul>
   </div>
