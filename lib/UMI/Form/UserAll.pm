@@ -577,6 +577,8 @@ sub validate {
     $self->namesake(++$uids_namesake_suffixes_desc[0]);
   } elsif ( $mesg->count ) {
     $self->field('person_login')->add_error('Auto-generaged variant for login exiscts!');
+  } else {
+    $self->namesake('');
   }
 
   my $i = 0;
