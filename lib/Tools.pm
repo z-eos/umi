@@ -111,11 +111,10 @@ read input file into the returned variable and set final message on results
 sub file2var {
   my  ( $self, $file, $final_message ) = @_;
   local $/ = undef;
-  open(my $fh, "<", $file) || do { push @{$final_message->{error}}, "Can not open $file: $!";
-				   exit 1; };
-  my $file_in_var = <$fh>;
-  close($fh) || do { push @{$final_message->{error}}, "$!";
-		     exit 1; };
+  open FILE, $file || do { push @{$final_message->{error}}, "Can not open $file: $!"; exit 1; };
+  binmode FILE;
+  my $file_in_var = <FILE>;
+  close FILE || do { push @{$final_message->{error}}, "$!"; exit 1; };
   return $file_in_var;
 }
 

@@ -548,7 +548,7 @@ has_field 'aux_submit'
 
 sub validate {
   my $self = shift;
-  my ( $element, $field, $ldap_crud, $loginpfx, $logintmp, $elementcmp, $err, $error );
+  my ( $element, $field, $ldap_crud, $loginpfx, $logintmp, $elementcmp, $err, $error, $cert, $is_x509, $cert_msg );
 
   $self->autologin( lc($self->utf2lat( $self->field('person_givenname')->value ) . '.' .
 		     $self->utf2lat( $self->field('person_sn')->value )));
@@ -648,7 +648,7 @@ sub validate {
       $element->field('login')->add_error($loginpfx . ' <mark>' . $logintmp . '</mark> is not available!')
 	if ($mesg->count);
     }
-    
+
     $self->add_form_error('<span class="fa-stack fa-fw">' .
 			  '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
 			  '<i class="fa fa-user pull-right fa-stack-1x"></i>' .
@@ -656,7 +656,7 @@ sub validate {
 			  '<b class="visible-lg-inline">&nbsp;Pass&nbsp;</b>' .
 			  'Empty duplicatee! Fill it or remove, please')
       if $self->field('account')->has_error_fields;
-    
+
     $i++;
   }
   # p $elementcmp;
@@ -750,6 +750,21 @@ sub validate {
 			    '<b> -> OpenVPN:</b> Empty duplicatee! Fill it or remove, please');
     }
 
+    if ( defined $element->field('cert')->value ) {
+      $element->field('cert')->value;
+      $cert = $self->file2var( $element->field('cert')->value->{tempname}, $cert_msg);
+      $element->field('cert')->add_error($cert_msg->{error}) if defined $cert_msg->{error};
+      $is_x509 = $self->cert_info({ cert => $cert });
+      $element->field('cert')->add_error('Certificate file is broken or not DER format!') if defined $is_x509->{error};
+      $self->add_form_error('<span class="fa-stack fa-fw">' .
+			    '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
+			    '<i class="fa fa-user-times pull-right fa-stack-1x"></i>' .
+			    '</span>' .
+			    '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
+			    '<b> -> OpenVPN:</b> Problems with certificate file<br>' . $is_x509->{error})
+	if defined $is_x509->{error};
+  }
+    
     $i++;
   }
 
