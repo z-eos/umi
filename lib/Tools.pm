@@ -101,6 +101,25 @@ sub pwdgen {
 }
 
 
+=head2 file2var
+
+read input file into the returned variable and set final message on results
+
+=cut
+
+
+sub file2var {
+  my  ( $self, $file, $final_message ) = @_;
+  local $/ = undef;
+  open(my $fh, "<", $file) || do { push @{$final_message->{error}}, "Can not open $file: $!";
+				   exit 1; };
+  my $file_in_var = <$fh>;
+  close($fh) || do { push @{$final_message->{error}}, "$!";
+		     exit 1; };
+  return $file_in_var;
+}
+
+
 =head2 cert_info
 
 data taken, generally, from
@@ -125,6 +144,7 @@ sub cert_info {
 	  'S/N' => $x509->serial,
 	  'Not Before' => strftime ("%a %b %e %H:%M:%S %Y", localtime($x509->not_before)),
 	  'Not  After' => strftime ("%a %b %e %H:%M:%S %Y", localtime( $x509->not_after)),
+	  'error' => $x509->error ? sprintf('Error on parsing Certificate: %s', $x509->error) : undef,
 	 };
 }
 

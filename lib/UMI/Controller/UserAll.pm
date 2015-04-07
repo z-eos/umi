@@ -41,8 +41,14 @@ sub index :Path :Args(0) {
 	 $c->check_user_roles('802.1x-eap') ) {
       my $params = $c->req->parameters;
       my $final_message;
-      $params->{'avatar'} = $c->req->upload('avatar') if $params->{'avatar'};
-
+      $params->{'person_avatar'} = $c->req->upload('person_avatar') if $params->{'person_avatar'};
+      my $i = 0;
+      foreach ( $self->form->field('loginless_ovpn')->fields ) {
+	$params->{'loginless_ovpn.' . $i . '.cert'} =
+	  $c->req->upload('loginless_ovpn.' . $i . '.cert') if $params->{'loginless_ovpn.' . $i . '.cert'};
+	$i++;
+      }
+      
       $c->stash( template => 'user/user_all.tt',
 		 form => $self->form,
 		 final_message => $final_message, );
@@ -230,6 +236,11 @@ sub create_account {
 			   { clear => '<del>NOPASSWORD</del>' }
 			 };
       } elsif ( $x->{authorizedservice} eq 'ovpn' ) {
+	$x->{userCertificate} = $element->field('cert')->value
+	  if defined $element->field('cert')->value;
+	$x->{password} = { $x->{authorizedservice} =>
+			   { clear => '<del>NOPASSWORD</del>' }
+			 };
       }
 
       $leaf =
@@ -468,23 +479,25 @@ sub create_account_branch_leaf {
 			  sshPublicKey => [ @$sshPublicKey ],
 			  uid => $arg->{uid},
 			 ];
-  } elsif ( $arg->{service} eq 'ovpn' ) {
 
-    my $usercertificate = file2var($arg->{userCertificate}->{'tempname'}, $final_message);
+  } elsif ( $arg->{service} eq 'ovpn' ) {
+    my $usercertificate = $self->file2var($arg->{userCertificate}->{'tempname'}, $final_message);
     $arg->{dn} = 'cn=' . substr($arg->{userCertificate}->{filename},0,-4) . ',' . $arg->{basedn};
+    $arg->{cert_info} = $self->cert_info({ cert => $usercertificate });
     $authorizedService = [
 			  cn => substr($arg->{userCertificate}->{filename},0,-4),
 			  # here `sn' is "missused" since we use it as
 			  # Serial Number rather than last (family)
 			  # name(s) for which the entity is known by
-			  sn => '' . $self->cert_info({ cert => $usercertificate })->{'S/N'},
+			  sn => '' . $arg->{cert_info}->{'S/N'},
 			  objectClass => $ldap_crud->{cfg}->{objectClass}->{ovpn},
 			  'userCertificate;binary' => $usercertificate,
 			 ];
+    push @{$final_message->{error}}, $arg->{cert_info}->{error} if defined $arg->{cert_info}->{error};
   }
 
   p $arg->{dn};
-  p $authorizedService;
+  # p $authorizedService;
 
   my $mesg =
     $ldap_crud->add(
@@ -492,27 +505,20 @@ sub create_account_branch_leaf {
     		    $authorizedService,
     		   );
   if ( $mesg ) {
-    push @{$final_message->{error}}, 'Error during ' . uc($arg->{service}) .
-      ' account creation occured:</h4><strong><em>' . $mesg->{caller} . $mesg->{html} .
-      '</em></strong>service account was not created, you need take care of it!';
+    push @{$final_message->{error}},
+      sprintf('Error during %s account creation occured: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s',
+	      uc($arg->{service}),
+	      $mesg->{html},
+	      $mesg->{srv},
+	      $mesg->{text});
   } else {
     push @{$final_message->{success}},
       sprintf('<i class="%s fa-fw"></i>&nbsp;<em>%s account login:</em> &laquo;<strong class="text-success">%s</strong>&raquo; <em>password:</em> &laquo;<strong class="text-success mono">%s</strong>&raquo;',
 	      $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{icon},
 	      $arg->{service},
-	      substr((split(/,/,$arg->{dn}))[0],4),
+	      (split(/=/,(split(/,/,$arg->{dn}))[0]))[1], # taking RDN value
 	      $arg->{password}->{$arg->{service}}->{'clear'});
   }
-}
-
-
-sub file2var {
-  my  ( $self, $file, $final_message ) = @_;
-  local $/ = undef;
-  open(my $fh, "<", $file) or push @{$final_message->{error}}, "Can not open $file: $!";
-  my $file_in_var = <$fh>;
-  close($fh) or push @{$final_message->{error}}, "$!";
-  return $file_in_var;
 }
 
 
