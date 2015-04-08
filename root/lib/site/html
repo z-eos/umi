@@ -18,7 +18,6 @@
    
    <script src="/static/js/jquery.min.js"></script>
    <script src="/static/js/fakeLoader.min.js"></script>
-   
  </head>
  <body>
 
@@ -26,14 +25,16 @@
 
 
    <div id="loader">
-     <i class="fa fa-refresh fa-spin fa-3x fa-fw margin-bottom"></i>
+     <!-- <i class="fa fa-refresh fa-spin fa-3x fa-fw margin-bottom"></i> -->
    </div>
    
    <script type="text/javascript">  
-      
     function showLoader () {$('#loader').show(200);}
     $('form').on('submit', showLoader);
     window.onbeforeunload = showLoader;
+    $(window).load(function(){
+      $('#loader').fadeOut('slow',function(){$(this).remove();});
+    });
    </script>
 
  </body>
