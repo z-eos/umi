@@ -134,7 +134,7 @@ sub index :Path :Args(0) {
     } elsif ( defined $params->{'ldap_history'} &&
 	      $params->{'ldap_history'} ne '' ) {
       $filter_show = $filter = 'reqDN=' . $params->{'ldap_history'};
-      $base = 'cn=umilog';
+      $base = UMI->config->{ldap_crud_db_log};
     } else {
       $filter = 'objectClass=*';
       $filter_show = $filter;
