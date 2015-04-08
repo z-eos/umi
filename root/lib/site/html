@@ -20,10 +20,13 @@
    <script src="/static/js/fakeLoader.min.js"></script>
    
  </head>
- <body class="js">
+ <!-- <body class="js"> -->
+ <body>
    <!-- <div id="fakeLoader"></div> -->
 
-   <div id="preloader"></div>
+   <!-- <div id="preloader"></div> -->
+
+   <div class="se-pre-con"></div>
    
    [% content %]
 
@@ -43,15 +46,19 @@
     // window.onbeforeunload = function (e) { $('#fakeLoader').show(200) };
 
 
-    //jQuery(document).ready(function($) {  
+    /* //jQuery(document).ready(function($) {  
 
-      // site preloader -- also uncomment the div in the header and the css style for #preloader
-      $(window).load(function(){
-	$('#preloader').fadeOut('slow',function(){$(this).remove();});
-      });
+       // site preloader -- also uncomment the div in the header and the css style for #preloader
+       $(window).load(function(){
+       $('#preloader').fadeOut('slow');; // ,function(){$(this).remove();});
+       });
 
-    //});
+       //}); */
 
+    $(window).load(function() {
+      $(".se-pre-con").fadeOut("slow");;
+    });
+    
    </script>
 
  </body>
