@@ -395,7 +395,7 @@ sub create_account_branch_leaf {
 	     sshkeydescr => $args->{sshkeydescr} || undef,
 	     userCertificate => $args->{userCertificate} || undef,
 	     radiusgroupname => $args->{radiusgroupname} || 'ip-phone',
-	     radiustunnelprivategroup => $args->{radiustunnelprivategroup} || 3,
+	     radiustunnelprivategroupid => $args->{radiustunnelprivategroupid} || 3,
 	    };
 
   $arg->{basedn} = 'authorizedService=' . $args->{service} . '@' . $args->{associatedDomain} .
