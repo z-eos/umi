@@ -24,17 +24,17 @@
    [% content %]
 
 
-   <div id="loader">
-     <!-- <i class="fa fa-refresh fa-spin fa-3x fa-fw margin-bottom"></i> -->
+   <div id="loaderfa">
+     <i class="fa fa-refresh fa-spin fa-3x fa-fw margin-bottom"></i>
    </div>
    
    <script type="text/javascript">  
-    function showLoader () {$('#loader').show(200);}
+    function showLoader () {$('#loaderfa').show(200);}
     $('form').on('submit', showLoader);
     window.onbeforeunload = showLoader;
-    $(window).load(function(){
-      $('#loader').fadeOut('slow',function(){$(this).remove();});
-    });
+    // $(window).load(function(){
+    //   $('#loader').fadeOut('slow',function(){$(this).remove();});
+    // });
    </script>
 
  </body>
