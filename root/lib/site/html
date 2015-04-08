@@ -20,34 +20,20 @@
    <script src="/static/js/fakeLoader.min.js"></script>
    
  </head>
- <body class="js">
-   <!-- <div id="fakeLoader"></div> -->
-
-   <div id="preloader"></div>
+ <body>
 
    [% content %]
 
+
+   <div id="loader">
+     <i class="fa fa-refresh fa-spin fa-3x fa-fw margin-bottom"></i>
+   </div>
+   
    <script type="text/javascript">  
-    /* $("#fakeLoader").fakeLoader({
-       spinner:"spinner3",
-       zIndex:"9999",
-       timeToHide:10,
-       bgColor:"rgba(121,141,143,0.6)"
-       });
-
-       function showLoad () {$('#fakeLoader').show(200);}
-
-       $('form').on('submit', showLoad);
-       window.onbeforeunload = showLoad; */
-    
-    // window.onbeforeunload = function (e) { $('#fakeLoader').show(200) };
-    // });
-
-
-    // site preloader -- also uncomment the div in the header and the css style for #preloader
-    $(window).load(function(){
-      $('#preloader').fadeOut('slow',function(){$(this).remove();});
-    });
+      
+    function showLoader () {$('#loader').show(200);}
+    $('form').on('submit', showLoader);
+    window.onbeforeunload = showLoader;
    </script>
 
  </body>

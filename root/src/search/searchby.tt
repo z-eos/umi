@@ -161,6 +161,17 @@
 			    </button>
 			  </form>
 			</li>
+			<li>
+			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/index') %]">
+			    <button type="submit" title="edit object" class="btn btn-link"
+				    value="[% entry.key %]"
+				    data-order="100"
+				    name="ldap_history">
+			      <span class="fa fa-fw fa-history text-info"></span>
+			      history
+			    </button>
+			  </form>
+			</li>
 			[% IF entry.value.mgmnt.is_group %]
 			<li>
 			  <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">

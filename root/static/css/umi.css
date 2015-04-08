@@ -132,3 +132,21 @@
   opacity: .6;
   background: #fff url('/static/images/preloaders.net-MovingBlocks.GIF') no-repeat center center;
 }
+
+#loader {
+  display: none;
+  position: fixed;
+  width: 54px;
+  height: 54px;
+  z-index: 9999;
+  left: 0;
+  font-size: 12px;
+  line-height: 74px;
+  text-align: center;
+  border-radius: 100%;
+  top: 0;
+  overflow: visible;
+  opacity: .6;
+  background: rgba(252, 252, 252, 0.37);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.48);
+}
