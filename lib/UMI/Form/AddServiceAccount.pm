@@ -61,7 +61,7 @@ has_field 'pwdcomment' => ( type => 'Display',
 has_field 'radiusgroupname' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
 		       label => 'RADIUS Group Name',
 		       size => 60,
-		       wrapper_class => [ 'col-xs-4' ],
+		       wrapper_class => [ 'col-xs-6', 'col-lg-6', ],
 		       # element_attr => { disabled => '', },
 		       # element_class => [ 'disabled' ],
 		       # init_value => 'add_svc_acc' . '-<service choosen>',
@@ -70,24 +70,31 @@ has_field 'radiusgroupname' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
 		       		       },
 		     );
 
-has_field 'radiustunnelprivategroup' => ( apply => [ NoSpaces, Printable ],
-					  label => 'RADIUS Tunnel Private Group',
-					  size => 60,
-					  wrapper_class => [ 'col-xs-4' ],
-					  # element_attr => { disabled => '', },
-					  # element_class => [ 'disabled' ],
-					  # init_value => 'add_svc_acc' . '-<service choosen>',
-					  element_attr => {
-							   placeholder => 'VLAN, this 802.1x authenticates to',
-							  },
-					);
+has_field 'radiustunnelprivategroup'
+  => ( type => 'Select',
+       label => 'RADIUS Tunnel Private Group',
+       wrapper_class => [ 'col-xs-6', 'col-lg-6', ],
+       options => [
+		   { value => '', label => '--- Choose VLAN ---'},
+		   { value => '2', label => 'Management (VLAN2)'},
+		   { value => '3', label => 'Voice (VLAN3)'},
+		   { value => '4', label => 'Video (VLAN4)'},
+		   { value => '5', label => 'SmartHouse (VLAN5)'},
+		   { value => '6', label => 'PRN (VLAN6)'},
+		   { value => '11', label => 'WAN (VLAN11)'},
+		   { value => '3480', label => 'Guest WiFi (VLAN3480)'},
+		   { value => '3498', label => 'Guest (VLAN3498)'},
+		   { value => '3499', label => 'Bootp (VLAN3499)'},
+		   { value => '3500', label => 'Guest RG45 (VLAN3500)'},
+		  ],
+     );
 
 has_field 'descr' => ( type => 'TextArea',
 		       label => 'Description',
 		       element_attr =>
 		       { placeholder =>
 			 'Meaningfull, service related description to make it easy to understand who, when, where e.t.c.' },
-		       wrapper_class => [ 'col-xs-5' ],
+		       wrapper_class => [ 'col-xs-6', 'col-lg-6', ],
 		       cols => 30, rows => 1);
 
 has_field 'sshpublickey' => ( type => 'TextArea',
@@ -98,7 +105,7 @@ has_field 'sshpublickey' => ( type => 'TextArea',
 
 has_field 'to_sshkeygen' => ( type => 'Checkbox',
 			      label => 'Generate SSH Key',
-			      element_attr => { disabled => '', },
+			      # element_attr => { disabled => '', },
 			      wrapper_class => [ 'checkbox', 'col-xs-1' ],
 			    );
 
@@ -107,7 +114,7 @@ has_field 'sshkeydescr' => ( apply => [ NotAllDigits, Printable ],
 			     wrapper_class => [ 'col-xs-11' ],
 			     element_attr =>
 			     {
-			      disabled => '',
+			      # disabled => '',
 			      placeholder =>
 			      'Meaningfull key description like host name for which it is to be used, e.t.c.',
 			     },
@@ -129,7 +136,7 @@ has_field 'usercertificate' => ( type => 'Upload',
 has_field 'associateddomain' => ( type => 'Select',
 				  label => 'Domain Name', label_class => [ 'required' ],
 				  # options => [{ value => '0', label => '--- select domain ---', selected => 'on' }],
-				  wrapper_class => [ 'col-xs-5' ],
+				  wrapper_class => [ 'col-xs-6', 'col-lg-6', ],
 				  # required => 1,
 				);
 
@@ -168,7 +175,7 @@ sub options_associateddomain {
 
 has_field 'authorizedservice' => ( type => 'Multiple',
 				   label => 'Service', label_class => [ 'required' ],
-				   wrapper_class => [ 'col-xs-3' ],
+				   wrapper_class => [ 'col-xs-6', 'col-lg-6', ],
 				   size => 7,
 				   # required => 1,
 				 );
@@ -203,12 +210,12 @@ sub options_authorizedservice {
 
 
 has_field 'aux_reset' => ( type => 'Reset',
-			   wrapper_class => [ 'col-xs-2' ],
+			   wrapper_class => [ 'col-xs-4' ],
 			   element_class => [ 'btn', 'btn-danger', 'btn-block', ],
 			   element_wrapper_class => [ 'col-xs-12', ], );
 
 has_field 'aux_submit' => ( type => 'Submit',
-			    wrapper_class => [ 'col-xs-10'],
+			    wrapper_class => [ 'col-xs-8'],
 			    element_class => [ 'btn', 'btn-success', 'btn-block' ],
 			    value => 'Submit' );
 
@@ -271,6 +278,7 @@ has_block 'services' => ( tag => 'fieldset',
 			);
 
 has_block 'submitit' => ( tag => 'fieldset',
+			  label => '<hr>',
 			  render_list => [ 'aux_reset', 'aux_submit', ],
 			  class => [ 'row' ]
 			);
