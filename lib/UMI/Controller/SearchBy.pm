@@ -150,7 +150,7 @@ sub index :Path :Args(0) {
 				  }
 				 );
 
-    my @entries = $mesg->sorted; # entries;
+    my @entries = $mesg->entries;
 
     my $return;
     $return->{warning} = $ldap_crud->err($mesg)->{caller} .
@@ -187,11 +187,15 @@ sub index :Path :Args(0) {
 	}
       }
     }
-    # p $ttentries;
+
+    # suffix array of dn preparation to respect LDAP objects "inheritance"
+    # http://en.wikipedia.org/wiki/Suffix_array
+    my @ttentries_keys = map { scalar reverse } sort map { scalar reverse } keys %{$ttentries};
     $c->stash(
 	      template => 'search/searchby.tt',
 	      base_dn => $base,
 	      filter => $filter_show,
+	      entrieskeys => \@ttentries_keys,
 	      entries => $ttentries,
 	      # entries => \@entries,
 	      services => $ldap_crud->{cfg}->{authorizedService},

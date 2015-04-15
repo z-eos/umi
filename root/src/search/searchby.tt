@@ -39,8 +39,10 @@
       </tr>
     </thead>
     <tbody>
-      [% IF entries.size == 1 %][% in='in' %][% ELSE %][% in='' %][% END %]
-      [% FOREACH entry IN entries %]
+      [% IF entries.size == 1 %][% in='in' %][% ELSE %][% in='' %][% END %] [% # no keys suffix sort FOREACH entry IN entries %]
+      [% FOREACH entrykey IN entrieskeys %]
+      [% entry.key = entrykey
+	 entry.value = entries.$entrykey %]
       [% dn = entry.key.split(',|=').hash %][% # preparing hash from each dn %]
       <tr>
 	<td>

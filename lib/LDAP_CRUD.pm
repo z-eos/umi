@@ -6,6 +6,9 @@ package LDAP_CRUD;
 use Moose;
 
 use Net::LDAP;
+use Net::LDAP::Control;
+use Net::LDAP::Control::Sort;
+use Net::LDAP::Constant qw(LDAP_CONTROL_SORTRESULT);
 use Net::LDAP::Util qw(
 			ldap_error_text
 			ldap_error_name
@@ -460,12 +463,12 @@ sub search {
   # p $arg;
 
   return $self->ldap->search( base => $arg->{base},
-  			      scope => $arg->{scope},
-  			      filter => $arg->{filter},
-  			      deref => $arg->{deref},
-  			      attrs => $arg->{attrs},
-  			      sizelimit => $arg->{sizelimit},
-  			    );
+			      scope => $arg->{scope},
+			      filter => $arg->{filter},
+			      deref => $arg->{deref},
+			      attrs => $arg->{attrs},
+			      sizelimit => $arg->{sizelimit},
+			    );
 }
 
 
