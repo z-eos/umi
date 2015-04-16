@@ -11,9 +11,9 @@
 /*     height: 100%; */
 /* } */
 
-/* .container { */
-/*     padding-top: 60px; */
-/* } */
+/* .underheader {
+   padding-top: 160px;
+		      } */
 
 /* #header { */
 /*     background-color: [% site.col.head %]; */
@@ -32,10 +32,10 @@
 /* } */
 
 #content {
-    padding-top: 70px;
-    padding-left: 30px;
-    padding-right: 30px;
-    padding-bottom: 10px;
+  padding-top: 70px;
+  padding-left: 30px;
+  padding-right: 30px;
+  padding-bottom: 10px;
 }
 
 /* h1.title { */

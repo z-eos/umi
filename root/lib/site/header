@@ -170,7 +170,7 @@
 			value="1" tabindex="16"
 			name="ldapsearch_by_email"
 			title="filter pattern in mail">
-		<span class="[% icon_class %] fa-envelope-o"></span>&nbsp;by email</button></li>
+		<span class="[% icon_class %] fa-envelope"></span>&nbsp;by email</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
 			value="1" tabindex="17"

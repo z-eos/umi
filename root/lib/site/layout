@@ -3,7 +3,20 @@
 </div>
 
 <div id="content">
-[% content %]
+
+  <noscript>
+    <div class="panel panel-danger text-center">
+      <div class="panel-heading">
+	<span class="fa fa-exclamation-triangle fa-lg"></span>
+	<strong>Warning! JavaScript is disabled!</strong>
+      </div>
+      <div class="panel-body">
+	Important functionality is missing! You are strongly recommended to enable JS!
+      </div>
+    </div>
+  </noscript>
+
+  [% content %]
 </div>
 
 <div id="footer">

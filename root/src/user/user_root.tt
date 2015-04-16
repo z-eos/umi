@@ -66,10 +66,6 @@
 	  <span class="fa fa-plus-circle"></span>
 	  create new</a>
       </li>
-      <li><a href="[% c.uri_for('user/user_add_svc_new') %]" target="_top">
-	  <span class="fa fa-plus-circle"></span>
-	  create new alt</a>
-      </li>
       <li><a href="[% c.uri_for('userall') %]" target="_top">
 	  <span class="fa fa-plus-circle"></span>
 	  create new alt (fin)</a>

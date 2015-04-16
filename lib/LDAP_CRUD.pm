@@ -147,7 +147,7 @@ sub _build_cfg {
 		      disabled => 0,
 		      homeDirectory_prefix => '/var/mail/IMAP_HOMES/',
 		      gidNumber => 10006,
-		      icon => 'fa fa-envelope-o',
+		      icon => 'fa fa-envelope',
 		      data_fields => 'login,password1,password2',
 		     },
 	   'xmpp' => {
