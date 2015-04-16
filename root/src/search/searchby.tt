@@ -8,7 +8,7 @@
 </h2>
 
 <h6 class="text-muted">
-  <span class="fa fa-exclamation-circle"></span> <em>Please note, not all objects could be found via predefined search items, to search for <strong>all</strong> objects use</em> &laquo;<span class="fa fa-search-plus"></span> advanced search&raquo; <em>menu item!</em>
+  <span class="fa fa-exclamation-triangle"></span> <em>Please note, not all objects could be found via predefined search items, to search for <strong>all</strong> objects use</em> &laquo;<span class="fa fa-search-plus"></span> advanced search&raquo; <em>menu item!</em>
 </h6>
 
 <div class="table-responsive">
@@ -26,11 +26,11 @@
 	     data-html="true"
 	     data-toggle="popover"
 	     data-original-title="Legend"
-	     data-content="<ul class='list-unstyled'>
-	     <li><span class='fa fa-fw fa-user label label-info'>&nbsp;root object</span></li>
-	     <li><span class='fa fa-fw fa-code-fork label label-warning'>&nbsp;service branch</span></li>
-	     <li><span class='fa fa-fw fa-leaf label label-success'>&nbsp;service account</span></li>
-	     <li><span class='label label-primary'>user input</span></li>
+	     data-content="<ul class='fa-ul'>
+	     <li class='text-info'><i class='fa-li fa fa-user'></i> root object</li>
+	     <li class='text-warning'><i class='fa-li fa fa-step-forward'></i> service branch</li>
+	     <li class='text-success'><i class='fa-li fa fa-fast-forward'></i> service account</li>
+	     <li><i class='fa-li fa fa-check-square'></i><span class='label label-primary'> user input</span></li>
 	     </ul>"
 	     tabindex="0">
 	    <span style="font-size: 100%;" class="glyphicon glyphicon-list-alt"></span>
@@ -248,7 +248,8 @@
 			name="ldap_subtree"
 			value="[% entry.key %]">
 		  <b>
-		    [% child = '<span class="fa fa-angle-right fa-lg"></span>' %]
+		    [% child = '<i class="fa fa-step-backward"></i>' %]
+		    [% doublechild = '<i class="fa fa-fast-backward"></i>' %]
 		    [% IF entry.value.mgmnt.is_dn %]
 		    <abbr title="Root Account"><span class="fa fa-user fa-lg"></span></abbr>
 		    [% ELSIF entry.key.match('^author') %]
@@ -282,7 +283,7 @@
 		    [% END %]
 		    
 		    [% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
-		    [% child %][% child %]
+		    [% doublechild %]
 
 		    [% IF dn.authorizedService.match('mail')%]
 		    <abbr title="EMAIL Service Account"><span class="[% services.mail.icon %] fa-lg"></span></abbr>
@@ -314,8 +315,8 @@
 		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 		      <div class="modal-header">
 			<h4 class="modal-title alert alert-danger" id="globmgmntModalLabel[% loop.index %]">
-			  <span class="glyphicon glyphicon-remove-circle"></span>
-			  You are about to perform deletion of DN: <b>[% entry.key %]</b>
+			  <span class="fa fa-times-circle"></span>
+			  You are about to perform deletion of DN: <b>[% entry.key.replace(',', ', ') %]</b>
 			</h4>
 		      </div>
 		      <div class="modal-body text-primary">
@@ -343,8 +344,8 @@
 		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/delete') %]">
 		      <div class="modal-header">
 			<h4 class="modal-title alert alert-danger" id="deleteModalLabel[% loop.index %]">
-			  <span class="glyphicon glyphicon-remove-circle"></span>
-			  You are about to perform deletion of DN: <b>[% entry.key %]</b>
+			  <span class="fa fa-times-circle"></span>
+			  You are about to perform deletion of DN: <b>[% entry.key.replace(',', ', ') %]</b>
 			</h4>
 		      </div>
 		      <div class="modal-body text-primary">
@@ -372,14 +373,22 @@
 		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/delete') %]">
 		      <div class="modal-header">
 			<h4 class="modal-title alert alert-danger" id="chgaccModalLabel[% loop.index %]">
-			  <span class="glyphicon glyphicon-remove-circle"></span>
-			  You are about to change root DN for: <b>[% entry.key %]</b>
+			  <span class="fa fa-times-circle"></span>
+			  You are abojut to change root DN for: <b>[% entry.key.replace(',', ', ') %]</b>
 			</h4>
 		      </div>
-		      <div class="modal-body text-primary">
-			<input type="checkbox" name="chg_acc_recursive">
-			Change root DN for children as well
-			</input>
+		      <div class="modal-body clearfix form-group text-primary">
+			<label for="chg_acc_dn_new" class="col-xs-2 text-right control-label">
+			  Recipient DN:
+			</label>
+			<div class="col-xs-10">
+			  <input type="text" class="input-sm form-control" id="chg_acc_dn_new" name="chg_acc_dn_new"
+				 placeholder="Provide the recipient root DN the object have to be moved to">
+			</div>
+			<div class="col-xs-offset-2 col-xs-10">
+			  <input type="checkbox" name="chg_acc_wholebranch">
+			  Move whole branch as well
+			</div>
 		      </div>
 		      <div class="modal-footer">
 			<button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
@@ -402,7 +411,7 @@
 		      <div class="modal-header">
 			<h4 class="modal-title alert alert-info" id="ldifModalLabel[% loop.index %]">
 			  <span class="fa fa-info-circle"></span>
-			  LDIF of DN: <b>[% entry.key %]</b>
+			  LDIF of DN: <b>[% entry.key.replace(',', ', ') %]</b>
 			</h4>
 		      </div>
 		      <div class="modal-body text-primary">
