@@ -23,7 +23,7 @@
    [% content %]
 
    <div id="loaderfa">
-     <i class="fa fa-refresh fa-spin fa-3x fa-fw margin-bottom"></i>
+     <i class="fa fa-cog fa-spin fa-4x"></i>
    </div>
    
    <script type="text/javascript">  
