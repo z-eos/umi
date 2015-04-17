@@ -32,13 +32,16 @@ utf8 input (particularly cyrillic) to latin1 transliteration
 
 sub utf2lat {
   my ($self, $to_translit) = @_;
-
   use utf8;
   use Text::Unidecode;
-
+  # Catalyst provides utf8::encoded data! here we need them to
+  # utf8::decode to make them suitable for unidecode, since it expects
+  # utf8::decode input
   utf8::decode( $to_translit );
-
-  return unidecode( $to_translit );
+  my $a = unidecode( $to_translit );
+  # remove non-alphas (like ' and `)
+  $a =~ tr/a-zA-Z//cds;
+  return $a;
 }
 
 sub is_int {
