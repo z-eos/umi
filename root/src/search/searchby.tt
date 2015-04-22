@@ -254,7 +254,7 @@
 		    [% IF entry.value.mgmnt.is_dn %]
 		    <abbr title="Root Account"><span class="fa fa-user fa-lg"></span></abbr>
 		    [% ELSIF entry.key.match('^author') %]
-		    <i class="fa fa-fw [% child %]"></i>			  
+		    <i class="fa fa-fw [% child %] text-primary"></i>			  
 		    [% IF dn.authorizedService.match('mail')%]
 		    <abbr title="EMAIL Service Account Branch">
 		      <span class="[% services.mail.icon %] fa-lg"></span>
@@ -284,8 +284,8 @@
 		    [% END %]
 		    
 		    [% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
-		    <i class="fa fa-fw [% doublechild %]"></i>			  
-
+		    <i class="fa fa-fw [% child %] text-primary"></i><i class="fa fa-fw [% child %] text-primary"></i>
+		    
 		    [% IF dn.authorizedService.match('mail')%]
 		    <abbr title="EMAIL Service Account"><span class="[% services.mail.icon %] fa-lg"></span></abbr>
 		    [% ELSIF dn.authorizedService.match('xmpp')%]

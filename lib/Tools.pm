@@ -5,6 +5,17 @@ package Tools;
 use Moose::Role;
 
 
+
+=head1 NAME
+
+UMI::Tools
+
+=head1 DESCRIPTION
+
+auxiliary methods
+
+=head1 METHODS
+
 =head2 is_ascii
 
 checks whether the argument is ASCII
@@ -12,7 +23,6 @@ checks whether the argument is ASCII
 returns 0 if it is and 1 if not
 
 =cut
-
 
 sub is_ascii {
   my ($self, $arg) = @_;
@@ -26,7 +36,7 @@ sub is_ascii {
 
 =head2 utf2lat
 
-utf8 input (particularly cyrillic) to latin1 transliteration
+utf8 input (cyrillic in particular) to latin1 transliteration
 
 =cut
 
@@ -106,7 +116,8 @@ sub pwdgen {
 
 =head2 file2var
 
-read input file into the returned variable and set final message on results
+read input file into the returned variable and set final message on
+results of the assignment
 
 =cut
 
@@ -232,6 +243,17 @@ sub macnorm {
   }
 }
 
+
+=head1 AUTHOR
+
+Zeus
+
+=head1 LICENSE
+
+This library is free software. You can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
 
 ######################################################################
 

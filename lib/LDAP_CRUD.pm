@@ -660,26 +660,6 @@ sub ldif {
 		       $dn,
 		       $ts);
 
-  # my $attrs;
-  # if ( $sysinfo ) {
-  #   $attrs = [ '*',
-  # 	       'createTimestamp',
-  # 	       'creatorsName',
-  # 	       'entryCSN',
-  # 	       'entryDN',
-  # 	       'entryUUID',
-  # 	       'hasSubordinates',
-  # 	       'modifiersName',
-  # 	       'modifyTimestamp',
-  # 	       'structuralobjectclass',
-  # 	       'subschemaSubentry',
-  # 	     ];
-  # }
-  # elase {
-  #   $attrs = [ '*' ];
-  # }
-
-
   my $msg = $self->ldap->search ( base => $dn,
 				  scope => $recursive ? 'sub' : 'base',
 				  filter => 'objectClass=*',

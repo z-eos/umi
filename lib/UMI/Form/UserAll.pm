@@ -489,6 +489,7 @@ sub options_groups {
   my $ldap_crud = $self->ldap_crud;
   my $mesg = $ldap_crud->search( { base => $ldap_crud->{cfg}->{base}->{group},
 				   scope => 'one',
+				   sizelimit => 0,
 				   attrs => ['cn' ], } );
 
   if ( ! $mesg->count ) {
