@@ -16,7 +16,7 @@ sub build_form_element_class { [ 'form-horizontal' ] }
 has_field 'ldap_modify_password' => ( type => 'Hidden', );
 
 has_field 'password_init' => ( type => 'Password',
-			       minlength => 7, maxlength => 16,
+			       minlength => 7, maxlength => 128,
 			       label => 'New Password',
 			       label_class => [ 'col-md-5' ],
 			       apply => [ NoSpaces, NotAllDigits, Printable ],
@@ -25,7 +25,7 @@ has_field 'password_init' => ( type => 'Password',
 			 );
 
 has_field 'password_cnfm' => ( type => 'Password',
-			       minlength => 7, maxlength => 16,
+			       minlength => 7, maxlength => 128,
 			       label => 'Confirm Password',
 			       label_class => [ 'col-md-5' ],
 			       apply => [ NoSpaces, NotAllDigits, Printable ],
@@ -35,7 +35,8 @@ has_field 'password_cnfm' => ( type => 'Password',
 
 has_field 'aux_pwdcomment' => ( type => 'Display',
 				html => '<p class="form-group help-block col-md-10 col-md-offset-4 text-center"><em>' .
-				'leave, both of password fields empty, to autogenerate 12 character length, strong password</em></p>',
+				'leave, both of password fields empty, to autogenerate ' . UMI->config->{pwd}->{len} .
+				' character length, strong password</em></p>',
 				# element_class => 'text-muted',
 				# wrapper_class => [ 'col-md-7', 'col-md-offset-4' ],
 			      );

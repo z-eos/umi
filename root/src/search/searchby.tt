@@ -11,8 +11,8 @@
   <span class="fa fa-exclamation-triangle"></span> <em>Please note, not all objects could be found via predefined search items, to search for <strong>all</strong> objects use</em> &laquo;<span class="fa fa-search-plus"></span> advanced search&raquo; <em>menu item!</em>
 </h6>
 
-[% child = 'fa-play' %]
-[% doublechild = 'fa-forward' %]
+[% fa_child = 'fa-ellipsis-h' %]
+[% child = '<i class="fa fa-fw ' _ fa_child _ ' text-default"></i>' %]
 
 <div class="table-responsive">
   <table class="table">
@@ -31,8 +31,8 @@
 	     data-original-title="Legend"
 	     data-content="<ul class='fa-ul'>
 	     <li class='text-info'><i class='fa-li fa fa-user'></i> root object</li>
-	     <li class='text-warning'><i class='fa-li fa [% child %]'></i> service branch</li>
-	     <li class='text-success'><i class='fa-li fa [% doublechild %]'></i> service account</li>
+	     <li class='text-warning'><i class='fa-li fa [% fa_child %]'></i> service branch</li>
+	     <li class='text-success'><i class='fa-li fa [% fa_child %]'></i> service account</li>
 	     <li><i class='fa-li fa fa-check-square'></i><span class='label label-primary'> user input</span></li>
 	     </ul>"
 	     tabindex="0">
@@ -62,7 +62,7 @@
 		      data-target="#collapse[% loop.index %]"
 		      data-toggle="collapse"
 		      data-parent="#accordion[% loop.index %]">
-		<span class="fa fa-toggle-down text-primary"></span>
+		<span class="fa fa-eject text-primary"></span>
 	      </button>
 	      <div class="dropdown pull-left">
 		<button class="btn btn-link btn-xs dropdown-toggle"
@@ -105,6 +105,17 @@
 			      name="add_svc_acc">
 			<span class="fa fa-fw fa-plus-circle text-primary"></span>
 			new service account
+		      </button>
+		    </form>
+		  </li>
+		  <li>
+		    <form role="form" method="POST" action="[% c.uri_for_action('userall/index') %]">
+		      <button type="submit" title="add new service account" class="btn btn-link"
+			      value="[% entry.key %]"
+			      data-order="20"
+			      name="add_svc_acc">
+			<span class="fa fa-fw fa-plus-circle text-danger"></span>
+			new service account (alt)
 		      </button>
 		    </form>
 		  </li>
@@ -241,68 +252,50 @@
 			title="click to open root (management) object of this object"
 			name="ldap_subtree"
 			value="[% entry.key.split(',').slice(-3, -1).join(',') %]">
-		  <span class="fa fa-tag text-primary"></span>
+		  <span class="fa fa-star text-primary"></span>
 		</button>
 	      </form>
 
 	      <form role="form" method="POST" action="[% c.uri_for_action('searchby/index') %]" class="col-xs-offset-1">
 		<button type="submit" class="btn btn-link btn-xs umi-search"
-			title="click to open this object subtree"
 			name="ldap_subtree"
-			value="[% entry.key %]">
-		  <b>
-		    [% IF entry.value.mgmnt.is_dn %]
-		    <abbr title="Root Account"><span class="fa fa-user fa-lg"></span></abbr>
-		    [% ELSIF entry.key.match('^author') %]
-		    <i class="fa fa-fw [% child %] text-primary"></i>			  
-		    [% IF dn.authorizedService.match('mail')%]
-		    <abbr title="EMAIL Service Account Branch">
-		      <span class="[% services.mail.icon %] fa-lg"></span>
-		    </abbr>
-		    [% ELSIF dn.authorizedService.match('xmpp')%]
-		    <abbr title="XMPP (Jabber) Service Account Branch">
-		      <span class="[% services.xmpp.icon %] fa-lg"></span>
-		    </abbr>
-		    [% ELSIF dn.authorizedService.match('ovpn')%]
-		    <abbr title="OpenVPN Service Account Branch">
-		      <span class="[% services.ovpn.icon %] fa-lg"></span>
-		    </abbr>
-		    [% ELSIF dn.authorizedService.match('ssh')%]
-		    <abbr title="SSH key Branch">
-		      <span class="[% services.ssh.icon %] fa-lg"></span>
-		    </abbr>
-		    [% ELSIF dn.authorizedService.match('mac')%][% mac='802.1x-mac' %]
-		    <abbr title="802.1x MAC AUTH Service Account Branch">
-		      <span class="[% services.$mac.icon %] fa-lg"></span>
-		    </abbr>
-		    [% ELSIF dn.authorizedService.match('eap')%][% eap='802.1x-eap' %]
-		    <abbr title="802.1x EAP AUTH Service Account Branch">
-		      <span class="[% services.$eap.icon %] fa-lg"></span>
-		    </abbr>
-		    [% ELSE %]
-		    <abbr title="Service Account Branch"><span class="fa fa-code-fork fa-lg"></span></abbr>
-		    [% END %]
+			value="[% entry.key %]"
+			[% IF entry.value.mgmnt.is_dn %]
+		  title="Root Account"><span class="fa fa-user fa-lg"></span>
+		  [% ELSIF entry.key.match('^author') %]
+		  [% IF dn.authorizedService.match('mail')%]
+		  title="EMAIL Service Account Branch">[% child %]<i class="[% services.mail.icon %] fa-lg"></i>
+		  [% ELSIF dn.authorizedService.match('xmpp')%]
+		  title="XMPP (Jabber) Service Account Branch">[% child %]<i class="[% services.xmpp.icon %] fa-lg"></i>
+		  [% ELSIF dn.authorizedService.match('ovpn')%]
+		  title="OpenVPN Service Account Branch">[% child %]<i class="[% services.ovpn.icon %] fa-lg"></i>
+		  [% ELSIF dn.authorizedService.match('ssh')%]
+		  title="SSH key Branch">[% child %]<i class="[% services.ssh.icon %] fa-lg"></i>
+		  [% ELSIF dn.authorizedService.match('mac')%][% mac='802.1x-mac' %]
+		  title="802.1x MAC AUTH Service Account Branch">[% child %]<i class="[% services.$mac.icon %] fa-lg"></i>
+		  [% ELSIF dn.authorizedService.match('eap')%][% eap='802.1x-eap' %]
+		  title="802.1x EAP AUTH Service Account Branch">[% child %]<i class="[% services.$eap.icon %] fa-lg"></i>
+		  [% ELSE %]
+		  title="Service Account Branch"><i class="fa fa-code-fork fa-lg"></i>
+		  [% END %]
 		    
-		    [% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
-		    <i class="fa fa-fw [% child %] text-primary"></i><i class="fa fa-fw [% child %] text-primary"></i>
-		    
-		    [% IF dn.authorizedService.match('mail')%]
-		    <abbr title="EMAIL Service Account"><span class="[% services.mail.icon %] fa-lg"></span></abbr>
-		    [% ELSIF dn.authorizedService.match('xmpp')%]
-		    <abbr title="XMPP (Jabber) Service Account"><span class="[% services.xmpp.icon %] fa-lg"></span></abbr>
-		    [% ELSIF dn.authorizedService.match('ovpn')%]
-		    <abbr title="OpenVPN Service Account"><span class="[% services.ovpn.icon %] fa-lg"></span></abbr>
-		    [% ELSIF dn.authorizedService.match('ssh')%]
-		    <abbr title="SSH key"><span class="[% services.ssh.icon %] fa-lg"></span></abbr>
-		    [% ELSIF dn.authorizedService.match('mac')%][% mac='802.1x-mac' %]
-		    <abbr title="802.1x MAC AUTH Service Account"><span class="[% services.$mac.icon %] fa-lg"></span></abbr>
-		    [% ELSIF dn.authorizedService.match('eap')%][% eap='802.1x-eap' %]
-		    <abbr title="802.1x EAP AUTH Service Account"><span class="[% services.$eap.icon %] fa-lg"></span></abbr>
-		    [% END %]
+		  [% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
+		  [% IF dn.authorizedService.match('mail')%]
+		  title="EMAIL Service Account">[% child %][% child %]<i class="[% services.mail.icon %] fa-lg"></i>
+		  [% ELSIF dn.authorizedService.match('xmpp')%]
+		  title="XMPP (Jabber) Service Account">[% child %][% child %]<i class="[% services.xmpp.icon %] fa-lg"></i>
+		  [% ELSIF dn.authorizedService.match('ovpn')%]
+		  title="OpenVPN Service Account">[% child %][% child %]<i class="[% services.ovpn.icon %] fa-lg"></i>
+		  [% ELSIF dn.authorizedService.match('ssh')%]
+		  title="SSH key">[% child %][% child %]<i class="[% services.ssh.icon %] fa-lg"></i>
+		  [% ELSIF dn.authorizedService.match('mac')%][% mac='802.1x-mac' %]
+		  title="802.1x MAC AUTH Service Account">[% child %][% child %]<i class="[% services.$mac.icon %] fa-lg"></i>
+		  [% ELSIF dn.authorizedService.match('eap')%][% eap='802.1x-eap' %]
+		  title="802.1x EAP AUTH Service Account">[% child %][% child %]<i class="[% services.$eap.icon %] fa-lg"></i>
+		  [% END %]
 
-		    [% END %]
-		    &nbsp;&nbsp;&nbsp;[% entry.key.replace(',', ',&nbsp;') %]
-		  </b>
+		  [% END %]
+		  &nbsp;&nbsp;&nbsp;[% entry.key.replace(',', ',&nbsp;') %]
 		</button>
 	      </form>
 

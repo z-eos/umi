@@ -49,7 +49,8 @@ sub index :Path :Args(0) {
 	$i++;
       }
       
-      $c->stash( template => 'user/user_all.tt',
+      $c->stash( template => defined $params->{add_svc_acc} ? 'user/user_all_add_svc.tt' : 'user/user_all.tt',
+		 add_svc_acc => $params->{add_svc_acc} || '',
 		 form => $self->form,
 		 final_message => $final_message, );
 

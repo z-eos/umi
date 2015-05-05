@@ -229,7 +229,7 @@ has_field 'account.login'
 
 has_field 'account.password1'
   => ( type => 'Password',
-       # minlength => 7, maxlength => 16,
+       minlength => 7, maxlength => 128,
        label => 'Password',
        label_class => [ 'col-xs-2', ],
        element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
@@ -244,7 +244,7 @@ has_field 'account.password1'
 
 has_field 'account.password2'
   => ( type => 'Password',
-       # minlength => 7, maxlength => 16,
+       minlength => 7, maxlength => 128,
        label => '',
        label_class => [ 'col-xs-2', ],
        element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
