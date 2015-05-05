@@ -333,11 +333,11 @@ to add error correction
 =cut
 
 has 'last_gidNumber' => (
-	is       => 'ro',
-	isa      => 'Str',
-	required => 0, lazy => 1,
-	builder  => 'build_last_gidNumber',
-);
+			 is       => 'ro',
+			 isa      => 'Str',
+			 required => 0, lazy => 1,
+			 builder  => 'build_last_gidNumber',
+			);
 
 sub build_last_gidNumber {
   my $self = shift;
