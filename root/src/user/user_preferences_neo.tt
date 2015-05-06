@@ -2,6 +2,7 @@
 
 [% INCLUDE ldap_err.tt %]
 
+
 <div class="page-header">
   <h2>
     <b>[% auth_obj.givenname %] [% auth_obj.sn %]</b> <small class="mono">(<i>UID: &laquo;[% auth_obj.uid %]&raquo; preferences)</i></small>
@@ -78,16 +79,16 @@
 	[% FOREACH org IN orgs %]
 
 	<div class="panel panel-info">
-	  <div class="panel-heading" id="heading_org_[% org.key %]">
+	  <div class="panel-heading" id="heading_org_[% org.key.replace('\.', '_') %]">
 	    <h3 class="panel-title">
 	      <a class="collapsed" data-toggle="collapse"
-		 href="#collapse_org_[% org.key %]" aria-expanded="false" aria-controls="collapse_org_[% org.key %]">
+		 href="#collapse_org_[% org.key.replace('\.', '_') %]" aria-expanded="false" aria-controls="collapse_org_[% org.key.replace('\.', '_') %]">
 		<span class="fa fa-eject text-default"></span>
               </a>
-	      <span class="fa fa-user col-xs-offset-1">&nbsp;</span>[% org.key %]
+	      <span class="fa fa-user col-xs-offset-1">&nbsp;</span>[% org.key.replace('\.', '_') %]
 	    </h3>
 	  </div>
-	  <div id="collapse_org_[% org.key %]" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_org_[% org.key %]">
+	  <div id="collapse_org_[% org.key.replace('\.', '_') %]" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_org_[% org.key.replace('\.', '_') %]">
 	    <div class="panel-body">
 	      <dl class="dl-horizontal fa-ul">
 		<li><span class="fa fa-li fa-envelope"></span>[% org.value %]</li>
