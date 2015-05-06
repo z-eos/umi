@@ -25,9 +25,11 @@ requires 'Catalyst::Plugin::Authentication';
 requires 'Catalyst::Authentication::Store::LDAP';
 requires 'Net::LDAP';
 requires 'Crypt::GeneratePassword'; # it is required but don't see pkg installed
-requires 'Crypt::X509';
+requires 'Crypt::RSA';
 requires 'Digest::SHA1';
 requires 'MIME::Base64';
+requires 'GD::Barcode::QRcode';
+requires 'Net::SSH::Perl';
 
 test_requires 'Test::More' => '0.88';
 catalyst;

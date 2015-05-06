@@ -5,7 +5,7 @@ package UMI;
 use Moose;
 use namespace::autoclean;
 
-use Catalyst::Runtime 5.80;
+use Catalyst::Runtime 5.8;
 
 # Set flags and add plugins for the application.
 #
@@ -39,7 +39,7 @@ use Catalyst qw/
 
 extends 'Catalyst';
 
-our $VERSION = '0.01';
+our $VERSION = '0.91';
 
 # Configure the application.
 #
