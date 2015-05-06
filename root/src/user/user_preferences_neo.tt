@@ -79,16 +79,16 @@
 	[% FOREACH org IN orgs %]
 
 	<div class="panel panel-info">
-	  <div class="panel-heading" id="heading_org_[% org.key.replace('\.', '') %]">
+	  <div class="panel-heading" id="heading_org_[% org.key.replace('[\. ]', '') %]">
 	    <h3 class="panel-title">
 	      <a class="collapsed" data-toggle="collapse"
-		 href="#collapse_org_[% org.key.replace('\.', '') %]" aria-expanded="false" aria-controls="collapse_org_[% org.key.replace('\.', '') %]">
+		 href="#collapse_org_[% org.key.replace('[\. ]', '') %]" aria-expanded="false" aria-controls="collapse_org_[% org.key.replace('[\. ]', '') %]">
 		<span class="fa fa-eject text-default"></span>
               </a>
 	      <span class="fa fa-user col-xs-offset-1">&nbsp;</span>[% org.key %]
 	    </h3>
 	  </div>
-	  <div id="collapse_org_[% org.key.replace('\.', '') %]" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_org_[% org.key.replace('\.', '') %]">
+	  <div id="collapse_org_[% org.key.replace('[\. ]', '') %]" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_org_[% org.key.replace('[\. ]', '') %]">
 	    <div class="panel-body">
 	      <dl class="dl-horizontal fa-ul">
 		<li><span class="fa fa-li fa-envelope"></span>[% org.value %]</li>
