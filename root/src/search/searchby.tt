@@ -260,7 +260,7 @@
 		<button type="submit" class="btn btn-link btn-xs umi-search"
 			name="ldap_subtree"
 			value="[% entry.key %]"
-			[% IF entry.value.mgmnt.is_dn %]
+		  [% IF entry.value.mgmnt.is_dn %]
 		  title="Root Account"><span class="fa fa-user fa-lg"></span>
 		  [% ELSIF entry.key.match('^author') %]
 		  [% IF dn.authorizedService.match('mail')%]
@@ -294,6 +294,9 @@
 		  title="802.1x EAP AUTH Service Account">[% child %][% child %]<i class="[% services.$eap.icon %] fa-lg"></i>
 		  [% END %]
 
+		  [% ELSE %]
+		  title="Service Account Branch"><i class="fa fa-code-fork fa-lg"></i>
+		  
 		  [% END %]
 		  &nbsp;&nbsp;&nbsp;[% entry.key.replace(',', ',&nbsp;') %]
 		</button>
@@ -350,7 +353,7 @@
 		      <div class="modal-footer">
 			<button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
 			<button type="submit" class="btn btn-danger umi-btn-event umi-btn-ajax"  name="ldap_delete"
-				value="[% entry.key %]" data-action="delete" >
+				value="[% entry.key %]" data-action="delete">
 			  Yes, I really want to delete it and yes, I understand all consequences!
 			</button>
 		      </div>
