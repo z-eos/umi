@@ -83,7 +83,7 @@ $(function(){
 		    removeObjects([hidden, type]);
 		},
 		error: function(x, o, e){
-		    applyError(obj, options.ajaxError+e);
+		    applyError(obj, options.ajaxError+e+"<hr class='text-warning'>"+data);
 		    removeObjects([hidden, type]);
 		}
 	    });

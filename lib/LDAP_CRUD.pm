@@ -4,6 +4,9 @@
 package LDAP_CRUD;
 
 use Moose;
+use namespace::autoclean;
+
+BEGIN { with 'Tools'; }
 
 use Net::LDAP;
 use Net::LDAP::Control;
@@ -18,19 +21,9 @@ use Net::LDAP::Util qw(
 			canonical_dn
 		     );
 
-use namespace::autoclean;
-
 use Data::Dumper;
 use Data::Printer;
 use Try::Tiny;
-
-with 'Tools';
-
-has 'host' => ( is => 'ro', isa => 'Str', required => 1, default => UMI->config->{ldap_crud_host});
-has 'uid' => ( is => 'ro', isa => 'Str', required => 1 );
-has 'pwd' => ( is => 'ro', isa => 'Str', required => 1 );
-has 'dry_run' => ( is => 'ro', isa => 'Bool', default => 0 );
-# has 'path_to_images' => ( is => 'ro', isa => 'Str', required => 1 );
 
 
 =head2 cfg
@@ -40,29 +33,12 @@ topology independence was undertaken.
 
 =cut
 
-has 'cfg' => ( traits => ['Hash'],
-	       is => 'ro',
-	       isa => 'HashRef',
-	       builder => '_build_cfg',
-	     );
+has 'cfg' => ( traits => ['Hash'], is => 'ro', isa => 'HashRef', builder => '_build_cfg', );
 
-#=====================================================================
-##
-## CONFIGURATION STARTS HERE
-##
-#=====================================================================
 sub _build_cfg {
   my $self = shift;
 
   return {
-	  exclude_prefix => 'aux_',
-	  stub => {
-		   homeDirectory => '/nonexistent',
-		   loginShell => '/sbin/nologin',
-		   gidNumber => 10012,
-		   noavatar_mgmnt => UMI->path_to('root', 'static', 'images', '/avatar-mgmnt.png'),
-		   icon => 'fa fa-user',
-		  },
 	  base => {
 		   db => UMI->config->{ldap_crud_db},
 		   acc_root =>       'ou=People,' . UMI->config->{ldap_crud_db},
@@ -73,6 +49,22 @@ sub _build_cfg {
 		   group =>          'ou=group,' . UMI->config->{ldap_crud_db},
 		   org =>            'ou=Organizations,' . UMI->config->{ldap_crud_db},
 		   rad_profile =>    'ou=rad-profiles,' . UMI->config->{ldap_crud_db},
+		  },
+	  exclude_prefix => 'aux_',
+
+	  #=====================================================================
+	  ##
+	  ### CONFIGURATION STARTS HERE (something you could want to change.
+	  ### *all other stuff can be changed ONLY if you understand what for*
+	  ##
+	  #=====================================================================
+
+	  stub => {
+		   homeDirectory => '/nonexistent',
+		   loginShell => '/sbin/nologin',
+		   gidNumber => 10012,
+		   noavatar_mgmnt => UMI->path_to('root', 'static', 'images', '/avatar-mgmnt.png'),
+		   icon => 'fa fa-user',
 		  },
 	  rdn => {
 		  org =>            'ou',
@@ -230,13 +222,19 @@ sub _build_cfg {
 		      # data_fields => 'block_crt',
 		     },
 	  },
+	  #=====================================================================
+	  ##
+	  ### CONFIGURATION STOPS HERE
+	  ##
+	  #=====================================================================
 	 };
 }
-#=====================================================================
-##
-## CONFIGURATION STOPS HERE
-##
-#=====================================================================
+
+has 'host' => ( is => 'ro', isa => 'Str', required => 1, default => UMI->config->{ldap_crud_host});
+has 'uid' => ( is => 'ro', isa => 'Str', required => 1 );
+has 'pwd' => ( is => 'ro', isa => 'Str', required => 1 );
+has 'dry_run' => ( is => 'ro', isa => 'Bool', default => 0 );
+# has 'path_to_images' => ( is => 'ro', isa => 'Str', required => 1 );
 
 has '_ldap' => (
 	is       => 'rw',
@@ -510,7 +508,7 @@ https://metacpan.org/pod/Net::LDAP::Control::PreRead
 
 sub del {
   my ($self, $dn) = @_;
-
+p $dn;
   my $callername = (caller(1))[3];
   $callername = 'main' if ! defined $callername;
   my $return = 'call to LDAP_CRUD->del from ' . $callername . ': ';

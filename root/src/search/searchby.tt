@@ -260,39 +260,44 @@
 		<button type="submit" class="btn btn-link btn-xs umi-search"
 			name="ldap_subtree"
 			value="[% entry.key %]"
-		  [% IF entry.value.mgmnt.is_dn %]
+			
+		  [% IF entry.value.mgmnt.is_dn && entry.key.match('People') %]
 		  title="Root Account"><span class="fa fa-user fa-lg"></span>
+
+		  [% ELSIF entry.value.mgmnt.is_dn && ! entry.key.match('People') %]
+		  title="Root Objectt"><span class="fa fa-star fa-lg"></span>
+
 		  [% ELSIF entry.key.match('^author') %]
-		  [% IF dn.authorizedService.match('mail')%]
-		  title="EMAIL Service Account Branch">[% child %]<i class="[% services.mail.icon %] fa-lg"></i>
-		  [% ELSIF dn.authorizedService.match('xmpp')%]
-		  title="XMPP (Jabber) Service Account Branch">[% child %]<i class="[% services.xmpp.icon %] fa-lg"></i>
-		  [% ELSIF dn.authorizedService.match('ovpn')%]
-		  title="OpenVPN Service Account Branch">[% child %]<i class="[% services.ovpn.icon %] fa-lg"></i>
-		  [% ELSIF dn.authorizedService.match('ssh')%]
-		  title="SSH key Branch">[% child %]<i class="[% services.ssh.icon %] fa-lg"></i>
-		  [% ELSIF dn.authorizedService.match('mac')%][% mac='802.1x-mac' %]
-		  title="802.1x MAC AUTH Service Account Branch">[% child %]<i class="[% services.$mac.icon %] fa-lg"></i>
-		  [% ELSIF dn.authorizedService.match('eap')%][% eap='802.1x-eap' %]
-		  title="802.1x EAP AUTH Service Account Branch">[% child %]<i class="[% services.$eap.icon %] fa-lg"></i>
-		  [% ELSE %]
-		  title="Service Account Branch"><i class="fa fa-code-fork fa-lg"></i>
-		  [% END %]
+		    [% IF dn.authorizedService.match('mail')%]
+		    title="EMAIL Service Account Branch">[% child %]<i class="[% services.mail.icon %] fa-lg"></i>
+		    [% ELSIF dn.authorizedService.match('xmpp')%]
+		    title="XMPP (Jabber) Service Account Branch">[% child %]<i class="[% services.xmpp.icon %] fa-lg"></i>
+		    [% ELSIF dn.authorizedService.match('ovpn')%]
+		    title="OpenVPN Service Account Branch">[% child %]<i class="[% services.ovpn.icon %] fa-lg"></i>
+		    [% ELSIF dn.authorizedService.match('ssh')%]
+		    title="SSH key Branch">[% child %]<i class="[% services.ssh.icon %] fa-lg"></i>
+		    [% ELSIF dn.authorizedService.match('mac')%][% mac='802.1x-mac' %]
+		    title="802.1x MAC AUTH Service Account Branch">[% child %]<i class="[% services.$mac.icon %] fa-lg"></i>
+		    [% ELSIF dn.authorizedService.match('eap')%][% eap='802.1x-eap' %]
+		    title="802.1x EAP AUTH Service Account Branch">[% child %]<i class="[% services.$eap.icon %] fa-lg"></i>
+		    [% ELSE %]
+		    title="Service Account Branch"><i class="fa fa-code-fork fa-lg"></i>
+		    [% END %]
 		    
 		  [% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
-		  [% IF dn.authorizedService.match('mail')%]
-		  title="EMAIL Service Account">[% child %][% child %]<i class="[% services.mail.icon %] fa-lg"></i>
-		  [% ELSIF dn.authorizedService.match('xmpp')%]
-		  title="XMPP (Jabber) Service Account">[% child %][% child %]<i class="[% services.xmpp.icon %] fa-lg"></i>
-		  [% ELSIF dn.authorizedService.match('ovpn')%]
-		  title="OpenVPN Service Account">[% child %][% child %]<i class="[% services.ovpn.icon %] fa-lg"></i>
-		  [% ELSIF dn.authorizedService.match('ssh')%]
-		  title="SSH key">[% child %][% child %]<i class="[% services.ssh.icon %] fa-lg"></i>
-		  [% ELSIF dn.authorizedService.match('mac')%][% mac='802.1x-mac' %]
-		  title="802.1x MAC AUTH Service Account">[% child %][% child %]<i class="[% services.$mac.icon %] fa-lg"></i>
-		  [% ELSIF dn.authorizedService.match('eap')%][% eap='802.1x-eap' %]
-		  title="802.1x EAP AUTH Service Account">[% child %][% child %]<i class="[% services.$eap.icon %] fa-lg"></i>
-		  [% END %]
+		    [% IF dn.authorizedService.match('mail')%]
+		    title="EMAIL Service Account">[% child %][% child %]<i class="[% services.mail.icon %] fa-lg"></i>
+		    [% ELSIF dn.authorizedService.match('xmpp')%]
+		    title="XMPP (Jabber) Service Account">[% child %][% child %]<i class="[% services.xmpp.icon %] fa-lg"></i>
+		    [% ELSIF dn.authorizedService.match('ovpn')%]
+		    title="OpenVPN Service Account">[% child %][% child %]<i class="[% services.ovpn.icon %] fa-lg"></i>
+		    [% ELSIF dn.authorizedService.match('ssh')%]
+		    title="SSH key">[% child %][% child %]<i class="[% services.ssh.icon %] fa-lg"></i>
+		    [% ELSIF dn.authorizedService.match('mac')%][% mac='802.1x-mac' %]
+		    title="802.1x MAC AUTH Service Account">[% child %][% child %]<i class="[% services.$mac.icon %] fa-lg"></i>
+		    [% ELSIF dn.authorizedService.match('eap')%][% eap='802.1x-eap' %]
+		    title="802.1x EAP AUTH Service Account">[% child %][% child %]<i class="[% services.$eap.icon %] fa-lg"></i>
+		    [% END %]
 
 		  [% ELSE %]
 		  title="Service Account Branch"><i class="fa fa-code-fork fa-lg"></i>
