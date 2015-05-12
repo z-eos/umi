@@ -119,7 +119,7 @@ sub options_authorizedservice {
 		     value => $key,
 		     label => $self->ldap_crud->{cfg}->{authorizedService}->{$key}->{descr},
 		    } if ! $self->ldap_crud->{cfg}->{authorizedService}->{$key}->{disabled};
-p $key;
+    # p $key;
   }
   # p @services;
   return \@services;

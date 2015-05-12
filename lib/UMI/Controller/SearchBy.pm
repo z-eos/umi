@@ -662,7 +662,7 @@ sub proc :Path(proc) :Args(0) {
 	       jpegPhoto => $file,
 	       userCertificate => $params->{usercertificate},
 	       radiusgroupname => $params->{radiusgroupname},
-	       radiustunnelprivategroup => $params->{radiustunnelprivategroup},
+	       radiustunnelprivategroupid => $params->{radiustunnelprivategroupid},
 	      };
 
 	  if ( defined $params->{to_sshkeygen} ) {

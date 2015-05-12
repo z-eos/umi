@@ -70,7 +70,7 @@ has_field 'radiusgroupname' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
 		       		       },
 		     );
 
-has_field 'radiustunnelprivategroup'
+has_field 'radiustunnelprivategroupid'
   => ( type => 'Select',
        label => 'RADIUS Tunnel Private Group',
        wrapper_class => [ 'col-xs-6', 'col-lg-6', ],
@@ -238,7 +238,7 @@ has_block 'block_802' => ( tag => 'fieldset',
 			 attr => { id => 'block_802', },
 			 render_list => [
 					 'radiusgroupname',
-					 'radiustunnelprivategroup',
+					 'radiustunnelprivategroupid',
 					],
 			 label => '<span class="fa fa-shield"></span>&nbsp;802.1x details',
 			 label_class => [ 'text-info' ],

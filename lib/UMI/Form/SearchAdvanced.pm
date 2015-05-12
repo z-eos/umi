@@ -23,7 +23,7 @@ has_field 'display_format' => ( type => 'Select',
 
 has_field 'base_dn' => ( label => 'Base DN',
 			 wrapper_class => [ 'col-md-8' ],
-			 element_attr => { placeholder => 'dc=umidb', },
+			 element_attr => { placeholder => UMI->config->{ldap_crud_db}, },
 			 required => 1 );
 
 has_field 'search_scope' => ( type => 'Select',

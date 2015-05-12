@@ -37,6 +37,7 @@ sub index :Path :Args(0) {
       $c->stash(
 		template => 'search/search_advanced.tt',
 		form => $self->form,
+		ldap_crud => $c->model('LDAP_CRUD'),
 	       );
     } else {
       $c->stash( template => 'signin.tt', );

@@ -258,6 +258,8 @@ sub create_account {
 			       password => $pwd->{$service},
 			       telephoneNumber => $telephoneNumber,
 			       jpegPhoto => $args->{avatar},
+			       radiusgroupname => $args->{radiusgroupname} || 'ip-phone',
+			       radiustunnelprivategroupid => defined $args->{radiustunnelprivategroupid} ? $args->{radiustunnelprivategroupid} : 3,
 			      },
 			    );
 
@@ -482,7 +484,7 @@ sub create_account_branch_leaf {
        radiustunnelprivategroupid => $arg->{radiustunnelprivategroupid},
        radiustunneltype => 13,
       ];
-    p $authorizedService_add;
+    # p $authorizedService_add;
     undef $authorizedService;
     $authorizedService = [];
     $arg->{dn} = 'uid=' . $arg->{'login'} . ',' . $arg->{basedn};
