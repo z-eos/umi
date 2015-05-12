@@ -48,8 +48,8 @@ sub proc :Path(proc) :Args(0) {
 
     if ( $c->check_user_roles('wheel')) {
       my $params = $c->req->params;
-      # use Data::Printer use_prototypes => 0;
-      # p $params;
+      use Data::Printer use_prototypes => 0;
+      #p $params;
       my @attrs = split(/,/, $params->{'show_attrs'});
       my $ldap_crud =
 	$c->model('LDAP_CRUD');
@@ -103,10 +103,14 @@ sub proc :Path(proc) :Args(0) {
       my $search_filter = $params->{'search_filter'} ne '' ?
 	sprintf('<kbd>%s</kbd>', $params->{'search_filter'}) : '(objectClass=*)';
 
+      # suffix array of dn preparation to respect LDAP objects "inheritance"
+      # http://en.wikipedia.org/wiki/Suffix_array
+      my @ttentries_keys = map { scalar reverse } sort map { scalar reverse } keys %{$ttentries};
       $c->stash(
 		template => 'search/searchby.tt',
 		base_dn => $base_dn,
 		filter => $search_filter,
+		entrieskeys => \@ttentries_keys,
 		entries => $ttentries,
 		services => $ldap_crud->{cfg}->{authorizedService},
 		final_message => $return,

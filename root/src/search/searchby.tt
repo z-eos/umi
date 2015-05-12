@@ -305,6 +305,11 @@
 		  [% END %]
 		  &nbsp;&nbsp;&nbsp;[% entry.key.replace(',', ',&nbsp;') %]
 		</button>
+		[% IF entry.value.mgmnt.is_dn && entry.key.match('People') %]
+		<span class="text-primary">
+		  <b><i>&nbsp;[% entry.value.attrs.givenName.0 %] [% entry.value.attrs.sn.0 %]</i></b>
+		</span>
+		[% END %]
 	      </form>
 
 
