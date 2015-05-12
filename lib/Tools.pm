@@ -4,7 +4,7 @@
 package Tools;
 use Moose::Role;
 
-
+use Data::Printer;
 
 =head1 NAME
 
@@ -113,8 +113,8 @@ sub pwdgen {
 			    $pwdgen->{'num'},
 			    $pwdgen->{'cap'}
 			  );
-  } elsif ( ( ! defined $pwdgen->{'pwd'} || $pwdgen->{'pwd'} eq '' ) ||
-	    ( defined $pwdgen->{'pwd'} && ! $pwdgen->{'pronounceable'} ) ) {
+  } elsif ( ( ! defined $pwdgen->{'pwd'} || $pwdgen->{'pwd'} eq '' )
+	    && ! $pwdgen->{'pronounceable'} ) {
     $pwdgen->{'pwd'} = chars( $pwdgen->{'len'}, $pwdgen->{'len'} );
   }
 

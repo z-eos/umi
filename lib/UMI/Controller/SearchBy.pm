@@ -854,7 +854,7 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
   my $return;
   if ( $self->form_mod_pwd->validated && $self->form_mod_pwd->ran_validation ) {
 
-    if ( $arg->{'password_init'} eq '' && $arg->{'password_cnfm'} eq '' ) {
+    if ( $arg->{password_init} eq '' && $arg->{password_cnfm} eq '' ) {
       $arg->{password_gen} = $self->pwdgen;
     } elsif ( $arg->{'password_init'} ne '' && $arg->{'password_cnfm'} ne '' ) {
       $arg->{password_gen} = $self->pwdgen({ pwd => $arg->{'password_cnfm'} });
