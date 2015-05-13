@@ -42,7 +42,7 @@
       </tr>
     </thead>
     <tbody>
-      [% IF entries.size == 1 %][% in='in' %][% ELSE %][% in='' %][% END %] [% # no keys suffix sort FOREACH entry IN entries %]
+      [% IF entries.size == 1 %][% in='in' %][% chevron_toggle='up' %][% ELSE %][% in='' %][% chevron_toggle='down' %][% END %] [% # no keys suffix sort FOREACH entry IN entries %]
       [% FOREACH entrykey IN entrieskeys %]
       [% entry.key = entrykey
 	 entry.value = entries.$entrykey %]
@@ -56,13 +56,13 @@
 	    [% END %]
 
 	    <div class="panel-heading">
-	      <button class="btn btn-link pull-left"
+	      <button class="chevron_toggleable btn btn-link pull-left"
 		      type="button"
 		      title="Collapse In/Out This Panel"
 		      data-target="#collapse[% loop.index %]"
 		      data-toggle="collapse"
 		      data-parent="#accordion[% loop.index %]">
-		<span class="fa fa-eject text-primary"></span>
+		<span class="fa fa-toggle-[% chevron_toggle %] text-primary"></span>
 	      </button>
 	      <div class="dropdown pull-left">
 		<button class="btn btn-link dropdown-toggle"
@@ -524,6 +524,11 @@
   </table>
 </div>
 
+<script>
+ $('.chevron_toggleable').on('click', function() {
+   $(this).find('.fa').toggleClass('fa-toggle-down').toggleClass('fa-toggle-up')
+ });
+</script>
 <script> $(function(){ $('#btnLegend').popover() }); </script>
 
 <script src="/static/js/umi-ddmenu-sort.js"></script>
