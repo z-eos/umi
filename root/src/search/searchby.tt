@@ -15,7 +15,7 @@
 [% child = '<i class="fa fa-fw ' _ fa_child _ ' text-default"></i>' %]
 
 <div class="table-responsive">
-  <table class="table">
+  <table class="table table-condensed">
     <thead>
       <tr class="bg-primary">
 	<td colspan=2 class="text-right">
@@ -56,7 +56,7 @@
 	    [% END %]
 
 	    <div class="panel-heading">
-	      <button class="btn btn-link btn-xs pull-left"
+	      <button class="btn btn-link pull-left"
 		      type="button"
 		      title="Collapse In/Out This Panel"
 		      data-target="#collapse[% loop.index %]"
@@ -65,7 +65,7 @@
 		<span class="fa fa-eject text-primary"></span>
 	      </button>
 	      <div class="dropdown pull-left">
-		<button class="btn btn-link btn-xs dropdown-toggle"
+		<button class="btn btn-link dropdown-toggle"
 			type="button" id="dropdownMenuActions"
 			data-toggle="dropdown"
 			title="Possible Actions Upon the Object">
@@ -129,6 +129,17 @@
 		    </form>
 		  </li>
 		  [% END %]
+		  <li>
+		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+		      <button type="submit" title="add service account" class="btn btn-link"
+			      value="[% entry.key %]"
+			      data-order="11"
+			      name="user_ban">
+			<span class="fa fa-fw fa-ban text-danger"></span>
+			ban all
+		      </button>
+		    </form>
+		  </li>
 		  <li>
 		    <button type="button" title="delete object" class="btn btn-link"
 			    value="[% entry.key %]"
@@ -248,7 +259,7 @@
 		</ul>
 	      </div>
 	      <form role="form" method="POST" action="[% c.uri_for_action('searchby/index') %]">
-		<button type="submit" class="btn btn-link btn-xs pull-left umi-search"
+		<button type="submit" class="btn btn-link pull-left umi-search"
 			title="click to open root (management) object of this object"
 			name="ldap_subtree"
 			value="[% entry.key.split(',').slice(-3, -1).join(',') %]">
@@ -256,8 +267,8 @@
 		</button>
 	      </form>
 
-	      <form role="form" method="POST" action="[% c.uri_for_action('searchby/index') %]" class="col-xs-offset-1">
-		<button type="submit" class="btn btn-link btn-xs umi-search"
+	      <form role="form" method="POST" action="[% c.uri_for_action('searchby/index') %]" class="col-xs-offset-2">
+		<button type="submit" class="btn btn-link umi-search"
 			name="ldap_subtree"
 			value="[% entry.key %]"
 			
@@ -304,12 +315,14 @@
 		  
 		  [% END %]
 		  &nbsp;&nbsp;&nbsp;[% entry.key.replace(',', ',&nbsp;') %]
-		</button>
 		[% IF entry.value.mgmnt.is_dn && entry.key.match('People') %]
 		<span class="text-primary">
-		  <b><i>&nbsp;[% entry.value.attrs.givenName.0 %] [% entry.value.attrs.sn.0 %]</i></b>
+		  <span class="h5">
+		    <strong>&nbsp;[% entry.value.attrs.givenName.0 %] [% entry.value.attrs.sn.0 %]</strong>
+		  </span>
 		</span>
 		[% END %]
+		</button>
 	      </form>
 
 

@@ -1,5 +1,5 @@
 <!-- BEGIN site/header -->
-<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+<nav class="navbar navbar-default navbar-fixed-top bg-primary" role="navigation">
   <div class="container">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -12,12 +12,14 @@
 	<img class="pull-left logo"
 	     src="/static/images/umi-logo.50x50.png"
 	     exify_initialized="true"
-	     style="margin-top: 5px;">
+	     width="40px"
+	     style="margin-top: 3px;margin-bottom: 3px;"
+	     >
       </a>
       <a class="navbar-brand" href="/" tabindex="-1">
 	&nbsp;
-	<span class="visible-xs-inline visible-sm-inline">UMI</span>
-	<span class="visible-md-inline visible-lg-inline">Unified Management Interface</span>
+	<span class="visible-xs-inline visible-sm-inline"><b>UmI</b></span>
+	<span class="visible-md-inline visible-lg-inline"><b>UNIFIED management INTERFACE</b></span>
       </a>
     </div>
     <div class="collapse navbar-collapse">
@@ -144,14 +146,14 @@
 	  	 tabindex="12">
 	  <div class="input-group-btn">
 	    <button type="submit"
-		    class="btn btn-default"
+		    class="btn btn-default btn-sm"
 		    value="1" tabindex="13"
 		    name="ldapsearch_by_name"
 		    title="Search &laquo;by name&raquo;">
 	      <span class="fa fa-search"></span>
 	    </button>
 	    <button type="submit"
-		    class="btn btn-default dropdown-toggle"
+		    class="btn btn-default btn-sm dropdown-toggle"
 		    tabindex="14"
 		    data-toggle="dropdown"
 		    title="LDAP Select Bases">
@@ -252,13 +254,16 @@
 
 	      [% color = "warning" %]
 
-	      <li class="bg-[% color %]">
-		<a href="[% c.uri_for('/searchadvanced') %]" class="[% menu_item %][% color %] btn-link" tabindex="26">
-		  <span class="[% icon_class %] fa-search-plus">&nbsp;advanced search</span></a></li>
-	      <li class="bg-[% color %]">
-		<a href="[% c.uri_for('/searchadvanced') %]" class="[% menu_item %][% color %] btn-link" tabindex="27">
-		<span class="[% icon_class %] fa-medkit">&nbsp;audit</span></a></li>
-
+	      <li>
+		<a href="[% c.uri_for('/searchadvanced') %]" tabindex="26">
+		  <span class="[% icon_class %] fa-search-plus">&nbsp;advanced search</span>
+		</a>
+	      </li>
+	      <li>
+		<a href="[% c.uri_for('/searchadvanced') %]" tabindex="27">
+		  <span class="[% icon_class %] fa-medkit">&nbsp;audit</span>
+		</a>
+	      </li>
 	    </ul>
 	  </div>
 	</div>
