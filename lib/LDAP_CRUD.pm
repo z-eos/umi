@@ -397,7 +397,7 @@ sub err {
 
   my $caller = (caller(1))[3];
   my $err = {
-	     html => $mesg->{code} && ldap_error_name($mesg) ne 'LDAP_SUCCESS' ?
+	     html => ldap_error_name($mesg) ne 'LDAP_SUCCESS' ?
 	     sprintf( '<dl class="dl-horizontal">
   <dt>code</dt><dd>%s</dd>
   <dt>error name</dt><dd>%s</dd>
@@ -587,6 +587,77 @@ sub delr {
   return $return;
 }
 
+
+=head2 ban_dn
+
+ban object of DN
+
+=cut
+
+
+sub ban_dn {
+  my ($self, $args) = @_;
+  my $callername = (caller(1))[3];
+  $callername = 'main' if ! defined $callername;
+  my $return; # = 'call to LDAP_CRUD->ban_dn from ' . $callername . ': ';
+  my $attr;
+  my $userPassword;
+  my @userPublicKeys;
+  my @keys;
+  
+  my $msg = $self->search ( { base => $args->{dn}, } );
+  if ($msg->is_error()) {
+    $return->{error} = $self->err( $msg )->{html};
+  } else {
+    my @entries = $msg->entries;
+    foreach my $entry ( @entries ) {
+      if ( $entry->exists('userPassword') ) {
+	if ( $args->{action} eq 'ban' &&
+	     $entry->get_value('userPassword') !~ /^!/ ) {
+	  $userPassword = sprintf('!%s',
+				  $entry->get_value('userPassword'));
+	} elsif ( $args->{action} eq 'unban' &&
+		  $entry->get_value('userPassword') =~ /^!/) {
+	  $userPassword = substr($entry->get_value('userPassword'), 1);
+	}
+	$msg = $self->mod(
+			  $entry->dn,
+			  { userPassword => $userPassword, },
+			 );
+	$return->{error} .= $self->err( $msg )->{html} if ref($msg) eq 'HASH';
+      }
+
+      if ( $entry->exists('sshPublicKey') ) {
+	@userPublicKeys = $entry->get_value('userPublicKey');
+	foreach my $key ( @userPublicKeys ) {
+	  if ( $args->{action} eq 'ban' &&
+	       $key !~ /^from="127.0.0.1" / ) {
+	    push @keys, sprintf('from="127.0.0.1" %s', $key);
+	  } elsif ( $args->{action} eq 'unban' &&
+		    $key =~ /^from="127.0.0.1" /) {
+	    push @keys, substr($entry->get_value('userPublicKey'), 17);
+	  }
+	  $msg = $self->mod(
+			    $entry->dn,
+			    { userPublicKey => [ \@keys ], },
+			   );
+	  $return->{error} .= $self->err( $msg )->{html} if ref($msg) eq 'HASH';
+	}
+      }
+      
+      # if ( $args->{action} eq 'ban' ) {
+      # 	# add to group
+      # } elsif ( $args->{action} eq 'unban' ) {
+      # 	# remove from group
+      # }
+
+      $return->{success} .= $entry->dn . "\n";
+    }
+  }
+  return $return;
+}
+
+
 =head2 mod
 
 modify method
@@ -603,13 +674,14 @@ sub mod {
   if ( ! $self->dry_run ) {
     $msg = $self->ldap->modify ( $dn, replace => $replace, );
     if ($msg->is_error()) {
-      $return .= $self->err( $msg );
+      $return .= $self->err( $msg )->{html};
     } else {
       $return = 0;
     }
   } else {
     $return = $msg->ldif;
   }
+  p $return;
   return $return;
 }
 
@@ -685,7 +757,7 @@ sub ldif {
   my $a = ldap_explode_dn($dn, casefold => 'none');
   pop $a;
   pop $a;
-  p $a;
+  # p $a;
   return $return;
 }
 

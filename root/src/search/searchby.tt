@@ -44,6 +44,7 @@
     <tbody>
       [% IF entries.size == 1 %][% in='in' %][% chevron_toggle='up' %][% ELSE %][% in='' %][% chevron_toggle='down' %][% END %] [% # no keys suffix sort FOREACH entry IN entries %]
       [% FOREACH entrykey IN entrieskeys %]
+      [% zufix = entry.key.split(',').1.split('=').1.replace('[@\.]', '_') _ '_' _ loop.index %]
       [% entry.key = entrykey
 	 entry.value = entries.$entrykey %]
       [% dn = entry.key.split(',|=').hash %][% # preparing hash of each dn %]
@@ -128,18 +129,29 @@
 		      </button>
 		    </form>
 		  </li>
-		  [% END %]
 		  <li>
-		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
-		      <button type="submit" title="add service account" class="btn btn-link"
-			      value="[% entry.key %]"
-			      data-order="11"
-			      name="user_ban">
-			<span class="fa fa-fw fa-ban text-danger"></span>
-			ban all
-		      </button>
-		    </form>
+		    <button type="button" title="ban starting with this DN: [% entry.key %]" class="btn btn-link"
+			    value="[% entry.key %]"
+			    name="user_ban"
+			    data-order="19"
+			    data-toggle="modal"
+			    data-target="#modal_ban[% zufix %]">
+		      <span class="fa fa-fw fa-thumbs-down text-danger"></span>
+		      ban
+		    </button>
 		  </li>
+		  <li>
+		    <button type="button" title="un ban starting with this DN: [% entry.key %]" class="btn btn-link"
+			    value="[% entry.key %]"
+			    name="user_ban"
+			    data-order="19"
+			    data-toggle="modal"
+			    data-target="#modal_unban[% zufix %]">
+		      <span class="fa fa-fw fa-thumbs-up text-success"></span>
+		      unban
+		    </button>		    
+		  </li>
+		  [% END %]
 		  <li>
 		    <button type="button" title="delete object" class="btn btn-link"
 			    value="[% entry.key %]"
@@ -326,35 +338,6 @@
 	      </form>
 
 
-	      <!-- #### Modal: Account Global Management start -->
-	      <div class="modal" id="globmgmntModal[% loop.index %]"
-		   tabindex="-1" role="dialog" aria-labelledby="globmgmntModalLabel[% loop.index %]"
-		   aria-hidden="true">
-		<div class="modal-dialog modal-lg">
-		  <div class="modal-content">
-		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
-		      <div class="modal-header">
-			<h4 class="modal-title alert alert-danger" id="globmgmntModalLabel[% loop.index %]">
-			  <span class="fa fa-times-circle"></span>
-			  You are about to perform deletion of DN: <b>[% entry.key.replace(',', ', ') %]</b>
-			</h4>
-		      </div>
-		      <div class="modal-body text-primary">
-			<input type="checkbox" name="ldap_delete_recursive">
-			Recursive deletion of all children of this object as well
-			</input>
-		      </div>
-		      <div class="modal-footer">
-			<button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
-			<button type="submit" class="btn btn-primary"  name="ldap_delete"
-				value="[% entry.key %]">
-			  Yes, I really want to delete it and yes, I understand all consequences!
-			</button>
-		      </div>
-		    </form>
-		  </div>
-		</div>
-	      </div><!-- #### Modal: Account Global Management end -->
 	      <!-- #### Modal: Delete start -->
 	      <div class="modal" id="deleteModal[% loop.index %]"
 		   tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel[% loop.index %]"
@@ -384,6 +367,56 @@
 		  </div>
 		</div>
 	      </div><!-- #### Modal: Delete end -->
+	      <!-- #### Modal: Ban start -->
+	      <div class="modal" id="modal_ban[% zufix %]"
+		   tabindex="-1" role="dialog" aria-labelledby="modal_ban[% zufix %]_label"
+		   aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+		  <div class="modal-content">
+		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/ban') %]">
+		      <div class="modal-header">
+			<h4 class="h4 modal-title alert alert-danger" id="modal_ban[% zufix %]_label">
+			  <span class="fa fa-thumbs-down"></span>
+			  You are about to ban user with DN: <b>[% entry.key.replace(',', ', ') %]</b>
+			</h4>
+		      </div>
+		      <!-- <div class="modal-body text-primary"></div> -->
+		      <div class="modal-footer">
+			<button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
+			<button type="submit" class="btn btn-danger umi-btn-event umi-btn-ajax"  name="user_ban"
+				value="[% entry.key %]" data-action="ban">
+			  Yes, I really want to ban this user and yes, I understand all consequences!
+			</button>
+		      </div>
+		    </form>
+		  </div>
+		</div>
+	      </div><!-- #### Modal: Ban end -->
+	      <!-- #### Modal: UnBan start -->
+	      <div class="modal" id="modal_unban[% zufix %]"
+		   tabindex="-1" role="dialog" aria-labelledby="modal_unban[% zufix %]_label"
+		   aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+		  <div class="modal-content">
+		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/ban') %]">
+		      <div class="modal-header">
+			<h4 class="h4 modal-title alert alert-success" id="modal_unban[% zufix %]_label">
+			  <span class="fa fa-thumbs-up"></span>
+			  You are about to unban user with DN: <b>[% entry.key.replace(',', ', ') %]</b>
+			</h4>
+		      </div>
+		      <!-- <div class="modal-body text-primary"></div> -->
+		      <div class="modal-footer">
+			<button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
+			<button type="submit" class="btn btn-success umi-btn-event umi-btn-ajax"  name="user_unban"
+				value="[% entry.key %]" data-action="ban">
+			  Yes, I really want to unban this user, I understand all consequences!
+			</button>
+		      </div>
+		    </form>
+		  </div>
+		</div>
+	      </div><!-- #### Modal: UnBan end -->
 	      <!-- #### Modal: Change Root Account start -->
 	      <div class="modal" id="chgaccModal[% loop.index %]"
 		   tabindex="-1" role="dialog" aria-labelledby="chgaccModalLabel[% loop.index %]"

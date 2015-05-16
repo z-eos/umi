@@ -79,6 +79,12 @@ $(function(){
 				$tr.remove();
 			    });
 			break;
+		    case "ban":
+			
+			break;
+		    case "unban":
+			
+			break;
 		    }
 		    removeObjects([hidden, type]);
 		},

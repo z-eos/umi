@@ -1201,6 +1201,53 @@ sub delete :Path(delete) :Args(0) {
 
 #=====================================================================
 
+=head1 ban
+
+ban whole object hierarchy
+
+=cut
+
+
+sub ban :Path(ban) :Args(0) {
+  my ( $self, $c ) = @_;
+  my $args = $c->req->parameters;
+  my $params = {
+		dn => $args->{user_ban} || $args->{user_unban},
+		action => defined $args->{user_ban} ? 'ban' : 'unban',
+	       };
+  my $msg = $c->model('LDAP_CRUD')->ban_dn( $params );
+
+  if ( defined $msg->{error} ) {
+    p $msg;
+    $c->stash(
+	      current_view => 'Web',
+  	      template => 'search/delete.tt',
+  	      finalmessage => $msg,
+  	     );
+    $c->forward('View::TT');
+  } else {
+    if ( $params->{type} eq 'json' ) {
+      # p $params;
+      $c->stash->{current_view} = 'WebJSON';
+      $c->stash->{success} = 'true';
+      $c->stash->{message} = 'OK';
+    } else {
+      $c->stash(
+		# template => 'search/delete.tt',
+		# delete => $params->{'ldap_delete'},
+		# recursive => defined $params->{'ldap_delete_recursive'} &&
+		# $params->{'ldap_delete_recursive'} eq 'on' ? '1' : '0',
+		err => $msg,
+		type => $params->{'type'},
+	       );
+    }
+  }
+}
+
+
+
+#=====================================================================
+
 =head1 dhcp_add
 
 DHCP object to user binding
