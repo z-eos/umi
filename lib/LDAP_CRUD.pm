@@ -65,6 +65,7 @@ sub _build_cfg {
 		   gidNumber => 10012,
 		   noavatar_mgmnt => UMI->path_to('root', 'static', 'images', '/avatar-mgmnt.png'),
 		   icon => 'fa fa-user',
+		   group_banned => 'banned',
 		  },
 	  rdn => {
 		  org =>            'ou',
@@ -604,54 +605,59 @@ sub ban_dn {
   my $userPassword;
   my @userPublicKeys;
   my @keys;
-  
-  my $msg = $self->search ( { base => $args->{dn}, } );
-  if ($msg->is_error()) {
-    $return->{error} = $self->err( $msg )->{html};
+  my ( $msg, $msg_usr, $msg_add, $msg_chg, $ent_svc, $ent_chg, @bangr );
+
+  $msg_usr = $self->search ( { base => $args->{dn}, } );
+  if ( $msg_usr->is_error() ) {
+    $return->{error} = $self->err( $msg_usr )->{html};
   } else {
-    my @entries = $msg->entries;
-    foreach my $entry ( @entries ) {
-      if ( $entry->exists('userPassword') ) {
-	if ( $args->{action} eq 'ban' &&
-	     $entry->get_value('userPassword') !~ /^!/ ) {
-	  $userPassword = sprintf('!%s',
-				  $entry->get_value('userPassword'));
-	} elsif ( $args->{action} eq 'unban' &&
-		  $entry->get_value('userPassword') =~ /^!/) {
-	  $userPassword = substr($entry->get_value('userPassword'), 1);
-	}
-	$msg = $self->mod(
-			  $entry->dn,
-			  { userPassword => $userPassword, },
-			 );
+    # bellow we are blocking services
+    my @ent_toban = $msg_usr->entries;
+    foreach $ent_svc ( @ent_toban ) {
+      if ( $ent_svc->exists('userPassword') ) {
+	$userPassword = $self->pwdgen;
+	$msg = $self->mod( $ent_svc->dn,
+			   { userPassword => $userPassword->{ssha}, }, );
 	$return->{error} .= $self->err( $msg )->{html} if ref($msg) eq 'HASH';
       }
 
-      if ( $entry->exists('sshPublicKey') ) {
-	@userPublicKeys = $entry->get_value('userPublicKey');
-	foreach my $key ( @userPublicKeys ) {
-	  if ( $args->{action} eq 'ban' &&
-	       $key !~ /^from="127.0.0.1" / ) {
-	    push @keys, sprintf('from="127.0.0.1" %s', $key);
-	  } elsif ( $args->{action} eq 'unban' &&
-		    $key =~ /^from="127.0.0.1" /) {
-	    push @keys, substr($entry->get_value('userPublicKey'), 17);
-	  }
-	  $msg = $self->mod(
-			    $entry->dn,
-			    { userPublicKey => [ \@keys ], },
-			   );
-	  $return->{error} .= $self->err( $msg )->{html} if ref($msg) eq 'HASH';
+      if ( $ent_svc->exists('sshPublicKey') ) {
+	@userPublicKeys = $ent_svc->get_value('sshPublicKey');
+	@keys = map { $_ !~ /^from="127.0.0.1" / ? sprintf('from="127.0.0.1" %s', $_) : $_ } @userPublicKeys;
+	$msg = $self->mod( $ent_svc->dn,
+			   { sshPublicKey => \@keys, }, );
+	$return->{error} .= $self->err( $msg )->{html} if ref($msg) eq 'HASH';
+      }
+      $return->{success} .= $ent_svc->dn . "\n";
+    }
+
+    # is this user in ban group?
+    my $bangr_dn =
+      sprintf('cn=%s,%s',
+	      $self->cfg->{stub}->{group_banned},
+	      $self->cfg->{base}->{group});
+
+    $msg = $self->search ( { base => $self->cfg->{base}->{group},
+			     filter => sprintf('(&(cn=%s)(memberUid=%s))',
+					       $self->cfg->{stub}->{group_banned},
+					       substr( (split /,/, $args->{dn})[0], 4 )),
+			   } );
+    if ( $msg->is_error() ) {    
+      $return->{error} .= $self->err( $msg )->{html};
+    } elsif ( $msg->count == 0) {
+      $msg_chg = $self->search ( { base => $bangr_dn, } );
+      if ( $msg_chg->is_error() ) {
+	$return->{error} .= $self->err( $msg_chg )->{html};
+      } else {
+	$ent_chg = $msg_chg->entry(0);
+	@bangr = $ent_chg->get_value('memberUid');
+	push @bangr, substr( (split /,/, $args->{dn})[0], 4 );
+	$ent_chg = $self->mod( $bangr_dn,
+			       { memberUid => \@bangr } );
+	if ( $ent_chg != 0 && defined $ent_chg->{error} ) {
+	  $return->{error} .= $self->err( $ent_chg )->{html};
 	}
       }
-      
-      # if ( $args->{action} eq 'ban' ) {
-      # 	# add to group
-      # } elsif ( $args->{action} eq 'unban' ) {
-      # 	# remove from group
-      # }
-
-      $return->{success} .= $entry->dn . "\n";
     }
   }
   return $return;
@@ -681,7 +687,7 @@ sub mod {
   } else {
     $return = $msg->ldif;
   }
-  p $return;
+  # p $dn; p $replace;
   return $return;
 }
 
@@ -693,7 +699,7 @@ modify method
 
 sub modify {
   my ($self, $dn, $changes) = @_;
-
+p [ $dn, $changes ];
   my $callername = (caller(1))[3];
   $callername = 'main' if ! defined $callername;
   my $return = 'call to LDAP_CRUD->modify from ' . $callername . ': ';

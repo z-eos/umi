@@ -23,21 +23,21 @@ has 'form_mod_pwd' => ( isa => 'UMI::Form::ModPwd', is => 'rw',
 
 use UMI::Form::ModJpegPhoto;
 has 'form_jpegphoto' => ( isa => 'UMI::Form::ModJpegPhoto', is => 'rw',
-		      lazy => 1, default => sub { UMI::Form::ModJpegPhoto->new },
-		      documentation => q{Form to add/modify jpegPhoto},
-		    );
+			  lazy => 1, default => sub { UMI::Form::ModJpegPhoto->new },
+			  documentation => q{Form to add/modify jpegPhoto},
+			);
 
 use UMI::Form::ModUserGroup;
 has 'form_mod_groups' => ( isa => 'UMI::Form::ModUserGroup', is => 'rw',
-		      lazy => 1, default => sub { UMI::Form::ModUserGroup->new },
-		      documentation => q{Form to add/modify group/s of the user.},
-		    );
+			   lazy => 1, default => sub { UMI::Form::ModUserGroup->new },
+			   documentation => q{Form to add/modify group/s of the user.},
+			 );
 
 use UMI::Form::ModGroupMemberUid;
 has 'form_mod_memberUid' => ( isa => 'UMI::Form::ModGroupMemberUid', is => 'rw',
-		      lazy => 1, default => sub { UMI::Form::ModGroupMemberUid->new },
-		      documentation => q{Form to add/modify memberUid/s of the group.},
-		    );
+			      lazy => 1, default => sub { UMI::Form::ModGroupMemberUid->new },
+			      documentation => q{Form to add/modify memberUid/s of the group.},
+			    );
 
 use UMI::Form::AddServiceAccount;
 has 'form_add_svc_acc' => ( isa => 'UMI::Form::AddServiceAccount', is => 'rw',
@@ -156,12 +156,21 @@ sub index :Path :Args(0) {
     $return->{warning} = $ldap_crud->err($mesg)->{caller} .
       ': ' . $ldap_crud->err($mesg)->{html} if ! $mesg->count;
 
-    my ( $ttentries, $attr, $tmp );
+    my ( $ttentries, $attr, $ban, $tmp );
     foreach (@entries) {
+      $mesg = $ldap_crud->search({
+				  base => $ldap_crud->cfg->{base}->{group},
+				  filter => sprintf('(&(cn=%s)(memberUid=%s))',
+						    $ldap_crud->cfg->{stub}->{group_banned},
+						    substr( (split /,/, $_->dn)[0], 4 )),
+				 });
+      $return->{error} .= $ldap_crud->err( $mesg )->{html}
+	if $mesg->is_error();
       # $tmp = $ldap_crud->canonical_dn_rev ( $_->dn );
       $tmp = $_->dn;
       $ttentries->{$tmp}->{'mgmnt'} =
 	{
+	 is_banned => $mesg->count,
 	 is_dn => scalar split(',', $tmp) <= 3 ? 1 : 0,
 	 is_account => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
 	 is_group => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{group}/ ? 1 : 0,
@@ -914,8 +923,6 @@ sub mod_groups {
     $arg->{groups_sel}->{$_} = 1;
   }
 
-  p $arg;
-
   my $return;
   if ( $self->form_mod_groups->validated ) {
     my $mesg = $ldap_crud->search( { base => $ldap_crud->{cfg}->{base}->{group},
@@ -960,15 +967,15 @@ sub mod_groups {
       }
 
       if ( $#groups_chg >= 0) {
-	p [ $_, @groups_chg ];
+	# p [ $_, @groups_chg ];
 	$mesg = $ldap_crud->modify(
-				   'cn=' . $_ . $ldap_crud->{cfg}->{base}->{group},
+				   sprintf('cn=%s,%s', $_, $ldap_crud->{cfg}->{base}->{group}),
 				   \@groups_chg
 				  );
 	if ( $mesg ) {
 	  push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html};
 	} else {
-	  $return->{success}->[0] = 1;
+	  $return->{success}->[0] = "User group/s modification went successfully!";
 	}
 	$#groups_chg = -1;
       }
@@ -1211,26 +1218,25 @@ ban whole object hierarchy
 sub ban :Path(ban) :Args(0) {
   my ( $self, $c ) = @_;
   my $args = $c->req->parameters;
-  my $params = {
-		dn => $args->{user_ban} || $args->{user_unban},
-		action => defined $args->{user_ban} ? 'ban' : 'unban',
-	       };
+  my $params = { dn => $args->{user_ban},
+		 type => $args->{type}, };
   my $msg = $c->model('LDAP_CRUD')->ban_dn( $params );
 
-  if ( defined $msg->{error} ) {
-    p $msg;
+  if ( $msg != 0 && defined $msg->{error} ) {
     $c->stash(
 	      current_view => 'Web',
   	      template => 'search/delete.tt',
-  	      finalmessage => $msg,
+  	      final_message => $msg,
   	     );
     $c->forward('View::TT');
   } else {
     if ( $params->{type} eq 'json' ) {
-      # p $params;
-      $c->stash->{current_view} = 'WebJSON';
-      $c->stash->{success} = 'true';
-      $c->stash->{message} = 'OK';
+      $c->stash(
+		current_view => 'WebJSON',
+		success => 'true',
+		message => 'OK',
+		final_message => $msg,
+	       );
     } else {
       $c->stash(
 		# template => 'search/delete.tt',

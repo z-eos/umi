@@ -136,20 +136,9 @@
 			    data-order="19"
 			    data-toggle="modal"
 			    data-target="#modal_ban[% zufix %]">
-		      <span class="fa fa-fw fa-thumbs-down text-danger"></span>
+		      <span class="fa fa-fw fa-ban text-danger"></span>
 		      ban
 		    </button>
-		  </li>
-		  <li>
-		    <button type="button" title="un ban starting with this DN: [% entry.key %]" class="btn btn-link"
-			    value="[% entry.key %]"
-			    name="user_ban"
-			    data-order="19"
-			    data-toggle="modal"
-			    data-target="#modal_unban[% zufix %]">
-		      <span class="fa fa-fw fa-thumbs-up text-success"></span>
-		      unban
-		    </button>		    
 		  </li>
 		  [% END %]
 		  <li>
@@ -284,8 +273,10 @@
 			name="ldap_subtree"
 			value="[% entry.key %]"
 			
-		  [% IF entry.value.mgmnt.is_dn && entry.key.match('People') %]
+		  [% IF entry.value.mgmnt.is_dn && entry.key.match('People') && ! entry.value.mgmnt.is_banned %]
 		  title="Root Account"><span class="fa fa-user fa-lg"></span>
+		  [% ELSIF entry.value.mgmnt.is_dn && entry.key.match('People') && entry.value.mgmnt.is_banned %]
+		  title="Root Account"><span class="fa fa-user fa-lg text-danger"></span>
 
 		  [% ELSIF entry.value.mgmnt.is_dn && ! entry.key.match('People') %]
 		  title="Root Objectt"><span class="fa fa-star fa-lg"></span>
@@ -327,13 +318,13 @@
 		  
 		  [% END %]
 		  &nbsp;&nbsp;&nbsp;[% entry.key.replace(',', ',&nbsp;') %]
-		[% IF entry.value.mgmnt.is_dn && entry.key.match('People') %]
-		<span class="text-primary">
-		  <span class="h5">
-		    <strong>&nbsp;[% entry.value.attrs.givenName.0 %] [% entry.value.attrs.sn.0 %]</strong>
+		  [% IF entry.value.mgmnt.is_dn && entry.key.match('People') %]
+		  <span class="[% IF entry.value.mgmnt.is_banned %]text-danger[% ELSE %]text-primary[% END %]">
+		    <span class="h5">
+		      <strong>&nbsp;[% entry.value.attrs.givenName.0 %] [% entry.value.attrs.sn.0 %]</strong>
+		    </span>
 		  </span>
-		</span>
-		[% END %]
+		  [% END %]
 		</button>
 	      </form>
 
@@ -376,7 +367,7 @@
 		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/ban') %]">
 		      <div class="modal-header">
 			<h4 class="h4 modal-title alert alert-danger" id="modal_ban[% zufix %]_label">
-			  <span class="fa fa-thumbs-down"></span>
+			  <span class="fa fa-ban"></span>
 			  You are about to ban user with DN: <b>[% entry.key.replace(',', ', ') %]</b>
 			</h4>
 		      </div>
@@ -385,38 +376,13 @@
 			<button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
 			<button type="submit" class="btn btn-danger umi-btn-event umi-btn-ajax"  name="user_ban"
 				value="[% entry.key %]" data-action="ban">
-			  Yes, I really want to ban this user and yes, I understand all consequences!
+			  Yes, I really want to ban this user all accounts, and yes, I understand all consequences!
 			</button>
 		      </div>
 		    </form>
 		  </div>
 		</div>
 	      </div><!-- #### Modal: Ban end -->
-	      <!-- #### Modal: UnBan start -->
-	      <div class="modal" id="modal_unban[% zufix %]"
-		   tabindex="-1" role="dialog" aria-labelledby="modal_unban[% zufix %]_label"
-		   aria-hidden="true">
-		<div class="modal-dialog modal-lg">
-		  <div class="modal-content">
-		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/ban') %]">
-		      <div class="modal-header">
-			<h4 class="h4 modal-title alert alert-success" id="modal_unban[% zufix %]_label">
-			  <span class="fa fa-thumbs-up"></span>
-			  You are about to unban user with DN: <b>[% entry.key.replace(',', ', ') %]</b>
-			</h4>
-		      </div>
-		      <!-- <div class="modal-body text-primary"></div> -->
-		      <div class="modal-footer">
-			<button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
-			<button type="submit" class="btn btn-success umi-btn-event umi-btn-ajax"  name="user_unban"
-				value="[% entry.key %]" data-action="ban">
-			  Yes, I really want to unban this user, I understand all consequences!
-			</button>
-		      </div>
-		    </form>
-		  </div>
-		</div>
-	      </div><!-- #### Modal: UnBan end -->
 	      <!-- #### Modal: Change Root Account start -->
 	      <div class="modal" id="chgaccModal[% loop.index %]"
 		   tabindex="-1" role="dialog" aria-labelledby="chgaccModalLabel[% loop.index %]"

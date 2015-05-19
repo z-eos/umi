@@ -79,11 +79,8 @@ $(function(){
 				$tr.remove();
 			    });
 			break;
-		    case "ban":
-			
-			break;
-		    case "unban":
-			
+		    case "ban":			
+			if ($modal && $modal.length) $modal.modal("hide");
 			break;
 		    }
 		    removeObjects([hidden, type]);

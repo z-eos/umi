@@ -70,6 +70,8 @@
       [% FOREACH val IN attr.value %]
       [% IF attr.key == rdn %]
       <input type=text value="[% val %]" name="[% attr.key %]" disabled="" class="form-control">
+      [% ELSIF attr.key == 'sshPublicKey' %]
+      <p><textarea name="[% attr.key %]" class="form-control" rows=2>[% val %]</textarea></p>
       [% ELSIF attr.key == 'grayPublicKey' %]
       <p><textarea name="[% attr.key %]" class="form-control" rows=2>[% val %]</textarea></p>
       [% ELSE %]
