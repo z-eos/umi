@@ -79,7 +79,7 @@ $(function(){
 				$tr.remove();
 			    });
 			break;
-		    case "ban":			
+		    case "block":
 			if ($modal && $modal.length) $modal.modal("hide");
 			break;
 		    }

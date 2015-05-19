@@ -130,14 +130,14 @@
 		    </form>
 		  </li>
 		  <li>
-		    <button type="button" title="ban starting with this DN: [% entry.key %]" class="btn btn-link"
+		    <button type="button" title="block all accounts of the user with DN: [% entry.key %]" class="btn btn-link"
 			    value="[% entry.key %]"
-			    name="user_ban"
+			    name="user_block"
 			    data-order="19"
 			    data-toggle="modal"
-			    data-target="#modal_ban[% zufix %]">
+			    data-target="#modal_block[% zufix %]">
 		      <span class="fa fa-fw fa-ban text-danger"></span>
-		      ban
+		      block
 		    </button>
 		  </li>
 		  [% END %]
@@ -273,9 +273,9 @@
 			name="ldap_subtree"
 			value="[% entry.key %]"
 			
-		  [% IF entry.value.mgmnt.is_dn && entry.key.match('People') && ! entry.value.mgmnt.is_banned %]
+		  [% IF entry.value.mgmnt.is_dn && entry.key.match('People') && ! entry.value.mgmnt.is_blocked %]
 		  title="Root Account"><span class="fa fa-user fa-lg"></span>
-		  [% ELSIF entry.value.mgmnt.is_dn && entry.key.match('People') && entry.value.mgmnt.is_banned %]
+		  [% ELSIF entry.value.mgmnt.is_dn && entry.key.match('People') && entry.value.mgmnt.is_blocked %]
 		  title="Root Account"><span class="fa fa-user fa-lg text-danger"></span>
 
 		  [% ELSIF entry.value.mgmnt.is_dn && ! entry.key.match('People') %]
@@ -319,7 +319,7 @@
 		  [% END %]
 		  &nbsp;&nbsp;&nbsp;[% entry.key.replace(',', ',&nbsp;') %]
 		  [% IF entry.value.mgmnt.is_dn && entry.key.match('People') %]
-		  <span class="[% IF entry.value.mgmnt.is_banned %]text-danger[% ELSE %]text-primary[% END %]">
+		  <span class="[% IF entry.value.mgmnt.is_blocked %]text-danger[% ELSE %]text-primary[% END %]">
 		    <span class="h5">
 		      <strong>&nbsp;[% entry.value.attrs.givenName.0 %] [% entry.value.attrs.sn.0 %]</strong>
 		    </span>
@@ -358,31 +358,31 @@
 		  </div>
 		</div>
 	      </div><!-- #### Modal: Delete end -->
-	      <!-- #### Modal: Ban start -->
-	      <div class="modal" id="modal_ban[% zufix %]"
-		   tabindex="-1" role="dialog" aria-labelledby="modal_ban[% zufix %]_label"
+	      <!-- #### Modal: Block start -->
+	      <div class="modal" id="modal_block[% zufix %]"
+		   tabindex="-1" role="dialog" aria-labelledby="modal_block[% zufix %]_label"
 		   aria-hidden="true">
 		<div class="modal-dialog modal-lg">
 		  <div class="modal-content">
-		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/ban') %]">
+		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/block') %]">
 		      <div class="modal-header">
-			<h4 class="h4 modal-title alert alert-danger" id="modal_ban[% zufix %]_label">
+			<h4 class="h4 modal-title alert alert-danger" id="modal_block[% zufix %]_label">
 			  <span class="fa fa-ban"></span>
-			  You are about to ban user with DN: <b>[% entry.key.replace(',', ', ') %]</b>
+			  You are about to block user with DN: <b>[% entry.key.replace(',', ', ') %]</b>
 			</h4>
 		      </div>
 		      <!-- <div class="modal-body text-primary"></div> -->
 		      <div class="modal-footer">
 			<button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
-			<button type="submit" class="btn btn-danger umi-btn-event umi-btn-ajax"  name="user_ban"
-				value="[% entry.key %]" data-action="ban">
-			  Yes, I really want to ban this user all accounts, and yes, I understand all consequences!
+			<button type="submit" class="btn btn-danger umi-btn-event umi-btn-ajax"  name="user_block"
+				value="[% entry.key %]" data-action="block">
+			  Yes, I really want to block this user all accounts, and yes, I understand all consequences!
 			</button>
 		      </div>
 		    </form>
 		  </div>
 		</div>
-	      </div><!-- #### Modal: Ban end -->
+	      </div><!-- #### Modal: Block end -->
 	      <!-- #### Modal: Change Root Account start -->
 	      <div class="modal" id="chgaccModal[% loop.index %]"
 		   tabindex="-1" role="dialog" aria-labelledby="chgaccModalLabel[% loop.index %]"

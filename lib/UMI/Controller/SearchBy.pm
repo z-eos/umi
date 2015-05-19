@@ -156,12 +156,12 @@ sub index :Path :Args(0) {
     $return->{warning} = $ldap_crud->err($mesg)->{caller} .
       ': ' . $ldap_crud->err($mesg)->{html} if ! $mesg->count;
 
-    my ( $ttentries, $attr, $ban, $tmp );
+    my ( $ttentries, $attr, $tmp );
     foreach (@entries) {
       $mesg = $ldap_crud->search({
 				  base => $ldap_crud->cfg->{base}->{group},
 				  filter => sprintf('(&(cn=%s)(memberUid=%s))',
-						    $ldap_crud->cfg->{stub}->{group_banned},
+						    $ldap_crud->cfg->{stub}->{group_blocked},
 						    substr( (split /,/, $_->dn)[0], 4 )),
 				 });
       $return->{error} .= $ldap_crud->err( $mesg )->{html}
@@ -170,7 +170,7 @@ sub index :Path :Args(0) {
       $tmp = $_->dn;
       $ttentries->{$tmp}->{'mgmnt'} =
 	{
-	 is_banned => $mesg->count,
+	 is_blocked => $mesg->count,
 	 is_dn => scalar split(',', $tmp) <= 3 ? 1 : 0,
 	 is_account => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
 	 is_group => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{group}/ ? 1 : 0,
@@ -1208,19 +1208,20 @@ sub delete :Path(delete) :Args(0) {
 
 #=====================================================================
 
-=head1 ban
+=head1 block
 
-ban whole object hierarchy
+block all user accounts (via password change and ssh-key modification)
+to make it impossible to use any of them
 
 =cut
 
 
-sub ban :Path(ban) :Args(0) {
+sub block :Path(block) :Args(0) {
   my ( $self, $c ) = @_;
   my $args = $c->req->parameters;
-  my $params = { dn => $args->{user_ban},
+  my $params = { dn => $args->{user_block},
 		 type => $args->{type}, };
-  my $msg = $c->model('LDAP_CRUD')->ban_dn( $params );
+  my $msg = $c->model('LDAP_CRUD')->block( $params );
 
   if ( $msg != 0 && defined $msg->{error} ) {
     $c->stash(

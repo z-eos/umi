@@ -65,7 +65,7 @@ sub _build_cfg {
 		   gidNumber => 10012,
 		   noavatar_mgmnt => UMI->path_to('root', 'static', 'images', '/avatar-mgmnt.png'),
 		   icon => 'fa fa-user',
-		   group_banned => 'banned',
+		   group_blocked => 'blocked',
 		  },
 	  rdn => {
 		  org =>            'ou',
@@ -589,31 +589,35 @@ sub delr {
 }
 
 
-=head2 ban_dn
+=head2 block
 
-ban object of DN
+block all user accounts (via password change and ssh-key modification)
+to make it impossible to use any of them
+
+unblock is possible only via password change, ssh-key modification and
+removal from the special group for blocked users
 
 =cut
 
 
-sub ban_dn {
+sub block {
   my ($self, $args) = @_;
   my $callername = (caller(1))[3];
   $callername = 'main' if ! defined $callername;
-  my $return; # = 'call to LDAP_CRUD->ban_dn from ' . $callername . ': ';
+  my $return; # = 'call to LDAP_CRUD->block from ' . $callername . ': ';
   my $attr;
   my $userPassword;
   my @userPublicKeys;
   my @keys;
-  my ( $msg, $msg_usr, $msg_add, $msg_chg, $ent_svc, $ent_chg, @bangr );
+  my ( $msg, $msg_usr, $msg_add, $msg_chg, $ent_svc, $ent_chg, @blockgr );
 
   $msg_usr = $self->search ( { base => $args->{dn}, } );
   if ( $msg_usr->is_error() ) {
     $return->{error} = $self->err( $msg_usr )->{html};
   } else {
     # bellow we are blocking services
-    my @ent_toban = $msg_usr->entries;
-    foreach $ent_svc ( @ent_toban ) {
+    my @ent_toblock = $msg_usr->entries;
+    foreach $ent_svc ( @ent_toblock ) {
       if ( $ent_svc->exists('userPassword') ) {
 	$userPassword = $self->pwdgen;
 	$msg = $self->mod( $ent_svc->dn,
@@ -631,29 +635,29 @@ sub ban_dn {
       $return->{success} .= $ent_svc->dn . "\n";
     }
 
-    # is this user in ban group?
-    my $bangr_dn =
+    # is this user in block group?
+    my $blockgr_dn =
       sprintf('cn=%s,%s',
-	      $self->cfg->{stub}->{group_banned},
+	      $self->cfg->{stub}->{group_blocked},
 	      $self->cfg->{base}->{group});
 
     $msg = $self->search ( { base => $self->cfg->{base}->{group},
 			     filter => sprintf('(&(cn=%s)(memberUid=%s))',
-					       $self->cfg->{stub}->{group_banned},
+					       $self->cfg->{stub}->{group_blocked},
 					       substr( (split /,/, $args->{dn})[0], 4 )),
 			   } );
     if ( $msg->is_error() ) {    
       $return->{error} .= $self->err( $msg )->{html};
     } elsif ( $msg->count == 0) {
-      $msg_chg = $self->search ( { base => $bangr_dn, } );
+      $msg_chg = $self->search ( { base => $blockgr_dn, } );
       if ( $msg_chg->is_error() ) {
 	$return->{error} .= $self->err( $msg_chg )->{html};
       } else {
 	$ent_chg = $msg_chg->entry(0);
-	@bangr = $ent_chg->get_value('memberUid');
-	push @bangr, substr( (split /,/, $args->{dn})[0], 4 );
-	$ent_chg = $self->mod( $bangr_dn,
-			       { memberUid => \@bangr } );
+	@blockgr = $ent_chg->get_value('memberUid');
+	push @blockgr, substr( (split /,/, $args->{dn})[0], 4 );
+	$ent_chg = $self->mod( $blockgr_dn,
+			       { memberUid => \@blockgr } );
 	if ( $ent_chg != 0 && defined $ent_chg->{error} ) {
 	  $return->{error} .= $self->err( $ent_chg )->{html};
 	}
