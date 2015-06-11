@@ -75,14 +75,14 @@ sub proc :Path(proc) :Args(0) {
 	$mesg = $ldap_crud->search({
 				    base => $ldap_crud->cfg->{base}->{group},
 				    filter => sprintf('(&(cn=%s)(memberUid=%s))',
-						      $ldap_crud->cfg->{stub}->{group_banned},
+						      $ldap_crud->cfg->{stub}->{group_blocked},
 						      substr( (split /,/, $_->dn)[0], 4 )),
 				   });
 	$return->{error} .= $ldap_crud->err( $mesg )->{html}
 	  if $mesg->is_error();
 	$ttentries->{$_->dn}->{'mgmnt'} =
 	  {
-	   is_banned => $mesg->count,
+	   is_blocked => $mesg->count,
 	   is_dn => scalar split(',', $_->dn) <= 3 ? 1 : 0,
 	   is_account => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
 	   jpegPhoto => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,

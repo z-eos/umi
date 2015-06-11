@@ -1,5 +1,31 @@
-$(function(){
+/* 
+   --- SIMPLIFIED FORM SWITCHER start ----------------------------------------
 
+  "simplified" user account creation switch. When checked, this
+  checkbox causes all services related UI been hidden and Domain
+  Name field been showed in section Person bellow.
+
+*/
+$('.simplified').hide(300);
+$('#person_namesake').prop('checked', false);
+$('#person_simplified').prop('checked', false);
+
+$("#person_simplified").click(function() {
+    if($(this).is(":checked")) {
+	$('.simplified').show(300);
+	$('.complex').hide(300);
+    } else {
+	$('.simplified').hide(300);
+	$('.complex').show(300);
+    }  
+});
+// --- SIMPLIFIED FORM SWITCHER stop -----------------------------------------
+
+
+// --- FORM LOGICS start -----------------------------------------------------
+
+$(function(){
+    
     // --- !!! STUB !!! -----------------------------------------------------------
     // need this because HFH adds .has-error to whole hierarchy of objects
     // instead of the only fields error have been set
@@ -136,3 +162,5 @@ $(function(){
     duplicatedAttachEvent($(document));
     reinitRelations();
 });
+
+// --- FORM LOGICS stop ------------------------------------------------------

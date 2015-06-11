@@ -84,7 +84,8 @@ sub create_account {
   my  ( $self, $ldap_crud, $args ) = @_;
   # my $args = $c->req->parameters;
   # my $ldap_crud = $c->model('LDAP_CRUD');
-  my @form_fields = qw{ account loginless_ovpn loginless_ssh groups};
+  my @form_fields = defined $args->{person_simplified} &&
+    $args->{person_simplified} eq "1" ? qw{ account } : qw{ account loginless_ovpn loginless_ssh groups };
   my $uidNumber = $ldap_crud->last_uidNumber + 1;
   my ( $final_message, $success_message, $warning_message, $error_message );
 
@@ -167,87 +168,166 @@ sub create_account {
   ######################################################################
   # SERVICE ACCOUNTS PROCESSING START
   ######################################################################
-  foreach my $form_field ( @form_fields ) {
+  foreach my $form_field ( @form_fields ) { # p $form_field;
     next if $form_field eq 'groups';
     # if ( $form_field eq 'loginless_ovpn' ) {
     #   p my @a = $self->form->field($form_field)->fields;
     #   p $#a;
     # }
-    foreach $element ( $self->form->field($form_field)->fields ) {
-      foreach ( $element->fields ) { $is_svc_empty .= $_->value if defined $_->value; } # p $is_svc_empty;
-      next if $is_svc_empty eq ''; # avoid all empty services
 
+    if ( defined $args->{person_simplified} ) {
       ######################################################################
-      # Account branch of ROOT Object
+      # Simplified Account mail branch of ROOT Object Creation
       ######################################################################
       $branch =
-    	$self
-	->create_account_branch ( $ldap_crud,
-				  {
-				   uid => $uid,
-				   authorizedservice => $form_field ne 'account' ?
-				   substr($form_field, 10) :
-				   $element->field('authorizedservice')->value,
-				   associateddomain => $element->field('associateddomain')->value,
-				  },
-				);
+      	$self
+      	->create_account_branch ( $ldap_crud,
+      				  {
+      				   uid => $uid,
+      				   authorizedservice => 'mail',
+      				   associateddomain => $args->{person_associateddomain},
+      				  },
+      				);
 
       push @{$final_message->{success}}, $branch->{success} if defined $branch->{success};
       push @{$final_message->{warning}}, $branch->{warning} if defined $branch->{warning};
       push @{$final_message->{error}}, $branch->{error} if defined $branch->{error};
 
       ######################################################################
-      # Leaf of the account branch of ROOT Object
+      # Simplified Leaf of the account mail branch of ROOT Object
       ######################################################################
       my $x =
 	{
 	 basedn => $branch->{dn},
-	 authorizedservice => $form_field ne 'account' ?
-	 substr($form_field, 10) : $element->field('authorizedservice')->value,
-	 associateddomain => $branch->{associateddomain_prefix} . $element->field('associateddomain')->value,
+	 authorizedservice => 'mail',
+	 associateddomain => $branch->{associateddomain_prefix} . $args->{person_associateddomain},
 	 uidNumber => $uidNumber,
 	 givenName => $args->{person_givenname},
 	 sn => $args->{person_sn},
 	 telephoneNumber => $args->{person_telephonenumber},
-	 # jpegPhoto => $jpeg,
+	 login => defined $args->{person_login} ? $args->{person_login} : $uid,
 	};
-      if ( $form_field eq 'account' ) {
-	if ( $element->field('authorizedservice')->value =~ /^802.1x-.*/ ) {
-	  $x->{password} = { $element->field('authorizedservice')->value =>
-			     { clear => $self->macnorm({ mac => $element->field('login')->value }) }
-			   };
-	  $x->{radiusgroupname} = $element->field('radiusgroupname')->value
-	    if defined $element->field('radiusgroupname')->value;
-	  $x->{radiustunnelprivategroupid} = $element->field('radiustunnelprivategroupid')->value
-	    if defined $element->field('radiustunnelprivategroupid')->value;
-	} elsif ( ! $element->field('password2')->value &&
-		  ! $element->field('password2')->value) {
-	  $x->{password} = { $element->field('authorizedservice')->value => $self->pwdgen };
-	} else {
-	  $x->{password} = { $element->field('authorizedservice')->value =>
-			     $self->pwdgen( { pwd => $element->field('password2')->value } ) };
-	}
 
-	$x->{login} = defined $element->field('login')->value ? $element->field('login')->value : $uid;
-
-      } elsif ( $x->{authorizedservice} eq 'ssh' ) {
-	$x->{sshpublickey} = $element->field('key')->value;
-	$x->{login} = $uid;
-	$x->{password} = { $x->{authorizedservice} =>
-			   { clear => '<del>NOPASSWORD</del>' }
-			 };
-      } elsif ( $x->{authorizedservice} eq 'ovpn' ) {
-	$x->{userCertificate} = $element->field('cert')->value
-	  if defined $element->field('cert')->value;
-	$x->{password} = { $x->{authorizedservice} =>
-			   { clear => '<del>NOPASSWORD</del>' }
-			 };
+      if ( ! $args->{person_password1} &&
+	   ! $args->{person_password2} ) {
+	$x->{password}->{mail} = $self->pwdgen;
+	$x->{password}->{xmpp} = $self->pwdgen;
+      } else {
+	$x->{password}->{mail} = $self->pwdgen( { pwd => $args->{person_password2} } );
+	$x->{password}->{xmpp} = $self->pwdgen( { pwd => $args->{person_password2} } );
       }
 
       $leaf =
-  	$self->create_account_branch_leaf ( $ldap_crud, $final_message, $x, );
+	$self->create_account_branch_leaf ( $ldap_crud, $final_message, $x, );
+
+      ######################################################################
+      # Simplified Account xmpp branch of ROOT Object Creation
+      ######################################################################
+      $branch =
+      	$self
+      	->create_account_branch ( $ldap_crud,
+      				  {
+      				   uid => $uid,
+      				   authorizedservice => 'xmpp',
+      				   associateddomain => $args->{person_associateddomain},
+      				  },
+      				);
+
+      push @{$final_message->{success}}, $branch->{success} if defined $branch->{success};
+      push @{$final_message->{warning}}, $branch->{warning} if defined $branch->{warning};
+      push @{$final_message->{error}}, $branch->{error} if defined $branch->{error};
+
+      ######################################################################
+      # Simplified Leaf of the account email branch of ROOT Object
+      ######################################################################
+      $x->{basedn} = $branch->{dn};
+      $x->{authorizedservice} = 'xmpp';
+
+      $leaf =
+	$self->create_account_branch_leaf ( $ldap_crud, $final_message, $x, );
+
+    } else {
+      foreach $element ( $self->form->field($form_field)->fields ) { # p @{[$self->form->field($form_field)->fields]};
+	foreach ( $element->fields ) {
+	  $is_svc_empty .= $_->value if defined $_->value;
+	}			   # p $is_svc_empty;
+	next if $is_svc_empty eq ''; # avoid all empty services
+
+	######################################################################
+	# Account branch of ROOT Object
+	######################################################################
+	$branch =
+	  $self
+	  ->create_account_branch ( $ldap_crud,
+				    {
+				     uid => $uid,
+				     authorizedservice => $form_field ne 'account' ?
+				     substr($form_field, 10) :
+				     $element->field('authorizedservice')->value,
+				     associateddomain => $element->field('associateddomain')->value,
+				    },
+				  );
+
+	push @{$final_message->{success}}, $branch->{success} if defined $branch->{success};
+	push @{$final_message->{warning}}, $branch->{warning} if defined $branch->{warning};
+	push @{$final_message->{error}}, $branch->{error} if defined $branch->{error};
+
+	######################################################################
+	# Leaf of the account branch of ROOT Object
+	######################################################################
+	my $x =
+	  {
+	   basedn => $branch->{dn},
+	   authorizedservice => $form_field ne 'account' ?
+	   substr($form_field, 10) : $element->field('authorizedservice')->value,
+	   associateddomain => $branch->{associateddomain_prefix} . $element->field('associateddomain')->value,
+	   uidNumber => $uidNumber,
+	   givenName => $args->{person_givenname},
+	   sn => $args->{person_sn},
+	   telephoneNumber => $args->{person_telephonenumber},
+	   # jpegPhoto => $jpeg,
+	  };
+	if ( $form_field eq 'account' ) {
+	  if ( $element->field('authorizedservice')->value =~ /^802.1x-.*/ ) {
+	    $x->{password} = { $element->field('authorizedservice')->value =>
+			       {
+				clear => $self->macnorm({ mac => $element->field('login')->value }) }
+			     };
+	    $x->{radiusgroupname} = $element->field('radiusgroupname')->value
+	      if defined $element->field('radiusgroupname')->value;
+	    $x->{radiustunnelprivategroupid} = $element->field('radiustunnelprivategroupid')->value
+	      if defined $element->field('radiustunnelprivategroupid')->value;
+	  } elsif ( ! $element->field('password1')->value &&
+		    ! $element->field('password2')->value) {
+	    $x->{password} = { $element->field('authorizedservice')->value => $self->pwdgen };
+	  } else {
+	    $x->{password} = { $element->field('authorizedservice')->value =>
+			       $self->pwdgen( { pwd => $element->field('password2')->value } ) };
+	  }
+
+	  $x->{login} = defined $element->field('login')->value ? $element->field('login')->value : $uid;
+
+	} elsif ( $x->{authorizedservice} eq 'ssh' ) {
+	  $x->{sshpublickey} = $element->field('key')->value;
+	  $x->{login} = $uid;
+	  $x->{password} = { $x->{authorizedservice} =>
+			     {
+			      clear => '<del>NOPASSWORD</del>' }
+			   };
+	} elsif ( $x->{authorizedservice} eq 'ovpn' ) {
+	  $x->{userCertificate} = $element->field('cert')->value
+	    if defined $element->field('cert')->value;
+	  $x->{password} = { $x->{authorizedservice} =>
+			     {
+			      clear => '<del>NOPASSWORD</del>' }
+			   };
+	}
+
+	$leaf =
+	  $self->create_account_branch_leaf ( $ldap_crud, $final_message, $x, );
+      }
+      $is_svc_empty = '';
     }
-    $is_svc_empty = '';
   }
   ######################################################################
   # SERVICE ACCOUNTS PROCESSING STOP
@@ -358,7 +438,7 @@ sub create_account_branch {
 
 sub create_account_branch_leaf {
   my  ( $self, $ldap_crud, $final_message, $args ) = @_;
-  my $arg = {
+  p my $arg = {
 	     basedn => $args->{basedn},
 	     service => $args->{authorizedservice},
 	     associatedDomain => $args->{associateddomain},
@@ -498,7 +578,7 @@ sub create_account_branch_leaf {
   }
 
   p $arg->{dn};
-  # p $authorizedService;
+  p $authorizedService;
 
   my $mesg =
     $ldap_crud->add(

@@ -130,7 +130,7 @@
 		    </form>
 		  </li>
 		  <li>
-		    <button type="button" title="block all accounts of the user with DN: [% entry.key %]" class="btn btn-link"
+		    <button type="button" title="block all accounts (password changed to random ones, ssh key bound to localhost only) of the user with DN: [% entry.key %]" class="btn btn-link"
 			    value="[% entry.key %]"
 			    name="user_block"
 			    data-order="19"
@@ -147,7 +147,7 @@
 			    name="ldap_delete"
 			    data-order="50"
 			    data-toggle="modal"
-			    data-target="#deleteModal[% loop.index %]">
+			    data-target="#modal_delete[% zufix %]">
 		      <span class="fa fa-fw fa-trash text-danger"></span>
 		      delete
 		    </button>
@@ -282,35 +282,37 @@
 		  title="Root Objectt"><span class="fa fa-star fa-lg"></span>
 
 		  [% ELSIF entry.key.match('^author') %]
-		    [% IF dn.authorizedService.match('mail')%]
+		    [% IF dn.authorizedService.match('mail') %]
 		    title="EMAIL Service Account Branch">[% child %]<i class="[% services.mail.icon %] fa-lg"></i>
-		    [% ELSIF dn.authorizedService.match('xmpp')%]
+		    [% ELSIF dn.authorizedService.match('xmpp') %]
 		    title="XMPP (Jabber) Service Account Branch">[% child %]<i class="[% services.xmpp.icon %] fa-lg"></i>
-		    [% ELSIF dn.authorizedService.match('ovpn')%]
+		    [% ELSIF dn.authorizedService.match('ovpn') %]
 		    title="OpenVPN Service Account Branch">[% child %]<i class="[% services.ovpn.icon %] fa-lg"></i>
-		    [% ELSIF dn.authorizedService.match('ssh')%]
+		    [% ELSIF dn.authorizedService.match('ssh') %]
 		    title="SSH key Branch">[% child %]<i class="[% services.ssh.icon %] fa-lg"></i>
-		    [% ELSIF dn.authorizedService.match('mac')%][% mac='802.1x-mac' %]
+		    [% ELSIF dn.authorizedService.match('mac') %][% mac='802.1x-mac' %]
 		    title="802.1x MAC AUTH Service Account Branch">[% child %]<i class="[% services.$mac.icon %] fa-lg"></i>
-		    [% ELSIF dn.authorizedService.match('eap')%][% eap='802.1x-eap' %]
+		    [% ELSIF dn.authorizedService.match('eap') %][% eap='802.1x-eap' %]
 		    title="802.1x EAP AUTH Service Account Branch">[% child %]<i class="[% services.$eap.icon %] fa-lg"></i>
 		    [% ELSE %]
 		    title="Service Account Branch"><i class="fa fa-code-fork fa-lg"></i>
 		    [% END %]
 		    
 		  [% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
-		    [% IF dn.authorizedService.match('mail')%]
+		    [% IF dn.authorizedService.match('mail') %]
 		    title="EMAIL Service Account">[% child %][% child %]<i class="[% services.mail.icon %] fa-lg"></i>
-		    [% ELSIF dn.authorizedService.match('xmpp')%]
+		    [% ELSIF dn.authorizedService.match('xmpp') %]
 		    title="XMPP (Jabber) Service Account">[% child %][% child %]<i class="[% services.xmpp.icon %] fa-lg"></i>
-		    [% ELSIF dn.authorizedService.match('ovpn')%]
+		    [% ELSIF dn.authorizedService.match('ovpn') %]
 		    title="OpenVPN Service Account">[% child %][% child %]<i class="[% services.ovpn.icon %] fa-lg"></i>
-		    [% ELSIF dn.authorizedService.match('ssh')%]
+		    [% ELSIF dn.authorizedService.match('ssh') %]
 		    title="SSH key">[% child %][% child %]<i class="[% services.ssh.icon %] fa-lg"></i>
-		    [% ELSIF dn.authorizedService.match('mac')%][% mac='802.1x-mac' %]
+		    [% ELSIF dn.authorizedService.match('mac') %][% mac='802.1x-mac' %]
 		    title="802.1x MAC AUTH Service Account">[% child %][% child %]<i class="[% services.$mac.icon %] fa-lg"></i>
-		    [% ELSIF dn.authorizedService.match('eap')%][% eap='802.1x-eap' %]
+		    [% ELSIF dn.authorizedService.match('eap') %][% eap='802.1x-eap' %]
 		    title="802.1x EAP AUTH Service Account">[% child %][% child %]<i class="[% services.$eap.icon %] fa-lg"></i>
+		    [% ELSE %]
+		    title="Service Account"><i class="fa fa-leaf fa-lg"></i>
 		    [% END %]
 
 		  [% ELSE %]
@@ -330,14 +332,14 @@
 
 
 	      <!-- #### Modal: Delete start -->
-	      <div class="modal" id="deleteModal[% loop.index %]"
-		   tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel[% loop.index %]"
+	      <div class="modal" id="modal_delete[% zufix %]"
+		   tabindex="-1" role="dialog" aria-labelledby="modal_delete[% zufix %]_label"
 		   aria-hidden="true">
 		<div class="modal-dialog modal-lg">
 		  <div class="modal-content">
 		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/delete') %]">
 		      <div class="modal-header">
-			<h4 class="modal-title alert alert-danger" id="deleteModalLabel[% loop.index %]">
+			<h4 class="modal-title alert alert-danger" id="modal_delete[% zufix %]_label">
 			  <span class="fa fa-times-circle"></span>
 			  You are about to perform deletion of DN: <b>[% entry.key.replace(',', ', ') %]</b>
 			</h4>

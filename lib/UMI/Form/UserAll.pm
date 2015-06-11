@@ -55,9 +55,18 @@ has_field 'person_sn'
 
 has_field 'person_namesake'
   => ( type => 'Checkbox',
-       label => 'namesake (check it if sure the user doesn\'t exist)',
+       label => 'namesake',
        label_class => [ 'col-xs-1', ],
+       element_attr => { title => 'This new user has the same name/s as of some existent one. Check it if sure this new user does not exist and is not that existent one' },
        element_wrapper_class => [ 'col-xs-offset-1', 'col-xs-11', 'col-lg-5', 'text-muted', ],
+     );
+
+has_field 'person_simplified'
+  => ( type => 'Checkbox',
+       label => 'simplified',
+       label_class => [ 'col-xs-1', ],
+       element_attr => { title => 'When checked, this checkbox causes user account bein created in a simplified manner. Only Email and XMPP services will be created with the FQDN choosen in Domain Name field bellow.' },
+       element_wrapper_class => [ 'col-xs-offset-1', 'col-xs-11', 'col-lg-5', 'text-muted' ],
      );
 
 has_field 'person_avatar'
@@ -121,6 +130,19 @@ has_field 'person_login'
        element_attr => { placeholder => 'john.doe', },
      );
 
+has_field 'person_associateddomain'
+  => ( type => 'Select',
+       wrapper_attr => { id => 'simplified', },
+       wrapper_class => [ 'simplified', ],
+       label => 'Domain Name',
+       label_class => [ 'col-xs-2', 'required', ],
+       empty_select => '--- Choose Domain ---',
+       # element_attr => { disabled => 'dissabled', },
+       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+       element_class => [ 'input-sm', ],
+       options_method => \&associateddomains,
+       required => 0 );
+
 has_field 'person_password1'
   => ( type => 'Password',
        label => 'Password',
@@ -154,6 +176,7 @@ has_block 'group_person'
 			'person_avatar',
 			'person_telephonenumber',
 			# 'person_telcomment',
+			'person_associateddomain',
 			'person_login',
 			'person_password1',
 			'person_password2',
@@ -417,36 +440,70 @@ has_field 'loginless_ovpn.cert'
 		       },
      );
 
-has_field 'loginless_ovpn.device'
-  => ( apply => [ NoSpaces, NotAllDigits, Printable ],
-       label => 'Device',
+has_field 'loginless_ovpn.dev'
+  => ( apply => [ NoSpaces, Printable ],
+       label => 'Device Type',
        label_class => [ 'col-xs-2', ],
        element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
        element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'Lenovo P780',
-			 'data-name' => 'device',
+       element_attr => { placeholder => 'notebook, netbook, smartphone',
+			 'data-name' => 'dev',
 			 'data-group' => 'loginless_ovpn', },
      );
 
-has_field 'loginless_ovpn.ip'
-  => ( apply => [ NoSpaces, NotAllDigits, Printable ],
-       label => 'IP',
+has_field 'loginless_ovpn.devmake'
+  => ( apply => [ Printable ],
+       label => 'Device Maker',
        label_class => [ 'col-xs-2', ],
        element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
        element_class => [ 'input-sm', ],
-       element_attr => { placeholder => '192.168.0.1',
-			 'data-name' => 'ip',
+       element_attr => { placeholder => 'HP, Dell, Asus, Lenovo',
+			 'data-name' => 'devmake',
 			 'data-group' => 'loginless_ovpn', },
      );
 
-has_field 'loginless_ovpn.os'
-  => ( apply => [ NotAllDigits, Printable ],
+has_field 'loginless_ovpn.devmodel'
+  => ( apply => [ Printable ],
+       label => 'Device Model',
+       label_class => [ 'col-xs-2', ],
+       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+       element_class => [ 'input-sm', ],
+       element_attr => { placeholder => 'Pavilion dm1',
+			 'data-name' => 'devmodel',
+			 'data-group' => 'loginless_ovpn', },
+     );
+
+
+has_field 'loginless_ovpn.ifconfigpush'
+  => ( apply => [ Printable ],
+       label => 'Ifconfig',
+       label_class => [ 'col-xs-2', ],
+       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+       element_class => [ 'input-sm', ],
+       element_attr => { placeholder => '10.0.97.2 10.0.97.1, 10.13.83.192 10.0.97.1',
+			 'data-name' => 'ifconfigpush',
+			 'data-group' => 'loginless_ovpn', },
+     );
+
+has_field 'loginless_ovpn.devos'
+  => ( apply => [ Printable ],
        label => 'OS',
        label_class => [ 'col-xs-2', ],
        element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
        element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'UNIX / Windows / iOS',
-			 'data-name' => 'os',
+       element_attr => { placeholder => 'xNIX, MacOS, Android, Windows',
+			 'data-name' => 'devos',
+			 'data-group' => 'loginless_ovpn', },
+     );
+
+has_field 'loginless_ovpn.devosv'
+  => ( apply => [ Printable ],
+       label => 'OS version',
+       label_class => [ 'col-xs-2', ],
+       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+       element_class => [ 'input-sm', ],
+       element_attr => { placeholder => '1.2.3',
+			 'data-name' => 'devosv',
 			 'data-group' => 'loginless_ovpn', },
      );
 
@@ -707,67 +764,67 @@ sub validate {
     $i++;
   }
 
-  $i = 0;
-  foreach $element ( $self->field('loginless_ovpn')->fields ) {
-    if ( defined $element->field('associateddomain')->value &&
-	 ! defined $element->field('cert')->value &&
-	 ! defined $element->field('device')->value &&
-	 ! defined $element->field('ip')->value ) { # only fqdn
-      $element->field('cert')->add_error('Cert field have to be defined!');
-      $element->field('device')->add_error('Device field have to be defined!');
-      $element->field('ip')->add_error('IP field have to be defined!');
-    } elsif ( ! defined $element->field('associateddomain')->value &&
-	      defined $element->field('cert')->value &&
-	      ! defined $element->field('device')->value &&
-	      ! defined $element->field('ip')->value ) { # only cert
-      $element->field('associateddomain')->add_error('Domain field have to be defined!');
-      $element->field('device')->add_error('Device field have to be defined!');
-      $element->field('ip')->add_error('IP field have to be defined!');
-    } elsif ( ! defined $element->field('associateddomain')->value &&
-	      ! defined $element->field('cert')->value &&
-	      defined $element->field('device')->value &&
-	      ! defined $element->field('ip')->value ) { # only device
-      $element->field('cert')->add_error('Cert field have to be defined!');
-      $element->field('associateddomain')->add_error('Domain field have to be defined!');
-      $element->field('ip')->add_error('IP field have to be defined!');
-    } elsif ( ! defined $element->field('associateddomain')->value &&
-	      ! defined $element->field('cert')->value &&
-	      ! defined $element->field('device')->value &&
-	      defined $element->field('ip')->value ) { # only ip
-      $element->field('cert')->add_error('Cert field have to be defined!');
-      $element->field('device')->add_error('Device field have to be defined!');
-      $element->field('associateddomain')->add_error('Domain field have to be defined!');
-    } elsif ( ! defined $element->field('associateddomain')->value &&
-    	      ! defined $element->field('cert')->value &&
-    	      ! defined $element->field('device')->value &&
-    	      ! defined $element->field('ip')->value &&
-	      $i > 0 ) { # empty duplicatee
-      $element->add_error('Empty duplicatee!');
-      $self->add_form_error('<span class="fa-stack fa-fw">' .
-			    '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
-			    '<i class="fa fa-user-times pull-right fa-stack-1x"></i>' .
-			    '</span>' .
-			    '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
-			    '<b> -> OpenVPN:</b> Empty duplicatee! Fill it or remove, please');
-    }
-
-    if ( defined $element->field('cert')->value ) {
-      $element->field('cert')->value;
-      $cert = $self->file2var( $element->field('cert')->value->{tempname}, $cert_msg);
-      $element->field('cert')->add_error($cert_msg->{error}) if defined $cert_msg->{error};
-      $is_x509 = $self->cert_info({ cert => $cert });
-      $element->field('cert')->add_error('Certificate file is broken or not DER format!') if defined $is_x509->{error};
-      $self->add_form_error('<span class="fa-stack fa-fw">' .
-			    '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
-			    '<i class="fa fa-user-times pull-right fa-stack-1x"></i>' .
-			    '</span>' .
-			    '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
-			    '<b> -> OpenVPN:</b> Problems with certificate file<br>' . $is_x509->{error})
-	if defined $is_x509->{error};
-  }
+  # temporarily disabled #  $i = 0;
+  # temporarily disabled #  foreach $element ( $self->field('loginless_ovpn')->fields ) {
+  # temporarily disabled #    if ( defined $element->field('associateddomain')->value &&
+  # temporarily disabled #  	 ! defined $element->field('cert')->value &&
+  # temporarily disabled #  	 ! defined $element->field('device')->value &&
+  # temporarily disabled #  	 ! defined $element->field('ip')->value ) { # only fqdn
+  # temporarily disabled #      $element->field('cert')->add_error('Cert field have to be defined!');
+  # temporarily disabled #      $element->field('device')->add_error('Device field have to be defined!');
+  # temporarily disabled #      $element->field('ip')->add_error('IP field have to be defined!');
+  # temporarily disabled #    } elsif ( ! defined $element->field('associateddomain')->value &&
+  # temporarily disabled #  	      defined $element->field('cert')->value &&
+  # temporarily disabled #  	      ! defined $element->field('device')->value &&
+  # temporarily disabled #  	      ! defined $element->field('ip')->value ) { # only cert
+  # temporarily disabled #      $element->field('associateddomain')->add_error('Domain field have to be defined!');
+  # temporarily disabled #      $element->field('device')->add_error('Device field have to be defined!');
+  # temporarily disabled #      $element->field('ip')->add_error('IP field have to be defined!');
+  # temporarily disabled #    } elsif ( ! defined $element->field('associateddomain')->value &&
+  # temporarily disabled #  	      ! defined $element->field('cert')->value &&
+  # temporarily disabled #  	      defined $element->field('device')->value &&
+  # temporarily disabled #  	      ! defined $element->field('ip')->value ) { # only device
+  # temporarily disabled #      $element->field('cert')->add_error('Cert field have to be defined!');
+  # temporarily disabled #      $element->field('associateddomain')->add_error('Domain field have to be defined!');
+  # temporarily disabled #      $element->field('ip')->add_error('IP field have to be defined!');
+  # temporarily disabled #    } elsif ( ! defined $element->field('associateddomain')->value &&
+  # temporarily disabled #  	      ! defined $element->field('cert')->value &&
+  # temporarily disabled #  	      ! defined $element->field('device')->value &&
+  # temporarily disabled #  	      defined $element->field('ip')->value ) { # only ip
+  # temporarily disabled #      $element->field('cert')->add_error('Cert field have to be defined!');
+  # temporarily disabled #      $element->field('device')->add_error('Device field have to be defined!');
+  # temporarily disabled #      $element->field('associateddomain')->add_error('Domain field have to be defined!');
+  # temporarily disabled #    } elsif ( ! defined $element->field('associateddomain')->value &&
+  # temporarily disabled #    	      ! defined $element->field('cert')->value &&
+  # temporarily disabled #    	      ! defined $element->field('device')->value &&
+  # temporarily disabled #    	      ! defined $element->field('ip')->value &&
+  # temporarily disabled #  	      $i > 0 ) { # empty duplicatee
+  # temporarily disabled #      $element->add_error('Empty duplicatee!');
+  # temporarily disabled #      $self->add_form_error('<span class="fa-stack fa-fw">' .
+  # temporarily disabled #  			    '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
+  # temporarily disabled #  			    '<i class="fa fa-user-times pull-right fa-stack-1x"></i>' .
+  # temporarily disabled #  			    '</span>' .
+  # temporarily disabled #  			    '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
+  # temporarily disabled #  			    '<b> -> OpenVPN:</b> Empty duplicatee! Fill it or remove, please');
+  # temporarily disabled #    }
     
-    $i++;
-  }
+  # temporarily disabled #    if ( defined $element->field('cert')->value ) {
+  # temporarily disabled #      $element->field('cert')->value;
+  # temporarily disabled #      $cert = $self->file2var( $element->field('cert')->value->{tempname}, $cert_msg);
+  # temporarily disabled #      $element->field('cert')->add_error($cert_msg->{error}) if defined $cert_msg->{error};
+  # temporarily disabled #      $is_x509 = $self->cert_info({ cert => $cert });
+  # temporarily disabled #      $element->field('cert')->add_error('Certificate file is broken or not DER format!') if defined $is_x509->{error};
+  # temporarily disabled #      $self->add_form_error('<span class="fa-stack fa-fw">' .
+  # temporarily disabled #  			    '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
+  # temporarily disabled #  			    '<i class="fa fa-user-times pull-right fa-stack-1x"></i>' .
+  # temporarily disabled #  			    '</span>' .
+  # temporarily disabled #  			    '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
+  # temporarily disabled #  			    '<b> -> OpenVPN:</b> Problems with certificate file<br>' . $is_x509->{error})
+  # temporarily disabled #  	if defined $is_x509->{error};
+  # temporarily disabled #    }
+    
+  # temporarily disabled #    $i++;
+  # temporarily disabled #  }
 
   # else {
   #    $mesg =

@@ -21,6 +21,8 @@
   [% form.field('person_givenname').render %]
   [% form.field('person_sn').render %]
   [% form.field('person_namesake').render %]
+  [% form.field('person_simplified').render %]
+
   <hr>
   
   <ul role="tablist" class="col-xs-1 nav nav-pills nav-stacked" id="myTab">
@@ -34,7 +36,7 @@
       </a>
     </li>
 
-    <li class="text-left" role="presentation">
+    <li class="complex text-left" role="presentation">
       <a aria-controls="auth" data-toggle="tab" role="tab"
 	 id="auth-tab" href="#auth" title="Login/Password Dependent Services"
 	 aria-expanded="false">
@@ -49,7 +51,7 @@
       </a>
     </li>
 
-    <li class="dropdown text-left" role="presentation">
+    <li class="complex dropdown text-left" role="presentation">
       <a aria-controls="sec-contents" data-toggle="dropdown"
 	 class="dropdown-toggle" id="umiSec" href="#"
 	 title="Services Without Login/Password" aria-expanded="false">
@@ -85,7 +87,7 @@
       </ul>
     </li>
 
-    <li class="text-left" role="presentation">
+    <li class="complex text-left" role="presentation">
       <a aria-controls="groups" data-toggle="tab" id="groups-tab"
 	 role="tab" href="#ms-groups" title="Group/s User Belongs to"
 	 aria-expanded="false">
