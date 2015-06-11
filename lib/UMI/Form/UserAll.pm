@@ -58,15 +58,16 @@ has_field 'person_namesake'
        label => 'namesake',
        label_class => [ 'col-xs-1', ],
        element_attr => { title => 'This new user has the same name/s as of some existent one. Check it if sure this new user does not exist and is not that existent one' },
-       element_wrapper_class => [ 'col-xs-offset-1', 'col-xs-11', 'col-lg-5', 'text-muted', ],
+       # element_wrapper_class => [ 'col-xs-offset-1', 'col-xs-11', 'col-lg-5', 'text-muted', ],
      );
 
 has_field 'person_simplified'
   => ( type => 'Checkbox',
        label => 'simplified',
        label_class => [ 'col-xs-1', ],
-       element_attr => { title => 'When checked, this checkbox causes user account bein created in a simplified manner. Only Email and XMPP services will be created with the FQDN choosen in Domain Name field bellow.' },
-       element_wrapper_class => [ 'col-xs-offset-1', 'col-xs-11', 'col-lg-5', 'text-muted' ],
+       element_attr => { title => 'When checked, this checkbox causes user account been created in a simplified manner. Only Email and XMPP services will be created for FQDN choosen with Domain Name field in section Person bellow.' },
+       # element_wrapper_class => [ 'col-xs-offset-1', 'col-xs-11', 'col-lg-5', 'text-muted' ],
+       # wrapper_class => [],
      );
 
 has_field 'person_avatar'

@@ -170,3 +170,8 @@
   background: rgba(252, 252, 252, 0.37);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.48);
 }
+
+.clear {
+  display: block;
+  clear: both;
+}

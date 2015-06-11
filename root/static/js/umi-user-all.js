@@ -6,9 +6,11 @@
   Name field been showed in section Person bellow.
 
 */
-$('.simplified').hide(300);
-$('#person_namesake').prop('checked', false);
-$('#person_simplified').prop('checked', false);
+//if (!$(".has-error")) {
+    $('.simplified').hide(300);
+    $('#person_namesake').prop('checked', false);
+    $('#person_simplified').prop('checked', false);
+//}
 
 $("#person_simplified").click(function() {
     if($(this).is(":checked")) {
