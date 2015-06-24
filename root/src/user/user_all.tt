@@ -4,11 +4,11 @@
 %]
 
 <div class="page-header">
-  <h2>New Root Object Creation Form
+  <h2>[% IF ! form.add_svc_acc %]Root And [% ELSE %]Additional [% END %]Services Object/s Creation Form[% IF form.add_svc_acc %] for user: [% form.add_svc_acc %][% END %]
     <small>
       <em>
-	complex form for all possible stuff (user's personal data and services),
-	sign &laquo;<span class="fa fa-exclamation-circle text-danger umi-opacity05"></span>&raquo; marks mandatory fields
+	(complex form for all possible stuff (user's personal data and services),
+	sign &laquo;<span class="fa fa-exclamation-circle text-danger umi-opacity05"></span>&raquo; marks mandatory fields)
       </em>
     </small>
   </h2>
@@ -17,7 +17,10 @@
 [% INCLUDE ldap_err.tt %]
 
 <form id="[% form.name %]" class="form-horizontal tab-content" method="post" enctype="multipart/form-data">
+<!-- <form class="form-horizontal tab-content" method="post" enctype="multipart/form-data"> -->
 
+  [% form.field('add_svc_acc').render %]
+  [% IF ! form.add_svc_acc %]
   [% form.field('person_givenname').render %]
   [% form.field('person_sn').render %]
   
@@ -29,24 +32,24 @@
       [% form.field('person_simplified').render %]
     </div>
   </div>
-
   <hr class="clear">
-  
+  [% END %]
+
   <ul role="tablist" class="col-xs-1 nav nav-pills nav-stacked" id="myTab">
     <!-- <li role="presentation">&nbsp;</li> -->
-    <li class="active text-left" role="presentation">
+    <li class="addsvcacc [% IF ! form.add_svc_acc %]active [% END %]text-left" role="presentation">
       <a aria-controls="person" data-toggle="tab" role="tab"
-	 id="person-tab" href="#person"
-	 title="Personal Data" aria-expanded="true">
+	 id="person-tab" href="#person" title="Personal Data"
+	 [% IF ! form.add_svc_acc %]aria-expanded="true"[% ELSE %]aria-expanded="false"[% END %]>
 	<span class="fa fa-fw fa-user fa-lg"></span>
 	<span class="visible-lg-inline">Person</span>
       </a>
     </li>
 
-    <li class="complex text-left" role="presentation">
+    <li class="complex text-left[% IF form.add_svc_acc %] active[% END %]"" role="presentation">
       <a aria-controls="auth" data-toggle="tab" role="tab"
 	 id="auth-tab" href="#auth" title="Login/Password Dependent Services"
-	 aria-expanded="false">
+	 [% IF ! form.add_svc_acc %]aria-expanded="false"[% ELSE %]aria-expanded="true"[% END %]>
 	<!-- <span class="fa fa-user-plus fa-lg"></span>
 		<span class="visible-lg-inline">Login</span> -->
 	<span class="fa-stack fa-fw">
@@ -104,7 +107,7 @@
     </li>
   </ul>
   [% # form.render %]
-  [% form.block('person').render %]
+  [% IF ! form.add_svc_acc %][% form.block('person').render %][% END %]
   [% form.block('auth').render %]
   [% form.block('ssh').render %]
   [% form.block('ovpn').render %]
@@ -131,6 +134,19 @@
     </dl>
   </div>
 </div>
+[% END %]
+
+[% IF form.add_svc_acc %]
+<script type="text/javascript">
+        /* 
+        --- FORM USED FOR AN EXISTENT DN ------------------------------------------
+        dn for account service to be added to, was selected in searchby form
+        */
+
+        $('.addsvcacc').hide(300);
+        $('#auth').addClass('in').addClass('active');
+        $('#person').removeClass('in').removeClass('active');
+        </script>
 [% END %]
 
 <script src="/static/js/umi-user-all.js"></script>  

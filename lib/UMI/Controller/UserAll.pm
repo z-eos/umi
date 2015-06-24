@@ -40,17 +40,18 @@ sub index :Path :Args(0) {
 	 $c->check_user_roles('802.1x-mac') ||
 	 $c->check_user_roles('802.1x-eap') ) {
       my $params = $c->req->parameters;
+      $self->form->add_svc_acc( defined $params->{add_svc_acc} ? $params->{add_svc_acc} : '' );
       my $final_message;
       $params->{'person_avatar'} = $c->req->upload('person_avatar') if $params->{'person_avatar'};
       my $i = 0;
       foreach ( $self->form->field('loginless_ovpn')->fields ) {
-	$params->{'loginless_ovpn.' . $i . '.cert'} =
-	  $c->req->upload('loginless_ovpn.' . $i . '.cert') if $params->{'loginless_ovpn.' . $i . '.cert'};
+	$params->{'loginless_ovpn.' . $i . '.userCertificate'} =
+	  $c->req->upload('loginless_ovpn.' . $i . '.userCertificate') if $params->{'loginless_ovpn.' . $i . '.userCertificate'};
 	$i++;
       }
-      
-      $c->stash( template => defined $params->{add_svc_acc} ? 'user/user_all_add_svc.tt' : 'user/user_all.tt',
-		 add_svc_acc => $params->{add_svc_acc} || '',
+
+      $c->stash( # template => $self->form->add_svc_acc ne '' ? 'user/user_all_add_svc.tt' : 'user/user_all.tt',
+		 template => 'user/user_all.tt',
 		 form => $self->form,
 		 final_message => $final_message, );
 
@@ -82,6 +83,7 @@ sub index :Path :Args(0) {
 
 sub create_account {
   my  ( $self, $ldap_crud, $args ) = @_;
+  p $args;
   # my $args = $c->req->parameters;
   # my $ldap_crud = $c->model('LDAP_CRUD');
   my @form_fields = defined $args->{person_simplified} &&
@@ -246,7 +248,7 @@ sub create_account {
       $leaf =
 	$self->create_account_branch_leaf ( $ldap_crud, $final_message, $x, );
 
-    } else {
+    } else { # person_simplified checkbox is *not* checked, we continue with general form
       foreach $element ( $self->form->field($form_field)->fields ) { # p @{[$self->form->field($form_field)->fields]};
 	foreach ( $element->fields ) {
 	  $is_svc_empty .= $_->value if defined $_->value;
@@ -315,12 +317,18 @@ sub create_account {
 			      clear => '<del>NOPASSWORD</del>' }
 			   };
 	} elsif ( $x->{authorizedservice} eq 'ovpn' ) {
-	  $x->{userCertificate} = $element->field('cert')->value
-	    if defined $element->field('cert')->value;
+	  $x->{userCertificate} = $element->field('userCertificate')->value
+	    if defined $element->field('userCertificate')->value;
 	  $x->{password} = { $x->{authorizedservice} =>
-			     {
-			      clear => '<del>NOPASSWORD</del>' }
-			   };
+			     { clear => '<del>NOPASSWORD</del>' } };
+	  $x->{associateddomain} = $element->field('associateddomain')->value;
+	  $x->{umiOvpnCfgIfconfigPush} = $element->field('ifconfigpush')->value || 'NA';
+	  $x->{umiOvpnAddStatus} = $element->field('status')->value || 'blocked';
+	  $x->{umiOvpnAddDevType} = $element->field('devtype')->value || 'NA';
+	  $x->{umiOvpnAddDevMake} = $element->field('devmake')->value || 'NA';
+	  $x->{umiOvpnAddDevModel} = $element->field('devmodel')->value || 'NA';
+	  $x->{umiOvpnAddDevOS} = $element->field('devos')->value || 'NA';
+	  $x->{umiOvpnAddDevOSVer} = $element->field('devosver')->value || 'NA';
 	}
 
 	$leaf =
@@ -388,6 +396,7 @@ sub create_account_branch {
   if ( $if_exist->count ) {
     $return->{warning} = 'branch DN: <b>&laquo;' . $arg->{dn} . '&raquo;</b> '
       . 'was not created since it <b>already exists</b>, I will use it further.';
+    $return->{dn} = $arg->{dn};
   } else {
     my $mesg = $ldap_crud->add( $arg->{dn}, $arg->{add_attrs} );
     if ( $mesg ) {
@@ -438,7 +447,7 @@ sub create_account_branch {
 
 sub create_account_branch_leaf {
   my  ( $self, $ldap_crud, $final_message, $args ) = @_;
-  p my $arg = {
+  my $arg = {
 	     basedn => $args->{basedn},
 	     service => $args->{authorizedservice},
 	     associatedDomain => $args->{associateddomain},
@@ -449,10 +458,20 @@ sub create_account_branch_leaf {
 	     password => $args->{password},
 	     telephoneNumber => $args->{telephoneNumber} || '666',
 	     jpegPhoto => $args->{jpegPhoto} || undef,
+	     
 	     to_sshkeygen => $args->{to_sshkeygen} || undef,
 	     sshpublickey => $args->{sshpublickey} || undef,
 	     sshkeydescr => $args->{sshkeydescr} || undef,
+	     
 	     userCertificate => $args->{userCertificate} || undef,
+	     umiOvpnCfgIfconfigPush => $args->{umiOvpnCfgIfconfigPush} || 'NA',
+	     umiOvpnAddStatus => $args->{umiOvpnAddStatus} || 'blocked',
+	     umiOvpnAddDevType => $args->{umiOvpnAddDevType} || 'NA',
+	     umiOvpnAddDevMake => $args->{umiOvpnAddDevMake} || 'NA',
+	     umiOvpnAddDevModel => $args->{umiOvpnAddDevModel} || 'NA',
+	     umiOvpnAddDevOS => $args->{umiOvpnAddDevOS} || 'NA',
+	     umiOvpnAddDevOSVer => $args->{umiOvpnAddDevOSVer} || 'NA',
+	     
 	     radiusgroupname => $args->{radiusgroupname} || 'ip-phone',
 	     radiustunnelprivategroupid => $args->{radiustunnelprivategroupid} || 3,
 	    };
@@ -562,17 +581,29 @@ sub create_account_branch_leaf {
 			 ];
 
   } elsif ( $arg->{service} eq 'ovpn' ) {
-    my $usercertificate = $self->file2var($arg->{userCertificate}->{'tempname'}, $final_message);
     $arg->{dn} = 'cn=' . substr($arg->{userCertificate}->{filename},0,-4) . ',' . $arg->{basedn};
-    $arg->{cert_info} = $self->cert_info({ cert => $usercertificate });
+    $arg->{cert_info} =
+      $self->cert_info({
+			cert => $self->file2var($arg->{userCertificate}->{'tempname'}, $final_message),
+			ts => "%Y%m%d%H%M%S",
+		       });
     $authorizedService = [
 			  cn => substr($arg->{userCertificate}->{filename},0,-4),
-			  # here `sn' is "missused" since we use it as
-			  # Serial Number rather than last (family)
-			  # name(s) for which the entity is known by
-			  sn => '' . $arg->{cert_info}->{'S/N'},
+			  associatedDomain => $arg->{associatedDomain},
 			  objectClass => $ldap_crud->{cfg}->{objectClass}->{ovpn},
-			  'userCertificate;binary' => $usercertificate,
+			  umiOvpnCfgIfconfigPush => $arg->{umiOvpnCfgIfconfigPush},
+			  umiOvpnAddStatus => $arg->{umiOvpnAddStatus},
+			  umiOvpnAddCertSn => '' . $arg->{cert_info}->{'S/N'},
+			  umiOvpnAddCertNotBefore => '' . $arg->{cert_info}->{'Not Before'},
+			  umiOvpnAddCertNotAfter => '' . $arg->{cert_info}->{'Not  After'},
+			  umiOvpnAddCertSubject => '' . $arg->{cert_info}->{'Subject'},
+			  umiOvpnAddCertIssuer => '' . $arg->{cert_info}->{'Issuer'},
+			  umiOvpnAddDevType => $arg->{umiOvpnAddDevType},
+			  umiOvpnAddDevMake => $arg->{umiOvpnAddDevMake},
+			  umiOvpnAddDevModel => $arg->{umiOvpnAddDevModel},
+			  umiOvpnAddDevOS => $arg->{umiOvpnAddDevOS},
+			  umiOvpnAddDevOSVer => $arg->{umiOvpnAddDevOSVer},
+			  'userCertificate;binary' => $arg->{cert_info}->{cert},
 			 ];
     push @{$final_message->{error}}, $arg->{cert_info}->{error} if defined $arg->{cert_info}->{error};
   }

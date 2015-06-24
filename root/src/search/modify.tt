@@ -1,10 +1,10 @@
 [% META
-   title = 'Search Simple Modify'
+   title = 'Modify All Fields'
    link = '<link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">'
    %]
 
 <div class="page-header">
-  <h2>Search Simple Modify Page <small><em>of DN: [% modify %]</em></small></h2>
+  <h2>Modify All Fields <small><em>of DN: [% modify %]</em></small></h2>
 </div>
 
 [% IF final_message.error %]
@@ -53,6 +53,7 @@
       [% IF schema.item(attr.key) != 1 && 
          attr.key != rdn &&
          attr.key != 'userPassword' &&
+         ! attr.key.match('userCertificate') &&
          attr.key != 'jpegPhoto' %]
       [% attr.key %]&nbsp;<a class="element-add" href="#" title="add value"><span class="fa fa-plus-square"></span></a>
       [% ELSE %]
@@ -63,13 +64,19 @@
       [% IF attr.key == 'jpegPhoto' %]
       <img alt="jpegPhoto of [% modify %]" src="[% attr.value %]" class="img-thumbnail pull-left" title="[% modify %]">
       <input type="file" class="btn btn-default" name="[% attr.key %]" accept="image/jpeg, image/png"></input>
+
+      [% ELSIF attr.key == 'userCertificate;binary' %]
+      <input type="file" class="btn btn-default" name="[% attr.key %]" accept=".der"></input>
+
       [% ELSIF attr.key == 'userPassword' %]
       <input type="password" name="[% attr.key %]0" class="form-control" placeholder="password is here">
       <input type="password" name="[% attr.key %]1" class="form-control" placeholder="confirm password">
       [% ELSE %]
       [% FOREACH val IN attr.value %]
       [% IF attr.key == rdn %]
-      <input type=text value="[% val %]" name="[% attr.key %]" disabled="" class="form-control">
+      <input type=text value="[% val %]" name="[% attr.key %]" disabled="" class="form-control" title="this field is RDN">
+      [% ELSIF attr.key.match('umiOvpnAddCert') %]
+      <input type=text value="[% val %]" name="[% attr.key %]" disabled="" class="form-control" title="auto changed by new, .der format certificate (see the field &laquo;userCertificate&raquo;) upload">
       [% ELSIF attr.key == 'sshPublicKey' %]
       <p><textarea name="[% attr.key %]" class="form-control" rows=2>[% val %]</textarea></p>
       [% ELSIF attr.key == 'grayPublicKey' %]

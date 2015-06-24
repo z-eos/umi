@@ -1,30 +1,44 @@
 [% IF form.has_form_errors || final_message.error %]
-<div class="panel panel-danger">
-  <div class="panel-heading">
-    <h4><span class="fa fa-exclamation-circle">&nbsp;</span>Error!</h4>
-  </div>
-  <div class="panel-body">
-    [% IF form.has_form_errors %]
-    <b class="text-danger">Form contains error/s! Check all tabs for fields constraints met, please!</b>
-    <ul>
-      [% FOREACH i IN form.form_errors.reverse %]
-      <li>[% i %]</li>
-      [% END %]
-    </ul>
-    [% END %]
-    [% IF final_message.error %]
-    <ul>
-      [% FOREACH i IN final_message.error %]
-      <li>[% i %]</li>
-      [% END %]
-    </ul>
-    [% END %]
+<div class="panel-group" id="accordion">
+  <div class="panel panel-danger">
+    <div class="panel-heading" role="tab" id="headErr">
+      <a class="chevron_toggleable btn btn-danger pull-left"
+	 href="#" title="Collapse In/Out This Panel"
+	 data-target="#collapseErr" data-toggle="collapse" data-parent="#accordion">
+	<span class="fa fa-toggle-up"></span>
+      </a>
+      <h4><span class="fa fa-exclamation-circle">&nbsp;</span>Error!</h4>
+    </div>
+    <div id="collapseErr" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingErr">
+      <div class="panel-body">
+	[% IF form.has_form_errors %]
+	<b class="text-danger">Form contains error/s! Check all tabs for fields constraints met, please!</b>
+	<ul>
+	  [% FOREACH i IN form.form_errors.reverse %]
+	  <li>[% i %]</li>
+	  [% END %]
+	</ul>
+	[% END %]
+	[% IF final_message.error %]
+	<ul>
+	  [% FOREACH i IN final_message.error %]
+	  <li>[% i %]</li>
+	  [% END %]
+	</ul>
+	[% END %]
+      </div>
+    </div>
   </div>
 </div>
 [% END %]
 [% IF final_message.warning %]
 <div class="panel panel-warning">
   <div class="panel-heading">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close"
+	    onclick="$(this).closest('.panel').hide(200)"
+	    title="Dismiss this panel.">
+      <span aria-hidden="true" class="fa fa-times-circle"></span>
+    </button>
     <h4><span class="fa fa-exclamation-triangle">&nbsp;</span>Warning!</h4>
   </div>
   <div class="panel-body">
@@ -50,3 +64,9 @@
   </div>
 </div>
 [% END %]
+
+<script>
+ $('.chevron_toggleable').on('click', function() {
+   $(this).find('.fa').toggleClass('fa-toggle-down').toggleClass('fa-toggle-up')
+ });
+</script>

@@ -161,7 +161,8 @@ openssl x509 -in target.crt -text -noout
 sub cert_info {
   my ( $self, $args ) = @_;
   my $arg = {
-	     cert => $args->{'cert'},
+	     cert => $args->{cert},
+	     ts => defined $args->{ts} && $args->{ts} ? $args->{ts} : "%a %b %e %H:%M:%S %Y",
 	    };
 
   use Crypt::X509;
@@ -171,9 +172,10 @@ sub cert_info {
 	  'Subject' => join(',',@{$x509->Subject}),
 	  'Issuer' => join(',',@{$x509->Issuer}),
 	  'S/N' => $x509->serial,
-	  'Not Before' => strftime ("%a %b %e %H:%M:%S %Y", localtime($x509->not_before)),
-	  'Not  After' => strftime ("%a %b %e %H:%M:%S %Y", localtime( $x509->not_after)),
+	  'Not Before' => strftime ($arg->{ts}, localtime($x509->not_before)),
+	  'Not  After' => strftime ($arg->{ts}, localtime( $x509->not_after)),
 	  'error' => $x509->error ? sprintf('Error on parsing Certificate: %s', $x509->error) : undef,
+	  'cert' => $arg->{cert},
 	 };
 }
 

@@ -8,7 +8,7 @@
 </h2>
 
 <h6 class="text-muted">
-  <span class="fa fa-exclamation-triangle"></span> <em>Please note, not all objects could be found via predefined search items, to search for <strong>all</strong> objects use</em> &laquo;<span class="fa fa-search-plus"></span> advanced search&raquo; <em>menu item!</em>
+  <span class="fa fa-exclamation-triangle text-warning"></span> <em>Please note, not all objects could be found via predefined search items, to search for <strong>all</strong> objects use</em> &laquo;<span class="fa fa-search-plus"></span> advanced search&raquo; <em>menu item!</em>
 </h6>
 
 [% fa_child = 'fa-ellipsis-h' %]
@@ -484,6 +484,8 @@
 			[% ELSIF hattr.key.match('userCertificate;binary') %]
 			<br><small class="pull-left"><em><dl class="dl-horizontal">
 			  [% FOREACH cert IN hattr.value %]
+			  [% NEXT IF cert.key == 'cert' %]
+			  [% NEXT IF cert.key == 'error' && ! cert.value %]
 			  <dt>[% cert.key %]</dt><dd class="mono">[% cert.value %]</dd>
 			  [% END %]
 			</dl></em></small>

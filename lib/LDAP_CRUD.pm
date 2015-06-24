@@ -117,7 +117,9 @@ sub _build_cfg {
 					       ) ],
 			  ovpn =>       [ qw(
 					      top
-					      inetOrgPerson
+					      domainRelatedObject
+					      strongAuthenticationUser
+					      umiOvpnCfg
 					   ) ],
 			  org =>            [ qw(
 						  top
