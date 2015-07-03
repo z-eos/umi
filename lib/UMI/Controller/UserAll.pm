@@ -50,8 +50,32 @@ sub index :Path :Args(0) {
 	$i++;
       }
 
-      $c->stash( # template => $self->form->add_svc_acc ne '' ? 'user/user_all_add_svc.tt' : 'user/user_all.tt',
-		 template => 'user/user_all.tt',
+      # here we initialize repeatable fields to be rendered when the form is called from
+      # another one
+      if ( defined $self->form->add_svc_acc && $self->form->add_svc_acc ne '' ) {
+	$params->{'account.0.associateddomain'} = '' if ! $params->{'account.0.associateddomain'};
+	$params->{'account.0.authorizedservice'} = '' if ! $params->{'account.0.authorizedservice'};
+	$params->{'account.0.login'} = '' if ! $params->{'account.0.login'};
+	$params->{'account.0.password1'} = '' if ! $params->{'account.0.password1'};
+	$params->{'account.0.password2'} = '' if ! $params->{'account.0.password2'};
+	$params->{'account.0.radiusgroupname'} = '' if ! $params->{'account.0.radiusgroupname'};
+	$params->{'account.0.radiustunnelprivategroupid'} = '' if ! $params->{'account.0.radiustunnelprivategroupid'};
+
+	$params->{'loginless_ovpn.0.associateddomain'} = '' if ! $params->{'loginless_ovpn.0.associateddomain'};
+	$params->{'loginless_ovpn.0.devmake'} = '' if ! $params->{'loginless_ovpn.0.devmake'};
+	$params->{'loginless_ovpn.0.devmodel'} = '' if ! $params->{'loginless_ovpn.0.devmodel'};
+	$params->{'loginless_ovpn.0.devos'} = '' if ! $params->{'loginless_ovpn.0.devos'};
+	$params->{'loginless_ovpn.0.devosver'} = '' if ! $params->{'loginless_ovpn.0.devosver'};
+	$params->{'loginless_ovpn.0.devtype'} = '' if ! $params->{'loginless_ovpn.0.devtype'};
+	$params->{'loginless_ovpn.0.ifconfigpush'} = '' if ! $params->{'loginless_ovpn.0.ifconfigpush'};
+	$params->{'loginless_ovpn.0.status'} = '' if ! $params->{'loginless_ovpn.0.status'};
+	$params->{'loginless_ovpn.0.userCertificate'} = '' if ! $params->{'loginless_ovpn.0.userCertificate'};
+									                                                         
+	$params->{'loginless_ssh.0.associateddomain'} = '' if ! $params->{'loginless_ssh.0.associateddomain'};
+	$params->{'loginless_ssh.0.key'} = '' if ! $params->{'loginless_ssh.0.key'};
+      }
+
+      $c->stash( template => 'user/user_all.tt',
 		 form => $self->form,
 		 final_message => $final_message, );
 
@@ -83,181 +107,234 @@ sub index :Path :Args(0) {
 
 sub create_account {
   my  ( $self, $ldap_crud, $args ) = @_;
-  p $args;
-  # my $args = $c->req->parameters;
-  # my $ldap_crud = $c->model('LDAP_CRUD');
-  my @form_fields = defined $args->{person_simplified} &&
-    $args->{person_simplified} eq "1" ? qw{ account } : qw{ account loginless_ovpn loginless_ssh groups };
-  my $uidNumber = $ldap_crud->last_uidNumber + 1;
-  my ( $final_message, $success_message, $warning_message, $error_message );
+  my ( @form_fields,
+       $uid,
+       $uidNumber,
+       $descr,
+       $pwd,
+       $file,
+       $jpeg,
+       $final_message,
+       $success_message,
+       $warning_message,
+       $error_message );
 
-  $args->{'uid_suffix'} = $self->form->namesake ? $self->form->namesake : '';
-  $args->{'person_givenname'} = $self->utf2lat( $args->{'person_givenname'} ) if $self->is_ascii( $args->{'person_givenname'} );
-  $args->{'person_sn'} =  $self->utf2lat( $args->{'person_sn'} ) if $self->is_ascii( $args->{'person_sn'} );
-  $args->{'person_telephonenumber'} = '666' if $args->{'person_telephonenumber'} eq '';
-  my $descr = 'description has to be here';
-  if (defined $args->{'descr'} && $args->{'descr'} ne '') {
-    $descr = join(' ', $args->{'descr'});
-    $descr = $self->utf2lat( $descr ) if $self->is_ascii( $descr );
-  }
+  ###################################################################################
+  # NEW ACCOUNT, not additional service one
+  ###################################################################################
+  # NEW/ADDITIONAL acoount start
+  if ( defined $self->form->add_svc_acc && $self->form->add_svc_acc eq '' ) {
+    @form_fields = defined $args->{person_simplified} &&
+      $args->{person_simplified} eq "1" ? qw{ account } : qw{ account loginless_ovpn loginless_ssh groups };
+    $uidNumber = $ldap_crud->last_uidNumber + 1;
 
-  my ( $pwd, $file, $jpeg);
-  if (defined $args->{'person_avatar'}) {
-    $file = $args->{'person_avatar'}->{'tempname'};
+    $args->{'uid_suffix'} = $self->form->namesake ? $self->form->namesake : '';
+    $args->{'person_givenname'} = $self->utf2lat( $args->{'person_givenname'} )
+      if $self->is_ascii( $args->{'person_givenname'} );
+    $args->{'person_sn'} =  $self->utf2lat( $args->{'person_sn'} )
+      if $self->is_ascii( $args->{'person_sn'} );
+    $args->{'person_telephonenumber'} = '666'
+      if $args->{'person_telephonenumber'} eq '';
+    $descr = 'description has to be here';
+    if (defined $args->{'descr'} && $args->{'descr'} ne '') {
+      $descr = join(' ', $args->{'descr'});
+      $descr = $self->utf2lat( $descr ) if $self->is_ascii( $descr );
+    }
+
+    if (defined $args->{'person_avatar'}) {
+      $file = $args->{'person_avatar'}->{'tempname'};
+    } else {
+      $file = $ldap_crud->{cfg}->{stub}->{noavatar_mgmnt};
+    }
+    $jpeg = $self->file2var( $file, $final_message );
+
+    $pwd = $args->{'person_password1'} eq '' ?
+      { root => $self->pwdgen } :
+      { root => $self->pwdgen( { pwd => $args->{'person_password1'} } ) };
+
+    #---------------------------------------------------------------------
+    # Account ROOT Object
+    #---------------------------------------------------------------------
+    # here we need suffix yet if the combination exists
+    $uid = sprintf('%s%s',
+		   $self->form->autologin,
+		   $self->form->namesake );
+
+    my $root_add_dn = sprintf('uid=%s,%s',
+			      $uid,
+			      $ldap_crud->{cfg}->{base}->{acc_root});
+    my $root_add_options =
+      [
+       uid => $uid,
+       userPassword => $pwd->{root}->{ssha},
+       telephoneNumber => $args->{person_telephonenumber},
+       physicalDeliveryOfficeName => $args->{'person_office'},
+       o => $args->{'person_org'},
+       givenName => $args->{person_givenname},
+       sn => $args->{person_sn},
+       cn => sprintf('%s %s',
+		     $args->{person_givenname},
+		     $args->{person_sn}),
+       uidNumber => $uidNumber,
+       gidNumber => $ldap_crud->{cfg}->{stub}->{gidNumber},
+       description => $descr,
+       gecos => $descr,
+       homeDirectory => $ldap_crud->{cfg}->{stub}->{homeDirectory},
+       jpegPhoto => [ $jpeg ],
+       loginShell => $ldap_crud->{cfg}->{stub}->{loginShell},
+
+       title => $self->is_ascii($args->{'person_title'}) ?
+       lc($self->utf2lat($args->{'person_title'})) :
+       lc($args->{'person_title'}),
+
+       objectClass => $ldap_crud->{cfg}->{objectClass}->{acc_root},
+      ];
+
+    my $ldif = $ldap_crud->add( $root_add_dn, $root_add_options );
+    if ( $ldif ) {
+      push @{$final_message->{error}},
+	sprintf('Error during management account creation occured: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s' .
+		$ldif->{html},
+		$ldif->{srv},
+		$ldif->{text});
+    } else {
+      push @{$final_message->{success}},
+	sprintf('<i class="fa fa-user fa-lg fa-fw"></i>&nbsp;<em>root account login:</em> &laquo;<strong class="text-success">%s</strong>&raquo; <em>password:</em> &laquo;<strong class="text-success mono">%s</strong>&raquo;',
+		$uid,
+		$pwd->{root}->{'clear'}) ;
+    }
+
   } else {
-    $file = $ldap_crud->{cfg}->{stub}->{noavatar_mgmnt};
+    #####################################################################################
+    # ADDITIONAL service account (no root account creation, but using the existent one)
+    #####################################################################################
+
+    my $add_to = $ldap_crud->search( { base => $self->form->add_svc_acc, scope => 'base', } );
+    if ( ! $add_to->count ) {
+      $final_message->{error} = 'no root object with DN: <b>&laquo;' .
+	$self->form->add_svc_acc . '&raquo;</b> found!';
+    }
+    my $add_to_obj = $add_to->entry(0);
+
+    $uidNumber = $add_to_obj->get_value('uidNumber');
+    $args->{'person_givenname'} = $add_to_obj->get_value('givenName');
+    $args->{'person_sn'} = $add_to_obj->get_value('sn');
+    $args->{'person_telephonenumber'} = $add_to_obj->exists('telephonenumber') ?
+      $add_to_obj->get_value('telephonenumber') : '666';
+    $descr = $add_to_obj->exists('description') ?
+      $add_to_obj->get_value('description') : 'description has to be here';
+
+    $uid = $add_to_obj->get_value('uid');
   }
-  $jpeg = $self->file2var( $file, $final_message );
+  # NEW/ADDITIONAL acoount stop
 
-  $pwd = $args->{'person_password1'} eq '' ?
-    { root => $self->pwdgen } :
-    { root => $self->pwdgen( { pwd => $args->{'person_password1'} } ) };
-
-  ######################################################################
-  # Account ROOT Object
-  ######################################################################
-  # here we need suffix yet if the combination exists
-  my $uid = sprintf('%s%s',
-		    $self->form->autologin,
-		    $self->form->namesake );
-  my $root_add_dn = sprintf('uid=%s,%s',
-			    $uid,
-			    $ldap_crud->{cfg}->{base}->{acc_root});
-  my $root_add_options =
-    [
-     uid => $uid,
-     userPassword => $pwd->{root}->{ssha},
-     telephoneNumber => $args->{person_telephonenumber},
-     physicalDeliveryOfficeName => $args->{'person_office'},
-     o => $args->{'person_org'},
-     givenName => $args->{person_givenname},
-     sn => $args->{person_sn},
-     cn => sprintf('%s %s',
-		   $args->{person_givenname},
-		   $args->{person_sn}),
-     uidNumber => $uidNumber,
-     gidNumber => $ldap_crud->{cfg}->{stub}->{gidNumber},
-     description => $descr,
-     gecos => $descr,
-     homeDirectory => $ldap_crud->{cfg}->{stub}->{homeDirectory},
-     jpegPhoto => [ $jpeg ],
-     loginShell => $ldap_crud->{cfg}->{stub}->{loginShell},
-
-     title => $self->is_ascii($args->{'person_title'}) ?
-     lc($self->utf2lat($args->{'person_title'})) :
-     lc($args->{'person_title'}),
-
-     objectClass => $ldap_crud->{cfg}->{objectClass}->{acc_root},
-    ];
-
-  my $ldif = $ldap_crud->add( $root_add_dn, $root_add_options );
-  if ( $ldif ) {
-    push @{$final_message->{error}},
-      sprintf('Error during management account creation occured: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s' .
-	      $ldif->{html},
-	      $ldif->{srv},
-	      $ldif->{text});
-  } else {
-    push @{$final_message->{success}},
-      sprintf('<i class="fa fa-user fa-lg fa-fw"></i>&nbsp;<em>root account login:</em> &laquo;<strong class="text-success">%s</strong>&raquo; <em>password:</em> &laquo;<strong class="text-success mono">%s</strong>&raquo;',
-	      $uid,
-	      $pwd->{root}->{'clear'}) ;
-  }
-
-  my ( $element, $associatedDomain, $authorizedService, $authorizedService_add );
-  my ($branch, $leaf);
+  my ( $element, $associatedDomain, $authorizedService, $authorizedService_add, $branch, $leaf);
   my $is_svc_empty = '';
+
   ######################################################################
   # SERVICE ACCOUNTS PROCESSING START
   ######################################################################
-  foreach my $form_field ( @form_fields ) { # p $form_field;
-    next if $form_field eq 'groups';
-    # if ( $form_field eq 'loginless_ovpn' ) {
-    #   p my @a = $self->form->field($form_field)->fields;
-    #   p $#a;
-    # }
 
-    if ( defined $args->{person_simplified} ) {
-      ######################################################################
-      # Simplified Account mail branch of ROOT Object Creation
-      ######################################################################
-      $branch =
-      	$self
-      	->create_account_branch ( $ldap_crud,
-      				  {
-      				   uid => $uid,
-      				   authorizedservice => 'mail',
-      				   associateddomain => $args->{person_associateddomain},
-      				  },
-      				);
+  #================================================================================
+  # person_simplified checkbox is *CHECKED*, we continue with SIMPLIFIED form
+  #================================================================================
+  if ( defined $args->{person_simplified} && $args->{person_simplified} eq '1' ) {
+      
+    #---------------------------------------------------------------------
+    # Simplified Account mail branch of ROOT Object Creation
+    #---------------------------------------------------------------------
+    $branch =
+      $self
+      ->create_account_branch ( $ldap_crud,
+				{
+				 uid => $uid,
+				 authorizedservice => 'mail',
+				 associateddomain => $args->{person_associateddomain},
+				},
+			      );
 
-      push @{$final_message->{success}}, $branch->{success} if defined $branch->{success};
-      push @{$final_message->{warning}}, $branch->{warning} if defined $branch->{warning};
-      push @{$final_message->{error}}, $branch->{error} if defined $branch->{error};
+    push @{$final_message->{success}}, $branch->{success} if defined $branch->{success};
+    push @{$final_message->{warning}}, $branch->{warning} if defined $branch->{warning};
+    push @{$final_message->{error}}, $branch->{error} if defined $branch->{error};
 
-      ######################################################################
-      # Simplified Leaf of the account mail branch of ROOT Object
-      ######################################################################
-      my $x =
-	{
-	 basedn => $branch->{dn},
-	 authorizedservice => 'mail',
-	 associateddomain => $branch->{associateddomain_prefix} . $args->{person_associateddomain},
-	 uidNumber => $uidNumber,
-	 givenName => $args->{person_givenname},
-	 sn => $args->{person_sn},
-	 telephoneNumber => $args->{person_telephonenumber},
-	 login => defined $args->{person_login} ? $args->{person_login} : $uid,
-	};
+    #---------------------------------------------------------------------
+    # Simplified Leaf of the account mail branch of ROOT Object
+    #---------------------------------------------------------------------
+    my $x =
+      {
+       basedn => $branch->{dn},
+       authorizedservice => 'mail',
+       associateddomain => $branch->{associateddomain_prefix} . $args->{person_associateddomain},
+       uidNumber => $uidNumber,
+       givenName => $args->{person_givenname},
+       sn => $args->{person_sn},
+       telephoneNumber => $args->{person_telephonenumber},
+       login => defined $args->{person_login} &&
+       $args->{person_login} ne '' ? $args->{person_login} : $uid,
+      };
 
-      if ( ! $args->{person_password1} &&
-	   ! $args->{person_password2} ) {
-	$x->{password}->{mail} = $self->pwdgen;
-	$x->{password}->{xmpp} = $self->pwdgen;
-      } else {
-	$x->{password}->{mail} = $self->pwdgen( { pwd => $args->{person_password2} } );
-	$x->{password}->{xmpp} = $self->pwdgen( { pwd => $args->{person_password2} } );
-      }
+    if ( ! $args->{person_password1} &&
+	 ! $args->{person_password2} ) {
+      $x->{password}->{mail} = $self->pwdgen;
+      $x->{password}->{xmpp} = $self->pwdgen;
+    } else {
+      $x->{password}->{mail} = $self->pwdgen( { pwd => $args->{person_password2} } );
+      $x->{password}->{xmpp} = $self->pwdgen( { pwd => $args->{person_password2} } );
+    }
 
-      $leaf =
-	$self->create_account_branch_leaf ( $ldap_crud, $final_message, $x, );
+    $leaf =
+      $self->create_account_branch_leaf ( $ldap_crud, $x, );
+    push @{$final_message->{success}}, @{$leaf->{success}} if defined $leaf->{success};
+    push @{$final_message->{warning}}, @{$leaf->{warning}} if defined $leaf->{warning};
+    push @{$final_message->{error}}, @{$leaf->{error}} if defined $leaf->{error};
 
-      ######################################################################
-      # Simplified Account xmpp branch of ROOT Object Creation
-      ######################################################################
-      $branch =
-      	$self
-      	->create_account_branch ( $ldap_crud,
-      				  {
-      				   uid => $uid,
-      				   authorizedservice => 'xmpp',
-      				   associateddomain => $args->{person_associateddomain},
-      				  },
-      				);
+    #---------------------------------------------------------------------
+    # Simplified Account xmpp branch of ROOT Object Creation
+    #---------------------------------------------------------------------
+    $branch =
+      $self
+      ->create_account_branch ( $ldap_crud,
+				{
+				 uid => $uid,
+				 authorizedservice => 'xmpp',
+				 associateddomain => $args->{person_associateddomain},
+				},
+			      );
 
-      push @{$final_message->{success}}, $branch->{success} if defined $branch->{success};
-      push @{$final_message->{warning}}, $branch->{warning} if defined $branch->{warning};
-      push @{$final_message->{error}}, $branch->{error} if defined $branch->{error};
+    push @{$final_message->{success}}, $branch->{success} if defined $branch->{success};
+    push @{$final_message->{warning}}, $branch->{warning} if defined $branch->{warning};
+    push @{$final_message->{error}}, $branch->{error} if defined $branch->{error};
 
-      ######################################################################
-      # Simplified Leaf of the account email branch of ROOT Object
-      ######################################################################
-      $x->{basedn} = $branch->{dn};
-      $x->{authorizedservice} = 'xmpp';
+    #---------------------------------------------------------------------
+    # Simplified Leaf of the account email branch of ROOT Object
+    #---------------------------------------------------------------------
+    $x->{basedn} = $branch->{dn};
+    $x->{authorizedservice} = 'xmpp';
 
-      $leaf =
-	$self->create_account_branch_leaf ( $ldap_crud, $final_message, $x, );
+    $leaf =
+      $self->create_account_branch_leaf ( $ldap_crud, $x, );
+    push @{$final_message->{success}}, @{$leaf->{success}} if defined $leaf->{success};
+    push @{$final_message->{warning}}, @{$leaf->{warning}} if defined $leaf->{warning};
+    push @{$final_message->{error}}, @{$leaf->{error}} if defined $leaf->{error};
 
-    } else { # person_simplified checkbox is *not* checked, we continue with general form
-      foreach $element ( $self->form->field($form_field)->fields ) { # p @{[$self->form->field($form_field)->fields]};
+      
+    #===========================================================================
+    # person_simplified checkbox is *not* checked, we continue with GENERAL form
+    #===========================================================================
+  } else {
+    @form_fields = qw{ account loginless_ovpn loginless_ssh groups };
+    foreach my $form_field ( @form_fields ) {
+      next if $form_field eq 'groups'; # groups we are skiping now
+      foreach $element ( $self->form->field($form_field)->fields ) {
+	# p @{[$self->form->field($form_field)->fields]};
 	foreach ( $element->fields ) {
 	  $is_svc_empty .= $_->value if defined $_->value;
-	}			   # p $is_svc_empty;
+	}			     # p $is_svc_empty;
 	next if $is_svc_empty eq ''; # avoid all empty services
 
-	######################################################################
+	#---------------------------------------------------------------------
 	# Account branch of ROOT Object
-	######################################################################
+	#---------------------------------------------------------------------
 	$branch =
 	  $self
 	  ->create_account_branch ( $ldap_crud,
@@ -274,9 +351,9 @@ sub create_account {
 	push @{$final_message->{warning}}, $branch->{warning} if defined $branch->{warning};
 	push @{$final_message->{error}}, $branch->{error} if defined $branch->{error};
 
-	######################################################################
-	# Leaf of the account branch of ROOT Object
-	######################################################################
+	#---------------------------------------------------------------------
+	# Leaf of the account BRANCH of ROOT Object
+	#---------------------------------------------------------------------
 	my $x =
 	  {
 	   basedn => $branch->{dn},
@@ -292,8 +369,7 @@ sub create_account {
 	if ( $form_field eq 'account' ) {
 	  if ( $element->field('authorizedservice')->value =~ /^802.1x-.*/ ) {
 	    $x->{password} = { $element->field('authorizedservice')->value =>
-			       {
-				clear => $self->macnorm({ mac => $element->field('login')->value }) }
+			       { clear => $self->macnorm({ mac => $element->field('login')->value }) }
 			     };
 	    $x->{radiusgroupname} = $element->field('radiusgroupname')->value
 	      if defined $element->field('radiusgroupname')->value;
@@ -313,8 +389,7 @@ sub create_account {
 	  $x->{sshpublickey} = $element->field('key')->value;
 	  $x->{login} = $uid;
 	  $x->{password} = { $x->{authorizedservice} =>
-			     {
-			      clear => '<del>NOPASSWORD</del>' }
+			     { clear => '<del>NOPASSWORD</del>' }
 			   };
 	} elsif ( $x->{authorizedservice} eq 'ovpn' ) {
 	  $x->{userCertificate} = $element->field('userCertificate')->value
@@ -332,7 +407,10 @@ sub create_account {
 	}
 
 	$leaf =
-	  $self->create_account_branch_leaf ( $ldap_crud, $final_message, $x, );
+	  $self->create_account_branch_leaf ( $ldap_crud, $x, );
+	push @{$final_message->{success}}, @{$leaf->{success}} if defined $leaf->{success};
+	push @{$final_message->{warning}}, @{$leaf->{warning}} if defined $leaf->{warning};
+	push @{$final_message->{error}}, @{$leaf->{error}} if defined $leaf->{error};
       }
       $is_svc_empty = '';
     }
@@ -358,10 +436,10 @@ creates branch for service accounts like
 
 returns hash
     {
-      dn => DN of the oject created
-      success => success message
-      warning => warning message
-      error => error message
+      dn => '...', # DN of the oject created
+      success => '...', # success message
+      warning => '...', # warning message
+      error => '...', # error message
     }
 
 =cut
@@ -371,19 +449,28 @@ sub create_account_branch {
   my  ( $self, $ldap_crud, $args ) = @_;
   my $arg = {
 	     authorizedservice => $args->{authorizedservice},
-	     associateddomain => $args->{associateddomain},
+	     associateddomain => sprintf('%s%s',
+					 defined $ldap_crud
+					 ->{cfg}
+					 ->{authorizedService}
+					 ->{$args->{authorizedservice}}
+					 ->{associateddomain_prefix}
+					 ->{$args->{associateddomain}} ?
+					 $ldap_crud->{cfg}
+					 ->{authorizedService}
+					 ->{$args->{authorizedservice}}
+					 ->{associateddomain_prefix}
+					 ->{$args->{associateddomain}} : '',
+					 $args->{associateddomain}),
 	     uid => $args->{uid},
-	     dn => sprintf("authorizedService=%s@%s,uid=%s,%s",
-			   $args->{authorizedservice},
-			   $args->{associateddomain},
-			   $args->{uid},
-			   $ldap_crud->{cfg}->{base}->{acc_root}),
 	    };
-  my $return;
 
-  ### !!! STUB !!! here are some exclusions, we need to manage them somewhere in cfg
-  $arg->{'associateddomain_prefix'} = $arg->{'associateddomain'} eq 'talax.startrek.in' &&
-    $arg->{authorizedservice} eq 'xmpp' ? 'im.' : '';
+  $arg->{dn} = sprintf("authorizedService=%s@%s,uid=%s,%s",
+		       $args->{authorizedservice},
+		       $arg->{associateddomain},
+		       $args->{uid},
+		       $ldap_crud->{cfg}->{base}->{acc_root}),
+  my $return;
 
   $arg->{add_attrs} = [ 'authorizedService' => $arg->{authorizedservice} . '@' .
 			$arg->{'associateddomain_prefix'} . $arg->{'associateddomain'},
@@ -415,42 +502,60 @@ sub create_account_branch {
   return $return;
 }
 
-# =head2 create_account_branch_leaf
 
-# creates leaves for service account branch like
+=head2 create_account_branch_leaf
 
-#     dn: uid=john.doe@foo.bar,authorizedService=mail@foo.bar,uid=U012C01-john.doe,ou=People,dc=umidb
-#     authorizedService: mail@foo.bar
-#     associatedDomain: foo.bar
-#     uid: john.doe@foo.bar
-#     cn: john.doe@foo.bar
-#     givenName: John
-#     sn: Doe
-#     uidNumber: 10738
-#     loginShell: /sbin/nologin
-#     objectClass: posixAccount
-#     objectClass: shadowAccount
-#     objectClass: inetOrgPerson
-#     objectClass: authorizedServiceObject
-#     objectClass: domainRelatedObject
-#     objectClass: mailutilsAccount
-#     userPassword: ********
-#     gecos: MAIL: john.doe @ foo.bar
-#     description: MAIL: john.doe @ foo.bar
-#     homeDirectory: /var/mail/IMAP_HOMES/foo.bar/john.doe@foo.bar
-#     mu-mailBox: maildir:/var/mail/foo.bar/john.doe@foo.bar
-#     gidNumber: 10006
+creates leaves for service account branch like
 
-# =cut
+    dn: uid=john.doe@foo.bar,authorizedService=mail@foo.bar,uid=U012C01-john.doe,ou=People,dc=umidb
+    authorizedService: mail@foo.bar
+    associatedDomain: foo.bar
+    uid: john.doe@foo.bar
+    cn: john.doe@foo.bar
+    givenName: John
+    sn: Doe
+    uidNumber: 10738
+    loginShell: /sbin/nologin
+    objectClass: posixAccount
+    objectClass: shadowAccount
+    objectClass: inetOrgPerson
+    objectClass: authorizedServiceObject
+    objectClass: domainRelatedObject
+    objectClass: mailutilsAccount
+    userPassword: ********
+    gecos: MAIL: john.doe @ foo.bar
+    description: MAIL: john.doe @ foo.bar
+    homeDirectory: /var/mail/IMAP_HOMES/foo.bar/john.doe@foo.bar
+    mu-mailBox: maildir:/var/mail/foo.bar/john.doe@foo.bar
+    gidNumber: 10006
 
+returns reference to hash of arrays
+    {
+      success => [...],
+      warning => [...],
+      error => [...],
+    }
 
+=cut
 
 sub create_account_branch_leaf {
-  my  ( $self, $ldap_crud, $final_message, $args ) = @_;
+  my  ( $self, $ldap_crud, $args ) = @_;
   my $arg = {
 	     basedn => $args->{basedn},
 	     service => $args->{authorizedservice},
-	     associatedDomain => $args->{associateddomain},
+	     associatedDomain => sprintf('%s%s',
+					 defined $ldap_crud
+					 ->{cfg}
+					 ->{authorizedService}
+					 ->{$args->{authorizedservice}}
+					 ->{associateddomain_prefix}
+					 ->{$args->{associateddomain}} ?
+					 $ldap_crud->{cfg}
+					 ->{authorizedService}
+					 ->{$args->{authorizedservice}}
+					 ->{associateddomain_prefix}
+					 ->{$args->{associateddomain}} : '',
+					 $args->{associateddomain}),
 	     uidNumber => $args->{uidNumber},
 	     givenName => $args->{givenName},
 	     sn => $args->{sn},
@@ -480,10 +585,6 @@ sub create_account_branch_leaf {
   $arg->{uid} = $arg->{'login'} . '@' . $arg->{associatedDomain};
   $arg->{dn} = 'uid=' . $arg->{uid} . ',' . $arg->{basedn};
 
-  ### !!! STUB !!! here are some exclusions, we need to manage them somewhere in cfg
-  $arg->{associatedDomain} = 'im.' . $arg->{associatedDomain}
-    if $arg->{associatedDomain} eq 'talax.startrek.in' && $arg->{service} eq 'xmpp';
-
   my ($authorizedService, $sshkey);
 
   if ( $arg->{service} eq 'ovpn' ) {
@@ -511,7 +612,7 @@ sub create_account_branch_leaf {
 			 ];
   }
 
-  my ($authorizedService_add, $success_mesage, $error_message, $jpegPhoto_file);
+  my ($authorizedService_add, $jpegPhoto_file);
   if ( $arg->{service} eq 'mail') {
     push @{$authorizedService},
       homeDirectory => $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{homeDirectory_prefix} .
@@ -532,7 +633,7 @@ sub create_account_branch_leaf {
       gidNumber => $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{gidNumber},
       userPassword => $arg->{password}->{$arg->{service}}->{'ssha'},
       telephonenumber => $arg->{telephoneNumber},
-      jpegPhoto => [ $self->file2var( $jpegPhoto_file, $final_message) ];
+      jpegPhoto => [ $self->file2var( $jpegPhoto_file, $return) ];
   } elsif ( $arg->{service} eq '802.1x-mac' ||
 	    $arg->{service} eq '802.1x-eap' ) {
     $arg->{dn} = 'uid=' . $self->macnorm({ mac => $arg->{login} }) . ',' . $arg->{basedn};
@@ -584,7 +685,7 @@ sub create_account_branch_leaf {
     $arg->{dn} = 'cn=' . substr($arg->{userCertificate}->{filename},0,-4) . ',' . $arg->{basedn};
     $arg->{cert_info} =
       $self->cert_info({
-			cert => $self->file2var($arg->{userCertificate}->{'tempname'}, $final_message),
+			cert => $self->file2var($arg->{userCertificate}->{'tempname'}, $return),
 			ts => "%Y%m%d%H%M%S",
 		       });
     $authorizedService = [
@@ -605,11 +706,11 @@ sub create_account_branch_leaf {
 			  umiOvpnAddDevOSVer => $arg->{umiOvpnAddDevOSVer},
 			  'userCertificate;binary' => $arg->{cert_info}->{cert},
 			 ];
-    push @{$final_message->{error}}, $arg->{cert_info}->{error} if defined $arg->{cert_info}->{error};
+    push @{$return->{error}}, $arg->{cert_info}->{error} if defined $arg->{cert_info}->{error};
   }
 
-  p $arg->{dn};
-  p $authorizedService;
+  # p $arg->{dn};
+  # p $authorizedService;
 
   my $mesg =
     $ldap_crud->add(
@@ -617,20 +718,21 @@ sub create_account_branch_leaf {
     		    $authorizedService,
     		   );
   if ( $mesg ) {
-    push @{$final_message->{error}},
+    push @{$return->{error}},
       sprintf('Error during %s account creation occured: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s',
 	      uc($arg->{service}),
 	      $mesg->{html},
 	      $mesg->{srv},
 	      $mesg->{text});
   } else {
-    push @{$final_message->{success}},
+    push @{$return->{success}},
       sprintf('<i class="%s fa-fw"></i>&nbsp;<em>%s account login:</em> &laquo;<strong class="text-success">%s</strong>&raquo; <em>password:</em> &laquo;<strong class="text-success mono">%s</strong>&raquo;',
 	      $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{icon},
 	      $arg->{service},
 	      (split(/=/,(split(/,/,$arg->{dn}))[0]))[1], # taking RDN value
 	      $arg->{password}->{$arg->{service}}->{'clear'});
   }
+  return $return;
 }
 
 

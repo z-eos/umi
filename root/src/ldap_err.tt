@@ -1,28 +1,28 @@
-[% IF form.has_form_errors || final_message.error %]
+[% IF form.errors || ( final_message.error && final_message.error != '') %]
 <div class="panel-group" id="accordion">
   <div class="panel panel-danger">
     <div class="panel-heading" role="tab" id="headErr">
       <a class="chevron_toggleable btn btn-danger pull-left"
-	 href="#" title="Collapse In/Out This Panel"
-	 data-target="#collapseErr" data-toggle="collapse" data-parent="#accordion">
+	 href="#" title="Collapse In/Out This Panel" data-target="#collapseErr"
+	 data-toggle="collapse" data-parent="#accordion">
 	<span class="fa fa-toggle-up"></span>
       </a>
       <h4><span class="fa fa-exclamation-circle">&nbsp;</span>Error!</h4>
     </div>
     <div id="collapseErr" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingErr">
       <div class="panel-body">
-	[% IF form.has_form_errors %]
+	[% IF form.errors %]
 	<b class="text-danger">Form contains error/s! Check all tabs for fields constraints met, please!</b>
 	<ul>
-	  [% FOREACH i IN form.form_errors.reverse %]
-	  <li>[% i %]</li>
+	  [% FOREACH i IN form.errors.reverse %]
+	  [% IF i != '' %]<li>[% i %]</li>[% END %]
 	  [% END %]
 	</ul>
 	[% END %]
 	[% IF final_message.error %]
 	<ul>
 	  [% FOREACH i IN final_message.error %]
-	  <li>[% i %]</li>
+	  [% IF i != '' %]<li>[% i %]</li>[% END %]
 	  [% END %]
 	</ul>
 	[% END %]

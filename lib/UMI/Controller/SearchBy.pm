@@ -1204,6 +1204,32 @@ sub delete :Path(delete) :Args(0) {
   }
 }
 
+=head1 reassign
+
+object reassign to another root DN
+
+=cut
+
+
+sub reassign :Path(reassign) :Args(0) {
+  my ( $self, $c ) = @_;
+  my $params = $c->req->parameters;
+
+  my $err = $c->model('LDAP_CRUD')->reassign($params);
+
+  if ( $params->{type} eq 'json' ) {
+    $c->stash->{current_view} = 'WebJSON';
+    $c->stash->{success} = 'true';
+    $c->stash->{message} = 'OK';
+  } else {
+    $c->stash(
+	      template => 'stub.tt',
+	      params => $params,
+	      err => $err,
+	     );
+  }
+}
+
 
 
 #=====================================================================

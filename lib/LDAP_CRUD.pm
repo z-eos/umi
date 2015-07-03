@@ -153,6 +153,10 @@ sub _build_cfg {
 		      jpegPhoto_noavatar => UMI->path_to('root', 'static', 'images', '/avatar-xmpp.png'),
 		      icon => 'fa fa-lightbulb-o',
 		      data_fields => 'login,password1,password2',
+		      associateddomain_prefix =>
+		      {
+		       'talax.startrek.in' => 'im.',
+		      },
 		     },
 	   '802.1x-mac' => {
 			    auth => 1,
@@ -498,6 +502,27 @@ sub add {
   return $return;
 }
 
+
+=head2 reassign
+
+reassign method
+
+=cut
+
+sub reassign {
+  my ($self, $args) = @_;
+
+  my $arg = {
+	     to_reassign => $args->{dn_to_reassign},
+	     reassign_to => $args->{dn_to_reassign_to},
+	     recursive => defined $args->{reassign_branch} && $args->{reassign_branch} eq "on" ? 1 : 0,
+	     stub => 1,
+	    };
+
+  return $arg;
+}
+
+
 =head2 del
 
 TODO
@@ -772,6 +797,7 @@ sub ldif {
   # p $a;
   return $return;
 }
+
 
 =head2 obj_schema
 

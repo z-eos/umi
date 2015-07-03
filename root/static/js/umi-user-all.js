@@ -35,6 +35,9 @@ $(function(){
     $(".duplicate").children(".form-group.has-error").removeClass("has-error");
     $(".form-group.hfh-repinst.has-error").removeClass("has-error");
     $(".no-has-error.has-error").removeClass("has-error");
+    $("#loginless_ovpn").removeClass("has-error");
+    $("#loginless_ssh").removeClass("has-error");
+    
     // ----------------------------------------------------------------------------
 
     

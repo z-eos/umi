@@ -85,6 +85,16 @@
     padding: 0 5px 0 0;
 }
 
+.blocked:after {
+  content: "\f05e";
+  font-family: "FontAwesome";
+  font-size: 70%;
+  color: #E74C3C;
+  vertical-align: top;
+  margin: -10px 0px 0px -20px;
+  padding: 0 5px 0 0;
+}
+
 .iconright:after {
   content: "\f06b";
   font-family: "FontAwesome";
@@ -174,4 +184,12 @@
 .clear {
   display: block;
   clear: both;
+}
+
+.umi-zerro-padding {
+  padding: 0 !important;
+}
+
+.umi-zerro-margin {
+  margin: 0 !important;
 }

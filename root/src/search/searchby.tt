@@ -13,57 +13,78 @@
 
 [% fa_child = 'fa-ellipsis-h' %]
 [% child = '<i class="fa fa-fw ' _ fa_child _ ' text-default"></i>' %]
+[% blocked = '' %]
+[% blocked_title = '' %]
+
+[% IF entries.size == 1 %][% in='in' %][% chevron_toggle='up' %][% ELSE %][% in='' %][% chevron_toggle='down' %][% END %] [% # no keys suffix sort FOREACH entry IN entries %]
 
 <div class="table-responsive">
   <table class="table table-condensed">
     <thead>
-      <tr class="bg-primary">
-	<td colspan=2 class="text-right">
-	  <a href="#"
-	     class="btn btn-primary btn-sm" role="button"
-	     title="Legend"
-	     id="btnLegend"
-	     data-animation="false"
-	     data-trigger="hover"
-	     data-placement="left"
-	     data-html="true"
-	     data-toggle="popover"
-	     data-original-title="Legend"
-	     data-content="<ul class='fa-ul'>
-	     <li class='text-info'><i class='fa-li fa fa-user'></i> root object</li>
-	     <li class='text-warning'><i class='fa-li fa [% fa_child %]'></i> service branch</li>
-	     <li class='text-success'><i class='fa-li fa [% fa_child %]'></i> service account</li>
-	     <li><i class='fa-li fa fa-check-square'></i><span class='label label-primary'> user input</span></li>
-	     </ul>"
-	     tabindex="0">
-	    <span style="font-size: 100%;" class="glyphicon glyphicon-list-alt"></span>
-	  </a>
+      <tr>
+	<td colspan=2>
+	  <div class="btn-group" role="group">
+	    <a href="#"
+	       class="chevron_toggleable collapse_in_out btn" role="button"
+	       type="button"
+	       title="Collapse In/Out Each Element On This Page"
+	       data-target="#collapse"
+	       data-toggle="collapse"
+	       data-parent="#accordion"
+	       tabindex="0">
+	      <span class="fa fa-toggle-[% chevron_toggle %]"></span>
+	    </a>
+	    <a href="#"
+	       class="btn" role="button"
+	       title="Legend"
+	       id="btnLegend"
+	       data-animation="false"
+	       data-trigger="hover"
+	       data-placement="bottom"
+	       data-html="true"
+	       data-toggle="popover"
+	       data-original-title="Legend"
+	       data-content="<ul class='fa-ul'>
+	       <li class='text-info'><i class='fa-li fa fa-user'></i> root object</li>
+	       <li class='text-warning'><i class='fa-li fa [% fa_child %]'></i> service branch</li>
+	       <li class='text-success'><i class='fa-li fa [% fa_child %]'></i> service account</li>
+	       <li><i class='fa-li fa fa-check-square'></i><span class='label label-primary'> user input</span></li>
+	       </ul>"
+	       tabindex="0">
+	      <span class="fa fa-info"></span>
+	    </a>
+	  </div>
 	</td>
       </tr>
     </thead>
     <tbody>
-      [% IF entries.size == 1 %][% in='in' %][% chevron_toggle='up' %][% ELSE %][% in='' %][% chevron_toggle='down' %][% END %] [% # no keys suffix sort FOREACH entry IN entries %]
+
       [% FOREACH entrykey IN entrieskeys %]
       [% zufix = entry.key.split(',').1.split('=').1.replace('[@\.]', '_') _ '_' _ loop.index %]
       [% entry.key = entrykey
 	 entry.value = entries.$entrykey %]
       [% dn = entry.key.split(',|=').hash %][% # preparing hash of each dn %]
+      [% IF entry.value.mgmnt.is_dn && entry.value.mgmnt.is_blocked %]
+      [% blocked = ' text-danger' %]
+      [% blocked_title = 'title="This DN was blocked! To unblock, remove root dn from the group &laquo;blocked&raquo; and manage each service account manualy."' %]
+      [% END %]
+
       <tr>
 	<td>
-	  <div class="panel-group" id="accordion[% loop.index %]">
+	  <div class="panel-group umi-zerro-margin" id="accordion[% loop.index %]">
 	    [% IF entry.value.mgmnt.is_dn %]<div class="panel panel-info">
 	    [% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]<div class="panel panel-success">
 	    [% ELSE %]<div class="panel panel-warning">
 	    [% END %]
 
-	    <div class="panel-heading">
+	    <div class="panel-heading clearfix umi-zerro-padding">
 	      <button class="chevron_toggleable btn btn-link pull-left"
 		      type="button"
 		      title="Collapse In/Out This Panel"
 		      data-target="#collapse[% loop.index %]"
 		      data-toggle="collapse"
 		      data-parent="#accordion[% loop.index %]">
-		<span class="fa fa-toggle-[% chevron_toggle %] text-primary"></span>
+		<span id="chevron_switcher" class="fa fa-toggle-[% chevron_toggle %] text-primary"></span>
 	      </button>
 	      <div class="dropdown pull-left">
 		<button class="btn btn-link dropdown-toggle"
@@ -79,8 +100,7 @@
 		  <li>
 		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/user_preferences') %]">
 		      <button type="submit" title="add service account" class="btn btn-link"
-			      value="[% entry.key %]"
-			      data-order="10"
+			      value="[% entry.key %]" data-order="10"
 			      name="user_preferences">
 			<span class="fa fa-fw fa-list-alt text-info"></span>
 			user prefs
@@ -89,8 +109,7 @@
 		  </li>
 		  <li>
 		    <button type="button" title="account global management page" class="btn btn-link disabled"
-			    value="[% entry.key %]"
-			    data-order="110"
+			    value="[% entry.key %]" data-order="110"
 			    name="accmgmnt"
 			    data-toggle="modal"
 			    data-target="#accmgmntModal[% loop.index %]">
@@ -101,8 +120,7 @@
 		  <li>
 		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 		      <button type="submit" title="add new service account" class="btn btn-link"
-			      value="[% entry.key %]"
-			      data-order="20"
+			      value="[% entry.key %]" data-order="20"
 			      name="add_svc_acc">
 			<span class="fa fa-fw fa-plus-circle text-primary"></span>
 			new service account
@@ -112,8 +130,7 @@
 		  <li>
 		    <form role="form" method="POST" action="[% c.uri_for_action('userall/index') %]">
 		      <button type="submit" title="add new service account" class="btn btn-link"
-			      value="[% entry.key %]"
-			      data-order="20"
+			      value="[% entry.key %]" data-order="20"
 			      name="add_svc_acc">
 			<span class="fa fa-fw fa-plus-circle text-danger"></span>
 			new service account (alt)
@@ -132,8 +149,7 @@
 		  <li>
 		    <button type="button" title="block all accounts (password changed to random ones, ssh key bound to localhost only) of the user with DN: [% entry.key %]" class="btn btn-link"
 			    value="[% entry.key %]"
-			    name="user_block"
-			    data-order="19"
+			    name="user_block" data-order="19"
 			    data-toggle="modal"
 			    data-target="#modal_block[% zufix %]">
 		      <span class="fa fa-fw fa-ban text-danger"></span>
@@ -144,8 +160,7 @@
 		  <li>
 		    <button type="button" title="delete object" class="btn btn-link"
 			    value="[% entry.key %]"
-			    name="ldap_delete"
-			    data-order="50"
+			    name="ldap_delete" data-order="50"
 			    data-toggle="modal"
 			    data-target="#modal_delete[% zufix %]">
 		      <span class="fa fa-fw fa-trash text-danger"></span>
@@ -155,14 +170,13 @@
 		  [% IF ! entry.value.mgmnt.is_dn %]
 		  <li>
 		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
-		      <button type="button" title="move this object to another root account" class="btn btn-link"
-			      value="[% entry.key %]"
-			      name="chg_acc"
-			      data-order="80"
+		      <button type="button" title="reassign to other root account (move this object to another root account)"
+			      class="btn btn-link" value="[% entry.key %]"
+			      name="chg_acc" data-order="80"
 			      data-toggle="modal"
-			      data-target="#chgaccModal[% loop.index %]">
+			      data-target="#reassignModal[% loop.index %]">
 			<span class="fa fa-fw fa-exchange text-danger"></span>
-			chg root account
+			reassign
 		      </button>
 		    </form>
 		  </li>
@@ -170,8 +184,7 @@
 		  <li>
 		    <button type="button" title="export LDIF of the object"
 			    class="btn btn-link"
-			    value="[% entry.key %]"
-			    data-order="70"
+			    value="[% entry.key %]" data-order="70"
 			    name="ldap_ldif"
 			    data-toggle="modal"
 			    data-target="#ldifModal[% loop.index %]">
@@ -182,8 +195,7 @@
 		  <li>
 		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 		      <button type="submit" title="edit object" class="btn btn-link"
-			      value="[% entry.key %]"
-			      data-order="100"
+			      value="[% entry.key %]" data-order="100"
 			      name="ldap_modify">
 			<span class="fa fa-fw fa-pencil text-primary"></span>
 			edit (all)
@@ -193,8 +205,7 @@
 		  <li>
 		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/index') %]">
 		      <button type="submit" title="edit object" class="btn btn-link"
-			      value="[% entry.key %]"
-			      data-order="100"
+			      value="[% entry.key %]" data-order="100"
 			      name="ldap_history">
 			<span class="fa fa-fw fa-history text-info"></span>
 			history
@@ -267,56 +278,50 @@
 		  <span class="fa fa-star text-primary"></span>
 		</button>
 	      </form>
-
-	      <form role="form" method="POST" action="[% c.uri_for_action('searchby/index') %]" class="col-xs-offset-2">
-		<button type="submit" class="btn btn-link umi-search"
-			name="ldap_subtree"
-			value="[% entry.key %]"
-			
-		  [% IF entry.value.mgmnt.is_dn && entry.key.match('People') && ! entry.value.mgmnt.is_blocked %]
-		  title="Root Account"><span class="fa fa-user fa-lg"></span>
-		  [% ELSIF entry.value.mgmnt.is_dn && entry.key.match('People') && entry.value.mgmnt.is_blocked %]
-		  title="Root Account"><span class="fa fa-user fa-lg text-danger"></span>
+	      <p></p>
+	      <span class="h5 col-xs-offset-1"><b class="[% blocked %]" [% blocked_title %]>
+		  [% IF entry.value.mgmnt.is_dn && entry.key.match('People') %]
+		  <span title="Root Account" class="fa fa-user fa-lg[% blocked %]"></span>
 
 		  [% ELSIF entry.value.mgmnt.is_dn && ! entry.key.match('People') %]
-		  title="Root Objectt"><span class="fa fa-star fa-lg"></span>
+		  <span title="Root Objectt" class="fa fa-star fa-lg[% blocked %]"></span>
 
 		  [% ELSIF entry.key.match('^author') %]
 		    [% IF dn.authorizedService.match('mail') %]
-		    title="EMAIL Service Account Branch">[% child %]<i class="[% services.mail.icon %] fa-lg"></i>
+		    [% child %]<i title="EMAIL Service Account Branch" class="[% services.mail.icon %] fa-lg[% blocked %]"></i>
 		    [% ELSIF dn.authorizedService.match('xmpp') %]
-		    title="XMPP (Jabber) Service Account Branch">[% child %]<i class="[% services.xmpp.icon %] fa-lg"></i>
+		    [% child %]<i title="XMPP (Jabber) Service Account Branch" class="[% services.xmpp.icon %] fa-lg[% blocked %]"></i>
 		    [% ELSIF dn.authorizedService.match('ovpn') %]
-		    title="OpenVPN Service Account Branch">[% child %]<i class="[% services.ovpn.icon %] fa-lg"></i>
+		    [% child %]<i title="OpenVPN Service Account Branch" class="[% services.ovpn.icon %] fa-lg[% blocked %]"></i>
 		    [% ELSIF dn.authorizedService.match('ssh') %]
-		    title="SSH key Branch">[% child %]<i class="[% services.ssh.icon %] fa-lg"></i>
+		    [% child %]<i title="SSH key Branch" class="[% services.ssh.icon %] fa-lg[% blocked %]"></i>
 		    [% ELSIF dn.authorizedService.match('mac') %][% mac='802.1x-mac' %]
-		    title="802.1x MAC AUTH Service Account Branch">[% child %]<i class="[% services.$mac.icon %] fa-lg"></i>
+		    [% child %]<i title="802.1x MAC AUTH Service Account Branch" class="[% services.$mac.icon %] fa-lg[% blocked %]"></i>
 		    [% ELSIF dn.authorizedService.match('eap') %][% eap='802.1x-eap' %]
-		    title="802.1x EAP AUTH Service Account Branch">[% child %]<i class="[% services.$eap.icon %] fa-lg"></i>
+		    [% child %]<i title="802.1x EAP AUTH Service Account Branch" class="[% services.$eap.icon %] fa-lg[% blocked %]"></i>
 		    [% ELSE %]
-		    title="Service Account Branch"><i class="fa fa-code-fork fa-lg"></i>
+		    <i title="Service Account Branch" class="fa fa-code-fork fa-lg[% blocked %]"></i>
 		    [% END %]
 		    
 		  [% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
 		    [% IF dn.authorizedService.match('mail') %]
-		    title="EMAIL Service Account">[% child %][% child %]<i class="[% services.mail.icon %] fa-lg"></i>
+		    [% child %][% child %]<i title="EMAIL Service Account" class="[% services.mail.icon %] fa-lg[% blocked %]"></i>
 		    [% ELSIF dn.authorizedService.match('xmpp') %]
-		    title="XMPP (Jabber) Service Account">[% child %][% child %]<i class="[% services.xmpp.icon %] fa-lg"></i>
+		    [% child %][% child %]<i title="XMPP (Jabber) Service Account" class="[% services.xmpp.icon %] fa-lg[% blocked %]"></i>
 		    [% ELSIF dn.authorizedService.match('ovpn') %]
-		    title="OpenVPN Service Account">[% child %][% child %]<i class="[% services.ovpn.icon %] fa-lg"></i>
+		    [% child %][% child %]<i title="OpenVPN Service Account" class="[% services.ovpn.icon %] fa-lg[% blocked %]"></i>
 		    [% ELSIF dn.authorizedService.match('ssh') %]
-		    title="SSH key">[% child %][% child %]<i class="[% services.ssh.icon %] fa-lg"></i>
+		    [% child %][% child %]<i title="SSH key" class="[% services.ssh.icon %] fa-lg[% blocked %]"></i>
 		    [% ELSIF dn.authorizedService.match('mac') %][% mac='802.1x-mac' %]
-		    title="802.1x MAC AUTH Service Account">[% child %][% child %]<i class="[% services.$mac.icon %] fa-lg"></i>
+		    [% child %][% child %]<i title="802.1x MAC AUTH Service Account" class="[% services.$mac.icon %] fa-lg[% blocked %]"></i>
 		    [% ELSIF dn.authorizedService.match('eap') %][% eap='802.1x-eap' %]
-		    title="802.1x EAP AUTH Service Account">[% child %][% child %]<i class="[% services.$eap.icon %] fa-lg"></i>
+		    [% child %][% child %]<i title="802.1x EAP AUTH Service Account" class="[% services.$eap.icon %] fa-lg[% blocked %]"></i>
 		    [% ELSE %]
-		    title="Service Account"><i class="fa fa-leaf fa-lg"></i>
+		    <i title="Service Account" class="fa fa-leaf fa-lg[% blocked %]"></i>
 		    [% END %]
 
 		  [% ELSE %]
-		  title="Service Account Branch"><i class="fa fa-code-fork fa-lg"></i>
+		  <i title="Service Account Branch" class="fa fa-code-fork fa-lg[% blocked %]"></i>
 		  
 		  [% END %]
 		  &nbsp;&nbsp;&nbsp;[% entry.key.replace(',', ',&nbsp;') %]
@@ -327,10 +332,7 @@
 		    </span>
 		  </span>
 		  [% END %]
-		</button>
-	      </form>
-
-
+	      </b></span>
 	      <!-- #### Modal: Delete start -->
 	      <div class="modal" id="modal_delete[% zufix %]"
 		   tabindex="-1" role="dialog" aria-labelledby="modal_delete[% zufix %]_label"
@@ -385,43 +387,43 @@
 		  </div>
 		</div>
 	      </div><!-- #### Modal: Block end -->
-	      <!-- #### Modal: Change Root Account start -->
-	      <div class="modal" id="chgaccModal[% loop.index %]"
-		   tabindex="-1" role="dialog" aria-labelledby="chgaccModalLabel[% loop.index %]"
+	      <!-- #### Modal: Reassign Root Account start -->
+	      <div class="modal" id="reassignModal[% loop.index %]"
+		   tabindex="-1" role="dialog" aria-labelledby="reassignModalLabel[% loop.index %]"
 		   aria-hidden="true">
 		<div class="modal-dialog modal-lg">
 		  <div class="modal-content">
-		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/delete') %]">
+		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/reassign') %]">
 		      <div class="modal-header">
-			<h4 class="modal-title alert alert-danger" id="chgaccModalLabel[% loop.index %]">
+			<h4 class="modal-title alert alert-danger" id="reassignModalLabel[% loop.index %]">
 			  <span class="fa fa-times-circle"></span>
 			  You are abojut to change root DN for: <b>[% entry.key.replace(',', ', ') %]</b>
 			</h4>
 		      </div>
 		      <div class="modal-body clearfix form-group text-primary">
-			<label for="chg_acc_dn_new" class="col-xs-2 text-right control-label">
-			  Recipient DN:
+			<label for="dn_to_reassign_to" class="col-xs-2 text-right control-label">
+			  UID reassign to:
 			</label>
 			<div class="col-xs-10">
-			  <input type="text" class="input-sm form-control" id="chg_acc_dn_new" name="chg_acc_dn_new"
-				 placeholder="Provide the recipient root DN the object have to be moved to">
+			  <input type="text" class="input-sm form-control" id="dn_to_reassign_to" name="dn_to_reassign_to"
+				 placeholder="Provide UID of the recipient">
 			</div>
 			<div class="col-xs-offset-2 col-xs-10">
-			  <input type="checkbox" name="chg_acc_wholebranch">
+			  <input type="checkbox" name="reassign_branch">
 			  Move whole branch as well
 			</div>
 		      </div>
 		      <div class="modal-footer">
 			<button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
-			<button type="submit" class="btn btn-danger umi-btn-event umi-btn-ajax"  name="chg_acc"
-				value="[% entry.key %]" data-action="delete" >
+			<button type="submit" class="btn btn-danger umi-btn-event umi-btn-ajax"  name="dn_to_reassign"
+				value="[% entry.key %]" data-action="reassign" >
 			  Yes, I really want to change it and yes, I understand all consequences!
 			</button>
 		      </div>
 		    </form>
 		  </div>
 		</div>
-	      </div><!-- #### Modal: Change Root Account end -->
+	      </div><!-- #### Modal: Reassign Root Account end -->
 	      <!-- #### Modal: LDIF start -->
 	      <div class="modal" id="ldifModal[% loop.index %]"
 		   tabindex="-1" role="dialog" aria-labelledby="ldifModalLabel[% loop.index %]"
@@ -532,6 +534,14 @@
    $(this).find('.fa').toggleClass('fa-toggle-down').toggleClass('fa-toggle-up')
  });
 </script>
+
+<script>
+ $('.collapse_in_out').on('click', function() {
+   $("[id^=collapse]").toggleClass('panel-collapse collapse in').toggleClass('panel-collapse collapse')
+   $("[id^=chevron_switcher]").toggleClass('fa-toggle-down').toggleClass('fa-toggle-up')
+ });
+</script>
+
 <script> $(function(){ $('#btnLegend').popover() }); </script>
 
 <script src="/static/js/umi-ddmenu-sort.js"></script>

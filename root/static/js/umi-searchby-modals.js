@@ -82,6 +82,9 @@ $(function(){
 		    case "block":
 			if ($modal && $modal.length) $modal.modal("hide");
 			break;
+		    case "reassign":
+			if ($modal && $modal.length) $modal.modal("hide");
+			break;
 		    }
 		    removeObjects([hidden, type]);
 		},

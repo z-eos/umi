@@ -289,7 +289,7 @@ has_field 'account.radiusgroupname'
   => ( type => 'Select',
        label => 'RADIUS Group Name',
        do_id => 'no',
-       label_class => [ 'col-xs-2', ],
+       label_class => [ 'col-xs-2', 'required', ],
        wrapper_class => [  'hidden', '8021x', 'relation', ],
        element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
        element_class => [ 'input-sm', ],
@@ -304,7 +304,7 @@ has_field 'account.radiustunnelprivategroupid'
        label => 'RADIUS Tunnel Private Group',
        wrapper_class => [  'hidden', '8021x', 'relation', ],
        do_id => 'no',
-       label_class => [ 'col-xs-2', ],
+       label_class => [ 'col-xs-2', 'required', ],
        element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'VLAN this 802.1x authenticates to',
@@ -375,7 +375,7 @@ has_field 'loginless_ssh.associateddomain'
 has_field 'loginless_ssh.key'
   => ( type => 'TextArea',
        label => 'SSH Pub Key',
-       label_class => [ 'col-xs-2', ],
+       label_class => [ 'col-xs-2', 'required', ],
        element_wrapper_class => [ 'col-xs-10', 'col-lg-8', ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'Paste SSH key',
@@ -452,7 +452,7 @@ has_field 'loginless_ovpn.associateddomain'
 has_field 'loginless_ovpn.userCertificate'
   => ( type => 'Upload',
        label => 'Cert (.DER)',
-       label_class => [ 'col-xs-2', ],
+       label_class => [ 'col-xs-2', 'required', ],
        element_wrapper_class => [ 'col-xs-2', 'col-lg-3', ],
        element_class => [ 'btn', 'btn-default', 'btn-sm',],
        element_attr => {
@@ -464,7 +464,7 @@ has_field 'loginless_ovpn.userCertificate'
 has_field 'loginless_ovpn.ifconfigpush'
   => ( apply => [ Printable ],
        label => 'Ifconfig',
-       label_class => [ 'col-xs-2', ],
+       label_class => [ 'col-xs-2', 'required', ],
        element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => '10.0.97.2 10.0.97.1, 10.13.83.192 10.0.97.1',
@@ -621,83 +621,125 @@ has_field 'aux_submit'
 
 
 ######################################################################
-#== VALIDATION =======================================================
+# ====================================================================
+# == VALIDATION ======================================================
+# ====================================================================
 ######################################################################
+
+before 'validate_form' => sub {
+   my $self = shift;
+   if( defined $self->params->{add_svc_acc} &&
+       $self->params->{add_svc_acc} ne '' ) {
+     $self->field('person_givenname')->required(0);
+     $self->field('person_sn')->required(0);
+     $self->field('person_org')->required(0);
+     $self->field('person_office')->required(0);
+     $self->field('person_title')->required(0);
+   }
+ };
 
 sub validate {
   my $self = shift;
-  my ( $element, $field, $ldap_crud, $loginpfx, $logintmp, $elementcmp, $err, $error, $cert, $is_x509, $cert_msg );
-
-  # p $self->add_svc_acc( defined $self->field('add_svc_acc')->value ? $self->field('add_svc_acc')->value : '' );
-  
-  $self->autologin( lc($self->utf2lat( $self->field('person_givenname')->value ) . '.' .
-		       $self->utf2lat( $self->field('person_sn')->value )))
-    if defined $self->field('person_givenname')->value && defined $self->field('person_sn')->value;
+  my (
+      $cert,
+      $cert_msg,
+      $element,
+      $elementcmp,
+      $err,
+      $error,
+      $field,
+      $is_x509,
+      $ldap_crud,
+      $loginpfx,
+      $logintmp,
+      $mesg,
+      $passwd_acc_filter,
+      $a1, $b1, $c1
+     );
 
   $ldap_crud = $self->ldap_crud;
-  my $mesg =
-    $ldap_crud->search({
-  			scope => 'one',
-  			filter => '(uid=' . $self->autologin . '*)',
-  			base => $ldap_crud->{cfg}->{base}->{acc_root},
-  			attrs => [ 'uid' ],
-  		       });
-  if ( $mesg->count == 1 &&
-       defined $self->field('person_namesake')->value &&
-       $self->field('person_namesake')->value == 1 ) {
-    $self->namesake(1);
-  } elsif ( $mesg->count &&
-	    defined $self->field('person_namesake')->value &&
-	    $self->field('person_namesake')->value eq '1' ) {
-    my @uids_namesake_suffixes;
-    foreach my $uid_namesake ( $mesg->entries ) {
-      push @uids_namesake_suffixes, 0+substr( $uid_namesake->get_value('uid'), length($self->autologin));
+
+  if ( defined $self->field('person_givenname')->value && defined $self->field('person_sn')->value ) {
+    $self->autologin( lc($self->utf2lat( $self->field('person_givenname')->value ) . '.' .
+			 $self->utf2lat( $self->field('person_sn')->value )));
+  } else {
+    my $autologin_mesg =
+      $ldap_crud->search({ scope => 'base',
+			   base => $self->add_svc_acc,
+			   attrs => [ 'givenName', 'sn' ], });
+    my $autologin_entry = $autologin_mesg->entry(0);
+    $self->autologin( lc($autologin_entry->get_value('givenName') . '.' .
+			 $autologin_entry->get_value('sn') ));
+  }
+  
+  if ( $self->add_svc_acc eq '' ) {
+    $mesg =
+      $ldap_crud->search({ scope => 'one',
+			   filter => '(uid=' . $self->autologin . '*)',
+			   base => $ldap_crud->{cfg}->{base}->{acc_root},
+			   attrs => [ 'uid' ], });
+    if ( $mesg->count == 1 &&
+	 defined $self->field('person_namesake')->value &&
+	 $self->field('person_namesake')->value == 1 ) {
+      $self->namesake(1);
+    } elsif ( $mesg->count &&
+	      defined $self->field('person_namesake')->value &&
+	      $self->field('person_namesake')->value eq '1' ) {
+      my @uids_namesake_suffixes;
+      foreach my $uid_namesake ( $mesg->entries ) {
+	push @uids_namesake_suffixes, int(substr( $uid_namesake->get_value('uid'), length($self->autologin)));
+      }
+      my @uids_namesake_suffixes_desc = sort {$b <=> $a} @uids_namesake_suffixes;
+      # @uids_namesake_suffixes_desc;
+      $self->namesake(++$uids_namesake_suffixes_desc[0]);
+    } elsif ( $mesg->count ) {
+      $self->field('person_login')->add_error('Auto-generaged variant for login exiscts!');
+    } else {
+      $self->namesake('');
     }
-    my @uids_namesake_suffixes_desc = sort {$b <=> $a} @uids_namesake_suffixes;
-    # @uids_namesake_suffixes_desc;
-    $self->namesake(++$uids_namesake_suffixes_desc[0]);
-  } elsif ( $mesg->count ) {
-    $self->field('person_login')->add_error('Auto-generaged variant for login exiscts!');
   } else {
     $self->namesake('');
   }
 
-  my $i = 0;
-  foreach $element ( $self->field('account')->fields ) {
-    if ( $#{$self->field('account')->fields} > 0 &&
-	 ! defined $element->field('authorizedservice')->value &&
-	 ! defined $element->field('associateddomain')->value ) { # no svc no fqdn
-      $element->field('associateddomain')->add_error('Domain Name is mandatory!');
-      $element->field('authorizedservice')->add_error('Service is mandatory!');
-    } elsif ( defined $element->field('authorizedservice')->value &&
-	      ! defined $element->field('associateddomain')->value ) { # no fqdn
-      $element->field('associateddomain')->add_error('Domain Name is mandatory!');
-    } elsif ( defined $element->field('associateddomain')->value &&
-	      ! defined $element->field('authorizedservice')->value ) { # no svc
-      $element->field('authorizedservice')->add_error('Service is mandatory!');
-    }
+  # not simplified variant start
+  if ( ! defined $self->field('person_simplified')->value ||
+       ( $self->field('person_simplified')->value &&
+	 $self->field('person_simplified')->value ne '1' ) ) {
+    #----------------------------------------------------------
+    #-- VALIDATION for services with password -----------------
+    #----------------------------------------------------------
+    my $i = 0;
+    foreach $element ( $self->field('account')->fields ) {
+      # if ( $#{$self->field('account')->fields} > -1 &&
+      if ( $self->add_svc_acc eq '' &&
+	   ((! defined $element->field('authorizedservice')->value &&
+	     ! defined $element->field('associateddomain')->value ) ||
+	    ( $element->field('authorizedservice')->value eq '' &&
+	      $element->field('associateddomain')->value eq '' )) ) { # no svc no fqdn
+	$element->field('associateddomain')->add_error('Domain Name is mandatory!');
+	$element->field('authorizedservice')->add_error('Service is mandatory!');
+      } elsif ( defined $element->field('authorizedservice')->value &&
+		$element->field('authorizedservice')->value ne '' &&
+		( ! defined $element->field('associateddomain')->value ||
+		  $element->field('associateddomain')->value eq '' ) ) { # no fqdn
+	$element->field('associateddomain')->add_error('Domain Name is mandatory!');
+      } elsif ( defined $element->field('associateddomain')->value &&
+		$element->field('associateddomain')->value ne '' &&
+		( ! defined $element->field('authorizedservice')->value ||
+		  $element->field('authorizedservice')->value eq '' )) { # no svc
+	$element->field('authorizedservice')->add_error('Service is mandatory!');
+      }
 
-    if ( ( defined $element->field('password1')->value &&
-	   ! defined $element->field('password2')->value ) ||
-	 ( defined $element->field('password2')->value &&
-	   ! defined $element->field('password1')->value ) ) { # only one pass
-      $element->field('password1')->add_error('Both or none passwords have to be defined!');
-      $element->field('password2')->add_error('Both or none passwords have to be defined!');
-    }
+      if ( ( defined $element->field('password1')->value &&
+	     ! defined $element->field('password2')->value ) ||
+	   ( defined $element->field('password2')->value &&
+	     ! defined $element->field('password1')->value ) ) { # only one pass
+	$element->field('password1')->add_error('Both or none passwords have to be defined!');
+	$element->field('password2')->add_error('Both or none passwords have to be defined!');
+      }
 
-    # 802.1x-mac but no mac
-    $element->field('login')->add_error('MAC address is mandatory!')
-      if $element->field('authorizedservice')->value =~ /^802.1x-mac$/ &&
-      ! defined $element->field('login')->value;
-
-    # mac is not valid
-    $element->field('login')->add_error('MAC address is not valid!')
-      if $element->field('authorizedservice')->value =~ /^802.1x-mac$/ &&
-      defined $element->field('login')->value &&
-      ! $self->macnorm({ mac => $element->field('login')->value });
-
-    if ( $element->field('authorizedservice')->value !~ /^802.1x-mac$/) {
-      if ( ! defined $element->field('login')->value ) {
+      if ( ! defined $element->field('login')->value ||
+	   $element->field('login')->value eq '' ) {
 	$logintmp = $self->autologin . $self->namesake;
 	$loginpfx = 'Login (autogenerated, since empty)';
       } else {
@@ -705,145 +747,210 @@ sub validate {
 	$loginpfx = 'Login';
       }
 
-    # prepare to know if login+service+fqdn is uniq?
-    if ( ! $i ) { # && defined $element->field('login')->value ) {
-      $elementcmp
-	->{$logintmp .
-	   $element->field('authorizedservice')->value .
-	   $element->field('associateddomain')->value} = 1;
-    } else { #if ( $i && defined $element->field('login')->value ) {
-      $elementcmp
-	->{$logintmp .
-	   $element->field('authorizedservice')->value .
-	   $element->field('associateddomain')->value}++;
+      $passwd_acc_filter = '(uid=' . $logintmp . '@' . $element->field('associateddomain')->value . ')'
+	if defined $element->field('associateddomain')->value && $element->field('associateddomain')->value ne '';
+
+      #---[ 802.1x ]------------------------------------------------
+      if ( defined $element->field('authorizedservice')->value &&
+	   $element->field('authorizedservice')->value =~ /^802.1x-.*$/ ) {
+
+	if ( $element->field('authorizedservice')->value =~ /^802.1x-mac$/ ) {
+	  $element->field('login')->add_error('MAC address is mandatory!')
+	    if ! defined $element->field('login')->value || $element->field('login')->value eq '';
+	  $element->field('login')->add_error('MAC address is not valid!')
+	    if defined $element->field('login')->value && $element->field('login')->value ne '' &&
+	    ! $self->macnorm({ mac => $element->field('login')->value });
+	  $logintmp = $self->macnorm({ mac => $element->field('login')->value });
+	  $loginpfx = 'MAC';
+	  $passwd_acc_filter = '(cn=' . $logintmp . ')';
+	}
+      
+	$element->field('radiusgroupname')->add_error('RADIUS group name is mandatory!')
+	  if ! defined $element->field('radiusgroupname')->value ||
+	  $element->field('radiusgroupname')->value eq '';
+	$element->field('radiustunnelprivategroupid')->add_error('RADIUS tunnel private grooup id is mandatory!')
+	  if ! defined $element->field('radiustunnelprivategroupid')->value ||
+	  $element->field('radiustunnelprivategroupid')->value eq '';
+      }
+      #---[ 802.1x ]------------------------------------------------
+
+
+      
+      # prepare to know if login+service+fqdn is uniq?
+      if ( ! $i ) {   # && defined $element->field('login')->value ) {
+	$elementcmp
+	  ->{$logintmp .
+	     $element->field('authorizedservice')->value .
+	     $element->field('associateddomain')->value} = 1;
+      } else { #if ( $i && defined $element->field('login')->value ) {
+	$elementcmp
+	  ->{$logintmp .
+	     $element->field('authorizedservice')->value .
+	     $element->field('associateddomain')->value}++;
+      }
+
+      if ( defined $element->field('authorizedservice')->value && $element->field('authorizedservice')->value ne '' &&
+	   defined $element->field('associateddomain')->value && $element->field('associateddomain')->value ne '' ) {
+	$mesg =
+	  $ldap_crud->search({
+			      filter => '(&(authorizedService=' .
+			      $element->field('authorizedservice')->value . '@' . $element->field('associateddomain')->value .
+			      ')' . $passwd_acc_filter .')',
+			      base => $ldap_crud->{cfg}->{base}->{acc_root},
+			      attrs => [ 'uid' ],
+			     });
+	$element->field('login')->add_error($loginpfx . ' <mark>' . $logintmp . '</mark> is not available!')
+	  if ($mesg->count);
+      }
+
+      $self->add_form_error('<span class="fa-stack fa-fw">' .
+			    '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
+			    '<i class="fa fa-user pull-right fa-stack-1x"></i></span>' .
+			    '<b class="visible-lg-inline">&nbsp;Pass&nbsp;</b>' .
+			    'Has error/s! Correct or remove, please')
+	if $self->field('account')->has_error_fields;
+
+      $i++;
     }
 
-      $mesg =
-	$ldap_crud->search({
-			    filter => '(&(authorizedService=' .
-			    $element->field('authorizedservice')->value . '@' . $element->field('associateddomain')->value .
-			    ')(uid=' . $logintmp . '@' . $element->field('associateddomain')->value .'))',
-			    base => $ldap_crud->{cfg}->{base}->{acc_root},
-			    attrs => [ 'uid' ],
-			   });
-      $element->field('login')->add_error($loginpfx . ' <mark>' . $logintmp . '</mark> is not available!')
-	if ($mesg->count);
+    # p $elementcmp;
+    # error rising if login+service+fqdn not uniq
+    $i = 0;
+    foreach $element ( $self->field('account')->fields ) {
+      if ( defined $element->field('authorizedservice')->value &&
+	   $element->field('authorizedservice')->value ne '' &&
+	   defined $element->field('associateddomain')->value &&
+	   $element->field('associateddomain')->value ne '' ) {
+	$element->field('login')
+	  ->add_error(sprintf('%s <mark>%s</mark> defined more than once for the same service and FQDN',
+			      $loginpfx, $logintmp))
+	  if defined $elementcmp->{$logintmp .
+				   $element->field('authorizedservice')->value .
+				   $element->field('associateddomain')->value} &&
+				     $elementcmp->{ $logintmp .
+						    $element->field('authorizedservice')->value .
+						    $element->field('associateddomain')->value
+						  } > 1;
+      }
+      $i++;
+    }
+  
+    #----------------------------------------------------------
+    #== VALIDATION password less ------------------------------
+    #----------------------------------------------------------
+  
+    #---[ ssh + ]------------------------------------------------
+    $i = 0;
+    foreach $element ( $self->field('loginless_ssh')->fields ) {
+      if ( defined $element->field('associateddomain')->value &&
+	   ! defined $element->field('key')->value ) { # fqdn but no key
+	$element->field('key')->add_error('Key field have to be defined!');
+      } elsif ( defined $element->field('key')->value &&
+		! defined $element->field('associateddomain')->value ) { # key but no fqdn
+	$element->field('associateddomain')->add_error('Domain field have to be defined!');
+      } elsif ( ! defined $element->field('key')->value &&
+		! defined $element->field('associateddomain')->value &&
+		$i > 0 ) {	# empty duplicatee
+	$self->add_form_error('<span class="fa-stack fa-fw">' .
+			      '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
+			      '<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
+			      '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
+			      '<b> <i class="fa fa-arrow-right"></i> SSH:</b> Empty duplicatee! Fill it or remove, please');
+      } elsif ( defined $element->field('key')->value &&
+		defined $element->field('associateddomain')->value ) {
+	# prepare to know if key+fqdn is uniq?
+	if ( ! $i ) {
+	  $elementcmp->{$element->field('key')->value . $element->field('associateddomain')->value} = 1;
+	} else {
+	  $elementcmp->{$element->field('key')->value . $element->field('associateddomain')->value}++;
+	}
+      }
+    
+      $i++;
+    }
+  
+    $i = 0;
+    foreach $element ( $self->field('loginless_ssh')->fields ) {
+      if ( defined $element->field('key')->value && $element->field('key')->value ne '' &&
+	   defined $element->field('associateddomain')->value && $element->field('associateddomain')->value ne '' ) {
+	$element->field('key')->add_error('The same key is defined more than once for the same FQDN')
+	  if $elementcmp->{$element->field('key')->value . $element->field('associateddomain')->value} > 1;
+      }
+      $i++;
     }
 
     $self->add_form_error('<span class="fa-stack fa-fw">' .
 			  '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
-			  '<i class="fa fa-user pull-right fa-stack-1x"></i>' .
-			  '</span>' .
-			  '<b class="visible-lg-inline">&nbsp;Pass&nbsp;</b>' .
-			  'Empty duplicatee! Fill it or remove, please')
-      if $self->field('account')->has_error_fields;
-
-    $i++;
-  }
-  # p $elementcmp;
-  # error rising if login+service+fqdn not uniq
-  $i = 0;
-  foreach $element ( $self->field('account')->fields ) {
-    $element->field('login')->add_error($loginpfx .
-					' <mark>' .
-					$logintmp .
-					'</mark> defined more than once for the same service and FQDN')
-      if $elementcmp->{$logintmp .
-		       $element->field('authorizedservice')->value .
-		       $element->field('associateddomain')->value} > 1;
-    $i++;
-  }
-
-  $i = 0;
-  foreach $element ( $self->field('loginless_ssh')->fields ) {
-    if ( defined $element->field('associateddomain')->value &&
-	 ! defined $element->field('key')->value ) { # fqdn but no key
-      $element->field('key')->add_error('<span class="fa-li fa fa-key"></span>Key field have to be defined!');
-    } elsif ( defined $element->field('key')->value &&
-	      ! defined $element->field('associateddomain')->value ) { # key but no fqdn
-      $element->field('associateddomain')->add_error('Domain field have to be defined!');
-    } elsif ( ! defined $element->field('key')->value &&
-	      ! defined $element->field('associateddomain')->value &&
-	      $i > 0 ) { # empty duplicatee
-      $element->add_error('Empty duplicatee!');
-      $self->add_form_error('<span class="fa-stack fa-fw">' .
-			    '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
-			    '<i class="fa fa-user-times pull-right fa-stack-1x"></i>' .
-			    '</span>' .
-			    '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
-			    '<b> -> SSH:</b> Empty duplicatee! Fill it or remove, please');
-    }
-
-    # prepare to know if key+fqdn is uniq?
-    if ( ! $i ) { $elementcmp->{$element->field('key')->value . $element->field('associateddomain')->value} = 1; }
-    else { $elementcmp->{$element->field('key')->value . $element->field('associateddomain')->value}++; }
-
-    $i++;
-  }
-  $i = 0;
-  foreach $element ( $self->field('loginless_ssh')->fields ) {
-    $element->field('key')->add_error('The same key is defined more than once for the same FQDN')
-      if $elementcmp->{$element->field('key')->value . $element->field('associateddomain')->value} > 1;
-    $i++;
-  }
-
-  $i = 0;
-  foreach $element ( $self->field('loginless_ovpn')->fields ) {
-    if ( defined $element->field('associateddomain')->value &&
-  	 ! defined $element->field('userCertificate')->value &&
-  	 ! defined $element->field('ifconfigpush')->value ) { # only fqdn
-      $element->field('userCertificate')->add_error('Cert field have to be defined!');
-      $element->field('ifconfigpush')->add_error('IP field have to be defined!');
-    } elsif ( ! defined $element->field('associateddomain')->value &&
-  	      defined $element->field('userCertificate')->value &&
-  	      ! defined $element->field('ifconfigpush')->value ) { # only cert
-      $element->field('associateddomain')->add_error('Domain field have to be defined!');
-      $element->field('ifconfigpush')->add_error('IP field have to be defined!');
-    } elsif ( ! defined $element->field('associateddomain')->value &&
-  	      ! defined $element->field('userCertificate')->value &&
-  	      defined $element->field('ifconfigpush')->value ) { # only ip
-      $element->field('userCertificate')->add_error('Cert field have to be defined!');
-      $element->field('associateddomain')->add_error('Domain field have to be defined!');
-    } elsif ( ! defined $element->field('associateddomain')->value &&
-    	      ! defined $element->field('userCertificate')->value &&
-    	      ! defined $element->field('ifconfigpush')->value &&
-  	      $i > 0 ) { # empty duplicatee
-      $element->add_error('Empty duplicatee!');
-      $self->add_form_error('<span class="fa-stack fa-fw">' .
-  			    '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
-  			    '<i class="fa fa-user-times pull-right fa-stack-1x"></i>' .
-  			    '</span>' .
-  			    '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
-  			    '<b> -> OpenVPN:</b> Empty duplicatee! Fill it or remove, please');
-    }
+			  '<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
+			  '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
+			  '<b> <i class="fa fa-arrow-right"></i> SSH:</b> Has error/s! Correct or remove, please')
+      if $self->field('loginless_ssh')->has_error_fields;
   
-    if ( defined $element->field('userCertificate')->value ) {
-      # $element->field('userCertificate')->value;
-      $cert = $self->file2var( $element->field('userCertificate')->value->{tempname}, $cert_msg);
-      $element->field('userCertificate')->add_error($cert_msg->{error}) if defined $cert_msg->{error};
-      $is_x509 = $self->cert_info({ cert => $cert });
-      $element->field('userCertificate')->add_error('Certificate file is broken or not DER format!') if defined $is_x509->{error};
-      $self->add_form_error('<span class="fa-stack fa-fw">' .
-  			    '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
-  			    '<i class="fa fa-user-times pull-right fa-stack-1x"></i>' .
-  			    '</span>' .
-  			    '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
-  			    '<b> -> OpenVPN:</b> Problems with certificate file<br>' . $is_x509->{error})
-  	if defined $is_x509->{error};
-    }
+    #---[ ssh - ]------------------------------------------------
+
+    #---[ OpenVPN + ]--------------------------------------------
+    $i = 0;
+    foreach $element ( $self->field('loginless_ovpn')->fields ) {
+      if ((( defined $element->field('associateddomain')->value &&
+	     defined $element->field('userCertificate')->value &&
+	     defined $element->field('ifconfigpush')->value &&
+	     ( $element->field('associateddomain')->value eq '' ||
+	       $element->field('userCertificate')->value eq '' ||
+	       $element->field('ifconfigpush')->value eq '' ) ) ||
+	   ( ! defined $element->field('associateddomain')->value ||
+	     ! defined $element->field('userCertificate')->value ||
+	     ! defined $element->field('ifconfigpush')->value  )) && $i > 0 ) {
+	$element->field('associateddomain')->add_error('');
+	$element->field('userCertificate')->add_error('');
+	$element->field('ifconfigpush')->add_error('');
+      }
+    
+      if ( ! defined $element->field('associateddomain')->value &&
+	   ! defined $element->field('userCertificate')->value &&
+	   ! defined $element->field('ifconfigpush')->value &&
+	   $i > 0 ) {	   # empty duplicate (repeatable)
+	# $element->add_error('Empty duplicatee!');
+	$self->add_form_error('<span class="fa-stack fa-fw">' .
+			      '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
+			      '<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
+			      '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
+			      '<b> <i class="fa fa-arrow-right"></i> OpenVPN:</b> Empty duplicatee! Fill it or remove, please');
+      }
   
-    $i++;
+      p $element->field('userCertificate')->value;
+      if ( defined $element->field('userCertificate')->value &&
+	   $element->field('userCertificate')->value ne '' ) {
+	$cert = $self->file2var( $element->field('userCertificate')->value->{tempname}, $cert_msg);
+	$element->field('userCertificate')->add_error($cert_msg->{error})
+	  if defined $cert_msg->{error};
+	$is_x509 = $self->cert_info({ cert => $cert });
+	$element->field('userCertificate')->add_error('Certificate file is broken or not DER format!')
+	  if defined $is_x509->{error};
+	$self->add_form_error('<span class="fa-stack fa-fw">' .
+			      '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
+			      '<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
+			      '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
+			      '<b> <i class="fa fa-arrow-right"></i> OpenVPN:</b> Problems with certificate file<br>' . $is_x509->{error})
+	  if defined $is_x509->{error};
+      }
+
+      #
+      ## !!! add check for this cert existance !!! since when it is absent, PSGI falls
+      #
+
+      $i++;
+    }
+
+  $self->add_form_error('<span class="fa-stack fa-fw">' .
+			'<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
+			'<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
+			'<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
+			'<b> <i class="fa fa-arrow-right"></i> OpenVPN:</b> Has error/s! Correct or remove, please')
+    if $self->field('loginless_ovpn')->has_error_fields;
+  #---[ OpenVPN - ]--------------------------------------------
+
   }
-
-  $error = $self->form->success_message ? $self->form->success_message : '';
-  $self->form->error_message('');
-  $self->form->add_form_error(sprintf('%s%s',
-  				      $self->form->success_message ? $self->form->success_message : '',
-  				      $err ? $err : ''
-  				     ));
-
-  # $self->add_form_error('<b class="text-danger">Form contains error/s! Check all tabs for fields constraints met, please!</b>')
-  #   if $self->has_error_fields;
+  # not simplified variant stop
 }
 
 ######################################################################
