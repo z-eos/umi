@@ -296,9 +296,9 @@
 		    [% ELSIF dn.authorizedService.match('ssh') %]
 		    [% child %]<i title="SSH key Branch" class="[% services.ssh.icon %] fa-lg[% blocked %]"></i>
 		    [% ELSIF dn.authorizedService.match('mac') %][% mac='802.1x-mac' %]
-		    [% child %]<i title="802.1x MAC AUTH Service Account Branch" class="[% services.$mac.icon %] fa-lg[% blocked %]"></i>
-		    [% ELSIF dn.authorizedService.match('eap') %][% eap='802.1x-eap' %]
-		    [% child %]<i title="802.1x EAP AUTH Service Account Branch" class="[% services.$eap.icon %] fa-lg[% blocked %]"></i>
+		    [% child %]<i title="802.1x EAP-MD5 (MAC) AUTH Service Account Branch" class="[% services.$mac.icon %] fa-lg[% blocked %]"></i>
+		    [% ELSIF dn.authorizedService.match('eap') %][% eap='802.1x-eap-tls' %]
+		    [% child %]<i title="802.1x EAP-TLS AUTH Service Account Branch" class="[% services.$eap.icon %] fa-lg[% blocked %]"></i>
 		    [% ELSE %]
 		    <i title="Service Account Branch" class="fa fa-code-fork fa-lg[% blocked %]"></i>
 		    [% END %]
@@ -313,9 +313,9 @@
 		    [% ELSIF dn.authorizedService.match('ssh') %]
 		    [% child %][% child %]<i title="SSH key" class="[% services.ssh.icon %] fa-lg[% blocked %]"></i>
 		    [% ELSIF dn.authorizedService.match('mac') %][% mac='802.1x-mac' %]
-		    [% child %][% child %]<i title="802.1x MAC AUTH Service Account" class="[% services.$mac.icon %] fa-lg[% blocked %]"></i>
-		    [% ELSIF dn.authorizedService.match('eap') %][% eap='802.1x-eap' %]
-		    [% child %][% child %]<i title="802.1x EAP AUTH Service Account" class="[% services.$eap.icon %] fa-lg[% blocked %]"></i>
+		    [% child %][% child %]<i title="802.1x EAP-MD5 (MAC) AUTH Service Account" class="[% services.$mac.icon %] fa-lg[% blocked %]"></i>
+		    [% ELSIF dn.authorizedService.match('eap') %][% eap='802.1x-eap-tls' %]
+		    [% child %][% child %]<i title="802.1x EAP-TLS AUTH Service Account" class="[% services.$eap.icon %] fa-lg[% blocked %]"></i>
 		    [% ELSE %]
 		    <i title="Service Account" class="fa fa-leaf fa-lg[% blocked %]"></i>
 		    [% END %]

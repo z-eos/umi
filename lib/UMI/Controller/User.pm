@@ -43,7 +43,7 @@ sub index :Path :Args(0) {
 	 $c->check_user_roles('email') ||
 	 $c->check_user_roles('xmpp') ||
 	 $c->check_user_roles('802.1x-mac') ||
-	 $c->check_user_roles('802.1x-eap') ) {
+	 $c->check_user_roles('802.1x-eap-tls') ) {
       my $params = $c->req->parameters;
       $params->{'avatar'} = $c->req->upload('avatar') if $params->{'avatar'};
 
@@ -414,7 +414,7 @@ sub create_account_branch_leaf {
   } elsif ( $arg->{service} eq 'ssh' ) {
     # left empty for latter amendations
   } elsif ( $arg->{service} eq '802.1x-mac' ||
-	    $arg->{service} eq '802.1x-eap' ) {
+	    $arg->{service} eq '802.1x-eap-tls' ) {
     $authorizedService = [];
   } else {
     $authorizedService = [
@@ -468,7 +468,7 @@ sub create_account_branch_leaf {
        jpegPhoto => [ $jpeg ],
       ];
   } elsif ( $arg->{service} eq '802.1x-mac' ||
-	    $arg->{service} eq '802.1x-eap' ) {
+	    $arg->{service} eq '802.1x-eap-tls' ) {
     $arg->{uid} = $arg->{'login'};
     $authorizedService_add =
       [

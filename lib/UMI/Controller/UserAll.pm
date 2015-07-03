@@ -38,7 +38,7 @@ sub index :Path :Args(0) {
 	 $c->check_user_roles('email') ||
 	 $c->check_user_roles('xmpp') ||
 	 $c->check_user_roles('802.1x-mac') ||
-	 $c->check_user_roles('802.1x-eap') ) {
+	 $c->check_user_roles('802.1x-eap-tls') ) {
       my $params = $c->req->parameters;
       $self->form->add_svc_acc( defined $params->{add_svc_acc} ? $params->{add_svc_acc} : '' );
       my $final_message;
@@ -352,7 +352,7 @@ sub create_account {
 	push @{$final_message->{error}}, $branch->{error} if defined $branch->{error};
 
 	#---------------------------------------------------------------------
-	# Leaf of the account BRANCH of ROOT Object
+	# LEAF of the account BRANCH of ROOT Object
 	#---------------------------------------------------------------------
 	my $x =
 	  {
@@ -368,9 +368,16 @@ sub create_account {
 	  };
 	if ( $form_field eq 'account' ) {
 	  if ( $element->field('authorizedservice')->value =~ /^802.1x-.*/ ) {
-	    $x->{password} = { $element->field('authorizedservice')->value =>
-			       { clear => $self->macnorm({ mac => $element->field('login')->value }) }
-			     };
+	    if ( $element->field('authorizedservice')->value eq '802.1x-mac' ) {
+	      $x->{password} = { $element->field('authorizedservice')->value =>
+				 { clear => $self->macnorm({ mac => $element->field('login')->value }) }
+			       };
+	    } elsif ( $element->field('authorizedservice')->value eq '802.1x-eap-tls' ) {
+	      $x->{password} = { $element->field('authorizedservice')->value =>
+				 { clear => $element->field('login')->value }
+			       };
+	    }
+
 	    $x->{radiusgroupname} = $element->field('radiusgroupname')->value
 	      if defined $element->field('radiusgroupname')->value;
 	    $x->{radiustunnelprivategroupid} = $element->field('radiustunnelprivategroupid')->value
@@ -592,7 +599,7 @@ sub create_account_branch_leaf {
   } elsif ( $arg->{service} eq 'ssh' ) {
     $authorizedService = [];
   } elsif ( $arg->{service} eq '802.1x-mac' ||
-	    $arg->{service} eq '802.1x-eap' ) {
+	    $arg->{service} eq '802.1x-eap-tls' ) {
     $authorizedService = [];
   } else {
     $authorizedService = [
@@ -635,13 +642,15 @@ sub create_account_branch_leaf {
       telephonenumber => $arg->{telephoneNumber},
       jpegPhoto => [ $self->file2var( $jpegPhoto_file, $return) ];
   } elsif ( $arg->{service} eq '802.1x-mac' ||
-	    $arg->{service} eq '802.1x-eap' ) {
-    $arg->{dn} = 'uid=' . $self->macnorm({ mac => $arg->{login} }) . ',' . $arg->{basedn};
+	    $arg->{service} eq '802.1x-eap-tls' ) {
+    $arg->{dn} = sprintf('uid=%s,%s',
+			 $arg->{service} eq '802.1x-mac' ? $self->macnorm({ mac => $arg->{login} }) : $arg->{login},
+			 $arg->{basedn});
     undef $authorizedService;
     push @{$authorizedService},
       authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
-      uid => $self->macnorm({ mac => $arg->{login} }),
-      cn => $self->macnorm({ mac => $arg->{login}}),
+      uid => $arg->{service} eq '802.1x-mac' ? $self->macnorm({ mac => $arg->{login} }) : $arg->{login},
+      cn =>  $arg->{service} eq '802.1x-mac' ? $self->macnorm({ mac => $arg->{login} }) : $arg->{login},
       objectClass => $ldap_crud->{cfg}->{objectClass}->{acc_svc_802_1x},
       userPassword => $arg->{password}->{$arg->{service}}->{clear},
       description => uc($arg->{service}) . ': ' . $arg->{'login'},
@@ -649,7 +658,7 @@ sub create_account_branch_leaf {
       radiustunnelmediumtype => 6,
       radiusservicetype => 'Framed-User',
       radiustunnelprivategroupid => $arg->{radiustunnelprivategroupid},
-      radiustunneltype => 13;
+      radiustunneltype => 13; p $authorizedService;
   } elsif ( $arg->{service} eq 'ssh' ) {
     ## I failed to figure out how to do that neither with Crypt::RSA nor with
     ## Net::SSH::Perl::Key, so leaving it for better times
