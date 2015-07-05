@@ -75,7 +75,7 @@
       [% FOREACH val IN attr.value %]
       [% IF attr.key == rdn %]
       <input type=text value="[% val %]" name="[% attr.key %]" disabled="" class="form-control" title="this field is RDN">
-      [% ELSIF attr.key.match('umiOvpnAddCert') %]
+      [% ELSIF attr.key.match('umiUserCertificate') %]
       <input type=text value="[% val %]" name="[% attr.key %]" disabled="" class="form-control" title="auto changed by new, .der format certificate (see the field &laquo;userCertificate&raquo;) upload">
       [% ELSIF attr.key == 'sshPublicKey' %]
       <p><textarea name="[% attr.key %]" class="form-control" rows=2>[% val %]</textarea></p>

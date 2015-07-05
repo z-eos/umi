@@ -76,15 +76,15 @@ sub _build_cfg {
 		  group =>          'cn',
 		 },
 	  objectClass => {
-			  acc_root =>       [ qw(
-						  top
-						  posixAccount
-						  inetOrgPerson
-						  organizationalPerson
-						  person
-						  inetLocalMailRecipient
-						  grayAccount
-					       ) ],
+			  acc_root => [ qw(
+					    top
+					    posixAccount
+					    inetOrgPerson
+					    organizationalPerson
+					    person
+					    inetLocalMailRecipient
+					    grayAccount
+					 ) ],
 			  acc_svc_branch => [ qw(
 						  account
 						  authorizedServiceObject
@@ -95,6 +95,14 @@ sub _build_cfg {
 						  authorizedServiceObject
 						  radiusprofile
 					       ) ],
+			  acc_svc_802_1x_eaptls => [ qw(
+							 account
+							 simpleSecurityObject
+							 authorizedServiceObject
+							 radiusprofile
+							 strongAuthenticationUser
+							 umiUserCertificate
+						      ) ],
 			  acc_svc_common => [ qw(
 						  posixAccount
 						  shadowAccount
@@ -102,34 +110,36 @@ sub _build_cfg {
 						  authorizedServiceObject
 						  domainRelatedObject
 					       ) ],
-			  gitacl =>         [ qw(
-						  top
-						  gitACL
-					       ) ],
-			  group =>          [ qw(
-						  top
-						  posixGroup
-					       ) ],
-			  dhcp =>           [ qw(
-						  top
-						  dhcpHost
-						  uidObject
-					       ) ],
-			  ovpn =>       [ qw(
-					      top
-					      domainRelatedObject
-					      strongAuthenticationUser
-					      umiOvpnCfg
-					   ) ],
-			  org =>            [ qw(
-						  top
-						  organizationalUnit
-					       ) ],
-			  ssh =>            [ qw(
-						  top
-						  account
-						  ldapPublicKey
-					       ) ],
+			  gitacl => [ qw(
+				    	  top
+				    	  gitACL
+				       ) ],
+			  group =>  [ qw(
+				    	  top
+				    	  posixGroup
+				       ) ],
+			  dhcp => [ qw(
+					top
+					dhcpHost
+					uidObject
+				     ) ],
+			  ovpn => [ qw(
+					top
+					organizationalRole
+					domainRelatedObject
+					strongAuthenticationUser
+					umiUserCertificate
+					umiOvpnCfg
+				     ) ],
+			  org => [ qw(
+				       top
+				       organizationalUnit
+				    ) ],
+			  ssh => [ qw(
+				       top
+				       account
+				       ldapPublicKey
+				    ) ],
 			 },
 	  jpegPhoto => {
 			'stub' => 'user-6-128x128.jpg',
@@ -171,8 +181,9 @@ sub _build_cfg {
 				descr => 'auth 802.1x EAP-TLS',
 				disabled => 0,
 				icon => 'fa fa-shield',
-				data_fields => 'login,password1,password2,radiusgroupname,radiustunnelprivategroup',
-				data_relation => '8021x',
+				data_fields => 'login,password1,password2,radiusgroupname,radiustunnelprivategroup,userCertificate',
+				data_relation => '8021xeaptls',
+				login_prefix => 'rad-',
 			       },
 	   'otrs' => {
 		      auth => 1,
@@ -223,7 +234,7 @@ sub _build_cfg {
 		    },
 	   'ovpn' => {
 		      auth => 0,
-		      descr => 'OpenVPN',
+		      descr => 'OpenVPN client',
 		      disabled => 0,
 		      icon => 'fa fa-certificate',
 		      # data_fields => 'block_crt',

@@ -42,43 +42,65 @@ sub index :Path :Args(0) {
       my $params = $c->req->parameters;
       $self->form->add_svc_acc( defined $params->{add_svc_acc} ? $params->{add_svc_acc} : '' );
       my $final_message;
-      $params->{'person_avatar'} = $c->req->upload('person_avatar') if $params->{'person_avatar'};
-      my $i = 0;
-      foreach ( $self->form->field('loginless_ovpn')->fields ) {
-	$params->{'loginless_ovpn.' . $i . '.userCertificate'} =
-	  $c->req->upload('loginless_ovpn.' . $i . '.userCertificate') if $params->{'loginless_ovpn.' . $i . '.userCertificate'};
-	$i++;
-      }
 
       # here we initialize repeatable fields to be rendered when the form is called from
       # another one
-      if ( defined $self->form->add_svc_acc && $self->form->add_svc_acc ne '' ) {
-	$params->{'account.0.associateddomain'} = '' if ! $params->{'account.0.associateddomain'};
-	$params->{'account.0.authorizedservice'} = '' if ! $params->{'account.0.authorizedservice'};
-	$params->{'account.0.login'} = '' if ! $params->{'account.0.login'};
-	$params->{'account.0.password1'} = '' if ! $params->{'account.0.password1'};
-	$params->{'account.0.password2'} = '' if ! $params->{'account.0.password2'};
-	$params->{'account.0.radiusgroupname'} = '' if ! $params->{'account.0.radiusgroupname'};
-	$params->{'account.0.radiustunnelprivategroupid'} = '' if ! $params->{'account.0.radiustunnelprivategroupid'};
+      if ( defined $self->form->add_svc_acc &&
+      	   $self->form->add_svc_acc ne '' &&
+      	   ! defined $params->{'account.0.associateddomain'} ) {
+      	$params->{'account.0.associateddomain'} = '' if ! $params->{'account.0.associateddomain'};
+      # 	$params->{'account.0.authorizedservice'} = '' if ! $params->{'account.0.aut# horizedservice'};
+      # 	$params->{'account.0.login'} = '' if ! $params->{'account.0.login'};
+      # 	$params->{'account.0.password1'} = '' if ! $params->{'account.0.password1'};
+      # 	$params->{'account.0.password2'} = '' if ! $params->{'account.0.password2'};
+      # 	$params->{'account.0.radiusgroupname'} = '' if ! $params->{'account.0.radiusgroupname'};
+      # 	$params->{'account.0.radiustunnelprivategroupid'} = '' if ! $params->{'account.0.radiustunnelprivategroupid'};
+      # 	$params->{'account.0.usercertificate'} = '' if ! $params->{'account.0.usercertificate'};
+      }
+      if ( defined $self->form->add_svc_acc &&
+      		$self->form->add_svc_acc ne '' &&
+      		! defined $params->{'loginless_ovpn.0.associateddomain'} ) {
+      	$params->{'loginless_ovpn.0.associateddomain'} = '' if ! $params->{'loginless_ovpn.0.associateddomain'};
+      # 	$params->{'loginless_ovpn.0.devmake'} = '' if ! $params->{'loginless_ovpn.0.devmake'};
+      # 	$params->{'loginless_ovpn.0.devmodel'} = '' if ! $params->{'loginless_ovpn.0.devmodel'};
+      # 	$params->{'loginless_ovpn.0.devos'} = '' if ! $params->{'loginless_ovpn.0.devos'};
+      # 	$params->{'loginless_ovpn.0.devosver'} = '' if ! $params->{'loginless_ovpn.0.devosver'};
+      # 	$params->{'loginless_ovpn.0.devtype'} = '' if ! $params->{'loginless_ovpn.0.devtype'};
+      # 	$params->{'loginless_ovpn.0.ifconfigpush'} = '' if ! $params->{'loginless_ovpn.0.ifconfigpush'};
+      # 	$params->{'loginless_ovpn.0.status'} = '' if ! $params->{'loginless_ovpn.0.status'};
+      # 	$params->{'loginless_ovpn.0.userCertificate'} = '' if ! $params->{'loginless_ovpn.0.userCertificate'};
+      }
+      if ( defined $self->form->add_svc_acc &&
+      	   $self->form->add_svc_acc ne '' &&
+      	   ! defined $params->{'loginless_ssh.0.associateddomain'} ) {
+      	$params->{'loginless_ssh.0.associateddomain'} = '' if ! $params->{'loginless_ssh.0.associateddomain'};
+      # 	$params->{'loginless_ssh.0.key'} = '' if ! $params->{'loginless_ssh.0.key'};
+      }
 
-	$params->{'loginless_ovpn.0.associateddomain'} = '' if ! $params->{'loginless_ovpn.0.associateddomain'};
-	$params->{'loginless_ovpn.0.devmake'} = '' if ! $params->{'loginless_ovpn.0.devmake'};
-	$params->{'loginless_ovpn.0.devmodel'} = '' if ! $params->{'loginless_ovpn.0.devmodel'};
-	$params->{'loginless_ovpn.0.devos'} = '' if ! $params->{'loginless_ovpn.0.devos'};
-	$params->{'loginless_ovpn.0.devosver'} = '' if ! $params->{'loginless_ovpn.0.devosver'};
-	$params->{'loginless_ovpn.0.devtype'} = '' if ! $params->{'loginless_ovpn.0.devtype'};
-	$params->{'loginless_ovpn.0.ifconfigpush'} = '' if ! $params->{'loginless_ovpn.0.ifconfigpush'};
-	$params->{'loginless_ovpn.0.status'} = '' if ! $params->{'loginless_ovpn.0.status'};
-	$params->{'loginless_ovpn.0.userCertificate'} = '' if ! $params->{'loginless_ovpn.0.userCertificate'};
-									                                                         
-	$params->{'loginless_ssh.0.associateddomain'} = '' if ! $params->{'loginless_ssh.0.associateddomain'};
-	$params->{'loginless_ssh.0.key'} = '' if ! $params->{'loginless_ssh.0.key'};
+      $params->{'person_avatar'} = $c->req->upload('person_avatar') if $params->{'person_avatar'};
+
+      my $i = 0;
+      #foreach ( $self->form->field('account')->fields ) {
+      for ( ; $i < 10; ) {
+	$params->{'account.' . $i . '.userCertificate'} =
+	  $c->req->upload('account.' . $i . '.userCertificate')
+	  if defined $params->{'account.' . $i . '.userCertificate'} &&
+	  $params->{'account.' . $i . '.userCertificate'} ne '';
+	$i++;
+      }
+      $i = 0;
+      foreach ( $self->form->field('loginless_ovpn')->fields ) {
+	$params->{'loginless_ovpn.' . $i . '.userCertificate'} =
+	  $c->req->upload('loginless_ovpn.' . $i . '.userCertificate')
+	  if defined $params->{'loginless_ovpn.' . $i . '.userCertificate'} &&
+	  $params->{'loginless_ovpn.' . $i . '.userCertificate'} ne '';
+	$i++;
       }
 
       $c->stash( template => 'user/user_all.tt',
 		 form => $self->form,
 		 final_message => $final_message, );
-
+p $params;
       return unless $self->form->process(
 					 posted => ($c->req->method eq 'POST'),
 					 params => $params,
@@ -359,7 +381,20 @@ sub create_account {
 	   basedn => $branch->{dn},
 	   authorizedservice => $form_field ne 'account' ?
 	   substr($form_field, 10) : $element->field('authorizedservice')->value,
-	   associateddomain => $branch->{associateddomain_prefix} . $element->field('associateddomain')->value,
+	   associateddomain => sprintf('%s%s',
+					 defined $ldap_crud->{cfg}
+					 ->{authorizedService}
+				       ->{$form_field ne 'account' ?
+					  substr($form_field, 10) : $element->field('authorizedservice')->value}
+					 ->{associateddomain_prefix}
+					 ->{$element->field('associateddomain')->value} ?
+					 $ldap_crud->{cfg}
+					 ->{authorizedService}
+				       ->{$form_field ne 'account' ?
+					  substr($form_field, 10) : $element->field('authorizedservice')->value}
+					 ->{associateddomain_prefix}
+					 ->{$element->field('associateddomain')->value} : '',
+					 $element->field('associateddomain')->value),
 	   uidNumber => $uidNumber,
 	   givenName => $args->{person_givenname},
 	   sn => $args->{person_sn},
@@ -374,7 +409,18 @@ sub create_account {
 			       };
 	    } elsif ( $element->field('authorizedservice')->value eq '802.1x-eap-tls' ) {
 	      $x->{password} = { $element->field('authorizedservice')->value =>
-				 { clear => $element->field('login')->value }
+				 { clear => sprintf('%s%s',
+						    defined $ldap_crud
+						    ->{cfg}
+						    ->{authorizedService}
+						    ->{$element->field('authorizedservice')->value}
+						    ->{login_prefix} ?
+						    $ldap_crud->{cfg}
+						    ->{authorizedService}
+						    ->{$element->field('authorizedservice')->value}
+						    ->{login_prefix} : '',
+						    defined $element->field('login')->value ?
+						    $element->field('login')->value : $uid ) }
 			       };
 	    }
 
@@ -392,6 +438,10 @@ sub create_account {
 
 	  $x->{login} = defined $element->field('login')->value ? $element->field('login')->value : $uid;
 
+	  $x->{userCertificate} = $element->field('userCertificate')->value
+	    if defined $element->field('userCertificate')->value &&
+	    $element->field('userCertificate')->value ne '';
+	  
 	} elsif ( $x->{authorizedservice} eq 'ssh' ) {
 	  $x->{sshpublickey} = $element->field('key')->value;
 	  $x->{login} = $uid;
@@ -479,8 +529,22 @@ sub create_account_branch {
 		       $ldap_crud->{cfg}->{base}->{acc_root}),
   my $return;
 
-  $arg->{add_attrs} = [ 'authorizedService' => $arg->{authorizedservice} . '@' .
-			$arg->{'associateddomain_prefix'} . $arg->{'associateddomain'},
+  $arg->{add_attrs} = [ 'authorizedService'
+			=> sprintf('%s@%s%s',
+				   $arg->{authorizedservice},
+				   defined $ldap_crud
+				   ->{cfg}
+				   ->{authorizedService}
+				   ->{$args->{authorizedservice}}
+				   ->{associateddomain_prefix}
+				   ->{$args->{associateddomain}} ?
+				   $ldap_crud
+				   ->{cfg}
+				   ->{authorizedService}
+				   ->{$args->{authorizedservice}}
+				   ->{associateddomain_prefix}
+				   ->{$args->{associateddomain}} : '',
+				   $arg->{associateddomain}),
 			'uid' => $arg->{uid} . '@' . $arg->{authorizedservice},
 			'objectClass' => $ldap_crud->{cfg}->{objectClass}->{acc_svc_branch}, ];
 
@@ -547,7 +611,7 @@ returns reference to hash of arrays
 
 sub create_account_branch_leaf {
   my  ( $self, $ldap_crud, $args ) = @_;
-  my $arg = {
+  p my $arg = {
 	     basedn => $args->{basedn},
 	     service => $args->{authorizedservice},
 	     associatedDomain => sprintf('%s%s',
@@ -574,8 +638,8 @@ sub create_account_branch_leaf {
 	     to_sshkeygen => $args->{to_sshkeygen} || undef,
 	     sshpublickey => $args->{sshpublickey} || undef,
 	     sshkeydescr => $args->{sshkeydescr} || undef,
-	     
-	     userCertificate => $args->{userCertificate} || undef,
+	     # !!! here we much need check for cert existance !!!
+	     userCertificate => $args->{userCertificate} || '',
 	     umiOvpnCfgIfconfigPush => $args->{umiOvpnCfgIfconfigPush} || 'NA',
 	     umiOvpnAddStatus => $args->{umiOvpnAddStatus} || 'blocked',
 	     umiOvpnAddDevType => $args->{umiOvpnAddDevType} || 'NA',
@@ -589,8 +653,16 @@ sub create_account_branch_leaf {
 	    };
   my $return;
 
-  $arg->{uid} = $arg->{'login'} . '@' . $arg->{associatedDomain};
-  $arg->{dn} = 'uid=' . $arg->{uid} . ',' . $arg->{basedn};
+  $arg->{prefixed_uid} =
+    sprintf('%s%s',
+	    defined $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{login_prefix} ?
+	    $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{login_prefix} : '',
+	    $arg->{login});
+  
+  $arg->{uid} = sprintf('%s@%s',
+			$arg->{prefixed_uid},
+			$arg->{associatedDomain});
+  $arg->{dn} = sprintf('uid=%s,%s', $arg->{uid}, $arg->{basedn});
 
   my ($authorizedService, $sshkey);
 
@@ -641,24 +713,52 @@ sub create_account_branch_leaf {
       userPassword => $arg->{password}->{$arg->{service}}->{'ssha'},
       telephonenumber => $arg->{telephoneNumber},
       jpegPhoto => [ $self->file2var( $jpegPhoto_file, $return) ];
+
   } elsif ( $arg->{service} eq '802.1x-mac' ||
 	    $arg->{service} eq '802.1x-eap-tls' ) {
-    $arg->{dn} = sprintf('uid=%s,%s',
-			 $arg->{service} eq '802.1x-mac' ? $self->macnorm({ mac => $arg->{login} }) : $arg->{login},
-			 $arg->{basedn});
     undef $authorizedService;
+
+    if ( $arg->{service} eq '802.1x-mac' ) {
+      $arg->{dn} = sprintf('uid=%s,%s',
+			   $self->macnorm({ mac => $arg->{login} }),
+			   $arg->{basedn}); # DN for MAC AUTH differs
+      push @{$authorizedService},
+	objectClass => $ldap_crud->{cfg}->{objectClass}->{acc_svc_802_1x},
+	uid => $self->macnorm({ mac => $arg->{login} }),
+	cn =>  $self->macnorm({ mac => $arg->{login} });
+    } else {
+      $arg->{dn} = sprintf('uid=%s,%s', $arg->{prefixed_uid}, $arg->{basedn}); # DN for EAP-TLS differs
+      push @{$authorizedService},
+	objectClass => $ldap_crud->{cfg}->{objectClass}->{acc_svc_802_1x_eaptls},
+	uid => $arg->{prefixed_uid},
+	cn => $arg->{prefixed_uid};
+    }
+
     push @{$authorizedService},
       authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
-      uid => $arg->{service} eq '802.1x-mac' ? $self->macnorm({ mac => $arg->{login} }) : $arg->{login},
-      cn =>  $arg->{service} eq '802.1x-mac' ? $self->macnorm({ mac => $arg->{login} }) : $arg->{login},
-      objectClass => $ldap_crud->{cfg}->{objectClass}->{acc_svc_802_1x},
       userPassword => $arg->{password}->{$arg->{service}}->{clear},
       description => uc($arg->{service}) . ': ' . $arg->{'login'},
       radiusgroupname => $arg->{radiusgroupname},
       radiustunnelmediumtype => 6,
       radiusservicetype => 'Framed-User',
       radiustunnelprivategroupid => $arg->{radiustunnelprivategroupid},
-      radiustunneltype => 13; p $authorizedService;
+      radiustunneltype => 13;
+
+    if ( $arg->{service} eq '802.1x-eap-tls' ) {
+      $arg->{cert_info} =
+	$self->cert_info({
+			  cert => $self->file2var($arg->{userCertificate}->{'tempname'}, $return),
+			  ts => "%Y%m%d%H%M%S",
+			 });
+      push @{$authorizedService},
+	umiUserCertificateSn => '' . $arg->{cert_info}->{'S/N'},
+	umiUserCertificateNotBefore => '' . $arg->{cert_info}->{'Not Before'},
+	umiUserCertificateNotAfter => '' . $arg->{cert_info}->{'Not  After'},
+	umiUserCertificateSubject => '' . $arg->{cert_info}->{'Subject'},
+	umiUserCertificateIssuer => '' . $arg->{cert_info}->{'Issuer'},
+	'userCertificate;binary' => $arg->{cert_info}->{cert};
+    }
+    
   } elsif ( $arg->{service} eq 'ssh' ) {
     ## I failed to figure out how to do that neither with Crypt::RSA nor with
     ## Net::SSH::Perl::Key, so leaving it for better times
@@ -703,11 +803,11 @@ sub create_account_branch_leaf {
 			  objectClass => $ldap_crud->{cfg}->{objectClass}->{ovpn},
 			  umiOvpnCfgIfconfigPush => $arg->{umiOvpnCfgIfconfigPush},
 			  umiOvpnAddStatus => $arg->{umiOvpnAddStatus},
-			  umiOvpnAddCertSn => '' . $arg->{cert_info}->{'S/N'},
-			  umiOvpnAddCertNotBefore => '' . $arg->{cert_info}->{'Not Before'},
-			  umiOvpnAddCertNotAfter => '' . $arg->{cert_info}->{'Not  After'},
-			  umiOvpnAddCertSubject => '' . $arg->{cert_info}->{'Subject'},
-			  umiOvpnAddCertIssuer => '' . $arg->{cert_info}->{'Issuer'},
+			  umiUserCertificateSn => '' . $arg->{cert_info}->{'S/N'},
+			  umiUserCertificateNotBefore => '' . $arg->{cert_info}->{'Not Before'},
+			  umiUserCertificateNotAfter => '' . $arg->{cert_info}->{'Not  After'},
+			  umiUserCertificateSubject => '' . $arg->{cert_info}->{'Subject'},
+			  umiUserCertificateIssuer => '' . $arg->{cert_info}->{'Issuer'},
 			  umiOvpnAddDevType => $arg->{umiOvpnAddDevType},
 			  umiOvpnAddDevMake => $arg->{umiOvpnAddDevMake},
 			  umiOvpnAddDevModel => $arg->{umiOvpnAddDevModel},

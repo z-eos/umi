@@ -519,7 +519,7 @@ sub create_account_branch_leaf {
 			 ];
     $authorizedService_add = [];
   } elsif ( $arg->{service} eq 'ovpn' ) {
-    p $arg->{userCertificate};
+    # p $arg->{userCertificate};
     local $/ = undef;
     open(my $fh, "<", $arg->{userCertificate}->{'tempname'}) or warn "Can not open $arg->{userCertificate}: $!";
     my $usercertificate = <$fh>;
