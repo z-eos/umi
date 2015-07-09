@@ -295,6 +295,8 @@
 		    [% child %]<i title="OpenVPN Service Account Branch" class="[% services.ovpn.icon %] fa-lg[% blocked %]"></i>
 		    [% ELSIF dn.authorizedService.match('ssh') %]
 		    [% child %]<i title="SSH key Branch" class="[% services.ssh.icon %] fa-lg[% blocked %]"></i>
+		    [% ELSIF dn.authorizedService.match('web') %]
+		    [% child %]<i title="Web Service Account Branch" class="[% services.web.icon %] fa-lg[% blocked %]"></i>
 		    [% ELSIF dn.authorizedService.match('mac') %][% mac='802.1x-mac' %]
 		    [% child %]<i title="802.1x EAP-MD5 (MAC) AUTH Service Account Branch" class="[% services.$mac.icon %] fa-lg[% blocked %]"></i>
 		    [% ELSIF dn.authorizedService.match('eap') %][% eap='802.1x-eap-tls' %]
@@ -312,6 +314,8 @@
 		    [% child %][% child %]<i title="OpenVPN Service Account" class="[% services.ovpn.icon %] fa-lg[% blocked %]"></i>
 		    [% ELSIF dn.authorizedService.match('ssh') %]
 		    [% child %][% child %]<i title="SSH key" class="[% services.ssh.icon %] fa-lg[% blocked %]"></i>
+		    [% ELSIF dn.authorizedService.match('web') %]
+		    [% child %][% child %]<i title="Web Account" class="[% services.web.icon %] fa-lg[% blocked %]"></i>
 		    [% ELSIF dn.authorizedService.match('mac') %][% mac='802.1x-mac' %]
 		    [% child %][% child %]<i title="802.1x EAP-MD5 (MAC) AUTH Service Account" class="[% services.$mac.icon %] fa-lg[% blocked %]"></i>
 		    [% ELSIF dn.authorizedService.match('eap') %][% eap='802.1x-eap-tls' %]

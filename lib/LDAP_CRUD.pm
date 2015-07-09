@@ -110,6 +110,13 @@ sub _build_cfg {
 						  authorizedServiceObject
 						  domainRelatedObject
 					       ) ],
+			  acc_svc_web => [ qw(
+					       account
+					       simpleSecurityObject
+					       uidObject
+					       authorizedServiceObject
+					       domainRelatedObject
+					    ) ],
 			  gitacl => [ qw(
 				    	  top
 				    	  gitACL
@@ -192,11 +199,11 @@ sub _build_cfg {
 		      icon => 'fa fa-file-code-o',
 		      data_fields => 'login,password1,password2',
 		     },
-	   'noc' => {
+	   'web' => {
 		     auth => 1,
-		     descr => 'NOC',
-		     disabled => 1,
-		     icon => 'fa fa-file-code-o',
+		     descr => 'Web Account',
+		     disabled => 0,
+		     icon => 'fa fa-puzzle-piece',
 		     data_fields => 'login,password1,password2',
 		    },
 	   'sms' => {

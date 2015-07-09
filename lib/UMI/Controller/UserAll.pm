@@ -666,15 +666,15 @@ sub create_account_branch_leaf {
 
   my ($authorizedService, $sshkey);
 
-  if ( $arg->{service} eq 'ovpn' ) {
-    $authorizedService = [];
-  } elsif ( $arg->{service} eq 'ssh' ) {
-    $authorizedService = [];
-  } elsif ( $arg->{service} eq '802.1x-mac' ||
-	    $arg->{service} eq '802.1x-eap-tls' ) {
+  if ( $arg->{service} eq 'ovpn' ||
+       $arg->{service} eq 'ssh' ||
+       ( $arg->{service} eq '802.1x-mac' ||
+	 $arg->{service} eq '802.1x-eap-tls' ) ||
+       $arg->{service} eq 'web' ) {
     $authorizedService = [];
   } else {
     $authorizedService = [
+			  objectClass => $ldap_crud->{cfg}->{objectClass}->{acc_svc_common},
 			  authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
 			  associatedDomain => $arg->{associatedDomain},
 			  uid => $arg->{uid},
@@ -683,7 +683,6 @@ sub create_account_branch_leaf {
 			  sn => $arg->{sn},
 			  uidNumber => $arg->{uidNumber},
 			  loginShell => $ldap_crud->{cfg}->{stub}->{loginShell},
-			  objectClass => $ldap_crud->{cfg}->{objectClass}->{acc_svc_common},
 			  gecos => uc($arg->{service}) . ': ' . $arg->{'login'} . ' @ ' .
 			  $arg->{associatedDomain},
 			  description => uc($arg->{service}) . ': ' . $arg->{'login'} . ' @ ' .
@@ -692,6 +691,7 @@ sub create_account_branch_leaf {
   }
 
   my ($authorizedService_add, $jpegPhoto_file);
+  #=== SERVICE: mail =================================================
   if ( $arg->{service} eq 'mail') {
     push @{$authorizedService},
       homeDirectory => $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{homeDirectory_prefix} .
@@ -700,6 +700,7 @@ sub create_account_branch_leaf {
       gidNumber => $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{gidNumber},
       userPassword => $arg->{password}->{$arg->{service}}->{'ssha'},
       objectClass => [ 'mailutilsAccount' ];
+  #=== SERVICE: xmpp =================================================
   } elsif ( $arg->{service} eq 'xmpp') {
     if ( defined $arg->{jpegPhoto} ) {
       $jpegPhoto_file = $arg->{jpegPhoto}->{'tempname'};
@@ -714,6 +715,7 @@ sub create_account_branch_leaf {
       telephonenumber => $arg->{telephoneNumber},
       jpegPhoto => [ $self->file2var( $jpegPhoto_file, $return) ];
 
+  #=== SERVICE: 802.1x ===============================================
   } elsif ( $arg->{service} eq '802.1x-mac' ||
 	    $arg->{service} eq '802.1x-eap-tls' ) {
     undef $authorizedService;
@@ -758,7 +760,8 @@ sub create_account_branch_leaf {
 	umiUserCertificateIssuer => '' . $arg->{cert_info}->{'Issuer'},
 	'userCertificate;binary' => $arg->{cert_info}->{cert};
     }
-    
+
+  #=== SERVICE: ssh ==================================================
   } elsif ( $arg->{service} eq 'ssh' ) {
     ## I failed to figure out how to do that neither with Crypt::RSA nor with
     ## Net::SSH::Perl::Key, so leaving it for better times
@@ -790,6 +793,7 @@ sub create_account_branch_leaf {
 			  uid => $arg->{uid},
 			 ];
 
+  #=== SERVICE: ovpn =================================================
   } elsif ( $arg->{service} eq 'ovpn' ) {
     $arg->{dn} = 'cn=' . substr($arg->{userCertificate}->{filename},0,-4) . ',' . $arg->{basedn};
     $arg->{cert_info} =
@@ -816,6 +820,16 @@ sub create_account_branch_leaf {
 			  'userCertificate;binary' => $arg->{cert_info}->{cert},
 			 ];
     push @{$return->{error}}, $arg->{cert_info}->{error} if defined $arg->{cert_info}->{error};
+    
+  #=== SERVICE: web ==================================================
+  } elsif ( $arg->{service} eq 'web' ) {
+    $authorizedService = [
+			  objectClass => $ldap_crud->{cfg}->{objectClass}->{acc_svc_web},
+			  authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
+			  associatedDomain => $arg->{associatedDomain},
+			  uid => $arg->{uid},
+			  userPassword => $arg->{password}->{$arg->{service}}->{'ssha'},
+			 ];
   }
 
   # p $arg->{dn};

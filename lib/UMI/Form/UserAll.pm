@@ -312,9 +312,9 @@ has_field 'account.radiustunnelprivategroupid'
 			 'data-name' => 'radiustunnelprivategroupid',
 			 'data-group' => 'account', },
        options => [{ value => '', label => '--- Choose VLAN ---'},
-		   { value => 'VLAN3', label => 'Voice (VLAN3)'},
-		   { value => 'VLAN3498', label => 'Guest (VLAN3498)'},
-		   { value => 'VLAN3499', label => 'Bootp (VLAN3499)'}, ],
+		   { value => '3', label => 'Voice (VLAN3)'},
+		   { value => '3498', label => 'Guest (VLAN3498)'},
+		   { value => '3499', label => 'Bootp (VLAN3499)'}, ],
      );
 
 has_field 'account.userCertificate'

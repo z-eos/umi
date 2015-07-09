@@ -238,10 +238,10 @@ delimiter for concatenation after splitting
 sub macnorm {
   my ( $self, $args ) = @_;
   my $arg = {
-	     mac => defined $args->{mac} && $args->{mac} ne '' ? uc($args->{mac}) : '',
+	     mac => defined $args->{mac} && $args->{mac} ne '' ? lc($args->{mac}) : '',
 	     oct => $args->{oct} || '[0-9a-fA-F]{2}',
 	     sep => $args->{sep} || '[.:-]',
-	     dlm => $args->{dlm} || '-',
+	     dlm => $args->{dlm} || '',
 	    };
   if (( $arg->{mac} =~ /^$arg->{oct}($arg->{sep})$arg->{oct}($arg->{sep})$arg->{oct}($arg->{sep})$arg->{oct}($arg->{sep})$arg->{oct}($arg->{sep})$arg->{oct}$/ ) &&
       ($1 x 4 eq "$2$3$4$5")) {

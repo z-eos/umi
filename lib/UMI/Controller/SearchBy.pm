@@ -878,8 +878,8 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
     if ( $mesg ne '0' ) {
       $return->{error} = '<li>Error during password change occured: ' . $mesg . '</li>';
     } else {
-      $return->{success} .= '<table class="table table-condensed table-vcenter"><tr><td><h1 class="mono text-right"><kbd>' .
-	$arg->{password_gen}->{'clear'} . '</kbd></h1></td><td class="text-center">';
+      $return->{success} .= '<table class="table table-condensed table-vcenter"><tr><td><h1 class="mono text-center">' .
+	$arg->{password_gen}->{'clear'} . '</h1></td><td class="text-center">';
 
       use GD::Barcode::QRcode;
       # binmode(STDOUT);
@@ -887,7 +887,7 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
       # print GD::Barcode::QRcode->new( $arg->{password_gen}->{'clear'} )->plot->png;
 
       use MIME::Base64;
-      my $qr = sprintf('<img alt="password" src="data:image/jpg;base64,%s" class="img-responsive img-thumbnail" title="password"/>',
+      my $qr = sprintf('<img alt="password" src="data:image/jpg;base64,%s" class="img-responsive" title="password"/>',
 		       encode_base64(GD::Barcode::QRcode
 				     ->new( $arg->{password_gen}->{'clear'},
 					    { Ecc => 'Q', Version => 6, ModuleSize => 8 } )
