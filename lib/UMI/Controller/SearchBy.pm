@@ -72,7 +72,8 @@ sub index :Path :Args(0) {
   # if ( defined $c->session->{"auth_uid"} ) {
   if ( defined $c->user_exists ) {
     my ( $params, $ldap_crud, $filter, $filter_meta, $filter_show, $base );
-
+    my $sort_order = 'reverse';
+    
     $params = $c->req->params;
 
     $ldap_crud =
@@ -134,6 +135,7 @@ sub index :Path :Args(0) {
     } elsif ( defined $params->{'ldap_history'} &&
 	      $params->{'ldap_history'} ne '' ) {
       $filter_show = $filter = 'reqDN=' . $params->{'ldap_history'};
+      $sort_order = 'straight';
       $base = UMI->config->{ldap_crud_db_log};
     } else {
       $filter = 'objectClass=*';
@@ -199,7 +201,15 @@ sub index :Path :Args(0) {
 
     # suffix array of dn preparation to respect LDAP objects "inheritance"
     # http://en.wikipedia.org/wiki/Suffix_array
-    my @ttentries_keys = map { scalar reverse } sort map { scalar reverse } keys %{$ttentries};
+    # this one to be used for all except history requests
+    # my @ttentries_keys = map { scalar reverse } sort map { scalar reverse } keys %{$ttentries};
+    # this one to be used for history requests
+    # my @ttentries_keys = sort { lc $a cmp lc $b } keys %{$ttentries};
+
+    my @ttentries_keys = $sort_order eq 'reverse' ?
+      map { scalar reverse } sort map { scalar reverse } keys %{$ttentries} :
+      sort { lc $a cmp lc $b } keys %{$ttentries};
+
     $c->stash(
 	      template => 'search/searchby.tt',
 	      base_dn => $base,
@@ -1221,6 +1231,7 @@ sub reassign :Path(reassign) :Args(0) {
     $c->stash->{current_view} = 'WebJSON';
     $c->stash->{success} = 'true';
     $c->stash->{message} = 'OK';
+    $c->stash->{final_message}->{error} = $err;
   } else {
     $c->stash(
 	      template => 'stub.tt',

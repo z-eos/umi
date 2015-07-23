@@ -3,7 +3,7 @@
 <div class="panel panel-danger">
   <div class="panel-heading">
     <h1 class="panel-title">
-    	<span class="glyphicon glyphicon-exclamation-sign"></span>
+    	<span class="fa fa-exclamation-triangle"></span>
     	Unauthorized access attempt number XXX!</h1>
   </div>
   <div class="panel-body">

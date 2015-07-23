@@ -3,14 +3,14 @@
 <div class="panel panel-warning">
   <div class="panel-heading">
     <h1 class="panel-title">
-    	<span class="glyphicon glyphicon-warning-sign">&nbsp;</span>
+    	<span class="fa fa-exclamation-triangle">&nbsp;</span>
     	<b>An error has occurred!</b>
     </h1>
   </div>
   <div class="panel-body">
     To talk to UMI admin concerning this case you'll have to provide 
       (<abbr title="copy/paste error text when talk to admin">
-	<span class="glyphicon glyphicon-camera"></span>
+	<span class="fa fa-camera"></span>
       </abbr>)
       error text bellow:
       <br>
@@ -18,5 +18,7 @@
     <div class="well">
       <em>[% error %]</em>
     </div>
+      [% USE dumper(indent=0, pad="<br>") %]
+      <pre>[% dumper.dump(c.user.session) %]</pre>
   </div>
 </div>

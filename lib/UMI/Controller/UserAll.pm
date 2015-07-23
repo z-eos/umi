@@ -34,11 +34,6 @@ Catalyst Controller.
 
 sub index :Path :Args(0) {
     my ( $self, $c, $ldapadduser_id ) = @_;
-    if ( $c->check_user_roles('wheel') ||
-	 $c->check_user_roles('email') ||
-	 $c->check_user_roles('xmpp') ||
-	 $c->check_user_roles('802.1x-mac') ||
-	 $c->check_user_roles('802.1x-eap-tls') ) {
       my $params = $c->req->parameters;
       $self->form->add_svc_acc( defined $params->{add_svc_acc} ? $params->{add_svc_acc} : '' );
       my $final_message;
@@ -110,17 +105,6 @@ p $params;
       # $final_message = $self->create_account( $c->model('LDAP_CRUD'), $params );
       $c->stash( final_message => $self->create_account( $c->model('LDAP_CRUD'), $params ) );
 
-    } elsif ( defined $c->session->{"auth_uid"} ) {
-      if (defined $c->session->{'unauthorized'}->{ $c->action } ) {
-	$c->session->{'unauthorized'}->{ $c->action } += 1;
-      } else {
-	$c->session->{'unauthorized'}->{ $c->action } = 1;
-      }
-      $c->stash( 'template' => 'unauthorized.tt',
-		 'unauth_action' => $c->action, );
-    } else {
-      $c->stash( template => 'signin.tt', );
-    }
 }
 
 =head2 create_account

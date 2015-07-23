@@ -38,7 +38,7 @@ strictly speaking - new object creation (ldapadd)
 
 sub index :Path :Args(0) {
     my ( $self, $c, $ldap_org_id ) = @_;
-    if ( $c->check_user_roles('wheel')) {
+    if ( $c->check_user_roles('admin') || $c->check_user_roles('acl-w-organizations') ) {
       $c->stash( template => 'org/org_wrap.tt',
 		 form => $self->form );
 
@@ -76,7 +76,7 @@ sub modify :Path(/ldap_organization_add/modify) :Args(0) {
 
     my ( $self, $c, $key, $val ) = @_;
 
-    if ( $c->check_user_roles('umi-admin')) {
+    if ( $c->check_user_roles('umi-admin') || $c->check_user_roles('org') ) {
       my $selected = $c->req->parameters;
 
       my @dn_parts = split(/,/, $selected->{'org'});

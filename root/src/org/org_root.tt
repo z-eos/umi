@@ -62,8 +62,8 @@
   </div>
   <div class="col-md-2">
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="[% c.uri_for('/org') %]">
-	  <span class="glyphicon glyphicon-plus-sign text-success"></span>
+      <li><a href="[% c.uri_for('/org') %]" target="_top">
+	  <span class="fa fa-plus-circle"></span>
 	  create new</a>
       </li>
     </ul>

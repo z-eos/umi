@@ -47,7 +47,7 @@
 	      </a>
 	    </li>
 	    [% END %]
-	    [% IF c.check_user_roles('wheel') || c.check_user_roles('email') || c.check_user_roles('xmpp') %]
+	    [% IF c.check_user_roles('wheel') || c.check_user_roles('org') || c.check_user_roles('email') || c.check_user_roles('xmpp') %]
             <li>
 	      <a href="[% c.uri_for_action('org_root') %]" tabindex="4">
         	<span class="fa fa-fw fa-institution"></span>
@@ -87,27 +87,27 @@
 	    </li>
             <li class="divider"></li>
             <li class="dropdown-header">Shown to the members of:</li>
-	    [% IF c.check_any_user_role( 'wheel', 'skiioo-dev' ) %]
+	    [% IF c.check_any_user_role( 'admin', 'acl-w-group' ) %]
             <li>
 	      <a href="#" tabindex="9">
 		<span class="fa fa-fw fa-leaf text-success"></span>
-		wheel && skiioo-dev
+		admin, acl-w-group
 	      </a>
 	    </li>
 	    [% END %]
-	    [% IF c.check_user_roles('wheel') %]
+	    [% IF c.check_any_user_role( 'admin', 'coadmin' ) %]
             <li>
 	      <a href="#" tabindex="10">
 		<span class="fa fa-fw fa-fire text-danger"></span>
-		wheel
+		co/admins
 	      </a>
 	    </li>
 	    [% END %]
-	    [% IF c.check_any_user_role( 'wheel', 'setup' ) %]
+	    [% IF c.check_any_user_role( 'admin', 'acl-w-people' ) %]
             <li>
 	      <a href="#" tabindex="11">
 		<span class="fa fa-fw fa-money text-info"></span>
-		wheel && setup
+		admin, acl-w-people
 	      </a>
 	    </li>
 	    [% END %]

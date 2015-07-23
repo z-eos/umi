@@ -4,14 +4,10 @@
 [% INCLUDE ldap_err.tt %]
 
 <h2>
-  Search Simple Results &nbsp; <small class="mono">base: [% base_dn %]; &nbsp;&nbsp; filter: [% filter %]</small>
+  Search Simple Results<sup><abbr  title="not all objects could be found via predefined search items, to search for all objects use advanced search menu item!" class="initialism"><i class="h6 fa fa-exclamation-triangle text-warning"></i></abbr></sup> &nbsp; <small class="mono">base: [% base_dn %]; &nbsp;&nbsp; filter: [% filter %]</small>
 </h2>
 
-<h6 class="text-muted">
-  <span class="fa fa-exclamation-triangle text-warning"></span> <em>Please note, not all objects could be found via predefined search items, to search for <strong>all</strong> objects use</em> &laquo;<span class="fa fa-search-plus"></span> advanced search&raquo; <em>menu item!</em>
-</h6>
-
-[% fa_child = 'fa-ellipsis-h' %]
+[% fa_child = 'fa-caret-right' %]
 [% child = '<i class="fa fa-fw ' _ fa_child _ ' text-default"></i>' %]
 [% blocked = '' %]
 [% blocked_title = '' %]

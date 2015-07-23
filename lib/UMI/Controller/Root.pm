@@ -326,6 +326,8 @@ sub user_preferences :Path(user_prefs) :Args(0) {
       $service_details = {
 			  branch_dn => $_->dn,
 			  authorizedService => $_->get_value('authorizedService'),
+			  auth => $ldap_crud->{cfg}->{authorizedService}
+			  ->{(split('@', $_->get_value('authorizedService')))[0]}->{auth},
 			  icon => $ldap_crud->{cfg}->{authorizedService}
 			  ->{(split('@', $_->get_value('authorizedService')))[0]}->{icon},
 			  descr => $ldap_crud->{cfg}->{authorizedService}
@@ -409,7 +411,14 @@ Attempt to render a view, if needed.
 
 =cut
 
-sub end : ActionClass('RenderView') {}
+sub end : ActionClass('RenderView') {
+  # my ( $self, $c ) = @_;
+
+  # if ( $c->error and $c->error->[-1] eq "access denied" ) {
+  #   $c->error(0); # clear the error
+  #   # access denied
+  # }
+}
 
 =head1 AUTHOR
 

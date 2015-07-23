@@ -292,7 +292,7 @@ sub update_model {
     my $item = undef;
     if ( ! $self->item ) {
       warn '$$$$$$$$$$$$$$$$$$$$$$$$$$$$ add $$$$$$$$$$$$$$$$$$$$$$$$$$$$' . "\n";
-      $self->add_form_error('<span class="glyphicon glyphicon-exclamation-sign">' .
+      $self->add_form_error('<span class="fa fa-exclamation-circle">' .
 			    '</span>&nbsp;first if');
       $item = $self->ldap_crud
 	->obj_add(

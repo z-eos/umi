@@ -137,7 +137,7 @@
 	      [% FOREACH x IN dhcp %]
 	      <tr class="mono">
 		<td>
-		  [% IF c.check_user_roles('wheel') || c.check_user_roles('wheel') %]
+		  [% IF c.check_user_roles('admin') || c.check_user_roles('coadmin') %]
 		  <div class="dropdown pull-left">
 		    <button class="btn btn-link btn-sm dropdown-toggle" 
 			    type="button" id="dropdownMenuActions" 
@@ -247,7 +247,7 @@
 	      [% END %]
 	    </tbody>
 	  </table>
-	  [% IF c.check_user_roles('wheel') || c.check_user_roles('wheel') %]
+	  [% IF c.check_user_roles('admin') || c.check_user_roles('coadmin') %]
 	</form>
 	[% END %]
       </div>
@@ -295,7 +295,7 @@
 		<ul class="dropdown-menu dropdown-menu-left bg-primary"
 		    aria-labelledby="dropdownMenuActions"
 		    role="menu">
-		  [% IF c.check_user_roles('wheel') || c.check_user_roles('wheel') %]
+		  [% IF c.check_user_roles('admin') || c.check_user_roles('coadmin') %]
 		  <li>
 		    <button type="button" title="delete object" class="btn btn-link"
 			    value="[% z.key %]"
@@ -330,7 +330,74 @@
 		      </button>
 		    </form>
 		  </li>
+		  <!-- #### Modal: Delete Service start -->
+		  <div class="modal" id="modal_del_svc_[% zufix %]"
+		       tabindex="-1" role="dialog" aria-labelledby="modal_del_svc_[% zufix %]_label"
+		       aria-hidden="true">
+		    <div class="modal-dialog modal-lg">
+		      <div class="modal-content">
+			<form role="form" method="POST" action="[% c.uri_for_action('searchby/delete') %]">
+			  <div class="modal-header">
+			    <h4 class="modal-title alert alert-danger" id="modal_del_svc_[% zufix %]_label">
+			      <span class="fa fa-times-circle"></span>
+			      You are about to perform deletion of DN: <b>[% z.key %]</b>
+			    </h4>
+			  </div>
+			  <div class="modal-body text-primary">
+			    <input type="checkbox" name="ldap_delete_recursive">
+			    Recursive deletion of all children of this object as well</input>
+			  </div>
+			  <div class="modal-footer">
+			    <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">
+			      Close
+			    </button>
+			    <button type="submit" class="btn btn-danger umi-btn-event umi-btn-ajax"
+				    name="ldap_delete" value="[% z.key %]" data-action="delete">
+			      Yes, I really want to delete it and yes, I understand all consequences!
+			    </button>
+			  </div>
+			</form>
+		      </div>
+		    </div>
+		  </div><!-- #### Modal: Delete Service end -->
+		  <!-- #### Modal: LDIF Service start -->
+		  <div class="modal" id="modal_ldif_[% zufix %]"
+		       tabindex="-1" role="dialog" aria-labelledby="modal_ldif_[% zufix %]_label"
+		       aria-hidden="true">
+		    <div class="modal-dialog modal-lg">
+		      <div class="modal-content">
+			<form role="form" method="POST">
+			  <div class="modal-header">
+			    <h4 class="modal-title alert alert-info" id="modal_ldif_[% zufix %]_label">
+			      <span class="fa fa-info-sign"></span>
+			      LDIF of DN: <b>[% z.key %]</b>
+			    </h4>
+			  </div>
+			  <div class="modal-body text-primary">
+			    <input type="checkbox" name="ldap_ldif_recursive">
+			    Get LDIFs for all children as well</input>
+			  </div>
+			  <div class="modal-body text-primary">
+			    <input type="checkbox" name="ldap_ldif_sysinfo">
+			    Get system info as well</input>
+			  </div>
+			  <div class="modal-footer">
+			    <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">
+			      Close
+			    </button>
+			    <button type="submit" class="btn btn-primary umi-btn-event umi-btn-logic"
+				    data-umiact="/searchby/ldif_gen" name="ldap_ldif" value="[% z.key %]">
+			      Yes, to get LDIF
+			    </button>
+			  </div>
+			</form>
+		      </div>
+		    </div>
+		  </div><!-- #### Modal: LDIF Service end -->
 		  [% END %]
+		  [% IF y.auth && ( y.authorizedService.search('mail') ||
+		     y.authorizedService.search('xmpp') ||
+		     y.authorizedService.search('web') ) %]
 		  <li>
 		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/modify_userpassword') %]">
 		      <button type="submit" title="modify password" class="btn btn-link" data-order="30"
@@ -349,76 +416,15 @@
 		      </button>
 		    </form>
 		  </li>
+		  [% END %]
 		</ul>
 	      </div>
-	      <!-- #### Modal: Delete Service start -->
-	      <div class="modal" id="modal_del_svc_[% zufix %]"
-		   tabindex="-1" role="dialog" aria-labelledby="modal_del_svc_[% zufix %]_label"
-		   aria-hidden="true">
-		<div class="modal-dialog modal-lg">
-		  <div class="modal-content">
-		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/delete') %]">
-		      <div class="modal-header">
-			<h4 class="modal-title alert alert-danger" id="modal_del_svc_[% zufix %]_label">
-			  <span class="fa fa-times-circle"></span>
-			  You are about to perform deletion of DN: <b>[% z.key %]</b>
-			</h4>
-		      </div>
-		      <div class="modal-body text-primary">
-			<input type="checkbox" name="ldap_delete_recursive">
-			Recursive deletion of all children of this object as well</input>
-		      </div>
-		      <div class="modal-footer">
-			<button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">
-			  Close
-			</button>
-			<button type="submit" class="btn btn-danger umi-btn-event umi-btn-ajax"
-				name="ldap_delete" value="[% z.key %]" data-action="delete">
-			  Yes, I really want to delete it and yes, I understand all consequences!
-			</button>
-		      </div>
-		      </form>
-		  </div>
-		</div>
-	      </div><!-- #### Modal: Delete Service end -->
-	      <!-- #### Modal: LDIF Service start -->
-	      <div class="modal" id="modal_ldif_[% zufix %]"
-		   tabindex="-1" role="dialog" aria-labelledby="modal_ldif_[% zufix %]_label"
-		   aria-hidden="true">
-		<div class="modal-dialog modal-lg">
-		  <div class="modal-content">
-		    <form role="form" method="POST">
-		    <div class="modal-header">
-		      <h4 class="modal-title alert alert-info" id="modal_ldif_[% zufix %]_label">
-			<span class="fa fa-info-sign"></span>
-			LDIF of DN: <b>[% z.key %]</b>
-		      </h4>
-		    </div>
-		    <div class="modal-body text-primary">
-		      <input type="checkbox" name="ldap_ldif_recursive">
-		      Get LDIFs for all children as well</input>
-		    </div>
-		    <div class="modal-body text-primary">
-		      <input type="checkbox" name="ldap_ldif_sysinfo">
-		      Get system info as well</input>
-		    </div>
-		    <div class="modal-footer">
-		      <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">
-			Close
-		      </button>
-		      <button type="submit" class="btn btn-primary umi-btn-event umi-btn-logic"
-			      data-umiact="/searchby/ldif_gen" name="ldap_ldif" value="[% z.key %]">
-			Yes, to get LDIF
-		      </button>
-		    </div>
-		    </form>
-		  </div>
-		</div>
-	      </div><!-- #### Modal: LDIF Service end -->
 	      [% z.value %]
 	      [% IF y.cert.${z.key} %]
 	      <br><small class="pull-left"><em><dl class="dl-horizontal">
 		[% FOREACH cert IN y.cert.${z.key} %]
+		[% NEXT IF cert.key == "cert" %]
+		[% NEXT IF cert.key == "error" && cert.value == "" %]
 		<dt>[% cert.key %]</dt><dd class="mono">[% cert.value %]</dd>
 		[% END %]
 	      </dl></em></small>

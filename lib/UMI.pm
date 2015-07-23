@@ -132,19 +132,20 @@ __PACKAGE__->setup();
 # | /user_root/                         | /user_root                           |
 # '-------------------------------------+--------------------------------------'
 
-__PACKAGE__->allow_access_if_any( "/", [ qw/wheel/ ]);
+# __PACKAGE__->allow_access_if( "/", [ qw/admin/ ]);
 
-__PACKAGE__->deny_access_unless_any( "/dhcp",           [ qw/wheel admin coadmin/ ]);
-__PACKAGE__->deny_access_unless_any( "/dhcp_root",      [ qw/wheel admin coadmin/ ]);
-__PACKAGE__->deny_access_unless_any( "/gitacl",         [ qw/wheel admin coadmin/ ]);
-__PACKAGE__->deny_access_unless_any( "/gitacl_root",    [ qw/wheel admin coadmin/ ]);
-__PACKAGE__->deny_access_unless_any( "/group",          [ qw/wheel admin coadmin/ ]);
-__PACKAGE__->deny_access_unless_any( "/group_root",     [ qw/wheel admin coadmin/ ]);
-__PACKAGE__->deny_access_unless_any( "/org",            [ qw/wheel admin coadmin/ ]);
-__PACKAGE__->deny_access_unless_any( "/org_root",       [ qw/wheel admin coadmin/ ]);
-__PACKAGE__->deny_access_unless_any( "/searchadvanced", [ qw/wheel admin coadmin/ ]);
-__PACKAGE__->deny_access_unless_any( "/searchby",       [ qw/wheel admin coadmin/ ]);
-__PACKAGE__->deny_access_unless_any( "/user",           [ qw/wheel admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/dhcp",           [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/dhcp_root",      [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/gitacl",         [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/gitacl_root",    [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/group",          [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/group_root",     [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/org",            [ qw/admin coadmin acl-w-organizations/ ]);
+__PACKAGE__->deny_access_unless_any( "/org_root",       [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/searchadvanced", [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/searchby",       [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/user",           [ qw/admin acl-w-people/ ]);
+__PACKAGE__->deny_access_unless_any( "/userall",        [ qw/admin acl-w-people/ ]);
 __PACKAGE__->allow_access_if( "/user/modpwd",
 			      sub {
 				my ( $c, $action ) = @_;
@@ -154,6 +155,9 @@ __PACKAGE__->allow_access_if( "/user/modpwd",
 				  die $Catalyst::Plugin::Authorization::ACL::Engine::DENIED;
 				}
 			      } );
+__PACKAGE__->allow_access("/searchby/modify_userpassword");
+
+__PACKAGE__->acl_allow_root_internals;
 
 
 =head1 NAME

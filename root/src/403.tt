@@ -3,13 +3,19 @@
 <div class="panel panel-danger">
   <div class="panel-heading">
     <h1 class="panel-title">
-    	<span class="glyphicon glyphicon-exclamation-sign">&nbsp;</span>
+    	<span class="fa fa-exclamation-circle">&nbsp;</span>
     	<b>Access denied!</b>
     </h1>
   </div>
-  <div class="panel-body">
-    <p>Dear <strong class="text-info"><em>[% c.user.username %] [% c.user.session.auth_obj.sn %]</em></strong>,
-      you are not allowed to access this page.</p>
-    <p>Contact UMI administrator for any question.</p>
+  <div class="text-center panel-body">
+    <span class="fa-stack fa-5x">
+      <i class="fa fa-user fa-stack-1x"></i>
+      <i class="fa fa-ban fa-stack-2x text-danger"></i>
+    </span>
+    <p class="text-info"><b><h1 class="text-info">[% c.user.user.attributes.givenname %] [% c.user.user.attributes.sn %] !</h1>
+      <em class="text-muted">coming as [% c.user %]</em></b></p>
+     <p>You are not allowed to access this page.</p>
+    <p>Contact UMI administrator to resolve that.</p>
   </div>
 </div>
+

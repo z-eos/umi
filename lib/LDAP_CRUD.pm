@@ -28,10 +28,36 @@ use Try::Tiny;
 
 =head2 cfg
 
-Related to LDAP DB objects configuration. Attempt to reach some sort of DB
-topology independence was undertaken.
+Related to LDAP DB objects configuration.
+
+each service described by hash like this:
+    I<service> => {
+       # whether login/password needed or not
+       I<auth> => 1 or 0,
+       I<descr> => 'Description seen in form select',
+       # to process or to not to process this service
+       I<disabled> => 1 or 0,
+       # some predefined gidNumber
+       I<gidNumber> => 10106,
+       I<jpegPhoto_noavatar> => UMI->path_to('path', 'to', '/image.jpg'),
+       I<icon> => 'fa fa-lightbulb-o',
+       # must-contain fields for this service
+       I<data_fields> => 'login,password1,password2',
+       # element wrapper class, presence of which is
+       # applying umi-user-all.js to the element
+       I<data_relation> => 'passw',
+       # domains which demands prefix (one more level domain) like
+       # service dedicated hosts
+       I<associateddomain_prefix> =>
+       {
+        'talax.startrek.in' => 'im.',
+       },
+       # automatically added for some services
+       I<login_prefix> => 'rad-',
+      },
 
 =cut
+
 
 has 'cfg' => ( traits => ['Hash'], is => 'ro', isa => 'HashRef', builder => '_build_cfg', );
 
@@ -161,6 +187,7 @@ sub _build_cfg {
 		      gidNumber => 10006,
 		      icon => 'fa fa-envelope',
 		      data_fields => 'login,password1,password2',
+		      data_relation => 'passw',
 		     },
 	   'xmpp' => {
 		      auth => 1,
@@ -170,6 +197,7 @@ sub _build_cfg {
 		      jpegPhoto_noavatar => UMI->path_to('root', 'static', 'images', '/avatar-xmpp.png'),
 		      icon => 'fa fa-lightbulb-o',
 		      data_fields => 'login,password1,password2',
+		      data_relation => 'passw',
 		      associateddomain_prefix =>
 		      {
 		       'talax.startrek.in' => 'im.',
@@ -180,7 +208,7 @@ sub _build_cfg {
 			    descr => 'auth 802.1x EAP-MD5 (MAC)',
 			    disabled => 0,
 			    icon => 'fa fa-shield',
-			    data_fields => 'login,password1,password2,radiusgroupname,radiustunnelprivategroup',
+			    data_fields => 'login,radiusgroupname,radiustunnelprivategroup',
 			    data_relation => '8021x',
 			   },
 	   '802.1x-eap-tls' => {
@@ -205,6 +233,7 @@ sub _build_cfg {
 		     disabled => 0,
 		     icon => 'fa fa-puzzle-piece',
 		     data_fields => 'login,password1,password2',
+		     data_relation => 'passw',
 		    },
 	   'sms' => {
 		     auth => 1,
@@ -218,6 +247,7 @@ sub _build_cfg {
 			  disabled => 0,
 			  icon => 'fa fa-terminal',
 			  data_fields => 'login,password1,password2',
+			  data_relation => 'passw',
 			 },
 	   'ssh-acc' => {
 			 auth => 1,
@@ -225,6 +255,7 @@ sub _build_cfg {
 			 disabled => 0,
 			 icon => 'fa fa-key',
 			 data_fields => 'login,password1,password2',
+			 data_relation => 'passw',
 			},
 	   'ssh' => {
 		     auth => 0,
@@ -525,6 +556,13 @@ sub add {
 
 reassign method
 
+    to_reassign => dn to reassign (branch or leaf)
+    reassign_to => dn to reassign to (root account object)
+    recursive => reassign all subtree recursively
+    is_branch_to_reassign => to_reassign is a branch?
+    is_branch_reassign_to => is there to_reassign branch in reassign_to subtree?
+
+
 =cut
 
 sub reassign {
@@ -534,9 +572,103 @@ sub reassign {
 	     to_reassign => $args->{dn_to_reassign},
 	     reassign_to => $args->{dn_to_reassign_to},
 	     recursive => defined $args->{reassign_branch} && $args->{reassign_branch} eq "on" ? 1 : 0,
+	     to_reassign_is_branch => substr($args->{dn_to_reassign}, 0, 17) eq 'authorizedService' ? 1 : 0,
 	     stub => 1,
 	    };
 
+  my ( $result, $mesg, $entry, $clone, $attrs );
+  
+  my @x = split(/,/, $arg->{to_reassign}); p \@x;
+  my $y = 0;
+  foreach my $z ( @x ) {
+    # if ( substr($z, 0, 4) ne 'auth' && $y == 0 ) {
+    #   shift @x;
+    #   p \@x;
+    # }
+    # $y = 1 if substr($z, 0, 4) eq 'auth';
+    if ( $z !~ /^authorizedService=/ && $y == 0 ) {
+      shift @x;
+      p \@x;
+    }
+    $y = 1 if $z =~ /^authorizedService=/;
+  }
+  p \@x;
+  $arg->{to_reassign_branch_dn} = join(',', @x);
+  
+  $arg->{reassign_to_branch_dn} = sprintf('%s,%s',
+					  (split(/,/, $arg->{to_reassign_branch_dn}))[0],
+					  $arg->{reassign_to});
+
+  $result = $self->ldap->search( base   => $arg->{reassign_to},
+				 filter => sprintf('(%s)', (split(/,/, $arg->{to_reassign_branch_dn}))[0]),
+				 scope => 'base' );
+
+  $arg->{reassign_to_has_branch} = $result->count;
+
+  # to_reassign BRANCH does'n exist in reassign_to subtree and here we
+  # CREATE it
+  if ( ! $arg->{reassign_to_has_branch} ) {
+    $result = $self->search( { base  => $arg->{to_reassign_branch_dn}, scope => 'base', } );
+    $clone = $result->entry(0)->clone;
+    $mesg = $clone->dn($arg->{reassign_to_branch_dn});
+
+    $mesg = $clone->replace( uid => sprintf('%s@%s.%s',
+					    (split(/=/, (split(/,/, $arg->{reassign_to}))[0]))[1],
+					    (split(/@/, (split(/=/, (split(/,/, $arg->{to_reassign_branch_dn}))[0]))[1]))[0],
+					    (split(/@/, (split(/=/, (split(/,/, $arg->{to_reassign_branch_dn}))[0]))[1]))[1]
+					   ) );
+    foreach ( $clone->attributes ) {
+      push @{$attrs}, $_ => $clone->get_value( $_, asref => 1 );
+    }
+    $mesg = $self->add( $clone->dn, $attrs );
+    
+    # !!! here is error handling
+  }
+  undef $attrs;
+
+  # to_reassign BRANCH already EXISTS in reassign_to subtree and here
+  # we are to process all objects bellow it
+  if ( $arg->{to_reassign_is_branch} && $arg->{recursive} ) {
+    $result = $self->search( { base  => $arg->{to_reassign}, scope => 'children', } );
+    foreach $entry ( $result->entries ) {
+      $clone = $entry->clone;
+      $mesg = $clone->dn(sprintf('%s,%s',
+				 (split(/,/, $entry->dn))[0],
+				 $arg->{reassign_to_branch_dn}));
+
+      foreach ( $clone->attributes ) {
+	push @{$attrs}, $_ => $clone->get_value( $_, asref => 1 );
+      }
+      $mesg = $self->add( $clone->dn, $attrs );
+      undef $attrs;
+    }
+
+    ### FINISH
+    # here we have to delete to_reassign subtree
+  } elsif ( ! $arg->{to_reassign_is_branch} && ! $arg->{recursive}) {
+    $result = $self->search( { base  => $arg->{to_reassign}, scope => 'base', } );
+    $clone = $result->entry(0)->clone;
+
+    $mesg = $clone->dn(sprintf('%s,%s',
+			       (split(/,/, $arg->{to_reassign}))[0],
+			       $arg->{reassign_to_branch_dn}));
+
+    foreach ( $clone->attributes ) {
+      push @{$attrs}, $_ => $clone->get_value( $_, asref => 1 );
+    }
+    $mesg = $self->add( $clone->dn, $attrs );
+    undef $attrs;
+    # !!! here is error handling
+    
+    
+    ### FINISH
+    # here we have to delete to_reassign subtree
+  }
+
+
+  
+
+  p $arg;
   return $arg;
 }
 
@@ -594,8 +726,8 @@ sub delr {
   my $return = 'call to LDAP_CRUD->del from ' . $callername . ': ';
 
   if ( ! $self->dry_run ) {
-    my $result      = $self->ldap->search( base   => $dn,
-					   filter => "(objectclass=*)" );
+    my $result = $self->ldap->search( base   => $dn,
+				      filter => "(objectclass=*)" );
     my @dnlist;
     foreach my $entry ( $result->all_entries ) {
       push @dnlist, $entry->dn;
@@ -1012,9 +1144,10 @@ sub obj_add {
 		       );
   my $message;
   if ( $mesg ) {
+    my $mesg2 = p $mesg;
     $message .= '<div class="alert alert-danger">' .
       '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span>&nbsp;' .
-	'Error during ' . $type . ' object creation occured: ' . $mesg . '</div>';
+	'Error during ' . $type . ' object creation occured: ' . $mesg2 . '</div>';
 
     warn sprintf('object dn: %s wasn not created! errors: %s', $attrs->{'dn'}, $mesg);
   } else {
