@@ -164,7 +164,7 @@ sub index :Path :Args(0) {
 				  base => $ldap_crud->cfg->{base}->{group},
 				  filter => sprintf('(&(cn=%s)(memberUid=%s))',
 						    $ldap_crud->cfg->{stub}->{group_blocked},
-						    substr( (split /,/, $_->dn)[0], 4 )),
+						    substr( (reverse split /,/, $_->dn)[2], 4 )),
 				 });
       $return->{error} .= $ldap_crud->err( $mesg )->{html}
 	if $mesg->is_error();
@@ -1231,7 +1231,8 @@ sub reassign :Path(reassign) :Args(0) {
     $c->stash->{current_view} = 'WebJSON';
     $c->stash->{success} = 'true';
     $c->stash->{message} = 'OK';
-    $c->stash->{final_message}->{error} = $err;
+    $c->stash->{err_flg} = $err ? 'tue' : 'false';
+    $c->stash->{err_msg} = $err;
   } else {
     $c->stash(
 	      template => 'stub.tt',

@@ -426,6 +426,8 @@ Net::LDAP errors handling
 
 Net::LDAP::Message is expected as single input argument
 
+returns hash with formatted details
+
 =cut
 
 sub err {
@@ -493,6 +495,26 @@ sub schema {
   $self->ldap->schema;
 }
 
+
+=head2 search
+
+Net::LDAP->search wrapper which expects hash on input
+    { 
+      dn => ...,
+      base  => ...,
+      scope => 'base',
+      ... e.t.c.
+    }
+
+if `dn' provided, then it is used to construct the `filter' and `base'
+(values of which will be overwriten), scope in that case will be set
+to `one'
+
+it returns just what Net::LDAP->search returns and in most cases
+should be processed with $self->err()
+
+=cut
+
 sub search {
   my ($self, $args) = @_;
 
@@ -556,12 +578,39 @@ sub add {
 
 reassign method
 
-    to_reassign => dn to reassign (branch or leaf)
-    reassign_to => dn to reassign to (root account object)
-    recursive => reassign all subtree recursively
-    is_branch_to_reassign => to_reassign is a branch?
-    is_branch_reassign_to => is there to_reassign branch in reassign_to subtree?
+    src => { # dn to reassign (branch or leaf)
+        arr   [ # splitted by `,'
+            [0] ...,
+            [n] ...
+        ],
+        str => "as string"
+    },
+    src_branch_dn => {
+        arr   [
+            [0] ...,
+            [n] ...
+        ],
+        str   "as string"
+    },
+    src_is_branch => is src a branch?
 
+
+    dst => { # dn to reassign to (root account object)
+        arr =>  [ # splitted by `,'
+            [0] ...,
+            [n] ...
+        ],
+        str => "as string"
+    },
+    dst_branch_dn => {
+        arr   [
+            [0] ...,
+            [n] ...
+        ],
+        str   "as string"
+    },
+
+    dst_has_branch => is there src branch in dst subtree?
 
 =cut
 
@@ -569,107 +618,135 @@ sub reassign {
   my ($self, $args) = @_;
 
   my $arg = {
-	     to_reassign => $args->{dn_to_reassign},
-	     reassign_to => $args->{dn_to_reassign_to},
-	     recursive => defined $args->{reassign_branch} && $args->{reassign_branch} eq "on" ? 1 : 0,
-	     to_reassign_is_branch => substr($args->{dn_to_reassign}, 0, 17) eq 'authorizedService' ? 1 : 0,
-	     stub => 1,
+	     dst => { str => sprintf('uid=%s,%s',
+					     $args->{dst_uid},
+					     $self->{cfg}->{base}->{acc_root}), },
+	     src => { str => $args->{src_dn},
+		      is_branch => $args->{src_dn} =~ /^authorizedService=/ ? 1 : 0, },
 	    };
+  @{$arg->{src}->{arr}} = split(/,/, $arg->{src}->{str});
+  @{$arg->{dst}->{arr}} = split(/,/, $arg->{dst}->{str});
 
-  my ( $result, $mesg, $entry, $clone, $attrs );
-  
-  my @x = split(/,/, $arg->{to_reassign}); p \@x;
+  my ( $return, $result, $mesg, $entry, $clone, $attrs, @x, $key, $val );
+
   my $y = 0;
-  foreach my $z ( @x ) {
-    # if ( substr($z, 0, 4) ne 'auth' && $y == 0 ) {
-    #   shift @x;
-    #   p \@x;
-    # }
-    # $y = 1 if substr($z, 0, 4) eq 'auth';
-    if ( $z !~ /^authorizedService=/ && $y == 0 ) {
-      shift @x;
-      p \@x;
-    }
+  foreach my $z ( @{$arg->{src}->{arr}} ) {
+    push @x, $z if $z =~ /^authorizedService=/ || $y == 1;
     $y = 1 if $z =~ /^authorizedService=/;
   }
-  p \@x;
-  $arg->{to_reassign_branch_dn} = join(',', @x);
-  
-  $arg->{reassign_to_branch_dn} = sprintf('%s,%s',
-					  (split(/,/, $arg->{to_reassign_branch_dn}))[0],
-					  $arg->{reassign_to});
 
-  $result = $self->ldap->search( base   => $arg->{reassign_to},
-				 filter => sprintf('(%s)', (split(/,/, $arg->{to_reassign_branch_dn}))[0]),
+  $arg->{src}->{branch_dn}->{str} = join(',', @x);
+  $arg->{src}->{branch_dn}->{arr} = \@x;
+
+  $arg->{dst}->{branch_dn}->{str} = sprintf('%s,%s',
+					  $arg->{src}->{branch_dn}->{arr}->[0],
+					  $arg->{dst}->{str});
+  @{$arg->{dst}->{branch_dn}->{arr}} = split(/,/, $arg->{dst}->{branch_dn}->{str});
+
+  $result = $self->ldap->search( base   => $arg->{dst}->{str},
+				 filter => sprintf('(%s)', $arg->{src}->{branch_dn}->{arr}->[0]),
 				 scope => 'base' );
 
-  $arg->{reassign_to_has_branch} = $result->count;
+  $arg->{dst}->{has_branch} = $result->count;
 
-  # to_reassign BRANCH does'n exist in reassign_to subtree and here we
+  $result = $self->search( { base  => $arg->{dst}->{str}, scope => 'base', } );
+  $entry = $result->entry(0);
+  foreach ( $entry->attributes ) {
+      $arg->{dst}->{data}->{$_} = $entry->get_value( $_, asref => 1 )
+      if $_ ne 'jpegPhoto';
+  }
+  
+  p $arg;
+
+  # src BRANCH does'n exist in dst subtree and here we
   # CREATE it
-  if ( ! $arg->{reassign_to_has_branch} ) {
-    $result = $self->search( { base  => $arg->{to_reassign_branch_dn}, scope => 'base', } );
+  if ( ! $arg->{dst}->{has_branch} ) {
+    $result = $self->search( { base  => $arg->{src}->{branch_dn}->{str}, scope => 'base', } );
+    # !!! we need to pick up this error in json somehow ...
+    push @{$return->{error}}, $self->err($result) if $result->code;
     $clone = $result->entry(0)->clone;
-    $mesg = $clone->dn($arg->{reassign_to_branch_dn});
+    $mesg = $clone->dn($arg->{dst}->{branch_dn}->{str}); # !!! error handling
 
-    $mesg = $clone->replace( uid => sprintf('%s@%s.%s',
-					    (split(/=/, (split(/,/, $arg->{reassign_to}))[0]))[1],
-					    (split(/@/, (split(/=/, (split(/,/, $arg->{to_reassign_branch_dn}))[0]))[1]))[0],
-					    (split(/@/, (split(/=/, (split(/,/, $arg->{to_reassign_branch_dn}))[0]))[1]))[1]
-					   ) );
+    $mesg = $clone->
+      replace( uid =>
+	       sprintf('%s@%s.%s',
+		       # dst uid value
+		       (split(/=/, $arg->{dst}->{arr}->[0]))[1],
+		       # left part of src branch dn authorizedService value
+		       (split(/@/, (split(/=/, $arg->{src}->{branch_dn}->{arr}->[0]))[1]))[0],
+		       # right part of src branch dn authorizedService value
+		       (split(/@/, (split(/=/, $arg->{src}->{branch_dn}->{arr}->[0]))[1]))[1]
+		      ) );
     foreach ( $clone->attributes ) {
       push @{$attrs}, $_ => $clone->get_value( $_, asref => 1 );
     }
     $mesg = $self->add( $clone->dn, $attrs );
-    
-    # !!! here is error handling
+    # !!! we need to pick up this error in json somehow ...
+    if ( $mesg->{name} eq 'LDAP_ALREADY_EXISTS' ) {
+      push @{$return->{warning}}, $mesg if $mesg;
+    } else {
+      push @{$return->{error}}, $mesg if $mesg;
+    }
   }
   undef $attrs;
 
-  # to_reassign BRANCH already EXISTS in reassign_to subtree and here
-  # we are to process all objects bellow it
-  if ( $arg->{to_reassign_is_branch} && $arg->{recursive} ) {
-    $result = $self->search( { base  => $arg->{to_reassign}, scope => 'children', } );
+  # src BRANCH already EXISTS in dst subtree and here
+  # we are to process all objects bellow it (bellow src branch)
+  if ( $arg->{src}->{is_branch} ) {
+    $result = $self->search( { base  => $arg->{src}->{str}, scope => 'children', } );
     foreach $entry ( $result->entries ) {
       $clone = $entry->clone;
       $mesg = $clone->dn(sprintf('%s,%s',
 				 (split(/,/, $entry->dn))[0],
-				 $arg->{reassign_to_branch_dn}));
+				 $arg->{dst}->{branch_dn}->{str}));
 
       foreach ( $clone->attributes ) {
-	push @{$attrs}, $_ => $clone->get_value( $_, asref => 1 );
-      }
+	if ( $_ eq 'givenName' ) {
+	  $val = $arg->{dst}->{data}->{givenName}->[0];
+	} elsif ( $_ eq 'sn' ) {
+	  $val = $arg->{dst}->{data}->{sn}->[0];
+	} else {
+	  $val = $clone->get_value( $_, asref => 1 )
+	}
+	push @{$attrs}, $_ => $val;
+      } p $attrs;
       $mesg = $self->add( $clone->dn, $attrs );
       undef $attrs;
+      # !!! we need to pick up this error in json somehow ...
+      push @{$return->{error}}, $mesg if $mesg;
     }
 
     ### FINISH
-    # here we have to delete to_reassign subtree
-  } elsif ( ! $arg->{to_reassign_is_branch} && ! $arg->{recursive}) {
-    $result = $self->search( { base  => $arg->{to_reassign}, scope => 'base', } );
+    # here we have to delete src subtree
+  } else {
+    $result = $self->search( { base  => $arg->{src}->{str}, scope => 'base', } );
     $clone = $result->entry(0)->clone;
 
     $mesg = $clone->dn(sprintf('%s,%s',
-			       (split(/,/, $arg->{to_reassign}))[0],
-			       $arg->{reassign_to_branch_dn}));
+			       $arg->{src}->{arr}->[0],
+			       $arg->{dst}->{branch_dn}->{str}));
 
-    foreach ( $clone->attributes ) {
-      push @{$attrs}, $_ => $clone->get_value( $_, asref => 1 );
-    }
+      foreach ( $clone->attributes ) {
+	if ( $_ eq 'givenName' ) {
+	  $val = $arg->{dst}->{data}->{givenName}->[0];
+	} elsif ( $_ eq 'sn' ) {
+	  $val = $arg->{dst}->{data}->{sn}->[0];
+	} else {
+	  $val = $clone->get_value( $_, asref => 1 )
+	}
+	push @{$attrs}, $_ => $val;
+      }
     $mesg = $self->add( $clone->dn, $attrs );
     undef $attrs;
-    # !!! here is error handling
-    
+    # !!! we need to pick up this error in json somehow ...
+    push @{$return->{error}}, $mesg if $mesg;
     
     ### FINISH
-    # here we have to delete to_reassign subtree
+    # here we have to delete src subtree
   }
 
-
-  
-
-  p $arg;
-  return $arg;
+  p $return;
+  return $return;
 }
 
 

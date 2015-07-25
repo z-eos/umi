@@ -60,7 +60,7 @@
       [% entry.key = entrykey
 	 entry.value = entries.$entrykey %]
       [% dn = entry.key.split(',|=').hash %][% # preparing hash of each dn %]
-      [% IF entry.value.mgmnt.is_dn && entry.value.mgmnt.is_blocked %]
+      [% IF entry.value.mgmnt.is_blocked %]
       [% blocked = ' text-danger' %]
       [% blocked_title = 'title="This DN was blocked! To unblock, remove root dn from the group &laquo;blocked&raquo; and manage each service account manualy."' %]
       [% END %]
@@ -397,25 +397,23 @@
 		      <div class="modal-header">
 			<h4 class="modal-title alert alert-danger" id="reassignModalLabel[% loop.index %]">
 			  <span class="fa fa-times-circle"></span>
-			  You are abojut to change root DN for: <b>[% entry.key.replace(',', ', ') %]</b>
+			  You are about to change root DN for: <b>[% entry.key.replace(',', ', ') %]</b>
 			</h4>
 		      </div>
 		      <div class="modal-body clearfix form-group text-primary">
 			<label for="dn_to_reassign_to" class="col-xs-2 text-right control-label">
-			  UID reassign to:
+			  <abbr title="user root account DN user ID (here UID is &laquo;abc&raquo; while user root account DN is &laquo;uid=abc,ou=bla,dc=foo&raquo;) this object will be reassigned to">
+			    UID reassign to:
+			  </abbr>
 			</label>
 			<div class="col-xs-10">
-			  <input type="text" class="input-sm form-control" id="dn_to_reassign_to" name="dn_to_reassign_to"
-				 placeholder="Provide UID of the recipient">
-			</div>
-			<div class="col-xs-offset-2 col-xs-10">
-			  <input type="checkbox" name="reassign_branch">
-			  Move whole branch as well
+			  <input type="text" class="input-sm form-control" id="dst_uid" name="dst_uid"
+				 placeholder="UID of the recipient">
 			</div>
 		      </div>
 		      <div class="modal-footer">
 			<button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
-			<button type="submit" class="btn btn-danger umi-btn-event umi-btn-ajax"  name="dn_to_reassign"
+			<button type="submit" class="btn btn-danger umi-btn-event umi-btn-ajax"  name="src_dn"
 				value="[% entry.key %]" data-action="reassign" >
 			  Yes, I really want to change it and yes, I understand all consequences!
 			</button>
@@ -524,6 +522,8 @@
 	    </div>
 	</td>
       </tr>
+      [% blocked = '' %]
+      [% blocked_title = '' %]
       [% END %]
     </tbody>
   </table>
