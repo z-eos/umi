@@ -1192,16 +1192,23 @@ sub delete :Path(delete) :Args(0) {
   my $err;
   if ( defined $params->{'ldap_delete_recursive'} &&
        $params->{'ldap_delete_recursive'} eq 'on' ) {
-    $err = $c->model('LDAP_CRUD')->delr($params->{ldap_delete});
+    p $err = $c->model('LDAP_CRUD')->delr($params->{ldap_delete});
   } else {
-    $err = $c->model('LDAP_CRUD')->del($params->{ldap_delete});
+    p $err = $c->model('LDAP_CRUD')->del($params->{ldap_delete});
   }
 
   if ( $params->{type} eq 'json' ) {
     $c->stash->{current_view} = 'WebJSON';
-    $c->stash->{success} = 'true';
-    $c->stash->{message} = 'OK';
-    # $c->forward('View::JSON');
+    $c->stash->{success} = ref($err) ne 'HASH' ? 1 : 0;
+    if ( ref($err) ne 'HASH' ) {
+      $c->stash->{message} = 'OK';
+    } elsif ( ref($err) eq 'HASH' && $#{$err->{error}} > -1 ) {
+      $c->stash->{message} = sprintf('<div class="panel panel-error text-left text-error"><div class="panel-heading text-center"><b>Error! Just close the window and try again!</b></div><div class="panel-body">%s</div></div><br>',
+				     $err->{error}->[0]->{html});
+    } elsif ( ref($err) eq 'HASH' && $#{$err->{warning}} > -1 ) {
+      $c->stash->{message} = sprintf('<div class="panel panel-warning text-left text-warning"><div class="panel-heading text-center"><b>Warning! Just close the window! Nothing else!</b></div><div class="panel-body">%s</div></div><br>',
+				     $err->{warning}->[0]->{html});
+    }
   } else {
     $c->stash(
 	      template => 'search/delete.tt',
@@ -1229,10 +1236,26 @@ sub reassign :Path(reassign) :Args(0) {
 
   if ( $params->{type} eq 'json' ) {
     $c->stash->{current_view} = 'WebJSON';
-    $c->stash->{success} = 'true';
-    $c->stash->{message} = 'OK';
-    $c->stash->{err_flg} = $err ? 'tue' : 'false';
-    $c->stash->{err_msg} = $err;
+    $c->stash->{success} = ref($err) ne 'HASH' ? 1 : 0;
+
+    if ( ref($err) ne 'HASH' ) {
+      $c->stash->{message} = 'OK';
+    } elsif ( ref($err) eq 'HASH' && $#{$err->{error}} > -1 ) {
+      $c->stash->{message} = sprintf('<div class="panel panel-error text-left text-error"><div class="panel-heading text-center"><b>Error! Just close the window and try again!</b></div><div class="panel-body">%s</div></div><br>',
+				     $err->{error}->[0]->{html});
+
+      # $c->stash->{message} = '<div class="alert alert-danger alert-dismissible" role="alert">' .
+      # 	'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;' .
+      # 	'</span></button>' . $err->{error}->[0]->{html} . '</div>';
+      
+    } elsif ( ref($err) eq 'HASH' && $#{$err->{warning}} > -1 ) {
+      $c->stash->{message} = sprintf('<div class="panel panel-warning text-left text-warning"><div class="panel-heading text-center"><b>Warning! Just close the window! Nothing else!</b></div><div class="panel-body">%s</div></div><br>',
+				     $err->{warning}->[0]->{html});
+      
+      # # # $c->stash->{message} = '<div class="alert alert-warning text-left">' . $err->{warning}->[0]->{html} . '</div><button type="button" class="close" data-dismiss="alert" aria-label="Close">close</button>';
+      
+      # $c->stash->{message} = '<div class="modal"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title">Info Message</h4></div><div class="modal-body">' . $err->{warning}->[0]->{html} . '</div><div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Close</button></div></div></div></div>';
+    }
   } else {
     $c->stash(
 	      template => 'stub.tt',

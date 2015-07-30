@@ -112,6 +112,7 @@ has_field 'businessCategory' => ( type => 'Select',
 				  label => 'Business Category',
 				  wrapper_class => 'col-xs-2',
 				  options => [
+					      { value => 'na', label => 'N/A',},
 					      { value => 'it', label => 'IT',},
 					      { value => 'trade', label => 'Trade',},
 					      { value => 'telephony', label => 'Telephony',},

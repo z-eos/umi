@@ -16,7 +16,7 @@ requires 'Catalyst::Action::RenderView';
 requires 'Moose';
 requires 'namespace::autoclean';
 requires 'Config::General'; # This should reflect the config file format you've chosen
-                 # See Catalyst::Plugin::ConfigLoader for supported formats
+# See Catalyst::Plugin::ConfigLoader for supported formats
 
 requires 'Catalyst::View::TT';
 requires 'Catalyst::View::JSON';
@@ -24,6 +24,8 @@ requires 'Catalyst::Plugin::Unicode';
 requires 'Catalyst::Plugin::Authentication';
 requires 'Catalyst::Authentication::Store::LDAP';
 requires 'Net::LDAP';
+requires 'Lingua::Translit';
+requires 'Text::Unidecode';
 requires 'Crypt::GeneratePassword'; # it is required but don't see pkg installed
 requires 'Crypt::RSA';
 requires 'Digest::SHA1';

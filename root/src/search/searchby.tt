@@ -7,8 +7,9 @@
   Search Simple Results<sup><abbr  title="not all objects could be found via predefined search items, to search for all objects use advanced search menu item!" class="initialism"><i class="h6 fa fa-exclamation-triangle text-warning"></i></abbr></sup> &nbsp; <small class="mono">base: [% base_dn %]; &nbsp;&nbsp; filter: [% filter %]</small>
 </h2>
 
-[% fa_child = 'fa-caret-right' %]
-[% child = '<i class="fa fa-fw ' _ fa_child _ ' text-default"></i>' %]
+[% # fa_child = 'fa-circle-thin' %]
+[% # child = '<i class="fa fa-fw ' _ fa_child _ ' text-default"></i>' %]
+[% child = '⬚' %]
 [% blocked = '' %]
 [% blocked_title = '' %]
 
@@ -137,7 +138,7 @@
 		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 		      <button type="submit" title="modify group" class="btn btn-link"
 			      value="[% entry.key %]" data-order="90" name="ldap_modify_group">
-			<span class="fa fa-fw fa-group text-primary"></span>
+			<span class="fa fa-fw fa-group text-info"></span>
 			group
 		      </button>
 		    </form>
@@ -193,7 +194,7 @@
 		      <button type="submit" title="edit object" class="btn btn-link"
 			      value="[% entry.key %]" data-order="100"
 			      name="ldap_modify">
-			<span class="fa fa-fw fa-pencil text-primary"></span>
+			<span class="fa fa-fw fa-pencil text-warning"></span>
 			edit (all)
 		      </button>
 		    </form>
@@ -213,7 +214,7 @@
 		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 		      <button type="submit" title="modify group members" class="btn btn-link"
 			      value="[% entry.key %]" name="ldap_modify_memberUid">
-			<span class="fa fa-fw fa-group text-primary"></span>
+			<span class="fa fa-fw fa-group text-info"></span>
 			members
 		      </button>
 		    </form>
@@ -224,7 +225,7 @@
 		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/modify_userpassword') %]">
 		      <button type="submit" title="modify password" class="btn btn-link"
 			      value="[% entry.key %]" data-order="30" name="ldap_modify_password" tabindex="1">
-			<span class="fa fa-fw fa-user-secret text-primary"></span>
+			<span class="fa fa-fw fa-user-secret text-warning"></span>
 			password
 		      </button>
 		    </form>
@@ -235,7 +236,7 @@
 		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/dhcp_add') %]">
 		      <button type="submit" title="add DHCP (MAC to IP binding)" class="btn btn-link"
 			      value="[% entry.key %]" data-order="40" name="ldap_add_dhcp">
-			<span class="fa fa-fw fa-sitemap text-primary"></span>
+			<span class="fa fa-fw fa-sitemap text-info"></span>
 			DHCP (IP to MAC binding)
 		      </button>
 		    </form>
@@ -246,7 +247,7 @@
 		    <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 		      <button type="submit" title="modify jpegPhoto" class="btn btn-link"
 			      value="[% entry.key %]" data-order="60" name="ldap_modify_jpegphoto">
-			<span class="fa fa-fw fa-image text-primary"></span>
+			<span class="fa fa-fw fa-image text-warning"></span>
 			image
 		      </button>
 		    </form>

@@ -472,7 +472,7 @@ sub err {
 		      ldap_error_desc($mesg),
 		      $mesg->server_error
 			    ) :
-	     'Your request returned no result. Try to change query parameter/s.',
+	     '&nbsp;<i class="fa fa-frown-o text-warning "></i>&nbsp;Your request returned no result. Try to change query parameter/s.',
 	     code => $mesg->code,
 	     name => ldap_error_name($mesg),
 	     text => ldap_error_text($mesg),
@@ -627,9 +627,8 @@ sub reassign {
   @{$arg->{src}->{arr}} = split(/,/, $arg->{src}->{str});
   @{$arg->{dst}->{arr}} = split(/,/, $arg->{dst}->{str});
 
-  my ( $return, $result, $mesg, $entry, $clone, $attrs, @x, $key, $val );
-
-  my $y = 0;
+  my ( $return, $y, $result, $mesg, $entry, $clone, $attrs, @x, $key, $val );
+  $y = 0;
   foreach my $z ( @{$arg->{src}->{arr}} ) {
     push @x, $z if $z =~ /^authorizedService=/ || $y == 1;
     $y = 1 if $z =~ /^authorizedService=/;
@@ -656,7 +655,7 @@ sub reassign {
       if $_ ne 'jpegPhoto';
   }
   
-  p $arg;
+  # p $arg;
 
   # src BRANCH does'n exist in dst subtree and here we
   # CREATE it
@@ -682,7 +681,7 @@ sub reassign {
     }
     $mesg = $self->add( $clone->dn, $attrs );
     # !!! we need to pick up this error in json somehow ...
-    if ( $mesg->{name} eq 'LDAP_ALREADY_EXISTS' ) {
+    if ( $mesg && $mesg->{name} eq 'LDAP_ALREADY_EXISTS' ) {
       push @{$return->{warning}}, $mesg if $mesg;
     } else {
       push @{$return->{error}}, $mesg if $mesg;
@@ -709,7 +708,7 @@ sub reassign {
 	  $val = $clone->get_value( $_, asref => 1 )
 	}
 	push @{$attrs}, $_ => $val;
-      } p $attrs;
+      } # p $attrs;
       $mesg = $self->add( $clone->dn, $attrs );
       undef $attrs;
       # !!! we need to pick up this error in json somehow ...
@@ -717,7 +716,10 @@ sub reassign {
     }
 
     ### FINISH
-    # here we have to delete src subtree
+    # here we have to delete src subtree recursively
+    $self->delr( $arg->{src}->{str} )
+      if ref($return) ne "HASH" ||
+      ( ref($return) eq "HASH" && $#{$return->{error}} < 1);
   } else {
     $result = $self->search( { base  => $arg->{src}->{str}, scope => 'base', } );
     $clone = $result->entry(0)->clone;
@@ -740,12 +742,16 @@ sub reassign {
     undef $attrs;
     # !!! we need to pick up this error in json somehow ...
     push @{$return->{error}}, $mesg if $mesg;
-    
+
     ### FINISH
-    # here we have to delete src subtree
+    # here we have to delete src dn
+    # $self->del( $arg->{src}->{str} ) if $return != 0 && $#{$return->{error}} > -1;
+    $self->del( $arg->{src}->{str} )
+      if ref($return) ne "HASH" ||
+      ( ref($return) eq "HASH" && $#{$return->{error}} < 1);
   }
 
-  p $return;
+  # p $return;
   return $return;
 }
 
@@ -763,15 +769,20 @@ https://metacpan.org/pod/Net::LDAP::Control::PreRead
 
 sub del {
   my ($self, $dn) = @_;
-p $dn;
+
   my $callername = (caller(1))[3];
   $callername = 'main' if ! defined $callername;
-  my $return = 'call to LDAP_CRUD->del from ' . $callername . ': ';
+  my $return; # = 'call to LDAP_CRUD->del from ' . $callername . ': ';
 
   if ( ! $self->dry_run ) {
     my $msg = $self->ldap->delete ( $dn );
     if ($msg->code) {
-      $return .= $self->err( $msg );
+      # $return .= $self->err( $msg );
+      if ( $msg && $msg->error_name eq 'LDAP_NO_SUCH_OBJECT' ) {
+	push @{$return->{warning}}, $self->err( $msg ) if $msg;
+      } else {
+	push @{$return->{error}}, $self->err( $msg ) if $msg;
+      }
     } else {
       $return = 0;
     }
@@ -800,7 +811,7 @@ sub delr {
 
   my $callername = (caller(1))[3];
   $callername = 'main' if ! defined $callername;
-  my $return = 'call to LDAP_CRUD->del from ' . $callername . ': ';
+  my $return; # = 'call to LDAP_CRUD->del from ' . $callername . ': ';
 
   if ( ! $self->dry_run ) {
     my $result = $self->ldap->search( base   => $dn,
@@ -829,7 +840,12 @@ sub delr {
       my $dn2del = join(",", @{ $HoL{$key} }).",$base";
       $msg = $self->ldap->delete($dn2del);
       if ($msg->code) {
-	$return .= $self->err( $msg );
+	# $return .= $self->err( $msg );
+	if ( $msg && $msg->error_name eq 'LDAP_NO_SUCH_OBJECT' ) {
+	  push @{$return->{warning}}, $self->err( $msg ) if $msg;
+	} else {
+	  push @{$return->{error}}, $self->err( $msg ) if $msg;
+	}
       } else {
 	$return = 0;
       }

@@ -42,15 +42,21 @@ utf8 input (cyrillic in particular) to latin1 transliteration
 
 sub utf2lat {
   my ($self, $to_translit) = @_;
-  use utf8;
-  use Text::Unidecode;
-  # Catalyst provides utf8::encoded data! here we need them to
-  # utf8::decode to make them suitable for unidecode, since it expects
-  # utf8::decode input
-  utf8::decode( $to_translit );
-  my $a = unidecode( $to_translit );
+  # noLingva # use utf8;
+  # noLingva # use Text::Unidecode;
+  # noLingva # # Catalyst provides utf8::encoded data! here we need them to
+  # noLingva # # utf8::decode to make them suitable for unidecode, since it expects
+  # noLingva # # utf8::decode input
+  # noLingva # utf8::decode( $to_translit );
+  # noLingva # my $a = unidecode( $to_translit );
+
+  use Lingua::Translit;
+  # "ALA-LC RUS", "GOST 7.79 RUS", "DIN 1460 RUS"
+  my $tr = new Lingua::Translit("GOST 7.79 RUS");
+  $a = $tr->translit( $to_translit );
+
   # remove non-alphas (like ' and `)
-  $a =~ tr/a-zA-Z//cds;
+  $a =~ tr/a-zA-Z0-9\,\.\_\-\ \@\#\%\*\(\)\!//cds;
   return $a;
 }
 

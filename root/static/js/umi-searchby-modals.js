@@ -13,11 +13,25 @@ $(function(){
     },
 
 	getErrorBlock = function(message) {
-	    return $("<div>").addClass("text-danger").html(message);
+	    // if (message.error.html) 
+	    // 	return $("<pre>").addClass("text-danger").html(message.error.0.html);
+	    // if (message.warning.html) 
+	    // 	return $("<pre>").addClass("text-warning").html(message.warning.0.html);
+	    //var $modal = $(".modal.in[aria-hidden='false'] .modal-content");
+	    //return ($modal.length) ? $modal.html(message) : alert(message);
+	    // # # # return $(message);
+
+	    //return $("<div>").addClass("text-danger").html(message);
+	    return $("<div>").html(message);
+	    // original // return $("<div>").addClass("text-danger").html(message);
 	},
 
 	applyError = function(item, message) {
+	    // # # # item.parents(".modal-content").html(message);
+	    // $("body").append(getErrorBlock(message));
+	    // original // item.parents().prepend(getErrorBlock(message));
 	    item.parent().prepend(getErrorBlock(message));
+	    // item.parents(".modal-content").html(message);
 	},
 
 	createHiddenButton = function(item, value) {
@@ -68,7 +82,7 @@ $(function(){
 		dataType: "json",
 		success: function(data) {
 		    if (!data || typeof data.success === "undefined") return applyError(obj, options.ajaxSystemError), false;
-		    if (data && data.success === false) return applyError(obj, data.message), false;
+		    if (data && data.success == 0) return applyError(obj, data.message), false;
 		    switch(action) {
 		    default:
 		    case "delete":
