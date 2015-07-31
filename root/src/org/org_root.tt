@@ -3,33 +3,39 @@
 <div class="row">
   <div class="col-md-10">
     <h3 class="page-header">Org <small>manipulations</small></h3>
-    Organization (office) DNs are hierarchycal
-    <dl class="dl-horizontal">
-      <dt>parent org DN:</dt>
-      <dd>ou=starfleet,ou=Organizations,dc=umidb</dd>
-      <dt>1st level child</dt>
-      <dd>ou=headquarters,ou=starfleet,ou=Organizations,dc=umidb</dd>
-      <dt>2nd level child</dt>
-      <dd>ou=ship01,ou=headquarters,ou=starfleet,ou=Organizations,dc=umidb</dd>
-      <dt>...</dt>
-      <dd>...</dd>
-    </dl>
-    <p>
-      Each Org object contains one or more <i>associatedDomain</i> values
-      defining FQDNs related to the organization/office
-    </p>
-    Each user root account has attribute <i>physicalDeliveryOfficeName</i> with DN of the office user belongs to
-    <dl class="dl-horizontal">
-      <dt>...</dt>
-      <dd>...</dd>
-      <dt>givenName:</dt>
-      <dd>Johan</dd>
-      <dt>sn:</dt>
-      <dd>Doe</dd>
-      <dt>physicalDeliveryOfficeName:</dt>
-      <dd>ou=ship01,ou=headquarters,ou=starfleet,ou=Organizations,dc=umidb</dd>
-      <dt>...</dt>
-      <dd>...</dd>
+    <dl>
+      <li>
+	<h3>Organization (office) DNs are hierarchycal</h3>
+	<dl class="dl-horizontal">
+	  <dt>parent org DN:</dt>
+	  <dd>ou=starfleet,ou=Organizations,dc=umidb</dd>
+	  <dt>1st level child</dt>
+	  <dd>ou=headquarters,ou=starfleet,ou=Organizations,dc=umidb</dd>
+	  <dt>2nd level child</dt>
+	  <dd>ou=ship01,ou=headquarters,ou=starfleet,ou=Organizations,dc=umidb</dd>
+	  <dt>...</dt>
+	  <dd>...</dd>
+	</dl>
+      </li>
+      <li>
+	<h3>Each Org object contains one or more <i>associatedDomain</i> values
+	  defining FQDNs related to the organization/office</h3>
+      </li>
+      <li>
+	<h3>Each user root account has attribute <i>physicalDeliveryOfficeName</i> with DN of the office user belongs to</h3>
+	<dl class="dl-horizontal">
+	  <dt>...</dt>
+	  <dd>...</dd>
+	  <dt>givenName:</dt>
+	  <dd>Johan</dd>
+	  <dt>sn:</dt>
+	  <dd>Doe</dd>
+	  <dt>physicalDeliveryOfficeName:</dt>
+	  <dd>ou=ship01,ou=headquarters,ou=starfleet,ou=Organizations,dc=umidb</dd>
+	  <dt>...</dt>
+	  <dd>...</dd>
+	</dl>
+      </li>
     </dl>
   </div>
   <div class="col-md-2">

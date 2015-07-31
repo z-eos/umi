@@ -79,8 +79,13 @@ sub index :Path :Args(0) {
     $ldap_crud =
       $c->model('LDAP_CRUD');
 
-    $filter_meta = $params->{'ldapsearch_filter'} ne '' ? $params->{'ldapsearch_filter'} : '*';
-
+    if ( $params->{'ldapsearch_filter'} eq '' ) {
+      $filter_meta = '*';
+    } else {
+      $filter_meta = $self->is_ascii($params->{'ldapsearch_filter'}) ?
+	$self->utf2lat($params->{'ldapsearch_filter'}) : $params->{'ldapsearch_filter'};
+    }
+    
     if ( defined $params->{'ldapsearch_by_email'} ) {
       $filter = sprintf("mail=%s", $filter_meta);
       $filter_show = sprintf("mail=<kbd>%s</kbd>", $filter_meta);
