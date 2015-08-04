@@ -277,9 +277,9 @@
 		    <span class="fa fa-star text-primary"></span>
 		    <strong>&nbsp;[% entry.value.attrs.givenName.0 %] [% entry.value.attrs.sn.0 %]</strong>
 		  </span>
-		  [% # ELSE %]
-		  <!-- <span class="fa fa-star text-primary"></span> -->
-		  [% # END %]
+		  [% ELSE %]
+		  <span class="fa fa-star text-primary"></span>
+		  [% END %]
 		</button>
 	      </form>
 	      <p></p>
