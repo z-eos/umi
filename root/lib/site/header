@@ -31,7 +31,7 @@
 	    <span class="caret"></span>
 	  </a>
           <ul class="dropdown-menu" role="menu">
-	    [% IF c.check_user_roles('wheel') || c.check_user_roles('email') || c.check_user_roles('xmpp') %]
+	    [% IF c.check_user_roles('admin') || c.check_user_roles('email') || c.check_user_roles('xmpp') %]
             <li>
 	      <a href="[% c.uri_for_action('user_root') %]" tabindex="2">
 		<span class="fa fa-fw fa-user"></span>
@@ -39,7 +39,7 @@
 	      </a>
 	    </li>
 	    [% END %]
-	    [% IF c.check_user_roles('wheel') %]
+	    [% IF c.check_user_roles('admin') %]
             <li>
 	      <a href="[% c.uri_for_action('group_root') %]" tabindex="3">
         	<span class="fa fa-fw fa-group"> </span>
@@ -47,7 +47,7 @@
 	      </a>
 	    </li>
 	    [% END %]
-	    [% IF c.check_user_roles('wheel') || c.check_user_roles('org') || c.check_user_roles('email') || c.check_user_roles('xmpp') %]
+	    [% IF c.check_user_roles('admin') || c.check_user_roles('org') || c.check_user_roles('email') || c.check_user_roles('xmpp') %]
             <li>
 	      <a href="[% c.uri_for_action('org_root') %]" tabindex="4">
         	<span class="fa fa-fw fa-institution"></span>
@@ -55,7 +55,7 @@
 	      </a>
 	    </li>
 	    [% END %]
-	    [% IF c.check_user_roles('wheel') %]
+	    [% IF c.check_user_roles('admin') %]
             <li>
 	      <a href="[% c.uri_for_action('gitacl_root') %]" tabindex="5">
         	<span class="fa fa-fw fa-gavel"></span>
@@ -63,14 +63,14 @@
 	      </a>
 	    </li>
 	    [% END %]
-	    [% IF c.check_user_roles('wheel') %]
+	    [% IF c.check_user_roles('admin') %]
             <li class="disabled">
 	      <a href="#" tabindex="6">
         	<span class="fa fa-fw fa-globe"></span>
         	DNS
 	      </a>
 	    </li>[% END %]
-	    [% IF c.check_user_roles('wheel') || c.check_user_roles('dhcp') %]
+	    [% IF c.check_user_roles('admin') || c.check_user_roles('dhcp') %]
             <li>
 	      <a href="[% c.uri_for_action('dhcp_root') %]" tabindex="7">
         	<span class="fa fa-fw fa-sitemap"></span>
@@ -297,7 +297,7 @@
             <li>
 	      <a href="#"><span class="fa fa-fw fa-bug text-danger">&nbsp;</span>bug</a>
 	    </li>
-	    [% IF c.check_user_roles('wheel') %]
+	    [% IF c.check_user_roles('admin') %]
             <li class="divider"></li>
             <li>
 	      <a href="#">

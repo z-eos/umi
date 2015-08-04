@@ -272,14 +272,7 @@
 			title="click to open root (management) object of this object"
 			name="ldap_subtree"
 			value="[% entry.key.split(',').slice(-3, -1).join(',') %]">
-		  [% # IF entry.value.mgmnt.is_dn && entry.key.match('People') %]
-		  <span class="label label-default">
-		    <span class="fa fa-star text-primary"></span>
-		    <strong>&nbsp;[% entry.value.attrs.givenName.0 %] [% entry.value.attrs.sn.0 %]</strong>
-		  </span>
-		  [% ELSE %]
 		  <span class="fa fa-star text-primary"></span>
-		  [% END %]
 		</button>
 	      </form>
 	      <p></p>
@@ -332,14 +325,12 @@
 		  <i title="Service Account Branch" class="fa fa-code-fork fa-lg[% blocked %]"></i>
 		  
 		  [% END %]
-		  &nbsp;&nbsp;&nbsp;[% entry.key.replace(',', ',&nbsp;') %]
 		  [% IF entry.value.mgmnt.is_dn && entry.key.match('People') %]
-		  <span class="[% IF entry.value.mgmnt.is_blocked %]text-danger[% ELSE %]text-primary[% END %]">
-		    <span class="badge badge-primary">
-		      <strong>&nbsp;[% entry.value.attrs.givenName.0 %] [% entry.value.attrs.sn.0 %]</strong>
-		    </span>
-		  </span>
+		  <mark class="h4 [% IF entry.value.mgmnt.is_blocked %]text-danger[% ELSE %]text-primary[% END %]">
+		    <strong>&nbsp;[% entry.value.attrs.givenName.0 %] [% entry.value.attrs.sn.0 %]</strong>
+		  </mark>
 		  [% END %]
+		  &nbsp;&nbsp;&nbsp;[% entry.key.replace(',', ',&nbsp;') %]
 	      </b></span>
 	      <!-- #### Modal: Delete start -->
 	      <div class="modal" id="modal_delete[% zufix %]"
