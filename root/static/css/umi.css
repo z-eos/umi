@@ -1,7 +1,7 @@
 
-/* html { */
-/*     height: 100%; */
-/* } */
+html,body {
+  height: 100%;
+}
 
 /* body { */
 /*     background-color: [% site.col.page %]; */
@@ -35,7 +35,9 @@
   padding-top: 70px;
   padding-left: 30px;
   padding-right: 30px;
-  padding-bottom: 10px;
+  padding-bottom: 75px;
+  min-height: 100%;
+  margin-bottom: -75px;
 }
 
 /* h1.title { */
@@ -140,6 +142,9 @@
   opacity: 0.5;
 }
 
+.umi-overflow-x-vis {
+  overflow-x: visible;
+}
 
 .js div#preloader {
   position: fixed;
@@ -192,4 +197,12 @@
 
 .umi-zerro-margin {
   margin: 0 !important;
+}
+
+.umi-1-margin-left {
+  margin: 0pt 0pt 0pt 15pt;
+}
+
+.umi-2-margin-left {
+  margin: 0pt 0pt 0pt 30pt;
 }
