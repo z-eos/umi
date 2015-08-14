@@ -231,7 +231,7 @@ has_field 'account.associateddomain'
 
 has_field 'account.authorizedservice'
   => ( type => 'Select',
-       label => 'Service', label_class => [ 'required' ],
+       label => 'Service',
        label_class => [ 'col-xs-2', 'required', ],
        empty_select => '--- Choose Service ---',
        element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
@@ -289,7 +289,7 @@ has_field 'account.password2'
 
 has_field 'account.radiusgroupname'
   => ( type => 'Select',
-       label => 'RADIUS Group Name',
+       label => 'RADIUS Group',
        do_id => 'no',
        label_class => [ 'col-xs-2', 'required', ],
        wrapper_class => [  'hidden', '8021x', '8021xeaptls', 'relation', ],
@@ -297,26 +297,23 @@ has_field 'account.radiusgroupname'
        element_class => [ 'input-sm', ],
        element_attr => { 'data-name' => 'radiusgroupname',
 			 'data-group' => 'account', },
-       empty_select => '--- Choose RADIUS Group ---',
-       options_method => \&radprofile,
+       empty_select => '--- Choose RADIUS default Group ---',
+       options_method => \&radgroup,
      );
 
-has_field 'account.radiustunnelprivategroupid'
+has_field 'account.radiusprofiledn'
   => ( type => 'Select',
-       label => 'RADIUS Tunnel Private Group',
+       label => 'RADIUS Profile',
        wrapper_class => [  'hidden', '8021x', '8021xeaptls', 'relation', ],
        do_id => 'no',
        label_class => [ 'col-xs-2', 'required', ],
        element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
        element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'VLAN this 802.1x authenticates to',
-			 'autocomplete' => 'off',
-			 'data-name' => 'radiustunnelprivategroupid',
+       element_attr => { 'autocomplete' => 'off',
+			 'data-name' => 'radiusprofiledn',
 			 'data-group' => 'account', },
-       options => [{ value => '', label => '--- Choose VLAN ---'},
-		   { value => '3', label => 'Voice (VLAN3)'},
-		   { value => '3498', label => 'Guest (VLAN3498)'},
-		   { value => '3499', label => 'Bootp (VLAN3499)'}, ],
+       empty_select => '--- Choose RADIUS Profile ---',
+       options_method => \&radprofile,
      );
 
 has_field 'account.userCertificate'
@@ -843,9 +840,9 @@ sub validate {
 	$element->field('radiusgroupname')->add_error('RADIUS group name is mandatory!')
 	  if ! defined $element->field('radiusgroupname')->value ||
 	  $element->field('radiusgroupname')->value eq '';
-	$element->field('radiustunnelprivategroupid')->add_error('RADIUS tunnel private grooup id is mandatory!')
-	  if ! defined $element->field('radiustunnelprivategroupid')->value ||
-	  $element->field('radiustunnelprivategroupid')->value eq '';
+	$element->field('radiusprofiledn')->add_error('RADIUS tunnel private grooup id is mandatory!')
+	  if ! defined $element->field('radiusprofiledn')->value ||
+	  $element->field('radiusprofiledn')->value eq '';
 	}
       }
       #---[ 802.1x ]------------------------------------------------
@@ -1071,6 +1068,12 @@ sub authorizedservice {
   my $self = shift;
   return unless $self->form->ldap_crud;
   return $self->form->ldap_crud->select_authorizedservice;
+}
+
+sub radgroup {
+  my $self = shift;
+  return unless $self->form->ldap_crud;
+  return $self->form->ldap_crud->select_radgroup;
 }
 
 sub radprofile {

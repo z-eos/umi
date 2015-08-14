@@ -49,7 +49,7 @@ sub index :Path :Args(0) {
       # 	$params->{'account.0.password1'} = '' if ! $params->{'account.0.password1'};
       # 	$params->{'account.0.password2'} = '' if ! $params->{'account.0.password2'};
       # 	$params->{'account.0.radiusgroupname'} = '' if ! $params->{'account.0.radiusgroupname'};
-      # 	$params->{'account.0.radiustunnelprivategroupid'} = '' if ! $params->{'account.0.radiustunnelprivategroupid'};
+      # 	$params->{'account.0.radiusprofiledn'} = '' if ! $params->{'account.0.radiusprofiledn'};
       # 	$params->{'account.0.usercertificate'} = '' if ! $params->{'account.0.usercertificate'};
       }
       if ( defined $self->form->add_svc_acc &&
@@ -410,8 +410,8 @@ sub create_account {
 
 	    $x->{radiusgroupname} = $element->field('radiusgroupname')->value
 	      if defined $element->field('radiusgroupname')->value;
-	    $x->{radiustunnelprivategroupid} = $element->field('radiustunnelprivategroupid')->value
-	      if defined $element->field('radiustunnelprivategroupid')->value;
+	    $x->{radiusprofiledn} = $element->field('radiusprofiledn')->value
+	      if defined $element->field('radiusprofiledn')->value;
 	  } elsif ( ! $element->field('password1')->value &&
 		    ! $element->field('password2')->value) {
 	    $x->{password} = { $element->field('authorizedservice')->value => $self->pwdgen };
@@ -511,7 +511,7 @@ sub create_account_branch {
 		       $arg->{associateddomain},
 		       $args->{uid},
 		       $ldap_crud->{cfg}->{base}->{acc_root}),
-  my $return;
+  my ( $return, $if_exist);
 
   $arg->{add_attrs} = [ 'authorizedService'
 			=> sprintf('%s@%s%s',
@@ -532,7 +532,7 @@ sub create_account_branch {
 			'uid' => $arg->{uid} . '@' . $arg->{authorizedservice},
 			'objectClass' => $ldap_crud->{cfg}->{objectClass}->{acc_svc_branch}, ];
 
-  my $if_exist = $ldap_crud->search( { base => $arg->{dn},
+  $if_exist = $ldap_crud->search( { base => $arg->{dn},
 				       scope => 'base',
 				       attrs => [ 'authorizedService' ], } );
   if ( $if_exist->count ) {
@@ -633,9 +633,9 @@ sub create_account_branch_leaf {
 	     umiOvpnAddDevOSVer => $args->{umiOvpnAddDevOSVer} || 'NA',
 	     
 	     radiusgroupname => $args->{radiusgroupname} || 'ip-phone',
-	     radiustunnelprivategroupid => $args->{radiustunnelprivategroupid} || 3,
+	     radiusprofiledn => $args->{radiusprofiledn} || 3,
 	    };
-  my $return;
+  my ( $return, $if_exist );
 
   $arg->{prefixed_uid} =
     sprintf('%s%s',
@@ -725,10 +725,7 @@ sub create_account_branch_leaf {
       userPassword => $arg->{password}->{$arg->{service}}->{clear},
       description => uc($arg->{service}) . ': ' . $arg->{'login'},
       radiusgroupname => $arg->{radiusgroupname},
-      radiustunnelmediumtype => 6,
-      radiusservicetype => 'Framed-User',
-      radiustunnelprivategroupid => $arg->{radiustunnelprivategroupid},
-      radiustunneltype => 13;
+      radiusprofiledn => $arg->{radiusprofiledn};
 
     if ( $arg->{service} eq '802.1x-eap-tls' ) {
       $arg->{cert_info} =
@@ -838,6 +835,27 @@ sub create_account_branch_leaf {
 	      $arg->{service},
 	      (split(/=/,(split(/,/,$arg->{dn}))[0]))[1], # taking RDN value
 	      $arg->{password}->{$arg->{service}}->{'clear'});
+
+
+    ### !!! RADIUS group modify with new member add if 802.1x
+    if ( defined $arg->{radiusgroupname} && $arg->{radiusgroupname} ne '' ) {
+      $if_exist = $ldap_crud->search( { base => $arg->{radiusgroupname},
+					   scope => 'base',
+					   filter => '(' . $arg->{dn} . ')', } );
+      if ( ! $if_exist->count ) {
+	$mesg = $ldap_crud->modify( $arg->{radiusgroupname},
+				    [ add => [ member => $arg->{dn}, ], ], );
+	if ( $mesg ) {
+	  push @{$return->{error}},
+	    sprintf('Error during %s group modification: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s',
+		    $arg->{radiusgroupname},
+		    $mesg->{html},
+		    $mesg->{srv},
+		    $mesg->{text});
+	}
+      }
+    }
+
   }
   return $return;
 }

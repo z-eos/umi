@@ -74,7 +74,8 @@ sub _build_cfg {
 		   gitacl =>         'ou=GitACL,' . UMI->config->{ldap_crud_db},
 		   group =>          'ou=group,' . UMI->config->{ldap_crud_db},
 		   org =>            'ou=Organizations,' . UMI->config->{ldap_crud_db},
-		   rad_profile =>    'ou=rad-profiles,' . UMI->config->{ldap_crud_db},
+		   rad_groups =>    'ou=groups,ou=RADIUS,' . UMI->config->{ldap_crud_db},
+		   rad_profiles =>    'ou=profiles,ou=RADIUS,' . UMI->config->{ldap_crud_db},
 		  },
 	  exclude_prefix => 'aux_',
 
@@ -208,7 +209,7 @@ sub _build_cfg {
 			    descr => 'auth 802.1x EAP-MD5 (MAC)',
 			    disabled => 0,
 			    icon => 'fa fa-shield',
-			    data_fields => 'login,radiusgroupname,radiustunnelprivategroup',
+			    data_fields => 'login,radiusgroupname,radiusprofile',
 			    data_relation => '8021x',
 			   },
 	   '802.1x-eap-tls' => {
@@ -216,7 +217,7 @@ sub _build_cfg {
 				descr => 'auth 802.1x EAP-TLS',
 				disabled => 0,
 				icon => 'fa fa-shield',
-				data_fields => 'login,password1,password2,radiusgroupname,radiustunnelprivategroup,userCertificate',
+				data_fields => 'login,password1,password2,radiusgroupname,radiusprofile,userCertificate',
 				data_relation => '8021xeaptls',
 				login_prefix => 'rad-',
 			       },
@@ -973,7 +974,7 @@ modify method
 
 sub modify {
   my ($self, $dn, $changes) = @_;
-p [ $dn, $changes ];
+  # p [ $dn, $changes ];
   my $callername = (caller(1))[3];
   $callername = 'main' if ! defined $callername;
   my $return = 'call to LDAP_CRUD->modify from ' . $callername . ': ';
@@ -1581,8 +1582,8 @@ has 'select_radprofile' => ( traits => ['Array'],
 sub _build_select_radprofile {
   my $self = shift;
   my @rad_profiles;
-  my $mesg = $self->search( { base => $self->{cfg}->{base}->{rad_profile},
-			      attrs => ['cn' ],
+  my $mesg = $self->search( { base => $self->{cfg}->{base}->{rad_profiles},
+			      attrs => ['cn', 'description' ],
 			    } );
   my $err_message = '';
   if ( ! $mesg->count ) {
@@ -1594,12 +1595,49 @@ sub _build_select_radprofile {
   my @entries = $mesg->sorted('cn');
   my @i;
   foreach my $entry ( @entries ) {
-    @i = $entry->get_value('cn');
-    foreach (@i) {
-      push @rad_profiles, { value => $_, label => $_, };
-    }
+    push @rad_profiles, { value => $entry->dn,
+			  label => sprintf('%s%s',
+					   $entry->get_value('cn'),
+					   $entry->exists('description') ? ' ---> ' . $entry->get_value('description') : ''),
+			};
   }
   return \@rad_profiles;
+}
+
+=head2 select_radgroup
+
+options builder for select element of rad-groups
+
+=cut
+
+has 'select_radgroup' => ( traits => ['Array'],
+	       is => 'ro', isa => 'ArrayRef', required => 0, lazy => 1,
+	       builder => '_build_select_radgroup',
+	     );
+
+sub _build_select_radgroup {
+  my $self = shift;
+  my @rad_groups;
+  my $mesg = $self->search( { base => $self->{cfg}->{base}->{rad_groups},
+			      attrs => ['cn', 'description' ],
+			    } );
+  my $err_message = '';
+  if ( ! $mesg->count ) {
+    $err_message = '<div class="alert alert-danger">' .
+      '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
+	$self->err($mesg) . '</ul></div>';
+  }
+
+  my @entries = $mesg->sorted('cn');
+  my @i;
+  foreach my $entry ( @entries ) {
+    push @rad_groups, { value => $entry->dn,
+			label => sprintf('%s%s',
+					 $entry->get_value('cn'),
+					 $entry->exists('description') ? ' --- ' . $entry->get_value('description') : ''),
+		      };
+  }
+  return \@rad_groups;
 }
 
 
