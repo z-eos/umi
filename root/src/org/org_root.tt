@@ -2,7 +2,7 @@
 
 <div class="row">
   <div class="col-md-10">
-    <h3 class="page-header">Org <small>manipulations</small></h3>
+    <h2 class="page-header">Org <small>manipulations</small></h2>
     <dl>
       <li>
 	<h3>Organization (office) DNs are hierarchycal</h3>
@@ -41,7 +41,7 @@
   <div class="col-md-2">
     <ul class="nav nav-pills nav-stacked">
       <li><a href="[% c.uri_for('/org') %]" target="_top">
-        <span class="fa fa-plus-circle"></span>
+        <span class="fa fa-industry"></span>
         create new</a>
       </li>
     </ul>

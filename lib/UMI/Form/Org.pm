@@ -1,4 +1,4 @@
-# -*- cperl -*-
+# -*- mode: cperl; mode: follow; -*-
 #
 
 package UMI::Form::Org;
@@ -8,183 +8,136 @@ extends 'UMI::Form::LDAP';
 
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable' );
 
+sub build_form_element_class { [ 'form-horizontal', ] }
+
 sub html_attributes {
   my ( $self, $field, $type, $attr ) = @_;
   push @{$attr->{'class'}}, 'required'
     if $type eq 'label' && $field->required;
 }
 
-# bl-0 ----------------------------------------------------------------------
+has_field 'aux_parent'
+  => (
+      type => 'Select',
+      label => 'Parent Office',
+      label_class => [ 'col-xs-2', ],
+      empty_select => '--- Choose a Parent Office if any ---',
+      element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+      options_method => \&parent_offices,
+     );
 
-has_field 'aux_parent' => ( type => 'Select',
-			    label => 'Parent Office',
-			    wrapper_class => [ 'col-xs-6' ],
-			    label_attr => { title => 'parent office, the one to be created belongs' },
-			  );
+has_field 'physicalDeliveryOfficeName' 
+  => (
+      apply => [ NotAllDigits, Printable, ],
+      label => 'physicalDeliveryOfficeName',
+      label_class => [ 'col-xs-2', ],
+      label_attr => { title => 'official office name as it is known to the world' },
+      element_attr => { placeholder => 'Horns & Hooves LLC' },
+      element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+      required => 1,
+     );
 
-=head2 options_aux_parent
+has_field 'ou'
+  => (
+      apply => [ NoSpaces, NotAllDigits, Printable, ],
+      label => 'Org Unit',
+      label_class => [ 'col-xs-2', ],
+      label_attr => { title => 'top level name of the organization as it is used in physicalDeliveryOfficeName value of users' },
+      element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+      element_attr => { placeholder => 'fo01' },
+      required => 1,
+     );
 
-returns array of hash refs { value => ... , label => ... } like:
+has_field 'telephoneNumber'
+  => (
+      label => 'telephoneNumber',
+      label_class => [ 'col-xs-2', ],
+      element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+      element_attr => { placeholder => '666' },
+     );
 
-'ou=foo,ou=Organizations,dc=ibs',
-'foo (Foo @ City1)',
-...
-'ou=br04,ou=br03,ou=br02,ou=br01,ou=bar,ou=Organizations,dc=WeAre',
-'br04 (Bar @ CityN) branch of  -> br03 -> br02 -> br01 -> bar'
+has_field 'businessCategory'
+  => ( type => 'Select',
+       label => 'Business Category',
+       label_class => [ 'col-xs-2', ],
+       element_wrapper_class => [ 'col-xs-5', 'col-lg-3', ],
+       options => [
+		   { value => 'na', label => 'N/A', },
+		   { value => 'it', label => 'IT', },
+		   { value => 'trade', label => 'Trade', },
+		   { value => 'telephony', label => 'Telephony', },
+		   { value => 'fin', label => 'Financial', },
+		   { value => 'tv', label => 'TV', },
+		   { value => 'logistics', label => 'Logistics' },
+		  ],
+     );
 
-=cut
+has_field 'postOfficeBox'
+  => ( label => 'PB',
+       label_class => [ 'col-xs-2', ],
+       element_wrapper_class => [ 'col-xs-5', 'col-lg-1', ],
+       element_attr => { placeholder => '121' },
+     );
 
-sub options_aux_parent {
-  my $self = shift;
+has_field 'street'
+  => ( label => 'Street',
+       label_class => [ 'col-xs-2', ],
+       element_wrapper_class => [ 'col-xs-5', 'col-lg-3', ],
+       element_attr => { placeholder => 'Shevchenka' },
+     );
 
-  return unless $self->ldap_crud;
+has_field 'postalCode'
+  => (
+      label => 'Postalcode',
+      label_class => [ 'col-xs-2', ],
+      element_wrapper_class => [ 'col-xs-5', 'col-lg-2', ],
+      element_attr => { placeholder => '12345' },
+     );
 
-  my $ldap_crud = $self->ldap_crud;
-  my $mesg = $ldap_crud->search(
-				{
-				 base => $ldap_crud->{'cfg'}->{'base'}->{'org'},
-				 scope => 'children',
-				 filter => 'ou=*',
-				 attrs => [ qw(ou physicaldeliveryofficename l) ],
-				 sizelimit => 0
-				}
-			       );
-  my @orgs = ( { value => '0', label => '--- no parent office ---', selected => 'on' } );
-  my @entries = $mesg->entries;
-  my ( $a, $i, @dn_arr, $dn, $label );
-  foreach my $entry ( @entries ) {
-    @dn_arr = split(',',$entry->dn);
-    if ( scalar @dn_arr < 4 ) {
-      $label = sprintf("%s (head office %s @ %s)",
-		       $entry->get_value ('ou'),
-		       $entry->get_value ('physicaldeliveryofficename'),
-		       $entry->get_value ('l'),
-		      );
-    } elsif ( scalar @dn_arr == 4 ) {
-      $label = sprintf("%s (%s @ %s) branch of %s",
-		       $entry->get_value ('ou'),
-		       $entry->get_value ('physicaldeliveryofficename'),
-		       $entry->get_value ('l'),
-		       substr($dn_arr[1],3)
-		      );
-    } else {
-      for ( $i = 1, $dn = ''; $i < scalar @dn_arr - 2; $i++ ) {
-	$dn .= $dn_arr[$i];
-      }
-      $a = $dn =~ s/ou=/ -> /g;
-      $label = sprintf("%s (%s @ %s) branch of %s",
-		       $entry->get_value ('ou'),
-		       $entry->get_value ('physicaldeliveryofficename'),
-		       $entry->get_value ('l'),
-		       $dn
-		      );
-    }
+has_field 'l'
+  => (
+      label => 'Location',
+      label_class => [ 'col-xs-2', ],
+      label_attr => { title => 'location, commonly the city the office situated at' },
+      element_wrapper_class => [ 'col-xs-5', 'col-lg-2', ],
+      element_attr => { placeholder => 'Kyiv' },
+      required => 1,
+     );
 
-    push @orgs, {
-		 value => $entry->dn,
-		 label => $label
-		};
-  }
-  return \@orgs;
+has_field 'st'
+  => ( label => 'State',
+       label_class => [ 'col-xs-2', ],
+       label_attr => { title => 'state, commonly short form of the city' },
+       element_wrapper_class => [ 'col-xs-5', 'col-lg-1', ],
+       element_attr => { placeholder => 'KV' },
+     );
 
-  $ldap_crud->unbind;
-}
+has_field 'postalAddress'
+  => ( label => 'PostalAdress',
+       label_class => [ 'col-xs-2', ],
+       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+       element_attr => { placeholder => '121, 4th floor' },
+     );
 
-# bl-1 ----------------------------------------------------------------------
+has_field 'registeredAddress'
+  => ( label => 'Registered Adress',
+       label_class => [ 'col-xs-2', ],
+       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+       element_attr => { placeholder => '121, 4th floor' },
+     );
 
-has_field 'physicalDeliveryOfficeName' => (
-					   label => 'physicalDeliveryOfficeName',
-					   label_attr => { title => 'official office name as it is known to the world' },
-					   wrapper_class => 'col-xs-4',
-					   element_attr => { placeholder => 'Horns & Hooves LLC' },
-					   required => 1,
-					  );
-
-has_field 'ou' => (
-		   label => 'Org Unit',
-		   label_attr => { title => 'top level name of the organization as it is used in physicalDeliveryOfficeName value of users' },
-		   wrapper_class => 'col-xs-2',
-		   element_attr => { placeholder => 'fo01' },
-		   required => 1,
-		  );
-
-has_field 'businessCategory' => ( type => 'Select',
-				  label => 'Business Category',
-				  wrapper_class => 'col-xs-2',
-				  options => [
-					      { value => 'na', label => 'N/A',},
-					      { value => 'it', label => 'IT',},
-					      { value => 'trade', label => 'Trade',},
-					      { value => 'telephony', label => 'Telephony',},
-					      { value => 'fin', label => 'Financial',},
-					      { value => 'tv', label => 'TV',},
-					      { value => 'logistics', label => 'Logistics'},
-					     ],
-				);
-
-has_field 'telephoneNumber' => (
-				label => 'telephoneNumber',
-				wrapper_class => 'col-xs-3',
-				element_attr => { placeholder => '666' },
-			       );
-
-# bl-2 ----------------------------------------------------------------------
-
-has_field 'postOfficeBox' => ( label => 'PB',
-			    wrapper_class => 'col-xs-1',
-			    element_attr => { placeholder => '121' },
-			     );
-
-has_field 'street' => ( label => 'Street',
-			wrapper_class => 'col-xs-3',
-			element_attr => { placeholder => 'Artema' },
-		      );
-
-has_field 'postalCode' => (
-			   label => 'Postalcode',
-			    wrapper_class => 'col-xs-2',
-			    element_attr => { placeholder => '83100' },
-			  );
-
-has_field 'l' => (
-		  label => 'Location',
-		  label_attr => { title => 'location, commonly the city the office situated at' },
-		  wrapper_class => 'col-xs-2',
-		  element_attr => { placeholder => 'Donetsk' },
-		  required => 1,
-		 );
-
-has_field 'st' => ( label => 'State',
-		    label_attr => { title => 'state, commonly short form of the city' },
-		    wrapper_class => 'col-xs-1',
-		    element_attr => { placeholder => 'DN' },
-		  );
-
-# bl-3 ----------------------------------------------------------------------
-
-has_field 'postalAddress' => ( label => 'PostalAdress',
-			       wrapper_class => 'col-xs-3',
-			       element_attr => { placeholder => '121, 4th floor' },
-			     );
-
-has_field 'registeredAddress' => ( label => 'Registered Adress',
-				   wrapper_class => 'col-xs-3',
-				   element_attr => { placeholder => '121, 4th floor' },
-				 );
-
-has_field 'description' => ( type => 'TextArea',
-			     label => 'Description',
-			     wrapper_class => 'col-xs-6',
-			     element_attr => { placeholder => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed dapibus nulla. Mauris vehicula vehicula ligula ac dapibus. Fusce vehicula a turpis sed. ' },
-			     # cols => 30,
-			     rows => 2
-			   );
-
-# bl-4 ----------------------------------------------------------------------
-
+has_field 'description'
+  => ( type => 'TextArea',
+       label => 'Description',
+       label_class => [ 'col-xs-2', ],
+       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+       element_attr => { placeholder => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed dapibus nulla. Mauris vehicula vehicula ligula ac dapibus. Fusce vehicula a turpis sed. ' },
+       # cols => 30,
+       rows => 2
+     );
 
 has_field 'aux_reset' => ( type => 'Reset',
-			   wrapper_class => [ 'col-xs-2' ],
+			   wrapper_class => [ 'col-xs-4' ],
 			   element_class => [ 'btn', 'btn-danger', 'btn-block', ],
 			   element_wrapper_class => [ 'col-xs-12', ],
 			   # value => 'Reset'
@@ -192,52 +145,18 @@ has_field 'aux_reset' => ( type => 'Reset',
 
 has_field 'aux_submit' => (
 			   type => 'Submit',
-			   wrapper_class => [ 'col-xs-10'],
+			   wrapper_class => [ 'col-xs-8'],
 			   element_class => [ 'btn', 'btn-success', 'btn-block', ],
 			   # label_no_filter => 1,
 			   # value => '<span class="glyphicon glyphicon-plus-sign"></span> Submit',
 			   value => 'Submit'
 			  );
 
-# FIELDSETs -----------------------------------------------------------------
-
-has_block 'bl-0' => ( tag => 'fieldset',
-		      render_list => [ 'aux_parent' ],
-		      label => '<abbr title="Head office" class="initialism"><span class="icon_building_alt" aria-hidden="true"></span></abbr>',
-		      class => [ 'row', ]
-		    );
-
-has_block 'bl-1' => ( tag => 'fieldset',
-		      render_list => [ 'physicalDeliveryOfficeName', 'ou', 'businessCategory', 'postOfficeBox', 'street' ],
-		      label => '<abbr title="Geografical Address Related Data" class="initialism"><span class="icon_building" aria-hidden="true"></span></abbr>',
-		      class => [ 'row', ]
-		    );
-
-has_block 'bl-2' => ( tag => 'fieldset',
-		      render_list => [ 'l', 'st', 'postalCode', 'registeredAddress', 'postalAddress' ],
-		      # label => '&nbsp;',
-		      class => [ 'row', ]
-		    );
-
-has_block 'bl-3' => ( tag => 'fieldset',
-		      render_list => [ 'telephoneNumber', 'description' ],
-		      # label => '&nbsp;',
-		      class => [ 'container-fluid', ]
-		    );
-
-has_block 'bl-4' => ( tag => 'fieldset',
-		      render_list => [ 'aux_reset', 'aux_submit'],
-		      # label => '&nbsp;',
-		      class => [ 'row', ]
-		    );
-
-sub build_render_list {[
-			'bl-0',
-			'bl-1',
-			'bl-2',
-			'bl-3',
-			'bl-4',
-		       ]}
+######################################################################
+# ====================================================================
+# == VALIDATION ======================================================
+# ====================================================================
+######################################################################
 
 sub validate {
   my $self = shift;
@@ -284,52 +203,12 @@ sub validate {
   # $ldap->unbind;
 }
 
-sub update_model {
-    use Data::Printer colored => 1, caller_info => 1;
-    p(@_);
+######################################################################
 
-    my $self = shift;
-
-    my $item = undef;
-    if ( ! $self->item ) {
-      warn '$$$$$$$$$$$$$$$$$$$$$$$$$$$$ add $$$$$$$$$$$$$$$$$$$$$$$$$$$$' . "\n";
-      $self->add_form_error('<span class="fa fa-exclamation-circle">' .
-			    '</span>&nbsp;first if');
-      $item = $self->ldap_crud
-	->obj_add(
-		  {
-		   'type' => 'org',
-		   'params' => $self->{'params'},
-		  }
-		 );
-    } elsif ( defined $self->{'item'}->{'act'} ) {
-      $item = $self->item;
-      warn '$$$$$$$$$$$$$$$$$$$$$$$$$$$$ modify $$$$$$$$$$$$$$$$$$$$$$$$$$$$' . "\n";
-      # $self->add_form_error('middle elsif');
-      # item => $c->model('LDAP_CRUD')
-      # 	->obj_mod(
-      # 		  {
-      # 		   'type' => 'org',
-      # 		   'params' => $params,
-      # 		  }
-      # 		 ),
-
-    } else  {
-      warn '$$$$$$$$$$$$$$$$$$$$$$$$$$$$ other $$$$$$$$$$$$$$$$$$$$$$$$$$$$' . "\n";
-
-      $item = $self->item;
-      $self->add_form_error('Final else');
-    }
-
-    return unless $item;
-
-    $self->add_form_error( $item->{'message'} ) if $item->{'message'};
-
-    # foreach my $field ( $self->all_fields ) {
-    #     my $name = $field->name;
-    #     next unless $item->can($name);
-    #     $item->$name( $field->value );
-    # }
+sub parent_offices {
+  my $self = shift;
+  return unless $self->form->ldap_crud;
+  return $self->form->ldap_crud->select_organizations;
 }
 
 ######################################################################

@@ -14,7 +14,7 @@ use Data::Printer;
 has '+enctype' => ( default => 'multipart/form-data');
 has 'namesake' => ( is => 'rw', );
 has 'autologin' => ( is => 'rw', );
-has 'add_svc_acc' => ( is => 'rw', );
+has 'add_svc_acc' => ( is => 'rw', ); # set if we add service account rather than new user
 
 sub build_form_element_class { [ 'form-horizontal', 'tab-content' ] }
 
@@ -85,7 +85,7 @@ has_field 'person_avatar'
 has_field 'person_org'
   => ( type => 'Select',
        label => 'Organization',
-       label_class => [ 'col-xs-2' ],
+       label_class => [ 'col-xs-2', ],
        empty_select => '--- Choose an Organization ---',
        element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
        element_class => [ 'input-sm', ],
@@ -97,8 +97,7 @@ has_field 'person_title'
        label_class => [ 'col-xs-2', ],
        element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
        element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'manager' },
-       required => 1 );
+       element_attr => { placeholder => 'manager' } );
 
 has_field 'person_office'
   => ( type => 'Select',
@@ -107,8 +106,7 @@ has_field 'person_office'
        empty_select => '--- Choose an Office ---',
        element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
        element_class => [ 'input-sm', ],
-       options_method => \&offices,
-       required => 1 );
+       options_method => \&offices, );
 
 has_field 'person_telephonenumber'
   => ( apply => [ NoSpaces ],
@@ -724,13 +722,17 @@ sub validate {
     foreach $element ( $self->field('account')->fields ) {
       # if ( $#{$self->field('account')->fields} > -1 &&
 
+      # new user, defined neither fqdn nor svc, but login
       if ( $self->add_svc_acc eq '' &&
+	   defined $element->field('login')->value &&
+	   $element->field('login')->value ne '' &&
 	   ((! defined $element->field('authorizedservice')->value &&
 	     ! defined $element->field('associateddomain')->value ) ||
 	    ( $element->field('authorizedservice')->value eq '' &&
-	      $element->field('associateddomain')->value eq '' )) ) { # no svc no fqdn
+	      $element->field('associateddomain')->value eq '' )) ) {
 	$element->field('associateddomain')->add_error('Domain Name is mandatory!');
 	$element->field('authorizedservice')->add_error('Service is mandatory!');
+	
       } elsif ( defined $element->field('authorizedservice')->value &&
 		$element->field('authorizedservice')->value ne '' &&
 		( ! defined $element->field('associateddomain')->value ||

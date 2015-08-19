@@ -76,6 +76,15 @@ sub _build_cfg {
 		   org =>            'ou=Organizations,' . UMI->config->{ldap_crud_db},
 		   rad_groups =>    'ou=groups,ou=RADIUS,' . UMI->config->{ldap_crud_db},
 		   rad_profiles =>    'ou=profiles,ou=RADIUS,' . UMI->config->{ldap_crud_db},
+		   icon => {
+			    People => 'fa fa-user',
+			    DHCP => 'fa fa-sitemap',
+			    GitACL => 'fa fa-gavel',
+			    group => 'fa fa-group',
+			    Organizations => 'fa fa-industry',
+			    rad_groups => 'fa fa-group',
+			    rad_profiles => 'fa fa-cogs',
+			   },
 		  },
 	  exclude_prefix => 'aux_',
 
@@ -717,10 +726,11 @@ sub reassign {
     }
 
     ### FINISH
-    # here we have to delete src subtree recursively
+    # here we have to delete src subtree recursively if
+    # @{$return->{error}} is empty
     $self->delr( $arg->{src}->{str} )
       if ref($return) ne "HASH" ||
-      ( ref($return) eq "HASH" && $#{$return->{error}} < 1);
+      ( ref($return) eq "HASH" && $#{$return->{error}} < 0);
   } else {
     $result = $self->search( { base  => $arg->{src}->{str}, scope => 'base', } );
     $clone = $result->entry(0)->clone;
@@ -745,11 +755,12 @@ sub reassign {
     push @{$return->{error}}, $mesg if $mesg;
 
     ### FINISH
-    # here we have to delete src dn
+    # here we have to delete src dn if
+    # @{$return->{error}} is empty
     # $self->del( $arg->{src}->{str} ) if $return != 0 && $#{$return->{error}} > -1;
     $self->del( $arg->{src}->{str} )
       if ref($return) ne "HASH" ||
-      ( ref($return) eq "HASH" && $#{$return->{error}} < 1);
+      ( ref($return) eq "HASH" && $#{$return->{error}} < 0);
   }
 
   # p $return;
@@ -1211,6 +1222,11 @@ sub select_key_val {
 
 =head2 obj_add
 
+simple, attributes-bunch add, according the object type configured
+above
+
+returns hash with results: either success or error
+
 =cut
 
 sub obj_add {
@@ -1218,47 +1234,22 @@ sub obj_add {
   my $type = $args->{'type'};
   my $params = $args->{'params'};
 
-  # return '' unless %{$params};
-
-#
-## TODO
-## HERE, MAY BE, WE NEED TO SET FLAG TO CREATE BRANCH FOR LOCALIZED
-## VERSION OF DATA
-## associatedService=localization-ru,uid=U...-user01,ou=People,dc=umidb
-## associatedService=localization-uk,uid=U...-user01,ou=People,dc=umidb
-
   my $attrs = $self->params2attrs({
 				   type => $type,
 				   params => $params,
 				  });
+  my $mesg = $self->add( $attrs->{dn}, $attrs->{attrs} );
 
-  my $mesg = $self->add(
-			$attrs->{'dn'},
-			$attrs->{'attrs'}
-		       );
-  my $message;
-  if ( $mesg ) {
-    my $mesg2 = p $mesg;
-    $message .= '<div class="alert alert-danger">' .
-      '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span>&nbsp;' .
-	'Error during ' . $type . ' object creation occured: ' . $mesg2 . '</div>';
-
-    warn sprintf('object dn: %s wasn not created! errors: %s', $attrs->{'dn'}, $mesg);
-  } else {
-    $message .= '<div class="alert alert-success">' .
-      '<span style="font-size: 140%" class="glyphicon glyphicon-ok-sign"></span>' .
-	'&nbsp;Object <em>&laquo;' . $self->utf2lat( $params->{'physicalDeliveryOfficeName'} ) .
-	    '&raquo;</em> of type <em>&laquo;' . $type .
-	      '&raquo;</em> was successfully created.</div>';
-  }
-
-  # warn 'FORM ERROR' . $final_message if $final_message;
-
-  # $self->unbind;
-
-  warn 'LDAP ERROR' . $mesg if $mesg;
-
-  return { message => $message };
+  my $callername = (caller(1))[3];
+  $callername = 'main' if ! defined $callername;
+  my $return;
+  if ($mesg) {
+      $return->{error} = $mesg->{html};
+    } else {
+      $return->{success} = $attrs->{dn} . " created successfully";
+    }
+  $return->{caller} = 'call to LDAP_CRUD->add from ' . $callername . ': ';
+  return $return;
 }
 
 
@@ -1337,6 +1328,7 @@ my $arg = {
     #
     ## TODO
     ## to add multivalue fields processing
+    ## to process uplod fields
     $val = $self->is_ascii( $arg->{'params'}->{$key} ) ?
       $self->utf2lat( $arg->{'params'}->{$key} ) :
 	$arg->{'params'}->{$key};

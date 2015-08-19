@@ -1,6 +1,8 @@
 [% META title = 'Org root' %]
 
 <h2>New Org Creation Form <small><em>all stuff</em></small></h2>
-  
+
+[% INCLUDE ldap_err.tt %]
+
 [% form.render %]
 

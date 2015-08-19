@@ -223,6 +223,7 @@ sub index :Path :Args(0) {
 	      entries => $ttentries,
 	      # entries => \@entries,
 	      services => $ldap_crud->{cfg}->{authorizedService},
+	      base_ico => $ldap_crud->{cfg}->{base}->{icon},
 	      final_message => $return,
 	     );
   } else {

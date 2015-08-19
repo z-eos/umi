@@ -61,6 +61,7 @@
       [% entry.key = entrykey
 	 entry.value = entries.$entrykey %]
       [% dn = entry.key.split(',|=').hash %][% # preparing hash of each dn %]
+      [% # USE dumper(indent=4, pad="<br>") %]<!-- <tr><td> -->[% # dumper.dump(dn.ou, base_ico.${dn.ou}) %]<!-- </td></tr> -->
       [% IF entry.value.mgmnt.is_blocked %]
       [% blocked = ' text-danger' %]
       [% blocked_title = 'title="This DN was blocked! To unblock, remove root dn from the group &laquo;blocked&raquo; and manage each service account manualy."' %]
@@ -321,6 +322,8 @@
 		    <i title="Service Account" class="umi-2-margin-left fa fa-leaf fa-lg[% blocked %]"></i>
 		    [% END %]
 
+		  [% ELSIF base_ico.${dn.ou} %]
+		  <i title="Service Account Branch" class="[% base_ico.${dn.ou} %] fa-lg[% blocked %]"></i>
 		  [% ELSE %]
 		  <i title="Service Account Branch" class="fa fa-code-fork fa-lg[% blocked %]"></i>
 		  
@@ -332,6 +335,67 @@
 		  [% END %]
 		  &nbsp;&nbsp;&nbsp;[% entry.key.replace(',', ',&nbsp;') %]
 	      </b></span>
+	    <div id="collapse[% loop.index %]" class="panel-collapse collapse [% in %]">
+	      <div class="panel-body">
+		<dl class="dl-horizontal">
+		  [% FOREACH hattr IN entry.value.attrs %]
+		  [% x=hattr.key %]
+		  [% IF hattr.key.match(';binary') %]
+		  <dt>[% hattr.key.substr(-7,7,'&nbsp;<abbr title="binary data"><span class="fa fa-file-zip-o text-info" title="binary data"></span></abbr>') %]:</dt><dd>
+		    [% ELSIF hattr.key == 'userPKCS12' %]
+		    <dt>[% hattr.key %]&nbsp;<abbr title="binary data"><span class="fa fa-file-zip-o text-info" title="binary data"></span></abbr>:</dt><dd>
+		      [% ELSE %]
+		      <dt>[% hattr.key %]:</dt><dd>
+			[% END %]
+			[% IF hattr.key == 'userPassword' %]
+			<span class="fa fa-circle"></span>
+			<span class="fa fa-circle"></span>
+			<span class="fa fa-circle"></span>
+			<span class="fa fa-circle"></span>
+			<span class="fa fa-circle"></span>
+			<span class="fa fa-circle"></span>
+			<span class="fa fa-circle"></span>
+			<span class="fa fa-circle"></span>
+			[% ELSIF hattr.key.match('userCertificate;binary') %]
+			<br><small class="pull-left"><em><dl class="dl-horizontal">
+			  [% FOREACH cert IN hattr.value %]
+			  [% NEXT IF cert.key == 'cert' %]
+			  [% NEXT IF cert.key == 'error' && ! cert.value %]
+			  <dt>[% cert.key %]</dt><dd class="mono">[% cert.value %]</dd>
+			  [% END %]
+			</dl></em></small>
+			[% ELSIF hattr.key == 'userPKCS12' %]
+			<kbd class="fa fa-file-o">&nbsp;Binary Data</kbd>
+			[% ELSIF hattr.key == 'jpegPhoto' %]
+			[%
+			   # bellow, value of jpegPhoto attribute contains no  `<img class="' part
+			   # to set background class here according the object type: root or child
+			   %]
+			[% IF entry.value.mgmnt.is_dn %]
+			<img class="bg-info [% hattr.value %]
+			     [% ELSE %]
+			     <img class="bg-success [% hattr.value %]
+			     [% END %]
+			     [% ELSIF entry.value.is_arr.$x %]
+			     [% FOREACH i IN hattr.value %]
+			     [% IF hattr.key == 'sshPublicKey' %]
+			<div class="panel panel-default">
+			  <div class="panel-body mono"><small>[% i %]</small></div></div>
+			[% ELSE %]
+			  [% IF loop.last %][% i %][% ELSE %][% i %]<br>[% END %]
+			  [% END %]
+			  [% END %]
+			  [% ELSE %]
+			  [% hattr.value %]
+			  [% END %] [% # IF hattr.key == 'userPassword' %]
+		      </dd>
+		      [% END %] [% # FOREACH hattr IN entry.value.attrs %]
+		</dl>
+	      </div>
+	    </div>
+	    </div>
+	    </div>
+	    </div>
 	      <!-- #### Modal: Delete start -->
 	      <div class="modal" id="modal_delete[% zufix %]"
 		   tabindex="-1" role="dialog" aria-labelledby="modal_delete[% zufix %]_label"
@@ -458,67 +522,6 @@
 		  </div>
 		</div>
 	      </div><!-- #### Modal: LDIF end -->
-	    </div>
-	    <div id="collapse[% loop.index %]" class="panel-collapse collapse [% in %]">
-	      <div class="panel-body">
-		<dl class="dl-horizontal">
-		  [% FOREACH hattr IN entry.value.attrs %]
-		  [% x=hattr.key %]
-		  [% IF hattr.key.match(';binary') %]
-		  <dt>[% hattr.key.substr(-7,7,'&nbsp;<abbr title="binary data"><span class="fa fa-file-zip-o text-info" title="binary data"></span></abbr>') %]:</dt><dd>
-		    [% ELSIF hattr.key == 'userPKCS12' %]
-		    <dt>[% hattr.key %]&nbsp;<abbr title="binary data"><span class="fa fa-file-zip-o text-info" title="binary data"></span></abbr>:</dt><dd>
-		      [% ELSE %]
-		      <dt>[% hattr.key %]:</dt><dd>
-			[% END %]
-			[% IF hattr.key == 'userPassword' %]
-			<span class="fa fa-circle"></span>
-			<span class="fa fa-circle"></span>
-			<span class="fa fa-circle"></span>
-			<span class="fa fa-circle"></span>
-			<span class="fa fa-circle"></span>
-			<span class="fa fa-circle"></span>
-			<span class="fa fa-circle"></span>
-			<span class="fa fa-circle"></span>
-			[% ELSIF hattr.key.match('userCertificate;binary') %]
-			<br><small class="pull-left"><em><dl class="dl-horizontal">
-			  [% FOREACH cert IN hattr.value %]
-			  [% NEXT IF cert.key == 'cert' %]
-			  [% NEXT IF cert.key == 'error' && ! cert.value %]
-			  <dt>[% cert.key %]</dt><dd class="mono">[% cert.value %]</dd>
-			  [% END %]
-			</dl></em></small>
-			[% ELSIF hattr.key == 'userPKCS12' %]
-			<kbd class="fa fa-file-o">&nbsp;Binary Data</kbd>
-			[% ELSIF hattr.key == 'jpegPhoto' %]
-			[%
-			   # bellow, value of jpegPhoto attribute contains no  `<img class="' part
-			   # to set background class here according the object type: root or child
-			   %]
-			[% IF entry.value.mgmnt.is_dn %]
-			<img class="bg-info [% hattr.value %]
-			     [% ELSE %]
-			     <img class="bg-success [% hattr.value %]
-			     [% END %]
-			     [% ELSIF entry.value.is_arr.$x %]
-			     [% FOREACH i IN hattr.value %]
-			     [% IF hattr.key == 'sshPublicKey' %]
-			<div class="panel panel-default">
-			  <div class="panel-body mono"><small>[% i %]</small></div></div>
-			[% ELSE %]
-			  [% IF loop.last %][% i %][% ELSE %][% i %]<br>[% END %]
-			  [% END %]
-			  [% END %]
-			  [% ELSE %]
-			  [% hattr.value %]
-			  [% END %] [% # IF hattr.key == 'userPassword' %]
-		      </dd>
-		      [% END %] [% # FOREACH hattr IN entry.value.attrs %]
-		</dl>
-	      </div>
-	    </div>
-	    </div>
-	    </div>
 	</td>
       </tr>
       [% blocked = '' %]

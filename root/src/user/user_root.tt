@@ -2,73 +2,32 @@
 
 <div class="row">
   <div class="col-md-10">
-    <h3 class="page-header">USERs <small>manipulations</small></h3>
-    <p>
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc
-      ultricies velit vel magna adipiscing dictum. Aliquam commodo porta
-      rhoncus. Nunc luctus ipsum at odio malesuada viverra. Duis bibendum
-      placerat posuere. Sed aliquet mattis nisl, in ullamcorper risus
-      lobortis nec. Sed mi nibh, porta quis nisl et, aliquam pharetra
-      risus. Integer cursus magna et ultrices auctor. Suspendisse malesuada
-      erat lacus, ac placerat erat suscipit ut. Suspendisse interdum vitae
-      neque id malesuada. Vivamus urna libero, lobortis sed porta at,
-      suscipit ac lorem. Pellentesque tincidunt ac nibh nec laoreet. Mauris
-      faucibus blandit mi sit amet rutrum. Suspendisse nec facilisis mi,
-      ultrices viverra lectus.
-    </p>
-    <p>
-      Quisque eget interdum justo, eu molestie ipsum. Nam eget imperdiet
-      ante. Donec semper, eros ac laoreet congue, eros libero adipiscing
-      metus, at pretium turpis leo at sapien. Etiam aliquet fringilla
-      orci. Vivamus tristique mi vel pellentesque porta. Nullam ornare
-      cursus justo, nec fermentum arcu tristique vel. Sed sed mauris eget
-      est aliquet mollis.
-    </p>
-    <p>
-      Nulla aliquam leo in iaculis sollicitudin. Donec porttitor nisi et
-      eros lacinia, nec pharetra nisl ornare. Integer pulvinar ligula eu
-      massa consequat, eu pharetra nisi porttitor. Donec iaculis quam dictum
-      tellus euismod, id consectetur arcu porta. Quisque gravida, mauris non
-      faucibus vulputate, lorem lectus condimentum magna, sit amet faucibus
-      tortor metus ut lorem. Fusce fermentum vulputate ante eu
-      pellentesque. Cras vestibulum quam tortor, sed fringilla massa sodales
-      a. Curabitur vitae massa lectus. Integer interdum sem purus, feugiat
-      fermentum enim lacinia at.
-    </p>
-    <p>
-      Curabitur vel nisl congue, blandit nulla vel, feugiat tortor. Maecenas
-      non purus dignissim enim hendrerit venenatis ac vitae erat. Mauris
-      porttitor massa quis lacus ullamcorper, tincidunt congue diam
-      adipiscing. Nullam pulvinar lacus at magna faucibus, id dignissim quam
-      tincidunt. Fusce posuere cursus ante, eget euismod metus pellentesque
-      sit amet. Quisque posuere molestie erat vitae pulvinar. Cras ac nulla
-      id lacus luctus ultricies in et erat. Nullam vel semper odio. Cras sed
-      erat quis nulla rutrum consequat in ut felis.
-    </p>
-    <p>
-      Quisque pulvinar, urna nec facilisis suscipit, arcu elit scelerisque
-      tortor, non euismod mauris risus eget lacus. Fusce feugiat, nibh non
-      pellentesque mattis, nunc dolor adipiscing nunc, et adipiscing leo
-      lectus in libero. Integer sapien risus, imperdiet nec dui ac, porta
-      imperdiet arcu. Aliquam convallis, lorem quis consequat iaculis, urna
-      nulla pretium odio, id mollis mauris ligula sed metus. Sed eget dolor
-      in libero convallis cursus. Praesent rhoncus felis in vehicula
-      auctor. Phasellus porta vulputate metus, tempus pretium purus luctus
-      sed. Suspendisse ut interdum dolor, id commodo enim. Vestibulum ante
-      ipsum primis in faucibus orci luctus et ultrices posuere cubilia
-      Curae; Phasellus posuere molestie est, ut dictum sem. Proin porta orci
-      accumsan eros fringilla cursus.
-    </p>
+    <h2 class="page-header">USERs <small>manipulations</small></h2>
+
+    <dl>
+      <li>
+	<h3>Mandatory fields (signed with &laquo;<span class="fa fa-exclamation-circle text-danger umi-opacity05"></span>&raquo;)</h3>
+	without these two, no root account can be created.
+	<dl class="dl-horizontal">
+	  <dt>FName:</dt>
+	  <dd>First Name</dd>
+	  <dt>LName</dt>
+	  <dd>Last Name</dd>
+	</dl>
+	all other fields are related to their services context
+      </li>
+    </dl>
+
   </div>
   <div class="col-md-2">
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="[% c.uri_for('user') %]">
-	  <span class="fa fa-plus-circle"></span>
-	  create new</a>
-      </li>
+      <!-- <li><a href="[% c.uri_for('user') %]">
+	     <span class="fa fa-pluse-circle"></span>
+	     create new</a>
+	     </li> -->
       <li><a href="[% c.uri_for('userall') %]" target="_top">
-	  <span class="fa fa-plus-circle"></span>
-	  create new alt (fin)</a>
+	  <span class="fa fa-user-plus"></span>
+	  create new</a>
       </li>
     </ul>
   </div>
