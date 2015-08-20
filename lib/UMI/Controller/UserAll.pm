@@ -838,7 +838,10 @@ sub create_account_branch_leaf {
 
 
     ### !!! RADIUS group modify with new member add if 802.1x
-    if ( defined $arg->{radiusgroupname} && $arg->{radiusgroupname} ne '' ) {
+    if ( $arg->{service} eq '802.1x-mac' ||
+	 $arg->{service} eq '802.1x-eap-tls' &&
+	 defined $arg->{radiusgroupname} &&
+	 $arg->{radiusgroupname} ne '' ) {
       $if_exist = $ldap_crud->search( { base => $arg->{radiusgroupname},
 					   scope => 'base',
 					   filter => '(' . $arg->{dn} . ')', } );

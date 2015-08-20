@@ -106,7 +106,8 @@ has_field 'person_office'
        empty_select => '--- Choose an Office ---',
        element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
        element_class => [ 'input-sm', ],
-       options_method => \&offices, );
+       options_method => \&offices,
+       required => 1 );
 
 has_field 'person_telephonenumber'
   => ( apply => [ NoSpaces ],
