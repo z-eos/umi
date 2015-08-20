@@ -97,8 +97,7 @@ has_field 'person_title'
        label_class => [ 'col-xs-2', ],
        element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
        element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'manager' },
-       required => 1 );
+       element_attr => { placeholder => 'manager' }, );
 
 has_field 'person_office'
   => ( type => 'Select',

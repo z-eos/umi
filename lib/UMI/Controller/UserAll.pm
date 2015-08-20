@@ -147,6 +147,9 @@ sub create_account {
       $descr = $self->utf2lat( $descr ) if $self->is_ascii( $descr );
     }
 
+    $args->{'person_title'} = 'employee'
+      if ! defined $args->{'person_title'} || $args->{'person_title'} eq '';
+
     if (defined $args->{'person_avatar'}) {
       $file = $args->{'person_avatar'}->{'tempname'};
     } else {
