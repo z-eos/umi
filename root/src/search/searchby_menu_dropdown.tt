@@ -1,0 +1,200 @@
+<button class="chevron_toggleable btn btn-link pull-left"
+	type="button" title="Collapse In/Out This Panel"
+	data-target="#collapse[% loop.index %]" data-toggle="collapse"
+	data-parent="#accordion[% loop.index %]">
+  <span id="chevron_switcher" class="fa fa-toggle-[% chevron_toggle %] text-primary"></span>
+</button>
+
+<div class="dropdown pull-left">
+  <button class="btn btn-link dropdown-toggle"
+	  type="button" id="dropdownMenuActions"
+	  data-toggle="dropdown"
+	  title="Possible Actions Upon the Object">
+    <span class="fa fa-cog text-primary"></span><span class="caret text-primary"></span>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-left bg-primary"
+      aria-labelledby="dropdownMenuActions"
+      role="menu">
+    [% IF entry.value.mgmnt.is_dn && entry.value.mgmnt.is_account %]
+    <li>
+      <form role="form" method="POST" action="[% c.uri_for_action('searchby/user_preferences') %]">
+	<button type="submit" title="add service account" class="btn btn-link"
+		value="[% entry.key %]" data-order="10"
+		name="user_preferences">
+	  <span class="fa fa-fw fa-list-alt text-info"></span>
+	  user prefs
+	</button>
+      </form>
+    </li>
+    <li>
+      <button type="button" title="account global management page" class="btn btn-link disabled"
+	      value="[% entry.key %]" data-order="110"
+	      name="accmgmnt"
+	      data-toggle="modal"
+	      data-target="#accmgmntModal[% loop.index %]">
+	<span class="fa fa-fw fa-retweet text-danger"></span>
+	mgmnt all
+      </button>
+    </li>
+    <li>
+      <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+	<button type="submit" title="add new service account" class="btn btn-link"
+		value="[% entry.key %]" data-order="20"
+		name="add_svc_acc">
+	  <span class="fa fa-fw fa-plus-circle text-primary"></span>
+	  new service account
+	</button>
+      </form>
+    </li>
+    <li>
+      <form role="form" method="POST" action="[% c.uri_for_action('userall/index') %]">
+	<button type="submit" title="add new service account" class="btn btn-link"
+		value="[% entry.key %]" data-order="20"
+		name="add_svc_acc">
+	  <span class="fa fa-fw fa-plus-circle text-danger"></span>
+	  new service account (alt)
+	</button>
+      </form>
+    </li>
+    <li>
+      <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+	<button type="submit" title="modify group" class="btn btn-link"
+		value="[% entry.key %]" data-order="90" name="ldap_modify_group">
+	  <span class="fa fa-fw fa-group text-info"></span>
+	  group
+	</button>
+      </form>
+    </li>
+    <li>
+      <button type="button" title="block all accounts (password changed to random ones, ssh key bound to localhost only) of the user with DN: [% entry.key %]" class="btn btn-link"
+	      value="[% entry.key %]"
+	      name="user_block" data-order="19"
+	      data-toggle="modal"
+	      data-target="#modal_block[% zufix %]">
+	<span class="fa fa-fw fa-ban text-danger"></span>
+	block
+      </button>
+    </li>
+    [% END %]
+    <li>
+      <button type="button" title="delete object" class="btn btn-link"
+	      value="[% entry.key %]"
+	      name="ldap_delete" data-order="50"
+	      data-toggle="modal"
+	      data-target="#modal_delete[% zufix %]">
+	<span class="fa fa-fw fa-trash text-danger"></span>
+	delete
+      </button>
+    </li>
+    [% IF ! entry.value.mgmnt.is_dn %]
+    <li>
+      <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+	<button type="button" title="reassign to other root account (move this object to another root account)"
+		class="btn btn-link" value="[% entry.key %]"
+		name="chg_acc" data-order="80"
+		data-toggle="modal"
+		data-target="#reassignModal[% loop.index %]">
+	  <span class="fa fa-fw fa-exchange text-danger"></span>
+	  reassign
+	</button>
+      </form>
+    </li>
+    [% END %]
+    <li>
+      <button type="button" title="export LDIF of the object"
+	      class="btn btn-link"
+	      value="[% entry.key %]" data-order="70"
+	      name="ldap_ldif"
+	      data-toggle="modal"
+	      data-target="#ldifModal[% loop.index %]">
+	<span class="fa fa-fw fa-upload text-info"></span>
+	export LDIF
+      </button>
+    </li>
+    <li>
+      <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+	<button type="submit" title="edit object" class="btn btn-link"
+		value="[% entry.key %]" data-order="100"
+		name="ldap_modify">
+	  <span class="fa fa-fw fa-pencil text-warning"></span>
+	  edit (all)
+	</button>
+      </form>
+    </li>
+    <li>
+      <form role="form" method="POST" action="[% c.uri_for_action('searchby/index') %]">
+	<button type="submit" title="edit object" class="btn btn-link"
+		value="[% entry.key %]" data-order="100"
+		name="ldap_history">
+	  <span class="fa fa-fw fa-history text-info"></span>
+	  history
+	</button>
+      </form>
+    </li>
+    [% IF entry.value.mgmnt.is_group %]
+    <li>
+      <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+	<button type="submit" title="modify group members" class="btn btn-link"
+		value="[% entry.key %]" name="ldap_modify_memberUid">
+	  <span class="fa fa-fw fa-group text-info"></span>
+	  members
+	</button>
+      </form>
+    </li>
+    [% END %]
+    [% IF entry.value.mgmnt.userPassword %]
+    <li>
+      <form role="form" method="POST" action="[% c.uri_for_action('searchby/modify_userpassword') %]">
+	<button type="submit" title="modify password" class="btn btn-link"
+		value="[% entry.key %]" data-order="30" name="ldap_modify_password" tabindex="1">
+	  <span class="fa fa-fw fa-user-secret text-warning"></span>
+	  password
+	</button>
+      </form>
+    </li>
+    [% END %]
+    [% IF entry.value.mgmnt.userDhcp %]
+    <li>
+      <form role="form" method="POST" action="[% c.uri_for_action('searchby/dhcp_add') %]">
+	<button type="submit" title="add DHCP (MAC to IP binding)" class="btn btn-link"
+		value="[% entry.key %]" data-order="40" name="ldap_add_dhcp">
+	  <span class="fa fa-fw fa-sitemap text-info"></span>
+	  DHCP (IP to MAC binding)
+	</button>
+      </form>
+    </li>
+    [% END %]
+    [% IF entry.value.mgmnt.jpegPhoto %]
+    <li>
+      <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+	<button type="submit" title="modify jpegPhoto" class="btn btn-link"
+		value="[% entry.key %]" data-order="60" name="ldap_modify_jpegphoto">
+	  <span class="fa fa-fw fa-image text-warning"></span>
+	  image
+	</button>
+      </form>
+    </li>
+    [% END %]
+
+    [% IF entry.value.mgmnt.gitAclProject %]
+    <li>
+      <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+	<button type="submit" title="reorder gitAcl" class="btn btn-link"
+		value="[% entry.key %]" data-order="120" name="ldap_gitacl_reorder">
+	  <span class="fa fa-fw fa-sort text-warning"></span>
+	  reorder
+	</button>
+      </form>
+    </li>
+    [% END %]
+  </ul>
+</div>
+
+<form role="form" method="POST" action="[% c.uri_for_action('searchby/index') %]">
+  <button type="submit" class="btn btn-link pull-left umi-search"
+	  title="click to open root (management) object of this object"
+	  name="ldap_subtree"
+	  value="[% entry.key.split(',').slice(-3, -1).join(',') %]">
+    <span class="fa fa-star text-primary"></span>
+  </button>
+</form>
