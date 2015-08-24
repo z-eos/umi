@@ -861,7 +861,6 @@ sub create_account_branch_leaf {
 	}
       }
     }
-
   }
   return $return;
 }

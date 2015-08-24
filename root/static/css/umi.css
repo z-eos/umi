@@ -76,6 +76,16 @@ html,body {
   padding: 0 3px 0 0;
 }
 
+.atleastone:after {
+  content: "\f071";
+  font-family: "FontAwesome";
+  font-size: 70%;
+  color: #E99002;
+  vertical-align: top;
+  margin: 0px 0px 0px 3px;
+  padding: 0 3px 0 0;
+}
+
 .requiredwhen:after {
     /* content: "\e146"; */
     content: "\e034";

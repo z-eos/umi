@@ -36,16 +36,16 @@
 	mgmnt all
       </button>
     </li>
-    <li>
-      <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
-	<button type="submit" title="add new service account" class="btn btn-link"
-		value="[% entry.key %]" data-order="20"
-		name="add_svc_acc">
-	  <span class="fa fa-fw fa-plus-circle text-primary"></span>
-	  new service account
-	</button>
-      </form>
-    </li>
+    <!-- <li>
+	    <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+	    <button type="submit" title="add new service account" class="btn btn-link"
+	    value="[% entry.key %]" data-order="20"
+	    name="add_svc_acc">
+	    <span class="fa fa-fw fa-plus-circle text-primary"></span>
+	    new service account
+	    </button>
+	    </form>
+	    </li> -->
     <li>
       <form role="form" method="POST" action="[% c.uri_for_action('userall/index') %]">
 	<button type="submit" title="add new service account" class="btn btn-link"
@@ -138,6 +138,17 @@
 		value="[% entry.key %]" name="ldap_modify_memberUid">
 	  <span class="fa fa-fw fa-group text-info"></span>
 	  members
+	</button>
+      </form>
+    </li>
+    [% END %]
+    [% IF entry.key.match('802.1x-') %]
+    <li>
+      <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+	<button type="submit" title="modify group members" class="btn btn-link"
+		value="[% entry.key %]" name="ldap_modify_member">
+	  <span class="fa fa-fw fa-group text-info"></span>
+	  member
 	</button>
       </form>
     </li>

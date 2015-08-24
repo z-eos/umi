@@ -8,7 +8,7 @@
     <small>
       <em>
 	(complex form for all possible stuff (user's personal data and services),
-	sign &laquo;<span class="fa fa-exclamation-circle text-danger umi-opacity05"></span>&raquo; marks mandatory fields)
+	sign &laquo;<span class="fa fa-exclamation-circle text-danger umi-opacity05"></span>&raquo; marks mandatory fields, sign &laquo;<span class="fa fa-exclamation-triangle text-warning umi-opacity05"></span>&raquo; marks optional fields)
       </em>
     </small>
   </h2>

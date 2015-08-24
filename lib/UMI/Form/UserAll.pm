@@ -290,7 +290,7 @@ has_field 'account.radiusgroupname'
   => ( type => 'Select',
        label => 'RADIUS Group',
        do_id => 'no',
-       label_class => [ 'col-xs-2', 'required', ],
+       label_class => [ 'col-xs-2', 'atleastone', ],
        wrapper_class => [  'hidden', '8021x', '8021xeaptls', 'relation', ],
        element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
        element_class => [ 'input-sm', ],
@@ -305,7 +305,7 @@ has_field 'account.radiusprofiledn'
        label => 'RADIUS Profile',
        wrapper_class => [  'hidden', '8021x', '8021xeaptls', 'relation', ],
        do_id => 'no',
-       label_class => [ 'col-xs-2', 'required', ],
+       label_class => [ 'col-xs-2', 'atleastone', ],
        element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
        element_class => [ 'input-sm', ],
        element_attr => { 'autocomplete' => 'off',
@@ -838,14 +838,13 @@ sub validate {
 				  '<b class="visible-lg-inline">&nbsp;Pass&nbsp;</b>' .
 				  'userCertificate is mandatory!<br>');
 	  }
-
-	
-	$element->field('radiusgroupname')->add_error('RADIUS group name is mandatory!')
-	  if ! defined $element->field('radiusgroupname')->value ||
-	  $element->field('radiusgroupname')->value eq '';
-	$element->field('radiusprofiledn')->add_error('RADIUS tunnel private grooup id is mandatory!')
-	  if ! defined $element->field('radiusprofiledn')->value ||
-	  $element->field('radiusprofiledn')->value eq '';
+	}
+	if (( ! defined $element->field('radiusgroupname')->value ||
+	      $element->field('radiusgroupname')->value eq '' ) &&
+	    ( ! defined $element->field('radiusprofiledn')->value ||
+	      $element->field('radiusprofiledn')->value eq '' )) {
+	  $element->field('radiusgroupname')->add_error('RADIUS group, profile or both are to be set!');
+	  $element->field('radiusprofiledn')->add_error('RADIUS profile, group or both are to be set!');
 	}
       }
       #---[ 802.1x ]------------------------------------------------
