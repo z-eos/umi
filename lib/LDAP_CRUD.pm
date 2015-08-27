@@ -1234,7 +1234,7 @@ sub obj_add {
   my $type = $args->{'type'};
   my $params = $args->{'params'};
 
-  my $attrs = $self->params2attrs({
+  p my $attrs = $self->params2attrs({
 				   type => $type,
 				   params => $params,
 				  });
@@ -1306,15 +1306,15 @@ to be fed to ->add for object creation
 sub params2attrs {
   my ( $self, $args ) = @_;
 
-my $arg = {
-	   type => $args->{'type'},
-	   params => $args->{'params'},
-	  };
+  p my $arg = {
+	     type => $args->{'type'},
+	     params => $args->{'params'},
+	    };
 
   my ( $key, $val, $dn, $base, $attrs );
 
   $base = ( defined $arg->{'params'}->{'aux_parent'} &&
-	    $arg->{'params'}->{'aux_parent'} ne "0" ) ?
+	    $arg->{'params'}->{'aux_parent'} ne '' ) ?
     $arg->{'params'}->{'aux_parent'} :
       $self->{'cfg'}->{'base'}->{$arg->{'type'}};
 
