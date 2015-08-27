@@ -635,8 +635,8 @@ sub create_account_branch_leaf {
 	     umiOvpnAddDevOS => $args->{umiOvpnAddDevOS} || 'NA',
 	     umiOvpnAddDevOSVer => $args->{umiOvpnAddDevOSVer} || 'NA',
 	     
-	     radiusgroupname => $args->{radiusgroupname} || 'ip-phone',
-	     radiusprofiledn => $args->{radiusprofiledn} || 3,
+	     radiusgroupname => $args->{radiusgroupname} || '',
+	     radiusprofiledn => $args->{radiusprofiledn} || '',
 	    };
   my ( $return, $if_exist );
 
@@ -726,9 +726,14 @@ sub create_account_branch_leaf {
     push @{$authorizedService},
       authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
       userPassword => $arg->{password}->{$arg->{service}}->{clear},
-      description => uc($arg->{service}) . ': ' . $arg->{'login'},
-      radiusgroupname => $arg->{radiusgroupname},
-      radiusprofiledn => $arg->{radiusprofiledn};
+      description => uc($arg->{service}) . ': ' . $arg->{'login'};
+    
+    push @{$authorizedService},
+      radiusgroupname => $arg->{radiusgroupname}
+      if $arg->{radiusgroupname} ne '';
+    push @{$authorizedService},
+      radiusprofiledn => $arg->{radiusprofiledn}
+      if $arg->{radiusprofiledn} ne '';
 
     if ( $arg->{service} eq '802.1x-eap-tls' ) {
       $arg->{cert_info} =

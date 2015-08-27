@@ -11,6 +11,7 @@
 [% # child = '<i class="fa fa-fw ' _ fa_child _ ' text-default"></i>' %]
 [% child = '⬚' %]
 [% blocked = '' %]
+[% btn_blocked = '' %]
 [% blocked_title = '' %]
 
 [% IF entries.size == 1 %][% in='in' %][% chevron_toggle='up' %][% ELSE %][% in='' %][% chevron_toggle='down' %][% END %] [% # no keys suffix sort FOREACH entry IN entries %]
@@ -64,6 +65,7 @@
       [% # USE dumper(indent=4, pad="<br>") %]<!-- <tr><td> -->[% # dumper.dump(dn.ou, base_ico.${dn.ou}) %]<!-- </td></tr> -->
       [% IF entry.value.mgmnt.is_blocked %]
       [% blocked = ' text-danger' %]
+      [% btn_blocked = ' btn-danger' %]
       [% blocked_title = 'title="This DN was blocked! To unblock, remove root dn from the group &laquo;blocked&raquo; and manage each service account manualy (in general it is password change)."' %]
       [% END %]
       [% brcl = ' fa-lg umi-1-margin-left' %]
@@ -77,6 +79,17 @@
 	    [% END %]
 	    <div class="panel-heading clearfix umi-zerro-padding">
 	      [% INCLUDE search/searchby_menu_dropdown.tt %]
+	      [% IF entry.value.mgmnt.is_dn && entry.key.match('People') %]
+	      [% fl_names = entry.value.attrs.givenName.0 _ ' ' _ entry.value.attrs.sn.0 %]
+	      [% END %]
+	      <form role="form" method="POST" action="[% c.uri_for_action('searchby/index') %]">
+		<button type="submit" class="btn btn-link umi-search col-xs-1"
+			title="click to open root object of this account"
+			name="ldap_subtree"
+			value="[% entry.key.split(',').slice(-3, -1).join(',') %]">
+		  <strong class="[% blocked %]">[% fl_names %]</strong>
+		</button>
+	      </form>
 	      <p></p>
 	      <span class="h5 col-xs-offset-1"><b class="[% blocked %]" [% blocked_title %]>
 		[% IF entry.value.mgmnt.is_dn && entry.key.match('People') %]
@@ -128,11 +141,6 @@
 		[% ELSE %]
 		<i title="Service Account Branch" class="fa fa-code-fork fa-lg[% blocked %]"></i>
 		
-		[% END %]
-		[% IF entry.value.mgmnt.is_dn && entry.key.match('People') %]&nbsp;
-		<code class="h4 [% IF entry.value.mgmnt.is_blocked %]bg-danger[% ELSE %]bg-default text-primary[% END %]">
-		  <strong>&nbsp;&nbsp;[% entry.value.attrs.givenName.0 %] [% entry.value.attrs.sn.0 %]&nbsp;&nbsp;</strong>
-		</code>&nbsp;
 		[% END %]
 		[% entry.key.replace(',', ',&nbsp;') %]
 	      </b></span>

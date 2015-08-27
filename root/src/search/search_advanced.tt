@@ -4,3 +4,23 @@
   <h2>Search Advanced <small><em>( advanced search form)</em></small></h2>
 </div>
 [% form.render %]
+
+<script>
+ ;(function() {
+   var $search_history = $("#search_history");
+   var $searchhistory = $('.searchhistory');
+   var $searchaccount = $('.searchaccount');
+   var $base_dn = $("#base_dn");
+   // if no checkbox exist (some other page for example)
+   if ( !$search_history.length ) return;
+   // is checkbox attribute `checked' set?
+   function search_history () {
+     $search_history[0].checked ? $searchhistory.show(300) : $searchhistory.hide(300);
+     $search_history[0].checked ? $searchaccount.hide(300) : $searchaccount.show(300);
+   };
+   // first run hides checkbox related fields
+   search_history();
+   // checkbox click unhides/hides the fields
+   $search_history.on('click', search_history);		
+ })();
+</script>

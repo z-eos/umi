@@ -8,27 +8,120 @@ BEGIN { extends 'UMI::Form::LDAP'; with 'Tools'; }
 
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable' );
 
-has '+item_class' => ( default => 'SearchAdvanced' );
-has '+enctype' => ( default => 'multipart/form-data');
+sub build_form_element_class { [ 'form-horizontal', ] }
+
+sub html_attributes {
+  my ( $self, $field, $type, $attr ) = @_;
+  push @{$attr->{'class'}}, 'required'
+    if $type eq 'label' && $field->required;
+}
+
 has '+action' => ( default => '/searchadvanced/proc' );
 
+has_field 'search_history'
+  => ( type => 'Checkbox',
+       # checkbox_value => '0',
+       label => 'search history',
+       wrapper_class => [ 'checkbox', ],
+       element_wrapper_class => [ 'col-xs-3', 'col-xs-offset-2', 'col-lg-1', ],
+       element_attr => { title => 'When checked, this checkbox causes additional fields to search in history.',}, );
 
-has_field 'display_format' => ( type => 'Select',
-				label => 'Display Format',
-				wrapper_class => [ 'col-md-2' ],
-				options => [{ value => 'list', label => 'list', selected => 'on'},
-					    { value => 'table', label => 'table'},
-					   ],
-			      );
+has_field 'base_dn'
+  => ( label => 'Base DN',
+       label_class => [ 'col-md-2' ],
+       wrapper_class => [ 'searchaccount', ],
+       element_wrapper_class => [ 'col-xs-10', 'col-lg-10', ],
+       element_attr => { placeholder => UMI->config->{ldap_crud_db}, },
+       required => 1 );
 
-has_field 'base_dn' => ( label => 'Base DN',
-			 wrapper_class => [ 'col-md-8' ],
-			 element_attr => { placeholder => UMI->config->{ldap_crud_db}, },
-			 required => 1 );
+has_field 'reqType'
+  => ( type => 'Select',
+       label => 'reqType',
+       label_class => [ 'col-md-2', ],
+       wrapper_class => [ 'searchhistory', ],
+       element_wrapper_class => [ 'col-xs-5', 'col-lg-2', ],
+       options => [{ value => 0, label => '--- cn=umilog search type ---', selected => 'on'},
+		   { value => 'add', label => 'add'},
+		   { value => 'modify', label => 'modify'},
+		   { value => 'delete', label => 'delete'}, ], );
+
+has_field 'reqAuthzID'
+  => ( label => 'Action Requester Dn',
+       label_class => [ 'col-md-2', ],
+       wrapper_class => [ 'searchhistory', ],
+       element_wrapper_class => [ 'col-xs-5', 'col-lg-5', ],
+       element_attr => { placeholder => 'uid=ACTION-REQUESTED-BY,ou=People,dc=' . UMI->config->{ldap_crud_db_log} },	);
+
+has_field 'reqDn'
+  => ( label => 'DN requested',
+       label_class => [ 'col-md-2', ],
+       wrapper_class => [ 'searchhistory', ],
+       element_wrapper_class => [ 'col-xs-5', 'col-lg-5', ],
+       element_attr => { placeholder => 'uid=ACTION-REQUESTED-ON,ou=People,dc=' . UMI->config->{ldap_crud_db} }, );
+
+has_field 'reqMod'
+  => ( type => 'TextArea',
+       label => 'Request Mod',
+       label_class => [ 'col-md-2', ],
+       wrapper_class => [ 'searchhistory', ],
+       element_wrapper_class => [ 'col-xs-10', 'col-lg-10', ],
+       element_attr => { placeholder => '*physicalDeliveryOfficeName:= ou=borg,*' },
+       rows => 1 );
+
+has_field 'reqOld'
+  => ( type => 'TextArea',
+       label => 'Request Old',
+       label_class => [ 'col-md-2', ],
+       wrapper_class => [ 'searchhistory', ],
+       element_wrapper_class => [ 'col-xs-10', 'col-lg-10', ],
+       element_attr => { placeholder => '*mail: ass2kick@borg.startrek.in*' },
+       rows => 1 );
+
+has_field 'reqStart'
+  => ( label => 'Request Start Time',
+       label_class => [ 'col-md-2', ],
+       wrapper_class => [ 'searchhistory', ],
+       element_wrapper_class => [ 'col-xs-5', 'col-lg-2', ],
+       element_attr => { placeholder => '20141104142246.000014Z' }, );
+
+has_field 'reqEnd'
+  => ( label => 'Request End Time',
+       label_class => [ 'col-md-2', ],
+       wrapper_class => [ 'searchhistory', ],
+       element_wrapper_class => [ 'col-xs-5', 'col-lg-2', ],
+       element_attr => { placeholder => '20141104142356.000007Z' }, );
+
+has_field 'search_filter'
+  => ( type => 'TextArea',
+       label => 'Search Filter',
+       label_class => [ 'col-md-2', 'required' ],
+       wrapper_class => [ 'searchaccount', ],
+       element_wrapper_class => [ 'col-xs-10', 'col-lg-10', ],
+       element_attr => { placeholder => '(objectClass=*)' },
+       rows => 1, );
+
+has_field 'show_attrs' => ( label => 'Show Attributes',
+			    label_class => [ 'col-md-2' ],
+			    element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+			    element_attr => { placeholder => 'cn, uid, mail, authorizedService' });
+
+has_field 'order_by' => ( label => 'Order By',
+			  label_class => [ 'col-md-2' ],
+			  wrapper_class => [ 'searchaccount', ],
+			  element_wrapper_class => [ 'col-xs-5', 'col-lg-5', ],
+			  element_attr => { placeholder => 'cn' },
+			);
+
+has_field 'search_results' => ( label => 'Search Results',
+				label_class => [ 'col-md-2' ],
+				element_wrapper_class => [ 'col-xs-2', 'col-lg-1', ],
+				element_attr => { placeholder => '50' },);
 
 has_field 'search_scope' => ( type => 'Select',
 			      label => 'Search Scope',
-			      wrapper_class => [ 'col-md-2' ],
+			      label_class => [ 'col-md-2' ],
+			      wrapper_class => [ 'searchaccount', ],
+			      element_wrapper_class => [ 'col-xs-3', 'col-lg-1', ],
 			      options => [{ value => 'sub', label => 'Sub', selected => 'on'},
 					  { value => 'children', label => 'Children'},
 					  { value => 'one', label => 'One'},
@@ -36,60 +129,16 @@ has_field 'search_scope' => ( type => 'Select',
 					 ],
 			    );
 
-has_field 'search_filter' => ( label => 'Search Filter',
-			       wrapper_class => [ 'col-md-12' ],
-			       element_attr => { placeholder => '(objectClass=*)' },
-			       required => 1 );
+has_field 'aux_reset' => ( type => 'Reset',
+			   wrapper_class => [ 'col-xs-4' ],
+			   element_class => [ 'btn', 'btn-danger', 'btn-block' ],
+			   element_wrapper_class => [ 'col-xs-12', ],
+		         );
 
-has_field 'show_attrs' => ( label => 'Show Attributes',
-			    wrapper_class => [ 'col-md-4' ],
-			    element_attr => { placeholder => 'cn, uid, mail, authorizedService' });
-
-has_field 'order_by' => ( label => 'Order By',
-			  wrapper_class => [ 'col-md-4' ],
-			  element_attr => { placeholder => 'cn' },
-			);
-
-has_field 'search_results' => ( label => 'Search Results',
-				wrapper_class => [ 'col-md-1' ],
-				element_attr => { placeholder => '50' },);
-
-has_field 'reset' => ( type => 'Reset',
-			wrapper_class => [ 'col-md-1' ],
-			element_class => [ 'btn', 'btn-danger', 'btn-block' ],
-		        value => 'Reset' );
-
-has_field 'submit' => ( type => 'Submit',
-			wrapper_class => [ 'col-md-11' ],
-			element_class => [ 'btn', 'btn-success', 'btn-block' ],
-			value => 'Submit' );
-
-has_block 'row1' => ( tag => 'fieldset',
-		      render_list => [ 'base_dn', 'search_scope', 'display_format' ],
-#		      label => '&nbsp;',
-		      class => [ 'row' ]
-		      );
-
-has_block 'row2' => ( tag => 'fieldset',
-		      render_list => [ 'search_filter' ],
-		      # label => '<abbr title="Standard LDAP search filter. Example: (&(sn=Smith)(givenName=David))" class="initialism"><span class="glyphicon glyphicon-filter"></span></abbr>',
-#		      label => '',
-		      class => [ 'row' ]
-		    );
-
-has_block 'row3' => ( tag => 'fieldset',
-		      render_list => [ 'show_attrs', 'order_by', 'search_results' ],
-#		      label => '&nbsp;',
-		      class => [ 'row' ]
-		    );
-
-has_block 'submitit' => ( tag => 'fieldset',
-			  render_list => [ 'reset', 'submit'],
-			  label => '&nbsp;',
-			  class => [ 'row' ]
-			);
-
-sub build_render_list {[ 'row1', 'row2', 'row3', 'submitit' ]}
+has_field 'aux_submit' => ( type => 'Submit',
+			    wrapper_class => [ 'col-md-8' ],
+			    element_class => [ 'btn', 'btn-success', 'btn-block' ],
+			    value => 'Submit' );
 
 sub html_attributes {
   my ( $self, $field, $type, $attr ) = @_;

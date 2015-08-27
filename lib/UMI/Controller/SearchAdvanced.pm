@@ -46,19 +46,42 @@ sub index :Path :Args(0) {
 
 sub proc :Path(proc) :Args(0) {
     my ( $self, $c ) = @_;
+    use Data::Printer use_prototypes => 0;
 
-    if ( $c->check_user_roles('wheel')) {
-      my $params = $c->req->params;
-      use Data::Printer use_prototypes => 0;
+    if ( defined $c->user_exists ) {
+      my ( $params, $ldap_crud, $basedn, $filter, $scope, $sort_order );
+
+      $params = $c->req->params;
+
+      if ( defined $params->{search_history} && $params->{search_history} eq '1' ) {
+	$basedn = 'cn=umilog';
+	$filter = '(&';
+	$filter .= '(reqAuthzID=' . $params->{reqAuthzID} . ')' if $params->{reqAuthzID} ne '';
+	$filter .= '(reqDn=' . $params->{reqDn} . ')' if $params->{reqDn} ne '';
+	$filter .= '(reqEnd=' . $params->{reqEnd} . ')' if $params->{reqEnd} ne '';
+	$filter .= '(reqMod=' . $params->{reqMod} . ')' if $params->{reqMod} ne '';
+	$filter .= '(reqOld=' . $params->{reqOld} . ')' if $params->{reqOld} ne '';
+	$filter .= '(reqStart=' . $params->{reqStart} . ')' if $params->{reqStart} ne '';
+	$filter .= '(reqType=' . $params->{reqType} . ')' if $params->{reqType} ne '';
+	$filter .= ')';
+	$scope = 'sub';
+	$sort_order = 'direct';
+      } else {
+	$basedn = $params->{'base_dn'};
+	$filter = $params->{'search_filter'};
+	$scope = $params->{'search_scope'};
+	$sort_order = 'reverse';
+      }
+
       #p $params;
       my @attrs = split(/,/, $params->{'show_attrs'});
-      my $ldap_crud =
+      $ldap_crud =
 	$c->model('LDAP_CRUD');
       my $mesg = $ldap_crud->search(
 				    {
-				     base => $params->{'base_dn'},
-				     filter => $params->{'search_filter'},
-				     scope => $params->{'search_scope'},
+				     base => $basedn,
+				     filter => $filter,
+				     scope => $scope,
 				     sizelimit => $params->{'search_results'},
 				     attrs => \@attrs,
 				    }
@@ -70,21 +93,28 @@ sub proc :Path(proc) :Args(0) {
 
       # p @entries;
 
-      my ( $ttentries, $attr );
+      my ( $ttentries, $attr, $umilog, $is_blocked );
       foreach (@entries) {
-	$mesg = $ldap_crud->search({
-				    base => $ldap_crud->cfg->{base}->{group},
-				    filter => sprintf('(&(cn=%s)(memberUid=%s))',
-						      $ldap_crud->cfg->{stub}->{group_blocked},
-						      substr( (split /,/, $_->dn)[0], 4 )),
-				   });
-	$return->{error} .= $ldap_crud->err( $mesg )->{html}
-	  if $mesg->is_error();
+	$umilog = UMI->config->{ldap_crud_db_log};
+	if ( $_->dn !~ /$umilog/ ) {
+	  $mesg = $ldap_crud->search({
+				      base => $ldap_crud->cfg->{base}->{group},
+				      filter => sprintf('(&(cn=%s)(memberUid=%s))',
+							$ldap_crud->cfg->{stub}->{group_blocked},
+							substr( (reverse split /,/, $_->dn)[2], 4 )),
+				     });
+	  $return->{error} .= $ldap_crud->err( $mesg )->{html}
+	    if $mesg->is_error();
+	  $is_blocked = $mesg->count;
+	} else {
+	  $is_blocked = 0;
+	}
 	$ttentries->{$_->dn}->{'mgmnt'} =
 	  {
-	   is_blocked => $mesg->count,
+	   is_blocked => $is_blocked,
 	   is_dn => scalar split(',', $_->dn) <= 3 ? 1 : 0,
 	   is_account => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
+	   is_group => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{group}/ ? 1 : 0,
 	   jpegPhoto => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
 	   gitAclProject => $_->exists('gitAclProject') ? 1 : 0,
 	   userPassword => $_->exists('userPassword') ? 1 : 0,
@@ -108,33 +138,31 @@ sub proc :Path(proc) :Args(0) {
 	}
       }
 
-      my $base_dn = $params->{'base_dn'} ne '' ?
-	sprintf('<kbd>%s</kbd>', $params->{'base_dn'}) : '';
-      my $search_filter = $params->{'search_filter'} ne '' ?
-	sprintf('<kbd>%s</kbd>', $params->{'search_filter'}) : '(objectClass=*)';
+      my $base_dn = sprintf('<kbd>%s</kbd>', $basedn);
+      my $search_filter = sprintf('<kbd>%s</kbd>', $filter);
 
-      # suffix array of dn preparation to respect LDAP objects "inheritance"
-      # http://en.wikipedia.org/wiki/Suffix_array
-      my @ttentries_keys = map { scalar reverse } sort map { scalar reverse } keys %{$ttentries};
-      $c->stash(
-		template => 'search/searchby.tt',
-		base_dn => $base_dn,
-		filter => $search_filter,
-		entrieskeys => \@ttentries_keys,
-		entries => $ttentries,
-		services => $ldap_crud->{cfg}->{authorizedService},
-		final_message => $return,
-		form => $self->form,
-	       );
+    # suffix array of dn preparation to respect LDAP objects "inheritance"
+    # http://en.wikipedia.org/wiki/Suffix_array
+    # this one to be used for all except history requests
+    # my @ttentries_keys = map { scalar reverse } sort map { scalar reverse } keys %{$ttentries};
+    # this one to be used for history requests
+    # my @ttentries_keys = sort { lc $a cmp lc $b } keys %{$ttentries};
 
-    } elsif ( defined $c->session->{"auth_uid"} ) {
-      if ( defined $c->session->{'unauthorized'}->{ $c->action } ) {
-	$c->session->{'unauthorized'}->{ $c->action } += 1;
-      } else {
-	$c->session->{'unauthorized'}->{ $c->action } = 1;
-      }
-      $c->stash( 'template' => 'unauthorized.tt',
-		 'unauth_action' => $c->action, );
+    my @ttentries_keys = $sort_order eq 'reverse' ?
+      map { scalar reverse } sort map { scalar reverse } keys %{$ttentries} :
+      sort { lc $a cmp lc $b } keys %{$ttentries};
+
+    $c->stash(
+	      template => 'search/searchby.tt',
+	      base_dn => $base_dn,
+	      filter => $search_filter,
+	      entrieskeys => \@ttentries_keys,
+	      entries => $ttentries,
+	      services => $ldap_crud->{cfg}->{authorizedService},
+	      base_ico => $ldap_crud->{cfg}->{base}->{icon},
+	      final_message => $return,
+	      form => $self->form,
+	     );
     } else {
       $c->stash( template => 'signin.tt', );
     }

@@ -65,6 +65,7 @@
 	</button>
       </form>
     </li>
+    [% IF ! entry.value.mgmnt.is_blocked %]
     <li>
       <button type="button" title="block all accounts (password changed to random ones, ssh key bound to localhost only) of the user with DN: [% entry.key %]" class="btn btn-link"
 	      value="[% entry.key %]"
@@ -75,6 +76,7 @@
 	block
       </button>
     </li>
+    [% END %]
     [% END %]
     <li>
       <button type="button" title="delete object" class="btn btn-link"
@@ -200,12 +202,3 @@
     [% END %]
   </ul>
 </div>
-
-<form role="form" method="POST" action="[% c.uri_for_action('searchby/index') %]">
-  <button type="submit" class="btn btn-link pull-left umi-search"
-	  title="click to open root (management) object of this object"
-	  name="ldap_subtree"
-	  value="[% entry.key.split(',').slice(-3, -1).join(',') %]">
-    <span class="fa fa-star text-primary"></span>
-  </button>
-</form>
