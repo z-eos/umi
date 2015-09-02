@@ -148,9 +148,9 @@
     <li>
       <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 	<button type="submit" title="modify group members" class="btn btn-link"
-		value="[% entry.key %]" name="ldap_modify_member">
+		value="[% entry.key %]" name="ldap_modify_rad_group">
 	  <span class="fa fa-fw fa-group text-info"></span>
-	  member
+	  rad grp
 	</button>
       </form>
     </li>

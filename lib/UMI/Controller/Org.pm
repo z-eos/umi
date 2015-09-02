@@ -39,9 +39,9 @@ new Organization/Office object creation
 sub index :Path :Args(0) {
     my ( $self, $c, $ldap_org_id ) = @_;
     my $params = $c->req->parameters;
-    
+
     $c->stash( template => 'org/org_wrap.tt',
-		 form => $self->form );
+	       form => $self->form );
 
     return unless
       $self->form->process(

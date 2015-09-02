@@ -12,7 +12,7 @@
     <div id="collapseErr" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingErr">
       <div class="panel-body">
 	[% IF form.errors %]
-	<b class="text-danger">Form contains error/s! Check all tabs for fields constraints met, please!</b>
+	<b class="text-danger">Form contains error/s! Check for fields constraints met, please!</b>
 	<ul>
 	  [% FOREACH i IN form.errors.reverse %]
 	  [% IF i != '' %]<li>[% i %]</li>[% END %]

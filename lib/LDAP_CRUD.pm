@@ -1576,6 +1576,7 @@ sub _build_select_radprofile {
   my @rad_profiles;
   my $mesg = $self->search( { base => $self->{cfg}->{base}->{rad_profiles},
 			      attrs => ['cn', 'description' ],
+			      scope => 'one',
 			    } );
   my $err_message = '';
   if ( ! $mesg->count ) {
@@ -1612,6 +1613,7 @@ sub _build_select_radgroup {
   my @rad_groups;
   my $mesg = $self->search( { base => $self->{cfg}->{base}->{rad_groups},
 			      attrs => ['cn', 'description' ],
+			      scope => 'one',
 			    } );
   my $err_message = '';
   if ( ! $mesg->count ) {

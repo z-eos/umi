@@ -8,6 +8,7 @@ use namespace::autoclean;
 BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 
 use UMI::Form::SearchAdvanced;
+use Data::Printer use_prototypes => 0;
 
 has 'form' => ( isa => 'UMI::Form::SearchAdvanced', is => 'rw',
 		lazy => 1, default => sub { UMI::Form::SearchAdvanced->new },
@@ -34,11 +35,19 @@ Catalyst Controller.
 sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
     if ( defined $c->session->{"auth_uid"} ) {
-      $c->stash(
-		template => 'search/search_advanced.tt',
-		form => $self->form,
-		ldap_crud => $c->model('LDAP_CRUD'),
-	       );
+      my $params = $c->req->params;
+
+      $c->stash( template => 'search/search_advanced.tt',
+      		 form => $self->form, );
+
+      return unless
+	$self->form->process(
+			     posted => ($c->req->method eq 'POST'),
+			     params => $params,
+			     ldap_crud => $c->model('LDAP_CRUD'),
+			    );
+
+      # $c->stash( final_message => '' );
     } else {
       $c->stash( template => 'signin.tt', );
     }
@@ -46,24 +55,41 @@ sub index :Path :Args(0) {
 
 sub proc :Path(proc) :Args(0) {
     my ( $self, $c ) = @_;
-    use Data::Printer use_prototypes => 0;
 
     if ( defined $c->user_exists ) {
-      my ( $params, $ldap_crud, $basedn, $filter, $scope, $sort_order );
+      my ( $params, $ldap_crud, $basedn, @filter_arr, $filter, $scope, $sort_order );
 
       $params = $c->req->params;
 
+      $c->stash( template => 'search/search_advanced.tt',
+      		 form => $self->form, );
+      return unless
+	$self->form->process(
+			     posted => ($c->req->method eq 'POST'),
+			     params => $params,
+			     # ldap_crud => $c->model('LDAP_CRUD'),
+			    );
+
+      $c->stash( template => 'search/searchby.tt', );
+
       if ( defined $params->{search_history} && $params->{search_history} eq '1' ) {
 	$basedn = 'cn=umilog';
-	$filter = '(&';
-	$filter .= '(reqAuthzID=' . $params->{reqAuthzID} . ')' if $params->{reqAuthzID} ne '';
-	$filter .= '(reqDn=' . $params->{reqDn} . ')' if $params->{reqDn} ne '';
-	$filter .= '(reqEnd=' . $params->{reqEnd} . ')' if $params->{reqEnd} ne '';
-	$filter .= '(reqMod=' . $params->{reqMod} . ')' if $params->{reqMod} ne '';
-	$filter .= '(reqOld=' . $params->{reqOld} . ')' if $params->{reqOld} ne '';
-	$filter .= '(reqStart=' . $params->{reqStart} . ')' if $params->{reqStart} ne '';
-	$filter .= '(reqType=' . $params->{reqType} . ')' if $params->{reqType} ne '';
-	$filter .= ')';
+	push @filter_arr, '(reqAuthzID=' . $params->{reqAuthzID} . ')' if $params->{reqAuthzID} ne '';
+	push @filter_arr, '(reqDn=' . $params->{reqDn} . ')' if $params->{reqDn} ne '';
+	push @filter_arr, '(reqEnd=' . $params->{reqEnd} . ')' if $params->{reqEnd} ne '';
+	push @filter_arr, '(reqResult=' . $params->{reqResult} . ')' if $params->{reqResult} ne '';
+	push @filter_arr, '(reqMessage=' . $params->{reqMessage} . ')' if $params->{reqMessage} ne '';
+	push @filter_arr, '(reqMod=' . $params->{reqMod} . ')' if $params->{reqMod} ne '';
+	push @filter_arr, '(reqOld=' . $params->{reqOld} . ')' if $params->{reqOld} ne '';
+	push @filter_arr, '(reqStart=' . $params->{reqStart} . ')' if $params->{reqStart} ne '';
+	push @filter_arr, '(reqType=' . $params->{reqType} . ')' if $params->{reqType} ne '';
+	if ( $#filter_arr > 0 ) {
+	  $filter = '(&' . join('', @filter_arr) . ')';
+	} elsif ( $#filter_arr == 0 ) {
+	  $filter = $filter_arr[0];
+	} else {
+	  $filter = '(abc stub)';
+	}
 	$scope = 'sub';
 	$sort_order = 'direct';
       } else {
