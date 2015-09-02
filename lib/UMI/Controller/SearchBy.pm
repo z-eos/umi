@@ -998,7 +998,6 @@ sub mod_groups {
   push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
     if ! $mesg->count;
 
-  # all possible groups
   my @groups_all = $mesg->sorted('cn');
   foreach ( @groups_all ) {
     if ( $arg->{type} eq 'posixGroup' ) {
@@ -1016,22 +1015,21 @@ sub mod_groups {
     }
   }
 
+  # after submit
   if ( $arg->{is_submit} ) {
     my @groups_chg;
     foreach (keys %{$arg->{groups_all}}) {
+      # submited data equals to the data from DB - nothing to do
       next if $arg->{groups_old}->{$_} && $arg->{groups_sel}->{$_};
       if (( $arg->{groups_old}->{$_} && ! $arg->{groups_sel}->{$_} ) ||
 	  ( $arg->{groups_old}->{$_} && ref($arg->{groups}) ne 'ARRAY' )) {
-	# obj is in group but group is not selected in form
+	# all submited data absent or lacks of DB data - delete
 	push @groups_chg, 'delete' => $arg->{type} eq 'posixGroup' ?
-	  [ 'memberUid' => $arg->{uid} ] :
-	  [ 'member' => $arg->{mod_groups_dn} ];
-      } elsif ( ! $arg->{groups_old}->{$_} &&
-		$arg->{groups_sel}->{$_} ) {
-	# obj doesn't belong to the group and the group is selected
+	  [ 'memberUid' => $arg->{uid} ] : [ 'member' => $arg->{mod_groups_dn} ];
+      } elsif ( ! $arg->{groups_old}->{$_} && $arg->{groups_sel}->{$_} ) {
+	# DB data lacks of submited data - add
 	push @groups_chg, 'add' => $arg->{type} eq 'posixGroup' ?
-	  [ 'memberUid' => $arg->{uid} ] :
-	  [ 'member' => $arg->{mod_groups_dn} ];
+	  [ 'memberUid' => $arg->{uid} ] : [ 'member' => $arg->{mod_groups_dn} ];
       }
       if ( $#groups_chg >= 0) {
 	$mesg = $ldap_crud
