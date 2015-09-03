@@ -1560,6 +1560,41 @@ sub _build_select_associateddomains {
   return \@domains;
 }
 
+=head2 select_group
+
+options builder for select element of groups
+
+=cut
+
+has 'select_group' => ( traits => ['Array'],
+			is => 'ro', isa => 'ArrayRef', required => 0, lazy => 1,
+			builder => '_build_select_group',
+	     );
+
+sub _build_select_group {
+  my $self = shift;
+  my @groups;
+  my $mesg = $self->search( { base => $self->{cfg}->{base}->{group},
+			      attrs => ['cn', 'description' ],
+			      scope => 'one', } );
+  my $err_message = '';
+  $err_message = '<div class="alert alert-danger">' .
+    '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
+    $self->err($mesg) . '</ul></div>'
+    if ! $mesg->count;
+
+  my @entries = $mesg->sorted('cn');
+  foreach my $entry ( @entries ) {
+    push @groups, { value => substr( (split /,/, $entry->dn)[0], 3),
+			label => sprintf('%s%s',
+					 $entry->get_value('cn'),
+					 $entry->exists('description') ? ' --- ' . $entry->get_value('description') : ''),
+		      };
+  }
+  return \@groups;
+}
+
+
 =head2 select_radprofile
 
 options builder for select element of rad-profiles

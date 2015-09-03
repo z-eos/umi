@@ -327,27 +327,68 @@ sub proc :Path(proc) :Args(0) {
     } elsif ( defined $params->{'ldap_modify_group'} &&
 	      $params->{'ldap_modify_group'} ne '' ) {
 
-      # in general preselected options has to be fed via field value
-      # $params->{groups} = [ qw( group0 group1 ... groupN) ];
-      #
-      # no submit yet, it is first run
-      if ( ! defined $params->{groups} ) {
-	my ( @groups, $return );
-	my $ldap_crud = $c->model('LDAP_CRUD');
+# old #       # in general preselected options has to be fed via field value
+# old #       # $params->{groups} = [ qw( group0 group1 ... groupN) ];
+# old #       #
+# old #       # no submit yet, it is first run
+# old #       if ( ! defined $params->{groups} ) {
+# old # 	my ( @groups, $return );
+# old # 	my $ldap_crud = $c->model('LDAP_CRUD');
+# old # 	my $mesg = $ldap_crud->search( { base => $ldap_crud->{cfg}->{base}->{group},
+# old # 					 filter => sprintf('memberUid=%s',
+# old # 							   substr((split /,/, $params->{ldap_modify_group})[0], 4)),
+# old # 					 attrs => ['cn'], } );
+# old # 
+# old # 	if ( $mesg->code != 0 ) {
+# old # 	  push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html};
+# old # 	}
+# old # 
+# old # 	my @groups_usr = $mesg->sorted('cn');
+# old # 
+# old # 	foreach ( @groups_usr ) {
+# old # 	  push @{$params->{groups}}, $_->get_value('cn');
+# old # 	}
+# old #       }
+# old # 
+# old #       $c->stash( template => 'user/user_mod_group.tt',
+# old # 		 form => $self->form_mod_groups,
+# old # 		 ldap_modify_group => $params->{'ldap_modify_group'}, );
+# old # 
+# old #       return unless $self->form_mod_groups
+# old #       	->process( posted => ($c->req->method eq 'POST'),
+# old # 		   params => $params,
+# old # 		   ldap_crud => $c->model('LDAP_CRUD'), );
+# old # 
+# old #       $c->stash( final_message => $self
+# old # 		 ->mod_groups( $c->model('LDAP_CRUD'),
+# old # 			       { mod_groups_dn => $params->{ldap_modify_group},
+# old # 				 groups => $params->{groups}, } ), );
+
+      my $groups;
+      if ( defined $params->{groups} ) {
+	if ( ref($params->{groups}) eq 'ARRAY' ) {
+	  $groups = $params->{groups};
+	} else {
+	  $groups = [ $params->{groups} ];
+	}
+      } else {
+	$groups = '';
+      }
+
+      my $ldap_crud = $c->model('LDAP_CRUD');
+
+      if ( ! defined $params->{groups} && ! defined $params->{aux_submit} ) {
+	my ( $return, $base, $filter, $dn );
 	my $mesg = $ldap_crud->search( { base => $ldap_crud->{cfg}->{base}->{group},
 					 filter => sprintf('memberUid=%s',
-							   substr((split /,/, $params->{ldap_modify_group})[0], 4)),
+							   substr( (split /,/, $params->{'ldap_modify_group'})[0], 4)),
 					 attrs => ['cn'], } );
-
-	if ( $mesg->code != 0 ) {
-	  push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html};
-	}
+	push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
+	  if $mesg->code != 0;
 
 	my @groups_usr = $mesg->sorted('cn');
-
-	foreach ( @groups_usr ) {
-	  push @{$params->{groups}}, $_->get_value('cn');
-	}
+	foreach ( @groups_usr ) { push @{$params->{groups}}, substr( (split /,/, $_->dn)[0], 3); }
+	# $params->{groups} = undef;
       }
 
       $c->stash( template => 'user/user_mod_group.tt',
@@ -357,12 +398,16 @@ sub proc :Path(proc) :Args(0) {
       return unless $self->form_mod_groups
       	->process( posted => ($c->req->method eq 'POST'),
 		   params => $params,
-		   ldap_crud => $c->model('LDAP_CRUD'), );
+		   ldap_crud => $ldap_crud );
 
       $c->stash( final_message => $self
-		 ->mod_groups( $c->model('LDAP_CRUD'),
+		 ->mod_groups( $ldap_crud,
 			       { mod_groups_dn => $params->{ldap_modify_group},
-				 groups => $params->{groups}, } ), );
+				 base => $ldap_crud->{cfg}->{base}->{group},
+				 groups => $groups,
+				 is_submit => defined $params->{aux_submit} &&
+				 $params->{aux_submit} eq 'Submit' ? 1 : 0,
+				 type => 'posixGroup', } ), );
 
 #=====================================================================
 # Modify RADIUS Groups
@@ -1005,7 +1050,8 @@ sub mod_groups {
       $arg->{groups_sel}->{$_->get_value('cn')} = 0
 	if ! defined $arg->{groups_sel}->{$_->get_value('cn')};
       $arg->{groups_old}->{$_->get_value('cn')} =
-	defined $g->{$_->get_value('cn')} ? 1 : 0;
+	# defined $g->{sprintf('cn=%s,%s',$_->get_value('cn'),$ldap_crud->{cfg}->{base}->{group})} ?
+	defined $g->{$_->dn} ? 1 : 0;
     } else {
       $arg->{groups_all}->{$_->dn} = 0;
       $arg->{groups_sel}->{$_->dn} = 0
@@ -1015,6 +1061,7 @@ sub mod_groups {
     }
   }
 
+  # p $arg;
   # after submit
   if ( $arg->{is_submit} ) {
     my @groups_chg;
@@ -1031,6 +1078,7 @@ sub mod_groups {
 	push @groups_chg, 'add' => $arg->{type} eq 'posixGroup' ?
 	  [ 'memberUid' => $arg->{uid} ] : [ 'member' => $arg->{mod_groups_dn} ];
       }
+      # p [$_, @groups_chg];
       if ( $#groups_chg >= 0) {
 	$mesg = $ldap_crud
 	  ->modify( $arg->{type} eq 'posixGroup' ? sprintf('cn=%s,%s', $_, $arg->{base}) : $_,
@@ -1044,13 +1092,10 @@ sub mod_groups {
 		    $groups_chg[1][1],
 		    $_);
 	}
-	p [$_, @groups_chg];
 	$#groups_chg = -1;
       }
     }
   }
-  # }
-  p $arg;
   return $return;
 }
 
