@@ -727,10 +727,11 @@ sub create_account_branch_leaf {
       authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
       userPassword => $arg->{password}->{$arg->{service}}->{clear},
       description => uc($arg->{service}) . ': ' . $arg->{'login'};
-    
-    push @{$authorizedService},
-      radiusgroupname => $arg->{radiusgroupname}
-      if $arg->{radiusgroupname} ne '';
+
+    # we decided to not to put radiusGroupName to the obj
+    # push @{$authorizedService},
+    #   radiusgroupname => $arg->{radiusgroupname}
+    #   if $arg->{radiusgroupname} ne '';
     push @{$authorizedService},
       radiusprofiledn => $arg->{radiusprofiledn}
       if $arg->{radiusprofiledn} ne '';
@@ -786,10 +787,8 @@ sub create_account_branch_leaf {
   } elsif ( $arg->{service} eq 'ovpn' ) {
     $arg->{dn} = 'cn=' . substr($arg->{userCertificate}->{filename},0,-4) . ',' . $arg->{basedn};
     $arg->{cert_info} =
-      $self->cert_info({
-			cert => $self->file2var($arg->{userCertificate}->{'tempname'}, $return),
-			ts => "%Y%m%d%H%M%S",
-		       });
+      $self->cert_info({ cert => $self->file2var($arg->{userCertificate}->{'tempname'}, $return),
+			 ts => "%Y%m%d%H%M%S", });
     $authorizedService = [
 			  cn => substr($arg->{userCertificate}->{filename},0,-4),
 			  associatedDomain => $arg->{associatedDomain},

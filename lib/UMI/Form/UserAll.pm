@@ -838,6 +838,7 @@ sub validate {
 				  '<b class="visible-lg-inline">&nbsp;Pass&nbsp;</b>' .
 				  'userCertificate is mandatory!<br>');
 	  }
+	  $logintmp = 'rad-' . $element->field('login')->value;
 	}
 	if (( ! defined $element->field('radiusgroupname')->value ||
 	      $element->field('radiusgroupname')->value eq '' ) &&
@@ -846,11 +847,30 @@ sub validate {
 	  $element->field('radiusgroupname')->add_error('RADIUS group, profile or both are to be set!');
 	  $element->field('radiusprofiledn')->add_error('RADIUS profile, group or both are to be set!');
 	}
+	if ( defined $element->field('radiusgroupname')->value &&
+	     $element->field('radiusgroupname')->value ne '' ) {
+	  $mesg =
+	    $ldap_crud
+	    ->search({ base => $element->field('radiusgroupname')->value,
+		       filter => sprintf('member=uid=%s,authorizedService=%s@%s,%s',
+					 $logintmp,
+					 $element->field('authorizedservice')->value,
+					 $element->field('associateddomain')->value,
+					 $self->add_svc_acc)
+		     });
+	  $element->field('radiusgroupname')
+	    ->add_error(sprintf('<span class="mono">%s</span> already is in this RADIUS group.<br>This service object <span class="mono">%s</span> either was deleted but not removed from, or is still the member of the group.',
+				$logintmp,
+				sprintf('uid=%s,authorizedService=%s@%s,%s',
+					$logintmp,
+					$element->field('authorizedservice')->value,
+					$element->field('associateddomain')->value,
+					$self->add_svc_acc)))
+	    if $mesg->count;
+	}
       }
       #---[ 802.1x ]------------------------------------------------
 
-
-      
       # prepare to know if login+service+fqdn is uniq?
       if ( ! $i ) {   # && defined $element->field('login')->value ) {
 	$elementcmp
