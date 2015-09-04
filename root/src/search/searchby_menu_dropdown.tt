@@ -15,11 +15,13 @@
   <ul class="dropdown-menu dropdown-menu-left bg-primary"
       aria-labelledby="dropdownMenuActions"
       role="menu">
+    [% # data-order values are defined in root/lib/config/searchby_menu %]
     [% IF entry.value.mgmnt.is_dn && entry.value.mgmnt.is_account %]
     <li>
       <form role="form" method="POST" action="[% c.uri_for_action('searchby/user_preferences') %]">
 	<button type="submit" title="add service account" class="btn btn-link"
-		value="[% entry.key %]" data-order="10"
+		value="[% entry.key %]"
+		data-order="[% site.searchby.menu.order.user_preferences %]"
 		name="user_preferences">
 	  <span class="fa fa-fw fa-list-alt text-info"></span>
 	  user prefs
@@ -28,7 +30,8 @@
     </li>
     <li>
       <button type="button" title="account global management page" class="btn btn-link disabled"
-	      value="[% entry.key %]" data-order="110"
+	      value="[% entry.key %]"
+	      data-order="[% site.searchby.menu.order.accmgmnt %]"
 	      name="accmgmnt"
 	      data-toggle="modal"
 	      data-target="#accmgmntModal[% loop.index %]">
@@ -39,7 +42,8 @@
     <!-- <li>
 	    <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 	    <button type="submit" title="add new service account" class="btn btn-link"
-	    value="[% entry.key %]" data-order="20"
+	    value="[% entry.key %]"
+	    data-order="20"
 	    name="add_svc_acc">
 	    <span class="fa fa-fw fa-plus-circle text-primary"></span>
 	    new service account
@@ -48,8 +52,10 @@
 	    </li> -->
     <li>
       <form role="form" method="POST" action="[% c.uri_for_action('userall/index') %]">
-	<button type="submit" title="add new service account" class="btn btn-link"
-		value="[% entry.key %]" data-order="20"
+	<button type="submit" title="add new service account"
+		class="btn btn-link"
+		value="[% entry.key %]"
+		data-order="[% site.searchby.menu.order.add_svc_acc %]"
 		name="add_svc_acc">
 	  <span class="fa fa-fw fa-plus-circle text-danger"></span>
 	  new service account (alt)
@@ -59,7 +65,9 @@
     <li>
       <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 	<button type="submit" title="modify group" class="btn btn-link"
-		value="[% entry.key %]" data-order="90" name="ldap_modify_group">
+		value="[% entry.key %]"
+		data-order="[% site.searchby.menu.order.ldap_modify_group %]"
+		name="ldap_modify_group">
 	  <span class="fa fa-fw fa-group text-info"></span>
 	  group
 	</button>
@@ -69,7 +77,8 @@
     <li>
       <button type="button" title="block all accounts (password changed to random ones, ssh key bound to localhost only) of the user with DN: [% entry.key %]" class="btn btn-link"
 	      value="[% entry.key %]"
-	      name="user_block" data-order="19"
+	      name="user_block"
+	      data-order="[% site.searchby.menu.order.user_block %]"
 	      data-toggle="modal"
 	      data-target="#modal_block[% zufix %]">
 	<span class="fa fa-fw fa-ban text-danger"></span>
@@ -81,7 +90,8 @@
     <li>
       <button type="button" title="delete object" class="btn btn-link"
 	      value="[% entry.key %]"
-	      name="ldap_delete" data-order="50"
+	      name="ldap_delete"
+	      data-order="[% site.searchby.menu.order.ldap_delete %]"
 	      data-toggle="modal"
 	      data-target="#modal_delete[% zufix %]">
 	<span class="fa fa-fw fa-trash text-danger"></span>
@@ -93,7 +103,8 @@
       <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 	<button type="button" title="reassign to other root account (move this object to another root account)"
 		class="btn btn-link" value="[% entry.key %]"
-		name="chg_acc" data-order="80"
+		name="chg_acc"
+		data-order="[% site.searchby.menu.order.chg_acc %]"
 		data-toggle="modal"
 		data-target="#reassignModal[% loop.index %]">
 	  <span class="fa fa-fw fa-exchange text-danger"></span>
@@ -105,7 +116,8 @@
     <li>
       <button type="button" title="export LDIF of the object"
 	      class="btn btn-link"
-	      value="[% entry.key %]" data-order="70"
+	      value="[% entry.key %]"
+	      data-order="[% site.searchby.menu.order.ldap_ldif %]"
 	      name="ldap_ldif"
 	      data-toggle="modal"
 	      data-target="#ldifModal[% loop.index %]">
@@ -116,7 +128,8 @@
     <li>
       <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 	<button type="submit" title="edit object" class="btn btn-link"
-		value="[% entry.key %]" data-order="100"
+		value="[% entry.key %]"
+		data-order="[% site.searchby.menu.order.ldap_modify %]"
 		name="ldap_modify">
 	  <span class="fa fa-fw fa-pencil text-warning"></span>
 	  edit (all)
@@ -126,7 +139,8 @@
     <li>
       <form role="form" method="POST" action="[% c.uri_for_action('searchby/index') %]">
 	<button type="submit" title="edit object" class="btn btn-link"
-		value="[% entry.key %]" data-order="100"
+		value="[% entry.key %]"
+		data-order="[% site.searchby.menu.order.ldap_history %]"
 		name="ldap_history">
 	  <span class="fa fa-fw fa-history text-info"></span>
 	  history
@@ -137,7 +151,9 @@
     <li>
       <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 	<button type="submit" title="modify group members" class="btn btn-link"
-		value="[% entry.key %]" name="ldap_modify_memberUid">
+		value="[% entry.key %]"
+		data-order="[% site.searchby.menu.order.ldap_modify_memberUid %]"
+		name="ldap_modify_memberUid">
 	  <span class="fa fa-fw fa-group text-info"></span>
 	  members
 	</button>
@@ -148,9 +164,11 @@
     <li>
       <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 	<button type="submit" title="modify group members" class="btn btn-link"
-		value="[% entry.key %]" name="ldap_modify_rad_group">
+		value="[% entry.key %]"
+		data-order="[% site.searchby.menu.order.ldap_modify_rad_group %]"
+		name="ldap_modify_rad_group">
 	  <span class="fa fa-fw fa-group text-info"></span>
-	  rad grp
+	  RADIUS group
 	</button>
       </form>
     </li>
@@ -159,7 +177,9 @@
     <li>
       <form role="form" method="POST" action="[% c.uri_for_action('searchby/modify_userpassword') %]">
 	<button type="submit" title="modify password" class="btn btn-link"
-		value="[% entry.key %]" data-order="30" name="ldap_modify_password" tabindex="1">
+		value="[% entry.key %]"
+		data-order="[% site.searchby.menu.order.ldap_modify_password %]"
+		name="ldap_modify_password" tabindex="1">
 	  <span class="fa fa-fw fa-user-secret text-warning"></span>
 	  password
 	</button>
@@ -170,7 +190,9 @@
     <li>
       <form role="form" method="POST" action="[% c.uri_for_action('searchby/dhcp_add') %]">
 	<button type="submit" title="add DHCP (MAC to IP binding)" class="btn btn-link"
-		value="[% entry.key %]" data-order="40" name="ldap_add_dhcp">
+		value="[% entry.key %]"
+		data-order="[% site.searchby.menu.order.ldap_add_dhcp %]"
+		name="ldap_add_dhcp">
 	  <span class="fa fa-fw fa-sitemap text-info"></span>
 	  DHCP (IP to MAC binding)
 	</button>
@@ -181,7 +203,9 @@
     <li>
       <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 	<button type="submit" title="modify jpegPhoto" class="btn btn-link"
-		value="[% entry.key %]" data-order="60" name="ldap_modify_jpegphoto">
+		value="[% entry.key %]"
+		data-order="[% site.searchby.menu.order.ldap_modify_jpegphoto %]"
+		name="ldap_modify_jpegphoto">
 	  <span class="fa fa-fw fa-image text-warning"></span>
 	  image
 	</button>
@@ -193,7 +217,9 @@
     <li>
       <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 	<button type="submit" title="reorder gitAcl" class="btn btn-link"
-		value="[% entry.key %]" data-order="120" name="ldap_gitacl_reorder">
+		value="[% entry.key %]"
+		data-order="[% site.searchby.menu.order.ldap_gitacl_reorder %]"
+		name="ldap_gitacl_reorder">
 	  <span class="fa fa-fw fa-sort text-warning"></span>
 	  reorder
 	</button>

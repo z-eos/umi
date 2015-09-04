@@ -1009,14 +1009,21 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
 
 =head1 mod_groups
 
-modify user's groups method
+modify groups object can/belong to method
+
+on input it expects hash:
+    obj_dn - DN of the object to manage group membership of
+    groups - select `groups' passed from from
+    base   - base of the group (RADIUS, general, e.t.c.)
+    type   - posixGroup or groupOfNames
+    is_submit - is it first run or after submit event
 
 =cut
 
 
 sub mod_groups {
   my ( $self, $ldap_crud, $args ) = @_;
-  my $arg = { mod_groups_dn => $args->{mod_groups_dn},
+  my $arg = { obj_dn => $args->{mod_groups_dn},
 	      groups => $args->{groups},
 	      base => defined $args->{base} ? $args->{base} : $ldap_crud->{cfg}->{base}->{group},
 	      type => defined $args->{type} ? $args->{type} : 'posixGroup',
@@ -1030,7 +1037,7 @@ sub mod_groups {
   my $mesg = $ldap_crud->search( { base => $arg->{base},
 				   filter => $arg->{type} eq 'posixGroup' ?
 				   'memberUid=' . $arg->{uid} :
-				   'member=' . $arg->{mod_groups_dn},
+				   'member=' . $arg->{obj_dn},
 				   attrs => ['cn'], } );
   push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
     if $mesg->code ne '0';
@@ -1072,11 +1079,11 @@ sub mod_groups {
 	  ( $arg->{groups_old}->{$_} && ref($arg->{groups}) ne 'ARRAY' )) {
 	# all submited data absent or lacks of DB data - delete
 	push @groups_chg, 'delete' => $arg->{type} eq 'posixGroup' ?
-	  [ 'memberUid' => $arg->{uid} ] : [ 'member' => $arg->{mod_groups_dn} ];
+	  [ 'memberUid' => $arg->{uid} ] : [ 'member' => $arg->{obj_dn} ];
       } elsif ( ! $arg->{groups_old}->{$_} && $arg->{groups_sel}->{$_} ) {
 	# DB data lacks of submited data - add
 	push @groups_chg, 'add' => $arg->{type} eq 'posixGroup' ?
-	  [ 'memberUid' => $arg->{uid} ] : [ 'member' => $arg->{mod_groups_dn} ];
+	  [ 'memberUid' => $arg->{uid} ] : [ 'member' => $arg->{obj_dn} ];
       }
       # p [$_, @groups_chg];
       if ( $#groups_chg >= 0) {
