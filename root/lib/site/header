@@ -165,6 +165,12 @@
 	      [% menu_item = "btn btn-block btn-xs umi-text-left btn-" %]
 	      [% color = "success" %]
 
+	      <li>
+		<a href="[% c.uri_for('/searchadvanced') %]" tabindex="2">
+		  <span class="[% icon_class %] fa-search-plus">&nbsp;advanced search</span>
+		</a>
+	      </li>
+
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
 			value="1" tabindex="15"
@@ -254,11 +260,6 @@
 
 	      [% color = "warning" %]
 
-	      <li>
-		<a href="[% c.uri_for('/searchadvanced') %]" tabindex="26">
-		  <span class="[% icon_class %] fa-search-plus">&nbsp;advanced search</span>
-		</a>
-	      </li>
 	      <li>
 		<a href="[% c.uri_for('/searchadvanced') %]" tabindex="27">
 		  <span class="[% icon_class %] fa-medkit">&nbsp;audit</span>
