@@ -1038,6 +1038,7 @@ sub mod_groups {
 				   filter => $arg->{type} eq 'posixGroup' ?
 				   'memberUid=' . $arg->{uid} :
 				   'member=' . $arg->{obj_dn},
+				   sizelimit => 0,
 				   attrs => ['cn'], } );
   push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
     if $mesg->code ne '0';
@@ -1046,6 +1047,7 @@ sub mod_groups {
 
   $mesg = $ldap_crud->search( { base => $arg->{base},
 				scope => 'one',
+				sizelimit => 0,
 				attrs => ['cn'], } );
   push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
     if ! $mesg->count;
