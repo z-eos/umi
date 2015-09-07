@@ -73,7 +73,7 @@ sub proc :Path(proc) :Args(0) {
       $c->stash( template => 'search/searchby.tt', );
 
       if ( defined $params->{search_history} && $params->{search_history} eq '1' ) {
-	$basedn = 'cn=umilog';
+	$basedn = UMI->config->{ldap_crud_db_log};
 	push @filter_arr, '(reqAuthzID=' . $params->{reqAuthzID} . ')' if $params->{reqAuthzID} ne '';
 	push @filter_arr, '(reqDn=' . $params->{reqDn} . ')' if $params->{reqDn} ne '';
 	push @filter_arr, '(reqEnd=' . $params->{reqEnd} . ')' if $params->{reqEnd} ne '';
