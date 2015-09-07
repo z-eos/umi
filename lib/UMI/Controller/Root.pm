@@ -412,8 +412,13 @@ Attempt to render a view, if needed.
 =cut
 
 sub end : ActionClass('RenderView') {
-  # my ( $self, $c ) = @_;
-
+  my ( $self, $c ) = @_;
+  my @rep = $c->stats->report;
+  p my $stats = { debug => UMI->config->{debug}->{level},
+		  elapsed => $c->stats->elapsed,
+		  report => \@rep };
+  $c->stash( stats => $stats );
+  
   # if ( $c->error and $c->error->[-1] eq "access denied" ) {
   #   $c->error(0); # clear the error
   #   # access denied

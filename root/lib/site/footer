@@ -53,6 +53,8 @@
   [% END %]
 </div>
 
+[% INCLUDE stat.tt %]
+
 <script src="/static/js/bootstrap.min.js"></script>
 <script src="/static/js/umi-header.js"></script>
 

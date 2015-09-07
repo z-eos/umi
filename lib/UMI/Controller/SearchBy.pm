@@ -1011,7 +1011,7 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
 
 modify groups object can/belong to method
 
-on input it expects hash:
+on input it expects hash with:
     obj_dn - DN of the object to manage group membership of
     groups - select `groups' passed from from
     base   - base of the group (RADIUS, general, e.t.c.)
