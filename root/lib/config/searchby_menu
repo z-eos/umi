@@ -1,0 +1,21 @@
+[%
+   site.searchby.menu.order = {
+     user_preferences = "10"
+     add_svc_acc = "20"
+     ldap_modify_group = "90"
+     user_block = "19"
+     ldap_delete = "50   "
+     chg_acc = "80	"
+     ldap_ldif = "90"
+     ldap_modify = "89"
+     ldap_modify_memberUid = ""
+     ldap_modify_rad_group = "75"
+     ldap_modify_password = "30"
+     ldap_add_dhcp = "40"
+     ldap_modify_jpegphoto = "60"
+     ldap_history = "100"
+     accmgmnt = "110"
+     ldap_gitacl_reorder = "120"
+     accmgmnt = "150"
+   }
+-%]
