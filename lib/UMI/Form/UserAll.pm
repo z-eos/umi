@@ -389,7 +389,7 @@ has_field 'loginless_ssh.key'
        label => 'SSH Pub Key',
        label_class => [ 'col-xs-2', 'required', ],
        element_wrapper_class => [ 'col-xs-10', 'col-lg-8', ],
-       element_class => [ 'input-sm', ],
+       element_class => [ 'input-sm', 'mono', ],
        element_attr => { placeholder => 'Paste SSH key',
 			 'data-name' => 'key',
 			 'data-group' => 'loginless_ssh', },

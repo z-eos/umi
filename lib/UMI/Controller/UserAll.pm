@@ -651,7 +651,7 @@ sub create_account_branch_leaf {
 			$arg->{associatedDomain});
   $arg->{dn} = sprintf('uid=%s,%s', $arg->{uid}, $arg->{basedn});
 
-  my ($authorizedService, $sshkey);
+  my ($authorizedService, $sshkey, $authorizedService_add, $jpegPhoto_file, $sshPublicKey );
 
   if ( $arg->{service} eq 'ovpn' ||
        $arg->{service} eq 'ssh' ||
@@ -677,7 +677,6 @@ sub create_account_branch_leaf {
 			 ];
   }
 
-  my ($authorizedService_add, $jpegPhoto_file);
   #=== SERVICE: mail =================================================
   if ( $arg->{service} eq 'mail') {
     push @{$authorizedService},
@@ -768,7 +767,6 @@ sub create_account_branch_leaf {
     #   p $sshkey;
     # } else {
     # }
-    my $sshPublicKey;
     if ( ref($arg->{sshpublickey}) eq 'ARRAY' ) {
       foreach ( @{$arg->{sshpublickey}} ) {
 	push @{$sshPublicKey}, $_;
@@ -820,48 +818,52 @@ sub create_account_branch_leaf {
 			 ];
   }
 
-  # p $arg->{dn};
-  # p $authorizedService;
-
-  my $mesg =
-    $ldap_crud->add(
-    		    $arg->{dn},
-    		    $authorizedService,
-    		   );
-  if ( $mesg ) {
-    push @{$return->{error}},
-      sprintf('Error during %s account creation occured: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s',
-	      uc($arg->{service}),
-	      $mesg->{html},
-	      $mesg->{srv},
-	      $mesg->{text});
+  p $arg->{dn};
+  p $authorizedService;
+  
+  my $mesg;
+  if ( $arg->{service} eq 'ssh' ) {
+    # for an existent SSH object we have to modify rather than add
+    $if_exist = $ldap_crud->search( { base => $arg->{dn}, scope => 'base', } );
+    if ( $if_exist->count ) {
+      $mesg = $ldap_crud->modify( $arg->{dn},
+				  [ add => [ sshPublicKey => $sshPublicKey, ], ], );
+      if ( $mesg ) {
+	push @{$return->{error}},
+	  sprintf('Error during %s service modification: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s',
+		  $arg->{service}, $mesg->{html}, $mesg->{srv}, $mesg->{text});
+      }
+    }
   } else {
-    push @{$return->{success}},
-      sprintf('<i class="%s fa-fw"></i>&nbsp;<em>%s account login:</em> &laquo;<strong class="text-success">%s</strong>&raquo; <em>password:</em> &laquo;<strong class="text-success mono">%s</strong>&raquo;',
-	      $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{icon},
-	      $arg->{service},
-	      (split(/=/,(split(/,/,$arg->{dn}))[0]))[1], # taking RDN value
-	      $arg->{password}->{$arg->{service}}->{'clear'});
+    # for nonexistent SSH object and all others
+    $mesg = $ldap_crud->add( $arg->{dn}, $authorizedService, );
+    if ( $mesg ) {
+      push @{$return->{error}},
+	sprintf('Error during %s account creation occured: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s',
+		uc($arg->{service}), $mesg->{html}, $mesg->{srv}, $mesg->{text});
+    } else {
+      push @{$return->{success}},
+	sprintf('<i class="%s fa-fw"></i>&nbsp;<em>%s account login:</em> &laquo;<strong class="text-success">%s</strong>&raquo; <em>password:</em> &laquo;<strong class="text-success mono">%s</strong>&raquo;',
+		$ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{icon},
+		$arg->{service},
+		(split(/=/,(split(/,/,$arg->{dn}))[0]))[1], # taking RDN value
+		$arg->{password}->{$arg->{service}}->{'clear'});
 
 
-    ### !!! RADIUS group modify with new member add if 802.1x
-    if ( $arg->{service} eq '802.1x-mac' ||
-	 $arg->{service} eq '802.1x-eap-tls' &&
-	 defined $arg->{radiusgroupname} &&
-	 $arg->{radiusgroupname} ne '' ) {
-      $if_exist = $ldap_crud->search( { base => $arg->{radiusgroupname},
-					   scope => 'base',
-					   filter => '(' . $arg->{dn} . ')', } );
-      if ( ! $if_exist->count ) {
-	$mesg = $ldap_crud->modify( $arg->{radiusgroupname},
-				    [ add => [ member => $arg->{dn}, ], ], );
-	if ( $mesg ) {
-	  push @{$return->{error}},
-	    sprintf('Error during %s group modification: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s',
-		    $arg->{radiusgroupname},
-		    $mesg->{html},
-		    $mesg->{srv},
-		    $mesg->{text});
+      ### !!! RADIUS group modify with new member add if 802.1x
+      if ( $arg->{service} eq '802.1x-mac' || $arg->{service} eq '802.1x-eap-tls' &&
+	   defined $arg->{radiusgroupname} && $arg->{radiusgroupname} ne '' ) {
+	$if_exist = $ldap_crud->search( { base => $arg->{radiusgroupname},
+					  scope => 'base',
+					  filter => '(' . $arg->{dn} . ')', } );
+	if ( ! $if_exist->count ) {
+	  $mesg = $ldap_crud->modify( $arg->{radiusgroupname},
+				      [ add => [ member => $arg->{dn}, ], ], );
+	  if ( $mesg ) {
+	    push @{$return->{error}},
+	      sprintf('Error during %s group modification: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s',
+		      $arg->{radiusgroupname}, $mesg->{html}, $mesg->{srv}, $mesg->{text});
+	  }
 	}
       }
     }
