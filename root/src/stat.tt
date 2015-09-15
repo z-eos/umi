@@ -1,33 +1,35 @@
-<hr>
-[% IF stats.debug %]
-<div class="panel panel-info">
-  <div class="panel-heading">
-    <span class="fa fa-line-chart"></span>
-    Page Statistics (debug level [% stats.debug %])
-  </div>
+[% IF c.user_exists && c.session.auth_uid %]
+  <hr>
+  [% IF stats.debug %]
+  <div class="panel panel-info">
+    <div class="panel-heading">
+      <span class="fa fa-line-chart"></span>
+      Page Statistics (debug level [% stats.debug %])
+    </div>
     [% IF stats.debug == 1 %]
       [% IF stats.elapsed < 0.1 %][% elapsed_bg = 'bg-success' %]
       [% ELSIF stats.elapsed > 0.7 %][% elapsed_bg = 'bg-danger' %]
       [% ELSE %][% elapsed_bg = 'bg-warning' %]
       [% END %]
-    <div class="panel-body panel-sm text-center umi-zerro-margin umi-zerro-padding [% elapsed_bg %]">
-      <b>Request took [% stats.elapsed %]s</b>
+      <div class="panel-body panel-sm text-center umi-zerro-margin umi-zerro-padding [% elapsed_bg %]">
+        <b>Request took [% stats.elapsed %]s</b>
     [% ELSIF stats.debug == 2 %]
       <div class="panel-body panel-sm umi-zerro-margin umi-zerro-padding">
-	<table class="table table-hover table-condensed umi-zerro-margin umi-zerro-padding">
+        <table class="table table-hover table-condensed umi-zerro-margin umi-zerro-padding">
 	  [% FOREACH i IN stats.report %]
-	  [% IF i.2 < 0.1 %]
-	  <tr class="bg-success text-primary">
-	    [% ELSIF i.2 > 0.7 %]
-	  <tr class="bg-danger text-primary">
-	  [% ELSE %]
-	  <tr class="bg-warning text-primary">
+	  [% IF i.2 < 0.1 %]<tr class="bg-success text-primary">
+	  [% ELSIF i.2 > 0.7 %]<tr class="bg-danger text-primary">
+	  [% ELSE %]<tr class="bg-warning text-primary">
 	  [% END %]
-	    <th>[% i.1 %]</th><th>took [% i.2 %] s</th></tr>
+	  <th>[% i.1 %]</th><th>took [% i.2 %] s</th></tr>
 	  [% END %]
-	  <tr class="bg-info"><th class="text-right">Whole request</th><th class="text-left">took [% stats.elapsed %] s</th></tr>
+	  <tr class="bg-info">
+	    <th class="text-right">Whole request</th><th class="text-left">took [% stats.elapsed %] s</th>
+	  </tr>
 	</table>
     [% END %]
+      </div>
     </div>
-  </div>
+  [% END %]
+
 [% END %]

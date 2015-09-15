@@ -34,25 +34,22 @@ sub index :Path :Args(0) {
 sub signin :Path Global {
   my ( $self, $c ) = @_;
 
-  $c->session->{"auth_uid"} = $c->req->param("auth_uid");
-  $c->session->{"auth_pwd"} = $c->req->param("auth_pwd");
+  $c->session->{auth_uid} = $c->req->param('auth_uid');
+  $c->session->{auth_pwd} = $c->req->param('auth_pwd');
 
   if ( $c->authenticate({
-			 id       => $c->session->{"auth_uid"},
-			 password => $c->session->{"auth_pwd"},
+			 id       => $c->session->{auth_uid},
+			 password => $c->session->{auth_pwd},
 			})) {
-
-    foreach my $key (keys (%{$c->_user->{user}->{attributes}})) {
-      next if $key eq 'jpegphoto' || $key eq 'jpegPhoto';
-      $c->session->{"auth_obj"}->{$key} = $c->_user->{user}->{attributes}->{$key};
-      $c->session->{"auth_uid"} = $c->_user->{user}->{attributes}->{$key} if $key eq 'uid';
-    }
+    $c->session->{auth_obj} = $c->user->attributes('ashash');
+    delete $c->session->{auth_obj}->{jpegphoto};
+    $c->session->{auth_uid} = $c->user->uid;
+    # use Data::Printer;
+    # p $c->session->{auth_obj};
     $c->stash( template => 'welcome.tt', );
   } else {
     $c->stash( template => 'signin.tt', );
   }
-  # use Data::Printer;
-  # p($c->session, colored => 1);
 }
 
 sub signout :Path Global {
