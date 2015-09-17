@@ -6,6 +6,8 @@ package LDAP_CRUD;
 use Moose;
 use namespace::autoclean;
 
+use Data::Printer  colored => 1;
+
 BEGIN { with 'Tools'; }
 
 use Net::LDAP;
@@ -21,10 +23,7 @@ use Net::LDAP::Util qw(
 			canonical_dn
 		     );
 
-use Data::Dumper;
-use Data::Printer;
 use Try::Tiny;
-
 
 =head2 cfg
 
@@ -442,8 +441,7 @@ returns hash with formatted details
 
 sub err {
   my ($self, $mesg) = @_;
-
-# to finish #   use Data::Dumper;
+  $mesg;
 # to finish #   use Log::Contextual qw( :log :dlog set_logger with_logger );
 # to finish #   use Log::Contextual::SimpleLogger;
 # to finish # 
@@ -490,8 +488,6 @@ sub err {
 	     srv => $mesg->server_error,
 	     caller => $caller ? $caller : 'main',
 	    };
-  # use Data::Printer;
-  # p $err;
   return $err; # if $mesg->code;
 }
 
@@ -544,9 +540,6 @@ sub search {
   	     attrs  => $args->{attrs} || [ '*' ],
   	     sizelimit => defined $args->{sizelimit} ? $args->{sizelimit} : 20,
   	    };
-
-  # use Data::Printer;
-  # p $arg;
 
   return $self->ldap->search( base => $arg->{base},
 			      scope => $arg->{scope},
@@ -665,8 +658,6 @@ sub reassign {
       if $_ ne 'jpegPhoto';
   }
   
-  # p $arg;
-
   # src BRANCH does'n exist in dst subtree and here we
   # CREATE it
   if ( ! $arg->{dst}->{has_branch} ) {
@@ -718,7 +709,7 @@ sub reassign {
 	  $val = $clone->get_value( $_, asref => 1 )
 	}
 	push @{$attrs}, $_ => $val;
-      } # p $attrs;
+      }
       $mesg = $self->add( $clone->dn, $attrs );
       undef $attrs;
       # !!! we need to pick up this error in json somehow ...
@@ -762,8 +753,6 @@ sub reassign {
       if ref($return) ne "HASH" ||
       ( ref($return) eq "HASH" && $#{$return->{error}} < 0);
   }
-
-  # p $return;
   return $return;
 }
 
@@ -952,30 +941,33 @@ sub block {
 
 =head2 mod
 
+!!! DEPRECATED !!!
+
 modify method
+
+!!! DEPRECATED !!!
 
 =cut
 
-sub mod {
-  my ($self, $dn, $replace) = @_;
+# sub mod {
+#   my ($self, $dn, $replace) = @_;
 
-  my $callername = (caller(1))[3];
-  $callername = 'main' if ! defined $callername;
-  my $return = 'call to LDAP_CRUD->mod from ' . $callername . ': ';
-  my $msg;
-  if ( ! $self->dry_run ) {
-    $msg = $self->ldap->modify ( $dn, replace => $replace, );
-    if ($msg->is_error()) {
-      $return .= $self->err( $msg )->{html};
-    } else {
-      $return = 0;
-    }
-  } else {
-    $return = $msg->ldif;
-  }
-  # p $dn; p $replace;
-  return $return;
-}
+#   my $callername = (caller(1))[3];
+#   $callername = 'main' if ! defined $callername;
+#   my $return = 'call to LDAP_CRUD->mod from ' . $callername . ': ';
+#   my $msg;
+#   if ( ! $self->dry_run ) {
+#     $msg = $self->ldap->modify ( $dn, replace => $replace, );
+#     if ($msg->is_error()) {
+#       $return .= $self->err( $msg )->{html};
+#     } else {
+#       $return = 0;
+#     }
+#   } else {
+#     $return = $msg->ldif;
+#   }
+#   return $return;
+# }
 
 =head2 modify
 
@@ -984,16 +976,15 @@ modify method
 =cut
 
 sub modify {
-  my ($self, $dn, $changes) = @_;
-  # p [ $dn, $changes ];
-  my $callername = (caller(1))[3];
-  $callername = 'main' if ! defined $callername;
-  my $return = 'call to LDAP_CRUD->modify from ' . $callername . ': ';
+  my ($self, $dn, $changes ) = @_;
+  # my $callername = (caller(1))[3];
+  # $callername = 'main' if ! defined $callername;
+  my $return; # = 'call to LDAP_CRUD->modify from ' . $callername . ': ';
   my $msg;
   if ( ! $self->dry_run ) {
     $msg = $self->ldap->modify ( $dn, changes => $changes, );
     if ($msg->is_error()) {
-      $return .= $self->err( $msg );
+      $return = $self->err( $msg );
     } else {
       $return = 0;
     }
@@ -1045,11 +1036,9 @@ sub ldif {
       $return->{success} .= $entry->ldif;
     }
   }
-  use Data::Printer;
   my $a = ldap_explode_dn($dn, casefold => 'none');
   pop $a;
   pop $a;
-  # p $a;
   return $return;
 }
 
@@ -1234,7 +1223,7 @@ sub obj_add {
   my $type = $args->{'type'};
   my $params = $args->{'params'};
 
-  p my $attrs = $self->params2attrs({
+  my $attrs = $self->params2attrs({
 				   type => $type,
 				   params => $params,
 				  });
@@ -1306,7 +1295,7 @@ to be fed to ->add for object creation
 sub params2attrs {
   my ( $self, $args ) = @_;
 
-  p my $arg = {
+  my $arg = {
 	     type => $args->{'type'},
 	     params => $args->{'params'},
 	    };
@@ -1686,7 +1675,8 @@ sub canonical_dn_rev {
 
 ######################################################################
 
-no Moose;
 __PACKAGE__->meta->make_immutable;
+
+no Moose;
 
 1;

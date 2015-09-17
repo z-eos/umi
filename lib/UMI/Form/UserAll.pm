@@ -8,8 +8,6 @@ BEGIN { extends 'UMI::Form::LDAP'; with 'Tools'; }
 
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable', 'StrongPassword' );
 
-use Data::Printer;
-
 # has '+error_message' => ( default => 'There were errors in your form.' );has '+item_class' => ( default =>'UserAll' );
 has '+enctype' => ( default => 'multipart/form-data');
 has 'namesake' => ( is => 'rw', );
@@ -479,7 +477,7 @@ has_field 'loginless_ovpn.ifconfigpush'
        label_class => [ 'col-xs-2', 'required', ],
        element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
        element_class => [ 'input-sm', ],
-       element_attr => { placeholder => '10.0.97.2 10.0.97.1, 10.13.83.192 10.0.97.1',
+       element_attr => { placeholder => '&laquo;10.0.97.2 10.0.97.1&raquo; or &laquo;10.13.83.192 10.0.97.1&raquo;',
 			 'data-name' => 'ifconfigpush',
 			 'data-group' => 'loginless_ovpn', },
      );
@@ -805,7 +803,6 @@ sub validate {
 	}
 
 	if ( $element->field('authorizedservice')->value eq '802.1x-eap-tls' ) {
-	  p $element->field('userCertificate')->value;
 	  if ( defined $element->field('userCertificate')->value &&
 	       ref($element->field('userCertificate')->value) eq 'HASH' ) {
 	    $cert = $self->file2var( $element->field('userCertificate')->value->{tempname}, $cert_msg);
@@ -907,8 +904,6 @@ sub validate {
 
       $i++;
     }
-
-    # p $elementcmp;
     # error rising if login+service+fqdn not uniq
     $i = 0;
     foreach $element ( $self->field('account')->fields ) {
@@ -1018,7 +1013,6 @@ sub validate {
 	   ( $element->field('associateddomain')->value ne '' ||
 	     $element->field('status')->value ne '' ||
 	     $element->field('ifconfigpush')->value ne '' ) ) {
-	p $element->field('userCertificate')->value;
 	if ( defined $element->field('userCertificate')->value &&
 	     ref($element->field('userCertificate')->value) eq 'HASH' ) {
 	  $cert = $self->file2var( $element->field('userCertificate')->value->{tempname}, $cert_msg);

@@ -45,8 +45,10 @@ sub signin :Path Global {
     delete $c->session->{auth_obj}->{jpegphoto};
     $c->session->{auth_uid} = $c->user->uid;
     push @{$c->session->{auth_roles}}, $c->user->roles;
+    $c->cache->set( 'auth_obj', $c->session->{auth_obj} );
     use Data::Printer;
-    p $c->session;
+    # p $c->session;
+    p $c->cache->get( 'auth_obj' );
     $c->stash( template => 'welcome.tt', );
   } else {
     $c->stash( template => 'signin.tt', );

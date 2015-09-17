@@ -95,7 +95,6 @@ sub index :Path :Args(0) {
       $c->stash( template => 'user/user_all.tt',
 		 form => $self->form,
 		 final_message => $final_message, );
-p $params;
       return unless $self->form->process(
 					 posted => ($c->req->method eq 'POST'),
 					 params => $params,
@@ -598,7 +597,7 @@ returns reference to hash of arrays
 
 sub create_account_branch_leaf {
   my  ( $self, $ldap_crud, $args ) = @_;
-  p my $arg = {
+  my $arg = {
 	     basedn => $args->{basedn},
 	     service => $args->{authorizedservice},
 	     associatedDomain => sprintf('%s%s',
@@ -818,8 +817,8 @@ sub create_account_branch_leaf {
 			 ];
   }
 
-  p $arg->{dn};
-  p $authorizedService;
+  # p $arg->{dn};
+  # p $authorizedService;
   
   my $mesg;
   if ( $arg->{service} eq 'ssh' ) {
@@ -859,11 +858,16 @@ sub create_account_branch_leaf {
 	if ( ! $if_exist->count ) {
 	  $mesg = $ldap_crud->modify( $arg->{radiusgroupname},
 				      [ add => [ member => $arg->{dn}, ], ], );
-	  if ( $mesg ) {
+	  if ( $mesg && $mesg->{code} == 20 ) {
+	    push @{$return->{warning}},
+	      sprintf('Warning during %s group modification: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s',
+		      $arg->{radiusgroupname}, $mesg->{html}, $mesg->{srv}, $mesg->{text});
+	  } elsif ( $mesg ) {
 	    push @{$return->{error}},
 	      sprintf('Error during %s group modification: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s',
 		      $arg->{radiusgroupname}, $mesg->{html}, $mesg->{srv}, $mesg->{text});
 	  }
+
 	}
       }
     }

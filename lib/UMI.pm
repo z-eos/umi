@@ -5,6 +5,9 @@ package UMI;
 use Moose;
 use namespace::autoclean;
 
+use Data::Printer  colored => 1;
+use Data::Dumper;
+
 use Catalyst::Runtime 5.8;
 
 use Catalyst qw/
@@ -13,6 +16,8 @@ use Catalyst qw/
     Static::Simple
 
     StackTrace
+
+    Cache
 
     Authentication
     Authorization::Roles
@@ -31,17 +36,20 @@ our $VERSION = '0.91';
 
 __PACKAGE__
   ->config(
+	   'Plugin::Cache' => { backend => { class => "Cache::Memory", }, },
 	   name => 'UMI',
 	   # Disable deprecated behavior needed by old applications
 	   disable_component_resolution_regex_fallback => 1,
 	   enable_catalyst_header => 1, # Send X-Catalyst header
 	   default_view => "Web",
 	   session => { storage => "/tmp/umi/sess-$^T-$>",
+			flash_to_stash => 1,
 			cache_size => '10m',
 			expire_time => '1d',
-			init_file => 1,
-			unlink_on_exit => 1, },
-	   'authentication' =>
+			## init_file => 1, # causes need for re-login if PSGI reloaded during the form filling
+			unlink_on_exit => 1,
+		      },
+	   authentication =>
 	   {
 	    default_realm => "ldap",
 	    realms => { ldap =>

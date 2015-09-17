@@ -4,8 +4,6 @@
 package Tools;
 use Moose::Role;
 
-use Data::Printer;
-
 =head1 NAME
 
 UMI::Tools

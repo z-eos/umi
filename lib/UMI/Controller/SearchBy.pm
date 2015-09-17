@@ -846,10 +846,8 @@ sub mod_jpegPhoto {
 
   my ( $error_message, $success_message, $final_message );
   if ( defined $arg->{jpegPhoto} ) {
-    my $mesg = $ldap_crud->mod(
-			       $arg->{mod_jpegPhoto_dn},
-			       { 'jpegPhoto' => [ $jpeg ], }
-			      );
+    my $mesg = $ldap_crud->modify( $arg->{mod_jpegPhoto_dn},
+				   [ replace => [ jpegPhoto => [ $jpeg ], ], ], );
 
     if ( $mesg ne '0' ) {
       $error_message = '<li>Error during jpegPhoto add/change occured: ' . $mesg . '</li>';
@@ -903,11 +901,8 @@ sub mod_pwd {
     } elsif ( $arg->{'password_init'} ne '' && $arg->{'password_cnfm'} ne '' ) {
       $arg->{password_gen} = $self->pwdgen({ pwd => $arg->{'password_cnfm'} });
     }
-    my $mesg = $ldap_crud->mod(
-			       $arg->{mod_pwd_dn},
-			       {
-				'userPassword' => $arg->{password_gen}->{ssha}, },
-			      );
+    my $mesg = $ldap_crud->modify( $arg->{mod_pwd_dn},
+				   [ replace => [ userPassword => $arg->{password_gen}->{ssha}, ], ], );
 
     if ( $mesg ne '0' ) {
       $error_message = '<li>Error during password change occured: ' . $mesg . '</li>';
@@ -973,11 +968,8 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
       $arg->{password_gen} = $self->pwdgen({ pwd => $arg->{'password_cnfm'} });
     }
 
-    my $mesg = $c->model('LDAP_CRUD')->mod(
-					   $arg->{mod_pwd_dn},
-					   {
-					    'userPassword' => $arg->{password_gen}->{ssha}, },
-					  );
+    my $mesg = $c->model('LDAP_CRUD')->modify( $arg->{mod_pwd_dn},
+					       [ replace => [ 'userPassword' => $arg->{password_gen}->{ssha}, ], ], );
 
     if ( $mesg ne '0' ) {
       $return->{error} = '<li>Error during password change occured: ' . $mesg . '</li>';
@@ -1244,14 +1236,14 @@ sub modify :Path(modify) :Args(0) {
       open(my $fh, "<", $file) or $c->log->debug("Can not open $file: $!" );
       $jpeg = <$fh>;
       close($fh) or $c->log->debug($!);
-      $mod->{$attr} = [ $jpeg ];
+      push @{$mod}, $attr, [ $jpeg ];
     } elsif ( $val ne "" or $val ne "0" ) { # && $val ne $orig ) {
-      $mod->{$attr} = $val;
+      push @{$mod}, $attr, $val;
     }
   }
 
-  if ( defined $mod ) {
-    $mesg = $ldap_crud->mod( $params->{dn}, $mod );
+  if ( defined $mod ) { p my $modx = [ replace => $mod ];
+    p $mesg = $ldap_crud->modify( $params->{dn}, [ replace => $mod, ], );
     if ( $mesg ne "0" ) {
       $return->{error} .= '<li>' . $mesg . '</li>';
     }

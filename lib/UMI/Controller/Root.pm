@@ -35,13 +35,9 @@ sub index :Path :Args(0) {
     # Hello World
     # $c->response->body( $c->welcome_message );
     if ( $c->user_exists() ) {
-      $c->stash(
-		template => 'welcome.tt',
-	       );
+      $c->stash( template => 'welcome.tt', );
     } else {
-      $c->stash(
-		template => 'signin.tt',
-	       );
+      $c->stash( template => 'signin.tt', );
     }
   }
 
@@ -75,26 +71,6 @@ sub accinfo :Path(accinfo) :Args(0) {
     $c->stash( template => 'acc_info.tt', );
 }
 
-## working sample
-# use UMI::Wizard::MultiPage;
-# has 'multiform' => ( isa => 'UMI::Wizard::MultiPage', is => 'rw',
-# 		     lazy => 1, default => sub { UMI::Wizard::MultiPage->new },
-# 		     documentation => q{MultiPage Form},
-# 		   );
-
-# sub multipage :Path(multipage) :Args(0) {
-#   my ( $self, $c ) = @_;
-#   $c->stash( template => 'multipage.tt',
-# 	     form => $self->multiform );
-
-#   return unless
-#     $self->multiform->process(
-# 			      posted => ($c->req->method eq 'POST'),
-# 			      params => $c->req->parameters,
-# 			     );
-# }
-
-
 =head2 download_from_ldap
 
 action to retrieve PKCS12 certificate from LDAP
@@ -104,8 +80,6 @@ account of whether we wish it ...
 =cut
 
 sub download_from_ldap :Path(download_from_ldap) :Args(0) {
-  use Data::Printer;
-
   my ( $self, $c ) = @_;
   # application/x-x509-ca-cert
   # application/x-x509-user-cert
@@ -141,9 +115,6 @@ sub user_preferences :Path(user_prefs) :Args(0) {
   my ( $self, $c, $args ) = @_;
   if ( $c->user_exists ) {
     my $ldap_crud = $c->model('LDAP_CRUD');
-
-    use Data::Printer colored => 0;
-    # p $c->session->{auth_obj}->{title};
 
     my ( $arg, $mesg, $return, $entry, $entries, $orgs, $domains, $fqdn,
 	 @roles,
@@ -348,7 +319,6 @@ sub user_preferences :Path(user_prefs) :Args(0) {
       undef $service_details;
     }
 
-    # p $arg;
     # $c->stash( template => 'user/user_preferences.tt',
     $c->stash( template => 'user/user_preferences_neo.tt',
 	       auth_obj => $arg,
