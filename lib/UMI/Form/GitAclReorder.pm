@@ -39,7 +39,7 @@ sub options_gitacls {
 
   my $gitAclProject = $mesg->entry(0);
 
-  $mesg = $ldap_crud->search( { base => $ldap_crud->{cfg}->{base}->{gitacl},
+  $mesg = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{gitacl},
 				filter => 'gitAclProject=' . $gitAclProj->get_value('gitAclProj'), } );
 
   my @gitacls = $mesg->sorted('gitAclOrder');

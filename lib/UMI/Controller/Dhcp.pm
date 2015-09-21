@@ -105,12 +105,12 @@ sub create_dhcp_host {
 			 uid => $arg->{uid},
 			 dhcpStatements => sprintf('fixed-address %s', $arg->{dhcpStatements}),
 			 cn => $arg->{cn},
-			 objectClass => $ldap_crud->{cfg}->{objectClass}->{dhcp},
+			 objectClass => $ldap_crud->cfg->{objectClass}->{dhcp},
 			];
 
   push @{$arg->{ldapadd_arg}}, dhcpComments => $arg->{dhcpComments} if defined $arg->{dhcpComments};
 
-  my $nets = $ldap_crud->search( { base => $ldap_crud->{cfg}->{base}->{dhcp},
+  my $nets = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{dhcp},
 				   filter => 'dhcpOption=domain-name "' . $arg->{net} . '"', } );
 
   if ( $nets->count > 1 ) {
@@ -127,7 +127,7 @@ sub create_dhcp_host {
     $return->{success} =
       sprintf('user <em><b>%s,%s</b></em> MAC: <em><b>%s</b></em> now bound to IP: <em><b>%s,%s</b></em>',
 	      $arg->{uid},
-	      $ldap_crud->{cfg}->{base}->{acc_root},
+	      $ldap_crud->cfg->{base}->{acc_root},
 	      $arg->{dhcpHWAddress},
 	      $arg->{dhcpStatements});
   }

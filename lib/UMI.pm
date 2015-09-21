@@ -45,7 +45,7 @@ __PACKAGE__
 	   session => { storage => "/tmp/umi/sess-$^T-$>",
 			flash_to_stash => 1,
 			cache_size => '10m',
-			expire_time => '1d',
+			# expire_time => '1d',
 			## init_file => 1, # causes need for re-login if PSGI reloaded during the form filling
 			unlink_on_exit => 1,
 		      },

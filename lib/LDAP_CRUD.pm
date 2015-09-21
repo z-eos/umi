@@ -13,6 +13,7 @@ BEGIN { with 'Tools'; }
 use Net::LDAP;
 use Net::LDAP::Control;
 use Net::LDAP::Control::Sort;
+use Net::LDAP::Control::SortResult;
 use Net::LDAP::Constant qw(LDAP_CONTROL_SORTRESULT);
 use Net::LDAP::Util qw(
 			ldap_error_text
@@ -86,6 +87,7 @@ sub _build_cfg {
 			   },
 		  },
 	  exclude_prefix => 'aux_',
+	  sizelimit => 50,
 
 	  #=====================================================================
 	  ##
@@ -330,7 +332,7 @@ around 'ldap' =>
     my $ldap = $self->$orig(@_);
 
     my $mesg = $ldap->bind(
-			   sprintf( "uid=%s,%s", $self->uid, $self->{cfg}->{base}->{acc_root} ),
+			   sprintf( "uid=%s,%s", $self->uid, $self->cfg->{base}->{acc_root} ),
 			   password => $self->pwd,
 			   version  => 3,
 			  );
@@ -370,7 +372,7 @@ sub build_last_uidNumber {
   $self->reset_ldap;
   my $mesg =
     $self->ldap->search(
-			base   => $self->{cfg}->{base}->{acc_root},
+			base   => $self->cfg->{base}->{acc_root},
 			scope  => 'one',
 			filter => '(uidNumber=*)',
 			attrs  => [ 'uidNumber' ],
@@ -412,7 +414,7 @@ sub build_last_gidNumber {
   $self->reset_ldap;
   my $mesg =
     $self->ldap->search(
-			base   => $self->{cfg}->{base}->{group},
+			base   => $self->cfg->{base}->{group},
 			scope  => 'one',
 			filter => '(gidNumber=*)',
 			attrs  => [ 'gidNumber' ],
@@ -453,34 +455,8 @@ sub err {
 # to finish # 
 # to finish #   log_debug { Dumper($self) . "\n" . $self->err( $mesg ) };
 
-  # return sprintf( '<dl class="dl-horizontal"><dt>code</dt><dd>%s</dd><dt>error_name</dt><dd>%s</dd><dt>error_text</dt><dd><b><i><pre>%s</pre></i></b></dd><dt>error_desc</dt><dd>%s</dd><dt>server_error</dt><dd>%s</dd></dl>',
-  # 		  $mesg->code,
-  # 		  $mesg->error_name,
-  # 		  $mesg->error_text,
-  # 		  $mesg->error_desc,
-  # 		  $mesg->server_error)
-  #   if $mesg->code;
-
   my $caller = (caller(1))[3];
   my $err = {
-	     html => ldap_error_name($mesg) ne 'LDAP_SUCCESS' ?
-	     sprintf( '<dl class="dl-horizontal">
-  <dt>code</dt><dd>%s</dd>
-  <dt>error name</dt><dd>%s</dd>
-  <dt>error text</dt>
-  <dd>
-    <em><small><pre>%s</pre></small></em>
-  </dd>
-  <dt>error description</dt><dd>%s</dd>
-  <dt>server_error</dt><dd>%s</dd>
-</dl>',
-		      $mesg->code,
-		      ldap_error_name($mesg),
-		      ldap_error_text($mesg),
-		      ldap_error_desc($mesg),
-		      $mesg->server_error
-			    ) :
-	     '&nbsp;<i class="fa fa-frown-o text-warning "></i>&nbsp;Your request returned no result. Try to change query parameter/s.',
 	     code => $mesg->code,
 	     name => ldap_error_name($mesg),
 	     text => ldap_error_text($mesg),
@@ -488,6 +464,23 @@ sub err {
 	     srv => $mesg->server_error,
 	     caller => $caller ? $caller : 'main',
 	    };
+
+  $err->{html} = ldap_error_name($mesg) ne 'LDAP_SUCCESS' ?
+    sprintf( '<dl class="dl-horizontal">
+  <dt>code</dt><dd>%s</dd>
+  <dt>error name</dt><dd>%s</dd>
+  <dt>error text</dt><dd><em><small><pre>%s</pre></small></em></dd>
+  <dt>error description</dt><dd>%s</dd>
+  <dt>server_error</dt><dd>%s</dd>
+</dl>',
+	     $mesg->code,
+	     ldap_error_name($mesg),
+	     ldap_error_text($mesg),
+	     ldap_error_desc($mesg),
+	     $mesg->server_error
+	   ) :
+	     '&nbsp;<i class="fa fa-thumbs-o-down text-warning "></i>&nbsp;Your request returned no result. Try to change query parameter/s.';
+
   return $err; # if $mesg->code;
 }
 
@@ -552,6 +545,8 @@ sub search {
 
 
 =head2 add
+
+Net::LDAP->add wrapper
 
 =cut
 
@@ -623,7 +618,7 @@ sub reassign {
   my $arg = {
 	     dst => { str => sprintf('uid=%s,%s',
 					     $args->{dst_uid},
-					     $self->{cfg}->{base}->{acc_root}), },
+					     $self->cfg->{base}->{acc_root}), },
 	     src => { str => $args->{src_dn},
 		      is_branch => $args->{src_dn} =~ /^authorizedService=/ ? 1 : 0, },
 	    };
@@ -796,13 +791,7 @@ sub del {
 
 =head2 delr
 
-TODO
-
-to backup entries deleted
-
-https://metacpan.org/pod/Net::LDAP::Control::PreRead
-
-to care recursively of subtree of the object to be deleted if exist
+recursive deletion
 
 =cut
 
@@ -821,12 +810,9 @@ sub delr {
     foreach my $entry ( $result->all_entries ) {
       push @dnlist, $entry->dn;
     }
-
-    # explode dn into an array and push
-    # arrays to indexed hash of arrays
+    # explode dn into an array and push them to indexed hash of arrays
     my %HoL;
-    my $i   = 0;
-
+    my $i = 0;
     my $base = join('', pop [ split(",", $dn) ]);
 
     for ( @dnlist ) {
@@ -971,26 +957,19 @@ modify method
 
 =head2 modify
 
-modify method
+Net::LDAP->modify( changes => ... ) wrapper
 
 =cut
 
 sub modify {
   my ($self, $dn, $changes ) = @_;
-  # my $callername = (caller(1))[3];
-  # $callername = 'main' if ! defined $callername;
-  my $return; # = 'call to LDAP_CRUD->modify from ' . $callername . ': ';
-  my $msg;
+  my ( $return, $msg );
   if ( ! $self->dry_run ) {
     $msg = $self->ldap->modify ( $dn, changes => $changes, );
     if ($msg->is_error()) {
       $return = $self->err( $msg );
-    } else {
-      $return = 0;
-    }
-  } else {
-    $return = $msg->ldif;
-  }
+    } else { $return = 0; }
+  } else { $return = $msg->ldif; }
   return $return;
 }
 
@@ -1353,7 +1332,7 @@ sub dhcp_lease {
 
   my $mesg =
     $self->search({
-		   base => $self->{cfg}->{base}->{dhcp},
+		   base => $self->cfg->{base}->{dhcp},
 		   filter => sprintf('dhcpOption=domain-name "%s"', $arg->{net}),
 		   attrs => [ 'cn', 'dhcpNetMask', 'dhcpRange' ],
 		  });
@@ -1442,21 +1421,21 @@ sub _build_select_authorizedservice {
   my $self = shift;
   my @services;
 
-  foreach my $key ( sort {$a cmp $b} keys %{$self->{cfg}->{authorizedService}}) {
-    if ( $self->{cfg}->{authorizedService}->{$key}->{auth} &&
-	 defined $self->{cfg}->{authorizedService}->{$key}->{data_relation} &&
-	 $self->{cfg}->{authorizedService}->{$key}->{data_relation} ne '' ) {
+  foreach my $key ( sort {$a cmp $b} keys %{$self->cfg->{authorizedService}}) {
+    if ( $self->cfg->{authorizedService}->{$key}->{auth} &&
+	 defined $self->cfg->{authorizedService}->{$key}->{data_relation} &&
+	 $self->cfg->{authorizedService}->{$key}->{data_relation} ne '' ) {
       push @services, {
 		       value => $key,
-		       label => $self->{cfg}->{authorizedService}->{$key}->{descr},
+		       label => $self->cfg->{authorizedService}->{$key}->{descr},
 		       attributes =>
-		       { 'data-relation' => $self->{cfg}->{authorizedService}->{$key}->{data_relation} },
-		      } if ! $self->{cfg}->{authorizedService}->{$key}->{disabled};
-    } elsif ( $self->{cfg}->{authorizedService}->{$key}->{auth} ) {
+		       { 'data-relation' => $self->cfg->{authorizedService}->{$key}->{data_relation} },
+		      } if ! $self->cfg->{authorizedService}->{$key}->{disabled};
+    } elsif ( $self->cfg->{authorizedService}->{$key}->{auth} ) {
       push @services, {
 		       value => $key,
-		       label => $self->{cfg}->{authorizedService}->{$key}->{descr},
-		      } if ! $self->{cfg}->{authorizedService}->{$key}->{disabled};
+		       label => $self->cfg->{authorizedService}->{$key}->{descr},
+		      } if ! $self->cfg->{authorizedService}->{$key}->{disabled};
     }
 
   }
@@ -1527,7 +1506,7 @@ has 'select_associateddomains' => ( traits => ['Array'],
 sub _build_select_associateddomains {
   my $self = shift;
   my @domains; # = ( {value => '0', label => '--- select domain ---', selected => 'selected'} );
-  my $mesg = $self->search( { base => $self->{cfg}->{base}->{org},
+  my $mesg = $self->search( { base => $self->cfg->{base}->{org},
 			      filter => 'associatedDomain=*',
 			      sizelimit => 0,
 			      attrs => ['associatedDomain' ],
@@ -1564,7 +1543,7 @@ has 'select_group' => ( traits => ['Array'],
 sub _build_select_group {
   my $self = shift;
   my @groups;
-  my $mesg = $self->search( { base => $self->{cfg}->{base}->{group},
+  my $mesg = $self->search( { base => $self->cfg->{base}->{group},
 			      attrs => ['cn', 'description' ],
 			      sizelimit => 0,
 			      scope => 'one', } );
@@ -1600,7 +1579,7 @@ has 'select_radprofile' => ( traits => ['Array'],
 sub _build_select_radprofile {
   my $self = shift;
   my @rad_profiles;
-  my $mesg = $self->search( { base => $self->{cfg}->{base}->{rad_profiles},
+  my $mesg = $self->search( { base => $self->cfg->{base}->{rad_profiles},
 			      attrs => ['cn', 'description' ],
 			      sizelimit => 0,
 			      scope => 'one',
@@ -1638,7 +1617,7 @@ has 'select_radgroup' => ( traits => ['Array'],
 sub _build_select_radgroup {
   my $self = shift;
   my @rad_groups;
-  my $mesg = $self->search( { base => $self->{cfg}->{base}->{rad_groups},
+  my $mesg = $self->search( { base => $self->cfg->{base}->{rad_groups},
 			      attrs => ['cn', 'description' ],
 			      sizelimit => 0,
 			      scope => 'one',

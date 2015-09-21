@@ -147,7 +147,7 @@ sub validate {
        $self->field('dhcpStatements')->value ne '' ) { # IP is set
     $mesg =
       $self->ldap_crud->search({
-			  base => $self->ldap_crud->{cfg}->{base}->{dhcp},
+			  base => $self->ldap_crud->cfg->{base}->{dhcp},
 			  filter => sprintf('dhcpStatements=*%s',
 					    $self->field('dhcpStatements')->value),
 			 });

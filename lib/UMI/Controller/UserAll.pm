@@ -152,7 +152,7 @@ sub create_account {
     if (defined $args->{'person_avatar'}) {
       $file = $args->{'person_avatar'}->{'tempname'};
     } else {
-      $file = $ldap_crud->{cfg}->{stub}->{noavatar_mgmnt};
+      $file = $ldap_crud->cfg->{stub}->{noavatar_mgmnt};
     }
     $jpeg = $self->file2var( $file, $final_message );
 
@@ -170,7 +170,7 @@ sub create_account {
 
     my $root_add_dn = sprintf('uid=%s,%s',
 			      $uid,
-			      $ldap_crud->{cfg}->{base}->{acc_root});
+			      $ldap_crud->cfg->{base}->{acc_root});
     my $root_add_options =
       [
        uid => $uid,
@@ -184,18 +184,18 @@ sub create_account {
 		     $args->{person_givenname},
 		     $args->{person_sn}),
        uidNumber => $uidNumber,
-       gidNumber => $ldap_crud->{cfg}->{stub}->{gidNumber},
+       gidNumber => $ldap_crud->cfg->{stub}->{gidNumber},
        description => $descr,
        gecos => $descr,
-       homeDirectory => $ldap_crud->{cfg}->{stub}->{homeDirectory},
+       homeDirectory => $ldap_crud->cfg->{stub}->{homeDirectory},
        jpegPhoto => [ $jpeg ],
-       loginShell => $ldap_crud->{cfg}->{stub}->{loginShell},
+       loginShell => $ldap_crud->cfg->{stub}->{loginShell},
 
        title => $self->is_ascii($args->{'person_title'}) ?
        lc($self->utf2lat($args->{'person_title'})) :
        lc($args->{'person_title'}),
 
-       objectClass => $ldap_crud->{cfg}->{objectClass}->{acc_root},
+       objectClass => $ldap_crud->cfg->{objectClass}->{acc_root},
       ];
 
     my $ldif = $ldap_crud->add( $root_add_dn, $root_add_options );
@@ -368,13 +368,13 @@ sub create_account {
 	   authorizedservice => $form_field ne 'account' ?
 	   substr($form_field, 10) : $element->field('authorizedservice')->value,
 	   associateddomain => sprintf('%s%s',
-					 defined $ldap_crud->{cfg}
+					 defined $ldap_crud->cfg
 					 ->{authorizedService}
 				       ->{$form_field ne 'account' ?
 					  substr($form_field, 10) : $element->field('authorizedservice')->value}
 					 ->{associateddomain_prefix}
 					 ->{$element->field('associateddomain')->value} ?
-					 $ldap_crud->{cfg}
+					 $ldap_crud->cfg
 					 ->{authorizedService}
 				       ->{$form_field ne 'account' ?
 					  substr($form_field, 10) : $element->field('authorizedservice')->value}
@@ -397,11 +397,11 @@ sub create_account {
 	      $x->{password} = { $element->field('authorizedservice')->value =>
 				 { clear => sprintf('%s%s',
 						    defined $ldap_crud
-						    ->{cfg}
+						    ->cfg
 						    ->{authorizedService}
 						    ->{$element->field('authorizedservice')->value}
 						    ->{login_prefix} ?
-						    $ldap_crud->{cfg}
+						    $ldap_crud->cfg
 						    ->{authorizedService}
 						    ->{$element->field('authorizedservice')->value}
 						    ->{login_prefix} : '',
@@ -494,12 +494,12 @@ sub create_account_branch {
 	     authorizedservice => $args->{authorizedservice},
 	     associateddomain => sprintf('%s%s',
 					 defined $ldap_crud
-					 ->{cfg}
+					 ->cfg
 					 ->{authorizedService}
 					 ->{$args->{authorizedservice}}
 					 ->{associateddomain_prefix}
 					 ->{$args->{associateddomain}} ?
-					 $ldap_crud->{cfg}
+					 $ldap_crud->cfg
 					 ->{authorizedService}
 					 ->{$args->{authorizedservice}}
 					 ->{associateddomain_prefix}
@@ -512,27 +512,27 @@ sub create_account_branch {
 		       $args->{authorizedservice},
 		       $arg->{associateddomain},
 		       $args->{uid},
-		       $ldap_crud->{cfg}->{base}->{acc_root}),
+		       $ldap_crud->cfg->{base}->{acc_root}),
   my ( $return, $if_exist);
 
   $arg->{add_attrs} = [ 'authorizedService'
 			=> sprintf('%s@%s%s',
 				   $arg->{authorizedservice},
 				   defined $ldap_crud
-				   ->{cfg}
+				   ->cfg
 				   ->{authorizedService}
 				   ->{$args->{authorizedservice}}
 				   ->{associateddomain_prefix}
 				   ->{$args->{associateddomain}} ?
 				   $ldap_crud
-				   ->{cfg}
+				   ->cfg
 				   ->{authorizedService}
 				   ->{$args->{authorizedservice}}
 				   ->{associateddomain_prefix}
 				   ->{$args->{associateddomain}} : '',
 				   $arg->{associateddomain}),
 			'uid' => $arg->{uid} . '@' . $arg->{authorizedservice},
-			'objectClass' => $ldap_crud->{cfg}->{objectClass}->{acc_svc_branch}, ];
+			'objectClass' => $ldap_crud->cfg->{objectClass}->{acc_svc_branch}, ];
 
   $if_exist = $ldap_crud->search( { base => $arg->{dn},
 				       scope => 'base',
@@ -550,7 +550,7 @@ sub create_account_branch {
 				 $mesg->{srv},
 				 $mesg->{text});
     } else { # $return->{success} = sprintf('<i class="%s fa-fw"></i> branch object &laquo;<b class="text-success">%s</b>&raquo; was successfully created',
-					  # $ldap_crud->{cfg}->{authorizedService}->{$arg->{authorizedservice}}->{icon},
+					  # $ldap_crud->cfg->{authorizedService}->{$arg->{authorizedservice}}->{icon},
 					  # $arg->{dn});
 	     $return->{dn} = $arg->{dn};
 	     $return->{associateddomain_prefix} = $arg->{'associateddomain_prefix'};
@@ -602,12 +602,12 @@ sub create_account_branch_leaf {
 	     service => $args->{authorizedservice},
 	     associatedDomain => sprintf('%s%s',
 					 defined $ldap_crud
-					 ->{cfg}
+					 ->cfg
 					 ->{authorizedService}
 					 ->{$args->{authorizedservice}}
 					 ->{associateddomain_prefix}
 					 ->{$args->{associateddomain}} ?
-					 $ldap_crud->{cfg}
+					 $ldap_crud->cfg
 					 ->{authorizedService}
 					 ->{$args->{authorizedservice}}
 					 ->{associateddomain_prefix}
@@ -641,8 +641,8 @@ sub create_account_branch_leaf {
 
   $arg->{prefixed_uid} =
     sprintf('%s%s',
-	    defined $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{login_prefix} ?
-	    $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{login_prefix} : '',
+	    defined $ldap_crud->cfg->{authorizedService}->{$arg->{service}}->{login_prefix} ?
+	    $ldap_crud->cfg->{authorizedService}->{$arg->{service}}->{login_prefix} : '',
 	    $arg->{login});
   
   $arg->{uid} = sprintf('%s@%s',
@@ -660,7 +660,7 @@ sub create_account_branch_leaf {
     $authorizedService = [];
   } else {
     $authorizedService = [
-			  objectClass => $ldap_crud->{cfg}->{objectClass}->{acc_svc_common},
+			  objectClass => $ldap_crud->cfg->{objectClass}->{acc_svc_common},
 			  authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
 			  associatedDomain => $arg->{associatedDomain},
 			  uid => $arg->{uid},
@@ -668,7 +668,7 @@ sub create_account_branch_leaf {
 			  givenName => $arg->{givenName},
 			  sn => $arg->{sn},
 			  uidNumber => $arg->{uidNumber},
-			  loginShell => $ldap_crud->{cfg}->{stub}->{loginShell},
+			  loginShell => $ldap_crud->cfg->{stub}->{loginShell},
 			  gecos => uc($arg->{service}) . ': ' . $arg->{'login'} . ' @ ' .
 			  $arg->{associatedDomain},
 			  description => uc($arg->{service}) . ': ' . $arg->{'login'} . ' @ ' .
@@ -679,10 +679,10 @@ sub create_account_branch_leaf {
   #=== SERVICE: mail =================================================
   if ( $arg->{service} eq 'mail') {
     push @{$authorizedService},
-      homeDirectory => $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{homeDirectory_prefix} .
+      homeDirectory => $ldap_crud->cfg->{authorizedService}->{$arg->{service}}->{homeDirectory_prefix} .
       $arg->{associatedDomain} . '/' . $arg->{uid},
       'mu-mailBox' => 'maildir:/var/mail/' . $arg->{associatedDomain} . '/' . $arg->{uid},
-      gidNumber => $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{gidNumber},
+      gidNumber => $ldap_crud->cfg->{authorizedService}->{$arg->{service}}->{gidNumber},
       userPassword => $arg->{password}->{$arg->{service}}->{'ssha'},
       objectClass => [ 'mailutilsAccount' ];
   #=== SERVICE: xmpp =================================================
@@ -690,12 +690,12 @@ sub create_account_branch_leaf {
     if ( defined $arg->{jpegPhoto} ) {
       $jpegPhoto_file = $arg->{jpegPhoto}->{'tempname'};
     } else {
-      $jpegPhoto_file = $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{jpegPhoto_noavatar};
+      $jpegPhoto_file = $ldap_crud->cfg->{authorizedService}->{$arg->{service}}->{jpegPhoto_noavatar};
     }
 
     push @{$authorizedService},
-      homeDirectory => $ldap_crud->{cfg}->{stub}->{homeDirectory},
-      gidNumber => $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{gidNumber},
+      homeDirectory => $ldap_crud->cfg->{stub}->{homeDirectory},
+      gidNumber => $ldap_crud->cfg->{authorizedService}->{$arg->{service}}->{gidNumber},
       userPassword => $arg->{password}->{$arg->{service}}->{'ssha'},
       telephonenumber => $arg->{telephoneNumber},
       jpegPhoto => [ $self->file2var( $jpegPhoto_file, $return) ];
@@ -710,13 +710,13 @@ sub create_account_branch_leaf {
 			   $self->macnorm({ mac => $arg->{login} }),
 			   $arg->{basedn}); # DN for MAC AUTH differs
       push @{$authorizedService},
-	objectClass => $ldap_crud->{cfg}->{objectClass}->{acc_svc_802_1x},
+	objectClass => $ldap_crud->cfg->{objectClass}->{acc_svc_802_1x},
 	uid => $self->macnorm({ mac => $arg->{login} }),
 	cn =>  $self->macnorm({ mac => $arg->{login} });
     } else {
       $arg->{dn} = sprintf('uid=%s,%s', $arg->{prefixed_uid}, $arg->{basedn}); # DN for EAP-TLS differs
       push @{$authorizedService},
-	objectClass => $ldap_crud->{cfg}->{objectClass}->{acc_svc_802_1x_eaptls},
+	objectClass => $ldap_crud->cfg->{objectClass}->{acc_svc_802_1x_eaptls},
 	uid => $arg->{prefixed_uid},
 	cn => $arg->{prefixed_uid};
     }
@@ -775,7 +775,7 @@ sub create_account_branch_leaf {
     }
 
     $authorizedService = [
-			  objectClass => $ldap_crud->{cfg}->{objectClass}->{ssh},
+			  objectClass => $ldap_crud->cfg->{objectClass}->{ssh},
 			  sshPublicKey => [ @$sshPublicKey ],
 			  uid => $arg->{uid},
 			 ];
@@ -789,7 +789,7 @@ sub create_account_branch_leaf {
     $authorizedService = [
 			  cn => substr($arg->{userCertificate}->{filename},0,-4),
 			  associatedDomain => $arg->{associatedDomain},
-			  objectClass => $ldap_crud->{cfg}->{objectClass}->{ovpn},
+			  objectClass => $ldap_crud->cfg->{objectClass}->{ovpn},
 			  umiOvpnCfgIfconfigPush => $arg->{umiOvpnCfgIfconfigPush},
 			  umiOvpnAddStatus => $arg->{umiOvpnAddStatus},
 			  umiUserCertificateSn => '' . $arg->{cert_info}->{'S/N'},
@@ -809,7 +809,7 @@ sub create_account_branch_leaf {
   #=== SERVICE: web ==================================================
   } elsif ( $arg->{service} eq 'web' ) {
     $authorizedService = [
-			  objectClass => $ldap_crud->{cfg}->{objectClass}->{acc_svc_web},
+			  objectClass => $ldap_crud->cfg->{objectClass}->{acc_svc_web},
 			  authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
 			  associatedDomain => $arg->{associatedDomain},
 			  uid => $arg->{uid},
@@ -843,7 +843,7 @@ sub create_account_branch_leaf {
     } else {
       push @{$return->{success}},
 	sprintf('<i class="%s fa-fw"></i>&nbsp;<em>%s account login:</em> &laquo;<strong class="text-success">%s</strong>&raquo; <em>password:</em> &laquo;<strong class="text-success mono">%s</strong>&raquo;',
-		$ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{icon},
+		$ldap_crud->cfg->{authorizedService}->{$arg->{service}}->{icon},
 		$arg->{service},
 		(split(/=/,(split(/,/,$arg->{dn}))[0]))[1], # taking RDN value
 		$arg->{password}->{$arg->{service}}->{'clear'});

@@ -148,7 +148,7 @@ sub options_associateddomain {
   my @domains = ( { value => '0', label => '--- select domain ---', selected => 'selected' } );
 
   my $ldap_crud = $self->ldap_crud;
-  my $mesg = $ldap_crud->search( { base => $ldap_crud->{cfg}->{base}->{org},
+  my $mesg = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{org},
 				   filter => 'associatedDomain=*',
 				   attrs => ['associatedDomain' ],
 				 } );
@@ -190,25 +190,25 @@ sub options_authorizedservice {
   		      selected => 'selected',
   		     };
 
-  foreach my $key ( sort {$b cmp $a} keys %{$self->ldap_crud->{cfg}->{authorizedService}}) {
+  foreach my $key ( sort {$b cmp $a} keys %{$self->ldap_crud->cfg->{authorizedService}}) {
     next if $key =~ /^802.1x-.*/;
     # if ( $key eq 'mail' || $key eq 'xmpp' ) {
     #   push @services, {
     # 		       value => $key,
-    # 		       label => $self->ldap_crud->{cfg}->{authorizedService}->{$key}->{descr},
+    # 		       label => $self->ldap_crud->cfg->{authorizedService}->{$key}->{descr},
     # 		       selected => 'on',
     # 		      };
     # } else {
-    if ( $self->ldap_crud->{cfg}->{authorizedService}->{$key}->{disabled} ) {
+    if ( $self->ldap_crud->cfg->{authorizedService}->{$key}->{disabled} ) {
       push @services, {
 		       value => $key,
-		       label => $self->ldap_crud->{cfg}->{authorizedService}->{$key}->{descr},
+		       label => $self->ldap_crud->cfg->{authorizedService}->{$key}->{descr},
 		       disabled => "disabled",
 		      };
     } else {
       push @services, {
 		       value => $key,
-		       label => $self->ldap_crud->{cfg}->{authorizedService}->{$key}->{descr},
+		       label => $self->ldap_crud->cfg->{authorizedService}->{$key}->{descr},
 		      };
     }
     # }
@@ -306,7 +306,7 @@ if ( defined $self->field('office')->value &&
 			scope => 'one',
 			filter => '(uid=' .
 			$self->field('login')->value . ')',
-			base => $ldap_crud->{cfg}->{base}->{acc_root},
+			base => $ldap_crud->cfg->{base}->{acc_root},
 			attrs => [ 'uid' ],
 		       });
   my ( $err, $error );

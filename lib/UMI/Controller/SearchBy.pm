@@ -77,7 +77,7 @@ sub index :Path :Args(0) {
 
   # if ( defined $c->session->{"auth_uid"} ) {
   if ( defined $c->user_exists ) {
-    my ( $params, $ldap_crud, $filter, $filter_meta, $filter_show, $base );
+    my ( $params, $ldap_crud, $filter, $filter_meta, $filter_show, $base, $return );
     my $sort_order = 'reverse';
     
     $params = $c->req->params;
@@ -95,45 +95,46 @@ sub index :Path :Args(0) {
     if ( defined $params->{'ldapsearch_by_email'} ) {
       $filter = sprintf("mail=%s", $filter_meta);
       $filter_show = sprintf("mail=<kbd>%s</kbd>", $filter_meta);
-      $base = $ldap_crud->{cfg}->{base}->{acc_root};
+      $base = $ldap_crud->cfg->{base}->{acc_root};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_jid'} ) {
       $filter = sprintf("&(authorizedService=xmpp@*)(uid=*%s*)", $filter_meta);
       $filter_show = sprintf("&(authorizedService=xmpp@*)(uid=*<kbd>%s</kbd>*)", $filter_meta);
-      $base = $ldap_crud->{cfg}->{base}->{acc_root};
+      $base = $ldap_crud->cfg->{base}->{acc_root};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_ip'} ) {
       $filter = sprintf("dhcpStatements=fixed-address %s", $filter_meta);
       $filter_show = sprintf("dhcpStatements=fixed-address <kbd>%s</kbd>", $filter_meta);
-      $base = $ldap_crud->{cfg}->{base}->{dhcp};
+      $base = $ldap_crud->cfg->{base}->{dhcp};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_mac'} ) {
-
-      $filter = sprintf("|(dhcpHWAddress=ethernet %s)(&(uid=%s)(authorizedService=802.1*))(&(cn=%s)(authorizedService=802.1*))",
+      push @{$return->{error}}, 'incorrect MAC address'
+	if ! $self->macnorm({ mac => $filter_meta });
+      $filter = sprintf("|(dhcpHWAddress=ethernet %s)(uid=%s)(cn=%s)",
 			$self->macnorm({ mac => $filter_meta, dlm => ':', }),
 			$self->macnorm({ mac => $filter_meta }),
 			$self->macnorm({ mac => $filter_meta }) );
 
-      $filter_show = sprintf("|(dhcpHWAddress=ethernet <kbd>%s</kbd>)(&(uid=<kbd>%s</kbd>)(authorizedService=802.1*))(&(cn=<kbd>%s</kbd>)(authorizedService=802.1*))",
+      $filter_show = sprintf("|(dhcpHWAddress=ethernet <kbd>%s</kbd>)(uid=<kbd>%s</kbd>)(cn=<kbd>%s</kbd>)",
 			     $self->macnorm({ mac => $filter_meta, dlm => ':', }),
 			     $self->macnorm({ mac => $filter_meta }),
 			     $self->macnorm({ mac => $filter_meta }) );
 
-      $base = $ldap_crud->{cfg}->{base}->{db};
+      $base = $ldap_crud->cfg->{base}->{db};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_name'} ) {
       $filter = sprintf("|(givenName=%s)(sn=%s)(uid=%s)(cn=%s)",
 			$filter_meta, $filter_meta, $filter_meta, $filter_meta);
       $filter_show = sprintf("|(givenName=<kbd>%s</kbd>)(sn=<kbd>%s</kbd>)(uid=<kbd>%s</kbd>)(cn=<kbd>%s</kbd>)",
 			     $filter_meta, $filter_meta, $filter_meta, $filter_meta);
-      $base = $ldap_crud->{cfg}->{base}->{acc_root};
+      $base = $ldap_crud->cfg->{base}->{acc_root};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_telephone'} ) {
       $filter = sprintf("|(telephoneNumber=%s)(mobile=%s)(homePhone=%s)",
 			$filter_meta, $filter_meta, $filter_meta);
       $filter_show = sprintf("|(telephoneNumber=<kbd>%s</kbd>)(mobile=<kbd>%s</kbd>)(homePhone=<kbd>%s</kbd>)",
 			     $filter_meta, $filter_meta, $filter_meta);
-      $base = $ldap_crud->{cfg}->{base}->{acc_root};
+      $base = $ldap_crud->cfg->{base}->{acc_root};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_filter'} &&
 	      $params->{'ldapsearch_filter'} ne '' ) {
@@ -159,14 +160,13 @@ sub index :Path :Args(0) {
 				  {
 				   base => $base,
 				   filter => '(' . $filter . ')',
-				   sizelimit => 50,
+				   sizelimit => $ldap_crud->cfg->{sizelimit},
 				  }
 				 );
 
     my @entries = $mesg->entries;
 
-    my $return;
-    $return->{warning} = $ldap_crud->err($mesg)->{caller} .
+    push @{$return->{warning}}, $ldap_crud->err($mesg)->{caller} .
       ': ' . $ldap_crud->err($mesg)->{html} if ! $mesg->count;
 
     my ( $ttentries, $attr, $tmp );
@@ -185,12 +185,12 @@ sub index :Path :Args(0) {
 	{
 	 is_blocked => $mesg->count,
 	 is_dn => scalar split(',', $tmp) <= 3 ? 1 : 0,
-	 is_account => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
-	 is_group => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{group}/ ? 1 : 0,
-	 jpegPhoto => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
+	 is_account => $tmp =~ /.*,$ldap_crud->cfg->{base}->{acc_root}/ ? 1 : 0,
+	 is_group => $tmp =~ /.*,$ldap_crud->cfg->{base}->{group}/ ? 1 : 0,
+	 jpegPhoto => $tmp =~ /.*,$ldap_crud->cfg->{base}->{acc_root}/ ? 1 : 0,
 	 gitAclProject => $_->exists('gitAclProject') ? 1 : 0,
 	 userPassword => $_->exists('userPassword') ? 1 : 0,
-	 userDhcp => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ &&
+	 userDhcp => $tmp =~ /.*,$ldap_crud->cfg->{base}->{acc_root}/ &&
 	 scalar split(',', $tmp) <= 3 ? 1 : 0,
 	};
       foreach $attr (sort $_->attributes) {
@@ -228,8 +228,8 @@ sub index :Path :Args(0) {
 	      entrieskeys => \@ttentries_keys,
 	      entries => $ttentries,
 	      # entries => \@entries,
-	      services => $ldap_crud->{cfg}->{authorizedService},
-	      base_ico => $ldap_crud->{cfg}->{base}->{icon},
+	      services => $ldap_crud->cfg->{authorizedService},
+	      base_ico => $ldap_crud->cfg->{base}->{icon},
 	      final_message => $return,
 	     );
   } else {
@@ -334,7 +334,7 @@ sub proc :Path(proc) :Args(0) {
 # old #       if ( ! defined $params->{groups} ) {
 # old # 	my ( @groups, $return );
 # old # 	my $ldap_crud = $c->model('LDAP_CRUD');
-# old # 	my $mesg = $ldap_crud->search( { base => $ldap_crud->{cfg}->{base}->{group},
+# old # 	my $mesg = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{group},
 # old # 					 filter => sprintf('memberUid=%s',
 # old # 							   substr((split /,/, $params->{ldap_modify_group})[0], 4)),
 # old # 					 attrs => ['cn'], } );
@@ -379,7 +379,7 @@ sub proc :Path(proc) :Args(0) {
 
       if ( ! defined $params->{groups} && ! defined $params->{aux_submit} ) {
 	my ( $return, $base, $filter, $dn );
-	my $mesg = $ldap_crud->search( { base => $ldap_crud->{cfg}->{base}->{group},
+	my $mesg = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{group},
 					 filter => sprintf('memberUid=%s',
 							   substr( (split /,/, $params->{'ldap_modify_group'})[0], 4)),
 					 attrs => ['cn'], } );
@@ -403,7 +403,7 @@ sub proc :Path(proc) :Args(0) {
       $c->stash( final_message => $self
 		 ->mod_groups( $ldap_crud,
 			       { mod_groups_dn => $params->{ldap_modify_group},
-				 base => $ldap_crud->{cfg}->{base}->{group},
+				 base => $ldap_crud->cfg->{base}->{group},
 				 groups => $groups,
 				 is_submit => defined $params->{aux_submit} &&
 				 $params->{aux_submit} eq 'Submit' ? 1 : 0,
@@ -430,7 +430,7 @@ sub proc :Path(proc) :Args(0) {
 
       if ( ! defined $params->{groups} && ! defined $params->{aux_submit} ) {
 	my ( $return, $base, $filter, $dn );
-	my $mesg = $ldap_crud->search( { base => $ldap_crud->{cfg}->{base}->{rad_groups},
+	my $mesg = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{rad_groups},
 					 filter => sprintf('member=%s', $params->{'ldap_modify_rad_group'}),
 					 attrs => ['cn'], } );
 	push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
@@ -453,7 +453,7 @@ sub proc :Path(proc) :Args(0) {
       $c->stash( final_message => $self
 		 ->mod_groups( $ldap_crud,
 			       { mod_groups_dn => $params->{ldap_modify_rad_group},
-				 base => $ldap_crud->{cfg}->{base}->{rad_groups},
+				 base => $ldap_crud->cfg->{base}->{rad_groups},
 				 groups => $groups,
 				 is_submit => defined $params->{aux_submit} &&
 				 $params->{aux_submit} eq 'Submit' ? 1 : 0,
@@ -639,7 +639,7 @@ sub proc :Path(proc) :Args(0) {
 				  ->path_to('root',
 					    'static',
 					    'images',
-					    $ldap_crud->{cfg}->{jpegPhoto}->{stub}),
+					    $ldap_crud->cfg->{jpegPhoto}->{stub}),
 				 }
 				),
 	       );
@@ -1017,7 +1017,7 @@ sub mod_groups {
   my ( $self, $ldap_crud, $args ) = @_;
   my $arg = { obj_dn => $args->{mod_groups_dn},
 	      groups => $args->{groups},
-	      base => defined $args->{base} ? $args->{base} : $ldap_crud->{cfg}->{base}->{group},
+	      base => defined $args->{base} ? $args->{base} : $ldap_crud->cfg->{base}->{group},
 	      type => defined $args->{type} ? $args->{type} : 'posixGroup',
 	      is_submit => $args->{is_submit},
 	      uid => substr( (split /,/, $args->{mod_groups_dn})[0], 4 ), };
@@ -1051,7 +1051,7 @@ sub mod_groups {
       $arg->{groups_sel}->{$_->get_value('cn')} = 0
 	if ! defined $arg->{groups_sel}->{$_->get_value('cn')};
       $arg->{groups_old}->{$_->get_value('cn')} =
-	# defined $g->{sprintf('cn=%s,%s',$_->get_value('cn'),$ldap_crud->{cfg}->{base}->{group})} ?
+	# defined $g->{sprintf('cn=%s,%s',$_->get_value('cn'),$ldap_crud->cfg->{base}->{group})} ?
 	defined $g->{$_->dn} ? 1 : 0;
     } else {
       $arg->{groups_all}->{$_->dn} = 0;
@@ -1208,7 +1208,7 @@ sub modify :Path(modify) :Args(0) {
   my $mod = undef;
   foreach $attr ( sort ( keys %{$params} )) {
     next if ( $attr eq 'dn' ||
-	      $attr =~ /$ldap_crud->{cfg}->{exclude_prefix}/ ||
+	      $attr =~ /$ldap_crud->cfg->{exclude_prefix}/ ||
 	      $attr =~ /userPassword/ ); ## !! stub, not processed yet !!
     if ( $attr eq "jpegPhoto" ) {
       $params->{jpegPhoto} = $c->req->upload('jpegPhoto');

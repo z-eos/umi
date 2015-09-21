@@ -301,7 +301,7 @@
 	    [% IF c.check_user_roles('admin') %]
             <li class="divider"></li>
             <li>
-	      <a href="#">
+	      <a href="[% c.uri_for('/sysinfo') %]">
 		<span class="fa fa-fw fa-info-circle text-info"></span>
 		system info
 	      </a>

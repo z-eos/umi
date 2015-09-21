@@ -93,14 +93,14 @@ sub create_group {
     }
 
     my $group_attrs = [
-		       'objectClass' => $ldap_crud->{cfg}->{objectClass}->{group},
+		       'objectClass' => $ldap_crud->cfg->{objectClass}->{group},
 		       'description' => $arg->{description},
 		       'gidNumber' => $ldap_crud->last_gidNumber + 1,
 		       'memberUid' => $memberUid,
 		      ];
     my $mesg =
       $ldap_crud->add(
-		      sprintf('cn=%s,%s', $arg->{cn}, $ldap_crud->{cfg}->{base}->{group}),
+		      sprintf('cn=%s,%s', $arg->{cn}, $ldap_crud->cfg->{base}->{group}),
 		      $group_attrs
     		     );
 

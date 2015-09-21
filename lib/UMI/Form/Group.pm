@@ -28,7 +28,7 @@ sub options_memberUid {
   return unless $self->ldap_crud;
 
   my $ldap_crud = $self->ldap_crud;
-  my $mesg = $ldap_crud->search( { base => $ldap_crud->{cfg}->{base}->{acc_root},
+  my $mesg = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{acc_root},
 				   scope => 'one',
 				   sizelimit => 0,
 				   attrs => [ qw{uid givenName sn} ], } );
@@ -83,7 +83,7 @@ sub validate {
 			scope => 'one',
 			filter => '(cn=' .
 			$self->utf2lat( $self->field('cn')->value ) . ')',
-			base => $ldap_crud->{cfg}->{base}->{group},
+			base => $ldap_crud->cfg->{base}->{group},
 			attrs => [ 'cn' ],
 		       });
   $self->field('cn')->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span> Group with name <em>&laquo;' .

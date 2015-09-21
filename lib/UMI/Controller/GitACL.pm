@@ -112,7 +112,7 @@ sub create_gitacl {
     if ( ! $gitAcl->{Order} ) {
       my $mesg = $ldap_crud->search(
 				    {
-				     base => $ldap_crud->{cfg}->{base}->{gitacl},
+				     base => $ldap_crud->cfg->{base}->{gitacl},
 				     scope => 'one',
 				     filter => 'gitAclProject=' . $gitAcl->{Project},
 				     attrs => [ qw(gitAclOrder) ]
@@ -157,7 +157,7 @@ sub create_gitacl {
     my $dn = sprintf('cn=%s-%s,%s',
 		     $gitAcl->{Project},
 		     int(rand(99999)),
-		     $ldap_crud->{cfg}->{base}->{gitacl});
+		     $ldap_crud->cfg->{base}->{gitacl});
 
     my $ldif =
       $ldap_crud->add(

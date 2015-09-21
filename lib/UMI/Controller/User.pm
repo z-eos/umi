@@ -154,7 +154,7 @@ sub create_account {
     my $ldif =
       $ldap_crud->add(
 		      'uid=' . $uid_prefix . $args->{'login'} .
-		      ',' . $ldap_crud->{cfg}->{base}->{acc_root},
+		      ',' . $ldap_crud->cfg->{base}->{acc_root},
 		      [
 		       uid => $uid_prefix . $args->{'login'},
 		       userPassword => $pwd->{root}->{ssha},
@@ -165,12 +165,12 @@ sub create_account {
 		       sn => $sn,
 		       cn => $cn,
 		       uidNumber => $uidNumber,
-		       gidNumber => $ldap_crud->{cfg}->{stub}->{gidNumber},
+		       gidNumber => $ldap_crud->cfg->{stub}->{gidNumber},
 		       description => $descr,
 		       gecos => $descr,
-		       homeDirectory => $ldap_crud->{cfg}->{stub}->{homeDirectory},
+		       homeDirectory => $ldap_crud->cfg->{stub}->{homeDirectory},
 		       jpegPhoto => [ $jpeg ],
-		       loginShell => $ldap_crud->{cfg}->{stub}->{loginShell},
+		       loginShell => $ldap_crud->cfg->{stub}->{loginShell},
 		       title => $self->is_ascii($args->{'title'}) ? $self->utf2lat($args->{'title'}) : $args->{'title'},
 		       objectClass => [ qw(top
 					   posixAccount
@@ -248,7 +248,7 @@ sub create_account {
 			       basedn => sprintf("uid=%s%s,%s",
 						 $uid_prefix,
 						 $args->{'login'},
-						 $ldap_crud->{cfg}->{base}->{acc_root}),
+						 $ldap_crud->cfg->{base}->{acc_root}),
 			       service => $service,
 			       associatedDomain => $associatedDomain,
 			       uidNumber => $uidNumber,
@@ -315,12 +315,12 @@ sub create_account_branch {
     sprintf("authorizedService=%s@%s,uid=%s,%s",
 	    $arg->{service}, $arg->{associatedDomain},
 	    $arg->{base_uid},
-	    $ldap_crud->{cfg}->{base}->{acc_root}) :
+	    $ldap_crud->cfg->{base}->{acc_root}) :
     sprintf("authorizedService=%s@%s,uid=%s%s,%s",
 	    $arg->{service}, $arg->{associatedDomain},
 	    $arg->{uid_prefix},
 	    $arg->{login},
-	    $ldap_crud->{cfg}->{base}->{acc_root});
+	    $ldap_crud->cfg->{base}->{acc_root});
 
   $arg->{ldapadd_arg} = [
 			 'authorizedService' => $arg->{service} . '@' . $arg->{'associatedDomain'},
@@ -425,8 +425,8 @@ sub create_account_branch_leaf {
 			  givenName => $arg->{givenName},
 			  sn => $arg->{sn},
 			  uidNumber => $arg->{uidNumber},
-			  loginShell => $ldap_crud->{cfg}->{stub}->{loginShell},
-			  objectClass => $ldap_crud->{cfg}->{objectClass}->{acc_svc_common},
+			  loginShell => $ldap_crud->cfg->{stub}->{loginShell},
+			  objectClass => $ldap_crud->cfg->{objectClass}->{acc_svc_common},
 			  userPassword => $arg->{password}->{'ssha'},
 			  gecos => uc($arg->{service}) . ': ' . $arg->{'login'} . ' @ ' .
 			  $arg->{associatedDomain},
@@ -439,20 +439,20 @@ sub create_account_branch_leaf {
   if ( $arg->{service} eq 'mail') {
     $authorizedService_add =
       [
-       homeDirectory => $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{homeDirectory_prefix} .
+       homeDirectory => $ldap_crud->cfg->{authorizedService}->{$arg->{service}}->{homeDirectory_prefix} .
        $arg->{associatedDomain} . '/' .
        $arg->{uid},
        'mu-mailBox' => 'maildir:/var/mail/' .
        $arg->{associatedDomain} . '/' .
        $arg->{uid},
-       gidNumber => $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{gidNumber},
+       gidNumber => $ldap_crud->cfg->{authorizedService}->{$arg->{service}}->{gidNumber},
        objectClass => [ 'mailutilsAccount' ],
       ];
   } elsif ( $arg->{service} eq 'xmpp') {
     if ( $arg->{jpegPhoto} ) {
       $jpegPhoto_file = $arg->{jpegPhoto}->{'tempname'};
     } else {
-      $jpegPhoto_file = $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{jpegPhoto_noavatar};
+      $jpegPhoto_file = $ldap_crud->cfg->{authorizedService}->{$arg->{service}}->{jpegPhoto_noavatar};
     }
     # p $arg->{jpegPhoto};
     local $/ = undef;
@@ -462,8 +462,8 @@ sub create_account_branch_leaf {
 
     $authorizedService_add =
       [
-       homeDirectory => $ldap_crud->{cfg}->{stub}->{homeDirectory},
-       gidNumber => $ldap_crud->{cfg}->{authorizedService}->{$arg->{service}}->{gidNumber},
+       homeDirectory => $ldap_crud->cfg->{stub}->{homeDirectory},
+       gidNumber => $ldap_crud->cfg->{authorizedService}->{$arg->{service}}->{gidNumber},
        telephonenumber => $arg->{telephoneNumber},
        jpegPhoto => [ $jpeg ],
       ];
@@ -475,7 +475,7 @@ sub create_account_branch_leaf {
        authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
        uid => $self->macnorm({ mac => $arg->{uid} }),
        cn => $self->macnorm({ mac => $arg->{uid}}),
-       objectClass => $ldap_crud->{cfg}->{objectClass}->{acc_svc_802_1x},
+       objectClass => $ldap_crud->cfg->{objectClass}->{acc_svc_802_1x},
        userPassword => $arg->{password}->{clear},
        description => uc($arg->{service}) . ': ' . $arg->{'login'},
        radiusgroupname => $arg->{radiusgroupname},
@@ -514,7 +514,7 @@ sub create_account_branch_leaf {
     }
 
     $authorizedService = [
-			  objectClass => $ldap_crud->{cfg}->{objectClass}->{ssh},
+			  objectClass => $ldap_crud->cfg->{objectClass}->{ssh},
 			  sshPublicKey => [ @$sshPublicKey ],
 			 ];
     $authorizedService_add = [];
@@ -531,7 +531,7 @@ sub create_account_branch_leaf {
 			  # Serial Number rather than last (family)
 			  # name(s) for which the entity is known by
 			  sn => '' . $self->cert_info({ cert => $usercertificate })->{'S/N'},
-			  objectClass => $ldap_crud->{cfg}->{objectClass}->{ovpn},
+			  objectClass => $ldap_crud->cfg->{objectClass}->{ovpn},
 			  'userCertificate;binary' => $usercertificate,
 			 ];
     $authorizedService_add = [];

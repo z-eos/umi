@@ -46,7 +46,7 @@ sub helper_cfg {
   my $return;
 
   if ( $cfg_type eq 'cfg_ldap_crud' ) {
-    $return = q{$c->model('LDAP_CRUD')->{cfg}};
+    $return = q{$c->model('LDAP_CRUD')->cfg};
   } elsif ( $cfg_type eq 'cfg_local' ) {
     $return = q{$c->config};
   }

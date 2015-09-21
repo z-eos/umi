@@ -71,6 +71,26 @@ sub accinfo :Path(accinfo) :Args(0) {
     $c->stash( template => 'acc_info.tt', );
 }
 
+sub sysinfo :Path(sysinfo) :Args(0) {
+  my ( $self, $c ) = @_;
+  my $sysinfo;
+  my $x = $c->session;
+  $x->{auth_pwd} = 'CENSORED';
+  $x->{auth_obj}->{userpassword} = 'CENSORED';
+  use Data::Printer colored => 0;
+  $sysinfo = {
+	       session => { title => 'Session',
+			    data => p($x,, colored => 0), },
+	       LDAP_CRUD_cfg => { title => 'LDAP_CRUD configuration ( $c->model(LDAP_CRUD)->cfg )',
+				  data => p($c->model('LDAP_CRUD')->cfg, colored => 0), },
+	      # UMI_config => { title => 'UMI config ( UMI->config )',
+	      # 		data => p(UMI->config, colored => 0), },
+	     };
+
+  $c->stash( template => 'sysinfo.tt',
+	     sysinfo => $sysinfo, );
+}
+
 =head2 download_from_ldap
 
 action to retrieve PKCS12 certificate from LDAP
@@ -128,7 +148,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
       $mesg = $ldap_crud->search( {
 				   base => sprintf('uid=%s,%s',
 						   $args->{uid},
-						   $ldap_crud->{cfg}->{base}->{acc_root}),
+						   $ldap_crud->cfg->{base}->{acc_root}),
 				   scope => 'base',
 				   attrs => [ qw(givenName
 						 sn
@@ -225,7 +245,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
     #
     $mesg = $ldap_crud->search( { base => sprintf('uid=%s,%s',
 						  $arg->{uid},
-						  $ldap_crud->{cfg}->{base}->{acc_root}),
+						  $ldap_crud->cfg->{base}->{acc_root}),
 				  scope => 'base', } );
     if ( $mesg->code ) {
       $return->{error} .= sprintf('<li>jpegPhoto %s %s</li>',
@@ -244,7 +264,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
     # user DHCP stuff
     #
     my ( $dhcp, @x, $domain_name );
-    $mesg = $ldap_crud->search( { base => $ldap_crud->{cfg}->{base}->{dhcp},
+    $mesg = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{dhcp},
 				  filter => sprintf('uid=%s', $arg->{uid}), } );
     if ( $mesg->code ) { $return->{error} .= sprintf('<li>DHCP %s %s</li>',
 						     $ldap_crud->err($mesg)->{caller},
@@ -277,7 +297,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
     #
     my ( $service, $service_details );
     $mesg = $ldap_crud->search( { base => 'uid=' . $arg->{uid} . ',' .
-				  $ldap_crud->{cfg}->{base}->{acc_root},
+				  $ldap_crud->cfg->{base}->{acc_root},
 				  scope => 'one',
 				  filter => 'authorizedService=*',
 				  attrs => [ 'authorizedService'],} );
@@ -297,11 +317,11 @@ sub user_preferences :Path(user_prefs) :Args(0) {
       $service_details = {
 			  branch_dn => $_->dn,
 			  authorizedService => $_->get_value('authorizedService'),
-			  auth => $ldap_crud->{cfg}->{authorizedService}
+			  auth => $ldap_crud->cfg->{authorizedService}
 			  ->{(split('@', $_->get_value('authorizedService')))[0]}->{auth},
-			  icon => $ldap_crud->{cfg}->{authorizedService}
+			  icon => $ldap_crud->cfg->{authorizedService}
 			  ->{(split('@', $_->get_value('authorizedService')))[0]}->{icon},
-			  descr => $ldap_crud->{cfg}->{authorizedService}
+			  descr => $ldap_crud->cfg->{authorizedService}
 			  ->{(split('@', $_->get_value('authorizedService')))[0]}->{descr},
 			 };
 
@@ -342,7 +362,12 @@ sub org_root :Path(org_root) :Args(0) {
 
 sub access_denied : Private {
   my ( $self, $c ) = @_;
-  $c->stash( template => '403.tt', );
+  if ( defined $c->session->{"auth_uid"} &&
+       defined $c->session->{"auth_pwd"} ) {
+    $c->stash( template => '403.tt', );
+  } else {
+    $c->stash( template => 'signin.tt', );
+  }
 }
 
 

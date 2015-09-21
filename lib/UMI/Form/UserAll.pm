@@ -574,7 +574,7 @@ sub options_groups {
   return unless $self->ldap_crud;
 
   my $ldap_crud = $self->ldap_crud;
-  my $mesg = $ldap_crud->search( { base => $ldap_crud->{cfg}->{base}->{group},
+  my $mesg = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{group},
 				   scope => 'one',
 				   sizelimit => 0,
 				   attrs => ['cn' ], } );
@@ -686,7 +686,7 @@ sub validate {
     $mesg =
       $ldap_crud->search({ scope => 'one',
 			   filter => '(uid=' . $self->autologin . '*)',
-			   base => $ldap_crud->{cfg}->{base}->{acc_root},
+			   base => $ldap_crud->cfg->{base}->{acc_root},
 			   attrs => [ 'uid' ], });
     if ( $mesg->count == 1 &&
 	 defined $self->field('person_namesake')->value &&
@@ -757,11 +757,11 @@ sub validate {
 	   $element->field('login')->value eq '' ) {
 	$logintmp = sprintf('%s%s%s',
 			    defined $ldap_crud
-			    ->{cfg}
+			    ->cfg
 			    ->{authorizedService}
 			    ->{$element->field('authorizedservice')->value}
 			    ->{login_prefix} ?
-			    $ldap_crud->{cfg}
+			    $ldap_crud->cfg
 			    ->{authorizedService}
 			    ->{$element->field('authorizedservice')->value}
 			    ->{login_prefix} : '',
@@ -771,11 +771,11 @@ sub validate {
       } else {
 	$logintmp = sprintf('%s%s',
 			    defined $ldap_crud
-			    ->{cfg}
+			    ->cfg
 			    ->{authorizedService}
 			    ->{$element->field('authorizedservice')->value}
 			    ->{login_prefix} ?
-			    $ldap_crud->{cfg}
+			    $ldap_crud->cfg
 			    ->{authorizedService}
 			    ->{$element->field('authorizedservice')->value}
 			    ->{login_prefix} : '',
@@ -888,7 +888,7 @@ sub validate {
 			      filter => '(&(authorizedService=' .
 			      $element->field('authorizedservice')->value . '@' . $element->field('associateddomain')->value .
 			      ')' . $passwd_acc_filter .')',
-			      base => $ldap_crud->{cfg}->{base}->{acc_root},
+			      base => $ldap_crud->cfg->{base}->{acc_root},
 			      attrs => [ 'uid' ],
 			     });
 	$element->field('login')->add_error($login_error_pfx . ' <mark>' . $logintmp . '</mark> is not available!')

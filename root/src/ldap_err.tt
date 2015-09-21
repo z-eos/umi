@@ -31,6 +31,7 @@
   </div>
 </div>
 [% END %]
+
 [% IF final_message.warning %]
 <div class="panel panel-warning">
   <div class="panel-heading clearfix umi-zerro-padding">
@@ -50,6 +51,7 @@
   </div>
 </div>
 [% END %]
+
 [% IF final_message.success %]
 <div class="panel panel-success">
   <div class="panel-heading clearfix umi-zerro-padding">

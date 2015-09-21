@@ -75,7 +75,7 @@ sub options_associateddomain {
   push my @domains, { value => '0', label => '--- select domain ---', selected => 'selected', };
 
   my $ldap_crud = $self->ldap_crud;
-  my $mesg = $ldap_crud->search( { base => $ldap_crud->{cfg}->{base}->{org},
+  my $mesg = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{org},
 				   filter => 'associatedDomain=*',
 				   attrs => [ 'associatedDomain' ],
 				 } );
@@ -114,11 +114,11 @@ sub options_authorizedservice {
 
   my @services = ( { value => '0', label => '--- select service ---', selected => 'selected' } );
 
-  foreach my $key ( sort {$a cmp $b} keys %{$self->ldap_crud->{cfg}->{authorizedService}}) {
+  foreach my $key ( sort {$a cmp $b} keys %{$self->ldap_crud->cfg->{authorizedService}}) {
     push @services, {
 		     value => $key,
-		     label => $self->ldap_crud->{cfg}->{authorizedService}->{$key}->{descr},
-		    } if ! $self->ldap_crud->{cfg}->{authorizedService}->{$key}->{disabled};
+		     label => $self->ldap_crud->cfg->{authorizedService}->{$key}->{descr},
+		    } if ! $self->ldap_crud->cfg->{authorizedService}->{$key}->{disabled};
     # p $key;
   }
   # p @services;

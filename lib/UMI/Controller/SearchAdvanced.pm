@@ -139,12 +139,12 @@ sub proc :Path(proc) :Args(0) {
 	  {
 	   is_blocked => $is_blocked,
 	   is_dn => scalar split(',', $_->dn) <= 3 ? 1 : 0,
-	   is_account => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
-	   is_group => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{group}/ ? 1 : 0,
-	   jpegPhoto => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
+	   is_account => $_->dn =~ /.*,$ldap_crud->cfg->{base}->{acc_root}/ ? 1 : 0,
+	   is_group => $_->dn =~ /.*,$ldap_crud->cfg->{base}->{group}/ ? 1 : 0,
+	   jpegPhoto => $_->dn =~ /.*,$ldap_crud->cfg->{base}->{acc_root}/ ? 1 : 0,
 	   gitAclProject => $_->exists('gitAclProject') ? 1 : 0,
 	   userPassword => $_->exists('userPassword') ? 1 : 0,
-	   userDhcp => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ &&
+	   userDhcp => $_->dn =~ /.*,$ldap_crud->cfg->{base}->{acc_root}/ &&
 	   scalar split(',', $_->dn) <= 3 ? 1 : 0,
 	  };
 	foreach $attr (sort $_->attributes) {
@@ -184,8 +184,8 @@ sub proc :Path(proc) :Args(0) {
 	      filter => $search_filter,
 	      entrieskeys => \@ttentries_keys,
 	      entries => $ttentries,
-	      services => $ldap_crud->{cfg}->{authorizedService},
-	      base_ico => $ldap_crud->{cfg}->{base}->{icon},
+	      services => $ldap_crud->cfg->{authorizedService},
+	      base_ico => $ldap_crud->cfg->{base}->{icon},
 	      final_message => $return,
 	      form => $self->form,
 	     );
