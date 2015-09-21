@@ -110,12 +110,12 @@ sub index :Path :Args(0) {
     } elsif ( defined $params->{'ldapsearch_by_mac'} ) {
       push @{$return->{error}}, 'incorrect MAC address'
 	if ! $self->macnorm({ mac => $filter_meta });
-      $filter = sprintf("|(dhcpHWAddress=ethernet %s)(uid=%s)(cn=%s)",
+      $filter = sprintf("|(dhcpHWAddress=ethernet %s)(&(uid=%s)(authorizedService=802.1*))(&(cn=%s)(authorizedService=802.1*))",
 			$self->macnorm({ mac => $filter_meta, dlm => ':', }),
 			$self->macnorm({ mac => $filter_meta }),
 			$self->macnorm({ mac => $filter_meta }) );
 
-      $filter_show = sprintf("|(dhcpHWAddress=ethernet <kbd>%s</kbd>)(uid=<kbd>%s</kbd>)(cn=<kbd>%s</kbd>)",
+      $filter_show = sprintf("|(dhcpHWAddress=ethernet <kbd>%s</kbd>)(&(uid=<kbd>%s</kbd>)(authorizedService=802.1*))(&(cn=<kbd>%s</kbd>)(authorizedService=802.1*))",
 			     $self->macnorm({ mac => $filter_meta, dlm => ':', }),
 			     $self->macnorm({ mac => $filter_meta }),
 			     $self->macnorm({ mac => $filter_meta }) );
