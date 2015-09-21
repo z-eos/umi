@@ -74,13 +74,13 @@ sub accinfo :Path(accinfo) :Args(0) {
 sub sysinfo :Path(sysinfo) :Args(0) {
   my ( $self, $c ) = @_;
   my $sysinfo;
-  my $x = $c->session;
-  $x->{auth_pwd} = 'CENSORED';
-  $x->{auth_obj}->{userpassword} = 'CENSORED';
+  my %x = %{$c->session};
+  $x{auth_pwd} = 'CENSORED';
+  $x{auth_obj}->{userpassword} = 'CENSORED';
   use Data::Printer colored => 0;
   $sysinfo = {
 	       session => { title => 'Session',
-			    data => p($x,, colored => 0), },
+			    data => p(%x, colored => 0), },
 	       LDAP_CRUD_cfg => { title => 'LDAP_CRUD configuration ( $c->model(LDAP_CRUD)->cfg )',
 				  data => p($c->model('LDAP_CRUD')->cfg, colored => 0), },
 	      # UMI_config => { title => 'UMI config ( UMI->config )',

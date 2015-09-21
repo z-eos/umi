@@ -6,8 +6,8 @@
 
     <dl>
       <li>
-	<h3>Mandatory fields (signed with &laquo;<span class="fa fa-exclamation-circle text-danger umi-opacity05"></span>&raquo;)</h3>
-	without these two, no root account can be created.
+	<h4>Mandatory fields (the ones signed with &laquo;<span class="fa fa-exclamation-circle text-danger umi-opacity05"></span>&raquo;)</h4>
+	without these two fields, no root account can be created.
 	<dl class="dl-horizontal">
 	  <dt>FName:</dt>
 	  <dd>First Name</dd>

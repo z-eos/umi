@@ -133,6 +133,7 @@ __PACKAGE__->deny_access_unless_any( "/org",            [ qw/admin coadmin acl-w
 __PACKAGE__->deny_access_unless_any( "/org_root",       [ qw/admin coadmin/ ]);
 __PACKAGE__->deny_access_unless_any( "/searchadvanced", [ qw/admin coadmin/ ]);
 __PACKAGE__->deny_access_unless_any( "/searchby",       [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/sysinfo",        [ qw/admin/ ]);
 __PACKAGE__->deny_access_unless_any( "/user",           [ qw/admin acl-w-people/ ]);
 __PACKAGE__->deny_access_unless_any( "/userall",        [ qw/admin acl-w-people/ ]);
 __PACKAGE__->allow_access_if( "/user/modpwd",
