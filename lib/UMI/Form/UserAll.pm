@@ -170,6 +170,16 @@ has_field 'person_password2'
      );
 
 
+has_field 'person_description'
+  => ( type => 'TextArea',
+       label => 'Description',
+       label_class => [ 'col-xs-2', ],
+       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+       element_class => [ 'input-sm', ],
+       element_attr => { placeholder => 'Any description.',
+			 'autocomplete' => 'off', },
+       cols => 30, rows => 1);
+
 has_block 'group_person'
   => ( tag => 'div',
        render_list => [ 'person_org',
@@ -182,6 +192,7 @@ has_block 'group_person'
 			'person_login',
 			'person_password1',
 			'person_password2',
+			'person_description',
 		      ],
        attr => { id => 'group_person', },
      );
@@ -283,6 +294,17 @@ has_field 'account.password2'
 			 'data-name' => 'password2',
 			 'data-group' => 'account', },
      );
+
+has_field 'account.description'
+  => ( type => 'TextArea',
+       label => 'Description',
+       label_class => [ 'col-xs-2', ],
+       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+       element_class => [ 'input-sm', ],
+       element_attr => { placeholder => 'Any description.',
+			 'autocomplete' => 'off',
+			 'data-group' => 'account', },
+       cols => 30, rows => 1);
 
 has_field 'account.radiusgroupname'
   => ( type => 'Select',

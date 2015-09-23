@@ -185,12 +185,12 @@ sub index :Path :Args(0) {
 	{
 	 is_blocked => $mesg->count,
 	 is_dn => scalar split(',', $tmp) <= 3 ? 1 : 0,
-	 is_account => $tmp =~ /.*,$ldap_crud->cfg->{base}->{acc_root}/ ? 1 : 0,
-	 is_group => $tmp =~ /.*,$ldap_crud->cfg->{base}->{group}/ ? 1 : 0,
-	 jpegPhoto => $tmp =~ /.*,$ldap_crud->cfg->{base}->{acc_root}/ ? 1 : 0,
+	 is_account => $tmp =~ /.*,($ldap_crud->{cfg}->{base}->{acc_root})/ ? 1 : 0,
+	 is_group => $tmp =~ /.*,($ldap_crud->cfg->{base}->{group})/ ? 1 : 0,
+	 jpegPhoto => $tmp =~ /.*,($ldap_crud->cfg->{base}->{acc_root})/ ? 1 : 0,
 	 gitAclProject => $_->exists('gitAclProject') ? 1 : 0,
 	 userPassword => $_->exists('userPassword') ? 1 : 0,
-	 userDhcp => $tmp =~ /.*,$ldap_crud->cfg->{base}->{acc_root}/ &&
+	 userDhcp => $tmp =~ /.*,($ldap_crud->cfg->{base}->{acc_root})/ &&
 	 scalar split(',', $tmp) <= 3 ? 1 : 0,
 	};
       foreach $attr (sort $_->attributes) {
@@ -220,7 +220,7 @@ sub index :Path :Args(0) {
     my @ttentries_keys = $sort_order eq 'reverse' ?
       map { scalar reverse } sort map { scalar reverse } keys %{$ttentries} :
       sort { lc $a cmp lc $b } keys %{$ttentries};
-
+p $ttentries;
     $c->stash(
 	      template => 'search/searchby.tt',
 	      base_dn => $base,

@@ -140,10 +140,12 @@ sub create_account {
       if $self->is_ascii( $args->{'person_sn'} );
     $args->{'person_telephonenumber'} = '666'
       if $args->{'person_telephonenumber'} eq '';
-    $descr = 'description has to be here';
-    if (defined $args->{'descr'} && $args->{'descr'} ne '') {
-      $descr = join(' ', $args->{'descr'});
+
+    if (defined $args->{'person_description'} && $args->{'person_description'} ne '') {
+      $descr = join(' ', $args->{'person_description'});
       $descr = $self->utf2lat( $descr ) if $self->is_ascii( $descr );
+    } else {
+      $descr = 'description has to be here';
     }
 
     $args->{'person_title'} = 'employee'
@@ -186,7 +188,9 @@ sub create_account {
        uidNumber => $uidNumber,
        gidNumber => $ldap_crud->cfg->{stub}->{gidNumber},
        description => $descr,
-       gecos => $descr,
+       gecos => sprintf('%s %s',
+			$args->{person_givenname},
+			$args->{person_sn}),
        homeDirectory => $ldap_crud->cfg->{stub}->{homeDirectory},
        jpegPhoto => [ $jpeg ],
        loginShell => $ldap_crud->cfg->{stub}->{loginShell},
@@ -382,6 +386,9 @@ sub create_account {
 					 ->{$element->field('associateddomain')->value} : '',
 					 $element->field('associateddomain')->value),
 	   uidNumber => $uidNumber,
+	   description => defined $element->field('description')->value ?
+	   $element->field('description')->value : '',
+	   gecos => sprintf('%s %s',),
 	   givenName => $args->{person_givenname},
 	   sn => $args->{person_sn},
 	   telephoneNumber => $args->{person_telephonenumber},
@@ -618,6 +625,8 @@ sub create_account_branch_leaf {
 	     sn => $args->{sn},
 	     login => $args->{login},
 	     password => $args->{password},
+	     description => $args->{description} || 'no description yet',
+	     gecos => sprintf('%s %s', $args->{givenName}, $args->{sn}),
 	     telephoneNumber => $args->{telephoneNumber} || '666',
 	     jpegPhoto => $args->{jpegPhoto} || undef,
 	     
@@ -658,6 +667,7 @@ sub create_account_branch_leaf {
 	 $arg->{service} eq '802.1x-eap-tls' ) ||
        $arg->{service} eq 'web' ) {
     $authorizedService = [];
+    $authorizedService = [ description => $arg->{description}, ];
   } else {
     $authorizedService = [
 			  objectClass => $ldap_crud->cfg->{objectClass}->{acc_svc_common},
@@ -669,10 +679,9 @@ sub create_account_branch_leaf {
 			  sn => $arg->{sn},
 			  uidNumber => $arg->{uidNumber},
 			  loginShell => $ldap_crud->cfg->{stub}->{loginShell},
-			  gecos => uc($arg->{service}) . ': ' . $arg->{'login'} . ' @ ' .
-			  $arg->{associatedDomain},
-			  description => uc($arg->{service}) . ': ' . $arg->{'login'} . ' @ ' .
-			  $arg->{associatedDomain},
+			  gecos => sprintf('%s %s', $args->{givenName}, $args->{sn}),
+			  description => $arg->{description} ne '' ? $arg->{description} :
+			  sprintf('%s: %s @ %s', uc($arg->{service}), $arg->{'login'}, $arg->{associatedDomain}),
 			 ];
   }
 

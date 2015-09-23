@@ -79,12 +79,12 @@ sub sysinfo :Path(sysinfo) :Args(0) {
   $x{auth_obj}->{userpassword} = 'CENSORED';
   use Data::Printer colored => 0;
   $sysinfo = {
-	       session => { title => 'Session',
-			    data => p(%x, colored => 0), },
-	       LDAP_CRUD_cfg => { title => 'LDAP_CRUD configuration ( $c->model(LDAP_CRUD)->cfg )',
-				  data => p($c->model('LDAP_CRUD')->cfg, colored => 0), },
-	      # UMI_config => { title => 'UMI config ( UMI->config )',
-	      # 		data => p(UMI->config, colored => 0), },
+	      session => { title => 'Session',
+			   data => p(%x, colored => 0), },
+	      LDAP_CRUD_cfg => { title => 'LDAP_CRUD configuration ( $c->model(LDAP_CRUD)->cfg )',
+				 data => p($c->model('LDAP_CRUD')->cfg, colored => 0), },
+	      # UMI_c => { title => 'UMI c',
+	      # 		      data => p($c, colored => 0), },
 	     };
 
   $c->stash( template => 'sysinfo.tt',
