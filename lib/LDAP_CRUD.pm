@@ -877,16 +877,16 @@ sub block {
     foreach $ent_svc ( @ent_toblock ) {
       if ( $ent_svc->exists('userPassword') ) {
 	$userPassword = $self->pwdgen;
-	$msg = $self->mod( $ent_svc->dn,
-			   { userPassword => $userPassword->{ssha}, }, );
+	$msg = $self->modify( $ent_svc->dn,
+			      [ replace => [ userPassword => $userPassword->{ssha}, ], ], );
 	$return->{error} .= $self->err( $msg )->{html} if ref($msg) eq 'HASH';
       }
 
       if ( $ent_svc->exists('sshPublicKey') ) {
 	@userPublicKeys = $ent_svc->get_value('sshPublicKey');
 	@keys = map { $_ !~ /^from="127.0.0.1" / ? sprintf('from="127.0.0.1" %s', $_) : $_ } @userPublicKeys;
-	$msg = $self->mod( $ent_svc->dn,
-			   { sshPublicKey => \@keys, }, );
+	$msg = $self->modify( $ent_svc->dn,
+			      [ replace => [ sshPublicKey => \@keys, ],], );
 	$return->{error} .= $self->err( $msg )->{html} if ref($msg) eq 'HASH';
       }
       $return->{success} .= $ent_svc->dn . "\n";
@@ -913,8 +913,8 @@ sub block {
 	$ent_chg = $msg_chg->entry(0);
 	@blockgr = $ent_chg->get_value('memberUid');
 	push @blockgr, substr( (split /,/, $args->{dn})[0], 4 );
-	$ent_chg = $self->mod( $blockgr_dn,
-			       { memberUid => \@blockgr } );
+	$ent_chg = $self->modify( $blockgr_dn,
+				  [ replace => [ memberUid => \@blockgr, ],], );
 	if ( $ent_chg != 0 && defined $ent_chg->{error} ) {
 	  $return->{error} .= $self->err( $ent_chg )->{html};
 	}
