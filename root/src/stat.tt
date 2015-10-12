@@ -3,8 +3,11 @@
   [% IF stats.debug %]
   <div class="panel panel-info">
     <div class="panel-heading">
-      <span class="fa fa-line-chart"></span>
-      Page Statistics (debug level [% stats.debug %])
+      <span class="fa fa-bar-chart"></span>
+      Page Statistics <small><em>(debug level [% stats.debug %])</em></small>
+      <small class="pull-right">
+	<em>session expires: [% USE date %][% date.format(time = c.session_expires, format = '%F %T') %]</em>
+      </small>
     </div>
     [% IF stats.debug == 1 %]
       [% IF stats.elapsed < 0.1 %][% elapsed_bg = 'bg-success' %]

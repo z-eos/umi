@@ -220,7 +220,7 @@ sub index :Path :Args(0) {
     my @ttentries_keys = $sort_order eq 'reverse' ?
       map { scalar reverse } sort map { scalar reverse } keys %{$ttentries} :
       sort { lc $a cmp lc $b } keys %{$ttentries};
-p $ttentries;
+    # p $ttentries;
     $c->stash(
 	      template => 'search/searchby.tt',
 	      base_dn => $base,

@@ -559,6 +559,17 @@ has_field 'loginless_ovpn.devosver'
 			 'data-group' => 'loginless_ovpn', },
      );
 
+has_field 'loginless_ovpn.description'
+  => ( type => 'TextArea',
+       label => 'Description',
+       label_class => [ 'col-xs-2', ],
+       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+       element_class => [ 'input-sm', ],
+       element_attr => { placeholder => 'Any description.',
+			 'autocomplete' => 'off',
+			 'data-group' => 'loginless_ovpn', },
+       cols => 30, rows => 1);
+
 sub wrap_loginless_ovpn_elements {
   my ( $self, $input, $subfield ) = @_;
   my $output = sprintf('%s%s%s', ! $subfield ? qq{\n<div class="duplicate">} : qq{\n<div class="duplicated">},

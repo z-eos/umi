@@ -102,6 +102,9 @@ sub _build_cfg {
 		   gidNumber => 10012,
 		   noavatar_mgmnt => UMI->path_to('root', 'static', 'images', '/avatar-mgmnt.png'),
 		   icon => 'fa fa-user',
+		   icon_error => 'fa fa-exclamation-circle',
+		   icon_warning => 'fa fa-exclamation-triangle',
+		   icon_success => 'fa fa-check-circle',
 		   group_blocked => 'blocked',
 		  },
 	  rdn => {
