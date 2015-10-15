@@ -44,26 +44,11 @@ sub index :Path :Args(0) {
       	   $self->form->add_svc_acc ne '' &&
       	   ! defined $params->{'account.0.associateddomain'} ) {
       	$params->{'account.0.associateddomain'} = '' if ! $params->{'account.0.associateddomain'};
-      # 	$params->{'account.0.authorizedservice'} = '' if ! $params->{'account.0.aut# horizedservice'};
-      # 	$params->{'account.0.login'} = '' if ! $params->{'account.0.login'};
-      # 	$params->{'account.0.password1'} = '' if ! $params->{'account.0.password1'};
-      # 	$params->{'account.0.password2'} = '' if ! $params->{'account.0.password2'};
-      # 	$params->{'account.0.radiusgroupname'} = '' if ! $params->{'account.0.radiusgroupname'};
-      # 	$params->{'account.0.radiusprofiledn'} = '' if ! $params->{'account.0.radiusprofiledn'};
-      # 	$params->{'account.0.usercertificate'} = '' if ! $params->{'account.0.usercertificate'};
       }
       if ( defined $self->form->add_svc_acc &&
       		$self->form->add_svc_acc ne '' &&
       		! defined $params->{'loginless_ovpn.0.associateddomain'} ) {
       	$params->{'loginless_ovpn.0.associateddomain'} = '' if ! $params->{'loginless_ovpn.0.associateddomain'};
-      # 	$params->{'loginless_ovpn.0.devmake'} = '' if ! $params->{'loginless_ovpn.0.devmake'};
-      # 	$params->{'loginless_ovpn.0.devmodel'} = '' if ! $params->{'loginless_ovpn.0.devmodel'};
-      # 	$params->{'loginless_ovpn.0.devos'} = '' if ! $params->{'loginless_ovpn.0.devos'};
-      # 	$params->{'loginless_ovpn.0.devosver'} = '' if ! $params->{'loginless_ovpn.0.devosver'};
-      # 	$params->{'loginless_ovpn.0.devtype'} = '' if ! $params->{'loginless_ovpn.0.devtype'};
-      # 	$params->{'loginless_ovpn.0.ifconfigpush'} = '' if ! $params->{'loginless_ovpn.0.ifconfigpush'};
-      # 	$params->{'loginless_ovpn.0.status'} = '' if ! $params->{'loginless_ovpn.0.status'};
-      # 	$params->{'loginless_ovpn.0.userCertificate'} = '' if ! $params->{'loginless_ovpn.0.userCertificate'};
       }
       if ( defined $self->form->add_svc_acc &&
       	   $self->form->add_svc_acc ne '' &&
@@ -81,6 +66,14 @@ sub index :Path :Args(0) {
 	  $c->req->upload('account.' . $i . '.userCertificate')
 	  if defined $params->{'account.' . $i . '.userCertificate'} &&
 	  $params->{'account.' . $i . '.userCertificate'} ne '';
+	$i++;
+      }
+      $i = 0;
+      foreach ( $self->form->field('loginless_ssh')->fields ) {
+	$params->{'loginless_ssh.' . $i . '.keyfile'} =
+	  $c->req->upload('loginless_ssh.' . $i . '.keyfile')
+	  if defined $params->{'loginless_ssh.' . $i . '.keyfile'} &&
+	  $params->{'loginless_ssh.' . $i . '.keyfile'} ne '';
 	$i++;
       }
       $i = 0;
@@ -386,14 +379,19 @@ sub create_account {
 				       ->{$element->field('associateddomain')->value} : '',
 				       $element->field('associateddomain')->value),
 	   uidNumber => $uidNumber,
-	   description => defined $element->field('description')->value ?
-	   $element->field('description')->value : '',
 	   gecos => sprintf('%s %s',),
 	   givenName => $args->{person_givenname},
 	   sn => $args->{person_sn},
 	   telephoneNumber => $args->{person_telephonenumber},
 	   # jpegPhoto => $jpeg,
 	  };
+	
+	if( defined $element->field('description') ) {
+	  $x->{description} = $element->field('description')->value;
+	} else {
+	  $x->{description} = '';
+	}
+
 	if ( $form_field eq 'account' ) {
 	  if ( $element->field('authorizedservice')->value =~ /^802.1x-.*/ ) {
 	    if ( $element->field('authorizedservice')->value eq '802.1x-mac' ) {
@@ -437,6 +435,7 @@ sub create_account {
 	  
 	} elsif ( $x->{authorizedservice} eq 'ssh' ) {
 	  $x->{sshpublickey} = $element->field('key')->value;
+	  $x->{sshpublickeyfile} = $element->field('keyfile')->value;
 	  $x->{login} = $uid;
 	  $x->{password} = { $x->{authorizedservice} =>
 			     { clear => '<del>NOPASSWORD</del>' }
@@ -632,6 +631,7 @@ sub create_account_branch_leaf {
 	     
 	     to_sshkeygen => $args->{to_sshkeygen} || undef,
 	     sshpublickey => $args->{sshpublickey} || undef,
+	     sshpublickeyfile => $args->{sshpublickeyfile} || undef,
 	     sshkeydescr => $args->{sshkeydescr} || undef,
 	     # !!! here we much need check for cert existance !!!
 	     userCertificate => $args->{userCertificate} || '',
@@ -775,19 +775,28 @@ sub create_account_branch_leaf {
     #   p $sshkey;
     # } else {
     # }
-    if ( ref($arg->{sshpublickey}) eq 'ARRAY' ) {
-      foreach ( @{$arg->{sshpublickey}} ) {
-	push @{$sshPublicKey}, $_;
-      }
-    } else {
-      push @{$sshPublicKey}, $arg->{sshpublickey};
-    }
+    
+    $sshPublicKey = $self->file2var( $arg->{sshpublickeyfile}->{tempname}, $return, 1)
+      if defined $arg->{sshpublickeyfile};
+    push @{$sshPublicKey}, $arg->{sshpublickey}
+      if defined $arg->{sshpublickey} && $arg->{sshpublickey} ne '';
 
     $authorizedService = [
 			  objectClass => $ldap_crud->cfg->{objectClass}->{ssh},
 			  sshPublicKey => [ @$sshPublicKey ],
 			  uid => $arg->{uid},
 			 ];
+
+    push @{$authorizedService},
+      description => $arg->{description} ne 'no description yet' ?
+      $self->utf2lat( sprintf("%s\nNote: %s bytes file \"%s\" was uploaded",
+			      $arg->{description},
+			      $arg->{sshpublickeyfile}->{size},
+			      $arg->{sshpublickeyfile}->{filename}) ) :
+      $self->utf2lat( sprintf("Note: %s bytes file %s was uploaded",
+			      $arg->{sshpublickeyfile}->{size},
+			      $arg->{sshpublickeyfile}->{filename}) )
+		      if defined $arg->{sshpublickeyfile};
 
   #=== SERVICE: ovpn =================================================
   } elsif ( $arg->{service} eq 'ovpn' ) {
@@ -828,19 +837,21 @@ sub create_account_branch_leaf {
 
   # p $arg->{dn};
   # p $authorizedService;
-  
+  # p $sshPublicKey;
   my $mesg;
-  if ( $arg->{service} eq 'ssh' ) {
-    # for an existent SSH object we have to modify rather than add
-    $if_exist = $ldap_crud->search( { base => $arg->{dn}, scope => 'base', } );
-    if ( $if_exist->count ) {
-      $mesg = $ldap_crud->modify( $arg->{dn},
-				  [ add => [ sshPublicKey => $sshPublicKey, ], ], );
-      if ( $mesg ) {
-	push @{$return->{error}},
-	  sprintf('Error during %s service modification: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s',
-		  $arg->{service}, $mesg->{html}, $mesg->{srv}, $mesg->{text});
-      }
+  # for an existent SSH object we have to modify rather than add
+  $if_exist = $ldap_crud->search( { base => $arg->{dn}, scope => 'base', } );
+  if ( $arg->{service} eq 'ssh' && $if_exist->count ) {
+    $mesg = $ldap_crud->modify( $arg->{dn},
+				[ add => [ sshPublicKey => $sshPublicKey, ], ], );
+    if ( $mesg ) {
+      push @{$return->{error}},
+	sprintf('Error during %s service modification: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s',
+		$arg->{service}, $mesg->{html}, $mesg->{srv}, $mesg->{text});
+    } else {
+      push @{$return->{success}},
+	sprintf('<i class="%s fa-fw"></i>&nbsp;<em>key was added</em>',
+		$ldap_crud->cfg->{authorizedService}->{$arg->{service}}->{icon} );
     }
   } else {
     # for nonexistent SSH object and all others

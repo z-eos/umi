@@ -4,6 +4,8 @@
 package Tools;
 use Moose::Role;
 
+
+
 =head1 NAME
 
 UMI::Tools
@@ -24,13 +26,32 @@ returns 0 if it is and 1 if not
 
 sub is_ascii {
   my ($self, $arg) = @_;
-  if ( defined $arg && $arg ne '' &&
-       $arg !~ /^[[:ascii:]]+$/ ) {
+  if ( defined $arg && $arg ne '' && $arg !~ /^[[:ascii:]]+$/ ) {
     return 1;
   } else {
     return 0;
   }
 }
+
+
+=head2 regex
+
+regexps and other variables
+
+=cut
+
+has 'regex' => ( traits => ['Hash'], is => 'ro', isa => 'HashRef', builder => '_build_regex', );
+
+sub _build_regex {
+  my $self = shift;
+
+  return {
+	  sshpubkey => { type => qr/ssh-rsa|ssh-dss|ssh-ed25519|ecdsa-\S+/,
+			 id => "[a-zA-Z_][a-zA-Z0-9_-]+",
+			 base64 => "[A-Za-z0-9+/]", },
+	 }
+}
+
 
 =head2 utf2lat
 
@@ -139,17 +160,29 @@ sub pwdgen {
 read input file into the returned variable and set final message on
 results of the assignment
 
+if $return_as_arr defined and is set to 1, then return array of
+strings, rather than scalar variable
+
 =cut
 
 
 sub file2var {
-  my  ( $self, $file, $final_message ) = @_;
-  local $/ = undef;
-  open FILE, $file || do { push @{$final_message->{error}}, "Can not open $file: $!"; exit 1; };
+  my  ( $self, $file, $final_message, $return_as_arr ) = @_;
+  my @file_in_arr;
+  my $file_in_str;
   binmode FILE;
-  my $file_in_var = <FILE>;
+  open FILE, $file || do { push @{$final_message->{error}}, "Can not open $file: $!"; exit 1; };
+  if ( defined $return_as_arr && $return_as_arr == 1 ) {
+    while (<FILE>) {
+      chomp;
+      push @file_in_arr, $_;
+    }
+  } else {
+    local $/ = undef;
+    $file_in_str = <FILE>;
+  }
   close FILE || do { push @{$final_message->{error}}, "$!"; exit 1; };
-  return $file_in_var;
+  return defined $return_as_arr && $return_as_arr == 1 ? \@file_in_arr : $file_in_str;
 }
 
 
@@ -263,6 +296,144 @@ sub macnorm {
   } else {
     return 0;
   }
+}
+
+
+=head2 sshpubkey_parse
+
+SSH2 pub key validator
+
+=cut
+
+sub sshpubkey_parse {
+  my ($self, $pub_key, $key_hash) = @_;
+  my $in = $$pub_key;
+
+  $key_hash->{original} = $in;
+  if ( ! $self->sshpubkey_parse_options(\$in, $key_hash) ||
+       ( ! defined $key_hash->{type} && ! $self->sshpubkey_parse_type(\$in, $key_hash) ) ||
+       ! $self->sshpubkey_parse_body(\$in, $key_hash) ) {
+    return 0;
+  }
+  $key_hash->{comment} = $in;
+  return 1;
+}
+
+=head2 sshpubkey_parse_options
+
+SSH2 pub key options validator
+
+=cut
+
+sub sshpubkey_parse_options {
+  my ($self, $pub_key, $key_hash) = @_;
+  my $in = $$pub_key;
+  $key_hash->{options} = {};
+  my $id = "[a-zA-Z_][a-zA-Z0-9_-]+";
+
+  while (1) {
+    my $value;
+    if ($in =~ /^(?<id>${id})(?<delim>(?:,|\s+))(?<tail>.*)/ ) {
+      # boolean option (without `=' sign)
+      $in = $+{tail};
+      my $is_type = $+{id};
+      if ( $is_type =~ /(?<type>$self->{regex}->{sshpubkey}->{type})/ ) {
+	$key_hash->{type} = $+{type};
+	$value = 'NO_OPTIONS'; # key contains no option, starts just with key type
+      } else {
+	$value = 1;
+      }
+    } elsif ($in =~ /^(?<id>${id})=(?<val>[^",]+)(?<delim>(?:,|\s+))(?<tail>.*)/) {
+      # option with `=' sign
+      $in = $+{tail};
+      $value = $+{val};
+    } elsif ($in =~ /^(?<id>${id})="(?<val>[^\\"]*)"(?<delim>(?:,|\s+))(?<tail>.*)/) {
+      # option with `=' sign and `"' after it
+      $in = $+{tail};
+      $value = $+{val};
+    } elsif ($in =~ /^(?<id>${id})="(?<val>[^\\"]*)\\(?<esc>.)(?<tail>.*)/) {
+      # option with `=' sign and escapes after it
+      $in = $+{tail};
+      $value = $+{val} . $+{esc};
+      while (1) {
+	if ($in =~ /^(?<part>[^\\"]*)\\(?<esc>.)(?<tail>.*)/) {
+	  $value .= $+{part} . $+{esc};
+	  $in = $+{tail};
+	} elsif ($in =~ /^(?<part>[^\\"]*)"(?<delim>(?:,|\s+))(?<tail>.*)/) {
+	  $in = $+{tail};
+	  $value .= $+{part};
+	  last;
+	}
+      }
+    } else {
+      $key_hash->{error} = "Pasing problem, incorrect SSH2 option/s found, failed at: \"... $in\"";
+      return 0;
+    }
+    if ( $+{id} eq 'environment' ) {
+      my ( $one, $two ) = split /=/, $value;
+      $key_hash->{options}->{environment}->{$one} = $two;
+    } elsif ( $+{id} eq 'permitopen' ) {
+      my ( $one, $two ) = split /:/, $value;
+      $key_hash->{options}->{permitopen}->{$one} = $two;
+    } elsif ( $+{id} eq 'from' ) {
+      push @{$key_hash->{options}->{from}}, split /,/,$value;
+    } else {
+      $key_hash->{options}->{$+{id}} = $value if $value ne 'NO_OPTIONS';
+    }
+    last if $+{delim} ne ",";
+  }
+  $$pub_key = $in;
+  return 1;
+}
+
+=head2 sshpubkey_parse_type
+
+SSH2 pub key type validator
+
+=cut
+
+sub sshpubkey_parse_type {
+  my ($self, $pub_key, $key_hash) = @_;
+  my $in = $$pub_key;
+
+  if ( $in !~ /^.*\s*(?<type>$self->{regex}->{sshpubkey}->{type})\s(?<tail>.*)/ ) {
+    $key_hash->{error} = "Parsing problem, no valid SSH2 key type found!";
+    return 0;
+  } else {
+    $in = $+{tail};
+    $key_hash->{type} = $+{type};
+  }
+  $$pub_key = $in;
+  return 1;
+}
+
+=head2 sshpubkey_parse_body
+
+SSH2 pub key body validator
+
+=cut
+
+sub sshpubkey_parse_body {
+  my ($self, $pub_key, $key_hash) = @_;
+  my $in = $$pub_key;
+
+  if ( $in !~ /^(?<key>$self->{regex}->{sshpubkey}->{base64}+)\s*(?<tail>.*)/ ) {
+    $key_hash->{error} = "Parsing problem, no valid SSH2 key body found!";
+    return 0;
+  } else {
+    $in = $+{tail};
+    # !!! STUB !!! here we need base64 validation !!! STUB !!!
+    my $x = $+{key};
+    my $y = decode_base64($x);
+    if ( $y ne '' && length($x) > 100 && $y =~ $self->{regex}->{sshpubkey}->{type} ) {
+      $key_hash->{key} = $x;
+    } else {
+      $key_hash->{error} = "Parsing problem, key body is not base64!";
+      return 0;
+    }
+  }
+  $$pub_key = $in;
+  return 1;
 }
 
 

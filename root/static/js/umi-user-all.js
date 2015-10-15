@@ -1,9 +1,8 @@
-/* 
-   --- SIMPLIFIED FORM SWITCHER start ----------------------------------------
+/* --- SIMPLIFIED FORM SWITCHER start ----------------------------------------
 
   "simplified" user account creation switch. When checked, this
-  checkbox causes all services related UI been hidden and Domain
-  Name field been showed in section Person bellow.
+  checkbox causes all the service related UI been hidden and Domain
+  Name field been unhided in the section "Person".
 
 */
 //if (!$(".has-error")) {
@@ -23,6 +22,29 @@ $("#person_simplified").click(function() {
 });
 // --- SIMPLIFIED FORM SWITCHER stop -----------------------------------------
 
+/* --- SSHPUBKEY/FILE SWITCHER start -----------------------------------------
+
+   hide one of `sshpubkey' or `sshpubkeyfile' according the clicked
+   one (if one clicked, another one is hidden)
+
+*/
+/*$('textarea[data-group=loginless_ssh]').on('input', function () {
+    var $file = $(this).closest('.repinst').find('[id=sshpubkeyfile]');
+	this.value === '' ? $file.show() : $file.hide();
+});
+
+var global = {};
+
+global.triggerTextarea = function (self) {
+	var $textarea = $(self).closest('.repinst').find('[id="sshpubkey"]');
+
+	setTimeout(function () {
+		self.files && self.files.length
+			? $textarea.hide()
+			: $textarea.show()
+	}, 10);
+};*/
+// --- SSHPUBKEY/FILE SWITCHER stop ------------------------------------------
 
 // --- FORM LOGICS start -----------------------------------------------------
 

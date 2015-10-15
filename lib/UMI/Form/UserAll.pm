@@ -408,6 +408,7 @@ has_field 'loginless_ssh.key'
   => ( type => 'TextArea',
        label => 'SSH Pub Key',
        label_class => [ 'col-xs-2', 'required', ],
+       wrapper_attr => { id => 'sshpubkey', },
        element_wrapper_class => [ 'col-xs-10', 'col-lg-8', ],
        element_class => [ 'input-sm', 'mono', ],
        element_attr => { placeholder => 'Paste SSH key',
@@ -415,6 +416,31 @@ has_field 'loginless_ssh.key'
 			 'data-group' => 'loginless_ssh', },
        cols => 30, rows => 4);
 
+
+has_field 'loginless_ssh.keyfile'
+  => ( type => 'Upload',
+       label => 'SSH Pub Key/s File',
+       label_class => [ 'col-xs-2', 'required', ],
+       wrapper_attr => { id => 'sshpubkeyfile', },
+       element_wrapper_class => [ 'col-xs-2', 'col-lg-3', ],
+       element_class => [ 'btn', 'btn-default', 'btn-sm',],
+       element_attr => {
+			'data-name' => 'key',
+			'data-group' => 'loginless_ssh',
+			# 'onchange' => 'global.triggerTextarea(this)',
+		       },
+     );
+
+has_field 'loginless_ssh.description'
+  => ( type => 'TextArea',
+       label => 'Description',
+       label_class => [ 'col-xs-2', ],
+       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+       element_class => [ 'input-sm', ],
+       element_attr => { placeholder => 'Any description.',
+			 'autocomplete' => 'off',
+			 'data-group' => 'ssh', },
+       cols => 30, rows => 1);
 
 sub wrap_loginless_ssh_elements {
   my ( $self, $input, $subfield ) = @_;
@@ -427,7 +453,7 @@ has_block 'ssh'
   => ( tag => 'fieldset',
        label => '<a href="#" class="btn btn-success btn-sm" data-duplicate="duplicate" title="Duplicate this section">' .
        '<span class="fa fa-plus-circle fa-lg"></span></a>&nbsp;' .
-       'SSH Key&nbsp;<small class="text-muted"><em>( <span class="fa fa-ellipsis-h"></span> )</em></small>',
+       'SSH Key&nbsp;<small class="text-muted"><em>( both, key and keyfile are added if provided )</em></small>',
        render_list => [ 'loginless_ssh', ],
        class => [ 'tab-pane', 'fade', ],
        attr => { id => 'ssh',
@@ -963,15 +989,20 @@ sub validate {
     #----------------------------------------------------------
   
     #---[ ssh + ]------------------------------------------------
+    my $sshpubkeyuniq;
     $i = 0;
     foreach $element ( $self->field('loginless_ssh')->fields ) {
       if ( defined $element->field('associateddomain')->value &&
-	   ! defined $element->field('key')->value ) { # fqdn but no key
-	$element->field('key')->add_error('Key field have to be defined!');
-      } elsif ( defined $element->field('key')->value &&
+	   ! defined $element->field('key')->value &&
+	   ! defined $element->field('keyfile')->value ) { # fqdn but no key
+	$element->field('key')->add_error('Either Key, KeyFile or both field/s have to be defined!');
+	$element->field('keyfile')->add_error('Either KeyFile, Key or both field/s have to be defined!');
+      } elsif ( ( defined $element->field('key')->value ||
+		  defined $element->field('keyfile')->value ) &&
 		! defined $element->field('associateddomain')->value ) { # key but no fqdn
 	$element->field('associateddomain')->add_error('Domain field have to be defined!');
       } elsif ( ! defined $element->field('key')->value &&
+		! defined $element->field('keyfile')->value &&
 		! defined $element->field('associateddomain')->value &&
 		$i > 0 ) {	# empty duplicatee
 	$self->add_form_error('<span class="fa-stack fa-fw">' .
@@ -979,27 +1010,76 @@ sub validate {
 			      '<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
 			      '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
 			      '<b> <i class="fa fa-arrow-right"></i> SSH:</b> Empty duplicatee! Fill it or remove, please');
-      } elsif ( defined $element->field('key')->value &&
-		defined $element->field('associateddomain')->value ) {
-	# prepare to know if key+fqdn is uniq?
-	if ( ! $i ) {
-	  $elementcmp->{$element->field('key')->value . $element->field('associateddomain')->value} = 1;
-	} else {
-	  $elementcmp->{$element->field('key')->value . $element->field('associateddomain')->value}++;
+      }
+
+      # prepare to know if fqdn+key+keyfile is uniq?
+      $sshpubkeyuniq->{associateddomain} = defined $element->field('associateddomain')->value ?
+	$element->field('associateddomain')->value : '';
+      $sshpubkeyuniq->{key} = defined $element->field('key')->value ?
+	$element->field('key')->value : '';
+      $sshpubkeyuniq->{keyfile} = defined $element->field('keyfile')->value ?
+	$element->field('keyfile')->value->{filename} : '';
+      $sshpubkeyuniq->{hash} = sprintf('%s%s%s',
+				       $sshpubkeyuniq->{associateddomain},
+				       $sshpubkeyuniq->{key},,
+				       $sshpubkeyuniq->{keyfile});
+      $elementcmp->{$sshpubkeyuniq->{hash}} = ! $i ? 1 : $elementcmp->{$sshpubkeyuniq->{hash}}++;
+
+      # validate keyfile if provided
+      my $sshpubkey_hash = {};
+      my ( $sshpubkey, $key_file, $key_file_msg );
+      if ( defined $element->field('keyfile')->value &&
+	   ref($element->field('keyfile')->value) eq 'Catalyst::Request::Upload' ) {
+	$key_file = $self->file2var( $element->field('keyfile')->value->{tempname}, $key_file_msg, 1);
+	$element->field('keyfile')->add_error($key_file_msg->{error})
+	  if defined $key_file_msg->{error};
+	foreach (@{$key_file}) {
+	  my $abc = $_;
+	  if ( ! $self->sshpubkey_parse(\$abc, $sshpubkey_hash) ) {
+	    $self->add_form_error('<span class="fa-stack fa-fw">' .
+				  '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
+				  '<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
+				  '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
+				  '<b> <i class="fa fa-arrow-right"></i> SSH:</b> ' . $sshpubkey_hash->{error});
+	  }
+	  $sshpubkey_hash = {};
 	}
       }
-    
-      $i++;
-    }
-  
-    $i = 0;
-    foreach $element ( $self->field('loginless_ssh')->fields ) {
-      if ( defined $element->field('key')->value && $element->field('key')->value ne '' &&
-	   defined $element->field('associateddomain')->value && $element->field('associateddomain')->value ne '' ) {
-	$element->field('key')->add_error('The same key is defined more than once for the same FQDN')
-	  if $elementcmp->{$element->field('key')->value . $element->field('associateddomain')->value} > 1;
+      
+      $sshpubkey = defined $element->field('key')->value ? $element->field('key')->value : undef;
+      if( defined $sshpubkey && ! $self->sshpubkey_parse(\$sshpubkey, $sshpubkey_hash) ) {
+	$self->add_form_error('<span class="fa-stack fa-fw">' .
+			      '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
+			      '<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
+			      '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
+			      '<b> <i class="fa fa-arrow-right"></i> SSH:</b> ' . $sshpubkey_hash->{error});
       }
       $i++;
+    }
+
+    foreach $element ( $self->field('loginless_ssh')->fields ) {
+      $sshpubkeyuniq->{associateddomain} = defined $element->field('associateddomain')->value ?
+	$element->field('associateddomain')->value : '';
+      $sshpubkeyuniq->{key} = defined $element->field('key')->value ?
+	$element->field('key')->value : '';
+      $sshpubkeyuniq->{keyfile} = defined $element->field('keyfile')->value ?
+	$element->field('keyfile')->value->{filename} : '';
+      $sshpubkeyuniq->{hash} = sprintf('%s%s%s',
+				       $sshpubkeyuniq->{associateddomain},
+				       $sshpubkeyuniq->{key},,
+				       $sshpubkeyuniq->{keyfile});
+      $element->field('key')->add_error('The same key is defined more than once for the same FQDN')
+	if $elementcmp->{$sshpubkeyuniq->{hash}} > 1 &&
+	$sshpubkeyuniq->{keyfile} eq '' &&
+	$sshpubkeyuniq->{key} ne '';
+      $element->field('keyfile')->add_error('The same keyfile is defined more than once for the same FQDN')
+	if $elementcmp->{$sshpubkeyuniq->{hash}} > 1 &&
+	$sshpubkeyuniq->{key} eq '' &&
+	$sshpubkeyuniq->{keyfile} ne '';
+      $element->field('key')->add_error('The same key and keyfile are defined more than once for the same FQDN')
+	if $elementcmp->{$sshpubkeyuniq->{hash}} > 1 &&
+	$sshpubkeyuniq->{keyfile} ne '' &&
+	$sshpubkeyuniq->{key} ne '';
     }
 
     $self->add_form_error('<span class="fa-stack fa-fw">' .

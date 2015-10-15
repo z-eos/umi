@@ -276,7 +276,8 @@ sub _build_cfg {
 		     descr => 'SSH key',
 		     disabled => 0,
 		     icon => 'fa fa-key',
-		     # data_fields => 'block_ssh',
+		     # data_fields => 'key,keyfile,associateddomain',
+		     # data_relation => 'sshpubkey',
 		    },
 	   'gpg' => {
 		     auth => 0,
