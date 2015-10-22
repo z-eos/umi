@@ -101,13 +101,15 @@
 	  </h4>
 	</div>
 	<div class="modal-body text-primary">
+	  <span class="fa fa-object-group fa-lg"></span>&nbsp;
+	  with subtree
 	  <input type="checkbox" name="ldap_ldif_recursive">
-	  Sub (entire subtree)
 	  </input>
 	</div>
 	<div class="modal-body text-primary">
+	  <span class="fa fa-info-circle fa-lg"></span>&nbsp;
+	  system info
 	  <input type="checkbox" name="ldap_ldif_sysinfo">
-	  Get system info as well
 	  </input>
 	</div>
 	<div class="modal-footer">

@@ -70,6 +70,7 @@ sub _build_cfg {
 		   acc_root =>       'ou=People,' . UMI->config->{ldap_crud_db},
 		   acc_svc_branch => 'ou=People,' . UMI->config->{ldap_crud_db},
 		   acc_svc_common => 'ou=People,' . UMI->config->{ldap_crud_db},
+		   alias =>           'ou=alias,' . UMI->config->{ldap_crud_db},
 		   dhcp =>           'ou=DHCP,' . UMI->config->{ldap_crud_db},
 		   gitacl =>         'ou=GitACL,' . UMI->config->{ldap_crud_db},
 		   group =>          'ou=group,' . UMI->config->{ldap_crud_db},
@@ -987,41 +988,44 @@ sub ldif {
   my ($self, $dn, $recursive, $sysinfo) = @_;
   use POSIX qw(strftime);
   my $ts = strftime "%Y-%m-%d %H:%M:%S", localtime;
-  my $return->{success} = sprintf("
+  my $return->{ldif} = sprintf("
 ## LDIF export for  \"%s\"
 ## Search Scope: \"base\"
 ## Search Filter: \"(objectClass=*)\"
 ##
-## LDIF generated on %s, by UMI\n",
-		       $dn,
-		       $ts);
+## LDIF generated on %s, by UMI\n", $dn, $ts);
 
-  my $msg = $self->ldap->search ( base => $dn,
-				  scope => $recursive ? 'sub' : 'base',
-				  filter => 'objectClass=*',
-				  attrs => $sysinfo ? [ '*',
-							'createTimestamp',
-							'creatorsName',
-							'entryCSN',
-							'entryDN',
-							'entryUUID',
-							'hasSubordinates',
-							'modifiersName',
-							'modifyTimestamp',
-							'structuralobjectclass',
-							'subschemaSubentry',
-						      ] : [ '*' ], );
+    my $msg = $self->ldap->search ( base => $dn,
+				    scope => $recursive ? 'sub' : 'base',
+				    filter => 'objectClass=*',
+				    attrs => $sysinfo ? [ '*',
+							  'createTimestamp',
+							  'creatorsName',
+							  'entryCSN',
+							  'entryDN',
+							  'entryUUID',
+							  'hasSubordinates',
+							  'modifiersName',
+							  'modifyTimestamp',
+							  'structuralobjectclass',
+							  'subschemaSubentry',
+							] : [ '*' ], );
   if ($msg->is_error()) {
     $return->{error} .= $self->err( $msg );
   } else {
     my @entries = $msg->sorted;
     foreach my $entry ( @entries ) {
-      $return->{success} .= $entry->ldif;
+      $return->{ldif} .= $entry->ldif;
     }
+    $return->{success} .= sprintf('LDIF for object with DN:<blockquote class="mono">%s</blockquote> generated including%s recursion and including%s system data.',
+				  $dn,
+				  ! $recursive ? ' no' : '',
+				  ! $sysinfo ? ' no' : '' );
   }
-  my $a = ldap_explode_dn($dn, casefold => 'none');
-  pop $a;
-  pop $a;
+  $return->{outfile_name} = join('_', split(/,/,canonical_dn($dn, casefold => 'none', reverse => 1, )));
+  $return->{dn} = $dn;
+  $return->{recursive} = $recursive;
+  $return->{sysinfo} = $sysinfo;
   return $return;
 }
 

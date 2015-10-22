@@ -2,24 +2,37 @@
 
 <h2>Search Simple Results <small><em>base: [% params.ldapsearch_base %]; &nbsp;&nbsp; filter: [% params.ldapsearch_filter %]</em></small></h2>
 
-[% IF final_message.error %]
-<div class="panel panel-danger">
-  <div class="panel-heading">
-    <h4><span class="glyphicon glyphicon-exclamation-sign">&nbsp;</span>Error!</h4>
-  </div>
-  <div class="panel-body">
-    <ul>
-      [% FOREACH i IN final_message.error %]
-        [% i %]
-      [% END %]
-    </ul>
-  </div>
-</div>
-[% ELSIF final_message.success %]
+[% INCLUDE ldap_err.tt %]
+
+<form method="POST" role="form" action="/searchby/ldif_gen2f" id="f_ldif_gen2f">
+  <input id="ldap_ldif_recursive"
+	 class="form-control"
+	 type="hidden"
+	 value="[%final_message.recursive %]"
+	 name="ldap_ldif_recursive">
+  <input id="ldap_ldif_sysinfo"
+	 class="form-control"
+	 type="hidden"
+	 value="[%final_message.sysinfo %]"
+	 name="ldap_ldif_sysinfo">
+  
+  <button class="btn btn-info btn-sm umi-btn-event umi-btn-logic"
+	  value="[%final_message.dn %]"
+	  name="ldap_ldif"
+	  data-umiact="/searchby/ldif_gen2f"
+	  title='save LDIF bellow as file: [% final_message.outfile_name %]_LDIF.txt'
+	  type="submit">
+    <span class="fa fa-download fa-lg"></span>
+  </button>
+</form>
+<br>
 <pre>
-  [% final_message.success %]
+  [% final_message.ldif %]
 </pre>
-[% END %]
 
-
-
+<script type="text/javascript">  
+ $(function(){
+   // console.log("ready");
+   $('form#f_ldif_gen2f').off('submit');
+ });
+</script>

@@ -71,7 +71,7 @@
 	      </a>
 	    </li>[% END %]
 	    [% IF c.check_user_roles('admin') || c.check_user_roles('dhcp') %]
-            <li>
+            <li class="disabled">
 	      <a href="[% c.uri_for_action('dhcp_root') %]" tabindex="7">
         	<span class="fa fa-fw fa-sitemap"></span>
         	DHCP
@@ -236,10 +236,10 @@
 		<span class="[% icon_class %] fa-sitemap"></span>&nbsp;DHCP</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
-			value="ou=[% helper_cfg('cfg_ldap_crud','base', 'alias') %]"
+			value="[% helper_cfg('cfg_ldap_crud','base', 'alias') %]"
 			name="ldapsearch_base" tabindex="22"
 			title="filter pattern with base Aliases">
-		<span class="[% icon_class %] fa-puzzle-piece"></span>&nbsp;mail alias</button></li>
+		<span class="[% icon_class %] fa-files-o"></span>&nbsp;alias</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
 			value="[% helper_cfg('cfg_ldap_crud','base', 'workstation') %]"
@@ -251,7 +251,7 @@
 			value="[% helper_cfg('cfg_ldap_crud','base', 'machines') %]"
 			name="ldapsearch_base" tabindex="24"
 			title="filter pattern with base Machines">
-		<span class="[% icon_class %] fa-laptop"></span>&nbsp;machines</button></li>
+		<span class="[% icon_class %] fa-server"></span>&nbsp;machines</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
 			value="[% helper_cfg('cfg_ldap_crud','base', 'gitacl') %]"
@@ -314,7 +314,7 @@
 	[% IF c.user %]
         <li class="dropdown float-right">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-	    <span class="fa fa-street-view"></span>
+	    <span class="fa fa-bookmark"></span>
 	    [% c.user() %]
 	    <span class="caret"></span>
 	  </a>

@@ -1170,16 +1170,36 @@ Since it is separate action, it is poped out of action proc()
 sub ldif_gen :Path(ldif_gen) :Args(0) {
   my ( $self, $c ) = @_;
   my $params = $c->req->parameters;
-
+  my $ldif = $c->model('LDAP_CRUD')->
+    ldif(
+	 $params->{ldap_ldif},
+	 defined $params->{ldap_ldif_recursive} && $params->{ldap_ldif_recursive} ne '' ? 1 : 0,
+	 defined $params->{ldap_ldif_sysinfo} && $params->{ldap_ldif_sysinfo} ne '' ? 1 : 0
+	);
   $c->stash(
 	    template => 'search/ldif.tt',
-	    final_message => $c->model('LDAP_CRUD')
-	    ->ldif(
-		   $params->{ldap_ldif},
-		   defined $params->{ldap_ldif_recursive} && $params->{ldap_ldif_recursive} ne '' ? 1 : 0,
-		   defined $params->{ldap_ldif_sysinfo} && $params->{ldap_ldif_sysinfo} ne '' ? 1 : 0
-		  ),
-	  );
+	    final_message => $ldif,
+	   );
+}
+
+sub ldif_gen2f :Path(ldif_gen2f) :Args(0) {
+  my ( $self, $c ) = @_;
+  my $params = $c->req->parameters;
+  my $ldif = $c->model('LDAP_CRUD')->
+    ldif(
+	 $params->{ldap_ldif},
+	 defined $params->{ldap_ldif_recursive} && $params->{ldap_ldif_recursive} ne '' ? 1 : 0,
+	 defined $params->{ldap_ldif_sysinfo} && $params->{ldap_ldif_sysinfo} ne '' ? 1 : 0
+	);
+
+    $c->stash(
+	      current_view => 'Download',
+	      download => 'text/plain',
+	      plain => $ldif->{success},
+	      outfile_name => $ldif->{outfile_name} . '_LDIF',
+	      outfile_ext => 'ldif',
+	     );
+    $c->forward('UMI::View::Download');
 }
 
 

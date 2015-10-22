@@ -27,9 +27,10 @@
    </div>
    
    <script type="text/javascript">  
-    function showLoader () {$('#loaderfa').show(200);}
+    function showLoader () { $('#loaderfa').show(200); }
+    // console.log("footer");
     $('form').on('submit', showLoader);
-    window.onbeforeunload = showLoader;
+    // // window.onbeforeunload = showLoader;
     // $(window).load(function(){
     //   $('#loader').fadeOut('slow',function(){$(this).remove();});
     // });
