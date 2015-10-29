@@ -249,13 +249,12 @@ sub create_account {
     # Simplified Account mail branch of ROOT Object Creation
     #---------------------------------------------------------------------
     $branch =
-      $self
-      ->create_account_branch ( $ldap_crud,
-				{
-				 uid => $uid,
-				 authorizedservice => 'mail',
-				 associateddomain => $args->{person_associateddomain},
-				},
+      $ldap_crud
+      ->create_account_branch ({
+				uid => $uid,
+				authorizedservice => 'mail',
+				associateddomain => $args->{person_associateddomain},
+			       },
 			      );
 
     push @{$final_message->{success}}, $branch->{success} if defined $branch->{success};
@@ -288,7 +287,7 @@ sub create_account {
     }
 
     $leaf =
-      $self->create_account_branch_leaf ( $ldap_crud, $x, );
+      $ldap_crud->create_account_branch_leaf ( $x );
     push @{$final_message->{success}}, @{$leaf->{success}} if defined $leaf->{success};
     push @{$final_message->{warning}}, @{$leaf->{warning}} if defined $leaf->{warning};
     push @{$final_message->{error}}, @{$leaf->{error}} if defined $leaf->{error};
@@ -297,13 +296,12 @@ sub create_account {
     # Simplified Account xmpp branch of ROOT Object Creation
     #---------------------------------------------------------------------
     $branch =
-      $self
-      ->create_account_branch ( $ldap_crud,
-				{
-				 uid => $uid,
-				 authorizedservice => 'xmpp',
-				 associateddomain => $args->{person_associateddomain},
-				},
+      $ldap_crud
+      ->create_account_branch ({
+				uid => $uid,
+				authorizedservice => 'xmpp',
+				associateddomain => $args->{person_associateddomain},
+			       },
 			      );
 
     push @{$final_message->{success}}, $branch->{success} if defined $branch->{success};
@@ -317,7 +315,7 @@ sub create_account {
     $x->{authorizedservice} = 'xmpp';
 
     $leaf =
-      $self->create_account_branch_leaf ( $ldap_crud, $x, );
+      $ldap_crud->create_account_branch_leaf ( $x );
     push @{$final_message->{success}}, @{$leaf->{success}} if defined $leaf->{success};
     push @{$final_message->{warning}}, @{$leaf->{warning}} if defined $leaf->{warning};
     push @{$final_message->{error}}, @{$leaf->{error}} if defined $leaf->{error};
@@ -341,15 +339,14 @@ sub create_account {
 	# Account branch of ROOT Object
 	#---------------------------------------------------------------------
 	$branch =
-	  $self
-	  ->create_account_branch ( $ldap_crud,
-				    {
-				     uid => $uid,
-				     authorizedservice => $form_field ne 'account' ?
-				     substr($form_field, 10) :
-				     $element->field('authorizedservice')->value,
-				     associateddomain => $element->field('associateddomain')->value,
-				    },
+	  $ldap_crud
+	  ->create_account_branch ({
+				    uid => $uid,
+				    authorizedservice => $form_field ne 'account' ?
+				    substr($form_field, 10) :
+				    $element->field('authorizedservice')->value,
+				    associateddomain => $element->field('associateddomain')->value,
+				   },
 				  );
 
 	push @{$final_message->{success}}, $branch->{success} if defined $branch->{success};
@@ -379,18 +376,15 @@ sub create_account {
 				       ->{$element->field('associateddomain')->value} : '',
 				       $element->field('associateddomain')->value),
 	   uidNumber => $uidNumber,
-	   gecos => sprintf('%s %s',),
+	   gecos => sprintf('%s %s', $args->{person_givenname}, $args->{person_sn}),
 	   givenName => $args->{person_givenname},
 	   sn => $args->{person_sn},
 	   telephoneNumber => $args->{person_telephonenumber},
 	   # jpegPhoto => $jpeg,
 	  };
-	
-	if( defined $element->field('description') ) {
-	  $x->{description} = $element->field('description')->value;
-	} else {
-	  $x->{description} = '';
-	}
+
+	$x->{description} =
+	  defined $element->field('description') ? $element->field('description')->value : '';
 
 	if ( $form_field eq 'account' ) {
 	  if ( $element->field('authorizedservice')->value =~ /^802.1x-.*/ ) {
@@ -400,18 +394,15 @@ sub create_account {
 			       };
 	    } elsif ( $element->field('authorizedservice')->value eq '802.1x-eap-tls' ) {
 	      $x->{password} = { $element->field('authorizedservice')->value =>
-				 { clear => sprintf('%s%s',
-						    defined $ldap_crud
-						    ->cfg
-						    ->{authorizedService}
-						    ->{$element->field('authorizedservice')->value}
-						    ->{login_prefix} ?
-						    $ldap_crud->cfg
-						    ->{authorizedService}
-						    ->{$element->field('authorizedservice')->value}
-						    ->{login_prefix} : '',
-						    defined $element->field('login')->value ?
-						    $element->field('login')->value : $uid ) }
+				 { clear =>
+				   sprintf('%s%s',
+					   defined $ldap_crud->cfg->{authorizedService}
+					   ->{$element->field('authorizedservice')->value}
+					   ->{login_prefix} ?
+					   $ldap_crud->cfg->{authorizedService}->{$element->field('authorizedservice')->value}
+					   ->{login_prefix} : '',
+					   defined $element->field('login')->value ?
+					   $element->field('login')->value : $uid ) }
 			       };
 	    }
 
@@ -456,7 +447,7 @@ sub create_account {
 	}
 
 	$leaf =
-	  $self->create_account_branch_leaf ( $ldap_crud, $x, );
+	  $ldap_crud->create_account_branch_leaf ( $x );
 	push @{$final_message->{success}}, @{$leaf->{success}} if defined $leaf->{success};
 	push @{$final_message->{warning}}, @{$leaf->{warning}} if defined $leaf->{warning};
 	push @{$final_message->{error}}, @{$leaf->{error}} if defined $leaf->{error};
@@ -473,427 +464,6 @@ sub create_account {
 }
 
 
-=head2 create_account_branch
-
-creates branch for service accounts like
-
-    dn: authorizedService=mail@foo.bar,uid=john.doe,ou=People,dc=umidb
-    authorizedService: mail@foo.bar
-    uid: john.doe@mail
-    objectClass: account
-    objectClass: authorizedServiceObject
-
-returns hash
-    {
-      dn => '...', # DN of the oject created
-      success => '...', # success message
-      warning => '...', # warning message
-      error => '...', # error message
-    }
-
-=cut
-
-
-sub create_account_branch {
-  my  ( $self, $ldap_crud, $args ) = @_;
-  my $arg = {
-	     authorizedservice => $args->{authorizedservice},
-	     associateddomain => sprintf('%s%s',
-					 defined $ldap_crud
-					 ->cfg
-					 ->{authorizedService}
-					 ->{$args->{authorizedservice}}
-					 ->{associateddomain_prefix}
-					 ->{$args->{associateddomain}} ?
-					 $ldap_crud->cfg
-					 ->{authorizedService}
-					 ->{$args->{authorizedservice}}
-					 ->{associateddomain_prefix}
-					 ->{$args->{associateddomain}} : '',
-					 $args->{associateddomain}),
-	     uid => $args->{uid},
-	    };
-
-  $arg->{dn} = sprintf("authorizedService=%s@%s,uid=%s,%s",
-		       $args->{authorizedservice},
-		       $arg->{associateddomain},
-		       $args->{uid},
-		       $ldap_crud->cfg->{base}->{acc_root}),
-  my ( $return, $if_exist);
-
-  $arg->{add_attrs} = [ 'authorizedService'
-			=> sprintf('%s@%s%s',
-				   $arg->{authorizedservice},
-				   defined $ldap_crud
-				   ->cfg
-				   ->{authorizedService}
-				   ->{$args->{authorizedservice}}
-				   ->{associateddomain_prefix}
-				   ->{$args->{associateddomain}} ?
-				   $ldap_crud
-				   ->cfg
-				   ->{authorizedService}
-				   ->{$args->{authorizedservice}}
-				   ->{associateddomain_prefix}
-				   ->{$args->{associateddomain}} : '',
-				   $arg->{associateddomain}),
-			'uid' => $arg->{uid} . '@' . $arg->{authorizedservice},
-			'objectClass' => $ldap_crud->cfg->{objectClass}->{acc_svc_branch}, ];
-
-  $if_exist = $ldap_crud->search( { base => $arg->{dn},
-				       scope => 'base',
-				       attrs => [ 'authorizedService' ], } );
-  if ( $if_exist->count ) {
-    $return->{warning} = 'branch DN: <b>&laquo;' . $arg->{dn} . '&raquo;</b> '
-      . 'was not created since it <b>already exists</b>, I will use it further.';
-    $return->{dn} = $arg->{dn};
-  } else {
-    my $mesg = $ldap_crud->add( $arg->{dn}, $arg->{add_attrs} );
-    if ( $mesg ) {
-      $return->{error} = sprintf('Error during %s branch creation occured: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s',
-				 uc($arg->{service}),
-				 $mesg->{html},
-				 $mesg->{srv},
-				 $mesg->{text});
-    } else { # $return->{success} = sprintf('<i class="%s fa-fw"></i> branch object &laquo;<b class="text-success">%s</b>&raquo; was successfully created',
-					  # $ldap_crud->cfg->{authorizedService}->{$arg->{authorizedservice}}->{icon},
-					  # $arg->{dn});
-	     $return->{dn} = $arg->{dn};
-	     $return->{associateddomain_prefix} = $arg->{'associateddomain_prefix'};
-	   }
-  }
-  return $return;
-}
-
-
-=head2 create_account_branch_leaf
-
-creates leaves for service account branch like
-
-    dn: uid=john.doe@foo.bar,authorizedService=mail@foo.bar,uid=U012C01-john.doe,ou=People,dc=umidb
-    authorizedService: mail@foo.bar
-    associatedDomain: foo.bar
-    uid: john.doe@foo.bar
-    cn: john.doe@foo.bar
-    givenName: John
-    sn: Doe
-    uidNumber: 10738
-    loginShell: /sbin/nologin
-    objectClass: posixAccount
-    objectClass: shadowAccount
-    objectClass: inetOrgPerson
-    objectClass: authorizedServiceObject
-    objectClass: domainRelatedObject
-    objectClass: mailutilsAccount
-    userPassword: ********
-    gecos: MAIL: john.doe @ foo.bar
-    description: MAIL: john.doe @ foo.bar
-    homeDirectory: /var/mail/IMAP_HOMES/foo.bar/john.doe@foo.bar
-    mu-mailBox: maildir:/var/mail/foo.bar/john.doe@foo.bar
-    gidNumber: 10006
-
-returns reference to hash of arrays
-    {
-      success => [...],
-      warning => [...],
-      error => [...],
-    }
-
-=cut
-
-sub create_account_branch_leaf {
-  my  ( $self, $ldap_crud, $args ) = @_;
-  my $arg = {
-	     basedn => $args->{basedn},
-	     service => $args->{authorizedservice},
-	     associatedDomain => sprintf('%s%s',
-					 defined $ldap_crud
-					 ->cfg
-					 ->{authorizedService}
-					 ->{$args->{authorizedservice}}
-					 ->{associateddomain_prefix}
-					 ->{$args->{associateddomain}} ?
-					 $ldap_crud->cfg
-					 ->{authorizedService}
-					 ->{$args->{authorizedservice}}
-					 ->{associateddomain_prefix}
-					 ->{$args->{associateddomain}} : '',
-					 $args->{associateddomain}),
-	     uidNumber => $args->{uidNumber},
-	     givenName => $args->{givenName},
-	     sn => $args->{sn},
-	     login => $args->{login},
-	     password => $args->{password},
-	     description => $args->{description} || 'no description yet',
-	     gecos => sprintf('%s %s', $args->{givenName}, $args->{sn}),
-	     telephoneNumber => $args->{telephoneNumber} || '666',
-	     jpegPhoto => $args->{jpegPhoto} || undef,
-	     
-	     to_sshkeygen => $args->{to_sshkeygen} || undef,
-	     sshpublickey => $args->{sshpublickey} || undef,
-	     sshpublickeyfile => $args->{sshpublickeyfile} || undef,
-	     sshkeydescr => $args->{sshkeydescr} || undef,
-	     # !!! here we much need check for cert existance !!!
-	     userCertificate => $args->{userCertificate} || '',
-	     umiOvpnCfgIfconfigPush => $args->{umiOvpnCfgIfconfigPush} || 'NA',
-	     umiOvpnAddStatus => $args->{umiOvpnAddStatus} || 'blocked',
-	     umiOvpnAddDevType => $args->{umiOvpnAddDevType} || 'NA',
-	     umiOvpnAddDevMake => $args->{umiOvpnAddDevMake} || 'NA',
-	     umiOvpnAddDevModel => $args->{umiOvpnAddDevModel} || 'NA',
-	     umiOvpnAddDevOS => $args->{umiOvpnAddDevOS} || 'NA',
-	     umiOvpnAddDevOSVer => $args->{umiOvpnAddDevOSVer} || 'NA',
-	     
-	     radiusgroupname => $args->{radiusgroupname} || '',
-	     radiusprofiledn => $args->{radiusprofiledn} || '',
-	    };
-  my ( $return, $if_exist );
-
-  $arg->{prefixed_uid} =
-    sprintf('%s%s',
-	    defined $ldap_crud->cfg->{authorizedService}->{$arg->{service}}->{login_prefix} ?
-	    $ldap_crud->cfg->{authorizedService}->{$arg->{service}}->{login_prefix} : '',
-	    $arg->{login});
-  
-  $arg->{uid} = sprintf('%s@%s',
-			$arg->{prefixed_uid},
-			$arg->{associatedDomain});
-  $arg->{dn} = sprintf('uid=%s,%s', $arg->{uid}, $arg->{basedn});
-
-  my ($authorizedService, $sshkey, $authorizedService_add, $jpegPhoto_file, $sshPublicKey );
-
-  if ( $arg->{service} eq 'ovpn' ||
-       $arg->{service} eq 'ssh' ||
-       ( $arg->{service} eq '802.1x-mac' ||
-	 $arg->{service} eq '802.1x-eap-tls' ) ||
-       $arg->{service} eq 'web' ) {
-    $authorizedService = [];
-    $authorizedService = [ description => $arg->{description}, ];
-  } else {
-    $authorizedService = [
-			  objectClass => $ldap_crud->cfg->{objectClass}->{acc_svc_common},
-			  authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
-			  associatedDomain => $arg->{associatedDomain},
-			  uid => $arg->{uid},
-			  cn => $arg->{uid},
-			  givenName => $arg->{givenName},
-			  sn => $arg->{sn},
-			  uidNumber => $arg->{uidNumber},
-			  loginShell => $ldap_crud->cfg->{stub}->{loginShell},
-			  gecos => sprintf('%s %s', $args->{givenName}, $args->{sn}),
-			  description => $arg->{description} ne '' ? $arg->{description} :
-			  sprintf('%s: %s @ %s', uc($arg->{service}), $arg->{'login'}, $arg->{associatedDomain}),
-			 ];
-  }
-
-  #=== SERVICE: mail =================================================
-  if ( $arg->{service} eq 'mail') {
-    push @{$authorizedService},
-      homeDirectory => $ldap_crud->cfg->{authorizedService}->{$arg->{service}}->{homeDirectory_prefix} .
-      $arg->{associatedDomain} . '/' . $arg->{uid},
-      'mu-mailBox' => 'maildir:/var/mail/' . $arg->{associatedDomain} . '/' . $arg->{uid},
-      gidNumber => $ldap_crud->cfg->{authorizedService}->{$arg->{service}}->{gidNumber},
-      userPassword => $arg->{password}->{$arg->{service}}->{'ssha'},
-      objectClass => [ 'mailutilsAccount' ];
-  #=== SERVICE: xmpp =================================================
-  } elsif ( $arg->{service} eq 'xmpp') {
-    if ( defined $arg->{jpegPhoto} ) {
-      $jpegPhoto_file = $arg->{jpegPhoto}->{'tempname'};
-    } else {
-      $jpegPhoto_file = $ldap_crud->cfg->{authorizedService}->{$arg->{service}}->{jpegPhoto_noavatar};
-    }
-
-    push @{$authorizedService},
-      homeDirectory => $ldap_crud->cfg->{stub}->{homeDirectory},
-      gidNumber => $ldap_crud->cfg->{authorizedService}->{$arg->{service}}->{gidNumber},
-      userPassword => $arg->{password}->{$arg->{service}}->{'ssha'},
-      telephonenumber => $arg->{telephoneNumber},
-      jpegPhoto => [ $self->file2var( $jpegPhoto_file, $return) ];
-
-  #=== SERVICE: 802.1x ===============================================
-  } elsif ( $arg->{service} eq '802.1x-mac' ||
-	    $arg->{service} eq '802.1x-eap-tls' ) {
-    undef $authorizedService;
-
-    if ( $arg->{service} eq '802.1x-mac' ) {
-      $arg->{dn} = sprintf('uid=%s,%s',
-			   $self->macnorm({ mac => $arg->{login} }),
-			   $arg->{basedn}); # DN for MAC AUTH differs
-      push @{$authorizedService},
-	objectClass => $ldap_crud->cfg->{objectClass}->{acc_svc_802_1x},
-	uid => $self->macnorm({ mac => $arg->{login} }),
-	cn =>  $self->macnorm({ mac => $arg->{login} });
-    } else {
-      $arg->{dn} = sprintf('uid=%s,%s', $arg->{prefixed_uid}, $arg->{basedn}); # DN for EAP-TLS differs
-      push @{$authorizedService},
-	objectClass => $ldap_crud->cfg->{objectClass}->{acc_svc_802_1x_eaptls},
-	uid => $arg->{prefixed_uid},
-	cn => $arg->{prefixed_uid};
-    }
-
-    push @{$authorizedService},
-      authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
-      userPassword => $arg->{password}->{$arg->{service}}->{clear},
-      description => uc($arg->{service}) . ': ' . $arg->{'login'};
-
-    # we decided to not to put radiusGroupName to the obj
-    # push @{$authorizedService},
-    #   radiusgroupname => $arg->{radiusgroupname}
-    #   if $arg->{radiusgroupname} ne '';
-    push @{$authorizedService},
-      radiusprofiledn => $arg->{radiusprofiledn}
-      if $arg->{radiusprofiledn} ne '';
-
-    if ( $arg->{service} eq '802.1x-eap-tls' ) {
-      $arg->{cert_info} =
-	$self->cert_info({
-			  cert => $self->file2var($arg->{userCertificate}->{'tempname'}, $return),
-			  ts => "%Y%m%d%H%M%S",
-			 });
-      push @{$authorizedService},
-	umiUserCertificateSn => '' . $arg->{cert_info}->{'S/N'},
-	umiUserCertificateNotBefore => '' . $arg->{cert_info}->{'Not Before'},
-	umiUserCertificateNotAfter => '' . $arg->{cert_info}->{'Not  After'},
-	umiUserCertificateSubject => '' . $arg->{cert_info}->{'Subject'},
-	umiUserCertificateIssuer => '' . $arg->{cert_info}->{'Issuer'},
-	'userCertificate;binary' => $arg->{cert_info}->{cert};
-    }
-
-  #=== SERVICE: ssh ==================================================
-  } elsif ( $arg->{service} eq 'ssh' ) {
-    ## I failed to figure out how to do that neither with Crypt::RSA nor with
-    ## Net::SSH::Perl::Key, so leaving it for better times
-    # if ( $arg->{to_sshkeygen} ) {
-    #   use Crypt::RSA;
-    #   $sshkey->{chain} = new Crypt::RSA::Key;
-    #   ($sshkey->{pub}, $sshkey->{pvt}) =
-    #   	$sshkey->{chain}->generate (
-    #   				KF => 'SSH',
-    #   				Identity  => 'Lord Macbeth <macbeth@glamis.com>',
-    #   				Size      => 2048,
-    #   				Verbosity => 1,
-    #   			       ) or die $sshkey->{chain}->errstr();
-    #   p $sshkey;
-    # } else {
-    # }
-    
-    $sshPublicKey = $self->file2var( $arg->{sshpublickeyfile}->{tempname}, $return, 1)
-      if defined $arg->{sshpublickeyfile};
-    push @{$sshPublicKey}, $arg->{sshpublickey}
-      if defined $arg->{sshpublickey} && $arg->{sshpublickey} ne '';
-
-    $authorizedService = [
-			  objectClass => $ldap_crud->cfg->{objectClass}->{ssh},
-			  sshPublicKey => [ @$sshPublicKey ],
-			  uid => $arg->{uid},
-			 ];
-
-    push @{$authorizedService},
-      description => $arg->{description} ne 'no description yet' ?
-      $self->utf2lat( sprintf("%s\nNote: %s bytes file \"%s\" was uploaded",
-			      $arg->{description},
-			      $arg->{sshpublickeyfile}->{size},
-			      $arg->{sshpublickeyfile}->{filename}) ) :
-      $self->utf2lat( sprintf("Note: %s bytes file %s was uploaded",
-			      $arg->{sshpublickeyfile}->{size},
-			      $arg->{sshpublickeyfile}->{filename}) )
-		      if defined $arg->{sshpublickeyfile};
-
-  #=== SERVICE: ovpn =================================================
-  } elsif ( $arg->{service} eq 'ovpn' ) {
-    $arg->{dn} = 'cn=' . substr($arg->{userCertificate}->{filename},0,-4) . ',' . $arg->{basedn};
-    $arg->{cert_info} =
-      $self->cert_info({ cert => $self->file2var($arg->{userCertificate}->{'tempname'}, $return),
-			 ts => "%Y%m%d%H%M%S", });
-    $authorizedService = [
-			  cn => substr($arg->{userCertificate}->{filename},0,-4),
-			  associatedDomain => $arg->{associatedDomain},
-			  objectClass => $ldap_crud->cfg->{objectClass}->{ovpn},
-			  umiOvpnCfgIfconfigPush => $arg->{umiOvpnCfgIfconfigPush},
-			  umiOvpnAddStatus => $arg->{umiOvpnAddStatus},
-			  umiUserCertificateSn => '' . $arg->{cert_info}->{'S/N'},
-			  umiUserCertificateNotBefore => '' . $arg->{cert_info}->{'Not Before'},
-			  umiUserCertificateNotAfter => '' . $arg->{cert_info}->{'Not  After'},
-			  umiUserCertificateSubject => '' . $arg->{cert_info}->{'Subject'},
-			  umiUserCertificateIssuer => '' . $arg->{cert_info}->{'Issuer'},
-			  umiOvpnAddDevType => $arg->{umiOvpnAddDevType},
-			  umiOvpnAddDevMake => $arg->{umiOvpnAddDevMake},
-			  umiOvpnAddDevModel => $arg->{umiOvpnAddDevModel},
-			  umiOvpnAddDevOS => $arg->{umiOvpnAddDevOS},
-			  umiOvpnAddDevOSVer => $arg->{umiOvpnAddDevOSVer},
-			  'userCertificate;binary' => $arg->{cert_info}->{cert},
-			 ];
-    push @{$return->{error}}, $arg->{cert_info}->{error} if defined $arg->{cert_info}->{error};
-    
-  #=== SERVICE: web ==================================================
-  } elsif ( $arg->{service} eq 'web' ) {
-    $authorizedService = [
-			  objectClass => $ldap_crud->cfg->{objectClass}->{acc_svc_web},
-			  authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
-			  associatedDomain => $arg->{associatedDomain},
-			  uid => $arg->{uid},
-			  userPassword => $arg->{password}->{$arg->{service}}->{'ssha'},
-			 ];
-  }
-
-  # p $arg->{dn};
-  # p $authorizedService;
-  # p $sshPublicKey;
-  my $mesg;
-  # for an existent SSH object we have to modify rather than add
-  $if_exist = $ldap_crud->search( { base => $arg->{dn}, scope => 'base', } );
-  if ( $arg->{service} eq 'ssh' && $if_exist->count ) {
-    $mesg = $ldap_crud->modify( $arg->{dn},
-				[ add => [ sshPublicKey => $sshPublicKey, ], ], );
-    if ( $mesg ) {
-      push @{$return->{error}},
-	sprintf('Error during %s service modification: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s',
-		$arg->{service}, $mesg->{html}, $mesg->{srv}, $mesg->{text});
-    } else {
-      push @{$return->{success}},
-	sprintf('<i class="%s fa-fw"></i>&nbsp;<em>key was added</em>',
-		$ldap_crud->cfg->{authorizedService}->{$arg->{service}}->{icon} );
-    }
-  } else {
-    # for nonexistent SSH object and all others
-    $mesg = $ldap_crud->add( $arg->{dn}, $authorizedService, );
-    if ( $mesg ) {
-      push @{$return->{error}},
-	sprintf('Error during %s account creation occured: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s',
-		uc($arg->{service}), $mesg->{html}, $mesg->{srv}, $mesg->{text});
-    } else {
-      push @{$return->{success}},
-	sprintf('<i class="%s fa-fw"></i>&nbsp;<em>%s account login:</em> &laquo;<strong class="text-success">%s</strong>&raquo; <em>password:</em> &laquo;<strong class="text-success mono">%s</strong>&raquo;',
-		$ldap_crud->cfg->{authorizedService}->{$arg->{service}}->{icon},
-		$arg->{service},
-		(split(/=/,(split(/,/,$arg->{dn}))[0]))[1], # taking RDN value
-		$arg->{password}->{$arg->{service}}->{'clear'});
-
-
-      ### !!! RADIUS group modify with new member add if 802.1x
-      if ( $arg->{service} eq '802.1x-mac' || $arg->{service} eq '802.1x-eap-tls' &&
-	   defined $arg->{radiusgroupname} && $arg->{radiusgroupname} ne '' ) {
-	$if_exist = $ldap_crud->search( { base => $arg->{radiusgroupname},
-					  scope => 'base',
-					  filter => '(' . $arg->{dn} . ')', } );
-	if ( ! $if_exist->count ) {
-	  $mesg = $ldap_crud->modify( $arg->{radiusgroupname},
-				      [ add => [ member => $arg->{dn}, ], ], );
-	  if ( $mesg && $mesg->{code} == 20 ) {
-	    push @{$return->{warning}},
-	      sprintf('Warning during %s group modification: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s',
-		      $arg->{radiusgroupname}, $mesg->{html}, $mesg->{srv}, $mesg->{text});
-	  } elsif ( $mesg ) {
-	    push @{$return->{error}},
-	      sprintf('Error during %s group modification: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s',
-		      $arg->{radiusgroupname}, $mesg->{html}, $mesg->{srv}, $mesg->{text});
-	  }
-
-	}
-      }
-    }
-  }
-  return $return;
-}
 
 
 

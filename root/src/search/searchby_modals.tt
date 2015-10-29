@@ -12,6 +12,7 @@
 	  </h4>
 	</div>
 	<div class="modal-body text-primary">
+	  <span class="fa fa-refresh"></span>
 	  <input type="checkbox" name="ldap_delete_recursive">
 	  Recursive deletion of all children of this object as well
 	  </input>

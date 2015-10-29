@@ -1227,9 +1227,9 @@ sub modify :Path(modify) :Args(0) {
   my ($attr, $val, $orig);
   my $mod = undef;
   foreach $attr ( sort ( keys %{$params} )) {
-    next if ( $attr eq 'dn' ||
-	      $attr =~ /$ldap_crud->cfg->{exclude_prefix}/ ||
-	      $attr =~ /userPassword/ ); ## !! stub, not processed yet !!
+    next if $attr =~ /$ldap_crud->{cfg}->{exclude_prefix}/ ||
+      $attr eq 'dn' ||
+      $attr =~ /userPassword/; ## !! stub, not processed yet !!
     if ( $attr eq "jpegPhoto" ) {
       $params->{jpegPhoto} = $c->req->upload('jpegPhoto');
     }
@@ -1237,7 +1237,7 @@ sub modify :Path(modify) :Args(0) {
     $val = $entry->get_value ( $attr, asref => 1 );
 
     $orig = ref($val) eq "ARRAY" && scalar @{$val} == 1 ? $val->[0] : $val;
-    p $val = $params->{$attr};
+    $val = $params->{$attr};
     # removing all empty array elements if any
     if ( ref($val) eq "ARRAY" ) {
       @{$val} = map { $self->is_ascii($_) ? $self->utf2lat($_) : $_ } grep { $_ ne '' } @{$val};
@@ -1262,21 +1262,21 @@ sub modify :Path(modify) :Args(0) {
     }
   }
 
-  if ( defined $mod ) { p my $modx = [ replace => $mod ];
-    p $mesg = $ldap_crud->modify( $params->{dn}, [ replace => $mod, ], );
+  if ( defined $mod ) {
+    p my $modx = [ replace => $mod ];
+    $mesg = $ldap_crud->modify( $params->{dn}, [ replace => $mod, ], );
     if ( $mesg ne "0" ) {
       $return->{error} .= '<li>' . $mesg . '</li>';
     }
-    $return->{success} = p($mod);
+    $return->{success} = 'Modification/s made:<pre>' .
+      p($mod, caller_info => 0, colored => 0, index => 0) . '</pre>';
   } else {
     $return->{warning} = 'No change was performed!';
   }
 
-  $c->stash(
-	    template => 'stub.tt',
-	    params => $params,
-	    final_message => $return,
-	   );
+  $c->stash( template => 'stub.tt',
+	     params => $params,
+	     final_message => $return, );
 }
 
 

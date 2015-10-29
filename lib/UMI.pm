@@ -131,19 +131,21 @@ __PACKAGE__->setup();
 # '--------------------------------+-------------------------------'
 # __PACKAGE__->allow_access_if( "/", [ qw/admin/ ]);
 
-__PACKAGE__->deny_access_unless_any( "/dhcp",           [ qw/admin coadmin/ ]);
-__PACKAGE__->deny_access_unless_any( "/dhcp_root",      [ qw/admin coadmin/ ]);
-__PACKAGE__->deny_access_unless_any( "/gitacl",         [ qw/admin coadmin/ ]);
-__PACKAGE__->deny_access_unless_any( "/gitacl_root",    [ qw/admin coadmin/ ]);
-__PACKAGE__->deny_access_unless_any( "/group",          [ qw/admin coadmin/ ]);
-__PACKAGE__->deny_access_unless_any( "/group_root",     [ qw/admin coadmin/ ]);
-__PACKAGE__->deny_access_unless_any( "/org",            [ qw/admin coadmin acl-w-organizations/ ]);
-__PACKAGE__->deny_access_unless_any( "/org_root",       [ qw/admin coadmin/ ]);
-__PACKAGE__->deny_access_unless_any( "/searchadvanced", [ qw/admin coadmin/ ]);
-__PACKAGE__->deny_access_unless_any( "/searchby",       [ qw/admin coadmin/ ]);
-__PACKAGE__->deny_access_unless_any( "/sysinfo",        [ qw/admin/ ]);
-__PACKAGE__->deny_access_unless_any( "/user",           [ qw/admin acl-w-people/ ]);
-__PACKAGE__->deny_access_unless_any( "/userall",        [ qw/admin acl-w-people/ ]);
+__PACKAGE__->deny_access_unless_any( "/dhcp",                [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/dhcp_root",           [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/gitacl",              [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/gitacl_root",         [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/group",               [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/group_root",          [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/org",                 [ qw/admin coadmin acl-w-organizations/ ]);
+__PACKAGE__->deny_access_unless_any( "/org_root",            [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/searchadvanced",      [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/searchby",            [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/searchby/ldif_gen",   [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/searchby/ldif_gen2f", [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/sysinfo",             [ qw/admin/ ]);
+__PACKAGE__->deny_access_unless_any( "/user",                [ qw/admin acl-w-people/ ]);
+__PACKAGE__->deny_access_unless_any( "/userall",             [ qw/admin acl-w-people/ ]);
 __PACKAGE__->allow_access_if( "/user/modpwd",
 			      sub {
 				my ( $c, $action ) = @_;

@@ -1,6 +1,6 @@
 [% META title = 'Search Simple Results' %]
 
-<h2>Search Simple Results <small><em>base: [% params.ldapsearch_base %]; &nbsp;&nbsp; filter: [% params.ldapsearch_filter %]</em></small></h2>
+<h2>Search Simple Results <small><em>base: [% final_message.dn %]; &nbsp;&nbsp; filter: (objectClass=*)</em></small></h2>
 
 [% INCLUDE ldap_err.tt %]
 
@@ -31,8 +31,5 @@
 </pre>
 
 <script type="text/javascript">  
- $(function(){
-   // console.log("ready");
-   $('form#f_ldif_gen2f').off('submit');
- });
+ $(function(){ $('form#f_ldif_gen2f').off('submit'); });
 </script>

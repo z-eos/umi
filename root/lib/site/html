@@ -13,27 +13,21 @@
    <link href="/static/css/bootstrap.css" rel="stylesheet" type="text/css">
    [% template.link %]
    <link href="/static/css/umi.css" rel="stylesheet">
-   <link href="/static/css/fakeLoader.css" rel="stylesheet" type="text/css">
    
    <script src="/static/js/jquery.min.js"></script>
-   <script src="/static/js/fakeLoader.min.js"></script>
  </head>
  <body>
    
    [% content %]
 
    <div id="loaderfa">
-     <i class="fa fa-cog fa-spin fa-4x"></i>
+     <span class="fa fa-cog fa-spin fa-4x"></span>
    </div>
    
    <script type="text/javascript">  
     function showLoader () { $('#loaderfa').show(200); }
-    // console.log("footer");
     $('form').on('submit', showLoader);
-    // // window.onbeforeunload = showLoader;
-    // $(window).load(function(){
-    //   $('#loader').fadeOut('slow',function(){$(this).remove();});
-    // });
+    window.onbeforeunload = showLoader;
    </script>
 
  </body>

@@ -24,14 +24,15 @@ has_field 'search_history'
        label => 'search history',
        wrapper_class => [ 'checkbox', ],
        element_wrapper_class => [ 'col-xs-3', 'col-xs-offset-2', 'col-lg-1', ],
-       element_attr => { title => 'When checked, this checkbox causes additional fields to search in history.',}, );
+       element_attr => { title => 'When checked, this checkbox causes additional fields to search by in history.',}, );
 
 has_field 'base_dn'
   => ( label => 'Base DN',
        label_class => [ 'col-md-2' ],
        wrapper_class => [ 'searchaccount', ],
        element_wrapper_class => [ 'col-xs-10', 'col-lg-10', ],
-       element_attr => { placeholder => UMI->config->{ldap_crud_db}, }, );
+       element_attr => { placeholder => UMI->config->{ldap_crud_db},
+			 title => q{The DN that is the base object entry relative to which the search is to be performed.}, }, );
 
 has_field 'reqType'
   => ( type => 'Select',
@@ -192,31 +193,51 @@ has_field 'search_filter'
        label_class => [ 'col-md-2', 'required' ],
        wrapper_class => [ 'searchaccount', ],
        element_wrapper_class => [ 'col-xs-10', 'col-lg-10', ],
-       element_attr => { placeholder => '(objectClass=*)' },
-       rows => 1, );
+       element_attr => { placeholder => '(objectClass=*)',
+			 title => q{A filter that defines the conditions an entry in the directory must meet in order for it to be returned by the search. It is a string. Values inside filters may need to be escaped to avoid security problems.}, },
+			 rows => 1, );
 
 has_field 'show_attrs' => ( label => 'Show Attributes',
 			    label_class => [ 'col-md-2' ],
 			    element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-			    element_attr => { placeholder => 'cn, uid, mail, authorizedService' });
+			    element_attr => { placeholder => 'cn, uid, mail, authorizedService',
+					      title => q{A list of attributes to be returned for each entry that matches the search filter.
+
+If not specified, then the server will return the attributes that are specified as accessible by default given your bind credentials.
+
+Certain additional attributes may also be available for the asking: createTimestamp }, });
 
 has_field 'order_by' => ( label => 'Order By',
 			  label_class => [ 'col-md-2' ],
 			  wrapper_class => [ 'searchaccount', ],
 			  element_wrapper_class => [ 'col-xs-5', 'col-lg-5', ],
-			  element_attr => { placeholder => 'cn' },
-			);
+			  element_attr => { placeholder => 'cn',
+					    title => q{A list of attributes, result objects to be sorted by. }, }, );
 
 has_field 'search_results' => ( label => 'Search Results',
 				label_class => [ 'col-md-2' ],
-				element_wrapper_class => [ 'col-xs-2', 'col-lg-1', ],
-				element_attr => { placeholder => '50' },);
+				element_wrapper_class => [ 'col-xs-3', 'col-lg-2', ],
+				element_attr => { placeholder => '50',
+						  title => q{A sizelimit that restricts the maximum number of entries to be returned as a result of the search. A value of 0, means that no restriction is requested.}, },);
 
 has_field 'search_scope' => ( type => 'Select',
 			      label => 'Search Scope',
 			      label_class => [ 'col-md-2' ],
+			      label_attr => { title => 'The scope in which to search', },
 			      wrapper_class => [ 'searchaccount', ],
-			      element_wrapper_class => [ 'col-xs-3', 'col-lg-1', ],
+			      element_wrapper_class => [ 'col-xs-3', 'col-lg-2', ],
+			      element_attr => { title => q{BASE:
+search only the base object.
+
+ONE:
+search the entries immediately below the base object.
+
+SUB and SUBTREE:
+search the whole tree below (and including) the base object. this is the default.
+
+CHILDREN:
+search the whole subtree below the base object, excluding the base object itself.},
+					      },
 			      options => [{ value => 'sub', label => 'Sub', selected => 'on'},
 					  { value => 'children', label => 'Children'},
 					  { value => 'one', label => 'One'},
