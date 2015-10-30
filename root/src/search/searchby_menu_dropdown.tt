@@ -58,7 +58,7 @@
 		data-order="[% site.searchby.menu.order.add_svc_acc %]"
 		name="add_svc_acc">
 	  <span class="fa fa-fw fa-plus-circle text-danger"></span>
-	  new service account (alt)
+	  new service
 	</button>
       </form>
     </li>
@@ -86,6 +86,19 @@
       </button>
     </li>
     [% END %]
+    [% END %]
+    [% IF entry.key.match('mail') || entry.key.match('xmpp') %]
+    <li>
+      <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+	<button type="submit" title="edit object" class="btn btn-link"
+		value="[% entry.key %]"
+		data-order="[% site.searchby.menu.order.qr4vcard %]"
+		name="qr4vcard">
+	  <span class="fa fa-fw fa-qrcode text-info"></span>
+	  vCard QR
+	</button>
+      </form>
+    </li>
     [% END %]
     <li>
       <button type="button" title="delete object" class="btn btn-link"
@@ -194,7 +207,7 @@
 		data-order="[% site.searchby.menu.order.ldap_add_dhcp %]"
 		name="ldap_add_dhcp">
 	  <span class="fa fa-fw fa-sitemap text-info"></span>
-	  DHCP (IP to MAC binding)
+	  DHCP (IP<->MAC)
 	</button>
       </form>
     </li>

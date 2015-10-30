@@ -88,7 +88,7 @@ sub create_dhcp_host {
 
   use Data::Printer;
 
-  my $dhcpStatements = ($ldap_crud->dhcp_lease({ net => $args->{net} }));
+  my $dhcpStatements = $ldap_crud->dhcp_lease({ net => $args->{net} });
   $return->{error} = sprintf('<li>%s</li>', $dhcpStatements->{error}) if ref($dhcpStatements) eq 'HASH';
 
   my $arg = {
@@ -132,7 +132,6 @@ sub create_dhcp_host {
 	      $arg->{dhcpStatements});
   }
 
-  p $return;
   return $return;
 }
 

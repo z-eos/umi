@@ -45,7 +45,7 @@ sub options_net {
 
   @org = $mesg->sorted('physicalDeliveryOfficeName');
 
-  foreach ( @org ) { p $_;
+  foreach ( @org ) {
     $mesg = $ldap_crud->search({
 				base => $_->get_value('physicalDeliveryOfficeName'),
 				scope => 'base',
@@ -154,21 +154,23 @@ sub validate {
 
     if ( $mesg->count ) { # IP is set and not available
       $self->field('dhcpStatements')
-	->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;IP address is not available.');
+	->add_error('<span class="fa fa-exclamation-circle"></span>&nbsp;IP address is not available.');
     }
   }
 
   my $dhcp = $self->ldap_crud->dhcp_lease({ net => $self->field('net')->value,
 					    what => 'used', });
+  $self->add_form_error($dhcp->{error}) if defined $dhcp->{error};
+
   ## hostname is not available
   $self->field('cn')
-    ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;Hostname is already used.')
+    ->add_error('<span class="fa fa-exclamation-circle"></span>&nbsp;Hostname is already used.')
       if defined $self->field('cn')->value &&
 	$dhcp->{hostname}->{$self->field('cn')->value}->{ip};
 
   ## MAC is not available
   $self->field('dhcpHWAddress')
-    ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;MAC address is already used.')
+    ->add_error('<span class="fa fa-exclamation-circle"></span>&nbsp;MAC address is already used.')
       if defined $self->field('dhcpHWAddress')->value &&
 	$dhcp->{mac}->{$self->field('dhcpHWAddress')->value}->{ip};
 }

@@ -1338,14 +1338,15 @@ sub dhcp_lease {
 	     what => $args->{what} || 'stub', # used, ip, mac, hostname, all
 	    };
 
+  # DHCP network objects like: cn=172.16.57.0,cn=cube01 DHCP Config,ou=cube01,ou=borg,ou=DHCP,dc=umidb
   my $mesg =
     $self->search({ base => $self->cfg->{base}->{dhcp},
 		    filter => sprintf('dhcpOption=domain-name "%s"', $arg->{net}),
 		    attrs => [ 'cn', 'dhcpNetMask', 'dhcpRange' ], });
 
   if (! $mesg->count) {
-    $return->{error} = '<span class="glyphicon glyphicon-exclamation-sign">&nbsp;</span>' .
-      'Net choosen, DHCP configuration looks absent.';
+    $return->{error} = 'DHCP configuration for net choosen, looks absent.';
+    return $return;
   } else {
     my ( $i, $net_addr, $addr_num, $range_left, $range_right, @leases, $lease, $ip, $mac, $hostname );
     my @net = $mesg->entries;
