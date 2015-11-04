@@ -28,6 +28,7 @@
     </div>
   </div>
 </div><!-- #### Modal: Delete end -->
+
 <!-- #### Modal: Block start -->
 <div class="modal" id="modal_block[% zufix %]"
      tabindex="-1" role="dialog" aria-labelledby="modal_block[% zufix %]_label"
@@ -53,6 +54,7 @@
     </div>
   </div>
 </div><!-- #### Modal: Block end -->
+
 <!-- #### Modal: Reassign Root Account start -->
 <div class="modal" id="reassignModal[% loop.index %]"
      tabindex="-1" role="dialog" aria-labelledby="reassignModalLabel[% loop.index %]"
@@ -88,6 +90,7 @@
     </div>
   </div>
 </div><!-- #### Modal: Reassign Root Account end -->
+
 <!-- #### Modal: LDIF start -->
 <div class="modal" id="ldifModal[% loop.index %]"
      tabindex="-1" role="dialog" aria-labelledby="ldifModalLabel[% loop.index %]"
@@ -102,16 +105,20 @@
 	  </h4>
 	</div>
 	<div class="modal-body text-primary">
-	  <span class="fa fa-object-group fa-lg"></span>&nbsp;
-	  with subtree
-	  <input type="checkbox" name="ldap_ldif_recursive">
-	  </input>
-	</div>
-	<div class="modal-body text-primary">
-	  <span class="fa fa-info-circle fa-lg"></span>&nbsp;
-	  system info
-	  <input type="checkbox" name="ldap_ldif_sysinfo">
-	  </input>
+	  <div class="checkbox">
+	    <span class="fa fa-object-group fa-lg col-xs-1 text-right"></span>&nbsp;
+	    <label>
+	      <input type="checkbox"  name="ldap_ldif_recursive">
+	      include object subtree
+	    </label>
+	  </div>
+	  <div class="checkbox">
+	    <span class="fa fa-info-circle fa-lg col-xs-1 text-right"></span>&nbsp;
+	    <label>
+	      <input type="checkbox"  name="ldap_ldif_sysinfo">
+	      include system info
+	    </label>
+	  </div>
 	</div>
 	<div class="modal-footer">
 	  <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
@@ -127,3 +134,48 @@
     </div>
   </div>
 </div><!-- #### Modal: LDIF end -->
+
+<!-- #### Modal: vCard start -->
+<div class="modal" id="vcardModal[% loop.index %]"
+     tabindex="-1" role="dialog" aria-labelledby="vcardModalLabel[% loop.index %]"
+     aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form role="form" method="POST">
+	<div class="modal-header">
+	  <h4 class="modal-title alert alert-info" id="vcardModalLabel[% loop.index %]">
+	    <span class="fa fa-files-o fa-lg"></span>
+	    vCard of DN: <b>[% entry.key.replace(',', ', ') %]</b>
+	  </h4>
+	</div>
+	<div class="modal-body text-primary">
+	  vCard file contains user image/s if any, while QR code not.<br><br>
+	  <div class="radio">
+	    <span class="fa fa-file-o fa-sm col-xs-1 text-right"></span>
+	    <label>
+	      <input type="radio" name="vcard_type" id="ldap_vcard1" value="qr_min" checked>
+	      minimal info vCard (name, email/s, IM id/s and telephone number/s)
+	    </label>
+	  </div>
+	  <div class="radio">
+	    <span class="fa fa-files-o fa-lg col-xs-1 text-right"></span>
+	    <label>
+	      <input type="radio" name="vcard_type" id="ldap_vcard2" value="qr_max" disabled>
+	      full info vCard
+	    </label>
+	  </div>
+	</div>
+	<div class="modal-footer">
+	  <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
+	  <button type="submit"
+		  class="btn btn-info umi-btn-event umi-btn-logic"
+		  data-umiact="/searchby/vcard_gen"
+		  name="vcard_dn"
+		  value="[% entry.key %]">
+	    Yes, to get vCard
+	  </button>
+	</div>
+      </form>
+    </div>
+  </div>
+</div><!-- #### Modal: vCard end -->

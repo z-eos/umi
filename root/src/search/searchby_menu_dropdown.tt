@@ -87,19 +87,6 @@
     </li>
     [% END %]
     [% END %]
-    [% IF entry.key.match('mail') || entry.key.match('xmpp') %]
-    <li>
-      <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
-	<button type="submit" title="edit object" class="btn btn-link"
-		value="[% entry.key %]"
-		data-order="[% site.searchby.menu.order.qr4vcard %]"
-		name="qr4vcard">
-	  <span class="fa fa-fw fa-qrcode text-info"></span>
-	  vCard QR
-	</button>
-      </form>
-    </li>
-    [% END %]
     <li>
       <button type="button" title="delete object" class="btn btn-link"
 	      value="[% entry.key %]"
@@ -126,8 +113,22 @@
       </form>
     </li>
     [% END %]
+    [% IF entry.key.match('mail') || entry.key.match('xmpp') || (entry.value.mgmnt.is_dn && entry.value.mgmnt.is_account) %]
     <li>
-      <button type="button" title="export LDIF of the object"
+      <button type="button" title="export as vCard"
+	      class="btn btn-link"
+	      value="[% entry.key %]"
+	      data-order="[% site.searchby.menu.order.vcard %]"
+	      name="vcard"
+	      data-toggle="modal"
+	      data-target="#vcardModal[% loop.index %]">
+	<span class="fa fa-fw fa-upload text-info"></span>
+	export vCard
+      </button>
+    </li>
+    [% END %]
+    <li>
+      <button type="button" title="export as LDIF"
 	      class="btn btn-link"
 	      value="[% entry.key %]"
 	      data-order="[% site.searchby.menu.order.ldap_ldif %]"

@@ -1029,6 +1029,144 @@ sub ldif {
   return $return;
 }
 
+=head2 vcard
+
+vCard export
+
+=cut
+
+sub vcard {
+  my ($self, $args) = @_;
+  use POSIX qw(strftime);
+  my $ts = strftime "%Y%m%d%H%M%S", localtime;
+  my $arg = {
+	     dn => $args->{vcard_dn},
+	     type => $args->{vcard_type},
+	    };
+  my ($msg, $branch, @branches, $branch_entry, $leaf, @leaves, $leaf_entry, $entry, @entries, $return, $tmp);
+  $msg = $self->ldap->search ( base => $arg->{dn}, scope => 'base', filter => 'objectClass=*', );
+  if ($msg->is_error()) {
+    $return->{error} .= $self->err( $msg )->{html};
+  } else {
+    $entry = $msg->entry(0);
+    $arg->{vcard}->{n} = sprintf('N:%s;%s;;;',
+				 $entry->get_value('sn'),
+				 $entry->get_value('givenName') );
+    $arg->{vcard}->{fn} = sprintf('FN:%s %s',
+				  $entry->get_value('givenName'),
+				  $entry->get_value('sn') );
+    $arg->{vcard}->{title} = sprintf('TITLE:%s', $entry->get_value('title') );
+
+    my $orgs = $entry->get_value('o', asref => 1);
+    $arg->{vcard}->{o} = '';
+    foreach ( @{$orgs} ) {
+      $tmp = $self->search ( { base => $_ } );
+      if ($tmp->is_error()) {
+	$return->{error} .= $self->err( $tmp )->{html};
+      } else {
+	my $org = $tmp->entry(0);
+	$arg->{vcard}->{o} .= sprintf("ORG:%s\n", $org->get_value('physicalDeliveryOfficeName') );
+    }
+    }
+
+    $arg->{vcard}->{telephonenumber} = '';
+    if ( $entry->exists('telephoneNumber') ) {
+      $tmp = $entry->get_value( 'telephoneNumber', asref => 1 );
+      foreach ( @{$tmp} ) {
+	$arg->{vcard}->{telephonenumber} .= 'TEL;TYPE=work:' . $_ . "\n";
+      }
+    }
+
+    $arg->{vcard}->{email} = '';
+    if ( $entry->exists('email') ) {
+      $tmp = $entry->get_value( 'email', asref => 1 );
+      foreach ( @{$tmp} ) {
+	$arg->{vcard}->{email} .= 'EMAIL;WORK:' . $_ . "\n";
+      }
+    }
+    $branch = $self->ldap->search ( base => $arg->{dn}, scope => 'one', filter => 'authorizedService=mail@*', );
+    if ($branch->is_error()) {
+      $return->{error} .= $self->err( $branch )->{html};
+    } else {
+      @branches = $branch->entries;
+      foreach $branch_entry ( @branches ) {
+	$leaf = $self->search ( { base => $branch_entry->dn, scope => 'one', } );
+	if ($leaf->is_error()) {
+	  $return->{error} .= $self->err( $leaf )->{html};
+	} else {
+	  if ( $leaf->count ) {
+	    @leaves = $leaf->entries;
+	    foreach $leaf_entry ( @leaves ) {
+	      {
+		$arg->{vcard}->{email} .= 'EMAIL;TYPE=work:' . $leaf_entry->get_value('uid') . "\n";
+	      }
+	    }
+	  }
+	}
+      }
+    }
+    
+    $arg->{vcard}->{xmpp} = '';
+    $msg = $self->ldap->search ( base => $arg->{dn}, scope => 'one', filter => 'authorizedService=xmpp@*', );
+    if ($msg->is_error()) {
+      $return->{error} .= $self->err( $msg )->{html};
+    } else {
+      @entries = $msg->entries;
+      foreach $entry ( @entries ) {
+	$msg = $self->ldap->search ( base => $entry->dn, scope => 'one', filter => '(objectClass=*)', );
+	if ($msg->is_error()) {
+	  $return->{error} .= $self->err( $msg )->{html};
+	} else {
+	  if ( $msg->count ) {
+	    my $a = $msg->entry(0);
+	    $arg->{vcard}->{xmpp} .= 'X-JABBER;TYPE=work:' . $a->get_value('uid') . "\n";
+	  }
+	}
+      }
+    }
+    
+    $return->{vcard} = sprintf("
+BEGIN:VCARD
+VERSION:2.1
+%s
+%s
+%s\n",
+			       $arg->{vcard}->{n},
+			       $arg->{vcard}->{fn},
+			       $arg->{vcard}->{title}
+			      );
+
+    $return->{vcard} .= $arg->{vcard}->{telephonenumber} if $arg->{vcard}->{telephonenumber} ne '';
+    $return->{vcard} .= $arg->{vcard}->{email} if $arg->{vcard}->{email} ne '';
+    $return->{vcard} .= $arg->{vcard}->{xmpp} if $arg->{vcard}->{xmpp} ne '';
+    $return->{vcard} .= $arg->{vcard}->{o} if $arg->{vcard}->{o} ne '';
+
+    $return->{success} .= sprintf('vCard generated for object with DN:<b class="mono"><em>%s</em></b>.', $arg->{dn} );
+  }
+  $return->{outfile_name} = join('_', split(/,/,canonical_dn($arg->{dn}, casefold => 'none', reverse => 1, )));
+  $return->{dn} = $arg->{dn};
+  $return->{type} = $arg->{type};
+  use MIME::Base64;
+  if ( $arg->{type} ne 'file' ) {
+    use GD::Barcode::QRcode;
+    $return->{qr} =
+      sprintf('<img alt="QR for DN %s" src="data:image/jpg;base64,%s" class="img-responsive img-thumbnail" title="QR for DN %s"/>',
+	      $arg->{dn},
+	      encode_base64(GD::Barcode::QRcode
+			    ->new( $return->{vcard},
+				   { Ecc => 'Q', Version => 24, ModuleSize => 4 } )->plot->png ),
+	      $arg->{dn}
+	     );
+  } else {
+    $return->{vcard} .= "PHOTO;ENCODING=BASE64;JPEG:" . encode_base64($entry->get_value('jpegPhoto'))
+      if $entry->exists('jpegPhoto');
+  }
+
+  $return->{vcard} .= "REV:" . $ts . "Z\nEND:VCARD\n";
+
+  return $return;
+}
+
 
 =head2 obj_schema
 

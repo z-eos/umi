@@ -27,7 +27,7 @@
    <script type="text/javascript">  
     function showLoader () { $('#loaderfa').show(200); }
     $('form').on('submit', showLoader);
-    window.onbeforeunload = showLoader;
+    // window.onbeforeunload = showLoader;
    </script>
 
  </body>

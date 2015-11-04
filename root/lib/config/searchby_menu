@@ -5,7 +5,7 @@
      ldap_modify_group = "90"
      user_block = "19"
      ldap_delete = "50"
-     qr4vcard = "60"
+     vcard = "90"
      chg_acc = "80"
      ldap_ldif = "90"
      ldap_modify = "89"

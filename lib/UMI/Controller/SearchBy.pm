@@ -1195,11 +1195,50 @@ sub ldif_gen2f :Path(ldif_gen2f) :Args(0) {
     $c->stash(
 	      current_view => 'Download',
 	      download => 'text/plain',
-	      plain => $ldif->{success},
-	      outfile_name => $ldif->{outfile_name} . '_LDIF',
+	      plain => $ldif->{ldif},
+	      outfile_name => $ldif->{outfile_name} . '.LDIF',
 	      outfile_ext => 'ldif',
 	     );
     $c->forward('UMI::View::Download');
+}
+
+
+#=====================================================================
+
+=head1 vcard
+
+get vCard (recursive or not, with or without system data) for the DN
+given
+
+Since it is separate action, it is poped out of action proc()
+
+=cut
+
+
+sub vcard_gen :Path(vcard_gen) :Args(0) {
+  my ( $self, $c ) = @_;
+  my $params = $c->req->parameters;
+  my $vcard = $c->model('LDAP_CRUD')->vcard( $params );
+  $c->stash(
+	    template => 'search/vcard.tt',
+	    final_message => $vcard,
+	   );
+}
+
+sub vcard_gen2f :Path(vcard_gen2f) :Args(0) {
+  my ( $self, $c ) = @_;
+  my $params = $c->req->parameters;
+  $params->{vcard_type} = 'file';
+  my $vcard = $c->model('LDAP_CRUD')->vcard( $params);
+
+  $c->stash(
+	    current_view => 'Download',
+	    download => 'text/plain',
+	    plain => $vcard->{vcard},
+	    outfile_name => $vcard->{outfile_name} . '.vCard',
+	    outfile_ext => 'vcard',
+	   );
+  $c->forward('UMI::View::Download');
 }
 
 
