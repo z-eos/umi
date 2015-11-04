@@ -1,0 +1,37 @@
+[% META title = 'Search Simple Results' %]
+
+<h2>Search Simple Results <small><em>base: [% final_message.dn %]; &nbsp;&nbsp; filter: (objectClass=*)</em></small></h2>
+
+[% INCLUDE ldap_err.tt %]
+
+<form method="POST" role="form" action="/searchby/vcard_gen2f" id="f_vcard_gen2f">
+  <input id="vcard_type"
+	 class="form-control"
+	 type="hidden"
+	 value="[%final_message.type %]"
+	 name="vcard_type">
+  
+  <button class="btn btn-info btn-sm umi-btn-event umi-btn-logic"
+	  value="[%final_message.dn %]"
+	  name="vcard_dn"
+	  data-umiact="/searchby/vcard_gen2f"
+	  title='save vCard bellow as file: [% final_message.outfile_name %]_vCard.txt'
+	  type="submit">
+    <span class="fa fa-download fa-lg"></span>
+  </button>
+</form>
+<br>
+<div class="row">
+  <div class="col-xs-6">
+    <pre>
+      [% final_message.vcard %]
+    </pre>
+  </div>
+  <div class="col-xs-6">
+      [% final_message.qr %]    
+  </div>
+</div>
+
+<script type="text/javascript">  
+ $(function(){ $('form#f_vcard_gen2f').off('submit'); });
+</script>
