@@ -264,12 +264,9 @@ sub proc :Path(proc) :Args(0) {
 	     $params->{'ldap_modify'} ne '') {
 
       my ($return, $attr, $entry_tmp, $entry);
-      my $ldap_crud =
-	$c->model('LDAP_CRUD');
+      my $ldap_crud = $c->model('LDAP_CRUD');
       my $mesg = $ldap_crud->search( { dn => $params->{ldap_modify} } );
-      if ( ! $mesg->count ) {
-	$return->{error} = $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html};
-      }
+      $return->{error} = $ldap_crud->err( $mesg )->{html} if ! $mesg->count;
       $entry_tmp = $mesg->entry(0);
       foreach $attr ( $entry_tmp->attributes ) {
 	if ( $attr =~ /;binary/ or
@@ -304,16 +301,14 @@ sub proc :Path(proc) :Args(0) {
 	}
       }
 
-      p $is_single;
       ## here we work with the only one, single entry!!
+      # p $is_single;
       # $c->session->{modify_entries} = $mesg->entry(0);
       # $c->session->{modify_dn} = $params->{ldap_modify};
       # $c->session->{modify_schema} = $is_single;
 
-
-
       $c->stash(
-		template => 'search/modify.tt', # look modify() bellow
+		template => 'search/modify.tt', # !!! look modify() bellow
 		modify => $params->{'ldap_modify'},
 		entries => $entry,
 		schema => $is_single,
@@ -1258,8 +1253,7 @@ sub modify :Path(modify) :Args(0) {
   my $ldap_crud = $c->model('LDAP_CRUD');
   my $mesg = $ldap_crud->search( { base => $params->{dn}, scope => 'base' } );
   my $return;
-  $return->{error} .= '<li>' . $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html} . '</li>'
-    if $mesg->code;
+  $return->{error} = $ldap_crud->err($mesg)->{html} if $mesg->code;
 
   my $entry = $mesg->entry(0);
 
@@ -1302,13 +1296,11 @@ sub modify :Path(modify) :Args(0) {
   }
 
   if ( defined $mod ) {
-    p my $modx = [ replace => $mod ];
+    my $modx = [ replace => $mod ];
     $mesg = $ldap_crud->modify( $params->{dn}, [ replace => $mod, ], );
-    if ( $mesg ne "0" ) {
-      $return->{error} .= '<li>' . $mesg . '</li>';
-    }
+    $return->{error} .= $mesg->{html} if $mesg ne "0";
     $return->{success} = 'Modification/s made:<pre>' .
-      p($mod, caller_info => 0, colored => 0, index => 0) . '</pre>';
+      p($mod, caller_info => 0, colored => 0, index => 0) . '</pre>' if $mesg eq "0";
   } else {
     $return->{warning} = 'No change was performed!';
   }

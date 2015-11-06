@@ -440,15 +440,17 @@ sub build_last_gidNumber {
 
 Net::LDAP errors handling
 
-Net::LDAP::Message is expected as single input argument
+Net::LDAP::Message is expected as first input argument
+
+second argument is debug level, which expected to be greater than 0
 
 returns hash with formatted details
 
 =cut
 
 sub err {
-  my ($self, $mesg) = @_;
-  $mesg;
+  my ($self, $mesg, $debug) = @_;
+  # p $mesg;
 # to finish #   use Log::Contextual qw( :log :dlog set_logger with_logger );
 # to finish #   use Log::Contextual::SimpleLogger;
 # to finish # 
@@ -462,30 +464,42 @@ sub err {
 
   my $caller = (caller(1))[3];
   my $err = {
-	     code => $mesg->code,
+	     code => defined $mesg->code ? $mesg->code : 'NA',
 	     name => ldap_error_name($mesg),
 	     text => ldap_error_text($mesg),
 	     desc => ldap_error_desc($mesg),
 	     srv => $mesg->server_error,
 	     caller => $caller ? $caller : 'main',
+	     matchedDN => $mesg->{matchedDN},
+	     supplementary => '',
 	    };
 
+  $err->{supplementary} .= sprintf('<li><h6><b>matchedDN:</b><small> %s</small><h6></li>', $err->{matchedDN})
+    if $err->{matchedDN} ne '';
+
+  $err->{supplementary} = '<div class="well well-sm"><ul class="list-unstyled">' . $err->{supplementary} . '</ul></div>'
+    if $err->{supplementary} ne '';
+  
   $err->{html} = ldap_error_name($mesg) ne 'LDAP_SUCCESS' ?
-    sprintf( '<dl class="dl-horizontal">
+    sprintf( 'Error had occured in <em>%s</em>: <dl class="dl-horizontal">
   <dt>code</dt><dd>%s</dd>
   <dt>error name</dt><dd>%s</dd>
   <dt>error text</dt><dd><em><small><pre>%s</pre></small></em></dd>
   <dt>error description</dt><dd>%s</dd>
   <dt>server_error</dt><dd>%s</dd>
+  <dt>supplementary data</dt><dd>%s</dd>
 </dl>',
+	     $caller,
 	     $mesg->code,
 	     ldap_error_name($mesg),
 	     ldap_error_text($mesg),
 	     ldap_error_desc($mesg),
-	     $mesg->server_error
+	     $mesg->server_error,
+	     $err->{supplementary}
 	   ) :
-	     '&nbsp;<i class="fa fa-thumbs-o-down text-warning "></i>&nbsp;Your request returned no result. Try to change query parameter/s.';
+	     '&nbsp;<i class="fa fa-search-minus fa-lg text-warning "></i>&nbsp;Your request returned no result. Try to change query parameter/s.';
 
+  p $err if defined $debug && $debug > 0;
   return $err; # if $mesg->code;
 }
 
@@ -1057,16 +1071,18 @@ sub vcard {
 				  $entry->get_value('sn') );
     $arg->{vcard}->{title} = sprintf('TITLE:%s', $entry->get_value('title') );
 
-    my $orgs = $entry->get_value('o', asref => 1);
     $arg->{vcard}->{o} = '';
-    foreach ( @{$orgs} ) {
-      $tmp = $self->search ( { base => $_ } );
-      if ($tmp->is_error()) {
-	$return->{error} .= $self->err( $tmp )->{html};
-      } else {
-	my $org = $tmp->entry(0);
-	$arg->{vcard}->{o} .= sprintf("ORG:%s\n", $org->get_value('physicalDeliveryOfficeName') );
-    }
+    if ( $entry->exists('o') ) {
+      my $orgs = $entry->get_value('o', asref => 1);
+      foreach ( @{$orgs} ) {
+	$tmp = $self->search ( { base => $_ } );
+	if ($tmp->is_error()) {
+	  $return->{error} .= $self->err( $tmp )->{html};
+	} else {
+	  my $org = $tmp->entry(0);
+	  $arg->{vcard}->{o} .= sprintf("ORG:%s\n", $org->get_value('physicalDeliveryOfficeName') );
+	}
+      }
     }
 
     $arg->{vcard}->{telephonenumber} = '';
@@ -1077,6 +1093,8 @@ sub vcard {
       }
     }
 
+    my $scope = $arg->{dn} =~ /^.*authorizedService.*$/ ? 'sub' : 'one';
+
     $arg->{vcard}->{email} = '';
     if ( $entry->exists('email') ) {
       $tmp = $entry->get_value( 'email', asref => 1 );
@@ -1084,13 +1102,13 @@ sub vcard {
 	$arg->{vcard}->{email} .= 'EMAIL;WORK:' . $_ . "\n";
       }
     }
-    $branch = $self->ldap->search ( base => $arg->{dn}, scope => 'one', filter => 'authorizedService=mail@*', );
+    $branch = $self->ldap->search ( base => $arg->{dn}, scope => $scope, filter => 'authorizedService=mail@*', );
     if ($branch->is_error()) {
       $return->{error} .= $self->err( $branch )->{html};
     } else {
       @branches = $branch->entries;
       foreach $branch_entry ( @branches ) {
-	$leaf = $self->search ( { base => $branch_entry->dn, scope => 'one', } );
+	$leaf = $self->search ( { base => $branch_entry->dn, scope => $scope ne 'one' ? 'base' : 'one', } );
 	if ($leaf->is_error()) {
 	  $return->{error} .= $self->err( $leaf )->{html};
 	} else {
@@ -1107,13 +1125,13 @@ sub vcard {
     }
     
     $arg->{vcard}->{xmpp} = '';
-    $msg = $self->ldap->search ( base => $arg->{dn}, scope => 'one', filter => 'authorizedService=xmpp@*', );
+    $msg = $self->ldap->search ( base => $arg->{dn}, scope => $scope, filter => 'authorizedService=xmpp@*', );
     if ($msg->is_error()) {
       $return->{error} .= $self->err( $msg )->{html};
     } else {
       @entries = $msg->entries;
       foreach $entry ( @entries ) {
-	$msg = $self->ldap->search ( base => $entry->dn, scope => 'one', filter => '(objectClass=*)', );
+	$msg = $self->search ( { base => $entry->dn, scope => $scope ne 'one' ? 'base' : 'one', } );
 	if ($msg->is_error()) {
 	  $return->{error} .= $self->err( $msg )->{html};
 	} else {
@@ -1125,12 +1143,7 @@ sub vcard {
       }
     }
     
-    $return->{vcard} = sprintf("
-BEGIN:VCARD
-VERSION:2.1
-%s
-%s
-%s\n",
+    $return->{vcard} = sprintf("\nBEGIN:VCARD\nVERSION:2.1\n%s\n%s\n%s\n",
 			       $arg->{vcard}->{n},
 			       $arg->{vcard}->{fn},
 			       $arg->{vcard}->{title}
@@ -1141,7 +1154,7 @@ VERSION:2.1
     $return->{vcard} .= $arg->{vcard}->{xmpp} if $arg->{vcard}->{xmpp} ne '';
     $return->{vcard} .= $arg->{vcard}->{o} if $arg->{vcard}->{o} ne '';
 
-    $return->{success} .= sprintf('vCard generated for object with DN:<b class="mono"><em>%s</em></b>.', $arg->{dn} );
+    $return->{success} .= sprintf('vCard generated for object with DN: <b class="mono"><em>%s</em></b>.', $arg->{dn} );
   }
   $return->{outfile_name} = join('_', split(/,/,canonical_dn($arg->{dn}, casefold => 'none', reverse => 1, )));
   $return->{dn} = $arg->{dn};
@@ -1163,7 +1176,7 @@ VERSION:2.1
   }
 
   $return->{vcard} .= "REV:" . $ts . "Z\nEND:VCARD\n";
-
+  # p $return;
   return $return;
 }
 
