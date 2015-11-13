@@ -94,7 +94,7 @@ sub sysinfo :Path(sysinfo) :Args(0) {
 =head2 download_from_ldap
 
 action to retrieve PKCS12 certificate from LDAP
-now it is now used since we had not agreed yet on
+now it is not used since we had not agreed yet on
 account of whether we wish it ...
 
 =cut
@@ -137,8 +137,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
     my $ldap_crud = $c->model('LDAP_CRUD');
 
     my ( $arg, $mesg, $return, $entry, $entries, $orgs, $domains, $fqdn,
-	 @roles,
-	 $physicaldeliveryofficename, $telephonenumber, $title, $mail, $roles, );
+	 $physicaldeliveryofficename, $telephonenumber, $title, $mail, );
 
     #=================================================================
     # user personal data
@@ -158,8 +157,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 						 telephoneNumber) ],
 				  } );
       if ( $mesg->code ) {
-	$return->{error} .= sprintf('<li>personal info %s %s</li>',
-				    $ldap_crud->err($mesg)->{caller},
+	$return->{error} .= sprintf('<li>personal info %s</li>',
 				    $ldap_crud->err($mesg)->{html});
       } else {
 	$entry = $mesg->entry(0);
@@ -172,7 +170,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 		telephonenumber => defined $entry->get_value('telephonenumber') ?
 		\@{[$entry->get_value('telephonenumber')]} : ['N/A'],
 		mail => defined $entry->get_value('mail') ? \@{[$entry->get_value('mail')]} : ['N/A'],
-		roles => $args->{uid} eq $c->user ? $c->user->roles : 'a mere mortal',
+		roles => $args->{uid} eq $c->user ? \@{[$c->user->roles]} : 'a mere mortal',
 	       };
       }
     } else {
@@ -182,7 +180,6 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	$c->user->telephonenumber : 'N/A';
       $title = $c->user->has_attribute('title') ? $c->user->title : 'N/A';
       $mail = $c->user->has_attribute('mail') ? $c->user->mail : 'N/A';
-      $roles = $c->user->roles;
       $arg = {
 	      uid => $c->user->uid,
 	      givenname => $c->user->givenname || 'N/A',
@@ -191,7 +188,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	      mail => $mail,
 	      physicaldeliveryofficename => $physicaldeliveryofficename,
 	      telephonenumber => $telephonenumber,
-	      roles => $roles || 'N/A',
+	      roles => \@{[$c->user->roles]} || 'N/A',
 	     };
     }
 
@@ -213,8 +210,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
       # any other, than we will use the one from it's ancestor
       $mesg = $ldap_crud->search( { base => $_, scope => 'base', } );
       if ( $mesg->code ) {
-	$return->{error} .= '<li>organization/s<br>' . $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html} . 
-	  '<em>' . (caller(1))[3] . ' @ line:' . (caller(1))[2] . '</em></li>';
+	$return->{error} .= '<li>organization/s<br>' . $ldap_crud->err($mesg)->{html};
       } else {
 	$entries = $mesg->as_struct;
 	foreach (keys (%{$entries})) {
@@ -228,8 +224,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	  $mesg = $ldap_crud->search( { base => $_,
 					attrs => [ 'associatedDomain' ], } );
 	  if ( $mesg->code ) {
-	    $return->{error} .= sprintf('<li>associatedDomain/s %s %s</li>',
-					$ldap_crud->err($mesg)->{caller},
+	    $return->{error} .= sprintf('<li>associatedDomain/s %s</li>',
 					$ldap_crud->err($mesg)->{html});
 	  } else {
 	    $domains = $mesg->entry(0);
@@ -248,8 +243,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 						  $ldap_crud->cfg->{base}->{acc_root}),
 				  scope => 'base', } );
     if ( $mesg->code ) {
-      $return->{error} .= sprintf('<li>jpegPhoto %s %s</li>',
-				  $ldap_crud->err($mesg)->{caller},
+      $return->{error} .= sprintf('<li>jpegPhoto %s</li>',
 				  $ldap_crud->err($mesg)->{html});
     }
     $entry = $mesg->entry(0);
@@ -266,8 +260,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
     my ( $dhcp, @x, $domain_name );
     $mesg = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{dhcp},
 				  filter => sprintf('uid=%s', $arg->{uid}), } );
-    if ( $mesg->code ) { $return->{error} .= sprintf('<li>DHCP %s %s</li>',
-						     $ldap_crud->err($mesg)->{caller},
+    if ( $mesg->code ) { $return->{error} .= sprintf('<li>DHCP %s</li>',
 						     $ldap_crud->err($mesg)->{html}); }
     $entries = $mesg->as_struct;
     foreach (keys (%{$entries})) {
@@ -276,8 +269,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
       $mesg = $ldap_crud->search( { base => join(',', @x),
 				    scope => 'base',
 				    attrs => [ 'dhcpOption' ],} );
-      if ( $mesg->code ) { $return->{error} .= sprintf('<li>DHCP domain-name/s %s %s</li>',
-						       $ldap_crud->err($mesg)->{caller},
+      if ( $mesg->code ) { $return->{error} .= sprintf('<li>DHCP domain-name/s %s</li>',
 						       $ldap_crud->err($mesg)->{html}); }
       foreach ( @{[$mesg->entry(0)->get_value('dhcpOption')]} ) {
 	$domain_name = substr($_, 13, -1) if $_ =~ /domain-name /;
@@ -302,15 +294,13 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 				  filter => 'authorizedService=*',
 				  attrs => [ 'authorizedService'],} );
     if ( $mesg->code ) {
-      $return->{error} .= sprintf('<li>services list %s %s</li>',
-				  $ldap_crud->err($mesg)->{caller},
+      $return->{error} .= sprintf('<li>services list %s</li>',
 				  $ldap_crud->err($mesg)->{html});
     }
     foreach ($mesg->sorted( 'authorizedService' )) {
       $mesg = $ldap_crud->search( { base => $_->dn, scope => 'children', });
       if ( $mesg->code ) {
-	$return->{error} .= sprintf('<li>each service children %s %s</li>',
-				    $ldap_crud->err($mesg)->{caller},
+	$return->{error} .= sprintf('<li>each service children %s</li>',
 				    $ldap_crud->err($mesg)->{html});
       }
       next if ! $mesg->count;

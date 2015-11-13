@@ -166,8 +166,7 @@ sub index :Path :Args(0) {
 
     my @entries = $mesg->entries;
 
-    push @{$return->{warning}}, $ldap_crud->err($mesg)->{caller} .
-      ': ' . $ldap_crud->err($mesg)->{html} if ! $mesg->count;
+    push @{$return->{warning}}, $ldap_crud->err($mesg)->{html} if ! $mesg->count;
 
     my ( $ttentries, $attr, $tmp );
     foreach (@entries) {

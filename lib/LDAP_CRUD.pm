@@ -294,6 +294,10 @@ sub _build_cfg {
 		      # data_fields => 'block_crt',
 		     },
 	  },
+	  err => {
+		  0 => '<i class="fa fa-search-minus fa-lg text-warning "></i>&nbsp;Looks like your request returned no result. Try to change query parameter/s.',
+		  50 => 'This situation needs your security officer and system administrator attention, please contact them to solve the issue.',
+		 },
 	  #=====================================================================
 	  ##
 	  ### CONFIGURATION STOPS HERE
@@ -480,24 +484,25 @@ sub err {
   $err->{supplementary} = '<div class="well well-sm"><ul class="list-unstyled">' . $err->{supplementary} . '</ul></div>'
     if $err->{supplementary} ne '';
   
-  $err->{html} = ldap_error_name($mesg) ne 'LDAP_SUCCESS' ?
-    sprintf( 'Error had occured in <em>%s</em>: <dl class="dl-horizontal">
+  $err->{html} = sprintf( 'call from <em>%s</em>: <dl class="dl-horizontal">
+  <dt>admin note</dt><dd>%s</dd>
+  <dt>supplementary data</dt><dd>%s</dd>
   <dt>code</dt><dd>%s</dd>
   <dt>error name</dt><dd>%s</dd>
   <dt>error text</dt><dd><em><small><pre>%s</pre></small></em></dd>
   <dt>error description</dt><dd>%s</dd>
   <dt>server_error</dt><dd>%s</dd>
-  <dt>supplementary data</dt><dd>%s</dd>
 </dl>',
-	     $caller,
-	     $mesg->code,
-	     ldap_error_name($mesg),
-	     ldap_error_text($mesg),
-	     ldap_error_desc($mesg),
-	     $mesg->server_error,
-	     $err->{supplementary}
-	   ) :
-	     '&nbsp;<i class="fa fa-search-minus fa-lg text-warning "></i>&nbsp;Your request returned no result. Try to change query parameter/s.';
+			   $caller,
+			   defined $self->cfg->{err}->{$mesg->code} && $self->cfg->{err}->{$mesg->code} ne '' ?
+			   $self->cfg->{err}->{$mesg->code} : '',
+			   $err->{supplementary},
+			   $mesg->code,
+			   ldap_error_name($mesg),
+			   ldap_error_text($mesg),
+			   ldap_error_desc($mesg),
+			   $mesg->server_error
+			 );
 
   p $err if defined $debug && $debug > 0;
   return $err; # if $mesg->code;
