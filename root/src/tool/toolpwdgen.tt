@@ -1,0 +1,9 @@
+[% META title = 'Password Generator' %]
+
+<div class="page-header">
+  <h2>Password Generator Form <small><em class="mono">completely random or random pronounceable word</em></small></h2>
+</div>
+
+[% INCLUDE ldap_err.tt %]
+
+[% form.render %]

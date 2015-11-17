@@ -1,0 +1,8 @@
+[% META title = 'To Translit' %]
+
+<h2>Text to translit <small><em>all stuff</em></small></h2>
+
+[% INCLUDE ldap_err.tt %]
+
+[% form.render %]
+

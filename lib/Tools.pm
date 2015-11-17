@@ -119,15 +119,18 @@ Method returns hash with cleartext and ssha coded password.
 sub pwdgen {
   my ( $self, $args ) = @_;
   my $pwdgen = {
-		pwd => $args->{'pwd'},
-		len => $args->{'len'} || UMI->config->{pwd}->{len},
-		num => $args->{'num'} || UMI->config->{pwd}->{num},
-		cap => $args->{'cap'} || UMI->config->{pwd}->{cap},
-		cnt => $args->{'cnt'} || UMI->config->{pwd}->{cnt},
-		salt => $args->{'salt'} || UMI->config->{pwd}->{salt},
-		pronounceable => $args->{'pronounceable'} || UMI->config->{pwd}->{pronounceable},
+		pwd => $args->{pwd},
+		len => $args->{len} || UMI->config->{pwd}->{len},
+		num => $args->{num} || UMI->config->{pwd}->{num},
+		cap => $args->{cap} || UMI->config->{pwd}->{cap},
+		cnt => $args->{cnt} || UMI->config->{pwd}->{cnt},
+		salt => $args->{salt} || UMI->config->{pwd}->{salt},
+		pronounceable => $args->{pronounceable} || UMI->config->{pwd}->{pronounceable},
 	       };
 
+  $pwdgen->{len} = UMI->config->{pwd}->{lenp}
+    if $pwdgen->{pronounceable};
+  
   use Crypt::GeneratePassword qw(word word3 chars);
 
   if ( ( ! defined $pwdgen->{'pwd'} || $pwdgen->{'pwd'} eq '' )

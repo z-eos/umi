@@ -79,10 +79,17 @@
 	    </li>
 	    [% END %]
             <li class="divider"></li>
+            <li class="dropdown-header">Tools:</li>
             <li>
-	      <a href="user_add_svc_new" tabindex="8">
-		<span class="fa fa-fw fa-bell text-danger"></span>
-		Test
+	      <a href="[% c.uri_for_action('tooltranslit/index') %]" tabindex="8">
+		<span class="fa fa-fw fa-text-width text-info"></span>
+		Translit
+	      </a>
+	    </li>
+            <li>
+	      <a href="[% c.uri_for_action('toolpwdgen/index') %]" tabindex="8">
+		<span class="fa fa-fw fa-user-secret text-info"></span>
+		Pwdgen
 	      </a>
 	    </li>
             <li class="divider"></li>

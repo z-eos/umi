@@ -349,7 +349,6 @@ sub org_root :Path(org_root) :Args(0) {
     $c->stash( template => 'org/org_root.tt', );
 }
 
-
 sub access_denied : Private {
   my ( $self, $c ) = @_;
   if ( defined $c->session->{"auth_uid"} &&
