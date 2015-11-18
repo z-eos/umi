@@ -49,7 +49,12 @@ sub index :Path :Args(0) {
 			   params => $params,
 			  );
 
-    my $final_message->{success} = $self->utf2lat( $params->{totranslit} );
+    my $final_message->{success} = 'Transliteration all variants:<dl class="dl-horizontal">';
+    my $tr = $self->utf2lat( $params->{totranslit}, 1 );
+    foreach my $key (sort(keys %{$tr})) {
+      $final_message->{success} .= sprintf('<dt>%s</dt><dd>%s</dd>', $key, $tr->{"$key"});
+    }
+    $final_message->{success} .= '</dl>';
     $c->stash( final_message => $final_message );
 }
 

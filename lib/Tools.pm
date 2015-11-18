@@ -60,7 +60,7 @@ utf8 input (cyrillic in particular) to latin1 transliteration
 =cut
 
 sub utf2lat {
-  my ($self, $to_translit) = @_;
+  my ($self, $to_translit, $allvariants) = @_;
   # noLingva # use utf8;
   # noLingva # use Text::Unidecode;
   # noLingva # # Catalyst provides utf8::encoded data! here we need them to
@@ -69,14 +69,34 @@ sub utf2lat {
   # noLingva # utf8::decode( $to_translit );
   # noLingva # my $a = unidecode( $to_translit );
 
-  use Lingua::Translit;
+  # Lingua::Translit::Tables
   # "ALA-LC RUS", "GOST 7.79 RUS", "DIN 1460 RUS"
-  my $tr = new Lingua::Translit("GOST 7.79 RUS");
-  $a = $tr->translit( $to_translit );
+  my $table = "ALA-LC RUS";
 
-  # remove non-alphas (like ' and `)
-  $a =~ tr/a-zA-Z0-9\,\.\_\-\ \@\#\%\*\(\)\!//cds;
-  return $a;
+  my ($tr, $return);
+  use utf8;
+  use Lingua::Translit;
+  if ( ! defined $allvariants ) {
+    $tr = new Lingua::Translit($table);
+    $return = $tr->translit( $to_translit );
+    # remove non-alphas (like ' and `)
+    $return =~ tr/a-zA-Z0-9\,\.\_\-\ \@\#\%\*\(\)\!//cds;
+    return $return;
+  } else {
+    $tr = new Lingua::Translit('ALA-LC RUS');
+    $return->{'ALA-LC RUS'} = $tr->translit( $to_translit );
+    $tr = new Lingua::Translit('GOST 7.79 RUS');
+    $return->{'GOST 7.79 RUS'} = $tr->translit( $to_translit );
+    $tr = new Lingua::Translit('DIN 1460 RUS');
+    $return->{'DIN 1460 RUS'} = $tr->translit( $to_translit );
+    $tr = new Lingua::Translit('ISO 9');
+    $return->{'ISO 9'} = $tr->translit( $to_translit );
+    $tr = new Lingua::Translit($table);
+    $return->{'UMI use ' . $table . ' with non-alphas removed'} = $tr->translit( $to_translit );
+    $return->{'UMI use ' . $table . ' with non-alphas removed'} =~ s/ĭ/j/g;
+    $return->{'UMI use ' . $table . ' with non-alphas removed'} =~ tr/a-zA-Z0-9\,\.\_\-\ \@\#\%\*\(\)\!//cds;
+    return $return;
+  }
 }
 
 sub is_int {

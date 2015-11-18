@@ -8,6 +8,8 @@ extends 'UMI::Form::LDAP';
 
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable' );
 
+use utf8;
+
 sub build_form_element_class { [ 'form-horizontal', ] }
 
 sub html_attributes {
@@ -21,7 +23,7 @@ has_field 'totranslit'
        label => 'Text to translit',
        label_class => [ 'col-xs-2', ],
        element_wrapper_class => [ 'col-xs-10', 'col-lg-7', ],
-       element_attr => { placeholder => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed dapibus nulla. Mauris vehicula vehicula ligula ac dapibus. Fusce vehicula a turpis sed. ' },
+       element_attr => { placeholder => 'Варкалось. Хливкие шорьки, Пырялись по наве, И хрюкотали зелюки, Как мюмзики в мове.' },
        # cols => 30,
        rows => 4
      );
