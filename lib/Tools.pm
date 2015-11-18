@@ -79,6 +79,8 @@ sub utf2lat {
   if ( ! defined $allvariants ) {
     $tr = new Lingua::Translit($table);
     $return = $tr->translit( $to_translit );
+    # escape important non ascii
+    $return =~ s/ĭ/j/g;
     # remove non-alphas (like ' and `)
     $return =~ tr/a-zA-Z0-9\,\.\_\-\ \@\#\%\*\(\)\!//cds;
     return $return;
