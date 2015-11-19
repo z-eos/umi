@@ -92,6 +92,12 @@
 		Pwdgen
 	      </a>
 	    </li>
+            <li>
+	      <a href="[% c.uri_for_action('toolqr/index') %]" tabindex="8">
+		<span class="fa fa-fw fa-qrcode text-info"></span>
+		QR
+	      </a>
+	    </li>
             <li class="divider"></li>
             <li class="dropdown-header">Shown to the members of:</li>
 	    [% IF c.check_any_user_role( 'admin', 'acl-w-group' ) %]

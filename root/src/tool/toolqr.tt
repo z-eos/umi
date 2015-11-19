@@ -1,0 +1,8 @@
+[% META title = 'To QR Code' %]
+
+<h2><i class="fa fa-qrcode fa-lg"></i> Text to QR Code <small><em>all stuff</em></small></h2>
+
+[% INCLUDE ldap_err.tt %]
+
+[% form.render %]
+

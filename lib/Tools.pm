@@ -4,7 +4,8 @@
 package Tools;
 use Moose::Role;
 
-
+use Data::Printer;
+use Try::Tiny;
 
 =head1 NAME
 
@@ -459,6 +460,40 @@ sub sshpubkey_parse_body {
   }
   $$pub_key = $in;
   return 1;
+}
+
+=head2 qr
+
+QR Code generator
+
+=cut
+
+sub qrcode {
+  my ($self, $args) = @_;
+  my $arg = {
+	     txt => $args->{txt},
+	     ecc => $args->{ecc} || 'M',
+	     mod => $args->{mod} || 1,
+	    };
+
+  $arg->{ops} = {
+		 Ecc => $arg->{ecc},
+		 ModuleSize => $arg->{mod},
+		};
+  if ( defined $args->{ver} ) {
+    $arg->{ver} = $args->{ver};
+    $arg->{ops}->{Version} = $arg->{ver};
+  }
+
+  use GD::Barcode::QRcode;
+  use MIME::Base64;
+
+  try {
+    $arg->{ret}->{qr} =
+      encode_base64(GD::Barcode::QRcode->new( $arg->{txt}, $arg->{ops} )->plot()->png);
+  } catch { $arg->{ret}->{error} = $_ . ' (in general max size is about 1660 characters of Latin1 codepage)'; };
+  p $arg;
+  return $arg->{ret};
 }
 
 
