@@ -70,13 +70,15 @@ sub _build_cfg {
 		   acc_root =>       'ou=People,' . UMI->config->{ldap_crud_db},
 		   acc_svc_branch => 'ou=People,' . UMI->config->{ldap_crud_db},
 		   acc_svc_common => 'ou=People,' . UMI->config->{ldap_crud_db},
-		   alias =>           'ou=alias,' . UMI->config->{ldap_crud_db},
+		   alias =>          'ou=alias,' . UMI->config->{ldap_crud_db},
 		   dhcp =>           'ou=DHCP,' . UMI->config->{ldap_crud_db},
 		   gitacl =>         'ou=GitACL,' . UMI->config->{ldap_crud_db},
 		   group =>          'ou=group,' . UMI->config->{ldap_crud_db},
+		   machines =>       'ou=machines,' . UMI->config->{ldap_crud_db},
 		   org =>            'ou=Organizations,' . UMI->config->{ldap_crud_db},
-		   rad_groups =>    'ou=groups,ou=RADIUS,' . UMI->config->{ldap_crud_db},
-		   rad_profiles =>    'ou=profiles,ou=RADIUS,' . UMI->config->{ldap_crud_db},
+		   rad_groups =>     'ou=groups,ou=RADIUS,' . UMI->config->{ldap_crud_db},
+		   rad_profiles =>   'ou=profiles,ou=RADIUS,' . UMI->config->{ldap_crud_db},
+		   workstations =>   'ou=workstations,' . UMI->config->{ldap_crud_db},
 		   icon => {
 			    People => 'fa fa-user',
 			    DHCP => 'fa fa-sitemap',
@@ -89,7 +91,8 @@ sub _build_cfg {
 		  },
 	  exclude_prefix => 'aux_',
 	  sizelimit => 50,
-
+	  translit => "ALA-LC RUS",
+	  
 	  #=====================================================================
 	  ##
 	  ### CONFIGURATION STARTS HERE (something you could want to change.

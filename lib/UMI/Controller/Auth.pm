@@ -4,6 +4,7 @@
 package UMI::Controller::Auth;
 use Moose;
 use namespace::autoclean;
+use Data::Printer;
 
 BEGIN { extends 'Catalyst::Controller'; }
 
@@ -44,9 +45,9 @@ sub signin :Path Global {
     $c->session->{auth_obj} = $c->user->attributes('ashash');
     delete $c->session->{auth_obj}->{jpegphoto};
     $c->session->{auth_uid} = $c->user->uid;
+    delete $c->session->{auth_roles};
     push @{$c->session->{auth_roles}}, $c->user->roles;
     $c->cache->set( 'auth_obj', $c->session->{auth_obj} );
-    # use Data::Printer;
     # p $c->session;
     # p $c->cache->get( 'auth_obj' );
     $c->stash( template => 'welcome.tt', );

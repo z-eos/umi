@@ -180,7 +180,7 @@
 
 	      <li>
 		<a href="[% c.uri_for('/searchadvanced') %]" tabindex="2">
-		  <span class="[% icon_class %] fa-search-plus">&nbsp;advanced search</span>
+		  <span class="[% icon_class %] fa-search-plus fa-lg"></span>&nbsp;advanced search
 		</a>
 	      </li>
 
@@ -255,7 +255,7 @@
 		<span class="[% icon_class %] fa-files-o"></span>&nbsp;alias</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
-			value="[% helper_cfg('cfg_ldap_crud','base', 'workstation') %]"
+			value="[% helper_cfg('cfg_ldap_crud','base', 'workstations') %]"
 			name="ldapsearch_base" tabindex="23"
 			title="filter pattern with base Workstations">
 		<span class="[% icon_class %] fa-desktop"></span>&nbsp;workstations</button></li>
@@ -275,7 +275,7 @@
 
 	      <li>
 		<a href="[% c.uri_for('/searchadvanced') %]" tabindex="27">
-		  <span class="[% icon_class %] fa-medkit">&nbsp;audit</span>
+		  <span class="[% icon_class %] fa-stethoscope fa-lg"></span>&nbsp;audit
 		</a>
 	      </li>
 	    </ul>
@@ -292,6 +292,9 @@
           <ul class="dropdown-menu" role="menu">
             <li>
 	      <a href="about"><span class="fa fa-fw fa-question-circle">&nbsp;</span>help</a>
+	    </li>
+            <li>
+	      <a href="https://github.com/z-eos/umi/wiki"><span class="fa fa-fw fa-wikipedia-w"></span>&nbsp;UMI wiki</a>
 	    </li>
             <li>
 	      <a href="[% helper_cfg('cfg_local','header','help', 'item2', 'url') %]">

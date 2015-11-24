@@ -88,47 +88,6 @@ __PACKAGE__
 # Start the application
 __PACKAGE__->setup();
 
-# .--------------------------------+-------------------------------.
-# | Path                           | Private                       |
-# +--------------------------------+-------------------------------+
-# | /                              | /index                        |
-# | /...                           | /default                      |
-# | /about/                        | /about                        |
-# | /accinfo/                      | /accinfo                      |
-# | /auth/                         | /auth/index                   |
-# | /auth/...                      | /auth/signout                 |
-# | /auth/...                      | /auth/signin                  |
-# | /dhcp/                         | /dhcp/index                   |
-# | /dhcp_root/                    | /dhcp_root                    |
-# | /download_from_ldap/           | /download_from_ldap           |
-# | /gitacl/                       | /gitacl/index                 |
-# | /gitacl_root/                  | /gitacl_root                  |
-# | /group/                        | /group/index                  |
-# | /group_root/                   | /group_root                   |
-# | /org/                          | /org/index                    |
-# | /org_root/                     | /org_root                     |
-# | /searchadvanced/               | /searchadvanced/index         |
-# | /searchadvanced/proc/          | /searchadvanced/proc          |
-# | /searchby/                     | /searchby/index               |
-# | /searchby/block/               | /searchby/block               |
-# | /searchby/delete/              | /searchby/delete              |
-# | /searchby/dhcp_add/            | /searchby/dhcp_add            |
-# | /searchby/ldif_gen/            | /searchby/ldif_gen            |
-# | /searchby/modify/              | /searchby/modify              |
-# | /searchby/modify_userpassword/ | /searchby/modify_userpassword |
-# | /searchby/proc/                | /searchby/proc                |
-# | /searchby/reassign/            | /searchby/reassign            |
-# | /searchby/user_preferences/    | /searchby/user_preferences    |
-# | /signin/...                    | /auth/signin                  |
-# | /signout/...                   | /auth/signout                 |
-# | /sysinfo/                      | /sysinfo                      |
-# | /user/                         | /user/index                   |
-# | /user/modpwd/                  | /user/modpwd                  |
-# | /user/user_add_svc_new/        | /user/user_add_svc_new        |
-# | /user_prefs/                   | /user_preferences             |
-# | /user_root/                    | /user_root                    |
-# | /userall/                      | /userall/index                |
-# '--------------------------------+-------------------------------'
 # __PACKAGE__->allow_access_if( "/", [ qw/admin/ ]);
 
 __PACKAGE__->deny_access_unless_any( "/dhcp",                [ qw/admin coadmin/ ]);
@@ -144,6 +103,9 @@ __PACKAGE__->deny_access_unless_any( "/searchby",            [ qw/admin coadmin/
 __PACKAGE__->deny_access_unless_any( "/searchby/ldif_gen",   [ qw/admin coadmin/ ]);
 __PACKAGE__->deny_access_unless_any( "/searchby/ldif_gen2f", [ qw/admin coadmin/ ]);
 __PACKAGE__->deny_access_unless_any( "/sysinfo",             [ qw/admin/ ]);
+__PACKAGE__->deny_access_unless_any( "/toolpwdgen",          [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/toolqr",              [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/tooltranslit",        [ qw/admin coadmin/ ]);
 __PACKAGE__->deny_access_unless_any( "/user",                [ qw/admin acl-w-people/ ]);
 __PACKAGE__->deny_access_unless_any( "/userall",             [ qw/admin acl-w-people/ ]);
 __PACKAGE__->allow_access_if( "/user/modpwd",

@@ -77,7 +77,7 @@ sub index :Path :Args(0) {
 
   # if ( defined $c->session->{"auth_uid"} ) {
   if ( defined $c->user_exists ) {
-    my ( $params, $ldap_crud, $filter, $filter_meta, $filter_show, $base, $return );
+    my ( $params, $ldap_crud, $filter, $filter_meta, $filter_show, $filter_translitall, $base, $return );
     my $sort_order = 'reverse';
     
     $params = $c->req->params;
@@ -123,12 +123,17 @@ sub index :Path :Args(0) {
       $base = $ldap_crud->cfg->{base}->{db};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_name'} ) {
-      $filter = sprintf("|(givenName=%s)(sn=%s)(uid=%s)(cn=%s)",
-			$filter_meta, $filter_meta, $filter_meta, $filter_meta);
-      $filter_show = sprintf("|(givenName=<kbd>%s</kbd>)(sn=<kbd>%s</kbd>)(uid=<kbd>%s</kbd>)(cn=<kbd>%s</kbd>)",
-			     $filter_meta, $filter_meta, $filter_meta, $filter_meta);
+
+      
+      $filter = 
+	sprintf("|(givenName=%s)(sn=%s)(uid=%s)(cn=%s)", $filter_meta, $filter_meta, $filter_meta, $filter_meta);
+      $filter_show =
+	sprintf("|(givenName=<kbd>%s</kbd>)(sn=<kbd>%s</kbd>)(uid=<kbd>%s</kbd>)(cn=<kbd>%s</kbd>)",
+		$filter_meta, $filter_meta, $filter_meta, $filter_meta );
       $base = $ldap_crud->cfg->{base}->{acc_root};
       $params->{'ldapsearch_base'} = $base;
+
+      
     } elsif ( defined $params->{'ldapsearch_by_telephone'} ) {
       $filter = sprintf("|(telephoneNumber=%s)(mobile=%s)(homePhone=%s)",
 			$filter_meta, $filter_meta, $filter_meta);
@@ -165,8 +170,19 @@ sub index :Path :Args(0) {
 				 );
 
     my @entries = $mesg->entries;
-
-    push @{$return->{warning}}, $ldap_crud->err($mesg)->{html} if ! $mesg->count;
+    if ( ! $mesg->count ) {
+      if ( $self->is_ascii($params->{'ldapsearch_filter'}) ) {
+	$filter_translitall = $self->utf2lat($params->{'ldapsearch_filter'}, 1);
+	push @{$return->{warning}},
+	  $ldap_crud->err($mesg)->{html},
+	  sprintf('Alternate transliteration: <em>%s, %s, %s</em><br><small><em class="text-info">please note, translit variants above are provided only as examples, in DB only ASCII characters are allowed!</em></small>',
+		  $filter_translitall->{'GOST 7.79 RUS'},
+		  $filter_translitall->{'DIN 1460 RUS'},
+		  $filter_translitall->{'ISO 9'} );
+      } else {
+	push @{$return->{warning}}, $ldap_crud->err($mesg)->{html};
+      }
+    }
 
     my ( $ttentries, $attr, $tmp );
     foreach (@entries) {
@@ -968,22 +984,37 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
     if ( $mesg ne '0' ) {
       $return->{error} = '<li>Error during password change occured: ' . $mesg . '</li>';
     } else {
-      $return->{success} .= '<table class="table table-condensed table-vcenter"><tr><td><h1 class="mono text-center">' .
-	$arg->{password_gen}->{'clear'} . '</h1></td><td class="text-center">';
+      # $return->{success} .= '<table class="table table-condensed table-vcenter"><tr><td><h1 class="mono text-center">' .
+	# $arg->{password_gen}->{'clear'} . '</h1></td><td class="text-center">';
 
-      use GD::Barcode::QRcode;
-      # binmode(STDOUT);
-      # print "Content-Type: image/png\n\n";
-      # print GD::Barcode::QRcode->new( $arg->{password_gen}->{'clear'} )->plot->png;
+      my $qr = $self->qrcode({ txt => $arg->{password_gen}->{'clear'}, ver => 2, mod => 5 });
+      if ( exists $qr->{error} ) {
+	$return->{error} = $qr->{error};
+      } else {
+	$return->{success} = sprintf('<table class="table table-condensed table-vcenter">
+<tr><td><h1 class="mono text-center">%s</h1></td><td class="text-center">
+<img alt="no QR Code was generated for: %s" 
+       src="data:image/jpg;base64,%s" 
+       class="img-responsive"
+       title="QR Code for user input"/></td></tr></table>',
+				     $arg->{password_gen}->{'clear'},
+				     $arg->{password_gen}->{'clear'},
+				     $qr->{qr} );
+      }
 
-      use MIME::Base64;
-      my $qr = sprintf('<img alt="password" src="data:image/jpg;base64,%s" class="img-responsive" title="password"/>',
-		       encode_base64(GD::Barcode::QRcode
-				     ->new( $arg->{password_gen}->{'clear'},
-					    { Ecc => 'Q', Version => 6, ModuleSize => 8 } )
-				     ->plot()->png)
-		      );
-      $return->{success} .= $qr . '</td></tr></table>';
+      # use GD::Barcode::QRcode;
+      # # binmode(STDOUT);
+      # # print "Content-Type: image/png\n\n";
+      # # print GD::Barcode::QRcode->new( $arg->{password_gen}->{'clear'} )->plot->png;
+
+      # use MIME::Base64;
+      # my $qr = sprintf('<img alt="password" src="data:image/jpg;base64,%s" class="img-responsive" title="password"/>',
+      # 		       encode_base64(GD::Barcode::QRcode
+      # 				     ->new( $arg->{password_gen}->{'clear'},
+      # 					    { Ecc => 'Q', Version => 6, ModuleSize => 8 } )
+      # 				     ->plot()->png)
+      # 		      );
+      # $return->{success} .= $qr . '</td></tr></table>';
     }
   }
 

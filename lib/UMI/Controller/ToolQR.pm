@@ -53,7 +53,7 @@ sub index :Path :Args(0) {
 
     # $qr = $self->qrcode({ txt => $params->{toqr}, ecc => 'Q', ver => 6, mod => 8 });
     for( my $i = 0; $i < 41; $i++ ) {
-      $qr = $self->qrcode({ txt => $params->{toqr}, ecc => 'Q', ver => $i, mod => 2 });
+      $qr = $self->qrcode({ txt => $params->{toqr}, ver => $i, mod => 5 });
       last if ! exists $qr->{error};
     }
 
@@ -61,11 +61,10 @@ sub index :Path :Args(0) {
       $final_message->{error} = $qr->{error};
     } else {
       $final_message->{success} = sprintf('QR code for input: <em><b>&laquo;%s&raquo;</b></em>:
-<div class="center-block">
-  <img alt="no QR Code was generated for: %s" 
+<img alt="no QR Code was generated for: %s" 
        src="data:image/jpg;base64,%s" 
        class="img-responsive"
-       title="QR Code for user input"/></div>',
+       title="QR Code for user input"/>',
 					  $params->{toqr},
 					  $params->{toqr},
 					  $qr->{qr} );

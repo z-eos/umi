@@ -82,6 +82,7 @@ sub utf2lat {
     $return = $tr->translit( $to_translit );
     # escape important non ascii
     $return =~ s/ĭ/j/g;
+    $return =~ s/ė/e/g;
     # remove non-alphas (like ' and `)
     $return =~ tr/a-zA-Z0-9\,\.\_\-\ \@\#\%\*\(\)\!//cds;
     return $return;
@@ -97,6 +98,7 @@ sub utf2lat {
     $tr = new Lingua::Translit($table);
     $return->{'UMI use ' . $table . ' with non-alphas removed'} = $tr->translit( $to_translit );
     $return->{'UMI use ' . $table . ' with non-alphas removed'} =~ s/ĭ/j/g;
+    $return->{'UMI use ' . $table . ' with non-alphas removed'} =~ s/ė/e/g;
     $return->{'UMI use ' . $table . ' with non-alphas removed'} =~ tr/a-zA-Z0-9\,\.\_\-\ \@\#\%\*\(\)\!//cds;
     return $return;
   }
@@ -492,7 +494,7 @@ sub qrcode {
     $arg->{ret}->{qr} =
       encode_base64(GD::Barcode::QRcode->new( $arg->{txt}, $arg->{ops} )->plot()->png);
   } catch { $arg->{ret}->{error} = $_ . ' (in general max size is about 1660 characters of Latin1 codepage)'; };
-  p $arg;
+
   return $arg->{ret};
 }
 
