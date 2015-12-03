@@ -80,9 +80,9 @@ sub sysinfo :Path(sysinfo) :Args(0) {
   use Data::Printer colored => 0;
   $sysinfo = {
 	      session => { title => 'Session',
-			   data => p(%x, colored => 0), },
+			   data => np(%x, colored => 0), },
 	      LDAP_CRUD_cfg => { title => 'LDAP_CRUD configuration ( $c->model(LDAP_CRUD)->cfg )',
-				 data => p($c->model('LDAP_CRUD')->cfg, colored => 0), },
+				 data => np($c->model('LDAP_CRUD')->cfg, colored => 0), },
 	      # UMI_c => { title => 'UMI c',
 	      # 		      data => p($c, colored => 0), },
 	     };
