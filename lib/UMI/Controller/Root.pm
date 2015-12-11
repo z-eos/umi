@@ -337,7 +337,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	       fqdn => $fqdn,
 	       dhcp => $dhcp,
 	       service => $service,
-	       session => p($c->session),
+	       session => $c->session,
 	       final_message => $return, );
   } else {
     $c->stash( template => 'signin.tt', );

@@ -204,7 +204,7 @@ sub _build_cfg {
 		      homeDirectory_prefix => '/var/mail/IMAP_HOMES/',
 		      gidNumber => 10006,
 		      icon => 'fa fa-envelope',
-		      data_fields => 'login,password1,password2',
+		      data_fields => 'login,logindescr,password1,password2',
 		      data_relation => 'passw',
 		     },
 	   'xmpp' => {
@@ -214,7 +214,7 @@ sub _build_cfg {
 		      gidNumber => 10106,
 		      jpegPhoto_noavatar => UMI->path_to('root', 'static', 'images', '/avatar-xmpp.png'),
 		      icon => 'fa fa-lightbulb-o',
-		      data_fields => 'login,password1,password2',
+		      data_fields => 'login,logindescr,password1,password2',
 		      data_relation => 'passw',
 		      associateddomain_prefix =>
 		      {
@@ -250,7 +250,7 @@ sub _build_cfg {
 		     descr => 'Web Account',
 		     disabled => 0,
 		     icon => 'fa fa-puzzle-piece',
-		     data_fields => 'login,password1,password2',
+		     data_fields => 'login,logindescr,password1,password2',
 		     data_relation => 'passw',
 		    },
 	   'sms' => {
@@ -264,7 +264,7 @@ sub _build_cfg {
 			  descr => 'CISCO Commutators',
 			  disabled => 0,
 			  icon => 'fa fa-terminal',
-			  data_fields => 'login,password1,password2',
+			  data_fields => 'login,logindescr,password1,password2',
 			  data_relation => 'passw',
 			 },
 	   'ssh-acc' => {
@@ -272,7 +272,7 @@ sub _build_cfg {
 			 descr => 'SSH',
 			 disabled => 0,
 			 icon => 'fa fa-key',
-			 data_fields => 'login,password1,password2',
+			 data_fields => 'login,logindescr,password1,password2',
 			 data_relation => 'passw',
 			},
 	   'ssh' => {

@@ -468,6 +468,8 @@ sub sshpubkey_parse_body {
 
 QR Code generator
 
+result image is interlaced and transparent (white color) background
+
 =cut
 
 sub qrcode {
@@ -491,8 +493,11 @@ sub qrcode {
   use MIME::Base64;
 
   try {
-    $arg->{ret}->{qr} =
-      encode_base64(GD::Barcode::QRcode->new( $arg->{txt}, $arg->{ops} )->plot()->png);
+    $arg->{gd} = GD::Barcode::QRcode->new( $arg->{txt}, $arg->{ops} )->plot();
+    $arg->{white} = $arg->{gd}->colorClosest(255,255,255);
+    $arg->{gd}->transparent($arg->{white});
+    $arg->{gd}->interlaced('true');
+    $arg->{ret}->{qr} = encode_base64($arg->{gd}->png);
   } catch { $arg->{ret}->{error} = $_ . ' (in general max size is about 1660 characters of Latin1 codepage)'; };
 
   return $arg->{ret};

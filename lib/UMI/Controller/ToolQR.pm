@@ -60,11 +60,10 @@ sub index :Path :Args(0) {
     if ( exists $qr->{error} ) {
       $final_message->{error} = $qr->{error};
     } else {
-      $final_message->{success} = sprintf('QR code for input: <em><b>&laquo;%s&raquo;</b></em>:
+      $final_message->{success} = sprintf('<div class="text-center">QR code for input: <em><b>&laquo;%s&raquo;</b></em>:<div>
 <img alt="no QR Code was generated for: %s" 
        src="data:image/jpg;base64,%s" 
-       class="img-responsive"
-       title="QR Code for user input"/>',
+       title="QR Code for user input"/></div></div>',
 					  $params->{toqr},
 					  $params->{toqr},
 					  $qr->{qr} );

@@ -58,7 +58,7 @@
     <h4>&nbsp;&nbsp;<span class="fa fa-check-circle">&nbsp;</span>Success!</h4>
   </div>
   <div class="panel-body">
-    <ul>
+    <ul class="list-unstyled">
       [% FOREACH i IN final_message.success %]
       <li>[% i %]</li>
       [% END %]

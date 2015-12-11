@@ -57,7 +57,7 @@
 		value="[% entry.key %]"
 		data-order="[% site.searchby.menu.order.add_svc_acc %]"
 		name="add_svc_acc">
-	  <span class="fa fa-fw fa-plus-circle text-danger"></span>
+	  <span class="fa fa-fw fa-plus-square text-success"></span>
 	  new service
 	</button>
       </form>
@@ -208,7 +208,7 @@
 		data-order="[% site.searchby.menu.order.ldap_add_dhcp %]"
 		name="ldap_add_dhcp">
 	  <span class="fa fa-fw fa-sitemap text-info"></span>
-	  DHCP (IP<->MAC)
+	  DHCP
 	</button>
       </form>
     </li>

@@ -149,6 +149,7 @@
 	  	 data-html="true"
 	         data-toggle="popover"
 	  	 data-original-title="Legend"
+		 data-template="<div class='popover hidden-xs' role='tooltip'><div class='arrow'></div><h3 class='popover-title'></h3><div class='popover-content'></div></div>"
 	  	 data-content="<ul>
 	          <li>default sort criteria is <i class='text-info'>by name</i> (First/Last Name, uid and cn)</li>
 	  	  <li>for each search criteria, <i class='text-info'>objectClass=<i class='fa fa-asterisk'></i></i> is used if empty</li>

@@ -258,8 +258,21 @@ has_field 'account.login'
        element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'john.doe',
+			 title => 'login will be added with @domain in the end',
 			 'autocomplete' => 'off',
 			 'data-name' => 'login',
+			 'data-group' => 'account', },
+     );
+
+has_field 'account.logindescr'
+  => ( type => 'Display',
+       html => '<div class="form-group hidden relation passw">' .
+       '<label class="col-xs-2 control-label"></label>' .
+       '<div class="col-xs-10 col-lg-5">' .
+       '<small class="text-muted"><em>' .
+       'login will be added with @domain' .
+       '</em></small></div></div>',
+       element_attr => { 'data-name' => 'logindescr',
 			 'data-group' => 'account', },
      );
 
