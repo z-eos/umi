@@ -13,14 +13,14 @@
       <div class="panel-body">
 	[% IF form.errors %]
 	<b class="text-danger">Form contains error/s! Check for fields constraints met, please!</b>
-	<ul>
+	<ul class="list-unstyled">
 	  [% FOREACH i IN form.errors.reverse %]
 	  [% IF i != '' %]<li>[% i %]</li>[% END %]
 	  [% END %]
 	</ul>
 	[% END %]
 	[% IF final_message.error %]
-	<ul>
+	<ul class="list-unstyled">
 	  [% FOREACH i IN final_message.error %]
 	  [% IF i != '' %]<li>[% i %]</li>[% END %]
 	  [% END %]
@@ -43,7 +43,7 @@
     <h4>&nbsp;&nbsp;<span class="fa fa-exclamation-triangle">&nbsp;</span>Warning!<em class="h5">(relax and do not panic! mostly it is just a note to let you know some detail/s)</em></h4>
   </div>
   <div class="panel-body">
-    <ul>
+    <ul class="list-unstyled">
       [% FOREACH i IN final_message.warning %]
       <li>[% i %]</li>
       [% END %]

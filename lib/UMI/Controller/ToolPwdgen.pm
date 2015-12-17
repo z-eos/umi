@@ -55,7 +55,8 @@ sub index :Path :Args(0) {
 			    cap => $params->{'pwd_cap'},
 			    pronounceable => defined $params->{pronounceable} ? $params->{pronounceable} : 0, });
 
-  my $final_message->{success} = 'Password generated:<table class="table table-vcenter"><tr class="success"><td width="50%"><h1 class="mono text-center">' .
+  my $final_message->{success} = 'Password generated:<table class="table table-vcenter">' .
+    '<tr class="success"><td width="50%"><h1 class="mono text-center">' .
     $pwd->{clear} . '</h1></td><td class="text-center" width="50%">';
 
   my $qr;

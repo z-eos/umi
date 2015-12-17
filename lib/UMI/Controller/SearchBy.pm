@@ -885,54 +885,54 @@ sub mod_jpegPhoto {
 
 #=====================================================================
 
-=head1 mod_pwd
+# =head1 mod_pwd
 
-DEPRECATED?
+# DEPRECATED? looks not used
 
-modify password method
+# modify password method
 
-=cut
+# =cut
 
 
-sub mod_pwd {
-  my ( $self, $ldap_crud, $args ) = @_;
+# sub mod_pwd {
+#   my ( $self, $ldap_crud, $args ) = @_;
 
-  my $arg = {
-	     mod_pwd_dn => $args->{mod_pwd_dn},
-	     password_init => $args->{password_init},
-	     password_cnfm => $args->{password_cnfm},
-	    };
+#   my $arg = {
+# 	     mod_pwd_dn => $args->{mod_pwd_dn},
+# 	     password_init => $args->{password_init},
+# 	     password_cnfm => $args->{password_cnfm},
+# 	    };
 
-  my ( $error_message, $success_message, $final_message );
-  if ( $self->form_mod_pwd->validated && $self->form_mod_pwd->ran_validation ) {
+#   my ( $error_message, $success_message, $final_message );
+#   if ( $self->form_mod_pwd->validated && $self->form_mod_pwd->ran_validation ) {
 
-    if ( $arg->{'password_init'} eq '' && $arg->{'password_cnfm'} eq '' ) {
-      $arg->{password_gen} = $self->pwdgen;
-    } elsif ( $arg->{'password_init'} ne '' && $arg->{'password_cnfm'} ne '' ) {
-      $arg->{password_gen} = $self->pwdgen({ pwd => $arg->{'password_cnfm'} });
-    }
-    my $mesg = $ldap_crud->modify( $arg->{mod_pwd_dn},
-				   [ replace => [ userPassword => $arg->{password_gen}->{ssha}, ], ], );
+#     if ( $arg->{'password_init'} eq '' && $arg->{'password_cnfm'} eq '' ) {
+#       $arg->{password_gen} = $self->pwdgen;
+#     } elsif ( $arg->{'password_init'} ne '' && $arg->{'password_cnfm'} ne '' ) {
+#       $arg->{password_gen} = $self->pwdgen({ pwd => $arg->{'password_cnfm'} });
+#     }
+#     my $mesg = $ldap_crud->modify( $arg->{mod_pwd_dn},
+# 				   [ replace => [ userPassword => $arg->{password_gen}->{ssha}, ], ], );
 
-    if ( $mesg ne '0' ) {
-      $error_message = '<li>Error during password change occured: ' . $mesg . '</li>';
-    } else {
-      $success_message .= $arg->{password_gen}->{'clear'};
-    }
+#     if ( $mesg ne '0' ) {
+#       $error_message = '<li>Error during password change occured: ' . $mesg . '</li>';
+#     } else {
+#       $success_message .= $arg->{password_gen}->{'clear'};
+#     }
 
-    $final_message = '<div class="alert alert-success" role="alert">' .
-      '<span style="font-size: 140%" class="glyphicon glyphicon-ok-sign">&nbsp;</span>' .
-	'<em>Password is changed and is:</em>&nbsp;' .
-	  '<kbd style="font-size: 150%; font-family: monospace;">' .
-	    $success_message . '</kbd></div>' if $success_message;
-  }
+#     $final_message = '<div class="alert alert-success" role="alert">' .
+#       '<span style="font-size: 140%" class="glyphicon glyphicon-ok-sign">&nbsp;</span>' .
+# 	'<em>Password is changed and is:</em>&nbsp;' .
+# 	  '<kbd style="font-size: 150%; font-family: monospace;">' .
+# 	    $success_message . '</kbd></div>' if $success_message;
+#   }
 
-  $final_message .= '<div class="alert alert-danger" role="alert">' .
-    '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
-      $error_message . '</ul></div>' if $error_message;
+#   $final_message .= '<div class="alert alert-danger" role="alert">' .
+#     '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
+#       $error_message . '</ul></div>' if $error_message;
 
-  return $final_message;
-}
+#   return $final_message;
+# }
 
 
 #=====================================================================
@@ -960,8 +960,12 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
 					     posted => ($c->req->method eq 'POST'),
 					     params => $params,
 					    ) &&
-					      ( defined $params->{password_init} ||
-						defined $params->{password_cnfm} );
+  					      ( defined $params->{password_init} ||
+  						defined $params->{password_cnfm} ||
+  						defined $params->{pwd_cap} ||
+  						defined $params->{pwd_len} ||
+  						defined $params->{pwd_num} ||
+  						defined $params->{pronounceable} );
 
   my $arg = {
 	     mod_pwd_dn => $params->{ldap_modify_password},
@@ -969,11 +973,14 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
 	     password_cnfm => $params->{password_cnfm},
 	    };
 
-  my $return;
+  my $return; p $self->form_mod_pwd->validated;
   if ( $self->form_mod_pwd->validated && $self->form_mod_pwd->ran_validation ) {
 
     if ( $arg->{password_init} eq '' && $arg->{password_cnfm} eq '' ) {
-      $arg->{password_gen} = $self->pwdgen;
+      $arg->{password_gen} = $self->pwdgen({ len => $params->{'pwd_len'},
+					     num => $params->{'pwd_num'},
+					     cap => $params->{'pwd_cap'},
+					     pronounceable => defined $params->{pronounceable} ? $params->{pronounceable} : 0, });
     } elsif ( $arg->{'password_init'} ne '' && $arg->{'password_cnfm'} ne '' ) {
       $arg->{password_gen} = $self->pwdgen({ pwd => $arg->{'password_cnfm'} });
     }
@@ -982,42 +989,42 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
 					       [ replace => [ 'userPassword' => $arg->{password_gen}->{ssha}, ], ], );
 
     if ( $mesg ne '0' ) {
-      $return->{error} = '<li>Error during password change occured: ' . $mesg . '</li>';
+      $return->{error} = '<li>Error during password change occured: ' . $mesg->{html} . '</li>';
     } else {
-      # $return->{success} .= '<table class="table table-condensed table-vcenter"><tr><td><h1 class="mono text-center">' .
-	# $arg->{password_gen}->{'clear'} . '</h1></td><td class="text-center">';
+      $return->{success} = 'Password generated:<table class="table table-vcenter">' .
+	'<tr><td width="50%"><h1 class="mono text-center">' .
+	$arg->{password_gen}->{clear} . '</h1></td><td class="text-center" width="50%">';
 
-      my $qr = $self->qrcode({ txt => $arg->{password_gen}->{'clear'}, ver => 2, mod => 5 });
-      if ( exists $qr->{error} ) {
-	$return->{error} = $qr->{error};
-      } else {
-	$return->{success} = sprintf('<table class="table table-condensed table-vcenter">
-<tr><td><h1 class="mono text-center">%s</h1></td><td class="text-center">
-<img alt="no QR Code was generated for: %s" 
-       src="data:image/jpg;base64,%s" 
-       class="img-responsive"
-       title="QR Code for user input"/></td></tr></table>',
-				     $arg->{password_gen}->{'clear'},
-				     $arg->{password_gen}->{'clear'},
-				     $qr->{qr} );
+      my $qr;
+      for( my $i = 0; $i < 41; $i++ ) {
+	$qr = $self->qrcode({ txt => $arg->{password_gen}->{clear}, ver => $i, mod => 5 });
+	last if ! exists $qr->{error};
       }
 
-      # use GD::Barcode::QRcode;
-      # # binmode(STDOUT);
-      # # print "Content-Type: image/png\n\n";
-      # # print GD::Barcode::QRcode->new( $arg->{password_gen}->{'clear'} )->plot->png;
+      $return->{error} = $qr->{error} if $qr->{error};
+      $return->{success} .= sprintf('<img alt="password QR" src="data:image/jpg;base64,%s" title="password QR"/>',
+					   $qr->{qr} );
+      $return->{success} .= '</td></tr></table>';
 
-      # use MIME::Base64;
-      # my $qr = sprintf('<img alt="password" src="data:image/jpg;base64,%s" class="img-responsive" title="password"/>',
-      # 		       encode_base64(GD::Barcode::QRcode
-      # 				     ->new( $arg->{password_gen}->{'clear'},
-      # 					    { Ecc => 'Q', Version => 6, ModuleSize => 8 } )
-      # 				     ->plot()->png)
-      # 		      );
-      # $return->{success} .= $qr . '</td></tr></table>';
+
+#       my $qr = $self->qrcode({ txt => $arg->{password_gen}->{'clear'}, ver => 2, mod => 5 });
+#       if ( exists $qr->{error} ) {
+# 	$return->{error} = $qr->{error};
+#       } else {
+# 	$return->{success} = sprintf('<table class="table table-condensed table-vcenter">
+# <tr><td><h1 class="mono text-center">%s</h1></td><td class="text-center">
+# <img alt="no QR Code was generated for: %s" 
+#        src="data:image/jpg;base64,%s" 
+#        class="img-responsive"
+#        title="QR Code for user input"/></td></tr></table>',
+# 				     $arg->{password_gen}->{'clear'},
+# 				     $arg->{password_gen}->{'clear'},
+# 				     $qr->{qr} );
+#       }
+
     }
   }
-
+p $arg;
   $c->stash( final_message => $return, );
 }
 

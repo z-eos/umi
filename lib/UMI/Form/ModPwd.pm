@@ -6,7 +6,7 @@ package UMI::Form::ModPwd;
 use HTML::FormHandler::Moose;
 BEGIN { extends 'UMI::Form::LDAP'; with 'Tools'; }
 
-use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable' );
+use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable', 'PositiveNum' );
 
 has '+item_class' => ( default =>'ModPwd' );
 # has '+action' => ( default => '/searchby/proc' );
@@ -15,31 +15,83 @@ sub build_form_element_class { [ 'form-horizontal' ] }
 
 has_field 'ldap_modify_password' => ( type => 'Hidden', );
 
-has_field 'password_init' => ( type => 'Password',
-			       minlength => 7, maxlength => 128,
-			       label => 'New Password',
-			       label_class => [ 'col-md-5' ],
-			       apply => [ NoSpaces, NotAllDigits, Printable ],
-			       element_attr => { placeholder => 'Password', },
-			       wrapper_class => [ 'col-md-7' ],
-			 );
+has_field 'password_init'
+  => ( type => 'Password',
+       apply => [ NoSpaces, NotAllDigits, Printable ],
+       minlength => 7, maxlength => 128,
+       label => 'New Password',
+       label_class => [ 'col-xs-2' ],
+       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+       element_attr => { placeholder => 'Password', },
+       wrapper_class => [ 'deactivate-bottom', ],
+     );
 
-has_field 'password_cnfm' => ( type => 'Password',
-			       minlength => 7, maxlength => 128,
+has_field 'password_cnfm'
+  => ( type => 'Password',
+       apply => [ NoSpaces, NotAllDigits, Printable ],
+       minlength => 7, maxlength => 128,
 			       label => 'Confirm Password',
-			       label_class => [ 'col-md-5' ],
-			       apply => [ NoSpaces, NotAllDigits, Printable ],
-			       element_attr => { placeholder => 'Confirm Password', },
-			       wrapper_class => [ 'col-md-7' ],
-			     );
+       label_class => [ 'col-xs-2' ],
+       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+       element_attr => { placeholder => 'Confirm Password', },
+       wrapper_class => [ 'deactivate-bottom', ],
+     );
 
-has_field 'aux_pwdcomment' => ( type => 'Display',
-				html => '<p class="form-group help-block col-md-10 col-md-offset-4 text-center"><em>' .
-				'leave, both of password fields empty, to autogenerate ' . UMI->config->{pwd}->{len} .
-				' character length, strong password</em></p>',
-				# element_class => 'text-muted',
-				# wrapper_class => [ 'col-md-7', 'col-md-offset-4' ],
-			      );
+has_field 'aux_pwdcomment'
+  => ( type => 'Display',
+       html => '<div class="form-group"><div class="help-block col-md-10 col-md-offset-2"><em>' .
+       'leave, both New/Confirm Password fields empty, to generate strong password according the options bellow</em></div></div>',
+       wrapper_class => [ 'deactivate-bottom', ],
+     );
+
+
+has_field 'pronounceable'
+  => (
+      type => 'Checkbox',
+      label => 'Pronounceable',
+      label_class => [ 'col-xs-2', ],
+      wrapper_class => [ 'checkbox', ],
+      element_wrapper_class => [ 'col-xs-3', 'col-xs-offset-2', 'col-lg-1', ],
+      element_attr => { title => 'Completely random word if unchecked, othervise max lengh is ' .
+			UMI->config->{pwd}->{lenp} },
+      wrapper_class => [ 'deactivate-top', ],
+     );
+
+has_field 'pwd_len'
+  => (
+      type => 'Integer',
+      apply => [ NoSpaces, PositiveNum ],
+      label => 'Password Length',
+      label_class => [ 'col-xs-2', ],
+      element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+      element_attr => { placeholder => 'max ' . UMI->config->{pwd}->{len} . ' for completely random and max ' .
+			UMI->config->{pwd}->{lenp} . ' for pronounceable' },
+      wrapper_class => [ 'deactivate-top', ],
+     );
+
+has_field 'pwd_cap'
+  => (
+      type => 'Integer',
+      apply => [ NoSpaces, PositiveNum ],
+      label => 'Capital Characters',
+      label_class => [ 'col-xs-2', ],
+      element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+      element_attr => { placeholder => 'max ' . UMI->config->{pwd}->{cap},
+			title => 'up to this many characters will be upper case' },
+      wrapper_class => [ 'deactivate-top', ],
+     );
+
+has_field 'pwd_num'
+  => (
+      type => 'Integer',
+      apply => [ NoSpaces, PositiveNum ],
+      label => 'Numbers And Spec. Characters',
+      label_class => [ 'col-xs-2', ],
+      element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+      element_attr => { placeholder => 'max ' . UMI->config->{pwd}->{num},
+			title => 'up to that many, numbers and special characters will occur in the password' },
+      wrapper_class => [ 'deactivate-top', ],
+     );
 
 has_field 'aux_reset' => ( type => 'Reset',
 			   element_wrapper_class => [ 'col-xs-12' ],
@@ -51,25 +103,6 @@ has_field 'aux_submit' => ( type => 'Submit',
 			    wrapper_class => [ 'col-xs-8', ],
 			    element_class => [ 'btn', 'btn-success', 'btn-block' ],
 			    value => 'Submit' );
-
-sub build_render_list {[ 'ldap_modify_password', 'pwd1', 'pwd2', 'pwdcomm', 'submitit' ]}
-
-
-has_block 'pwd1' => ( tag => 'fieldset',
-			 render_list => [ 'password_init', ],
-#			 label => '<span class="glyphicon glyphicon-lock"></span>',
-			 class => [ 'row' ],
-		       );
-
-has_block 'pwd2' => ( tag => 'fieldset',
-			 render_list => [ 'password_cnfm', ],
-			 class => [ 'row' ],
-		       );
-
-has_block 'pwdcomm' => ( tag => 'fieldset',
-				render_list => [ 'aux_pwdcomment', ],
-				class => [ 'row' ],
-			      );
 
 has_block 'submitit' => ( tag => 'fieldset',
 			  render_list => [ 'aux_reset', 'aux_submit'],
@@ -106,19 +139,23 @@ sub validate {
        ($self->field('password_init')->value ne $self->field('password_cnfm')->value)
      ) {
     $self->field('password_init')
-      ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;password and confirmation does not match');
-  }
-
-  if ( defined $self->field('password_init')->value &&
-       defined $self->field('password_cnfm')->value &&
-       (($self->field('password_init')->value ne '' &&
-	 $self->field('password_cnfm')->value eq '' ) ||
-	($self->field('password_init')->value eq '' &&
-	 $self->field('password_cnfm')->value ne '' )) ) {
-    $self->field('password_init')
-      ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;password mandatory if confirmation present');
+      ->add_error('password and confirmation does not match');
+  } elsif ( (defined $self->field('password_init')->value &&
+	     ! defined $self->field('password_cnfm')->value ) ||
+	    (defined $self->field('password_init')->value &&
+	     defined $self->field('password_cnfm')->value &&
+	     ($self->field('password_init')->value ne '' &&
+	      $self->field('password_cnfm')->value eq '' ) ) ) {
     $self->field('password_cnfm')
-      ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;confirmation is mandatory if password present');
+      ->add_error('confirmation is mandatory if password present');
+  } elsif ( (! defined $self->field('password_init')->value &&
+	     defined $self->field('password_cnfm')->value ) ||
+	    (defined $self->field('password_init')->value &&
+	     defined $self->field('password_cnfm')->value &&
+	     ($self->field('password_init')->value eq '' &&
+	      $self->field('password_cnfm')->value ne '' ) ) ) {
+    $self->field('password_init')
+      ->add_error('password mandatory if confirmation present');
   }
 
   # this realized with HTML::FormHandler::Types Printable
@@ -128,44 +165,10 @@ sub validate {
 	 $self->is_ascii($self->field('password_cnfm')->value) )
      ) {
     $self->field('password_init')
-      ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;password has to be ASCII only!');
+      ->add_error('password has to be ASCII only!');
     $self->field('password_cnfm')
-      ->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;confirmation has to be ASCII only!');
+      ->add_error('confirmation has to be ASCII only!');
   }
-
-
-#   my $ldap_crud = $self->ldap_crud;
-#   my $mesg =
-#     $ldap_crud->search(
-# 		       {
-# 			scope => 'one',
-# 			filter => '(&(givenname=' .
-# 			$self->utf2lat({ to_translate => $self->field('givenname')->value }) . ')(sn=' .
-# 			$self->utf2lat({ to_translate => $self->field('sn')->value }) . ')(uid=*-' .
-# 			$self->field('login')->value . '))',
-# 			base => 'ou=People,dc=umidb',
-# 			attrs => [ 'uid' ],
-# 		       }
-# 		      );
-
-#   if ($mesg->count) {
-#     my $err = '<span class="glyphicon glyphicon-exclamation-sign"></span> Fname+Lname+Login exists';
-#     $self->field('givenname')->add_error($err);
-#     $self->field('sn')->add_error($err);
-#     $self->field('login')->add_error($err);
-
-#     $err = '<div class="alert alert-danger">' .
-#       '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span>' .
-# 	'&nbsp;Account with the same fields &laquo;<strong>First Name&raquo;</strong>,' .
-# 	  ' &laquo;<strong>Last Name&raquo;</strong> and &laquo;<strong>Login&raquo;</strong>' .
-# 	    ' already exists!<br>Consider one of:<ul>' .
-# 	      '<li>change Login in case you need another account for the same person</li>' .
-# 		'<li>add service account to the existent one</li></ul></div>';
-#     my $error = $self->form->success_message;
-#     $self->form->error_message('');
-#     $self->form->add_form_error($error . $err);
-#   }
-#   $ldap_crud->unbind;
 
 }
 
