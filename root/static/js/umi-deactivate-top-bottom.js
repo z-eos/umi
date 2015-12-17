@@ -1,3 +1,7 @@
+/*
+ * Amaiak Abramian on 20151217
+ */
+
 ;(function () {
     var $topGroup     = $('.deactivate-top');
     var $bottomGroup  = $('.deactivate-bottom');
@@ -8,14 +12,12 @@
     var $inputs       = $group.find('input');
     var $form         = $inputs.closest('form');
 
-
     function checkFilder (element) {
         var checkbox = element.type === 'checkbox' && element.checked;
         var input    = element.type !== 'checkbox' && element.value !== "";
 
         return checkbox || input;
-    };
-    
+    };    
 
     function checkFilderGroup($element) {
         var condition = false;
@@ -30,7 +32,6 @@
         return condition;
     };
 
-
     function checkForm () {
         var conditionTop        = checkFilderGroup( $topInputs );
         var conditionBottom = checkFilderGroup( $bottomInputs );
@@ -42,5 +43,4 @@
     checkForm();
 
     $form.on('change input', checkForm);
-
 })();

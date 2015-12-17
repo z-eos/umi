@@ -32,18 +32,19 @@ has_field 'toqr'
 has_field 'aux_reset' => ( type => 'Reset',
 			   wrapper_class => [ 'col-xs-4' ],
 			   element_class => [ 'btn', 'btn-danger', 'btn-block', ],
-			   element_wrapper_class => [ 'col-xs-12', ],
-			   # value => 'Reset'
-			 );
+			   element_wrapper_class => [ 'col-xs-12', ], );
 
-has_field 'aux_submit' => (
-			   type => 'Submit',
-			   wrapper_class => [ 'col-xs-8'],
-			   element_class => [ 'btn', 'btn-success', 'btn-block', ],
-			   # label_no_filter => 1,
-			   # value => '<span class="glyphicon glyphicon-plus-sign"></span> Submit',
-			   value => 'Submit'
-			  );
+has_field 'aux_submit' => ( type => 'Submit',
+			    wrapper_class => [ 'col-xs-8'],
+			    element_class => [ 'btn', 'btn-success', 'btn-block', ],
+			    value => 'Submit', );
+
+has_block 'submitit' => ( tag => 'fieldset',
+			  render_list => [ 'aux_reset', 'aux_submit'],
+			  label => '&nbsp;',
+			  class => [ 'container-fluid' ], );
+
+sub build_render_list {[ 'toqr', 'submitit' ]}
 
 ######################################################################
 # ====================================================================

@@ -44,6 +44,14 @@ has_field 'aux_submit' => (
 			   value => 'Submit'
 			  );
 
+has_block 'submitit' => ( tag => 'fieldset',
+			  render_list => [ 'aux_reset', 'aux_submit'],
+			  label => '&nbsp;',
+			  class => [ 'container-fluid' ]
+			);
+
+sub build_render_list {[ 'totranslit', 'submitit' ]}
+
 ######################################################################
 # ====================================================================
 # == VALIDATION ======================================================
