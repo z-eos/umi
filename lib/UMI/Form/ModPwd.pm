@@ -110,7 +110,7 @@ has_block 'submitit' => ( tag => 'fieldset',
 			  class => [ 'container-fluid' ]
 			);
 
-sub build_render_list {[ 'password_init', 'password_cnfm', 'pronounceable', 'pwd_len', 'pwd_cap', 'pwd_num', 'submitit' ]}
+sub build_render_list {[ 'ldap_modify_password', 'password_init', 'password_cnfm', 'pronounceable', 'pwd_len', 'pwd_cap', 'pwd_num', 'submitit' ]}
 
 sub html_attributes {
   my ( $self, $field, $type, $attr ) = @_;

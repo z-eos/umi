@@ -973,7 +973,7 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
 	     password_cnfm => $params->{password_cnfm},
 	    };
 
-  my $return; p $self->form_mod_pwd->validated;
+  my ( $return, $pwd );
   if ( $self->form_mod_pwd->validated && $self->form_mod_pwd->ran_validation ) {
 
     if ( $arg->{password_init} eq '' && $arg->{password_cnfm} eq '' ) {
@@ -985,8 +985,10 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
       $arg->{password_gen} = $self->pwdgen({ pwd => $arg->{'password_cnfm'} });
     }
 
+    p $arg;
+    p $pwd = $arg->{mod_pwd_dn} =~ /.*authorizedService=802.1x-mac.*/ ? $arg->{password_gen}->{clear} : $arg->{password_gen}->{ssha};
     my $mesg = $c->model('LDAP_CRUD')->modify( $arg->{mod_pwd_dn},
-					       [ replace => [ 'userPassword' => $arg->{password_gen}->{ssha}, ], ], );
+					       [ replace => [ 'userPassword' => $pwd, ], ], );
 
     if ( $mesg ne '0' ) {
       $return->{error} = '<li>Error during password change occured: ' . $mesg->{html} . '</li>';
