@@ -199,7 +199,13 @@ sub file2var {
   my @file_in_arr;
   my $file_in_str;
   binmode FILE;
-  open FILE, $file || do { push @{$final_message->{error}}, "Can not open $file: $!"; exit 1; };
+  
+  try {
+    open FILE, $file;
+  } catch {
+    push @{$final_message->{error}}, "Can not open $file: $_";
+  };
+    
   if ( defined $return_as_arr && $return_as_arr == 1 ) {
     while (<FILE>) {
       chomp;
@@ -209,7 +215,13 @@ sub file2var {
     local $/ = undef;
     $file_in_str = <FILE>;
   }
-  close FILE || do { push @{$final_message->{error}}, "$!"; exit 1; };
+
+  try {
+    close FILE;
+  } catch {
+    push @{$final_message->{error}}, "$_";
+  };
+  
   return defined $return_as_arr && $return_as_arr == 1 ? \@file_in_arr : $file_in_str;
 }
 
@@ -501,6 +513,361 @@ sub qrcode {
   } catch { $arg->{ret}->{error} = $_ . ' (in general max size is about 1660 characters of Latin1 codepage)'; };
 
   return $arg->{ret};
+}
+
+
+=head2 lrtrim
+
+remove white space/s from both ends of each, "delim" delimited
+substring of the input string
+
+=cut
+
+sub lrtrim {
+  my ($self, $args) = @_;
+  my $arg = {
+	     str => $args->{str},
+	     delim => $args->{delim} || ',',
+	    };
+  my @ar = split(/$arg->{delim}/, $arg->{str});
+  $_ =~ s/^\s+|\s+$//g foreach @ar;
+  return join( $arg->{delim}, @ar);
+}
+
+
+=head2 file_is
+
+Very simple and dumb, file type detector. It detects output of these utilities:
+
+    dmidecode(8)
+    lspci(8) on Linux
+    pciconf(8) on BSD
+    smartctl(8)
+
+=cut
+
+sub file_is {
+  my ($self, $args) = @_;
+  my $arg = { file => $args->{file}, };
+  my ( $return, $fh );
+
+  try {
+    open $fh, "<", $arg->{file};
+  } catch {
+    return $return = { error => "Cannot open file: $arg->{file} for reading: $_", };
+  };
+
+  my $first_line = <$fh>;
+
+  try {
+    close $fh;
+  } catch {
+    return $return = { error => "close failed: $_" };
+  };
+
+  if ( $first_line =~ /.*dmidecode.*/ ) {
+    $return->{success} = 'dmidecode';
+  } elsif ( $first_line =~ /..:..\.. .*/ ) {
+    $return->{success}  = 'lspci';
+  } elsif ( $first_line =~ /.*@.*:.*:.*:.*: .*/ ) {
+    $return->{success} = 'pciconf';
+  } elsif ( $first_line =~ /^smartctl.*/ ) {
+    $return->{success} = 'smartctl';
+  } else {
+    $return->{warning} = undef;
+  }
+
+  return $return;
+}
+
+
+=head file_dmi
+
+reading input file ( output of dmidecode(8) ) and extracting DMI data
+
+return hash is:
+
+	{
+	 error => [ 'Error message if any', ... ],
+	 success => {
+	     cpu => [ [0] {...}, ],
+	      mb => [ [0] {...}, ],
+	     ram => [ [0] {...},
+	              [1] {...},
+	              [n] {...}, ],
+	 warning => [ 'Warning message if any', ... ],
+	}
+
+=cut
+
+sub file_dmi {
+  my ($self, $args) = @_;
+  my $arg = {
+	     file => $args->{file},
+	     compart => $args->{compart} || 'all', # mb, cpu, ram, all
+	     types => { 0 =>  { name => 'BIOS',
+				ldap_attrs => { 'hwBiosReleaseDate' => 'Release Date',
+						'hwBiosRevision' => 'BIOS Revision',
+						'hwBiosVendor' => 'Vendor',
+						'hwBiosVersion' => 'Version', }, },
+			1 =>  { name => 'System',
+				ldap_attrs => { hwFamily => 'Family',
+						hwManufacturer => 'Manufacturer',
+						'hwProductName' => 'Product Name',
+						'hwSerialNumber' => 'Serial Number',
+						hwUuid => 'UUID',
+						hwVersion => 'Version', }, },
+			2 =>  { name => 'Baseboard',
+				ldap_attrs => {
+					       hwManufacturer => 'Manufacturer',
+					       hwProductName => 'Product Name',
+					       hwSerialNumber => 'Serial Number',
+					       hwVersion => 'Version', }, },
+			3 =>  { name => 'Chassis', ldap_attrs => [ qw() ], },
+			4 =>  { name => 'Processor',
+				ldap_attrs => { hwFamily => 'Family',
+						hwManufacturer => 'Manufacturer',
+						hwId => 'ID',
+						hwSpeedCpu => 'Max Speed',
+						hwPartNumber => 'Part Number',
+						hwSerialNumber => 'Serial Number',
+						hwSignature => 'Signature',
+						hwVersion => 'Version', }, },
+			5 =>  { name => 'Memory Controller', ldap_attrs => [ qw() ], },
+			6 =>  { name => 'Memory Module', ldap_attrs => [ qw() ], },
+			7 =>  { name => 'Cache', ldap_attrs => [ qw() ], },
+			8 =>  { name => 'Port Connector', ldap_attrs => [ qw() ], },
+			9 =>  { name => 'System Slots', ldap_attrs => [ qw() ], },
+			10 => { name => 'On Board Devices', ldap_attrs => [ qw() ], },
+			11 => { name => 'OEM Strings', ldap_attrs => [ qw() ], },
+			12 => { name => 'System Configuration Options', ldap_attrs => [ qw() ], },
+			13 => { name => 'BIOS Language', ldap_attrs => [ qw() ], },
+			14 => { name => 'Group Associations', ldap_attrs => [ qw() ], },
+			15 => { name => 'System Event Log', ldap_attrs => [ qw() ], },
+			16 => { name => 'Physical Memory Array', ldap_attrs => [ qw() ], },
+			17 => { name => 'Memory Device',
+				ldap_attrs => { hwManufacturer => 'Manufacturer',
+						hwPartNumber => 'Part Number',
+						hwSerialNumber => 'Serial Number',
+						hwSizeRam => 'Size',
+						hwSpeedRam => 'Speed',
+						hwBankLocator => 'Bank Locator',
+						hwLocator => 'Locator',
+						hwFormFactor => 'Form Factor', }, },
+			18 => { name => '32-bit Memory Error', ldap_attrs => [ qw() ], },
+			19 => { name => 'Memory Array Mapped Address', ldap_attrs => [ qw() ], },
+			20 => { name => 'Memory Device Mapped Address', ldap_attrs => [ qw() ], },
+			21 => { name => 'Built-in Pointing Device', ldap_attrs => [ qw() ], },
+			22 => { name => 'Portable Battery', ldap_attrs => [ qw() ], },
+			23 => { name => 'System Reset', ldap_attrs => [ qw() ], },
+			24 => { name => 'Hardware Security', ldap_attrs => [ qw() ], },
+			25 => { name => 'System Power Controls', ldap_attrs => [ qw() ], },
+			26 => { name => 'Voltage Probe', ldap_attrs => [ qw() ], },
+			27 => { name => 'Cooling Device', ldap_attrs => [ qw() ], },
+			28 => { name => 'Temperature Probe', ldap_attrs => [ qw() ], },
+			29 => { name => 'Electrical Current Probe', ldap_attrs => [ qw() ], },
+			30 => { name => 'Out-of-band Remote Access', ldap_attrs => [ qw() ], },
+			31 => { name => 'Boot Integrity Services', ldap_attrs => [ qw() ], },
+			32 => { name => 'System Boot', ldap_attrs => [ qw() ], },
+			33 => { name => '64-bit Memory Error', ldap_attrs => [ qw() ], },
+			34 => { name => 'Management Device', ldap_attrs => [ qw() ], },
+			35 => { name => 'Management Device Component', ldap_attrs => [ qw() ], },
+			36 => { name => 'Management Device Threshold Data', ldap_attrs => [ qw() ], },
+			37 => { name => 'Memory Channel', ldap_attrs => [ qw() ], },
+			38 => { name => 'IPMI Device', ldap_attrs => [ qw() ], },
+			39 => { name => 'Power Supply', ldap_attrs => [ qw() ], },
+			40 => { name => 'Additional Information', ldap_attrs => [ qw() ], },
+			41 => { name => 'Onboard Devices Extended Information', ldap_attrs => [ qw() ], },
+			42 => { name => 'Management Controller Host Interface',} }
+	    };
+  my ( $file_is, $handle_x_type, $dmi, $fh, $return );
+
+  $file_is = $self->file_is({file => $arg->{file}});
+  return $return = { error => [ $file_is->{error} ] } if defined $file_is->{error};
+  return $return = { error => [ 'File uploaded is not dmidecode output file!' ] }
+    if defined $file_is->{success} && $file_is->{success} ne 'dmidecode';
+  
+  try {
+    open( $fh, "<", $arg->{file});
+  } catch {
+    return $return = { error => [ "Cannot open file: $arg->{file} for reading: $_", ] };
+  };
+
+  my ( $query, $handle, $key, $val, $i, $j, $k, $l, $m,);
+  $j = 0;
+  while (<$fh>) {
+    $return->{file} .= $_;
+    next if $. < 5;
+    $_ =~ s/^\s+|\n+$//g;
+    next if $_ eq '';
+
+    if ( $_ =~ /^Handle/ ) {
+      $handle = (split(/ /, (split(/,/, $_))[0]))[1];
+      $dmi->{$handle}->{_handle} = $_;
+      @{$dmi->{$handle}->{_type_arr}} = split(/,/, substr($_, 24, -6));
+      foreach $m (@{$dmi->{$handle}->{_type_arr}}) {
+	$m =~ s/^\s+//;
+	$dmi->{$handle}->{_type}->{$m} = $arg->{types}->{$m}->{name};
+	push @{$handle_x_type->{$m}}, $handle;
+      }
+      delete $dmi->{$handle}->{_type_arr};
+      $j = 0;
+    } elsif ( ! $j ) {
+      $dmi->{$handle}->{_info} = $_;
+      $j++;
+    } else {
+      ( $key, $val ) = split(/:/, $_);
+      $val = '' if ! defined $val;
+      $key =~ s/^\s+//g;
+      $val =~ s/^\s+//g;
+      $dmi->{$handle}->{ $dmi->{$handle}->{_info} }->{$key} = $val;
+    }
+  }
+
+  try {
+    close $fh;
+  } catch {
+    return $return = { error => "Cannot close file: $arg->{file} error: $_" };
+  };
+  undef $j;
+
+# LDIF for MB
+# data from DMI TYPE 2 will overwrite corresponding data of DMI TYPE 1
+  $i = { mb0 => [0, 1, 2], cpu => [4], ram => [17], };
+  # comparts related dmidecode sections
+  foreach $k ( keys %{$i} ) {
+    # each "class" of comparts
+    foreach $query ( @{$i->{$k}} ) {
+      # each compart
+      foreach $handle ( @{$handle_x_type->{$query}} ) {
+	$j++;
+	
+	# here $dmi->{$handle}->{$dmi->{$handle}->{_info}}->{...} are the data from the
+	# consequent dmidecode file section (ram, cpu, mb, e.t.c., mapped in $arg->{types} and
+	# $i above)
+	
+	# skip all absent RAM modules (in dmidecode output sloths of them are still present)
+	next if $k eq 'ram' &&
+	  $dmi->{$handle}->{$dmi->{$handle}->{_info}}->{Size} eq 'No Module Installed';
+
+	while (($key, $val) = each %{$arg->{types}->{$query}->{ldap_attrs}} ) {
+	  next if ! defined $dmi->{$handle}->{$dmi->{$handle}->{_info}}->{$val};
+	  # here $dmi->{meta} is intermediate hash to accumulate all current compart data
+	  next if defined $dmi->{meta}->{$key} &&
+	    ( $dmi->{meta}->{$key} eq $dmi->{$handle}->{$dmi->{$handle}->{_info}}->{$val} ||
+	      $dmi->{$handle}->{$dmi->{$handle}->{_info}}->{$val} eq 'To Be Filled By O.E.M.' );
+
+	  $dmi->{meta}->{$key} = $dmi->{$handle}->{$dmi->{$handle}->{_info}}->{$val};
+	}
+	push @{$dmi->{compart}->{$k}}, $dmi->{meta} if defined $dmi->{meta};
+	delete $dmi->{meta} if defined $dmi->{meta};
+      }
+    }
+  }
+
+  foreach ( @{$dmi->{compart}->{mb0}} ) {
+    while ( ( $key,$val ) = each( %{$_} ) ) {
+      $dmi->{compart}->{mb}->[0]->{$key} = $val;
+    }
+  }
+  delete $dmi->{compart}->{mb0};
+  $return->{success} = $dmi->{compart};
+  return $return;
+}
+
+
+=head file_smart
+
+reading input file ( output of `smartctl -i' ) and extracting
+S.M.A.R.T. data
+
+in case there are more then one disk, input file have to be
+concatenation of all disks data like:
+     smartctl -i /dev/ada0 >> smart.txt
+     smartctl -i /dev/ada1 >> smart.txt
+     e.t.c.
+
+return hash is:
+
+	{
+	 error => [ 'Error message if any', ... ],
+	 success => {
+	    disk => [ [0] {...},
+	              [1] {...},
+	              [n] {...}, ],
+	 warning => [ 'Warning message if any', ... ],
+	}
+
+=cut
+
+sub file_smart {
+  my ($self, $args) = @_;
+  my $arg = {
+	     file => $args->{file},
+	     file_type => 'smartctl',
+	     attrs => {
+		       'Model Family' => 'hwManufacturer',
+		       'Device Model' => 'hwModel',
+		       'Serial Number' => 'hwSerialNumber',
+		       'LU WWN Device Id' => 'hwId',
+		       'Firmware Version' => 'hwFirmware',
+		       'User Capacity' => 'hwSize',
+		       'Rotation Rate' => 'hwTypeDisk',
+		       # still not used => 'Sector Size',
+		       # still not used => 'ATA Version is',
+		       # still not used => 'SATA Version is',
+		      },
+	    };
+  my ( $file_is, $smart, $fh, $return );
+
+  $file_is = $self->file_is({file => $arg->{file}});
+  return $return = { error => [ $file_is->{error} ] } if defined $file_is->{error};
+  return $return = { error => [ 'File uploaded is not $arg->{file_type} output file!' ] }
+    if defined $file_is->{success} && $file_is->{success} ne $arg->{file_type};
+
+  try {
+    open( $fh, "<", $arg->{file});
+  } catch {
+    return $return = { error => [ "Cannot open file: $arg->{file} for reading: $_", ] };
+  };
+
+  my ( $start, $val, $i, $l, $r );
+  $start = 0;
+  $i = -1;
+  while (<$fh>) {
+    if ( $_ =~ /^=== START OF INFORMATION SECTION ===/ ) {
+      $start = 1;
+      $smart->{disk}->[$i]->{$arg->{attrs}->{hwTypeDisk}} = 'HDD'
+	if defined $arg->{tmp} && ! $arg->{tmp}->{hwTypeDisk};
+      $i++;
+      delete $arg->{tmp};
+    }
+    next if ! $start;
+    $_ =~ s/^\s+|\n+$//g;
+    ( $l, $r ) = split(/:/, $_);
+    $l =~ s/^\s+|\n+$//g;
+    $r =~ s/^\s+|\n+$//g;
+
+    if ( $l eq 'Rotation Rate' &&
+	 $r eq 'Solid State Device' ) {
+      $val = 'SSD';
+    } elsif ( $l eq 'Rotation Rate' &&
+	      $r =~ /.*rpm/ ) {
+      $val = 'HDD';
+    } else {
+      $val = $r;
+    }
+    $smart->{disk}->[$i]->{$arg->{attrs}->{$l}} = $val
+      if $arg->{attrs}->{$l};
+    $start = 0 if $_ eq '';
+  }
+  try {
+    close $fh;
+  } catch {
+    return $return = { error => "Cannot close file: $arg->{file} error: $_" };
+  };
+  $return->{success} = $smart;
+  return $return;
 }
 
 

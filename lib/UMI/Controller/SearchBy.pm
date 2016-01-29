@@ -7,6 +7,8 @@ use namespace::autoclean;
 
 use Data::Printer { use_prototypes => 0, caller_info => 1 };
 
+use Try::Tiny;
+
 BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 
 use UMI::Form::Dhcp;
@@ -184,7 +186,7 @@ sub index :Path :Args(0) {
       }
     }
 
-    my ( $ttentries, $attr, $tmp );
+    my ( $ttentries, $attr, $tmp, $dn_depth );
     foreach (@entries) {
       $mesg = $ldap_crud->search({
 				  base => $ldap_crud->cfg->{base}->{group},
@@ -196,12 +198,15 @@ sub index :Path :Args(0) {
 	if $mesg->is_error();
       # $tmp = $ldap_crud->canonical_dn_rev ( $_->dn );
       $tmp = $_->dn;
+      # !!! HARDCODE how deep dn could be to be considered as root for each type of objects !!!
+      $dn_depth = $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 3 : 5;
       $ttentries->{$tmp}->{'mgmnt'} =
 	{
 	 is_blocked => $mesg->count,
-	 is_dn => scalar split(',', $tmp) <= 3 ? 1 : 0,
+	 is_dn => scalar split(',', $tmp) <= $dn_depth ? 1 : 0,
 	 is_account => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
 	 is_group => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{group}/ ? 1 : 0,
+	 is_inventory => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ? 1 : 0,
 	 jpegPhoto => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
 	 gitAclProject => $_->exists('gitAclProject') ? 1 : 0,
 	 userPassword => $_->exists('userPassword') ? 1 : 0,
@@ -236,12 +241,14 @@ sub index :Path :Args(0) {
       map { scalar reverse } sort map { scalar reverse } keys %{$ttentries} :
       sort { lc $a cmp lc $b } keys %{$ttentries};
     # p $ttentries;
+    # p $ldap_crud->schema_attr_equality;
     $c->stash(
 	      template => 'search/searchby.tt',
 	      base_dn => $base,
 	      filter => $filter_show,
 	      entrieskeys => \@ttentries_keys,
 	      entries => $ttentries,
+	      schema => $ldap_crud->attr_equality,
 	      # entries => \@entries,
 	      services => $ldap_crud->cfg->{authorizedService},
 	      base_ico => $ldap_crud->cfg->{base}->{icon},
@@ -280,6 +287,9 @@ sub proc :Path(proc) :Args(0) {
 
       my ($return, $attr, $entry_tmp, $entry);
       my $ldap_crud = $c->model('LDAP_CRUD');
+      
+      p $ldap_crud->obj_schema({ dn => $params->{ldap_modify} });
+
       my $mesg = $ldap_crud->search( { dn => $params->{ldap_modify} } );
       $return->{error} = $ldap_crud->err( $mesg )->{html} if ! $mesg->count;
       $entry_tmp = $mesg->entry(0);
@@ -622,9 +632,8 @@ sub proc :Path(proc) :Args(0) {
 #=====================================================================
     } elsif ( defined $params->{'ldap_modify_jpegphoto'} &&
 	      $params->{'ldap_modify_jpegphoto'} ne '') {
-      # p $params;
+
       $params->{avatar} = $c->req->upload('avatar') if defined $params->{avatar};
-      # p $params;
 
       $c->stash(
 		template => 'user/user_modjpegphoto.tt',
@@ -636,6 +645,7 @@ sub proc :Path(proc) :Args(0) {
 						   posted => ($c->req->method eq 'POST'),
 						   params => $params,
 						  ) && defined $params->{avatar} && $params->{avatar} ne '';
+
 
       my $ldap_crud = $c->model('LDAP_CRUD');
 
@@ -843,41 +853,30 @@ sub mod_jpegPhoto {
 	     jpegPhoto_stub => $args->{jpegPhoto_stub},
 	    };
 
-  my ($file, $jpeg);
+  my ( $fh, $final_message, $file, $jpeg);
   if (defined $arg->{jpegPhoto}) {
     $file = $arg->{jpegPhoto}->{'tempname'};
   } else {
     $file = $arg->{jpegPhoto_stub};
   }
-  local $/ = undef;
-  open(my $fh, "<", $file) or p $!;
-  $jpeg = <$fh>;
-  close($fh);
+  
+  $jpeg = $self->file2var( $file, $final_message );
 
-  my ( $error_message, $success_message, $final_message );
+  return $jpeg if ref($jpeg) eq 'HASH' && defined $jpeg->{error};
+
   if ( defined $arg->{jpegPhoto} ) {
     my $mesg = $ldap_crud->modify( $arg->{mod_jpegPhoto_dn},
 				   [ replace => [ jpegPhoto => [ $jpeg ], ], ], );
 
     if ( $mesg ne '0' ) {
-      $error_message = '<li>Error during jpegPhoto add/change occured: ' . $mesg . '</li>';
+      $final_message->{error} = 'Error during jpegPhoto add/change occured: ' . $mesg;
     } else {
-      $success_message .= $arg->{jpegPhoto}->{'filename'} .
-	'</kbd> of type ' . $arg->{jpegPhoto}->{'type'} . ' and ' .
-	  $arg->{jpegPhoto}->{'size'} . ' bytes size.';
+      $final_message->{success} = '<b>jpegPhoto attribute is added/changed from file:</b>' .
+	'<dl class="dl-horizontal"><dt>name:</dt><dd>' . $arg->{jpegPhoto}->{'filename'} . '</dd>' .
+	'<dt>type:</dt><dd>' . $arg->{jpegPhoto}->{'type'} . '</dd>' .
+	'<dt>size:</dt><dd>' . $arg->{jpegPhoto}->{'size'} . ' bytes size.</dd></dl>';
     }
   }
-  if ( $self->form_jpegphoto->validated ) {
-    $final_message = '<div class="alert alert-success" role="alert">' .
-      '<span style="font-size: 140%" class="glyphicon glyphicon-ok-sign">&nbsp;</span>' .
-	'<em>jpegPhoto attribute is added/changed from file: </em>&nbsp;' .
-	  '<kbd style="font-size: 110%; font-family: monospace;">' .
-	    $success_message . '</div>' if $success_message;
-  }
-
-  $final_message .= '<div class="alert alert-danger" role="alert">' .
-    '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
-      $error_message . '</ul></div>' if $error_message;
 
   return $final_message;
 }
@@ -985,8 +984,7 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
       $arg->{password_gen} = $self->pwdgen({ pwd => $arg->{'password_cnfm'} });
     }
 
-    p $arg;
-    p $pwd = $arg->{mod_pwd_dn} =~ /.*authorizedService=802.1x-mac.*/ ? $arg->{password_gen}->{clear} : $arg->{password_gen}->{ssha};
+    $pwd = $arg->{mod_pwd_dn} =~ /.*authorizedService=802.1x-mac.*/ ? $arg->{password_gen}->{clear} : $arg->{password_gen}->{ssha};
     my $mesg = $c->model('LDAP_CRUD')->modify( $arg->{mod_pwd_dn},
 					       [ replace => [ 'userPassword' => $pwd, ], ], );
 
@@ -1026,7 +1024,7 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
 
     }
   }
-p $arg;
+  # p $arg;
   $c->stash( final_message => $return, );
 }
 
@@ -1388,9 +1386,9 @@ sub delete :Path(delete) :Args(0) {
   my $err;
   if ( defined $params->{'ldap_delete_recursive'} &&
        $params->{'ldap_delete_recursive'} eq 'on' ) {
-    p $err = $c->model('LDAP_CRUD')->delr($params->{ldap_delete});
+    $err = $c->model('LDAP_CRUD')->delr($params->{ldap_delete});
   } else {
-    p $err = $c->model('LDAP_CRUD')->del($params->{ldap_delete});
+    $err = $c->model('LDAP_CRUD')->del($params->{ldap_delete});
   }
 
   if ( $params->{type} eq 'json' ) {
@@ -1426,38 +1424,37 @@ object reassign to another root DN
 
 sub reassign :Path(reassign) :Args(0) {
   my ( $self, $c ) = @_;
-  my $params = $c->req->parameters;
+  p my $params = $c->req->parameters;
 
-  my $err = $c->model('LDAP_CRUD')->reassign($params);
-
+  p my $err = $c->model('LDAP_CRUD')->reassign($params);
+  p ref($err);
+  
   if ( $params->{type} eq 'json' ) {
     $c->stash->{current_view} = 'WebJSON';
-    $c->stash->{success} = ref($err) ne 'HASH' ? 1 : 0;
+    $c->stash->{success} = ref($err) ne 'HASH' && ref($err) ne 'ARRAY' ? 1 : 0;
 
-    if ( ref($err) ne 'HASH' ) {
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    if ( ref($err) ne 'HASH' && ref($err) ne 'ARRAY' ) {
       $c->stash->{message} = 'OK';
-    } elsif ( ref($err) eq 'HASH' && $#{$err->{error}} > -1 ) {
-      $c->stash->{message} = sprintf('<div class="panel panel-error text-left text-error"><div class="panel-heading text-center"><b>Error! Just close the window and try again!</b></div><div class="panel-body">%s</div></div><br>',
-				     $err->{error}->[0]->{html});
-
-      # $c->stash->{message} = '<div class="alert alert-danger alert-dismissible" role="alert">' .
-      # 	'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;' .
-      # 	'</span></button>' . $err->{error}->[0]->{html} . '</div>';
-      
-    } elsif ( ref($err) eq 'HASH' && $#{$err->{warning}} > -1 ) {
-      $c->stash->{message} = sprintf('<div class="panel panel-warning text-left text-warning"><div class="panel-heading text-center"><b>Warning! Just close the window! Nothing else!</b></div><div class="panel-body">%s</div></div><br>',
+    } elsif ( (ref($err) eq 'HASH' || ref($err) eq 'ARRAY' ) && $#{$err->{error}} > -1 ) {
+      $c->stash->{success} = 0;
+      $c->stash->{message} = sprintf('<div class="panel panel-danger text-left text-error">
+  <div class="panel-heading text-center"><b>Error! Just close the window and try again!</b></div>
+  <div class="panel-body">%s</div>
+</div>',
+      				     $err->{error}->[0]->{html});
+    } elsif ( ( ref($err) eq 'HASH' || ref($err) eq 'ARRAY' ) && $#{$err->{warning}} > -1 ) {
+      $c->stash->{success} = $err->{warning}->[0]->{code} == 68 ? 1 : 0;
+      $c->stash->{message} = sprintf('<div class="panel panel-warning text-left text-warning">
+  <div class="panel-heading text-center"><b>Warning! Just close the window! Nothing else!</b></div>
+  <div class="panel-body">%s</div>
+</div>',
 				     $err->{warning}->[0]->{html});
-      
-      # # # $c->stash->{message} = '<div class="alert alert-warning text-left">' . $err->{warning}->[0]->{html} . '</div><button type="button" class="close" data-dismiss="alert" aria-label="Close">close</button>';
-      
-      # $c->stash->{message} = '<div class="modal"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title">Info Message</h4></div><div class="modal-body">' . $err->{warning}->[0]->{html} . '</div><div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Close</button></div></div></div></div>';
     }
   } else {
-    $c->stash(
-	      template => 'stub.tt',
-	      params => $params,
-	      err => $err,
-	     );
+    $c->stash( template => 'stub.tt',
+	       params => $params,
+	       err => $err, );
   }
 }
 

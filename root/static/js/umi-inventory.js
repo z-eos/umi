@@ -22,30 +22,6 @@ $("#person_simplified").click(function() {
 });
 // --- SIMPLIFIED FORM SWITCHER stop -----------------------------------------
 
-/* --- SSHPUBKEY/FILE SWITCHER start -----------------------------------------
-
-   hide one of `sshpubkey' or `sshpubkeyfile' according the clicked
-   one (if one clicked, another one is hidden)
-
-*/
-/*$('textarea[data-group=loginless_ssh]').on('input', function () {
-    var $file = $(this).closest('.repinst').find('[id=sshpubkeyfile]');
-	this.value === '' ? $file.show() : $file.hide();
-});
-
-var global = {};
-
-global.triggerTextarea = function (self) {
-	var $textarea = $(self).closest('.repinst').find('[id="sshpubkey"]');
-
-	setTimeout(function () {
-		self.files && self.files.length
-			? $textarea.hide()
-			: $textarea.show()
-	}, 10);
-};*/
-// --- SSHPUBKEY/FILE SWITCHER stop ------------------------------------------
-
 // --- FORM LOGICS start -----------------------------------------------------
 
 $(function(){
@@ -73,8 +49,10 @@ $(function(){
             .first()
             .prop("selected",true);
     },
+	// UN HIDDING
+	// each element with class of select data-name value will be un hidden
 	currentRelation = false,
-	selectServiceAuthQuery = "select[data-name='authorizedservice']",
+	selectServiceAuthQuery = "select[data-name='hwtype'], select[data-name='common_hwtype']",
 	reinitRelations = function() {
 	    $(selectServiceAuthQuery).each(function(id, select){
 		var $select = $(select),
@@ -106,14 +84,15 @@ $(function(){
 	onServiceChange = function(event){
 	    var $this = $(this),
 		$option = $this.find("option:selected"),
+		prefix = $option.data("relation-prefix"),
 		relation = $option.data("relation"),
 		value = $this.val();
 	    
 	    switchRelations(
-		$this.parents(".hfh.repinst.form-group"),
+		$this.parents(prefix && prefix.length ? "form" : ".hfh.repinst.form-group"),
 		!relation || !relation.length || !value.length
 		    ? false
-		    : relation
+		    : (prefix && prefix.length) ? prefix + relation : relation
 	    );
 	},
 	serviceSelectAttachEvent = function($parent) {
@@ -133,7 +112,7 @@ $(function(){
 	    }
 	};
     
-    // duplicating code
+    // DUPLICATION CODE
     // $("a span.rm-duplicate").on("click",function(e){
     $("a.btn[data-duplicate]").on("click",function(e){
 	e.preventDefault();
@@ -153,7 +132,6 @@ $(function(){
 	    .prop("id",$duplicateOriginal.parents(".form-group").attr("id")+"."+counter);
 
 	$("input:text, input:password, input:file, select, textarea, input:radio, input:checkbox", $duplicate).each(function(id, element){
-	    // element attribute data-group is been analyzed
 	    var $element = $(element),
 		name = $element.data("group")+"."+counter+"."+$element.data('name');
 	    $element

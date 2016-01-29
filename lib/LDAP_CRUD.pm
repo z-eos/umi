@@ -74,7 +74,9 @@ sub _build_cfg {
 		   dhcp =>           'ou=DHCP,' . UMI->config->{ldap_crud_db},
 		   gitacl =>         'ou=GitACL,' . UMI->config->{ldap_crud_db},
 		   group =>          'ou=group,' . UMI->config->{ldap_crud_db},
+		   inventory =>      'ou=hw,ou=Inventory,' . UMI->config->{ldap_crud_db},
 		   machines =>       'ou=machines,' . UMI->config->{ldap_crud_db},
+		   netgroup =>       'ou=Netgroups,' . UMI->config->{ldap_crud_db},
 		   org =>            'ou=Organizations,' . UMI->config->{ldap_crud_db},
 		   rad_groups =>     'ou=groups,ou=RADIUS,' . UMI->config->{ldap_crud_db},
 		   rad_profiles =>   'ou=profiles,ou=RADIUS,' . UMI->config->{ldap_crud_db},
@@ -84,6 +86,7 @@ sub _build_cfg {
 			    DHCP => 'fa fa-sitemap',
 			    GitACL => 'fa fa-gavel',
 			    group => 'fa fa-group',
+			    inventory => 'fa fa-tag',
 			    Organizations => 'fa fa-industry',
 			    rad_groups => 'fa fa-group',
 			    rad_profiles => 'fa fa-cogs',
@@ -174,6 +177,10 @@ sub _build_cfg {
 					dhcpHost
 					uidObject
 				     ) ],
+			  netgroup =>  [ qw(
+					     top
+					     nisNetgroup
+					  ) ],
 			  ovpn => [ qw(
 					top
 					organizationalRole
@@ -191,6 +198,10 @@ sub _build_cfg {
 				       account
 				       ldapPublicKey
 				    ) ],
+			  inventory => [ qw(
+					     top
+					     hwInventory
+					  ) ],
 			 },
 	  jpegPhoto => {
 			'stub' => 'user-6-128x128.jpg',
@@ -297,10 +308,115 @@ sub _build_cfg {
 		      # data_fields => 'block_crt',
 		     },
 	  },
+	  
+	  hwType =>
+	  {
+	   singleboard => {
+			   dn_sfx => 'ou=SingleBoard,ou=hw,',
+			   ap => {
+				  descr => '',
+				  disabled => 0,
+				  icon => 'fa fa-cog',
+				 },
+			   com  => {
+				    descr => '',
+				    disabled => 0,
+				    icon => 'fa fa-cog',
+				   },
+			   wrt => {
+				   descr => '',
+				   disabled => 0,
+				   icon => 'fa fa-cog',
+				  },
+			   monitor => {
+				       descr => '',
+				       disabled => 0,
+				       icon => 'fa fa-cog',
+				      },
+			   prn => {
+				   descr => '',
+				   disabled => 0,
+				   icon => 'fa fa-cog',
+				  },
+			   mfu => {
+				   descr => '',
+				   disabled => 0,
+				   icon => 'fa fa-cog',
+				  },
+			  },
+	   composite => {
+			 dn_sfx => 'ou=Composite,ou=hw,',
+			 ws => {
+				descr => '',
+				disabled => 0,
+				icon => 'fa fa-cog',
+			       },
+			 srv => {
+				 descr => '',
+				 disabled => 0,
+				 icon => 'fa fa-cog',
+				},
+			},
+	   consumable => {
+			  dn_sfx => 'ou=Consumable,ou=hw,',
+			  kbd => {
+				  descr => '',
+				  disabled => 0,
+				  icon => 'fa fa-cog',
+				 },
+			  ms => {
+				 descr => '',
+				 disabled => 0,
+				 icon => 'fa fa-cog',
+				},
+			  hs => {
+				 descr => '',
+				 disabled => 0,
+				 icon => 'fa fa-cog',
+				},
+			 },
+	   compart => {
+		       dn_sfx => 'ou=Compart,ou=hw,',
+		       mb => {
+			      descr => '',
+			      disabled => 0,
+			      icon => 'fa fa-cog',
+			     },
+		       cpu => {
+			       descr => '',
+			       disabled => 0,
+			       icon => 'fa fa-cog',
+			      },
+		       ram => {
+			       descr => '',
+			       disabled => 0,
+			       icon => 'fa fa-cog',
+			      },
+		       disk => {
+			       descr => '',
+			       disabled => 0,
+			       icon => 'fa fa-cog',
+			      },
+		      },
+	   furniture => {
+			 dn_sfx => 'ou=Furniture,ou=hw,',
+			 tbl => {
+				 descr => '',
+				 disabled => 0,
+				 icon => 'fa fa-cog',
+				},
+			 chr => {
+				 descr => '',
+				 disabled => 0,
+				 icon => 'fa fa-cog',
+				},
+			},
+	  },
 	  err => {
 		  0 => '<i class="fa fa-search-minus fa-lg text-warning "></i>&nbsp;Looks like your request returned no result. Try to change query parameter/s.',
 		  50 => 'This situation needs your security officer and system administrator attention, please contact them to solve the issue.',
 		 },
+
 	  #=====================================================================
 	  ##
 	  ### CONFIGURATION STOPS HERE
@@ -358,6 +474,7 @@ around 'ldap' =>
     }
     return $ldap;
   };
+
 
 =head2 last_uidNumber
 
@@ -443,6 +560,40 @@ sub build_last_gidNumber {
   return $return;
 }
 
+=head2 last_seq
+
+find the latest index of the given RDN 
+
+for objects with RDN notation like: ABC-XXX
+
+where ABC is name of the object class (like ram/cpu/mb/e.t.c. for
+inventory) and XXX is incremental index
+
+=cut
+
+sub last_seq {
+  my ($self, $args) = @_;
+  my $arg = { base => $args->{base},
+	      filter => $args->{filter} || '(objectClass=*)',
+	      scope => $args->{scope} || 'one',
+	      attr => $args->{attr}, # one single attribute sequence of we calculate
+	      seq_pfx => $args->{seq_pfx},
+	      seq_cnt => 0, };
+
+  my $mesg = $self->ldap->search( base => $arg->{base},
+				  scope => $arg->{scope},
+				  filter => $arg->{filter},
+				  attrs => [ $arg->{attr} ], );
+  if ( $mesg->count ) {
+    @{$arg->{entries}} = $mesg->entries;
+    foreach my $i ( @{$arg->{entries}} ) {
+      push @{$arg->{seq}}, substr( $i->get_value( $arg->{attr} ), length $arg->{seq_pfx} );
+    }
+    @{$arg->{seq_sorted_desc}} = sort {$b <=> $a} @{$arg->{seq}};
+  }
+  return $arg->{seq_sorted_desc}[0];
+}
+
 =head2 err
 
 Net::LDAP errors handling
@@ -516,10 +667,10 @@ sub unbind {
   $self->ldap->unbind;
 }
 
-sub schema {
-  my $self = shift;
-  $self->ldap->schema;
-}
+# sub schema {
+#   my $self = shift;
+#   return $self->ldap->schema;
+# }
 
 
 =head2 search
@@ -641,37 +792,66 @@ reassign method
 
 sub reassign {
   my ($self, $args) = @_;
+  my ( $arg, $return, $y, $result, $mesg, $entry, $clone, $attrs, $key, $val );
 
-  my $arg = {
-	     dst => { str => sprintf('uid=%s,%s',
-					     $args->{dst_uid},
-					     $self->cfg->{base}->{acc_root}), },
-	     src => { str => $args->{src_dn},
-		      is_branch => $args->{src_dn} =~ /^authorizedService=/ ? 1 : 0, },
-	    };
+  if ( $args->{src_dn} =~ /.*,ou=People/ ) {
+    $arg->{type} = 'people';
+  } elsif ( $args->{src_dn} =~ /.*,ou=Inventory/ ) {
+    $arg->{type} = 'inventory';
+  } else {
+    $arg->{type} = '';
+  }
+
+  $arg->{dst} = { str =>
+		  # is DN?
+		  $args->{dst_uid} =~ /.*ou=.*dc=/ ?
+		  # what type is it?
+		  $args->{dst_uid} : $arg->{type} eq 'people' ?
+		  sprintf('uid=%s,%s', $args->{dst_uid}, $self->cfg->{base}->{acc_root}) :
+		  sprintf('cn=%s,ou=Composite,ou=hw,%s', $args->{dst_uid}, $self->cfg->{base}->{inventory}),
+		};
+  $arg->{src} = { str => $args->{src_dn},
+		  is_branch => $args->{src_dn} =~ /^.*,authorizedService=/ ? 0 : 1, };
+
+  $arg->{dst}->{str} = $self->lrtrim( { str => $arg->{dst}->{str} } );
+  
+  # return error if dst DN not exist
+  $arg->{garbage} = $self->search( { base  => $arg->{dst}->{str}, scope => 'base' } ); p $arg;
+  if ( $arg->{garbage}->code ) {
+    push @{$return->{error}}, $self->err($arg->{garbage});
+    $return->{error}->[0]->{html} = '<h3>dst DN does not exist!</h3>' . $return->{error}->[0]->{html};p $arg;
+    return $return if $arg->{garbage}->code;
+  }
+
   @{$arg->{src}->{arr}} = split(/,/, $arg->{src}->{str});
   @{$arg->{dst}->{arr}} = split(/,/, $arg->{dst}->{str});
 
-  my ( $return, $y, $result, $mesg, $entry, $clone, $attrs, @x, $key, $val );
-  $y = 0;
-  foreach my $z ( @{$arg->{src}->{arr}} ) {
-    push @x, $z if $z =~ /^authorizedService=/ || $y == 1;
-    $y = 1 if $z =~ /^authorizedService=/;
+  if ( $arg->{type} eq 'people' ) {
+    my @x;		  # array to pick src authorizedService branch
+    $y = 0; # flag to use all rest array elements to form src authorizedService branch DN
+    foreach my $z ( @{$arg->{src}->{arr}} ) {
+      push @x, $z if $z =~ /^authorizedService=/ || $y == 1;
+      $y = 1 if $z =~ /^authorizedService=/;
+    }
+  
+    # src authorizedService branch DN and DN elements array
+    $arg->{src}->{branch_dn}->{str} = join(',', @x);
+    $arg->{src}->{branch_dn}->{arr} = \@x;
+
+    $arg->{dst}->{branch_dn}->{str} = sprintf('%s,%s',
+					      $arg->{src}->{branch_dn}->{arr}->[0],
+					      $arg->{dst}->{str});
+    @{$arg->{dst}->{branch_dn}->{arr}} = split(/,/, $arg->{dst}->{branch_dn}->{str});
+
+    # is there dst branch?
+    $result = $self->ldap->search( base   => $arg->{dst}->{str},
+				   filter => sprintf('(%s)', $arg->{src}->{branch_dn}->{arr}->[0]),
+				   scope => 'base' );
+    $arg->{dst}->{has_branch} = $result->count;
+  } else {
+    $arg->{dst}->{has_branch} = 1; # it is rather than it has
+    $arg->{dst}->{branch_dn}->{str} = $arg->{dst}->{str};
   }
-
-  $arg->{src}->{branch_dn}->{str} = join(',', @x);
-  $arg->{src}->{branch_dn}->{arr} = \@x;
-
-  $arg->{dst}->{branch_dn}->{str} = sprintf('%s,%s',
-					  $arg->{src}->{branch_dn}->{arr}->[0],
-					  $arg->{dst}->{str});
-  @{$arg->{dst}->{branch_dn}->{arr}} = split(/,/, $arg->{dst}->{branch_dn}->{str});
-
-  $result = $self->ldap->search( base   => $arg->{dst}->{str},
-				 filter => sprintf('(%s)', $arg->{src}->{branch_dn}->{arr}->[0]),
-				 scope => 'base' );
-
-  $arg->{dst}->{has_branch} = $result->count;
 
   $result = $self->search( { base  => $arg->{dst}->{str}, scope => 'base', } );
   $entry = $result->entry(0);
@@ -680,11 +860,9 @@ sub reassign {
       if $_ ne 'jpegPhoto';
   }
   
-  # src BRANCH does'n exist in dst subtree and here we
-  # CREATE it
-  if ( ! $arg->{dst}->{has_branch} ) {
+  # CREATE dst BRANCH if not exists in dst subtree
+  if ( $arg->{type} eq 'people' && ! $arg->{dst}->{has_branch} ) {
     $result = $self->search( { base  => $arg->{src}->{branch_dn}->{str}, scope => 'base', } );
-    # !!! we need to pick up this error in json somehow ...
     push @{$return->{error}}, $self->err($result) if $result->code;
     $clone = $result->entry(0)->clone;
     $mesg = $clone->dn($arg->{dst}->{branch_dn}->{str}); # !!! error handling
@@ -703,7 +881,6 @@ sub reassign {
       push @{$attrs}, $_ => $clone->get_value( $_, asref => 1 );
     }
     $mesg = $self->add( $clone->dn, $attrs );
-    # !!! we need to pick up this error in json somehow ...
     if ( $mesg && $mesg->{name} eq 'LDAP_ALREADY_EXISTS' ) {
       push @{$return->{warning}}, $mesg if $mesg;
     } else {
@@ -714,7 +891,7 @@ sub reassign {
 
   # src BRANCH already EXISTS in dst subtree and here
   # we are to process all objects bellow it (bellow src branch)
-  if ( $arg->{src}->{is_branch} ) {
+  if ( $arg->{type} eq 'people' && $arg->{src}->{is_branch} ) {
     $result = $self->search( { base  => $arg->{src}->{str}, scope => 'children', } );
     foreach $entry ( $result->entries ) {
       $clone = $entry->clone;
@@ -734,13 +911,11 @@ sub reassign {
       }
       $mesg = $self->add( $clone->dn, $attrs );
       undef $attrs;
-      # !!! we need to pick up this error in json somehow ...
       push @{$return->{error}}, $mesg if $mesg;
     }
 
     ### FINISH
-    # here we have to delete src subtree recursively if
-    # @{$return->{error}} is empty
+    # here we have to delete src subtree recursively if @{$return->{error}} is empty
     $self->delr( $arg->{src}->{str} )
       if ref($return) ne "HASH" ||
       ( ref($return) eq "HASH" && $#{$return->{error}} < 0);
@@ -764,12 +939,10 @@ sub reassign {
       }
     $mesg = $self->add( $clone->dn, $attrs );
     undef $attrs;
-    # !!! we need to pick up this error in json somehow ...
     push @{$return->{error}}, $mesg if $mesg;
 
     ### FINISH
-    # here we have to delete src dn if
-    # @{$return->{error}} is empty
+    # here we have to delete src dn if @{$return->{error}} is empty
     # $self->del( $arg->{src}->{str} ) if $return != 0 && $#{$return->{error}} > -1;
     $self->del( $arg->{src}->{str} )
       if ref($return) ne "HASH" ||
@@ -1281,8 +1454,10 @@ sub obj_schema {
 	     'single-value' => $must->{'single-value'} || undef,
 	     'max_length' => $must->{'max_length'} || undef,
 	     'equality' => $must->{'equality'} || undef,
-#	     'attribute' => $self->schema->attribute($must->{'name'}) || undef,
+	     # 'attribute' => $self->schema->attribute($must->{'name'}) || undef,
 	    };
+	# $obj_schema->{$entry->dn}->{'equality'}->{$must->{'name'}} =
+	#   $obj_schema->{$entry->dn}->{$objectClass}->{'must'}->{$must->{'name'}}->{'equality'};
       }
 
       foreach $may ( $self->schema->may ( $objectClass ) ) {
@@ -1294,11 +1469,14 @@ sub obj_schema {
 	     'single-value' => $may->{'single-value'} || undef ,
 	     'max_length' => $may->{'max_length'} || undef ,
 	     'equality' => $may->{'equality'} || undef ,
-#	     'attribute' => $self->schema->attribute($may->{'name'}) || undef,
+	     # 'attribute' => $self->schema->attribute($may->{'name'}) || undef,
 	    };
+	# $obj_schema->{$entry->dn}->{'equality'}->{$may->{'name'}} =
+	#   $obj_schema->{$entry->dn}->{$objectClass}->{'may'}->{$may->{'name'}}->{'equality'};
       }
     }
   }
+
   return $obj_schema;
 }
 
@@ -2175,6 +2353,36 @@ sub create_account_branch_leaf {
   }
   return $return;
 }
+
+
+
+=head2 attr_equality
+
+each attribute equality of the whole schema, hash
+
+=cut
+has 'cfg' => ( traits => ['Hash'], is => 'ro', isa => 'HashRef', builder => '_build_cfg', );
+
+has 'attr_equality' 
+  => ( traits => ['Hash'],
+       is => 'ro',
+       isa => 'HashRef',
+       required => 0, lazy => 1,
+       builder  => 'build_attr_equality',
+     );
+
+sub build_attr_equality {
+  my $self = shift;
+  my $return;
+  foreach ( $self->ldap->schema->all_attributes ) {
+    $return->{$_->{name}} = $_->{equality}
+      if defined $_->{equality};
+  }
+  # p $return;
+  return $return;
+}
+
+
 
 ######################################################################
 # temporary stuff

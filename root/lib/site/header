@@ -46,12 +46,24 @@
         	Group
 	      </a>
 	    </li>
+            <li>
+	      <a href="[% c.uri_for_action('nisnetgroup/index') %]" tabindex="3">
+        	<span class="fa fa-fw fa-group"> </span>
+        	NIS NetGroup
+	      </a>
+	    </li>
 	    [% END %]
 	    [% IF c.check_user_roles('admin') || c.check_user_roles('org') || c.check_user_roles('email') || c.check_user_roles('xmpp') %]
             <li>
 	      <a href="[% c.uri_for_action('org_root') %]" tabindex="4">
         	<span class="fa fa-fw fa-industry"></span>
         	Org
+	      </a>
+	    </li>
+            <li>
+	      <a href="[% c.uri_for_action('/inventory/index') %]" tabindex="4">
+        	<span class="fa fa-fw fa-tags"></span>
+        	Inventory
 	      </a>
 	    </li>
 	    [% END %]
@@ -234,6 +246,12 @@
 		<span class="[% icon_class %] fa-group"></span>&nbsp;group</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
+			value="[% helper_cfg('cfg_ldap_crud','base', 'netgroup') %]"
+			name="ldapsearch_base"
+			title="filter pattern with base NisNetgroups">
+		<span class="[% icon_class %] fa-group"></span>&nbsp;netgroup</button></li>
+	      <li class="bg-[% color %]">
+		<button type="submit" class="[% menu_item %][% color %]"
 			value="[% helper_cfg('cfg_ldap_crud','base', 'acc_root') %]"
 			name="ldapsearch_base"
 			title="filter pattern with base People">
@@ -268,6 +286,12 @@
 			name="ldapsearch_base" tabindex="24"
 			title="filter pattern with base Machines">
 		<span class="[% icon_class %] fa-server"></span>&nbsp;machines</button></li>
+	      <li class="bg-[% color %]">
+		<button type="submit" class="[% menu_item %][% color %]"
+			value="[% helper_cfg('cfg_ldap_crud','base', 'inventory') %]"
+			name="ldapsearch_base" tabindex="24"
+			title="filter pattern with base Inventory">
+		<span class="[% icon_class %] fa-tags"></span>&nbsp;inventory</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
 			value="[% helper_cfg('cfg_ldap_crud','base', 'gitacl') %]"

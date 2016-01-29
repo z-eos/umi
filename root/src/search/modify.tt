@@ -23,7 +23,7 @@
          attr.key != 'userPassword' &&
          ! attr.key.match('userCertificate') &&
          attr.key != 'jpegPhoto' %]
-      [% attr.key %]&nbsp;<a class="element-add" href="#" title="add value"><span class="fa fa-plus-square"></span></a>
+      [% attr.key %]&nbsp;<a class="element-add" href="#" title="add value"><span class="fa fa-plus-square text-success"></span></a>
       [% ELSE %]
       [% attr.key %]
       [% END %]

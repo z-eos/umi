@@ -8,33 +8,45 @@ BEGIN { extends 'UMI::Form::LDAP'; with 'Tools'; }
 
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable' );
 
-has '+item_class' => ( default =>'ModJpegPhoto' );
+sub build_form_element_class { [ 'form-horizontal', ] }
+
+# has '+item_class' => ( default =>'ModJpegPhoto' );
 has '+enctype' => ( default => 'multipart/form-data');
 has '+action' => ( default => '/searchby/proc' );
-
-sub build_form_element_class { [ 'form-horizontal' ] }
 
 has_field 'ldap_modify_jpegphoto' => ( type => 'Hidden', );
 
 has_field 'avatar' => ( type => 'Upload',
 			label => 'Photo User ID',
-			# label_class => [ 'form-group', 'col-xs-4' ],
+			label_class => [ 'col-xs-2' ],
 			element_class => [ 'btn', 'btn-default', ],
-			# wrapper_class => [ 'col-xs-12' ],
+			element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
 			max_size => '50000',
 			# required => 1,
 		      );
 
+has_field 'aux_hspace' => ( type => 'Display',
+                            html => '<p>&nbsp;</p>',
+                          );
+
 has_field 'aux_reset' => ( type => 'Reset',
-		       wrapper_class => [ 'col-xs-1' ],
-		       element_class => [ 'btn', 'btn-danger', 'btn-block', ],
-		       element_wrapper_class => [ 'col-xs-12', ],
-		       value => 'Reset' );
+			   wrapper_class => [ 'col-xs-4' ],
+			   element_class => [ 'btn', 'btn-danger', 'btn-block', ],
+			   element_wrapper_class => [ 'col-xs-12', ],
+			   value => 'Reset' );
 
 has_field 'aux_submit' => ( type => 'Submit',
-			    wrapper_class => [ 'col-xs-11', ],
+			    wrapper_class => [ 'col-xs-8', ],
 			    element_class => [ 'btn', 'btn-success', 'btn-block', ],
 			    value => 'Submit' );
+
+has_block 'aux_submitit' => ( tag => 'fieldset',
+			      render_list => [ 'aux_hspace', 'aux_reset', 'aux_submit'],
+			      # label => '&nbsp;',
+			      class => [ 'container-fluid' ]
+			    );
+
+sub build_render_list {[ 'ldap_modify_jpegphoto', 'avatar', 'aux_submitit' ]}
 
 sub html_attributes {
   my ( $self, $field, $type, $attr ) = @_;
@@ -52,10 +64,9 @@ sub html_attributes {
 
 sub validate {
   my $self = shift;
-
-  if ( $self->field('avatar')->value eq '' ) {
-    $self->field('avatar')->add_error('<span class="fa fa-exclamation-circle"></span>&nbsp;File to be uploaded is mandatory!');
-  }
+  
+#  $self->field('avatar')->add_error('<span class="fa fa-exclamation-circle"></span>&nbsp;File to be uploaded is mandatory!')
+#    if ! defined $self->field('avatar')->value && defined $self->field('aux_submit')->value && $self->field('aux_submit')->value eq 'Submit';
 
 # if ( not $self->field('office')->value ) {
 #     $self->field('office')->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;office is mandatory!');

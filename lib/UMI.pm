@@ -97,6 +97,8 @@ __PACKAGE__->deny_access_unless_any( "/gitacl_root",         [ qw/admin coadmin/
 __PACKAGE__->deny_access_unless_any( "/group",               [ qw/admin coadmin/ ]);
 __PACKAGE__->deny_access_unless_any( "/group_root",          [ qw/admin coadmin/ ]);
 __PACKAGE__->deny_access_unless_any( "/org",                 [ qw/admin coadmin acl-w-organizations/ ]);
+__PACKAGE__->deny_access_unless_any( "/inventory",           [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/nisnetgroup",         [ qw/admin coadmin/ ]);
 __PACKAGE__->deny_access_unless_any( "/org_root",            [ qw/admin coadmin/ ]);
 __PACKAGE__->deny_access_unless_any( "/searchadvanced",      [ qw/admin coadmin/ ]);
 __PACKAGE__->deny_access_unless_any( "/searchby",            [ qw/admin coadmin/ ]);

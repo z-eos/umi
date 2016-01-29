@@ -119,7 +119,7 @@ sub proc :Path(proc) :Args(0) {
 
       # p @entries;
 
-      my ( $ttentries, $attr, $umilog, $is_blocked );
+      my ( $ttentries, $attr, $umilog, $is_blocked, $dn_depth );
       foreach (@entries) {
 	$umilog = UMI->config->{ldap_crud_db_log};
 	if ( $_->dn !~ /$umilog/ ) {
@@ -135,12 +135,16 @@ sub proc :Path(proc) :Args(0) {
 	} else {
 	  $is_blocked = 0;
 	}
+	
+	$dn_depth = $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ? 5 : 3;
+
 	$ttentries->{$_->dn}->{'mgmnt'} =
 	  {
 	   is_blocked => $is_blocked,
-	   is_dn => scalar split(',', $_->dn) <= 3 ? 1 : 0,
+	   is_dn => scalar split(',', $_->dn) <= $dn_depth ? 1 : 0,
 	   is_account => $_->dn =~ /.*,$ldap_crud->cfg->{base}->{acc_root}/ ? 1 : 0,
 	   is_group => $_->dn =~ /.*,$ldap_crud->cfg->{base}->{group}/ ? 1 : 0,
+	   is_inventory => $_->dn =~ /.*,$ldap_crud->cfg->{base}->{inventory}/ ? 1 : 0,
 	   jpegPhoto => $_->dn =~ /.*,$ldap_crud->cfg->{base}->{acc_root}/ ? 1 : 0,
 	   gitAclProject => $_->exists('gitAclProject') ? 1 : 0,
 	   userPassword => $_->exists('userPassword') ? 1 : 0,
@@ -177,9 +181,10 @@ sub proc :Path(proc) :Args(0) {
     my @ttentries_keys = $sort_order eq 'reverse' ?
       map { scalar reverse } sort map { scalar reverse } keys %{$ttentries} :
       sort { lc $a cmp lc $b } keys %{$ttentries};
-
+      # p $ttentries;
     $c->stash(
 	      template => 'search/searchby.tt',
+	      schema => $ldap_crud->attr_equality,
 	      base_dn => $base_dn,
 	      filter => $search_filter,
 	      entrieskeys => \@ttentries_keys,
