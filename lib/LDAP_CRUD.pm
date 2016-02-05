@@ -11,6 +11,7 @@ use Data::Printer  colored => 1;
 BEGIN { with 'Tools'; }
 
 use Net::LDAP;
+use Net::LDAP::LDIF;
 use Net::LDAP::Control;
 use Net::LDAP::Control::Sort;
 use Net::LDAP::Control::SortResult;
@@ -667,10 +668,10 @@ sub unbind {
   $self->ldap->unbind;
 }
 
-# sub schema {
-#   my $self = shift;
-#   return $self->ldap->schema;
-# }
+sub schema {
+  my $self = shift;
+  return $self->ldap->schema;
+}
 
 
 =head2 search
@@ -749,6 +750,54 @@ sub add {
   return $return;
 }
 
+
+sub ldif_read {
+  my ($self, $args) = @_;
+  my $arg = {
+	     file => $args->{file} || undef,
+	     ldif => $args->{ldif} || '',
+	    };
+  my ( $entry, $mesg, $file );
+  if ( $arg->{ldif} ) {
+    try {
+      open( $file, "<", \$arg->{ldif});
+    } catch {
+      return $arg->{final_message} = { error => [ "Cannot open data from variable: $arg->{ldif} for reading: $_", ] };
+    };
+  } else {
+    $file = $arg->{file};
+  }
+  my $ldif = Net::LDAP::LDIF->new( $file, "r", onerror => 'undef' );
+  while ( not $ldif->eof ) {
+    $entry = $ldif->read_entry;
+    if ( $ldif->error ) {
+      push @{$arg->{final_message}->{error}},
+	sprintf('Error msg: %s\nError lines:\n%s\n',
+		$ldif->error,
+		$ldif->error_lines );
+    } else {
+      $mesg = $entry->update($self->ldap);
+      if ( $mesg->code ) {
+	push @{$arg->{final_message}->{error}}, $self->err($mesg)->{html};
+      } else {
+	push @{$arg->{final_message}->{success}},
+	  '<form role="form" method="POST" action="' . UMI->uri_for_action("searchby/index") . '">' .
+	  '<button type="submit" class="btn btn-link btn-xs" title="click to open this object" name="ldap_subtree" value="' .
+	  $entry->dn . '">successfully added: ' . $entry->dn . '</button></form>';
+      }
+    }
+  }
+  $ldif->done;
+  if ( $arg->{ldif} ) {
+    try {
+      close $file;
+    } catch {
+      return $arg->{final_message} = { error => "Cannot close file: $arg->{ldif} error: $_" };
+    };
+  }
+
+  return $arg->{final_message};
+}
 
 =head2 reassign
 
@@ -1165,11 +1214,12 @@ sub modify {
   my ($self, $dn, $changes ) = @_;
   my ( $return, $msg );
   if ( ! $self->dry_run ) {
-    $msg = $self->ldap->modify ( $dn, changes => $changes, );
+    $msg = $self->ldap->modify ( $dn, changes => $changes, ); p $dn; p $changes;
     if ($msg->is_error()) {
       $return = $self->err( $msg );
     } else { $return = 0; }
   } else { $return = $msg->ldif; }
+  p $return;
   return $return;
 }
 
@@ -1441,7 +1491,7 @@ sub obj_schema {
 
   my @entries = $mesg->entries;
 
-  my ( $must, $may, $obj_schema );
+  my ( $must, $may, $obj_schema, $names );
   foreach my $entry ( @entries ) {
     foreach my $objectClass ( $entry->get_value('objectClass') ) {
       next if $objectClass eq 'top';
@@ -1476,7 +1526,6 @@ sub obj_schema {
       }
     }
   }
-
   return $obj_schema;
 }
 

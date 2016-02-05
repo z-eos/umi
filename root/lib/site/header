@@ -94,6 +94,12 @@
             <li class="divider"></li>
             <li class="dropdown-header">Tools:</li>
             <li>
+	      <a href="[% c.uri_for_action('toolimportldif/index') %]" tabindex="8">
+		<span class="fa fa-fw fa-download text-info"></span>
+		Import
+	      </a>
+	    </li>
+            <li>
 	      <a href="[% c.uri_for_action('tooltranslit/index') %]" tabindex="8">
 		<span class="fa fa-fw fa-text-width text-info"></span>
 		Translit

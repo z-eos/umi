@@ -288,7 +288,7 @@ sub proc :Path(proc) :Args(0) {
       my ($return, $attr, $entry_tmp, $entry);
       my $ldap_crud = $c->model('LDAP_CRUD');
       
-      p $ldap_crud->obj_schema({ dn => $params->{ldap_modify} });
+      # p $ldap_crud->obj_schema({ dn => $params->{ldap_modify} });
 
       my $mesg = $ldap_crud->search( { dn => $params->{ldap_modify} } );
       $return->{error} = $ldap_crud->err( $mesg )->{html} if ! $mesg->count;
@@ -312,22 +312,29 @@ sub proc :Path(proc) :Args(0) {
 	}
       }
       my $schema = $ldap_crud->obj_schema( { dn => $params->{ldap_modify} } );
-      my ($is_single);
+      my ($is_single, $names);
       foreach my $objectClass (sort (keys $schema->{$params->{ldap_modify}})) {
 	foreach $attr (sort (keys %{$schema->{$params->{ldap_modify}}->{$objectClass}->{must}} )) {
 	  next if $attr eq "objectClass";
 	  $is_single->{$attr} =
 	    $schema->{$params->{ldap_modify}}->{$objectClass}->{must}->{$attr}->{'single-value'};
+	  $names->{$attr} = 0;
 	}
 	foreach $attr (sort (keys %{$schema->{$params->{ldap_modify}}->{$objectClass}->{may}} )) {
 	  next if $attr eq "objectClass";
 	  $is_single->{$attr} =
 	    $schema->{$params->{ldap_modify}}->{$objectClass}->{may}->{$attr}->{'single-value'};
+	  $names->{$attr} = 0;
 	}
       }
 
+      foreach $attr ( $entry_tmp->attributes ) {
+	delete $names->{$attr};
+      }
       ## here we work with the only one, single entry!!
       # p $is_single;
+      # p $names;
+      # p $entry;
       # $c->session->{modify_entries} = $mesg->entry(0);
       # $c->session->{modify_dn} = $params->{ldap_modify};
       # $c->session->{modify_schema} = $is_single;
@@ -336,6 +343,7 @@ sub proc :Path(proc) :Args(0) {
 		template => 'search/modify.tt', # !!! look modify() bellow
 		modify => $params->{'ldap_modify'},
 		entries => $entry,
+		attrs_rest => $names,
 		schema => $is_single,
 		final_message => $return,
 		rdn => (split('=', (split(',', $params->{ldap_modify}))[0]))[0],
@@ -346,43 +354,6 @@ sub proc :Path(proc) :Args(0) {
 #=====================================================================
     } elsif ( defined $params->{'ldap_modify_group'} &&
 	      $params->{'ldap_modify_group'} ne '' ) {
-
-# old #       # in general preselected options has to be fed via field value
-# old #       # $params->{groups} = [ qw( group0 group1 ... groupN) ];
-# old #       #
-# old #       # no submit yet, it is first run
-# old #       if ( ! defined $params->{groups} ) {
-# old # 	my ( @groups, $return );
-# old # 	my $ldap_crud = $c->model('LDAP_CRUD');
-# old # 	my $mesg = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{group},
-# old # 					 filter => sprintf('memberUid=%s',
-# old # 							   substr((split /,/, $params->{ldap_modify_group})[0], 4)),
-# old # 					 attrs => ['cn'], } );
-# old # 
-# old # 	if ( $mesg->code != 0 ) {
-# old # 	  push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html};
-# old # 	}
-# old # 
-# old # 	my @groups_usr = $mesg->sorted('cn');
-# old # 
-# old # 	foreach ( @groups_usr ) {
-# old # 	  push @{$params->{groups}}, $_->get_value('cn');
-# old # 	}
-# old #       }
-# old # 
-# old #       $c->stash( template => 'user/user_mod_group.tt',
-# old # 		 form => $self->form_mod_groups,
-# old # 		 ldap_modify_group => $params->{'ldap_modify_group'}, );
-# old # 
-# old #       return unless $self->form_mod_groups
-# old #       	->process( posted => ($c->req->method eq 'POST'),
-# old # 		   params => $params,
-# old # 		   ldap_crud => $c->model('LDAP_CRUD'), );
-# old # 
-# old #       $c->stash( final_message => $self
-# old # 		 ->mod_groups( $c->model('LDAP_CRUD'),
-# old # 			       { mod_groups_dn => $params->{ldap_modify_group},
-# old # 				 groups => $params->{groups}, } ), );
 
       my $groups;
       if ( defined $params->{groups} ) {
@@ -1294,8 +1265,8 @@ sub modify :Path(modify) :Args(0) {
 
   my $entry = $mesg->entry(0);
 
-  my ($attr, $val, $orig);
-  my $mod = undef;
+  my ($jpeg, $attr, $val, $orig, $delete, $add);
+  my $replace = undef;
   foreach $attr ( sort ( keys %{$params} )) {
     next if $attr =~ /$ldap_crud->{cfg}->{exclude_prefix}/ ||
       $attr eq 'dn' ||
@@ -1304,45 +1275,63 @@ sub modify :Path(modify) :Args(0) {
       $params->{jpegPhoto} = $c->req->upload('jpegPhoto');
     }
 
-    $val = $entry->get_value ( $attr, asref => 1 );
-
-    $orig = ref($val) eq "ARRAY" && scalar @{$val} == 1 ? $val->[0] : $val;
     $val = $params->{$attr};
+    $orig = $entry->get_value($attr);
+    
+    # SMARTMATCH: recurse on paired elements of ARRAY1 and ARRAY2
+    # if identical then next
+    next if ref($val) eq "ARRAY" && $val ~~ $orig;
+    next if defined $entry->get_value($attr) && $val eq $entry->get_value($attr);
+
     # removing all empty array elements if any
     if ( ref($val) eq "ARRAY" ) {
       @{$val} = map { $self->is_ascii($_) ? $self->utf2lat($_) : $_ } grep { $_ ne '' } @{$val};
-    } elsif ( $val ne '' ) {
+    } elsif ( $val ne '' && defined $entry->get_value($attr) && $val ne $entry->get_value($attr) ) {
       $val = $self->utf2lat($val) if $self->is_ascii($val);
     }
 
-    # SMARTMATCH: recurse on paired elements of ARRAY1 and ARRAY2
-    # if identical then next
-    next if $val ~~ $orig;
-
-    if ( $attr eq 'jpegPhoto' && $val ne "" ) {
-      my ($file, $jpeg);
-      $file = $val->{'tempname'};
-      local $/ = undef;
-      open(my $fh, "<", $file) or $c->log->debug("Can not open $file: $!" );
-      $jpeg = <$fh>;
-      close($fh) or $c->log->debug($!);
-      push @{$mod}, $attr, [ $jpeg ];
-    } elsif ( $val ne "" or $val ne "0" ) { # && $val ne $orig ) {
-      push @{$mod}, $attr, $val;
+    if ( $val eq '' && defined $entry->get_value($attr) ) {
+      push @{$delete}, $attr => [];
+    } elsif ( $val ne '' && ! defined $entry->get_value($attr) ) {
+      if ( $attr eq 'jpegPhoto' ) {
+	$jpeg = $self->file2var( $val->{'tempname'}, $return );
+	return $jpeg if ref($jpeg) eq 'HASH' && defined $jpeg->{error};
+	$val = [ $jpeg ];
+      }
+      push @{$add}, $attr => $val;
+    } elsif ( $attr eq 'jpegPhoto' && $val ne "" ) {
+      $jpeg = $self->file2var( $val->{'tempname'}, $return );
+      return $jpeg if ref($jpeg) eq 'HASH' && defined $jpeg->{error};
+      push @{$replace}, $attr => [ $jpeg ];
+    } elsif ( ref($val) eq "ARRAY" && $#{$val} > -1 ) {
+      push @{$replace}, $attr => $val;
+    } elsif ( ref($val) ne "ARRAY" && $val ne "" ) { # && $val ne $orig ) {
+      push @{$replace}, $attr => $val;
     }
   }
 
-  if ( defined $mod ) {
-    my $modx = [ replace => $mod ];
-    $mesg = $ldap_crud->modify( $params->{dn}, [ replace => $mod, ], );
+  my $modx;
+  if ( defined $delete && $#{$delete} > -1 ) {
+    push @{$modx}, delete => $delete;
+  }
+  if ( defined $add && $#{$add} > -1 ) {
+    push @{$modx}, add => $add;
+  }
+  if ( defined $replace && $#{$replace} > -1 ) {
+    push @{$modx}, replace => $replace;
+  }
+
+  if ( defined $modx && $#{$modx} > -1 ) {
+    p $modx;
+    $mesg = $ldap_crud->modify( $params->{dn}, $modx, );
     $return->{error} .= $mesg->{html} if $mesg ne "0";
     $return->{success} = 'Modification/s made:<pre>' .
-      p($mod, caller_info => 0, colored => 0, index => 0) . '</pre>' if $mesg eq "0";
+      np($modx, caller_info => 0, colored => 0, index => 0) . '</pre>' if $mesg eq "0";
   } else {
     $return->{warning} = 'No change was performed!';
   }
 
-  $c->stash( template => 'stub.tt',
+  $c->stash( template => 'search/modify.tt', # stub.tt',
 	     params => $params,
 	     final_message => $return, );
 }

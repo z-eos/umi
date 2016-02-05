@@ -87,7 +87,7 @@
 	      [% fl_names = entry.key.split(',').slice(-5, -1).0.split('=').1 %]
 	      [% END %]
 	      <form role="form" method="POST" action="[% c.uri_for_action('searchby/index') %]">
-		<button type="submit" class="btn btn-link umi-search col-xs-1"
+		<button type="submit" class="btn btn-link umi-search visible-lg-block visible-md-block col-xs-1"
 			title="click to open root object of this account"
 			name="ldap_subtree"
 			value="[% IF entry.key.match('People') %]
@@ -99,8 +99,22 @@
 			[% END %]">
 		  <strong class="[% blocked %]">[% fl_names %]</strong>
 		</button>
+
+		<button type="submit" class="btn btn-link umi-search visible-xs-block visible-sm-block"
+			title="click to open root object of this account"
+			name="ldap_subtree"
+			value="[% IF entry.key.match('People') %]
+			[% entry.key.split(',').slice(-3, -1).join(',') %]
+			[% ELSIF entry.key.match('Inventory') && entry.key.split(',').size > 4 %]
+			[% entry.key.split(',').slice(-5, -1).join(',') %]
+			[% ELSE %]
+			[% entry.key %]
+			[% END %]">
+		  <i class="[% blocked %] fa fa-star">&nbsp;&nbsp;</i>
+		</button>
+
 	      </form>
-	      <p></p>
+	      <p class="visible-lg-block visible-md-block"></p>
 	      <span class="h5 col-xs-offset-1"><b class="[% blocked %]" [% blocked_title %]>
 		[% IF entry.value.mgmnt.is_dn && entry.key.match('People') %]
 		<span title="Root Account" class="fa fa-user fa-lg[% blocked %]"></span>

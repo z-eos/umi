@@ -15,6 +15,43 @@
       action="[% c.uri_for_action('/searchby/modify') %]">
   <input type="hidden" name="dn" id="dn" value="[% modify %]">
 
+  <div class="form-group">
+    <label class="col-sm-2 control-label">
+      Attributes Available
+    </label>
+    <div class="col-sm-10">
+      <select class="form-control" name="aux_attrs_rest" id="aux_attrs_rest">
+	<option value=""> --- Choose An Attribute ---</option>
+	[% FOREACH attr_rest IN attrs_rest %]
+	<option value="[% attr_rest.key %]">[% attr_rest.key %]</option>
+	[% END %]
+      </select>
+    </div>
+  </div>
+  [% FOREACH attr_rest IN attrs_rest %]
+  <div id="[% attr_rest.key %]" class="form-group hidden attrs-rest">
+    <label class="col-sm-2 control-label">
+      [% IF schema.item(attr_rest.key) != 1 && 
+         attr_rest.key != rdn &&
+         attr_rest.key != 'userPassword' &&
+         ! attr_rest.key.match('userCertificate') &&
+         attr_rest.key != 'jpegPhoto' %]
+      [% attr_rest.key %]&nbsp;<a class="element-add" href="#" title="add value"><span class="fa fa-plus-square text-success"></span></a>
+      [% ELSE %]
+      [% attr_rest.key %]
+      [% END %]
+    </label>
+    <div class="col-sm-10">
+      [% IF attr_rest.key == 'jpegPhoto' %]
+      <input type="file" class="btn btn-default" name="[% attr_rest.key %]" accept="image/jpeg, image/png"></input>      
+      [% ELSE %]
+      <input type=text value="" name="[% attr_rest.key %]" class="form-control" placeholder="new attribute value to be added">
+      [% END %]
+    </div>
+  </div>
+  [% END %]
+  <hr>
+  
   [% FOREACH attr IN entries %]
   <div class="form-group">
     <label class="col-sm-2 control-label">
@@ -68,8 +105,8 @@
 </form>
 
 <script>
- $(function(){
-   var duplicateElement = function(event, undef){
+ $(function() {
+   var duplicateElement = function(event, undef) {
      var $origin = $(this).parents("label").next().find("p:first");
 
      if (!$origin.length) return !1;
@@ -87,6 +124,28 @@
      return false;
 
    };
+   
    $(".element-add").on("click", duplicateElement);
+
+   $("#aux_attrs_rest").on("change", function(e) {
+     var $this = $(this),
+	 value = $this.val();
+
+     if (!value || !value.length) return;
+     var $form = $this.parents("form");
+     $form.find("div.attrs-rest").addClass("hidden").each(function(index, item) {
+       $(item).find("input:text, input:password, input:file, select, textarea, input:radio, input:checkbox").each(function(id, element) {
+	 $(element).val('')
+		   .removeAttr('checked')
+		   .removeAttr('selected')
+		   .children("option")
+		   .first()
+		   .prop("selected",true);
+       });
+     });
+     $form.find("div#"+value).removeClass("hidden");     
+   });
+
  });
-</script>
+ 
+</script> 
