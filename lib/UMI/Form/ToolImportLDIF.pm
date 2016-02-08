@@ -22,6 +22,7 @@ has '+enctype' => ( default => 'multipart/form-data');
 
 has_field 'file'
   => ( type => 'Upload',
+       wrapper_attr => { id => 'fieldfile', },
        label => 'LDIF File',
        label_class => [ 'col-xs-2' ],
        element_class => [ 'btn', 'btn-default', ],
@@ -32,10 +33,11 @@ has_field 'file'
 
 has_field 'ldif'
   => ( type => 'TextArea',
+       wrapper_attr => { id => 'fieldldif', },
        label => 'LDIF Data',
        label_class => [ 'col-xs-2', ],
        element_wrapper_class => [ 'col-xs-10', 'col-lg-7', ],
-       element_attr => { placeholder => 'LDIF data' },
+       element_attr => { placeholder => 'LDIF data', },
        # cols => 30,
        rows => 20
      );

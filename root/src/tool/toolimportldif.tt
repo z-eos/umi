@@ -6,3 +6,4 @@
 
 [% form.render %]
 
+<script src="/static/js/umi-tool-import.js"></script>

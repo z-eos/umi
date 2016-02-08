@@ -1070,6 +1070,11 @@ sub delr {
       $i++;
     }
 
+    # !!!
+    # her we need to clean all attributes of the different objects which
+    # could contain DN of any object to be deleted
+    # !!!
+    
     my $msg;
     # sorted descending by number of members (leaf nodes last)
     foreach my $key ( sort { @{$HoL{$b}} <=> @{$HoL{$a}} } keys %HoL ) {

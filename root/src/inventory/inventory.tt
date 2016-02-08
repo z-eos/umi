@@ -79,15 +79,16 @@
 
 [% IF form.add_inventory %]
 <script type="text/javascript">
-        /* 
-        --- FORM USED FOR AN EXISTENT DN ------------------------------------------
-        dn for account service to be added to, was selected in searchby form
-        */
+ /* 
+    --- FORM USED FOR AN EXISTENT DN ------------------------------------------
+    dn for account service to be added to, was selected in searchby form
+  */
 
-        $('.addsvcacc').hide(300);
-        $('#compart').addClass('in').addClass('active');
-        $('#common').removeClass('in').removeClass('active');
-        </script>
+ $('.addsvcacc').hide(300);
+ $('#compart').addClass('in').addClass('active');
+ $('#common').removeClass('in').removeClass('active');
+
+</script>
 [% END %]
 
 <script src="/static/js/umi-inventory.js"></script>  
