@@ -92,13 +92,7 @@
 	    [% END %]
 	    [% # -------------------------------------------------------- %]
             <li class="divider"></li>
-            <li class="dropdown-header">Tools:</li>
-            <li>
-	      <a href="[% c.uri_for_action('toolimportldif/index') %]" tabindex="8">
-		<span class="fa fa-fw fa-download text-info"></span>
-		Import
-	      </a>
-	    </li>
+            <li class="dropdown-header">Tools Pub:</li>
             <li>
 	      <a href="[% c.uri_for_action('tooltranslit/index') %]" tabindex="8">
 		<span class="fa fa-fw fa-text-width text-info"></span>
@@ -119,28 +113,12 @@
 	    </li>
             <li class="divider"></li>
 	    [% # -------------------------------------------------------- %]
-            <li class="dropdown-header">Shown to the members of:</li>
-	    [% IF c.check_any_user_role( 'admin', 'acl-w-group' ) %]
+            <li class="dropdown-header">Tools Adm:</li>
+	    [% IF c.check_any_user_role( 'admin' ) %]
             <li>
-	      <a href="#" tabindex="9">
-		<span class="fa fa-fw fa-leaf text-success"></span>
-		admin, acl-w-group
-	      </a>
-	    </li>
-	    [% END %]
-	    [% IF c.check_any_user_role( 'admin', 'coadmin' ) %]
-            <li>
-	      <a href="#" tabindex="10">
-		<span class="fa fa-fw fa-fire text-danger"></span>
-		co/admins
-	      </a>
-	    </li>
-	    [% END %]
-	    [% IF c.check_any_user_role( 'admin', 'acl-w-people' ) %]
-            <li>
-	      <a href="#" tabindex="11">
-		<span class="fa fa-fw fa-money text-info"></span>
-		admin, acl-w-people
+	      <a href="[% c.uri_for_action('toolimportldif/index') %]" tabindex="8">
+		<span class="fa fa-fw fa-download text-info"></span>
+		LDIF Import
 	      </a>
 	    </li>
 	    [% END %]

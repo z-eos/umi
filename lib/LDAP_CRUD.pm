@@ -1239,11 +1239,11 @@ sub ldif {
   use POSIX qw(strftime);
   my $ts = strftime "%Y-%m-%d %H:%M:%S", localtime;
   my $return->{ldif} = sprintf("
-## LDIF export for  \"%s\"
-## Search Scope: \"base\"
-## Search Filter: \"(objectClass=*)\"
+## LDIF export DN: \"%s\"
+##   Search Scope: \"base\"
+##  Search Filter: \"(objectClass=*)\"
 ##
-## LDIF generated on %s, by UMI\n", $dn, $ts);
+## LDIF generated on %s, by UMI user %s\n##\n", $dn, $ts, $self->uid);
 
     my $msg = $self->ldap->search ( base => $dn,
 				    scope => $recursive ? 'sub' : 'base',
