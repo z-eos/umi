@@ -23,44 +23,46 @@
     </div>
     <div id="collapse_personal_data" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_personal_data">
       <div class="panel-body">
-	<div class="col-sm-3 text-right">[% jpegPhoto %]</div>
-	<div class="col-sm-9">
-	  <dl class="dl-horizontal fa-ul">
-	    <li><i>
-	      <span class="fa fa-li fa-user" title="first, last names"></span>
-	      </span>
-	      <em><b>[% auth_obj.givenname %] [% auth_obj.sn %]</b></em>
-	    </i></li>
-	    <li><i>
-	      <span class="fa fa-li fa-sign-in" title="login"></span>
-	      [% auth_obj.uid %]
-	    </i></li>
-	    <li><i>
-	      <span class="fa fa-li fa-black-tie" title="title/position"></span>
-	      [% IF auth_obj.title.size %][% FOREACH i IN auth_obj.title %][% i %]<br>[% END %]
-	      [% ELSE %]
-	      [% auth_obj.title %]
-	      [% END %]
-	    </i></li>
-	    <li><i>
-	      <span class="fa fa-li fa-group" title="group/s user belongs to"></span>
-	      [% FOREACH role IN auth_obj.roles.sort %][% role %]<br>[% END %]
-	    </i></li>
-	    <li><i>
-	      <span class="fa fa-li fa-phone-square" title="phone number/s"></span>
-	      [% IF auth_obj.telephonenumber.size %][% FOREACH i IN auth_obj.telephonenumber %][% i %]<br>[% END %]
-	      [% ELSE %][% auth_obj.telephonenumber %][% END %]
-	    </i></li>
-	    <li><i>
-	      <span class="fa fa-li fa-envelope-square" title="email address/es"></span>
-	      [% IF auth_obj.mail.size %][% FOREACH i IN auth_obj.mail %][% i %]<br>[% END %]
-	      [% ELSE %][% auth_obj.mail %][% END %]
-	    </i></li>
-	  </dl>
+	<div class="media">
+	  <div class="media-left">[% jpegPhoto %]</div>
+	  <div class="media-body">
+	    <dl class="dl-horizontal fa-ul">
+	      <li class="media-heading">
+		<i><span class="fa fa-li fa-user" title="first, last names"></span>
+		<em><b>[% auth_obj.givenname %] [% auth_obj.sn %]</b></em></i>
+	      </li>
+	      <li><i>
+		<span class="fa fa-li fa-sign-in" title="login"></span>
+		[% auth_obj.uid %]
+	      </i></li>
+	      <li><i>
+		<span class="fa fa-li fa-black-tie" title="title/position"></span>
+		[% IF auth_obj.title.size %][% FOREACH i IN auth_obj.title %][% i %]<br>[% END %]
+		[% ELSE %]
+		[% auth_obj.title %]
+		[% END %]
+	      </i></li>
+	      <li><i>
+		<span class="fa fa-li fa-group" title="group/s user belongs to"></span>
+		[% FOREACH role IN auth_obj.roles.sort %][% role %]<br>[% END %]
+	      </i></li>
+	      <li><i>
+		<span class="fa fa-li fa-phone-square" title="phone number/s"></span>
+		[% IF auth_obj.telephonenumber.size %][% FOREACH i IN auth_obj.telephonenumber %][% i %]<br>[% END %]
+		[% ELSE %][% auth_obj.telephonenumber %][% END %]
+	      </i></li>
+	      <li><i>
+		<span class="fa fa-li fa-envelope-square" title="email address/es"></span>
+		[% IF auth_obj.mail.size %][% FOREACH i IN auth_obj.mail %][% i %]<br>[% END %]
+		[% ELSE %][% auth_obj.mail %][% END %]
+	      </i></li>
+	    </dl>
+	  </div>
 	</div>
       </div>
     </div>
   </div>
+    
 
 [% IF orgs.size > 0 %]
 

@@ -96,15 +96,15 @@ sub create_inventory {
     }
   }
 
-  if ( $file_is->{success} eq 'lspci' ) {
-    return $return = { error => $hw->{error} } if defined $hw->{error};
-    return $return = { warning => $hw->{warning} } if defined $hw->{warning};
-  }
+  # if ( $file_is->{success} eq 'lspci' ) {
+  #   return $return = { error => $hw->{error} } if defined $hw->{error};
+  #   return $return = { warning => $hw->{warning} } if defined $hw->{warning};
+  # }
 
-  if ( $file_is->{success} eq 'pciconf' ) {
-    return $return = { error => $hw->{error} } if defined $hw->{error};
-    return $return = { warning => $hw->{warning} } if defined $hw->{warning};
-  }
+  # if ( $file_is->{success} eq 'pciconf' ) {
+  #   return $return = { error => $hw->{error} } if defined $hw->{error};
+  #   return $return = { warning => $hw->{warning} } if defined $hw->{warning};
+  # }
 
   if ( defined $args->{common_FileSMART}->{tempname} ) {
     $file_is = $self->file_is({ file => $args->{common_FileSMART}->{tempname} });
@@ -122,7 +122,7 @@ sub create_inventory {
   # root object DN ( EXAMPLE: composite_srv )
   ($l, $r) = split(/_/, $args->{common_hwType});
   $l = ucfirst $l;
-  if ( $l ne 'Comparts' ) { # comparts has individual DNs
+  # if ( $l ne 'Comparts' ) { # comparts has individual DNs
     $add->{root}->{dn} = sprintf('cn=%s-%s,ou=%s,%s',
 				 $r,
 				 $ldap_crud->last_seq({ base => 'ou=' . $l . ',' . $ldap_crud->{cfg}->{base}->{inventory},
@@ -134,11 +134,11 @@ sub create_inventory {
 
     push @{$add->{root}->{attrs}}, objectClass => $ldap_crud->{cfg}->{objectClass}->{inventory};
     $hwAssignedTo = $add->{root}->{dn};
-  }
+  # }
   
-  #--- Composite start ----------------------------------------------
+  #--- Composite or Single Compart start ----------------------------------------------
   if ( $l eq 'Composite' || $l eq 'Comparts' || $l eq 'Singleboard' ) {
-    if ( defined $hw->{success} ) {
+    if ( defined $hw->{success} ) { # initialized from files
       while ( ( $key, $val ) = each %{$hw->{success}} ) { # ->file_<dmi/lspci/pciconf/smartctl> value processing
 	$i = 0; # number of comparts of each type (number of CPU,RAM, e.t.c.)
 	# CN uniq index calculation
@@ -177,23 +177,23 @@ sub create_inventory {
 	    push @{$return->{success}}, sprintf('%s<br >', $add->{$key}->[$i]->{dn}) ;
 	  }
 
-	  if ( $l ne 'Comparts' ) { # comparts has individual DNs
-	    push @{$add->{root}->{attrs}}, 'hw' . $key => $add->{$key}->[$i]->{dn};
-	  }
+	  # comparts has individual DNs and here, we add them to the root obj
+	  push @{$add->{root}->{attrs}}, 'hw' . $key => $add->{$key}->[$i]->{dn}
+	    if $l ne 'Comparts';
 
 	  $i++;
 	  $j++;
 	}
       }
     }
-    
-    #--- Repeatable field Compart start --------------------------------------
+    #--- Repeatable field Compart start --- ( if any ) -----------------------
     undef $compart;
     foreach my $element ( $self->form->field('compart')->fields ) {
       foreach my $field ( $element->fields ) {
 	next if $field->name eq 'rm-duplicate' || ! defined $field->value;
-	push @{$compart->{ldif}->{attrs}}, $field->name => $field->value;
-	$compart->{ldif}->{hash}->{$field->name} = $field->value;
+	$tmp = $field->name ne 'hwMac' ? $field->value : $self->macnorm({ mac => $field->value });
+	push @{$compart->{ldif}->{attrs}}, $field->name => $tmp;
+	$compart->{ldif}->{hash}->{$field->name} = $tmp;
       }
       next if ! defined $compart->{ldif}->{hash}->{hwType};
       push @{$compart->{ldif}->{attrs}}, objectClass => $ldap_crud->{cfg}->{objectClass}->{inventory};
@@ -224,19 +224,24 @@ sub create_inventory {
       push @{$add->{repeatable}}, $compart;
       delete $compart->{ldif};
     }
-
     #--- Repeatable field Compart stop ----------------------------------------
-    #--- Composite stop -----------------------------------------------
+    
+    #--- Composite or Single Compart stop -----------------------------------------------
   }
 
-  if ( $l ne 'Comparts' ) { # comparts has individual DNs
-    # form `common_*' fields data
-    while ( ( $key, $val ) = each %{$args} ) {
+  # if ( $l ne 'Comparts' ) { # comparts has individual DNs
+    # rest of the root obj attributes (form `common_*' fields data)
+    while ( ( $key, $val ) = each %{$args} ) { p $key; p $val;
       next if $key !~ /common_.*/ || $key =~ /common_File.*/;
       ( $l, $r) = split(/_/, $key);
-      push @{$add->{root}->{attrs}}, $r => $val;
+      
+      $tmp = $r ne 'hwMac' ? $val : $self->macnorm({ mac => $val });
+      $tmp = 'unassigned' if $r eq 'hwAssignedTo' && $val eq '';
+      
+      push @{$add->{root}->{attrs}}, $r => $tmp;
     }
-    # p $add->{root};
+  # p $add; # ->{root};
+  
     $add->{root}->{ldif} = $ldap_crud->add( $add->{root}->{dn}, $add->{root}->{attrs} );
     if ( $add->{root}->{ldif} ) {
       push @{$return->{error}},
@@ -248,8 +253,8 @@ sub create_inventory {
     } else {
       push @{$return->{success}}, sprintf('%s<br >', $add->{root}->{dn}) ;
     }
-  }
-  p $add; # p $return->{warning} = $add;
+  # }
+  # p $add; # p $return->{warning} = $add;
   return $return; # = { success => $add };
 }
 

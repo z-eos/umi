@@ -286,8 +286,10 @@ The standard (IEEE 802) format for printing MAC-48 addresses in
 human-friendly form is six groups of two hexadecimal digits, separated
 by hyphens (-) or colons (:), in transmission order
 (e.g. 01-23-45-67-89-ab or 01:23:45:67:89:ab ) is casted to the twelve
-hexadecimal digits without delimiter. For the examples above it will
-look: 0123456789ab
+hexadecimal digits without delimiter. 
+
+
+For the examples above it will look: 0123456789ab
 
 =over
 

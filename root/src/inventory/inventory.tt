@@ -30,7 +30,7 @@
   <hr class="clear">
   [% END %]
 
-  <ul role="tablist" class="col-xs-1 nav nav-pills nav-stacked" id="myTab">
+  <ul role="tablist" class="col-xs-1 nav nav-pills nav-stacked" id="inventoryTabs">
     <li class="addsvcacc [% IF ! form.add_inventory %]active [% END %]text-left" role="presentation">
       <a aria-controls="common" data-toggle="tab" role="tab"
 	 id="common-tab" href="#common" title="Common Data"

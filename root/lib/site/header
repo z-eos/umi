@@ -215,6 +215,12 @@
 		<span class="[% icon_class %] fa-barcode"></span>&nbsp;by MAC</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
+			value="1" tabindex="19"
+			name="ldapsearch_by_sn"
+			title="filter pattern in Serial Number address">
+		<span class="[% icon_class %] fa-barcode"></span>&nbsp;by S/N</button></li>
+	      <li class="bg-[% color %]">
+		<button type="submit" class="[% menu_item %][% color %]"
 			value="1" tabindex="20"
 			name="ldapsearch_by_telephone"
 			title="filter pattern in telephone number">

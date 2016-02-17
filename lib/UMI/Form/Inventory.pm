@@ -447,10 +447,10 @@ has_field 'common_hwBus'
 has_field 'common_hwMac'
   => ( apply => [ Printable ],
        label => 'MAC', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'common_comparts_ram', ],
+       wrapper_class => [  'hidden', 'relation', 'common_comparts_if', ],
        element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
        element_class => [ 'input-sm', ],
-       element_attr => { placeholder => '44:8a:5b:d4:4e:0f',
+       element_attr => { placeholder => 'e.g. 44:8a:5b:d4:4e:0f or 44-8A-5B-D4-4E-0F (will be normalized to 448a5bd44e0f)',
 			 'data-name' => 'ap',
 			 'data-group' => 'singleboard', },
      );
@@ -863,7 +863,8 @@ has_field 'compart.hwMac'
        wrapper_class => [  'hidden', 'relation', 'comparts_if', ],
        element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
        element_class => [ 'input-sm', ],
-       element_attr => { placeholder => '0a:1b:2c:3d:4e:5f', 'data-name' => 'ap', 'data-group' => 'compart', },
+       element_attr => { placeholder => 'e.g. 44:8a:5b:d4:4e:0f or 44-8A-5B-D4-4E-0F (will be normalized to 448a5bd44e0f)',
+			 'data-name' => 'ap', 'data-group' => 'compart', },
      );
 
 has_field 'compart.hwId'
