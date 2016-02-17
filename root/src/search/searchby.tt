@@ -86,6 +86,8 @@
 	      [% # !!!!!!!!!!!!!!!!!!!! HARDCODE we need to manage it !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! %]
 	      [% ELSIF entry.value.mgmnt.is_dn && entry.key.match('Inventory') && entry.key.split(',').size > 4  %]
 	      [% root_of_rec = entry.key.split(',').slice(-5, -1).0.split('=').1 %]
+	      [% ELSIF entry.key.match('Inventory') && entry.key.split(',').size <= 4  %]
+	      [% root_of_rec = '<span class="fa fa-cube"></span>' %]
 	      [% END %]
 	      
 	      <form role="form" method="POST" action="[% c.uri_for_action('searchby/index') %]">
