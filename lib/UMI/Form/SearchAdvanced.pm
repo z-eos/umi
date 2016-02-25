@@ -3,6 +3,8 @@
 
 package UMI::Form::SearchAdvanced;
 
+use Data::Printer;
+
 use HTML::FormHandler::Moose;
 BEGIN { extends 'UMI::Form::LDAP'; with 'Tools'; }
 

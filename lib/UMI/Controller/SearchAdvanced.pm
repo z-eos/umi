@@ -36,7 +36,7 @@ sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
     if ( defined $c->session->{"auth_uid"} ) {
       my $params = $c->req->params;
-
+    
       $c->stash( template => 'search/search_advanced.tt',
       		 form => $self->form, );
 
@@ -55,11 +55,18 @@ sub index :Path :Args(0) {
 
 sub proc :Path(proc) :Args(0) {
     my ( $self, $c ) = @_;
+    my $params = $c->req->params;
+    use Data::Printer use_prototypes => 1;
+    # p $c->session->{auth_roles};
+    # my %roles = map { $_ => $_ =~ /acl-/ ? 1 : 0  } @{[$c->user->roles]};
+    # my %roles = map { $_ => 1 } @{[$c->user->roles]};
+    # my $is_searchable = $self->is_searchable({ base_dn => $params->{base_dn},
+    # 			     filter => $params->{'search_filter'},
+    # 			     roles => [ $c->user->roles ], });
+    # 			     # roles => \%roles, });
 
     if ( defined $c->user_exists ) {
-      my ( $params, $ldap_crud, $basedn, @filter_arr, $filter, $scope, $sort_order );
-
-      $params = $c->req->params;
+      my ( $ldap_crud, $basedn, @filter_arr, $filter, $scope, $sort_order );
 
       $c->stash( template => 'search/search_advanced.tt',
       		 form => $self->form, );
@@ -72,7 +79,8 @@ sub proc :Path(proc) :Args(0) {
 
       $c->stash( template => 'search/searchby.tt', );
 
-      if ( defined $params->{search_history} && $params->{search_history} eq '1' ) {
+      if ( defined $params->{search_history} && $params->{search_history} eq '1' &&
+	   $c->check_any_user_role( qw/admin coadmin/ ) ) {
 	$basedn = UMI->config->{ldap_crud_db_log};
 	push @filter_arr, '(reqAuthzID=' . $params->{reqAuthzID} . ')' if $params->{reqAuthzID} ne '';
 	push @filter_arr, '(reqDn=' . $params->{reqDn} . ')' if $params->{reqDn} ne '';
@@ -92,11 +100,25 @@ sub proc :Path(proc) :Args(0) {
 	}
 	$scope = 'sub';
 	$sort_order = 'direct';
-      } else {
+      } elsif ( $c->check_any_user_role( qw/admin coadmin/ ) ||
+		$self->is_searchable({ base_dn => $params->{base_dn},
+				       filter => $params->{'search_filter'},
+				       roles => [ $c->user->roles ], }) ) {
 	$basedn = $params->{'base_dn'};
 	$filter = $params->{'search_filter'};
 	$scope = $params->{'search_scope'};
 	$sort_order = 'reverse';
+      } else {
+	$c->stash(
+		  template => 'ldap_err.tt',
+		  final_message => { error
+				     => sprintf('you are not permited to search base dn:
+<h5>&laquo;<b><em>%s</em></b>&raquo;</h5> and/or filter:
+<h5>&laquo;<b><em>%s</em></b>&raquo;</h5>',
+						$params->{'base_dn'},
+						$params->{'search_filter'} ), },
+		 );
+	return 0;
       }
 
       #p $params;

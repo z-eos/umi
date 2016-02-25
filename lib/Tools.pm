@@ -46,11 +46,9 @@ has 'regex' => ( traits => ['Hash'], is => 'ro', isa => 'HashRef', builder => '_
 sub _build_regex {
   my $self = shift;
 
-  return {
-	  sshpubkey => { type => qr/ssh-rsa|ssh-dss|ssh-ed25519|ecdsa-\S+/,
-			 id => "[a-zA-Z_][a-zA-Z0-9_-]+",
-			 base64 => "[A-Za-z0-9+/]", },
-	 }
+  return { sshpubkey => { type => qr/ssh-rsa|ssh-dss|ssh-ed25519|ecdsa-\S+/,
+			  id => "[a-zA-Z_][a-zA-Z0-9_-]+",
+			  base64 => "[A-Za-z0-9+/]", }, }
 }
 
 
@@ -97,8 +95,10 @@ sub utf2lat {
     $return->{'ISO 9'} = $tr->translit( $to_translit );
     $tr = new Lingua::Translit($table);
     $return->{'UMI use ' . $table . ' with non-alphas removed'} = $tr->translit( $to_translit );
-    $return->{'UMI use ' . $table . ' with non-alphas removed'} =~ s/ĭ/j/g;
-    $return->{'UMI use ' . $table . ' with non-alphas removed'} =~ s/ė/e/g;
+    $return->{'UMI use ' . $table . ' with non-alphas removed'} =~ s/ї/i/g;
+    $return->{'UMI use ' . $table . ' with non-alphas removed'} =~ s/є/e/g;
+    $return->{'UMI use ' . $table . ' with non-alphas removed'} =~ s/і/i/g;
+    $return->{'UMI use ' . $table . ' with non-alphas removed'} =~ s/ī/i/g;
     $return->{'UMI use ' . $table . ' with non-alphas removed'} =~ tr/a-zA-Z0-9\,\.\_\-\ \@\#\%\*\(\)\!//cds;
     return $return;
   }
@@ -872,6 +872,46 @@ sub file_smart {
   return $return;
 }
 
+
+=head is_searchable
+
+checking the match of the search filter provided against user roles
+
+user role constructed as `acl-<r/w>-KEYWORD> where KEYWORD is the
+pattern for the match
+
+in other words, if KEYWORD for any of user roles matches the filter,
+the check is successfull
+
+return 1 if match and 0 if not
+
+input parameters are
+
+    base_dn - base DN for check
+    filter  - filter for check
+    skip - pattern to substract from each of the roles of the user
+
+=cut
+
+sub is_searchable {
+  my ($self, $args) = @_;
+  my $arg = { base_dn => $args->{base_dn},
+	      filter => $args->{filter},
+	      skip => $args->{skip} || 'acl-.-',
+	      return => 0, };
+  # my %roles = map { $_ => $_ =~ /$arg->{skip}/ ? 1 : 0  } @{$args->{roles}};
+  my %roles = map { $_ => 1 } @{$args->{roles}};
+  $arg->{roles} = \%roles;
+
+  foreach my $i ((keys %{$arg->{roles}})) {
+    next if $i !~ /$arg->{skip}/is;
+    $arg->{regex} = substr( $i, length $arg->{skip});
+    $arg->{return}++ if $arg->{filter} =~ /$arg->{regex}/is ||
+      $arg->{base_dn} =~ /$arg->{regex}/is;
+  }
+  # p $arg;
+  return $arg->{return};
+}
 
 =head1 AUTHOR
 

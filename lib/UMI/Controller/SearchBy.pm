@@ -84,6 +84,22 @@ sub index :Path :Args(0) {
     
     $params = $c->req->params;
 
+    if ( ! $c->check_any_user_role( qw/admin coadmin/ ) &&
+	 ! $self->is_searchable({ base_dn => $params->{ldapsearch_base},
+				  filter => $params->{'ldapsearch_filter'},
+				  roles => [ $c->user->roles ], }) ) {
+      $c->stash(
+		template => 'ldap_err.tt',
+		final_message => { error
+				   => sprintf('you are not permited to search base dn:
+<h5>&laquo;<b><em>%s</em></b>&raquo;</h5> and/or filter:
+<h5>&laquo;<b><em>%s</em></b>&raquo;</h5>',
+					      $params->{'ldapsearch_base'},
+					      $params->{'ldapsearch_filter'} ), },
+	       );
+      return 0;
+    }
+
     $ldap_crud =
       $c->model('LDAP_CRUD');
 

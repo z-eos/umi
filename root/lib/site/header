@@ -60,6 +60,8 @@
         	Org
 	      </a>
 	    </li>
+	    [% END %]
+	    [% IF c.check_user_roles('admin') || c.check_user_roles('coadmin') || c.check_user_roles('acl-w-inventory')  %]
             <li>
 	      <a href="[% c.uri_for_action('/inventory/index') %]" tabindex="4">
         	<span class="fa fa-fw fa-tags"></span>
