@@ -109,21 +109,26 @@ __PACKAGE__->deny_access_unless_any( "/searchby",            [ qw/admin coadmin 
 __PACKAGE__->deny_access_unless_any( "/searchby/ldif_gen",   [ qw/admin coadmin/ ]);
 __PACKAGE__->deny_access_unless_any( "/searchby/ldif_gen2f", [ qw/admin coadmin/ ]);
 __PACKAGE__->deny_access_unless_any( "/sysinfo",             [ qw/admin/ ]);
-__PACKAGE__->deny_access_unless_any( "/toolpwdgen",          [ qw/admin coadmin employee/ ]);
-__PACKAGE__->deny_access_unless_any( "/toolqr",              [ qw/admin coadmin employee/ ]);
-__PACKAGE__->deny_access_unless_any( "/tooltranslit",        [ qw/admin coadmin employee/ ]);
+
+__PACKAGE__->deny_access_unless_any( "/toolpwdgen",          [ qw/admin coadmin operator employee/ ]);
+__PACKAGE__->deny_access_unless_any( "/toolqr",              [ qw/admin coadmin operator employee/ ]);
+__PACKAGE__->deny_access_unless_any( "/tooltranslit",        [ qw/admin coadmin operator employee/ ]);
+
 __PACKAGE__->deny_access_unless_any( "/toolimportldif",      [ qw/admin/ ]);
 __PACKAGE__->deny_access_unless_any( "/user",                [ qw/admin acl-w-people/ ]);
 __PACKAGE__->deny_access_unless_any( "/userall",             [ qw/admin acl-w-people/ ]);
-__PACKAGE__->allow_access_if( "/user/modpwd",
-			      sub {
-				my ( $c, $action ) = @_;
-				if ( $c->user_exists ) {
-				  die $Catalyst::Plugin::Authorization::ACL::Engine::ALLOWED;
-				} else {
-				  die $Catalyst::Plugin::Authorization::ACL::Engine::DENIED;
-				}
-			      } );
+
+__PACKAGE__
+  ->allow_access_if( "/user/modpwd",
+		     sub {
+		       my ( $c, $action ) = @_;
+		       if ( $c->user_exists ) {
+			 die $Catalyst::Plugin::Authorization::ACL::Engine::ALLOWED;
+		       } else {
+			 die $Catalyst::Plugin::Authorization::ACL::Engine::DENIED;
+		       }
+		     } );
+
 __PACKAGE__->allow_access("/searchby/modify_userpassword");
 
 __PACKAGE__->acl_allow_root_internals;

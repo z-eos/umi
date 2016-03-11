@@ -238,7 +238,8 @@ sub user_preferences :Path(user_prefs) :Args(0) {
     #=================================================================
     # user jpegPhoto
     #
-    $mesg = $ldap_crud->search( { base => sprintf('uid=%s,%s',
+    $mesg = $ldap_crud->search( { base => sprintf('%s=%s,%s',
+						  $ldap_crud->cfg->{rdn}->{acc_root},
 						  $arg->{uid},
 						  $ldap_crud->cfg->{base}->{acc_root}),
 				  scope => 'base', } );

@@ -163,12 +163,13 @@ sub create_account {
 		   $self->form->autologin,
 		   $self->form->namesake );
 
-    my $root_add_dn = sprintf('uid=%s,%s',
+    my $root_add_dn = sprintf('%s=%s,%s',
+			      $ldap_crud->cfg->{rdn}->{acc_root},
 			      $uid,
 			      $ldap_crud->cfg->{base}->{acc_root});
     my $root_add_options =
       [
-       uid => $uid,
+       $ldap_crud->cfg->{rdn}->{acc_root} => $uid,
        userPassword => $pwd->{root}->{ssha},
        telephoneNumber => $args->{person_telephonenumber},
        physicalDeliveryOfficeName => $args->{'person_office'},
@@ -229,7 +230,7 @@ sub create_account {
     $descr = $add_to_obj->exists('description') ?
       $add_to_obj->get_value('description') : 'description has to be here';
 
-    $uid = $add_to_obj->get_value('uid');
+    $uid = $add_to_obj->get_value($ldap_crud->cfg->{rdn}->{acc_root});
   }
   # NEW/ADDITIONAL acoount stop
 
@@ -254,8 +255,7 @@ sub create_account {
 				uid => $uid,
 				authorizedservice => 'mail',
 				associateddomain => $args->{person_associateddomain},
-			       },
-			      );
+			       },);
 
     push @{$final_message->{success}}, $branch->{success} if defined $branch->{success};
     push @{$final_message->{warning}}, $branch->{warning} if defined $branch->{warning};
@@ -341,7 +341,7 @@ sub create_account {
 	$branch =
 	  $ldap_crud
 	  ->create_account_branch ({
-				    uid => $uid,
+				    $ldap_crud->cfg->{rdn}->{acc_root} => $uid,
 				    authorizedservice => $form_field ne 'account' ?
 				    substr($form_field, 10) :
 				    $element->field('authorizedservice')->value,

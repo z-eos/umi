@@ -154,7 +154,12 @@ sub create_inventory {
 	  push @{$add->{$key}->[$i]->{attrs}}, hwType => 'comparts_' . $key;
 
 	  if ( defined $args->{common_hwAssignedTo} && $args->{common_hwAssignedTo} ne '' ) {
-	    push @{$add->{$key}->[$i]->{attrs}}, hwAssignedTo => $args->{common_hwAssignedTo};
+	    push @{$add->{$key}->[$i]->{attrs}},
+	      hwAssignedTo => $args->{common_hwAssignedTo} =~ /.*,$ldap_crud->{cfg}->{base}->{db}/ ?
+	      $args->{common_hwAssignedTo} :
+	      sprintf('uid=%s,ou=People,%s',
+		      $args->{common_hwAssignedTo},
+		      $ldap_crud->{cfg}->{base}->{db});
 	  } elsif ( $hwAssignedTo ne '' ) {
 	    push @{$add->{$key}->[$i]->{attrs}}, hwAssignedTo => $hwAssignedTo;
 	  }

@@ -1,12 +1,15 @@
+# -*- mode: cperl; mode: follow; -*-
+#
+
 package UMI::View::WebJSON;
 
 use strict;
 use base 'Catalyst::View::JSON';
 
 __PACKAGE__->config({
-		     allow_callback  => 1,
-		     callback_param  => 'cb',
-		     expose_stash    => [ qw(success message) ],
+		     # allow_callback  => 1,
+		     # callback_param  => 'cb',
+		     expose_stash    => [ qw( success message ) ],
 		    });
 
 =head1 NAME

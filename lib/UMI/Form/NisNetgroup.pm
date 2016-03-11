@@ -42,7 +42,7 @@ has_field 'descr' => ( type => 'TextArea',
 
 
 has_field 'memberNisNetgroup' => ( type => 'Multiple',
-			   label => 'NisNetgroup Members',
+			   label => 'NisNetgroup Subgroups',
 			   # element_class => [ 'multiselect' ],
 			   # required => 1,
 			 );

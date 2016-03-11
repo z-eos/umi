@@ -44,7 +44,8 @@ sub signin :Path Global {
 			})) {
     $c->session->{auth_obj} = $c->user->attributes('ashash');
     delete $c->session->{auth_obj}->{jpegphoto};
-    $c->session->{auth_uid} = $c->user->uid;
+    # dending of what RDN type is used for auth e.g.uid, cn
+    $c->session->{auth_uid} = eval '$c->user->' . UMI->config->{authentication}->{realms}->{ldap}->{store}->{user_field};
     delete $c->session->{auth_roles};
     push @{$c->session->{auth_roles}}, $c->user->roles;
     $c->cache->set( 'auth_obj', $c->session->{auth_obj} );

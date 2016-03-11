@@ -83,7 +83,19 @@ sub index :Path :Args(0) {
     my $sort_order = 'reverse';
     
     $params = $c->req->params;
+    $ldap_crud = $c->model('LDAP_CRUD');
 
+    if ( defined $params->{'ldapsearch_by_name'} ||
+	 defined $params->{'ldapsearch_by_email'} ||
+	 defined $params->{'ldapsearch_by_jid'} ||
+	 defined $params->{'ldapsearch_by_telephone'} ) {
+      $base = $ldap_crud->cfg->{base}->{acc_root};
+    } elsif ( defined $params->{'ldap_subtree'} && $params->{'ldap_subtree'} ne '' ) {
+      $base = $params->{'ldap_subtree'};
+    } else {
+      $base = $params->{ldapsearch_base};
+    }
+    
     if ( ! $c->check_any_user_role( qw/admin coadmin/ ) &&
 	 ! $self->is_searchable({ base_dn => $params->{ldapsearch_base},
 				  filter => $params->{'ldapsearch_filter'},
@@ -91,17 +103,16 @@ sub index :Path :Args(0) {
       $c->stash(
 		template => 'ldap_err.tt',
 		final_message => { error
-				   => sprintf('you are not permited to search base dn:
+				   => sprintf('You are not allowed to search base dn:
 <h5>&laquo;<b><em>%s</em></b>&raquo;</h5> and/or filter:
-<h5>&laquo;<b><em>%s</em></b>&raquo;</h5>',
+<h5>&laquo;<b><em>%s</em></b>&raquo;</h5>
+
+ask UMI admin for explanation/s.',
 					      $params->{'ldapsearch_base'},
 					      $params->{'ldapsearch_filter'} ), },
 	       );
       return 0;
     }
-
-    $ldap_crud =
-      $c->model('LDAP_CRUD');
 
     if ( $params->{'ldapsearch_filter'} eq '' ) {
       $filter_meta = '*';
@@ -217,7 +228,9 @@ sub index :Path :Args(0) {
       # $tmp = $ldap_crud->canonical_dn_rev ( $_->dn );
       $tmp = $_->dn;
       # !!! HARDCODE how deep dn could be to be considered as root for each type of objects !!!
-      $dn_depth = $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 3 : 5;
+      $dn_depth = $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 3;
+      $dn_depth += split(/,/, $ldap_crud->{cfg}->{base}->{acc_root});
+
       $ttentries->{$tmp}->{'mgmnt'} =
 	{
 	 is_blocked => $mesg->count,
@@ -499,7 +512,7 @@ sub proc :Path(proc) :Args(0) {
 	}
       }
 
-      p $params;
+      # p $params;
 
       $c->stash(
 		template => 'group/group_mod_memberUid.tt',
@@ -1178,7 +1191,7 @@ sub mod_memberUid {
 
 #=====================================================================
 
-=head1 ldif
+=head1 ldif_gen
 
 get LDIF (recursive or not, with or without system data) for the DN
 given
@@ -1194,14 +1207,24 @@ sub ldif_gen :Path(ldif_gen) :Args(0) {
   my $ldif = $c->model('LDAP_CRUD')->
     ldif(
 	 $params->{ldap_ldif},
-	 defined $params->{ldap_ldif_recursive} && $params->{ldap_ldif_recursive} ne '' ? 1 : 0,
-	 defined $params->{ldap_ldif_sysinfo} && $params->{ldap_ldif_sysinfo} ne '' ? 1 : 0
+	 $params->{ldap_ldif_recursive},
+	 $params->{ldap_ldif_sysinfo}
 	);
+        # looks like they are defined always
+	#  defined $params->{ldap_ldif_recursive} && $params->{ldap_ldif_recursive} ne '' ? 1 : 0,
+	#  defined $params->{ldap_ldif_sysinfo} && $params->{ldap_ldif_sysinfo} ne '' ? 1 : 0
+	# );
   $c->stash(
 	    template => 'search/ldif.tt',
 	    final_message => $ldif,
 	   );
 }
+
+=head1 ldif_gen2f
+
+method to download ldif_gen() results as text/plain file
+
+=cut
 
 sub ldif_gen2f :Path(ldif_gen2f) :Args(0) {
   my ( $self, $c ) = @_;
@@ -1209,9 +1232,13 @@ sub ldif_gen2f :Path(ldif_gen2f) :Args(0) {
   my $ldif = $c->model('LDAP_CRUD')->
     ldif(
 	 $params->{ldap_ldif},
-	 defined $params->{ldap_ldif_recursive} && $params->{ldap_ldif_recursive} ne '' ? 1 : 0,
-	 defined $params->{ldap_ldif_sysinfo} && $params->{ldap_ldif_sysinfo} ne '' ? 1 : 0
+	 $params->{ldap_ldif_recursive},
+	 $params->{ldap_ldif_sysinfo}
 	);
+        # looks like they are defined always
+	#  defined $params->{ldap_ldif_recursive} && $params->{ldap_ldif_recursive} ne '' ? 1 : 0,
+	#  defined $params->{ldap_ldif_sysinfo} && $params->{ldap_ldif_sysinfo} ne '' ? 1 : 0
+	# );
 
     $c->stash(
 	      current_view => 'Download',

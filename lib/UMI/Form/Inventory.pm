@@ -1043,38 +1043,38 @@ sub validate {
   ### !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   
-  # my $self = shift;
-  # my (
-  #     $cert,
-  #     $cert_msg,
-  #     $element,
-  #     $elementcmp,
-  #     $err,
-  #     $error,
-  #     $field,
-  #     $is_x509,
-  #     $ldap_crud,
-  #     $login_error_pfx,
-  #     $logintmp,
-  #     $mesg,
-  #     $passwd_acc_filter,
-  #     $a1, $b1, $c1
-  #    );
+  my $self = shift;
+  my (
+      $assignedto,
+      $cert_msg,
+      $element,
+      $elementcmp,
+      $err,
+      $error,
+      $field,
+      $is_x509,
+      $ldap_crud,
+      $login_error_pfx,
+      $logintmp,
+      $mesg,
+      $passwd_acc_filter,
+      $a1, $b1, $c1
+     );
 
-  # $ldap_crud = $self->ldap_crud;
+  $ldap_crud = $self->ldap_crud;
 
-  # if ( defined $self->field('person_givenname')->value && defined $self->field('person_sn')->value ) {
-  #   $self->autologin( lc($self->utf2lat( $self->field('person_givenname')->value ) . '.' .
-  # 			 $self->utf2lat( $self->field('person_sn')->value )));
-  # } else {
-  #   my $autologin_mesg =
-  #     $ldap_crud->search({ scope => 'base',
-  # 			   base => $self->add_svc_acc,
-  # 			   attrs => [ 'givenName', 'sn' ], });
-  #   my $autologin_entry = $autologin_mesg->entry(0);
-  #   $self->autologin( lc($autologin_entry->get_value('givenName') . '.' .
-  # 			 $autologin_entry->get_value('sn') ));
-  # }
+  if ( defined $self->field('common_hwAssignedTo')->value && $self->field('common_hwAssignedTo')->value ne '') {
+    $assignedto = $self->field('common_hwAssignedTo')->value =~ /.*,$ldap_crud->{cfg}->{base}->{db}/ ?
+      $self->field('common_hwAssignedTo')->value :
+      sprintf('uid=%s,ou=People,%s',
+	      $self->field('common_hwAssignedTo')->value,
+	      $ldap_crud->{cfg}->{base}->{db});
+    $mesg =
+      $ldap_crud->search({ scope => 'base',
+  			   base => $assignedto, });
+    $self->field('common_hwAssignedTo')->add_error('No such user exist!')
+      if ! $mesg->count;
+  }
   
   # if ( $self->add_svc_acc eq '' ) {
   #   $mesg =

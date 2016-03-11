@@ -54,6 +54,7 @@ sub index :Path :Args(0) {
     foreach my $key (sort(keys %{$tr})) {
       $final_message->{success} .= sprintf('<dt>%s</dt><dd>%s</dd>', $key, $tr->{"$key"});
     }
+
     $final_message->{success} .= '</dl>';
     $c->stash( final_message => $final_message );
 }
