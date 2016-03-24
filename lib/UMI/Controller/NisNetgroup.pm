@@ -33,7 +33,7 @@ Catalyst Controller.
 
 sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
-    my $params = $c->req->parameters;
+    p my $params = $c->req->parameters;
 
 
     $c->stash( template => 'nis/nisnetgroup.tt',
@@ -71,9 +71,9 @@ sub create_nisnetgroup {
     }
 
     my $netgroup_attrs = [
-		       'objectClass' => $ldap_crud->cfg->{objectClass}->{netgroup},
-		       'description' => $arg->{description},
-		       'memberNisNetgroup' => $memberNisNetgroup,
+			  'objectClass' => $ldap_crud->cfg->{objectClass}->{netgroup},
+			  'description' => $arg->{description},
+			  'memberNisNetgroup' => $memberNisNetgroup,
 			 ];
 
     my $netgroup_triple;
@@ -81,10 +81,10 @@ sub create_nisnetgroup {
     my $b = undef;
     foreach my $element ( $self->form->field('triple')->fields ) {
       foreach ( $element->fields ) {
-	next if $_->name eq 'rm-duplicate';
+	next if $_->name eq 'rm-duplicate' || $_->name eq 'remove';
 	push @{$a}, $_->value;
       }
-      $netgroup_triple = '(' . join(',', @{$a}) . ')';
+      p $netgroup_triple = '(' . join(',', @{$a}) . ')';
       $a = undef;
       push @{$b}, $netgroup_triple if $netgroup_triple ne '(,,)';
     }

@@ -48,7 +48,7 @@ sub about :Path(about) :Args(0) {
 
 sub gitacl_root :Path(gitacl_root) :Args(0) {
     my ( $self, $c ) = @_;
-    $c->stash( template => 'gitacl/gitacl_root.tt', );
+    $c->stash( template => 'gitacl/gitacl_wrap.tt', );
 }
 
 sub dhcp_root :Path(dhcp_root) :Args(0) {

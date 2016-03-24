@@ -4,17 +4,17 @@
 package UMI::Form::NisNetgroup;
 
 use HTML::FormHandler::Moose;
-BEGIN { extends 'UMI::Form::LDAP'; with 'Tools'; }
+BEGIN { extends 'UMI::Form::LDAP';
+	with 'Tools', 'HTML::FormHandler::Render::RepeatableJs'; }
 
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable' );
 
 has '+enctype' => ( default => 'multipart/form-data');
 
 #sub build_form_element_class { [ 'form-horizontal', ] }
-
-sub build_update_subfields {
-  by_flag => { repeatable => { do_wrapper => 1, do_label => 1 } }
-}
+# sub build_update_subfields {
+#   by_flag => { repeatable => { do_wrapper => 1, do_label => 1, controls_div => 1, } }
+# }
 
 sub html_attributes {
   my ( $self, $field, $type, $attr ) = @_;
@@ -27,19 +27,111 @@ sub html_attributes {
   return $attr;
 }
 
+has_field 'aux_dn_form_to_modify' => ( type => 'Hidden', );
+
 has_field 'cn' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
-		    label => 'NisNetgroup Name',
+		    label => 'Name',
 		    # label_class => [ 'h2', ],
 		    element_attr => { placeholder => 'users-allowed-to-fly' },
 		    # wrapper_class => [ 'col-xs-11', 'col-lg-2', ],
 		    required => 1 );
 
 
-has_field 'descr' => ( type => 'TextArea',
+has_field 'description' => ( type => 'TextArea',
 		       label => 'Description',
 		       element_attr => { placeholder => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed dapibus nulla. Mauris vehicula vehicula ligula ac dapibus. Fusce vehicula a turpis sed. ' },
 		       cols => 30, rows => 2);
 
+
+has_field 'aux_delim_triple'
+  => ( type => 'Display',
+       html => '<br><h4>Host-User-Domain Triple/s</h4>',
+     );
+
+has_field 'aux_add_triple'
+  => ( type => 'AddElement',
+       repeatable => 'triple',
+       value => 'Add new triple',
+       element_class => [ 'btn-success', ],
+       # wrapper_class => [ 'col-xs-12', 'col-lg-offset-10', 'col-lg-2', ],
+     );
+
+has_field 'triple'
+  => ( type => 'Repeatable',
+       setup_for_js => 1,
+       do_wrapper => 1,
+       # tags => { controls_div => 1 },
+       element_class => [ 'btn-success', ],
+       element_wrapper_class => [ 'controls', ],
+       # wrapper_attr => { class => [ 'no-has-error', ], },
+       # wrap_repeatable_element_method => \&wrap_triple_elements,
+     );
+# sub wrap_triple_elements {
+#   my ( $self, $input, $subfield ) = @_;
+#   my $output = sprintf('%s%s%s', qq{\n<div class="controls">},
+# 		       $input,
+# 		       qq{</div>});
+# }
+# sub wrap_triple_elements {
+#   my ( $self, $input, $subfield ) = @_;
+#   my $output = sprintf('%s%s%s', ! $subfield ? qq{\n<div class="duplicate">} : qq{\n<div class="duplicated">},
+# 		       $input,
+# 		       qq{</div>});
+# }
+
+has_field 'triple.host'
+  => ( apply => [ NoSpaces, NotAllDigits, Printable ],
+       do_label => 0,
+       label => 'Host',
+       element_attr => { placeholder => 'host01',
+			 'data-name' => 'host',
+			 'data-group' => 'triple', },
+       wrapper_class => [ 'col-xs-11', 'col-lg-3', ],
+     );
+
+has_field 'triple.user'
+  => ( apply => [ NoSpaces, NotAllDigits, Printable ],
+       do_label => 0,
+       label => 'User',
+       element_attr => { placeholder => 'user06',
+			 'data-name' => 'user',
+			 'data-group' => 'triple', },
+       wrapper_class => [ 'col-xs-11', 'col-lg-3', ],
+     );
+
+has_field 'triple.domain'
+  => ( apply => [ NoSpaces, NotAllDigits, Printable ],
+       do_label => 0,
+       label => 'Domain',
+       element_attr => { placeholder => 'foo.bar',
+			 'data-name' => 'domain',
+			 'data-group' => 'triple', },
+       wrapper_class => [ 'col-xs-11', 'col-lg-3', ],
+     );
+
+has_field 'triple.remove'
+  => ( type => 'RmElement',
+       value => 'Remove this triple',
+       element_class => [ 'btn-danger', ],
+       wrapper_class => [ 'col-xs-11', 'col-lg-3', ],
+     );
+
+has_block 'nistriple'
+  => ( tag => 'fieldset',
+       label => '<a href="#" class="btn btn-success btn-sm" data-duplicate="duplicate" title="Duplicate this section">' .
+       '<span class="fa fa-plus-circle fa-lg"></span></a>&nbsp;' .
+       'NIS Netgroup Triple&nbsp;<small class="text-muted"><em>(host,user,domain)</em></small>',
+       render_list => [ 'triple', ],
+       # class => [ 'h6', ],
+       # attr => { id => 'auth',
+       # 		 'aria-labelledby' => "auth-tab",
+       # 	 role => "tabpanel", },
+);
+
+has_field 'aux_delim_memberNisNetgroup'
+  => ( type => 'Display',
+       html => '<br><br><br><br><br><br><h4>NIS Sub Ggoups</h4>',
+     );
 
 has_field 'memberNisNetgroup' => ( type => 'Multiple',
 			   label => 'NisNetgroup Subgroups',
@@ -68,67 +160,6 @@ sub options_memberNisNetgroup {
   }
   return \@memberNisNetgroup;
 }
-
-
-
-has_field 'triple'
-  => ( type => 'Repeatable',
-       do_wrapper => 1,
-       wrapper_attr => { class => 'no-has-error' },
-       wrap_repeatable_element_method => \&wrap_triple_elements,
-     );
-
-has_field 'triple.rm-duplicate'
-  => ( type => 'Display',
-       html => '<div class="rm-duplicate hidden">' .
-       '<a href="#" class="btn btn-danger btn-sm" title="Delete this section"><span class="fa fa-trash-o fa-lg"></span></a></div>',
-     );
-
-has_field 'triple.host'
-  => ( apply => [ NoSpaces, NotAllDigits, Printable ],
-       label => 'Host',
-       element_attr => { placeholder => 'host01',
-			 'data-name' => 'host',
-			 'data-group' => 'triple', },
-       wrapper_class => [ 'col-xs-11', 'col-lg-4', ],
-     );
-
-has_field 'triple.user'
-  => ( apply => [ NoSpaces, NotAllDigits, Printable ],
-       label => 'User',
-       element_attr => { placeholder => 'user06',
-			 'data-name' => 'user',
-			 'data-group' => 'triple', },
-       wrapper_class => [ 'col-xs-11', 'col-lg-4', ],
-     );
-
-has_field 'triple.domain'
-  => ( apply => [ NoSpaces, NotAllDigits, Printable ],
-       label => 'Domain',
-       element_attr => { placeholder => 'foo.bar',
-			 'data-name' => 'domain',
-			 'data-group' => 'triple', },
-       wrapper_class => [ 'col-xs-11', 'col-lg-4', ],
-     );
-
-sub wrap_triple_elements {
-  my ( $self, $input, $subfield ) = @_;
-  my $output = sprintf('%s%s%s', ! $subfield ? qq{\n<div class="duplicate">} : qq{\n<div class="duplicated">},
-		       $input,
-		       qq{</div>});
-}
-
-has_block 'nistriple'
-  => ( tag => 'fieldset',
-       label => '<a href="#" class="btn btn-success btn-sm" data-duplicate="duplicate" title="Duplicate this section">' .
-       '<span class="fa fa-plus-circle fa-lg"></span></a>&nbsp;' .
-       'NIS Netgroup Triple&nbsp;<small class="text-muted"><em>(host,user,domain)</em></small>',
-       render_list => [ 'triple', ],
-       # class => [ 'h6', ],
-       # attr => { id => 'auth',
-       # 		 'aria-labelledby' => "auth-tab",
-       # 	 role => "tabpanel", },
-);
 
 
 has_field 'aux_reset' => ( type => 'Reset',

@@ -1,42 +1,48 @@
 [% META
-   title = 'NisGroup root'
+   title = 'NisGroup'
    link = '<link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">'
 %]
 
 <div class="page-header">
-  <h2>New Group Creation Form <small><em>all stuff</em></small></h2>
+[% IF form.init_object.aux_dn_form_to_modify %]
+<h2>Update Nis Group 2 Form <small><em>[% form.init_object.aux_dn_form_to_modify %]</em></small></h2>
+[% ELSE %]
+<h2>Nis Group 2 Creation Form <small><em>all stuff</em></small></h2>
+[% END %]
 </div>
 
 [% INCLUDE ldap_err.tt %]
 
-<form id="[% form.name %]" method="post" enctype="multipart/form-data">
+[% form.render_repeatable_js %]
 
-  [% form.field('cn').render %]
+[% form.render %]
 
-  [% form.field('descr').render %]
-  <br><br>
-  [% form.block('nistriple').render %]
-  <br><br>
+<!-- <form id="[% form.name %]" method="post" enctype="multipart/form-data">
 
-  [% form.field('memberNisNetgroup').render %]
-  
-  <br><br>
-  <div class="row">
-    [% form.field('aux_reset').render %]
-    [% form.field('aux_submit').render %]
-  </div>
-</form>
+	[% # form.field('aux_dn_form_to_modify').render %]
+	[% # form.field('cn').render %]
 
-<script src="/static/js/umi-user-all.js"></script>
+	[% # form.field('descr').render %]
+	<br><br>
+	[% ## form.block('nistriple').render %]
+	[% # form.field('aux_add_triple').render %]
+	[% # form.field('triple').render %]
+	<br><br>
+
+	[% # form.field('memberNisNetgroup').render %]
+	
+	<br><br>
+	<div class="row">
+	[% # form.field('aux_reset').render %]
+	[% # form.field('aux_submit').render %]
+	</div>
+	</form> -->
+
 <script>
 
 $(function(){
     $('#memberNisNetgroup').multiSelect({
 	keepOrder: true,
-
-	// selectableHeader: "<button type='button' class='btn btn-block btn-info'><span class='glyphicon glyphicon-tags'>&nbsp;</span><b>Available Members</b></button><div class='input-group search-input'><div class='input-group-addon search-input'><span class='glyphicon glyphicon-search'></span></div><input type='text' class='form-control search-input' autocomplete='off' placeholder='try \"um\"'></div></div>",
-
-	// selectionHeader: "<button type='button' class='btn btn-block btn-success'><span class='glyphicon glyphicon-tags'>&nbsp;</span><b>Selected Members</b></button><div class='input-group'><div class='input-group-addon'><span class='glyphicon glyphicon-search'></span></div><input type='text' class='form-control search-input' autocomplete='off' placeholder='try \"adm\"'></div></div>",
 
 	selectableHeader: "<button type='button' class='btn btn-block btn-info'><span class='glyphicon glyphicon-tags'>&nbsp;</span><b>Available Subgroups</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",
 	selectionHeader: "<button type='button' class='btn btn-block btn-success'><span class='glyphicon glyphicon-tags'>&nbsp;</span><b>Selected Subgroups</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",

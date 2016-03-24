@@ -19,7 +19,8 @@
     [% IF entry.value.mgmnt.is_dn && entry.value.mgmnt.is_account %]
     <li>
       <form role="form" method="POST" action="[% c.uri_for_action('searchby/user_preferences') %]">
-	<button type="submit" title="add service account" class="btn btn-link"
+	<button type="submit" class="btn btn-link"
+		title="look user object subtree data"
 		value="[% entry.key %]"
 		data-order="[% site.searchby.menu.order.user_preferences %]"
 		name="user_preferences">
@@ -64,7 +65,8 @@
     </li>
     <li>
       <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
-	<button type="submit" title="modify group" class="btn btn-link"
+	<button type="submit" class="btn btn-link"
+		title="modify group/s user belongs to"
 		value="[% entry.key %]"
 		data-order="[% site.searchby.menu.order.ldap_modify_group %]"
 		name="ldap_modify_group">
@@ -140,8 +142,21 @@
       </button>
     </li>
     <li>
+      <form role="form" method="POST" action="[% c.uri_for_action('searchby/modform') %]">
+	<button type="submit" class="btn btn-link"
+		title="edit form (the one used for object creation)"
+		value="[% entry.key %]"
+		data-order="[% site.searchby.menu.order.ldap_modify %]"
+		name="aux_dn_form_to_modify">
+	  <span class="fa fa-fw fa-edit text-warning"></span>
+	  edit form
+	</button>
+      </form>
+    </li>
+    <li>
       <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
-	<button type="submit" title="edit object" class="btn btn-link"
+	<button type="submit" class="btn btn-link"
+		title="lowlevel LDAP object edit ( allattributes as are )"
 		value="[% entry.key %]"
 		data-order="[% site.searchby.menu.order.ldap_modify %]"
 		name="ldap_modify">
@@ -152,7 +167,8 @@
     </li>
     <li>
       <form role="form" method="POST" action="[% c.uri_for_action('searchby/index') %]">
-	<button type="submit" title="edit object" class="btn btn-link"
+	<button type="submit" class="btn btn-link"
+		title="object changes flow history"
 		value="[% entry.key %]"
 		data-order="[% site.searchby.menu.order.ldap_history %]"
 		name="ldap_history">
@@ -216,7 +232,8 @@
     [% IF entry.value.mgmnt.jpegPhoto %]
     <li>
       <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
-	<button type="submit" title="modify jpegPhoto" class="btn btn-link"
+	<button type="submit" class="btn btn-link"
+		title="change jpegPhoto"
 		value="[% entry.key %]"
 		data-order="[% site.searchby.menu.order.ldap_modify_jpegphoto %]"
 		name="ldap_modify_jpegphoto">

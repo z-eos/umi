@@ -30,9 +30,10 @@
     </div>
   </div>
 </div>
-[% END %]
 <br>
+[% END %]
 [% IF final_message.warning %]
+<br>
 <div class="panel panel-warning">
   <div class="panel-heading clearfix umi-zerro-padding">
     <button type="button" class="close" data-dismiss="alert" aria-label="Close"
@@ -51,8 +52,8 @@
   </div>
 </div>
 [% END %]
-<br>
 [% IF final_message.success %]
+<br>
 <div class="panel panel-success">
   <div class="panel-heading clearfix umi-zerro-padding">
     <h4>&nbsp;&nbsp;<span class="fa fa-check-circle">&nbsp;</span>Success!</h4>
@@ -65,8 +66,8 @@
     </ul>
   </div>
 </div>
-[% END %]
 <br>
+[% END %]
 
 <script>
  $('.chevron_toggleable').on('click', function() {

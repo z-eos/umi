@@ -4,6 +4,7 @@
 package Tools;
 use Moose::Role;
 
+use utf8;
 use Data::Printer;
 use Try::Tiny;
 
@@ -103,6 +104,7 @@ sub utf2lat {
     return $return;
   }
 }
+
 
 sub is_int {
   my ($self, $arg) = @_;

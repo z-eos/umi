@@ -45,7 +45,7 @@ sub index :Path :Args(0) {
       # $c->log->debug( "\$params:\n" . Dumper($params));
 
       # Validate and insert/update database
-      return unless $self->form->process( item_id => $gitacl_create_id,
+      return unless $self->form->process( # item_id => $gitacl_create_id,
 					  posted => ($c->req->method eq 'POST'),
 					  params => $params,
 					  ldap_crud => $c->model('LDAP_CRUD'),

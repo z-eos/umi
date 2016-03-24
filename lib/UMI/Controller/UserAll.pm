@@ -127,16 +127,16 @@ sub create_account {
     $uidNumber = $ldap_crud->last_uidNumber + 1;
 
     $args->{'uid_suffix'} = $self->form->namesake ? $self->form->namesake : '';
-    $args->{'person_givenname'} = $self->utf2lat( $args->{'person_givenname'} )
-      if $self->is_ascii( $args->{'person_givenname'} );
-    $args->{'person_sn'} =  $self->utf2lat( $args->{'person_sn'} )
-      if $self->is_ascii( $args->{'person_sn'} );
+    # $args->{'person_givenname'} = $self->utf2lat( $args->{'person_givenname'} )
+    #   if $self->is_ascii( $args->{'person_givenname'} );
+    # $args->{'person_sn'} =  $self->utf2lat( $args->{'person_sn'} )
+    #   if $self->is_ascii( $args->{'person_sn'} );
     $args->{'person_telephonenumber'} = '666'
       if $args->{'person_telephonenumber'} eq '';
 
     if (defined $args->{'person_description'} && $args->{'person_description'} ne '') {
       $descr = join(' ', $args->{'person_description'});
-      $descr = $self->utf2lat( $descr ) if $self->is_ascii( $descr );
+      # $descr = $self->utf2lat( $descr ) if $self->is_ascii( $descr );
     } else {
       $descr = 'description has to be here';
     }
@@ -167,6 +167,10 @@ sub create_account {
 			      $ldap_crud->cfg->{rdn}->{acc_root},
 			      $uid,
 			      $ldap_crud->cfg->{base}->{acc_root});
+
+    # my $schema = $ldap_crud->schema;
+    # p my $schemattr = $schema->attribute('gecos');
+
     my $root_add_options =
       [
        $ldap_crud->cfg->{rdn}->{acc_root} => $uid,
@@ -182,16 +186,14 @@ sub create_account {
        uidNumber => $uidNumber,
        gidNumber => $ldap_crud->cfg->{stub}->{gidNumber},
        description => $descr,
-       gecos => sprintf('%s %s',
-			$args->{person_givenname},
-			$args->{person_sn}),
+       gecos => $self->utf2lat( sprintf('%s %s',
+					$args->{person_givenname},
+					$args->{person_sn}) ),
        homeDirectory => $ldap_crud->cfg->{stub}->{homeDirectory},
        jpegPhoto => [ $jpeg ],
        loginShell => $ldap_crud->cfg->{stub}->{loginShell},
 
-       title => $self->is_ascii($args->{'person_title'}) ?
-       lc($self->utf2lat($args->{'person_title'})) :
-       lc($args->{'person_title'}),
+       title => lc($args->{'person_title'}),
 
        objectClass => $ldap_crud->cfg->{objectClass}->{acc_root},
       ];
@@ -376,7 +378,9 @@ sub create_account {
 				       ->{$element->field('associateddomain')->value} : '',
 				       $element->field('associateddomain')->value),
 	   uidNumber => $uidNumber,
-	   gecos => sprintf('%s %s', $args->{person_givenname}, $args->{person_sn}),
+	   gecos => $self->utf2lat( sprintf('%s %s',
+					    $args->{person_givenname},
+					    $args->{person_sn}) ),
 	   givenName => $args->{person_givenname},
 	   sn => $args->{person_sn},
 	   telephoneNumber => $args->{person_telephonenumber},

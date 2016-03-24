@@ -11,10 +11,12 @@ use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printabl
 sub build_form_element_class { [ 'form-horizontal', ] }
 
 sub html_attributes {
-  my ( $self, $field, $type, $attr ) = @_;
+  my ( $self, $field, $type, $attr ) = @_; use Data::Printer;
   push @{$attr->{'class'}}, 'required'
     if $type eq 'label' && $field->required;
 }
+
+has_field 'aux_dn_form_to_modify' => ( type => 'Hidden', );
 
 has_field 'aux_parent'
   => (
@@ -23,6 +25,7 @@ has_field 'aux_parent'
       label_class => [ 'col-xs-2', ],
       empty_select => '--- Choose a Parent Office if any ---',
       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+      wrapper_class => [ 'hide4update', ],
       options_method => \&parent_offices,
      );
 
@@ -33,6 +36,20 @@ has_field 'physicalDeliveryOfficeName'
       label_class => [ 'col-xs-2', ],
       label_attr => { title => 'official office name as it is known to the world' },
       element_attr => { placeholder => 'Horns & Hooves LLC' },
+      element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+      required => 1,
+     );
+
+has_field 'associatedDomain'
+  => (
+      apply => [ NotAllDigits, Printable,
+		 { check => qr/^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/,
+		   message => 'Must be valid FQDN' }, ],
+      label => 'associatedDomain',
+      label_class => [ 'col-xs-2', ],
+      label_attr => { title => 'FQDN' },
+      element_attr => { placeholder => 'orgXXX.foo.bar',
+			title => 'FQDN, at least an internal one, something like oXXX.local', },
       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
       required => 1,
      );
@@ -57,10 +74,10 @@ has_field 'telephoneNumber'
      );
 
 has_field 'businessCategory'
-  => ( type => 'Select',
+  => ( type => 'Multiple',
        label => 'Business Category',
        label_class => [ 'col-xs-2', ],
-       element_wrapper_class => [ 'col-xs-5', 'col-lg-3', ],
+       element_wrapper_class => [ 'col-xs-5', 'col-lg-5', ],
        options => [
 		   { value => 'na', label => 'N/A', },
 		   { value => 'it', label => 'IT', },
@@ -160,7 +177,12 @@ has_field 'aux_submit' => (
 
 sub validate {
   my $self = shift;
-
+  # use Data::Printer;
+  # foreach ( $self->fields ) {
+  #   p $_->{name};
+  #   p $self->field($_->{name})->value;
+  # }
+  
   # if ( $self->field('password1')->value ne $self->field('password2')->value ) {
   #   $self->field('password2')->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;password and its confirmation does not match');
   # }

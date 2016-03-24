@@ -71,7 +71,7 @@
 	    [% END %]
 	    [% IF c.check_user_roles('admin') %]
             <li>
-	      <a href="[% c.uri_for_action('gitacl_root') %]" tabindex="5">
+	      <a href="[% c.uri_for_action('gitacl/index') %]" tabindex="5">
         	<span class="fa fa-fw fa-gavel"></span>
         	GitACL
 	      </a>

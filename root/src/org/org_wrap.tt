@@ -1,8 +1,16 @@
 [% META title = 'Org root' %]
 
-<h2>New Org Creation Form <small><em>all stuff</em></small></h2>
+[% IF form.init_object.aux_dn_form_to_modify %]
+<h2>Update Org Form <small><em>[% form.init_object.aux_dn_form_to_modify %]</em></small></h2>
+[% ELSE %]
+<h2>Creation Org Form <small><em>all stuff</em></small></h2>
+[% END %]
 
 [% INCLUDE ldap_err.tt %]
 
 [% form.render %]
+
+[% IF form.init_object.aux_dn_form_to_modify %]
+<script type="text/javascript"> $('.hide4update').hide(300); </script>
+[% END %]
 

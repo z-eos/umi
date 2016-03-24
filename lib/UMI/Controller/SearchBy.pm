@@ -2,6 +2,8 @@
 #
 
 package UMI::Controller::SearchBy;
+
+use utf8;
 use Moose;
 use namespace::autoclean;
 
@@ -52,6 +54,7 @@ has 'form_add_svc_acc' => ( isa => 'UMI::Form::AddServiceAccount', is => 'rw',
 			    lazy => 1, default => sub { UMI::Form::AddServiceAccount->new },
 			    documentation => q{Form to add service account},
 			  );
+
 
 
 =head1 NAME
@@ -244,8 +247,14 @@ ask UMI admin for explanation/s.',
 	 userDhcp => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ &&
 	 scalar split(',', $tmp) <= 3 ? 1 : 0,
 	};
+
+      my $to_utf_decode;
       foreach $attr (sort $_->attributes) {
-	$ttentries->{$tmp}->{attrs}->{$attr} = $_->get_value( $attr, asref => 1 );
+	
+	$to_utf_decode = $_->get_value( $attr, asref => 1 );
+	map { utf8::decode($_); $_} @{$to_utf_decode};
+	$ttentries->{$tmp}->{attrs}->{$attr} = $to_utf_decode;
+	
 	if ( $attr eq 'jpegPhoto' ) {
 	  use MIME::Base64;
 	  $ttentries->{$tmp}->{attrs}->{$attr} =
@@ -271,6 +280,7 @@ ask UMI admin for explanation/s.',
     my @ttentries_keys = $sort_order eq 'reverse' ?
       map { scalar reverse } sort map { scalar reverse } keys %{$ttentries} :
       sort { lc $a cmp lc $b } keys %{$ttentries};
+
     # p $ttentries;
     # p $ldap_crud->schema_attr_equality;
     $c->stash(
@@ -310,18 +320,15 @@ sub proc :Path(proc) :Args(0) {
   if ( defined $c->user_exists ) {
     my $params = $c->req->parameters;
 
-#=====================================================================
-# Modify (all fields form)
-#=====================================================================
-      if (defined $params->{'ldap_modify'} &&
-	     $params->{'ldap_modify'} ne '') {
+    my ($ldap_crud, $mesg, $return, $attr, $entry_tmp, $entry);
+    $ldap_crud = $c->model('LDAP_CRUD');
 
-      my ($return, $attr, $entry_tmp, $entry);
-      my $ldap_crud = $c->model('LDAP_CRUD');
-      
-      # p $ldap_crud->obj_schema({ dn => $params->{ldap_modify} });
+    #=====================================================================
+    # Modify (all fields form)
+    #=====================================================================
+      if (defined $params->{'ldap_modify'} && $params->{'ldap_modify'} ne '') {
 
-      my $mesg = $ldap_crud->search( { dn => $params->{ldap_modify} } );
+      $mesg = $ldap_crud->search( { dn => $params->{ldap_modify} } );
       $return->{error} = $ldap_crud->err( $mesg )->{html} if ! $mesg->count;
       $entry_tmp = $mesg->entry(0);
       foreach $attr ( $entry_tmp->attributes ) {
@@ -340,6 +347,7 @@ sub proc :Path(proc) :Args(0) {
 	#   $entry->{$attr} = '*' x 8;
 	} else {
 	  $entry->{$attr} = $entry_tmp->get_value($attr, asref => 1);
+	  map { utf8::decode($_),$_ } @{$entry->{$attr}};
 	}
       }
       my $schema = $ldap_crud->obj_schema( { dn => $params->{ldap_modify} } );
@@ -379,6 +387,7 @@ sub proc :Path(proc) :Args(0) {
 		final_message => $return,
 		rdn => (split('=', (split(',', $params->{ldap_modify}))[0]))[0],
 	       );
+
 
 #=====================================================================
 # Modify Groups
@@ -1320,7 +1329,7 @@ sub modify :Path(modify) :Args(0) {
       $params->{jpegPhoto} = $c->req->upload('jpegPhoto');
     }
 
-    $val = $params->{$attr};
+    $val  = $params->{$attr};
     $orig = $entry->get_value($attr);
     
     # SMARTMATCH: recurse on paired elements of ARRAY1 and ARRAY2
@@ -1330,11 +1339,15 @@ sub modify :Path(modify) :Args(0) {
 
     # removing all empty array elements if any
     if ( ref($val) eq "ARRAY" ) {
-      @{$val} = map { $self->is_ascii($_) ? $self->utf2lat($_) : $_ } grep { $_ ne '' } @{$val};
+      @{$val} = reverse map { $self->is_ascii($_) &&
+			$attr ne 'givenName' && $attr ne 'sn' && $attr ne 'description'	?
+			$self->utf2lat($_) : $_ } grep { $_ ne '' } @{$val};
     } elsif ( $val ne '' && defined $entry->get_value($attr) && $val ne $entry->get_value($attr) ) {
-      $val = $self->utf2lat($val) if $self->is_ascii($val);
+      $val = $self->utf2lat($val) if $self->is_ascii($val) &&
+	$attr ne 'givenName' && $attr ne 'sn' && $attr ne 'description';
     }
 
+    # what to do or to not to do?
     if ( $val eq '' && defined $entry->get_value($attr) ) {
       push @{$delete}, $attr => [];
     } elsif ( $val ne '' && ! defined $entry->get_value($attr) ) {
@@ -1379,6 +1392,144 @@ sub modify :Path(modify) :Args(0) {
   $c->stash( template => 'search/modify.tt', # stub.tt',
 	     params => $params,
 	     final_message => $return, );
+}
+
+
+#=====================================================================
+
+=head1 modform
+
+modify form as it is (reuse of add)
+
+=cut
+
+
+sub modform :Path(modform) :Args(0) {
+  my ( $self, $c ) = @_;
+  my $params = $c->req->parameters;
+  my ( $return, $form, $arg, $init_obj, $tmp, $i );
+
+  $arg->{dn} = $params->{aux_dn_form_to_modify};
+  
+  my $ldap_crud = $c->model('LDAP_CRUD');
+
+  my $mesg = $ldap_crud->search( { dn => $arg->{dn} } );
+  $return->{error} = $ldap_crud->err( $mesg )->{html} if ! $mesg->count;
+  my $entry = $mesg->entry(0);
+
+  my ( $attr, $triple, $domain, $host, $user );
+  foreach $attr ( $entry->attributes ) {
+    next if $attr eq 'objectClass';
+    $tmp = $entry->get_value( $attr, asref => 1 );
+    map { utf8::decode($_); $_} @{$tmp};
+    $init_obj->{$attr} = $#{$tmp} > 0 ? $tmp : $tmp->[0];
+  }
+  $init_obj->{aux_dn_form_to_modify} = $params->{aux_dn_form_to_modify};
+
+  ####################################################################
+  # TARGETS TO MODIFY
+  ####################################################################
+  if ( $params->{aux_dn_form_to_modify} =~ /$ldap_crud->{cfg}->{base}->{acc_root}/ ) { ## ACCOUNTS
+    $return->{success} = 'Form to be edited is account';
+    
+  } elsif ( $params->{aux_dn_form_to_modify} =~ /$ldap_crud->{cfg}->{base}->{gitacl}/ ) { ## GITACLs
+    @{$init_obj->{gitAclOp_arr}} = split(//, $init_obj->{gitAclOp});
+    $init_obj->{gitAclOp} = $init_obj->{gitAclOp_arr};
+    delete $init_obj->{gitAclOp_arr};
+    ( $init_obj->{gitAclUser}, $init_obj->{gitAclUser_cidr} ) = split(/@/, $init_obj->{gitAclUser});
+    if ( $init_obj->{gitAclUser} !~ /^%/ ) {
+      $init_obj->{gitAclUser_user} = $init_obj->{gitAclUser};
+    } else {
+      $init_obj->{gitAclUser_group} = $init_obj->{gitAclUser};
+    }
+    delete $init_obj->{gitAclUser};
+
+    use UMI::Form::GitACL;
+    $form = UMI::Form::GitACL->new( init_object => $init_obj, );
+    $return->{warning} = 'js has to be refactoried!!!';
+    $c->stash( template => 'gitacl/gitacl_wrap.tt',
+	       final_message => $return, );
+
+  } elsif ( $params->{aux_dn_form_to_modify} =~ /$ldap_crud->{cfg}->{base}->{netgroup}/ ) { ## NIS NETGROUPS
+    if ( ref($init_obj->{nisNetgroupTriple}) eq 'ARRAY' ) {
+      $init_obj->{nisNetgroupTriple_arr} = $init_obj->{nisNetgroupTriple};
+    } else {
+      push @{$init_obj->{nisNetgroupTriple_arr}}, $init_obj->{nisNetgroupTriple};
+    }
+
+    foreach $triple ( @{$init_obj->{nisNetgroupTriple_arr}} ) {
+      # according the order of LDAP attr nisNetgroupTriple value
+      ( $host, $user, $domain ) = split(/,/, $triple);
+      push @{$init_obj->{triple}},
+	{ host => substr($host, 1),
+	  user => $user,
+	  domain => substr($domain, 0, -1), };
+    }
+    delete $init_obj->{nisNetgroupTriple_arr};
+    delete $init_obj->{nisNetgroupTriple};
+
+    use UMI::Form::NisNetgroup;
+    $form = UMI::Form::NisNetgroup->new( init_object => $init_obj, );
+    $c->stash( template => 'nis/nisnetgroup.tt', );
+    
+  } elsif ( $params->{aux_dn_form_to_modify} =~ /$ldap_crud->{cfg}->{base}->{org}/ ) { ## ORGANIZATIONs
+    use UMI::Form::Org;
+    $form = UMI::Form::Org->new( init_object => $init_obj, );
+    $c->stash( template => 'org/org_wrap.tt', );
+  } else { ## REST
+    $return->{success} = 'Form to be edited is general all fields form';
+  }
+  p $init_obj; # p $form; # ->{index};
+  $c->stash( form => $form, );
+  
+  # first run (coming from searchby)
+  if ( keys %{$params} == 1 ) {
+    return unless $form
+      ->process( ldap_crud => $c->model('LDAP_CRUD'), );
+  } else {
+    return unless $form
+      ->process( posted => ($c->req->method eq 'POST'),
+		 params => $params,
+		 ldap_crud => $c->model('LDAP_CRUD'), );
+  }
+
+  $arg->{rpl} = [];
+  foreach my $ff ( $form->fields ) {
+    next if ! defined $ff->value ||
+      $ff->name =~ /aux_/ ||
+      defined $init_obj->{$ff->name} && $ff->value eq $init_obj->{$ff->name};
+
+    # the object to modify is NisNetgroup object and current field is tripple and it is not empty
+    if ( $form->field('aux_dn_form_to_modify')->value =~ /$ldap_crud->{cfg}->{base}->{netgroup}/ &&
+	 $ff->name eq 'triple' && $ff->value ) {
+      my $triple;
+      foreach ( @{$ff->value} ) {
+	push @{$triple}, sprintf('(%s,%s,%s)', $_->{host}, $_->{user}, $_->{domain});
+      }
+      push @{$arg->{rpl}}, nisNetgroupTriple => $triple;
+    } else {
+      push @{$arg->{rpl}}, $ff->name => $ff->value if $ff->value ne 'na' && $ff->value ne '';
+    }
+    
+    push @{$arg->{rpl}}, $ff->name => [] if $ff->value eq ''
+      && defined $init_obj->{$ff->name}
+      && $init_obj->{$ff->name} ne '';
+    
+  }
+  push @{$arg->{changes}}, replace => $arg->{rpl};
+  
+  p $arg;
+  
+  if ( $#{$arg->{rpl}} > 0 ) {
+    my $chg = $ldap_crud->modify( $arg->{dn}, $arg->{changes} );
+    if ( $chg eq '0' ) {
+      $return->{success} = "$arg->{dn} was changed";
+    } else {
+      $return->{error} = $chg;
+    }
+  }
+
+  $c->stash( final_message => $return, );
 }
 
 

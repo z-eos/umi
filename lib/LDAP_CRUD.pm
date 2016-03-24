@@ -10,6 +10,7 @@ use Data::Printer  colored => 1;
 
 BEGIN { with 'Tools'; }
 
+use utf8;
 use Net::LDAP;
 use Net::LDAP::LDIF;
 use Net::LDAP::Control;
@@ -96,6 +97,17 @@ sub _build_cfg {
 	  exclude_prefix => 'aux_',
 	  sizelimit => 50,
 	  translit => "ALA-LC RUS",
+	  translit_no => {
+			  description => 1,
+			  givenName => 1,
+			  l => 1,
+			  postalAddress => 1,
+			  registeredAddress => 1,
+			  sn => 1,
+			  st => 1,
+			  streen => 1,
+			  title => 1,
+			 },
 	  
 	  #=====================================================================
 	  ##
@@ -1244,12 +1256,12 @@ sub modify {
   my ($self, $dn, $changes ) = @_;
   my ( $return, $msg );
   if ( ! $self->dry_run ) {
-    $msg = $self->ldap->modify ( $dn, changes => $changes, ); p $dn; p $changes;
+    $msg = $self->ldap->modify ( $dn, changes => $changes, );
     if ($msg->is_error()) {
-      $return = $self->err( $msg );
+      $return = $self->err( $msg )->{html};
     } else { $return = 0; }
   } else { $return = $msg->ldif; }
-  p $return;
+  p $dn; p $changes; p $return;
   return $return;
 }
 
@@ -1534,6 +1546,7 @@ sub obj_schema {
 	     'single-value' => $must->{'single-value'} || undef,
 	     'max_length' => $must->{'max_length'} || undef,
 	     'equality' => $must->{'equality'} || undef,
+	     'syntax' => $must->{'syntax'} || undef,
 	     # 'attribute' => $self->schema->attribute($must->{'name'}) || undef,
 	    };
 	# $obj_schema->{$entry->dn}->{'equality'}->{$must->{'name'}} =
@@ -1549,6 +1562,7 @@ sub obj_schema {
 	     'single-value' => $may->{'single-value'} || undef ,
 	     'max_length' => $may->{'max_length'} || undef ,
 	     'equality' => $may->{'equality'} || undef ,
+	     'syntax' => $may->{'syntax'} || undef,
 	     # 'attribute' => $self->schema->attribute($may->{'name'}) || undef,
 	    };
 	# $obj_schema->{$entry->dn}->{'equality'}->{$may->{'name'}} =
@@ -1720,23 +1734,21 @@ sub params2attrs {
     #
     ## TODO
     ## to add multivalue fields processing
-    ## to process uplod fields
-    $val = $self->is_ascii( $arg->{'params'}->{$key} ) ?
-      $self->utf2lat( $arg->{'params'}->{$key} ) :
-	$arg->{'params'}->{$key};
+    ## to process upload fields
+    $val = $self->is_ascii( $arg->{params}->{$key} ) &&
+      ! $self->{cfg}->{translit_no}->{$key} ?
+      $self->utf2lat( $arg->{params}->{$key} ) : $arg->{params}->{$key};
 
     # build DN for org
-    if ( $arg->{'type'} eq 'org' && $key eq 'ou' ) {
+    if ( $arg->{type} eq 'org' && $key eq 'ou' ) {
       $dn = sprintf('%s=%s,%s', $key, $val, $base);
     }
 
     push @{$attrs}, $key => $val;
   }
   # warn 'attributes prepared, dn: ' . $dn . '; $attrs:' . Dumper($attrs);
-  return {
-	  dn => $dn,
-	  attrs => $attrs
-	 };
+  return { dn => $dn,
+	   attrs => $attrs };
 }
 
 =head2 dhcp_lease
@@ -1968,7 +1980,7 @@ sub _build_select_organizations {
 			   attrs => [ qw(ou physicaldeliveryofficename l) ],
 			   sizelimit => 0
 			  });
-    my @branchOffices = $mesg->entries;
+    my @branchOffices = $mesg->sorted( 'ou' );
     foreach my $branchOffice (@branchOffices) {
       push @branches, {
 		       value => $branchOffice->dn,
@@ -2264,7 +2276,7 @@ sub create_account_branch_leaf {
       login => $args->{login},
       password => $args->{password},
       description => $args->{description} || 'no description yet',
-      gecos => sprintf('%s %s', $args->{givenName}, $args->{sn}),
+      gecos => $self->utf2lat( sprintf('%s %s', $args->{givenName}, $args->{sn}) ),
       telephoneNumber => $args->{telephoneNumber} || '666',
       jpegPhoto => $args->{jpegPhoto} || undef,
 	     
@@ -2319,7 +2331,7 @@ p $arg;
 			  sn => $arg->{sn},
 			  uidNumber => $arg->{uidNumber},
 			  loginShell => $self->cfg->{stub}->{loginShell},
-			  gecos => sprintf('%s %s', $args->{givenName}, $args->{sn}),
+			  gecos => $self->utf2lat( sprintf('%s %s', $args->{givenName}, $args->{sn}) ),
 			  description => $arg->{description} ne '' ? $arg->{description} :
 			  sprintf('%s: %s @ %s', uc($arg->{service}), $arg->{'login'}, $arg->{associatedDomain}),
 			 ];

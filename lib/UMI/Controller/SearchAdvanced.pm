@@ -173,8 +173,14 @@ sub proc :Path(proc) :Args(0) {
 	   userDhcp => $_->dn =~ /.*,$ldap_crud->cfg->{base}->{acc_root}/ &&
 	   scalar split(',', $_->dn) <= 3 ? 1 : 0,
 	  };
+
+	my $to_utf_decode;
 	foreach $attr (sort $_->attributes) {
-	  $ttentries->{$_->dn}->{attrs}->{$attr} = $_->get_value( $attr, asref => 1 );
+
+	  $to_utf_decode = $_->get_value( $attr, asref => 1 );
+	  map { utf8::decode($_); $_} @{$to_utf_decode};
+	  $ttentries->{$_->dn}->{attrs}->{$attr} = $to_utf_decode;
+
 	  if ( $attr eq 'jpegPhoto' ) {
 	    use MIME::Base64;
 	    $ttentries->{$_->dn}->{attrs}->{$attr} =

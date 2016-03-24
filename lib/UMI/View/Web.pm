@@ -1,6 +1,7 @@
 package UMI::View::Web;
 
 use strict;
+use utf8;
 use base 'Catalyst::View::TT';
 
 __PACKAGE__->config(
@@ -14,7 +15,7 @@ __PACKAGE__->config(
 		    TIMER        => 0,
 		    render_die   => 1,
 		    EVAL_PERL    => 1,
-		    ENCODING     => 'utf-8',
+		    ENCODING     => 'utf8',
 		    expose_methods => [ qw{ helper_cfg } ],
 		   );
 
