@@ -484,16 +484,20 @@ sub proc :Path(proc) :Args(0) {
 #=====================================================================
     } elsif ( defined $params->{'ldap_modify_memberUid'} &&
 	      $params->{'ldap_modify_memberUid'} ne '') {
+      
+      $c->stash( template => 'group/group_mod_memberUid.tt',
+		 form => $self->form_mod_memberUid, );
 
-      my $init_obj;
       my $ldap_crud = $c->model('LDAP_CRUD');
-      if ( ! defined $params->{memberUid} ) {
-	my ( @memberUid, $return );
+      
+      # first run (coming from searchby)
+      if ( keys %{$params} == 1 ) {
+	my $init_obj = { ldap_modify_memberUid => $params->{ldap_modify_memberUid} };
+	my $return;
 	my $mesg = $ldap_crud
-	  ->search({
-		    base => $params->{ldap_modify_memberUid},
-		    attrs => ['memberUid'],
-		   });
+	  ->search({ base => $params->{ldap_modify_memberUid},
+		     attrs => ['memberUid'],
+		     sizelimit => 0,});
 
 	push @{$return->{error}}, $ldap_crud->err($mesg)->{html}
 	  if $mesg->code ne '0';
@@ -501,32 +505,26 @@ sub proc :Path(proc) :Args(0) {
 	my @group_memberUids = $mesg->sorted('memberUid');
 
 	foreach ( @group_memberUids ) {
-	  push @{$params->{memberUid}}, $_->get_value('memberUid');
+	  push @{$init_obj->{memberUid}}, $_->get_value('memberUid');
 	}
-      }
 
-      $c->stash( template => 'group/group_mod_memberUid.tt',
-		 form => $self->form_mod_memberUid, );
-
-      # p $params;
-      # first run (coming from searchby)
-      if ( keys %{$params} == 1 ) {
-	p $params;
+	# first run, we just have choosen the group to manage and here we
+	# render it as it is (no params passed, just init_object)
 	return unless $self->form_mod_memberUid
-	  ->process( init_object => $params, );
+	  ->process( init_object => $init_obj,
+		     ldap_crud => $c->model('LDAP_CRUD'),);
       } else {
-	p $params;
+	# all next, after-submit runs
 	return unless $self->form_mod_memberUid
 	  ->process( posted => ($c->req->method eq 'POST'),
 		     params => $params,
 		     ldap_crud => $c->model('LDAP_CRUD'), );
+
+	$c->stash( final_message => $self
+		   ->mod_memberUid( $c->model('LDAP_CRUD'),
+				    { mod_group_dn => $params->{ldap_modify_memberUid},
+				      memberUid => $params->{memberUid}, }), );
       }
-      
-      # p $params;
-      $c->stash( final_message => $self
-		 ->mod_memberUid( $c->model('LDAP_CRUD'),
-				  { mod_group_dn => $params->{ldap_modify_memberUid},
-				    memberUid => $params->{memberUid}, }), );
 
 #=====================================================================
 # Modify GitACL order
