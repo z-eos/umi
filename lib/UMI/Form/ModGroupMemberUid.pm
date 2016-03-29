@@ -23,10 +23,10 @@ has_field 'memberUid' => ( type => 'Multiple',
 
 sub options_memberUid {
   my $self = shift;
-  my ( @memberUid, $return );
 
   return unless $self->ldap_crud;
 
+  my ( @memberUid, $return );
   my $ldap_crud = $self->ldap_crud;
   my $mesg = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{acc_root},
 				   scope => 'one',

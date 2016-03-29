@@ -485,22 +485,18 @@ sub proc :Path(proc) :Args(0) {
     } elsif ( defined $params->{'ldap_modify_memberUid'} &&
 	      $params->{'ldap_modify_memberUid'} ne '') {
 
-      # in general preselected options has to be fed via field value
-      # $params->{memberUid} = [ qw( memberUid0 ... memberUidN) ];
-      #
-      # no submit yet, it is first run
+      my $init_obj;
+      my $ldap_crud = $c->model('LDAP_CRUD');
       if ( ! defined $params->{memberUid} ) {
 	my ( @memberUid, $return );
-	my $ldap_crud = $c->model('LDAP_CRUD');
 	my $mesg = $ldap_crud
 	  ->search({
-		     base => $params->{ldap_modify_memberUid},
-		     attrs => ['memberUid'],
-		    });
+		    base => $params->{ldap_modify_memberUid},
+		    attrs => ['memberUid'],
+		   });
 
-	if ( $mesg->code ne '0' ) {
-	  push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
-	}
+	push @{$return->{error}}, $ldap_crud->err($mesg)->{html}
+	  if $mesg->code ne '0';
 
 	my @group_memberUids = $mesg->sorted('memberUid');
 
@@ -509,42 +505,28 @@ sub proc :Path(proc) :Args(0) {
 	}
       }
 
-      p $params;
+      $c->stash( template => 'group/group_mod_memberUid.tt',
+		 form => $self->form_mod_memberUid, );
 
-      $c->stash(
-		template => 'group/group_mod_memberUid.tt',
-		form => $self->form_mod_memberUid,
-		ldap_modify_memberUid => $params->{'ldap_modify_memberUid'},
-	       );
-
+      # p $params;
       # first run (coming from searchby)
       if ( keys %{$params} == 1 ) {
+	p $params;
 	return unless $self->form_mod_memberUid
-	  ->process( ldap_crud => $c->model('LDAP_CRUD'), );
+	  ->process( init_object => $params, );
       } else {
+	p $params;
 	return unless $self->form_mod_memberUid
 	  ->process( posted => ($c->req->method eq 'POST'),
 		     params => $params,
 		     ldap_crud => $c->model('LDAP_CRUD'), );
       }
-
       
-      # return unless $form->form_mod_memberUid
-      # 	->process(
-      # 		  posted => ($c->req->method eq 'POST'),
-      # 		  params => $params,
-      # 		  ldap_crud => $c->model('LDAP_CRUD'),
-      # 		 );
-
+      # p $params;
       $c->stash( final_message => $self
-		 ->mod_memberUid(
-				 $c->model('LDAP_CRUD'),
-				 {
-				  mod_group_dn => $params->{ldap_modify_memberUid},
-				  memberUid => $params->{memberUid},
-				 }
-				),
-	       );
+		 ->mod_memberUid( $c->model('LDAP_CRUD'),
+				  { mod_group_dn => $params->{ldap_modify_memberUid},
+				    memberUid => $params->{memberUid}, }), );
 
 #=====================================================================
 # Modify GitACL order
@@ -1166,44 +1148,41 @@ modify group members ( memberUid attribute/s )
 
 sub mod_memberUid {
   my ( $self, $ldap_crud, $args ) = @_;
-
-  my $arg = {
+  use Data::Printer;
+  p my $arg = {
 	     mod_group_dn => $args->{mod_group_dn},
 	     memberUid => ref($args->{memberUid}) eq 'ARRAY' ? $args->{memberUid} : [ $args->{memberUid} ],
 	     cn => substr( (split /,/, $args->{mod_group_dn})[0], 3 ),
 	    };
 
   my $return;
-  if ( $self->form_mod_memberUid->validated ) {
+  my ( $memberUid, @memberUid_old );
 
-    my ( $memberUid, @memberUid_old );
+  my $mesg = $ldap_crud->search( { base => $arg->{mod_group_dn},
+				   attrs => ['memberUid'], } );
 
-    my $mesg = $ldap_crud->search( { base => $arg->{mod_group_dn},
-				     attrs => ['memberUid'], } );
+  push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
+    if ! $mesg->count;
 
-    push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
-      if ! $mesg->count;
-
-    foreach ( $mesg->sorted('memberUid') ) {
-      push @memberUid_old, $_->get_value('memberUid');
+  foreach ( $mesg->sorted('memberUid') ) {
+    push @memberUid_old, $_->get_value('memberUid');
+  }
+  my @a = sort @{$arg->{memberUid}};
+  my @b = sort @memberUid_old; p \@b;
+  if ( @a ~~ @b ) {
+    $return->{success} = 'Nothing changed.';
+  } else {
+    foreach (@a) {
+      push @{$memberUid}, 'memberUid', $_ ;
     }
-    my @a = sort @{$arg->{memberUid}};
-    my @b = sort @memberUid_old;
-    if ( @a ~~ @b ) {
-      $return->{success} = 'Nothing changed.';
+    $mesg = $ldap_crud->modify(
+			       $arg->{mod_group_dn},
+			       [ replace => [ memberUid => \@a ] ],
+			      );
+    if ( $mesg ) {
+      push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
     } else {
-      foreach (@a) {
-	push @{$memberUid}, 'memberUid', $_ ;
-      }
-      $mesg = $ldap_crud->modify(
-      				 $arg->{mod_group_dn},
-      				 [ replace => [ memberUid => \@a ] ],
-      				);
-      if ( $mesg ) {
-      	push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
-      } else {
-      	$return->{success} = 'Group was modified.';
-      }
+      $return->{success} = 'Group was modified.';
     }
   }
   return $return;
