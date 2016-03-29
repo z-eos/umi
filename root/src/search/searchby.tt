@@ -1,11 +1,11 @@
 [% META title = 'Search Simple Results' %]
-[% stash.name %]
-
-[% INCLUDE ldap_err.tt %]
+[% # stash.name %]
 
 <h2>
   Search Simple Results<sup><abbr  title="not all objects could be found via predefined search items, to search for all objects use advanced search menu item!" class="initialism"><i class="h6 fa fa-exclamation-triangle text-warning"></i></abbr></sup> &nbsp; <small class="mono">base: [% base_dn %]; &nbsp;&nbsp; filter: [% filter %]</small>
 </h2>
+
+[% INCLUDE ldap_err.tt %]
 
 [% # fa_child = 'fa-circle-thin' %]
 [% # child = '<i class="fa fa-fw ' _ fa_child _ ' text-default"></i>' %]

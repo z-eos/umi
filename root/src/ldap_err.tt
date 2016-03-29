@@ -61,7 +61,7 @@
   <div class="panel-body">
     <ul class="list-unstyled">
       [% FOREACH i IN final_message.success %]
-      <li>[% i %]</li>
+      <li>[% IF i == 1 %]Operation went well![% ELSE %][% i %][% END %]</li>
       [% END %]
     </ul>
   </div>

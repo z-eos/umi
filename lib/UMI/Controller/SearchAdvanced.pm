@@ -8,7 +8,7 @@ use namespace::autoclean;
 BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 
 use UMI::Form::SearchAdvanced;
-use Data::Printer use_prototypes => 0;
+use Data::Printer use_prototypes => 1;
 
 has 'form' => ( isa => 'UMI::Form::SearchAdvanced', is => 'rw',
 		lazy => 1, default => sub { UMI::Form::SearchAdvanced->new },
@@ -56,14 +56,6 @@ sub index :Path :Args(0) {
 sub proc :Path(proc) :Args(0) {
     my ( $self, $c ) = @_;
     my $params = $c->req->params;
-    use Data::Printer use_prototypes => 1;
-    # p $c->session->{auth_roles};
-    # my %roles = map { $_ => $_ =~ /acl-/ ? 1 : 0  } @{[$c->user->roles]};
-    # my %roles = map { $_ => 1 } @{[$c->user->roles]};
-    # my $is_searchable = $self->is_searchable({ base_dn => $params->{base_dn},
-    # 			     filter => $params->{'search_filter'},
-    # 			     roles => [ $c->user->roles ], });
-    # 			     # roles => \%roles, });
 
     if ( defined $c->user_exists ) {
       my ( $ldap_crud, $basedn, @filter_arr, $filter, $scope, $sort_order );
@@ -125,23 +117,18 @@ sub proc :Path(proc) :Args(0) {
       my @attrs = split(/,/, $params->{'show_attrs'});
       $ldap_crud =
 	$c->model('LDAP_CRUD');
-      my $mesg = $ldap_crud->search(
-				    {
+      my $mesg = $ldap_crud->search({
 				     base => $basedn,
 				     filter => $filter,
 				     scope => $scope,
 				     sizelimit => $params->{'search_results'},
 				     attrs => \@attrs,
-				    }
-				   );
+				    });
       my $return;
       $return->{warning} = $ldap_crud->err($mesg)->{html} if ! $mesg->count;
-
       my @entries = $mesg->entries;
 
-      # p @entries;
-
-      my ( $ttentries, $attr, $umilog, $is_blocked, $dn_depth );
+      my ( $ttentries, $attr, $umilog, $dn_depth );
       foreach (@entries) {
 	$umilog = UMI->config->{ldap_crud_db_log};
 	if ( $_->dn !~ /$umilog/ ) {
@@ -153,16 +140,13 @@ sub proc :Path(proc) :Args(0) {
 				     });
 	  $return->{error} .= $ldap_crud->err( $mesg )->{html}
 	    if $mesg->is_error();
-	  $is_blocked = $mesg->count;
-	} else {
-	  $is_blocked = 0;
 	}
 	
 	$dn_depth = $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ? 5 : 3;
 
 	$ttentries->{$_->dn}->{'mgmnt'} =
 	  {
-	   is_blocked => $is_blocked,
+	   is_blocked => $mesg->count,
 	   is_dn => scalar split(',', $_->dn) <= $dn_depth ? 1 : 0,
 	   is_account => $_->dn =~ /.*,$ldap_crud->cfg->{base}->{acc_root}/ ? 1 : 0,
 	   is_group => $_->dn =~ /.*,$ldap_crud->cfg->{base}->{group}/ ? 1 : 0,
@@ -176,7 +160,6 @@ sub proc :Path(proc) :Args(0) {
 
 	my $to_utf_decode;
 	foreach $attr (sort $_->attributes) {
-
 	  $to_utf_decode = $_->get_value( $attr, asref => 1 );
 	  map { utf8::decode($_); $_} @{$to_utf_decode};
 	  $ttentries->{$_->dn}->{attrs}->{$attr} = $to_utf_decode;

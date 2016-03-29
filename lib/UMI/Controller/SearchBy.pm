@@ -82,7 +82,7 @@ sub index :Path :Args(0) {
 
   # if ( defined $c->session->{"auth_uid"} ) {
   if ( defined $c->user_exists ) {
-    my ( $params, $ldap_crud, $filter, $filter_meta, $filter_show, $filter_translitall, $base, $return );
+    my ( $params, $ldap_crud, $filter, $filter_meta, $filter_translitall, $base, $return );
     my $sort_order = 'reverse';
     
     $params = $c->req->params;
@@ -120,23 +120,22 @@ ask UMI admin for explanation/s.',
     if ( $params->{'ldapsearch_filter'} eq '' ) {
       $filter_meta = '*';
     } else {
-      $filter_meta = $self->is_ascii($params->{'ldapsearch_filter'}) ?
-	$self->utf2lat($params->{'ldapsearch_filter'}) : $params->{'ldapsearch_filter'};
+      $filter_meta = $params->{'ldapsearch_filter'};
     }
+    #   $filter_meta = $self->is_ascii($params->{'ldapsearch_filter'}) ?
+    # 	$self->utf2lat($params->{'ldapsearch_filter'}) : $params->{'ldapsearch_filter'};
+    # }
     
     if ( defined $params->{'ldapsearch_by_email'} ) {
       $filter = sprintf("mail=%s", $filter_meta);
-      $filter_show = sprintf("mail=<kbd>%s</kbd>", $filter_meta);
       $base = $ldap_crud->cfg->{base}->{acc_root};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_jid'} ) {
       $filter = sprintf("&(authorizedService=xmpp@*)(uid=*%s*)", $filter_meta);
-      $filter_show = sprintf("&(authorizedService=xmpp@*)(uid=*<kbd>%s</kbd>*)", $filter_meta);
       $base = $ldap_crud->cfg->{base}->{acc_root};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_ip'} ) {
       $filter = sprintf("dhcpStatements=fixed-address %s", $filter_meta);
-      $filter_show = sprintf("dhcpStatements=fixed-address <kbd>%s</kbd>", $filter_meta);
       $base = $ldap_crud->cfg->{base}->{dhcp};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_mac'} ) {
@@ -148,31 +147,16 @@ ask UMI admin for explanation/s.',
 			$self->macnorm({ mac => $filter_meta }),
 			$self->macnorm({ mac => $filter_meta }) );
 
-      $filter_show = sprintf("|(dhcpHWAddress=ethernet <kbd>%s</kbd>)(&(uid=<kbd>%s</kbd>)(authorizedService=802.1*))(&(cn=<kbd>%s</kbd>)(authorizedService=802.1*))(hwMac=<kbd>%s</kbd>)",
-			     $self->macnorm({ mac => $filter_meta, dlm => ':', }),
-			     $self->macnorm({ mac => $filter_meta }),
-			     $self->macnorm({ mac => $filter_meta }),
-			     $self->macnorm({ mac => $filter_meta }) );
-
       $base = $ldap_crud->cfg->{base}->{db};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_name'} ) {
-
-      
       $filter = 
 	sprintf("|(givenName=%s)(sn=%s)(uid=%s)(cn=%s)", $filter_meta, $filter_meta, $filter_meta, $filter_meta);
-      $filter_show =
-	sprintf("|(givenName=<kbd>%s</kbd>)(sn=<kbd>%s</kbd>)(uid=<kbd>%s</kbd>)(cn=<kbd>%s</kbd>)",
-		$filter_meta, $filter_meta, $filter_meta, $filter_meta );
       $base = $ldap_crud->cfg->{base}->{acc_root};
       $params->{'ldapsearch_base'} = $base;
-
-      
     } elsif ( defined $params->{'ldapsearch_by_telephone'} ) {
       $filter = sprintf("|(telephoneNumber=%s)(mobile=%s)(homePhone=%s)",
 			$filter_meta, $filter_meta, $filter_meta);
-      $filter_show = sprintf("|(telephoneNumber=<kbd>%s</kbd>)(mobile=<kbd>%s</kbd>)(homePhone=<kbd>%s</kbd>)",
-			     $filter_meta, $filter_meta, $filter_meta);
       $base = $ldap_crud->cfg->{base}->{acc_root};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_filter'} &&
@@ -181,31 +165,29 @@ ask UMI admin for explanation/s.',
       $base = $params->{'ldapsearch_base'};
     } elsif ( defined $params->{'ldap_subtree'} &&
 	      $params->{'ldap_subtree'} ne '' ) {
-      $filter_show = $filter = 'objectClass=*';
+      $filter = 'objectClass=*';
       $base = $params->{'ldap_subtree'};
     } elsif ( defined $params->{'ldap_history'} &&
 	      $params->{'ldap_history'} ne '' ) {
-      $filter_show = $filter = 'reqDN=' . $params->{'ldap_history'};
+      $filter = 'reqDN=' . $params->{'ldap_history'};
       $sort_order = 'straight';
       $base = UMI->config->{ldap_crud_db_log};
     } else {
       $filter = 'objectClass=*';
-      $filter_show = $filter;
       $base = $params->{'ldapsearch_base'};
     }
 
-    $params->{'filter'} = '(' . $filter_show . ')';
-    my $mesg = $ldap_crud->search(
-				  {
+    $params->{'filter'} = '(' . $filter . ')';
+    my $mesg = $ldap_crud->search({
 				   base => $base,
 				   filter => '(' . $filter . ')',
 				   sizelimit => $ldap_crud->cfg->{sizelimit},
-				  }
-				 );
+				  });
 
     my @entries = $mesg->entries;
     if ( ! $mesg->count ) {
-      if ( $self->is_ascii($params->{'ldapsearch_filter'}) ) {
+      if ( $self->is_ascii($params->{'ldapsearch_filter'}) &&
+	   $params->{'ldapsearch_by_name'} ne 1 ) {
 	$filter_translitall = $self->utf2lat($params->{'ldapsearch_filter'}, 1);
 	push @{$return->{warning}},
 	  $ldap_crud->err($mesg)->{html},
@@ -220,6 +202,8 @@ ask UMI admin for explanation/s.',
 
     my ( $ttentries, $attr, $tmp, $dn_depth );
     foreach (@entries) {
+      # p $ldap_crud->obj_schema({ dn => $_->dn });
+
       $mesg = $ldap_crud->search({
 				  base => $ldap_crud->cfg->{base}->{group},
 				  filter => sprintf('(&(cn=%s)(memberUid=%s))',
@@ -250,11 +234,10 @@ ask UMI admin for explanation/s.',
 
       my $to_utf_decode;
       foreach $attr (sort $_->attributes) {
-	
 	$to_utf_decode = $_->get_value( $attr, asref => 1 );
 	map { utf8::decode($_); $_} @{$to_utf_decode};
 	$ttentries->{$tmp}->{attrs}->{$attr} = $to_utf_decode;
-	
+
 	if ( $attr eq 'jpegPhoto' ) {
 	  use MIME::Base64;
 	  $ttentries->{$tmp}->{attrs}->{$attr} =
@@ -280,17 +263,14 @@ ask UMI admin for explanation/s.',
     my @ttentries_keys = $sort_order eq 'reverse' ?
       map { scalar reverse } sort map { scalar reverse } keys %{$ttentries} :
       sort { lc $a cmp lc $b } keys %{$ttentries};
-
     # p $ttentries;
-    # p $ldap_crud->schema_attr_equality;
     $c->stash(
 	      template => 'search/searchby.tt',
 	      base_dn => $base,
-	      filter => $filter_show,
+	      filter => $filter,
 	      entrieskeys => \@ttentries_keys,
 	      entries => $ttentries,
 	      schema => $ldap_crud->attr_equality,
-	      # entries => \@entries,
 	      services => $ldap_crud->cfg->{authorizedService},
 	      base_ico => $ldap_crud->cfg->{base}->{icon},
 	      final_message => $return,
@@ -390,7 +370,7 @@ sub proc :Path(proc) :Args(0) {
 
 
 #=====================================================================
-# Modify Groups
+# Modify Groups of the user
 #=====================================================================
     } elsif ( defined $params->{'ldap_modify_group'} &&
 	      $params->{'ldap_modify_group'} ne '' ) {
@@ -408,11 +388,20 @@ sub proc :Path(proc) :Args(0) {
 
       my $ldap_crud = $c->model('LDAP_CRUD');
 
+      my $id;
+      if ( $ldap_crud->{cfg}->{rdn}->{acc_root} ne 'uid' ) {
+	my $mesg = $ldap_crud->search( { base => $params->{'ldap_modify_group'},
+					 scope => 'base',
+					 attrs => [ 'uid' ], });
+	push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
+	  if $mesg->code != 0;
+	$id = $mesg->entry(0)->get_value( 'uid' );
+      }
+
       if ( ! defined $params->{groups} && ! defined $params->{aux_submit} ) {
 	my ( $return, $base, $filter, $dn );
-	my $mesg = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{group},
-					 filter => sprintf('memberUid=%s',
-							   substr( (split /,/, $params->{'ldap_modify_group'})[0], 4)),
+	$mesg = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{group},
+					 filter => sprintf('memberUid=%s', $id),
 					 attrs => ['cn'], } );
 	push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
 	  if $mesg->code != 0;
@@ -502,16 +491,15 @@ sub proc :Path(proc) :Args(0) {
       # no submit yet, it is first run
       if ( ! defined $params->{memberUid} ) {
 	my ( @memberUid, $return );
-	my $ldap_crud =
-	  $c->model('LDAP_CRUD');
+	my $ldap_crud = $c->model('LDAP_CRUD');
 	my $mesg = $ldap_crud
-	  ->search( {
+	  ->search({
 		     base => $params->{ldap_modify_memberUid},
 		     attrs => ['memberUid'],
-		    } );
+		    });
 
 	if ( $mesg->code ne '0' ) {
-	  push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html};
+	  push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
 	}
 
 	my @group_memberUids = $mesg->sorted('memberUid');
@@ -521,7 +509,7 @@ sub proc :Path(proc) :Args(0) {
 	}
       }
 
-      # p $params;
+      p $params;
 
       $c->stash(
 		template => 'group/group_mod_memberUid.tt',
@@ -529,12 +517,24 @@ sub proc :Path(proc) :Args(0) {
 		ldap_modify_memberUid => $params->{'ldap_modify_memberUid'},
 	       );
 
-      return unless $self->form_mod_memberUid
-      	->process(
-      		  posted => ($c->req->method eq 'POST'),
-      		  params => $params,
-      		  ldap_crud => $c->model('LDAP_CRUD'),
-      		 );
+      # first run (coming from searchby)
+      if ( keys %{$params} == 1 ) {
+	return unless $self->form_mod_memberUid
+	  ->process( ldap_crud => $c->model('LDAP_CRUD'), );
+      } else {
+	return unless $self->form_mod_memberUid
+	  ->process( posted => ($c->req->method eq 'POST'),
+		     params => $params,
+		     ldap_crud => $c->model('LDAP_CRUD'), );
+      }
+
+      
+      # return unless $form->form_mod_memberUid
+      # 	->process(
+      # 		  posted => ($c->req->method eq 'POST'),
+      # 		  params => $params,
+      # 		  ldap_crud => $c->model('LDAP_CRUD'),
+      # 		 );
 
       $c->stash( final_message => $self
 		 ->mod_memberUid(
@@ -1062,19 +1062,31 @@ sub mod_groups {
 	      groups => $args->{groups},
 	      base => defined $args->{base} ? $args->{base} : $ldap_crud->cfg->{base}->{group},
 	      type => defined $args->{type} ? $args->{type} : 'posixGroup',
-	      is_submit => $args->{is_submit},
-	      uid => substr( (split /,/, $args->{mod_groups_dn})[0], 4 ), };
+	      is_submit => $args->{is_submit}, };
+
+  my ( $mesg, $return);
+  if ( $ldap_crud->{cfg}->{rdn}->{acc_root} ne 'uid' ) {
+    $mesg = $ldap_crud->search( { base => $arg->{obj_dn},
+				     scope => 'base',
+				     attrs => [ 'uid' ], });
+    push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
+      if $mesg->code != 0;
+    $arg->{uid} = $mesg->entry(0)->get_value( 'uid' );
+  } else {
+    $arg->{uid} = substr( (split /,/, $args->{mod_groups_dn})[0], 4 );
+  }
+
   # hash with all selected for add/delete group/s
   if ( ref($arg->{groups}) eq 'ARRAY' ) {
     foreach (@{$arg->{groups}}) { $arg->{groups_sel}->{$_} = 1; }
   }
-  my $return;
-  my $mesg = $ldap_crud->search( { base => $arg->{base},
-				   filter => $arg->{type} eq 'posixGroup' ?
-				   'memberUid=' . $arg->{uid} :
-				   'member=' . $arg->{obj_dn},
-				   sizelimit => 0,
-				   attrs => ['cn'], } );
+  $return;
+  $mesg = $ldap_crud->search( { base => $arg->{base},
+				filter => $arg->{type} eq 'posixGroup' ?
+				'memberUid=' . $arg->{uid} :
+				'member=' . $arg->{obj_dn},
+				sizelimit => 0,
+				attrs => ['cn'], } );
   push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
     if $mesg->code ne '0';
 
@@ -1169,9 +1181,8 @@ sub mod_memberUid {
     my $mesg = $ldap_crud->search( { base => $arg->{mod_group_dn},
 				     attrs => ['memberUid'], } );
 
-    if ( ! $mesg->count ) {
-      push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html};
-    }
+    push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
+      if ! $mesg->count;
 
     foreach ( $mesg->sorted('memberUid') ) {
       push @memberUid_old, $_->get_value('memberUid');
@@ -1179,7 +1190,7 @@ sub mod_memberUid {
     my @a = sort @{$arg->{memberUid}};
     my @b = sort @memberUid_old;
     if ( @a ~~ @b ) {
-      $return->{success}->[0] = 1;
+      $return->{success} = 'Nothing changed.';
     } else {
       foreach (@a) {
 	push @{$memberUid}, 'memberUid', $_ ;
@@ -1189,9 +1200,9 @@ sub mod_memberUid {
       				 [ replace => [ memberUid => \@a ] ],
       				);
       if ( $mesg ) {
-      	push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html};
+      	push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
       } else {
-      	$return->{success}->[0] = 1;
+      	$return->{success} = 'Group was modified.';
       }
     }
   }
@@ -1429,10 +1440,11 @@ sub modform :Path(modform) :Args(0) {
   ####################################################################
   # TARGETS TO MODIFY
   ####################################################################
-  if ( $params->{aux_dn_form_to_modify} =~ /$ldap_crud->{cfg}->{base}->{acc_root}/ ) { ## ACCOUNTS
-    $return->{success} = 'Form to be edited is account';
+  # if ( $params->{aux_dn_form_to_modify} =~ /$ldap_crud->{cfg}->{base}->{acc_root}/ ) { ## ACCOUNTS
+  #   $return->{success} = 'Form to be edited is account';
     
-  } elsif ( $params->{aux_dn_form_to_modify} =~ /$ldap_crud->{cfg}->{base}->{gitacl}/ ) { ## GITACLs
+  # } els
+  if ( $params->{aux_dn_form_to_modify} =~ /$ldap_crud->{cfg}->{base}->{gitacl}/ ) { ## GITACLs
     @{$init_obj->{gitAclOp_arr}} = split(//, $init_obj->{gitAclOp});
     $init_obj->{gitAclOp} = $init_obj->{gitAclOp_arr};
     delete $init_obj->{gitAclOp_arr};
@@ -1477,9 +1489,12 @@ sub modform :Path(modform) :Args(0) {
     $form = UMI::Form::Org->new( init_object => $init_obj, );
     $c->stash( template => 'org/org_wrap.tt', );
   } else { ## REST
-    $return->{success} = 'Form to be edited is general all fields form';
+    $return->{warning} = 'Use &laquo;<i class="fa fa-pencil"></i> <b>edit (all)</b>&raquo; menu item instead, please. For now there is only lowlevel edit form for this type of objects.';
+    $c->stash( template => 'stub.tt',
+	       final_message => $return, );
+    $c->detach();
   }
-  p $init_obj; # p $form; # ->{index};
+  # p $init_obj;		# p $form; # ->{index};
   $c->stash( form => $form, );
   
   # first run (coming from searchby)
@@ -1518,7 +1533,7 @@ sub modform :Path(modform) :Args(0) {
   }
   push @{$arg->{changes}}, replace => $arg->{rpl};
   
-  p $arg;
+  # p $arg;
   
   if ( $#{$arg->{rpl}} > 0 ) {
     my $chg = $ldap_crud->modify( $arg->{dn}, $arg->{changes} );
@@ -1530,6 +1545,7 @@ sub modform :Path(modform) :Args(0) {
   }
 
   $c->stash( final_message => $return, );
+
 }
 
 

@@ -1533,11 +1533,12 @@ sub obj_schema {
 
   my @entries = $mesg->entries;
 
-  my ( $must, $may, $obj_schema, $names );
+  my ( $must, $may, $obj_schema, $names, $syntmp );
   foreach my $entry ( @entries ) {
     foreach my $objectClass ( $entry->get_value('objectClass') ) {
       next if $objectClass eq 'top';
       foreach $must ( $self->schema->must ( $objectClass ) ) {
+	$syntmp = $self->schema->attribute_syntax($must->{'name'});
 	$obj_schema->{$entry->dn}->{$objectClass}->{'must'}
 	  ->{ $must->{'name'} } =
 	    {
@@ -1546,7 +1547,9 @@ sub obj_schema {
 	     'single-value' => $must->{'single-value'} || undef,
 	     'max_length' => $must->{'max_length'} || undef,
 	     'equality' => $must->{'equality'} || undef,
-	     'syntax' => $must->{'syntax'} || undef,
+	     'syntax' => { desc => $syntmp->{desc},
+			   oid =>  $syntmp->{oid}, },
+	     # 'syntax' => $must->{'syntax'} || undef,
 	     # 'attribute' => $self->schema->attribute($must->{'name'}) || undef,
 	    };
 	# $obj_schema->{$entry->dn}->{'equality'}->{$must->{'name'}} =
@@ -1554,6 +1557,7 @@ sub obj_schema {
       }
 
       foreach $may ( $self->schema->may ( $objectClass ) ) {
+	$syntmp = $self->schema->attribute_syntax($may->{'name'});
 	$obj_schema->{$entry->dn}->{$objectClass}->{'may'}
 	  ->{$may->{'name'}} =
 	    {
@@ -1562,7 +1566,9 @@ sub obj_schema {
 	     'single-value' => $may->{'single-value'} || undef ,
 	     'max_length' => $may->{'max_length'} || undef ,
 	     'equality' => $may->{'equality'} || undef ,
-	     'syntax' => $may->{'syntax'} || undef,
+	     'syntax' => { desc => $syntmp->{desc},
+			   oid =>  $syntmp->{oid}, },
+	     # 'syntax' => $may->{'syntax'} || undef,
 	     # 'attribute' => $self->schema->attribute($may->{'name'}) || undef,
 	    };
 	# $obj_schema->{$entry->dn}->{'equality'}->{$may->{'name'}} =

@@ -8,7 +8,7 @@ BEGIN { extends 'UMI::Form::LDAP'; with 'Tools'; }
 
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable' );
 
-has '+item_class' => ( default =>'ModGroupMemberUid' );
+# has '+item_class' => ( default =>'ModGroupMemberUid' );
 has '+action' => ( default => '/searchby/proc' );
 
 # sub build_form_element_class { [ 'form-horizontal' ] }
@@ -30,31 +30,39 @@ sub options_memberUid {
   my $ldap_crud = $self->ldap_crud;
   my $mesg = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{acc_root},
 				   scope => 'one',
-				   attrs => [ qw{uid givenName sn} ], } );
+				   attrs => [ qw{uid givenName sn} ],
+				   sizelimit => 0,} );
 
-  if ( ! $mesg->count ) {
-    push @{$return->{error}}, $ldap_crud->err($mesg);
-  }
+  push @{$return->{error}}, $ldap_crud->err($mesg)
+    if ! $mesg->count;
 
   my @memberUid_all = $mesg->sorted('uid');
 
+  my ( $gn, $sn);
   foreach ( @memberUid_all ) {
-    push @memberUid, { value => $_->get_value('uid'), label => sprintf('%s (%s %s)', $_->get_value('uid'), $_->get_value('givenName'), $_->get_value('sn')), };
+    $gn = $_->get_value('givenName');
+    $sn = $_->get_value('sn');
+    utf8::decode($gn);
+    utf8::decode($sn);
+    push @memberUid, { value => $_->get_value('uid'),
+		       label => sprintf('%s (%s %s)', $_->get_value('uid'), $gn, $sn), };
   }
+
   return \@memberUid;
 }
 
 
 has_field 'aux_reset' => ( type => 'Reset',
 		       label => '',
-		       wrapper_class => [ 'col-xs-1' ],
+		       wrapper_class => [ 'col-xs-4' ],
 		       element_class => [ 'btn', 'btn-danger', 'btn-block', ],
 		       element_wrapper_class => [ 'col-xs-12', ],
 		       value => 'Reset' );
 
 has_field 'aux_submit' => ( type => 'Submit',
-			wrapper_class => [ 'col-xs-11' ],
+			wrapper_class => [ 'col-xs-8' ],
 			element_class => [ 'btn', 'btn-success', 'btn-block', ],
+			   element_wrapper_class => [ 'col-xs-12', ],
 			value => 'Submit' );
 
 # has_block 'submitit' => ( tag => 'fieldset',

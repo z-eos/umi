@@ -3,116 +3,60 @@
    link = '<link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">'
 %]
 
-<!-- <div class="container"> -->
-  <div class="col-md-10">
-    <div class="page-header">
-      <h2>Group Member/s Modification Form <small><em class="mono">for group: [% ldap_modify_memberUid %]</em></small></h2>
-    </div>
+<div class="page-header">
+  <h2>Group Member/s Modification Form <small><em class="mono">for group: [% ldap_modify_memberUid %]</em></small></h2>
+</div>
 
-    [% IF final_message.error %]
-    <div class="panel panel-danger">
-      <div class="panel-heading">
-	<h4><span class="glyphicon glyphicon-exclamation-sign">&nbsp;</span>Error!</h4>
-      </div>
-      <div class="panel-body">
-	<ul>
-	  [% # IF final_message.error.size > 1 %]
-	    [% FOREACH i IN final_message.error %]
-	     [% i %]
-	    [% END %]
-	  [% # ELSE %]
-	    [% # final_message.error %]
-	  [% # END %]
-	</ul>
-      </div>
-    </div>
-    [% ELSIF final_message.success %]
-    <div class="panel panel-success">
-      <div class="panel-heading">
-	<h4><span class="glyphicon glyphicon-ok-sign">&nbsp;</span>Group members successfully modified.</h4>
-      </div>
-      <!-- <div class="panel-body"> -->
-	  [% # final_message.error %]
-      <!-- </div> -->
-    </div>
-    [% END %]
-    [% form.render %]
+[% INCLUDE ldap_err.tt %]
 
-  </div>
-  <div class="col-md-2">
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="[% c.uri_for('/group') %]">
-	  <span class="glyphicon glyphicon-plus-sign text-success"></span>
-	  create</a>
-      </li>
-      <li><a href="#">
-	  <span class="glyphicon glyphicon-edit text-warning"></span>
-	  update</a>
-      </li>
-      <li><a href="#">
-	  <span class="glyphicon glyphicon-edit text-warning"></span>
-	  password</a>
-      </li>
-      <li><a href="#">
-	  <span class="glyphicon glyphicon-remove-sign text-danger"></span>
-	  delete</a>
-      </li>
-    </ul>
-  </div>
-
-<!-- </div> -->
+[% form.render %]
 
 <script>
-
 $(function(){
-    $('#memberUid').multiSelect({
-	keepOrder: true,
+  $('#memberUid').multiSelect({
+    keepOrder: true,
 
-	// selectableHeader: "<button type='button' class='btn btn-block btn-info'><span class='glyphicon glyphicon-tags'>&nbsp;</span><b>Available Members</b></button><div class='input-group search-input'><div class='input-group-addon search-input'><span class='glyphicon glyphicon-search'></span></div><input type='text' class='form-control search-input' autocomplete='off' placeholder='try \"um\"'></div></div>",
+    selectableHeader: "<button type='button' class='btn btn-block btn-info'><span class='glyphicon glyphicon-tags'>&nbsp;</span><b>Available Members</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",
+    selectionHeader: "<button type='button' class='btn btn-block btn-success'><span class='glyphicon glyphicon-tags'>&nbsp;</span><b>Selected Members</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",
 
-	// selectionHeader: "<button type='button' class='btn btn-block btn-success'><span class='glyphicon glyphicon-tags'>&nbsp;</span><b>Selected Members</b></button><div class='input-group'><div class='input-group-addon'><span class='glyphicon glyphicon-search'></span></div><input type='text' class='form-control search-input' autocomplete='off' placeholder='try \"adm\"'></div></div>",
+    // selectableFooter: "<div class='text-info text-center'><em><small>members available</em></small></div>",
+    // selectionFooter: "<div class='text-success text-center'><em><small>members choosen</em></small></div>",
 
-	selectableHeader: "<button type='button' class='btn btn-block btn-info'><span class='glyphicon glyphicon-tags'>&nbsp;</span><b>Available Members</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",
-	selectionHeader: "<button type='button' class='btn btn-block btn-success'><span class='glyphicon glyphicon-tags'>&nbsp;</span><b>Selected Members</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",
+    afterInit: function(ms){
+      var that = this,
+          $selectableSearch = that.$selectableUl.prev(),
+          $selectionSearch = that.$selectionUl.prev(),
+          selectableSearchString = '#'+that.$container.attr('id')+' .ms-elem-selectable:not(.ms-selected)',
+          selectionSearchString = '#'+that.$container.attr('id')+' .ms-elem-selection.ms-selected';
 
-	// selectableFooter: "<div class='text-info text-center'><em><small>members available</em></small></div>",
-	// selectionFooter: "<div class='text-success text-center'><em><small>members choosen</em></small></div>",
+      that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
+				  .on('keydown', function(e){
+				    if (e.which === 40){
+				      that.$selectableUl.focus();
+				      return false;
+				    }
+				  });
 
-	afterInit: function(ms){
-	    var that = this,
-            $selectableSearch = that.$selectableUl.prev(),
-            $selectionSearch = that.$selectionUl.prev(),
-            selectableSearchString = '#'+that.$container.attr('id')+' .ms-elem-selectable:not(.ms-selected)',
-            selectionSearchString = '#'+that.$container.attr('id')+' .ms-elem-selection.ms-selected';
+      that.qs2 = $selectionSearch.quicksearch(selectionSearchString)
+				 .on('keydown', function(e){
+				   if (e.which == 40){
+				     that.$selectionUl.focus();
+				     return false;
+				   }
+				 });
+    },
+    afterSelect: function(){
+      this.qs1.cache();
+      this.qs2.cache();
+    },
+    afterDeselect: function(){
+      this.qs1.cache();
+      this.qs2.cache();
+    }
 
-	    that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
-		.on('keydown', function(e){
-		    if (e.which === 40){
-			that.$selectableUl.focus();
-			return false;
-		    }
-		});
-
-	    that.qs2 = $selectionSearch.quicksearch(selectionSearchString)
-		.on('keydown', function(e){
-		    if (e.which == 40){
-			that.$selectionUl.focus();
-			return false;
-		    }
-		});
-	},
-	afterSelect: function(){
-	    this.qs1.cache();
-	    this.qs2.cache();
-	},
-	afterDeselect: function(){
-	    this.qs1.cache();
-	    this.qs2.cache();
-	}
-
-    });
-});
-
+  });
+ });
 </script>
+
 <script src="/static/js/jquery.multi-select.js" type="text/javascript"></script>
 <script src="/static/js/jquery.quicksearch.js" type="text/javascript"></script>
