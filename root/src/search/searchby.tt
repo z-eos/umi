@@ -73,6 +73,10 @@
       [% lfcl = ' fa-lg umi-2-margin-left' %]
       <tr>
 	<td>
+	  [% num_of_dc = 0 %]
+	  [% FOREACH pat IN entry.key.split(',') %]
+          [% IF pat.match('dc=') %][% num_of_dc = num_of_dc + 1 %][% END %]
+	  [% END %]
 	  <div class="panel-group umi-zerro-margin" id="accordion[% loop.index %]">
 	    [% IF entry.value.mgmnt.is_dn %]<div class="panel panel-info">
 	    [% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]<div class="panel panel-success">
@@ -83,10 +87,10 @@
 
 	      [% IF entry.value.mgmnt.is_dn && entry.key.match('People') %]
 	      [% root_of_rec = entry.value.attrs.givenName.0 _ ' ' _ entry.value.attrs.sn.0 %]
-	      [% # !!!!!!!!!!!!!!!!!!!! HARDCODE we need to manage it !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! %]
-	      [% ELSIF entry.value.mgmnt.is_dn && entry.key.match('Inventory') && entry.key.split(',').size > 4  %]
-	      [% root_of_rec = entry.key.split(',').slice(-5, -1).0.split('=').1 %]
-	      [% ELSIF entry.key.match('Inventory') && entry.key.split(',').size <= 4  %]
+	      [% # !!! HARDCODED customization, depends of DN structure !!! %]
+	      [% ELSIF entry.value.mgmnt.is_dn && entry.key.match('Inventory') && entry.key.split(',').size >  ( 3 + num_of_dc)  %]
+	      [% root_of_rec = entry.key.split(',').slice(-1 * ( 4 + num_of_dc), -1 ).0.split('=').1 %]
+	      [% ELSIF entry.key.match('Inventory') && entry.key.split(',').size <= ( 3 + num_of_dc)  %]
 	      [% root_of_rec = '<span class="fa fa-th-large"></span>' %]
 	      [% END %]
 	      
@@ -94,10 +98,11 @@
 		<button type="submit" class="btn btn-link umi-search visible-lg-block visible-md-block col-xs-1"
 			title="click to open root object of this account"
 			name="ldap_subtree"
+			[% # !!! HARDCODED customization, depends of DN structure !!! %]
 			value="[% IF entry.key.match('People') %]
-			[% entry.key.split(',').slice(-3, -1).join(',') %]
-			[% ELSIF entry.key.match('Inventory') && entry.key.split(',').size > 4 %]
-			[% entry.key.split(',').slice(-5, -1).join(',') %]
+			[% entry.key.split(',').slice(-1 * ( 2 + num_of_dc), -1 ).join(',') %]
+			[% ELSIF entry.key.match('Inventory') && entry.key.split(',').size > ( 3 + num_of_dc) %]
+			[% entry.key.split(',').slice(-1 * ( 4 + num_of_dc), -1 ).join(',') %]
 			[% ELSE %]
 			[% entry.key %]
 			[% END %]">
@@ -107,10 +112,11 @@
 		<button type="submit" class="btn btn-link umi-search visible-xs-block visible-sm-block"
 			title="click to open root object of this account"
 			name="ldap_subtree"
+			[% # !!! HARDCODED customization, depends of DN structure !!! %]
 			value="[% IF entry.key.match('People') %]
-			[% entry.key.split(',').slice(-3, -1).join(',') %]
-			[% ELSIF entry.key.match('Inventory') && entry.key.split(',').size > 4 %]
-			[% entry.key.split(',').slice(-5, -1).join(',') %]
+			[% entry.key.split(',').slice(-1 * ( 2 + num_of_dc), -1 ).join(',') %]
+			[% ELSIF entry.key.match('Inventory') && entry.key.split(',').size > ( 3 + num_of_dc) %]
+			[% entry.key.split(',').slice(-1 * ( 4 + num_of_dc), -1 ).join(',') %]
 			[% ELSE %]
 			[% entry.key %]
 			[% END %]">

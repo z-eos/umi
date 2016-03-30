@@ -486,7 +486,8 @@ sub proc :Path(proc) :Args(0) {
 	      $params->{'ldap_modify_memberUid'} ne '') {
       
       $c->stash( template => 'group/group_mod_memberUid.tt',
-		 form => $self->form_mod_memberUid, );
+		 form => $self->form_mod_memberUid,
+		 groupdn => $params->{ldap_modify_memberUid}, );
 
       my $ldap_crud = $c->model('LDAP_CRUD');
       
@@ -512,7 +513,7 @@ sub proc :Path(proc) :Args(0) {
 	# render it as it is (no params passed, just init_object)
 	return unless $self->form_mod_memberUid
 	  ->process( init_object => $init_obj,
-		     ldap_crud => $c->model('LDAP_CRUD'),);
+		     ldap_crud => $c->model('LDAP_CRUD'), );
       } else {
 	# all next, after-submit runs
 	return unless $self->form_mod_memberUid
