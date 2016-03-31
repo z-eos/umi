@@ -21,7 +21,7 @@
 	[% END %]
 	[% IF final_message.error %]
 	<ul class="list-unstyled">
-	  [% FOREACH i IN final_message.error %]
+	  [% FOREACH i IN final_message.error.sort %]
 	  [% IF i != '' %]<li>[% i %]</li>[% END %]
 	  [% END %]
 	</ul>
@@ -45,7 +45,7 @@
   </div>
   <div class="panel-body">
     <ul class="list-unstyled">
-      [% FOREACH i IN final_message.warning %]
+      [% FOREACH i IN final_message.warning.sort %]
       <li>[% i %]</li>
       [% END %]
     </ul>
@@ -60,7 +60,7 @@
   </div>
   <div class="panel-body">
     <ul class="list-unstyled">
-      [% FOREACH i IN final_message.success %]
+      [% FOREACH i IN final_message.success.sort %]
       <li>[% IF i == 1 %]Operation went well![% ELSE %][% i %][% END %]</li>
       [% END %]
     </ul>

@@ -401,8 +401,9 @@ sub proc :Path(proc) :Args(0) {
       if ( ! defined $params->{groups} && ! defined $params->{aux_submit} ) {
 	my ( $return, $base, $filter, $dn );
 	$mesg = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{group},
-					 filter => sprintf('memberUid=%s', $id),
-					 attrs => ['cn'], } );
+				      filter => sprintf('memberUid=%s', $id),
+				      sizelimit => 0,
+				      attrs => ['cn'], } );
 	push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
 	  if $mesg->code != 0;
 
@@ -1029,8 +1030,8 @@ modify groups object can/belong to method
 
 on input it expects hash with:
     obj_dn - DN of the object to manage group membership of
-    groups - select `groups' passed from from
-    base   - base of the group (RADIUS, general, e.t.c.)
+    groups - select `groups' passed from the form
+    base   - base of the group branch (RADIUS, general, e.t.c.)
     type   - posixGroup or groupOfNames
     is_submit - is it first run or after submit event
 
@@ -1048,8 +1049,8 @@ sub mod_groups {
   my ( $mesg, $return);
   if ( $ldap_crud->{cfg}->{rdn}->{acc_root} ne 'uid' ) {
     $mesg = $ldap_crud->search( { base => $arg->{obj_dn},
-				     scope => 'base',
-				     attrs => [ 'uid' ], });
+				  scope => 'base',
+				  attrs => [ 'uid' ], });
     push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
       if $mesg->code != 0;
     $arg->{uid} = $mesg->entry(0)->get_value( 'uid' );
@@ -1115,22 +1116,23 @@ sub mod_groups {
 	push @groups_chg, 'add' => $arg->{type} eq 'posixGroup' ?
 	  [ 'memberUid' => $arg->{uid} ] : [ 'member' => $arg->{obj_dn} ];
       }
-      # p [$_, @groups_chg];
-      if ( $#groups_chg >= 0) {
-	$mesg = $ldap_crud
+      # p [sprintf('cn=%s,%s', $_, $arg->{base}), @groups_chg] if $#groups_chg > 0;
+      if ( $#groups_chg > 0) {
+	# p [sprintf('cn=%s,%s', $_, $arg->{base}), @groups_chg]
+	  $mesg = $ldap_crud
 	  ->modify( $arg->{type} eq 'posixGroup' ? sprintf('cn=%s,%s', $_, $arg->{base}) : $_,
 		    \@groups_chg );
 	if ( $mesg ) {
 	  push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html};
 	} else {
 	  push @{$return->{success}},
-	    sprintf('<b>%s</b> <span class="mono">%s</span> <b>for group</b> <span class="mono">%s</span>',
+	    sprintf('<b>%s</b> <span class="mono">%s</span> for group <b><span class="mono">%s</span></b>',
 		    $groups_chg[0],
 		    $groups_chg[1][1],
 		    $_);
 	}
-	$#groups_chg = -1;
       }
+      $#groups_chg = -1;
     }
   }
   return $return;

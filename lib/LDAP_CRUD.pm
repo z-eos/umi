@@ -1261,7 +1261,7 @@ sub modify {
       $return = $self->err( $msg )->{html};
     } else { $return = 0; }
   } else { $return = $msg->ldif; }
-  p $dn; p $changes; p $return;
+  # p [ $dn, $changes, $return];
   return $return;
 }
 

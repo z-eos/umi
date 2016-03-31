@@ -3,11 +3,11 @@
    link = '<link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">'
 %]
 
-[% INCLUDE ldap_err.tt %]
-
 <div class="page-header">
   <h2>User Groups Modification Form <small><em class="mono">for user: [% ldap_modify_group %]</em></small></h2>
 </div>
+
+[% INCLUDE ldap_err.tt %]
 
 [% form.render %]
 
