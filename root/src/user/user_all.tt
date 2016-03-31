@@ -97,6 +97,7 @@
       </ul>
     </li>
 
+    [% IF ! form.add_svc_acc %]
     <li class="complex text-left" role="presentation">
       <a aria-controls="groups" data-toggle="tab" id="groups-tab"
 	 role="tab" href="#ms-groups" title="Group/s User Belongs to"
@@ -105,6 +106,7 @@
 	<span class="visible-lg-inline">Group</span>
       </a>
     </li>
+    [% END %]
   </ul>
   [% # form.render %]
   [% IF ! form.add_svc_acc %][% form.block('person').render %][% END %]

@@ -172,6 +172,8 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 		mail => defined $entry->get_value('mail') ? \@{[$entry->get_value('mail')]} : ['N/A'],
 		roles => $args->{uid} eq $c->user ? \@{[$c->user->roles]} : 'a mere mortal',
 	       };
+	utf8::decode($arg->{givenname});
+	utf8::decode($arg->{sn});
       }
     } else {
       $physicaldeliveryofficename = $c->user->has_attribute('physicaldeliveryofficename') ?
