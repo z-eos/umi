@@ -1126,10 +1126,9 @@ sub mod_groups {
 	  push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html};
 	} else {
 	  push @{$return->{success}},
-	    sprintf('<b>%s</b> <span class="mono">%s</span> for group <b><span class="mono">%s</span></b>',
-		    $groups_chg[0],
-		    $groups_chg[1][1],
-		    $_);
+	    sprintf('<span class="%s">%s</span>',
+		    $groups_chg[0] eq 'add' ? 'text-success" title="added to' : 'text-danger" title="deleted from',
+		    $groups_chg[0] eq 'add' ? $_ : '<s>' . $_ . '</s>');
 	}
       }
       $#groups_chg = -1;
