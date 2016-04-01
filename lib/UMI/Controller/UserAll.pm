@@ -184,7 +184,7 @@ sub create_account {
 		     $args->{person_givenname},
 		     $args->{person_sn}),
        uidNumber => $uidNumber,
-       gidNumber => $ldap_crud->cfg->{stub}->{gidNumber},
+       gidNumber => $args->{person_gidnumber},
        description => $descr,
        gecos => $self->utf2lat( sprintf('%s %s',
 					$args->{person_givenname},

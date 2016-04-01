@@ -120,6 +120,7 @@ sub _build_cfg {
 		   homeDirectory => '/nonexistent',
 		   loginShell => '/sbin/nologin',
 		   gidNumber => 10012,
+		   group => 'employee',
 		   noavatar_mgmnt => UMI->path_to('root', 'static', 'images', '/avatar-mgmnt.png'),
 		   icon => 'fa fa-user',
 		   icon_error => 'fa fa-exclamation-circle',
@@ -2070,10 +2071,10 @@ sub _build_select_group {
   my @entries = $mesg->sorted('cn');
   foreach my $entry ( @entries ) {
     push @groups, { value => substr( (split /,/, $entry->dn)[0], 3),
-			label => sprintf('%s%s',
-					 $entry->get_value('cn'),
-					 $entry->exists('description') ? ' --- ' . $entry->get_value('description') : ''),
-		      };
+		    label => sprintf('%s%s',
+				     $entry->get_value('cn'),
+				     $entry->exists('description') ? ' --- ' . $entry->get_value('description') : ''),
+		  };
   }
   return \@groups;
 }

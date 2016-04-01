@@ -80,6 +80,54 @@ has_field 'person_avatar'
        element_class => [ 'btn', 'btn-default', 'btn-sm', ],
        max_size => '50000' );
 
+has_field 'person_gidnumber'
+  => ( type => 'Select',
+       label => 'Group',
+       label_class => [ 'col-xs-2', ],
+       # empty_select => $form->ldap_crud->{cfg}->{stub}->{gidNumber},
+       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+       element_class => [ 'input-sm', ],
+       element_attr => { title => 'User primary group. RFC2307: An integer uniquely identifying a group in an administrative domain', },
+       options_method => \&groups,
+       # required => 1,
+     );
+
+sub options_person_gidnumber {
+  my $self = shift;
+
+  return unless $self->ldap_crud;
+
+  my ( @groups, $return );
+  my $ldap_crud = $self->ldap_crud;
+  my $mesg = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{group},
+				   scope => 'one',
+				   attrs => [ qw{cn description gidNumber} ],
+				   sizelimit => 0,} );
+
+  # TO FIX (error is not handled) !!!
+  push @{$return->{error}}, $ldap_crud->err($mesg)
+    if ! $mesg->count;
+
+  my @gidnumber_all = $mesg->sorted('cn');
+
+  my ( $d, $n );
+  foreach ( @gidnumber_all ) {
+    $d = $_->get_value('description');
+    utf8::decode($d);
+    $n = $_->get_value('gidNumber');
+    if ( $n == $ldap_crud->{cfg}->{stub}->{gidNumber} ) {
+      push @groups, { value => $n,
+		      label => sprintf('%s --- %s', $_->get_value('cn'), $d),
+		      selected => 'selected', };
+    } else {
+      push @groups, { value => $n,
+		      label => sprintf('%s --- %s', $_->get_value('cn'), $d), };
+    }
+  }
+  return \@groups;
+}
+
+
 has_field 'person_org'
   => ( type => 'Select',
        label => 'Organization',
@@ -192,6 +240,7 @@ has_block 'group_person'
 			'person_login',
 			'person_password1',
 			'person_password2',
+			'person_gidnumber',
 			'person_description',
 		      ],
        attr => { id => 'group_person', },
@@ -1199,6 +1248,14 @@ sub offices {
   return unless $self->form->ldap_crud;
   return $self->form->ldap_crud->select_organizations;
 }
+
+# sub groups {
+#   my $self = shift;
+#   return unless $self->form->ldap_crud;
+#   use Data::Printer;
+#   p my $groups = $self->form->ldap_crud->select_group;
+#   return $groups;
+# }
 
 sub associateddomains {
   my $self = shift;
