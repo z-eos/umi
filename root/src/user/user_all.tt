@@ -4,7 +4,7 @@
 %]
 
 <div class="page-header">
-  <h2>[% IF ! form.add_svc_acc %]Root And [% ELSE %]Additional [% END %]Services Object/s Creation Form[% IF form.add_svc_acc %] for user: [% form.add_svc_acc %][% END %]
+  <h2>[% IF ! form.field('add_svc_acc').value %]Root And [% ELSE %]Additional [% END %]Services Object/s Creation Form[% IF form.field('add_svc_acc').value %] for user: [% form.field('add_svc_acc').value %][% END %]
     <small>
       <em>
 	(complex form for all possible stuff (user's personal data and services),
@@ -16,11 +16,11 @@
 
 [% INCLUDE ldap_err.tt %]
 
-<form id="[% form.name %]" class="form-horizontal tab-content" method="post" enctype="multipart/form-data">
+<form id="[% form.name %]" class="umi-margings-fixer form-horizontal tab-content" method="post" enctype="multipart/form-data">
 <!-- <form class="form-horizontal tab-content" method="post" enctype="multipart/form-data"> -->
 
   [% form.field('add_svc_acc').render %]
-  [% IF ! form.add_svc_acc %]
+  [% IF ! form.field('add_svc_acc').value %]
   [% form.field('person_givenname').render %]
   [% form.field('person_sn').render %]
   
@@ -32,91 +32,95 @@
       [% form.field('person_simplified').render %]
     </div>
   </div>
-  <hr class="clear">
+  <br class="clear">
   [% END %]
 
-  <ul role="tablist" class="col-xs-1 nav nav-pills nav-stacked" id="myTab">
-    <!-- <li role="presentation">&nbsp;</li> -->
-    <li class="addsvcacc [% IF ! form.add_svc_acc %]active [% END %]text-left" role="presentation">
-      <a aria-controls="person" data-toggle="tab" role="tab"
-	 id="person-tab" href="#person" title="Personal Data"
-	 [% IF ! form.add_svc_acc %]aria-expanded="true"[% ELSE %]aria-expanded="false"[% END %]>
-	<span class="fa fa-fw fa-user fa-lg"></span>
-	<span class="visible-lg-inline">Person</span>
-      </a>
-    </li>
+  <nav role="navigation" class="well well-sm">
+    <ul class="nav nav-pills nav-justified" id="myTab">
+      <li role="presentation" class="addsvcacc [% IF ! form.field('add_svc_acc').value %]active [% END %]text-left">
+	<a aria-controls="person" data-toggle="tab" role="button"
+	   id="person-tab" href="#person" title="Personal Data"
+	   [% IF ! form.field('add_svc_acc').value %]aria-expanded="true"[% ELSE %]aria-expanded="false"[% END %]>
+	  <span class="fa fa-fw fa-user fa-lg"></span>
+	  <span class="visible-lg-inline visible-md-inline">Person</span>
+	</a>
+      </li>
 
-    <li class="complex text-left[% IF form.add_svc_acc %] active[% END %]"" role="presentation">
-      <a aria-controls="auth" data-toggle="tab" role="tab"
-	 id="auth-tab" href="#auth" title="Login/Password Dependent Services"
-	 [% IF ! form.add_svc_acc %]aria-expanded="false"[% ELSE %]aria-expanded="true"[% END %]>
-	<!-- <span class="fa fa-user-plus fa-lg"></span>
-		<span class="visible-lg-inline">Login</span> -->
-	<span class="fa-stack fa-fw">
-	  <i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>
-	  <i class="fa fa-user pull-right fa-stack-1x"></i>
-	</span>
-	<span class="visible-lg-inline">&nbsp;&nbsp;</span>
-	<span class="visible-lg-inline">&nbsp;Pass</span>
-      </a>
-    </li>
+      <li role="presentation" class="complex text-left[% IF form.field('add_svc_acc').value %] active[% END %]">
+	<a aria-controls="auth" data-toggle="tab" role="button"
+	   id="auth-tab" href="#auth" title="Login/Password Dependent Services"
+	   [% IF ! form.field('add_svc_acc').value %]aria-expanded="false"[% ELSE %]aria-expanded="true"[% END %]>
+	  <!-- <span class="fa fa-user-plus fa-lg"></span>
+	      <span class="visible-lg-inline">Login</span> -->
+	  <span class="fa-stack fa-fw">
+	    <i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>
+	    <i class="fa fa-user pull-right fa-stack-1x"></i>
+	  </span>
+	  <span class="visible-lg-inline visible-md-inline">&nbsp;&nbsp;</span>
+	  <span class="visible-lg-inline visible-md-inline">&nbsp;Pass</span>
+	</a>
+      </li>
 
-    <li class="complex dropdown text-left" role="presentation">
-      <a aria-controls="sec-contents" data-toggle="dropdown"
-	 class="dropdown-toggle" id="umiSec" href="#"
-	 title="Services Without Login/Password" aria-expanded="false">
-	<!-- <span class="fa-stack fa-lg">
-		<i class="fa fa-square-o fa-stack-2x"></i>
-		<i class="fa fa-user-times fa-stack-1x"></i>
-		</span> -->
-	<span class="fa-stack fa-fw">
-	  <i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>
-	  <i class="fa fa-user-times pull-right fa-stack-1x"></i>
-	</span>
-	<!-- <span class="fa fa-user-times fa-lg"></span> -->
-	<span class="caret"></span>
-	<span class="visible-lg-inline">NoPass</span>
-      </a>
-      <ul id="umiSec-contents" aria-labelledby="umiSec"
-	  role="menu" class="dropdown-menu">
-	<li>
-	  <a aria-controls="ovpn" data-toggle="tab" id="ovpn-tab"
-	     role="tab" tabindex="-1" href="#ovpn" aria-expanded="false">
-	    <span class="fa fa-certificate"></span>
-	    OpenVPN
-	  </a>
-	</li>
-	<li>
-	  <a aria-controls="ssh" data-toggle="tab"
-	     id="ssh-tab" role="tab" tabindex="-1"
-	     href="#ssh" aria-expanded="false">
-	    <span class="fa fa-key"></span>
-	    SSH
-	  </a>
-	</li>
-      </ul>
-    </li>
+      <li role="presentation" class="complex dropdown text-left">
+	<a aria-controls="sec-contents" data-toggle="dropdown"
+	   class="dropdown-toggle" role="button" id="umiSec" href="#"
+	   title="Services Without Login/Password" aria-expanded="false">
+	  <!-- <span class="fa-stack fa-lg">
+	      <i class="fa fa-square-o fa-stack-2x"></i>
+	      <i class="fa fa-user-times fa-stack-1x"></i>
+	      </span> -->
+	  <span class="fa-stack fa-fw">
+	    <i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>
+	    <i class="fa fa-user-times pull-right fa-stack-1x"></i>
+	  </span>
+	  <!-- <span class="fa fa-user-times fa-lg"></span> -->
+	  <span class="caret"></span>
+	  <span class="visible-lg-inline visible-md-inline">NoPass</span>
+	</a>
+	<ul id="umiSec-contents" aria-labelledby="umiSec"
+	    class="dropdown-menu">
+	  <li role="presentation">
+	    <a aria-controls="ovpn" data-toggle="tab" id="ovpn-tab"
+	       role="button" tabindex="-1" href="#ovpn" aria-expanded="false">
+	      <span class="fa fa-certificate"></span>
+	      OpenVPN
+	    </a>
+	  </li>
+	  <li role="presentation">
+	    <a aria-controls="ssh" data-toggle="tab"
+	       id="ssh-tab" role="button" tabindex="-1"
+	       href="#ssh" aria-expanded="false">
+	      <span class="fa fa-key"></span>
+	      SSH
+	    </a>
+	  </li>
+	</ul>
+      </li>
 
-    [% IF ! form.add_svc_acc %]
-    <li class="complex text-left" role="presentation">
-      <a aria-controls="groups" data-toggle="tab" id="groups-tab"
-	 role="tab" href="#ms-groups" title="Group/s User Belongs to"
-	 aria-expanded="false">
-	<span class="fa fa-fw fa-group fa-lg"></span>
-	<span class="visible-lg-inline">Group</span>
-      </a>
-    </li>
-    [% END %]
-  </ul>
+      [% IF ! form.field('add_svc_acc').value %]
+      <li role="presentation" class="complex text-left">
+	<a aria-controls="groups" data-toggle="tab" id="groups-tab"
+	   role="button" href="#ms-groups" title="Group/s User Belongs to"
+	   aria-expanded="false">
+	  <span class="fa fa-fw fa-group fa-lg"></span>
+	  <span class="visible-lg-inline visible-md-inline">Group</span>
+	</a>
+      </li>
+      [% END %]
+    </ul>
+  </nav>
+  <br class="clear"><br>
+
   [% # form.render %]
-  [% IF ! form.add_svc_acc %][% form.block('person').render %][% END %]
+  [% form.render_repeatable_js %]
+  [% IF ! form.field('add_svc_acc').value %][% form.block('person').render %][% END %]
   [% form.block('auth').render %]
   [% form.block('ssh').render %]
   [% form.block('ovpn').render %]
   [% form.block('groupsselect').render %]
 
   <hr>
-  <div class="row">
+  <div class="form-group">
   [% form.field('aux_reset').render %]
   [% form.field('aux_submit').render %]
   </div>
@@ -138,7 +142,7 @@
 </div>
 [% END %]
 
-[% IF form.add_svc_acc %]
+[% IF form.field('add_svc_acc').value %]
 <script type="text/javascript">
         /* 
         --- FORM USED FOR AN EXISTENT DN ------------------------------------------

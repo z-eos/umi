@@ -51,18 +51,24 @@ sub index :Path :Args(0) {
 			   posted => ($c->req->method eq 'POST'),
 			   params => $params,
 			  );
-    my $final_message;
-    $final_message = $c->model('LDAP_CRUD')->ldif_read( { file => $params->{file}->{tempname} } )
-      if defined $params->{file};
-    $final_message = $c->model('LDAP_CRUD')->ldif_read( { ldif => $params->{ldif} } )
-      if defined $params->{ldif};
+    my ( $final_message, $ldif);
+
+    if ( defined $params->{ldif} && $params->{ldif} ne '' ) {
+      $ldif = { ldif => $params->{ldif} };
+    } else {
+      $ldif = { file => $params->{file}->{tempname} };
+    }
+    # $final_message = $c->model('LDAP_CRUD')->ldif_read( { file => $params->{file}->{tempname} } )
+    #   if defined $params->{file};
+    # $final_message = $c->model('LDAP_CRUD')->ldif_read( { ldif => $params->{ldif} } )
+    #   if defined $params->{ldif};
 
     # my $final_message;
     # push @{$final_message->{success}}, $params->{ldif} if $params->{ldif} ne '';
     # my $ldif_file = $self->file2var($params->{file}->{tempname}, $final_message) if defined $params->{file};
     # push @{$final_message->{success}}, '<pre>' . $ldif_file . '</pre>' if $ldif_file ne '';
 
-    $c->stash( final_message => $final_message );
+    $c->stash( final_message => $c->model('LDAP_CRUD')->ldif_read( $ldif ) );
 }
 
 

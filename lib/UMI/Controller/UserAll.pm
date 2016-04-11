@@ -33,70 +33,78 @@ Catalyst Controller.
 =cut
 
 sub index :Path :Args(0) {
-    my ( $self, $c, $ldapadduser_id ) = @_;
-      my $params = $c->req->parameters;
-      $self->form->add_svc_acc( defined $params->{add_svc_acc} ? $params->{add_svc_acc} : '' );
-      my $final_message;
+  my ( $self, $c ) = @_;
+  my $params = $c->req->parameters;
+  # p $self->form->add_svc_acc( defined $params->{add_svc_acc} && $params->{add_svc_acc} ne '' ? $params->{add_svc_acc} : '' );
+  
+  my $final_message;
 
-      # here we initialize repeatable fields to be rendered when the form is called from
-      # another one
-      if ( defined $self->form->add_svc_acc &&
-      	   $self->form->add_svc_acc ne '' &&
-      	   ! defined $params->{'account.0.associateddomain'} ) {
-      	$params->{'account.0.associateddomain'} = '' if ! $params->{'account.0.associateddomain'};
-      }
-      if ( defined $self->form->add_svc_acc &&
-      		$self->form->add_svc_acc ne '' &&
-      		! defined $params->{'loginless_ovpn.0.associateddomain'} ) {
-      	$params->{'loginless_ovpn.0.associateddomain'} = '' if ! $params->{'loginless_ovpn.0.associateddomain'};
-      }
-      if ( defined $self->form->add_svc_acc &&
-      	   $self->form->add_svc_acc ne '' &&
-      	   ! defined $params->{'loginless_ssh.0.associateddomain'} ) {
-      	$params->{'loginless_ssh.0.associateddomain'} = '' if ! $params->{'loginless_ssh.0.associateddomain'};
-      # 	$params->{'loginless_ssh.0.key'} = '' if ! $params->{'loginless_ssh.0.key'};
-      }
+  # here we initialize repeatable fields to be rendered when the form is called from
+  # another one
+  if ( defined $self->form->add_svc_acc &&
+       $self->form->add_svc_acc ne '' &&
+       ! defined $params->{'account.0.associateddomain'} ) {
+    $params->{'account.0.associateddomain'} = '' if ! $params->{'account.0.associateddomain'};
+  }
+  if ( defined $self->form->add_svc_acc &&
+       $self->form->add_svc_acc ne '' &&
+       ! defined $params->{'loginless_ovpn.0.associateddomain'} ) {
+    $params->{'loginless_ovpn.0.associateddomain'} = '' if ! $params->{'loginless_ovpn.0.associateddomain'};
+  }
+  if ( defined $self->form->add_svc_acc &&
+       $self->form->add_svc_acc ne '' &&
+       ! defined $params->{'loginless_ssh.0.associateddomain'} ) {
+    $params->{'loginless_ssh.0.associateddomain'} = '' if ! $params->{'loginless_ssh.0.associateddomain'};
+    # 	$params->{'loginless_ssh.0.key'} = '' if ! $params->{'loginless_ssh.0.key'};
+  }
 
-      $params->{'person_avatar'} = $c->req->upload('person_avatar') if $params->{'person_avatar'};
+  $params->{'person_avatar'} = $c->req->upload('person_avatar') if $params->{'person_avatar'};
 
-      my $i = 0;
-      #foreach ( $self->form->field('account')->fields ) {
-      for ( ; $i < 10; ) {
-	$params->{'account.' . $i . '.userCertificate'} =
-	  $c->req->upload('account.' . $i . '.userCertificate')
-	  if defined $params->{'account.' . $i . '.userCertificate'} &&
-	  $params->{'account.' . $i . '.userCertificate'} ne '';
-	$i++;
-      }
-      $i = 0;
-      foreach ( $self->form->field('loginless_ssh')->fields ) {
-	$params->{'loginless_ssh.' . $i . '.keyfile'} =
-	  $c->req->upload('loginless_ssh.' . $i . '.keyfile')
-	  if defined $params->{'loginless_ssh.' . $i . '.keyfile'} &&
-	  $params->{'loginless_ssh.' . $i . '.keyfile'} ne '';
-	$i++;
-      }
-      $i = 0;
-      foreach ( $self->form->field('loginless_ovpn')->fields ) {
-	$params->{'loginless_ovpn.' . $i . '.userCertificate'} =
-	  $c->req->upload('loginless_ovpn.' . $i . '.userCertificate')
-	  if defined $params->{'loginless_ovpn.' . $i . '.userCertificate'} &&
-	  $params->{'loginless_ovpn.' . $i . '.userCertificate'} ne '';
-	$i++;
-      }
+  my $i = 0;
+  #foreach ( $self->form->field('account')->fields ) {
+  for ( ; $i < 10; ) {
+    $params->{'account.' . $i . '.userCertificate'} =
+      $c->req->upload('account.' . $i . '.userCertificate')
+      if defined $params->{'account.' . $i . '.userCertificate'} &&
+      $params->{'account.' . $i . '.userCertificate'} ne '';
+    $i++;
+  }
+  $i = 0;
+  foreach ( $self->form->field('loginless_ssh')->fields ) {
+    $params->{'loginless_ssh.' . $i . '.keyfile'} =
+      $c->req->upload('loginless_ssh.' . $i . '.keyfile')
+      if defined $params->{'loginless_ssh.' . $i . '.keyfile'} &&
+      $params->{'loginless_ssh.' . $i . '.keyfile'} ne '';
+    $i++;
+  }
+  $i = 0;
+  foreach ( $self->form->field('loginless_ovpn')->fields ) {
+    $params->{'loginless_ovpn.' . $i . '.userCertificate'} =
+      $c->req->upload('loginless_ovpn.' . $i . '.userCertificate')
+      if defined $params->{'loginless_ovpn.' . $i . '.userCertificate'} &&
+      $params->{'loginless_ovpn.' . $i . '.userCertificate'} ne '';
+    $i++;
+  }
 
-      $c->stash( template => 'user/user_all.tt',
-		 form => $self->form,
-		 final_message => $final_message, );
-      return unless $self->form->process(
-					 posted => ($c->req->method eq 'POST'),
-					 params => $params,
-					 ldap_crud => $c->model('LDAP_CRUD'),
-					);
+  $c->stash( template => 'user/user_all.tt',
+	     form => $self->form,
+	     final_message => $final_message, );
 
-      # $final_message = $self->create_account( $c->model('LDAP_CRUD'), $params );
-      $c->stash( final_message => $self->create_account( $c->model('LDAP_CRUD'), $params ) );
-
+  if ( keys %{$params} == 1 ) {
+  # if ( defined $params->{add_svc_acc} && $params->{add_svc_acc} ne '' ) {
+    my $init_obj = { add_svc_acc => $params->{add_svc_acc} };
+    return unless $self->form
+      ->process( init_object => $init_obj,
+		 ldap_crud => $c->model('LDAP_CRUD'), );
+  } else {
+    p $params;
+    return unless $self->form
+      ->process( posted => ($c->req->method eq 'POST'),
+		 params => $params,
+		 ldap_crud => $c->model('LDAP_CRUD'), );
+    $self->form->add_svc_acc( defined $params->{add_svc_acc} && $params->{add_svc_acc} ne '' ? $params->{add_svc_acc} : '' );
+    $c->stash( final_message => $self->create_account( $c->model('LDAP_CRUD'), $params ) );
+  }
 }
 
 =head2 create_account
@@ -158,7 +166,7 @@ sub create_account {
     #---------------------------------------------------------------------
     # Account ROOT Object
     #---------------------------------------------------------------------
-    # here we need suffix yet if the combination exists
+    # here we need suffix in addition, if the combination exists
     $uid = sprintf('%s%s',
 		   $self->form->autologin,
 		   $self->form->namesake );
@@ -218,10 +226,9 @@ sub create_account {
     #####################################################################################
 
     my $add_to = $ldap_crud->search( { base => $self->form->add_svc_acc, scope => 'base', } );
-    if ( ! $add_to->count ) {
-      $final_message->{error} = 'no root object with DN: <b>&laquo;' .
-	$self->form->add_svc_acc . '&raquo;</b> found!';
-    }
+    $final_message->{error} = 'no root object with DN: <b>&laquo;' .
+      $self->form->add_svc_acc . '&raquo;</b> found!' if ! $add_to->count;
+
     my $add_to_obj = $add_to->entry(0);
 
     $uidNumber = $add_to_obj->get_value('uidNumber');
@@ -247,7 +254,6 @@ sub create_account {
   # person_simplified checkbox is *CHECKED*, we continue with SIMPLIFIED form
   #================================================================================
   if ( defined $args->{person_simplified} && $args->{person_simplified} eq '1' ) {
-      
     #---------------------------------------------------------------------
     # Simplified Account mail branch of ROOT Object Creation
     #---------------------------------------------------------------------
@@ -329,12 +335,20 @@ sub create_account {
   } else {
     @form_fields = qw{ account loginless_ovpn loginless_ssh groups };
     foreach my $form_field ( @form_fields ) {
-      next if $form_field eq 'groups'; # groups we are skiping now
+      next if $form_field eq 'groups'; # groups we are skiping for now
       foreach $element ( $self->form->field($form_field)->fields ) {
-	# p @{[$self->form->field($form_field)->fields]};
+
+=pod
+
+we skip empty (criteria is a concatenation of each field value) repeatable elements
+
+=cut
+
 	foreach ( $element->fields ) {
+	  next if $_->name =~ /aux_/ || $_->name eq 'remove';
 	  $is_svc_empty .= $_->value if defined $_->value;
-	}			     # p $is_svc_empty;
+	}
+	 p $is_svc_empty;
 	next if $is_svc_empty eq ''; # avoid all empty services
 
 	#---------------------------------------------------------------------

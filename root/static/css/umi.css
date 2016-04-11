@@ -227,3 +227,8 @@ html,body {
 .umi-2-margin-left {
   margin: 0pt 0pt 0pt 30pt;
 }
+
+.umi-margings-fixer.form-horizontal .form-group {
+    margin-left: 0;
+    margin-right: 0;
+}

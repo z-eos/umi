@@ -805,7 +805,7 @@ sub ldif_read {
   } else {
     $file = $arg->{file};
   }
-  my $ldif = Net::LDAP::LDIF->new( $file, "r", onerror => 'undef' );
+  my $ldif = Net::LDAP::LDIF->new( $file, "r", onerror => 'warn' );
   while ( not $ldif->eof ) {
     $entry = $ldif->read_entry;
     if ( $ldif->error ) {
@@ -826,7 +826,7 @@ sub ldif_read {
     }
   }
   $ldif->done;
-  if ( $arg->{ldif} ) {
+  if ( $arg->{file} ) {
     try {
       close $file;
     } catch {
