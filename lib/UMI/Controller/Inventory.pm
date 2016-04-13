@@ -82,7 +82,7 @@ sub create_inventory {
   $args->{common_hwAssignedTo} = 'unassigned'
     if defined $args->{common_hwAssignedTo} && $args->{common_hwAssignedTo} eq '';
   
-  my ( $file_is, $return, $hw, $tmp, $k, $key, $v, $val, $i, $j, $l, $r, $compart, $add, $hwAssignedTo );
+  my ( $file_is, $return, $hw, $tmp, $k, $key, $v, $val, $i, $j, $l, $r, $compart, $add, $hwAssignedTo, $common_compart );
 
 
   if ( defined $args->{common_FileDMI}->{tempname} ) {
@@ -135,7 +135,7 @@ sub create_inventory {
     push @{$add->{root}->{attrs}}, objectClass => $ldap_crud->{cfg}->{objectClass}->{inventory};
     $hwAssignedTo = $add->{root}->{dn};
   # }
-  
+
   #--- Composite or Single Compart start ----------------------------------------------
   if ( $l eq 'Composite' || $l eq 'Comparts' || $l eq 'Singleboard' ) {
     if ( defined $hw->{success} ) { # initialized from files
@@ -153,15 +153,16 @@ sub create_inventory {
 	  push @{$add->{$key}->[$i]->{attrs}}, hwStatus => 'assigned';
 	  push @{$add->{$key}->[$i]->{attrs}}, hwType => 'comparts_' . $key;
 
-	  if ( defined $args->{common_hwAssignedTo} && $args->{common_hwAssignedTo} ne '' ) {
+	  if ( $hwAssignedTo ne '' ) {
+	    push @{$add->{$key}->[$i]->{attrs}}, hwAssignedTo => $hwAssignedTo;
+	  } elsif ( defined $args->{common_hwAssignedTo} && $args->{common_hwAssignedTo} ne '' ) {
 	    push @{$add->{$key}->[$i]->{attrs}},
 	      hwAssignedTo => $args->{common_hwAssignedTo} =~ /.*,$ldap_crud->{cfg}->{base}->{db}/ ?
 	      $args->{common_hwAssignedTo} :
-	      sprintf('uid=%s,ou=People,%s',
+	      sprintf('%s=%s,%s',
+		      $ldap_crud->{cfg}->{rdn}->{acc_root},
 		      $args->{common_hwAssignedTo},
-		      $ldap_crud->{cfg}->{base}->{db});
-	  } elsif ( $hwAssignedTo ne '' ) {
-	    push @{$add->{$key}->[$i]->{attrs}}, hwAssignedTo => $hwAssignedTo;
+		      $ldap_crud->{cfg}->{base}->{acc_root});
 	  }
 
 	  push @{$add->{$key}->[$i]->{attrs}},
@@ -195,7 +196,7 @@ sub create_inventory {
     undef $compart;
     foreach my $element ( $self->form->field('compart')->fields ) {
       foreach my $field ( $element->fields ) {
-	next if $field->name eq 'rm-duplicate' || ! defined $field->value;
+	next if $field->name eq 'remove' || ! defined $field->value;
 	$tmp = $field->name ne 'hwMac' ? $field->value : $self->macnorm({ mac => $field->value });
 	push @{$compart->{ldif}->{attrs}}, $field->name => $tmp;
 	$compart->{ldif}->{hash}->{$field->name} = $tmp;
@@ -203,10 +204,15 @@ sub create_inventory {
       next if ! defined $compart->{ldif}->{hash}->{hwType};
       push @{$compart->{ldif}->{attrs}}, objectClass => $ldap_crud->{cfg}->{objectClass}->{inventory};
       push @{$compart->{ldif}->{attrs}}, hwStatus => 'assigned';
-      if ( defined $args->{common_hwAssignedTo} && $args->{common_hwAssignedTo} ne '' ) {
-	push @{$compart->{ldif}->{attrs}}, hwAssignedTo => $args->{common_hwAssignedTo};
-      } elsif ( $hwAssignedTo ne '' ) {
+      if ( $hwAssignedTo ne '' ) {
 	push @{$compart->{ldif}->{attrs}}, hwAssignedTo => $hwAssignedTo;
+      } elsif ( defined $args->{common_hwAssignedTo} && $args->{common_hwAssignedTo} ne '' ) {
+	push @{$compart->{ldif}->{attrs}},
+	  hwAssignedTo => $args->{common_hwAssignedTo} =~ /.*,$ldap_crud->{cfg}->{base}->{db}/ ?
+	  $args->{common_hwAssignedTo} :
+	  sprintf('uid=%s,ou=People,%s',
+		  $args->{common_hwAssignedTo},
+		  $ldap_crud->{cfg}->{base}->{db});
       }
 
       $compart->{type} = (split(/_/, $compart->{ldif}->{hash}->{hwType}))[1];
@@ -234,19 +240,40 @@ sub create_inventory {
     #--- Composite or Single Compart stop -----------------------------------------------
   }
 
-  # if ( $l ne 'Comparts' ) { # comparts has individual DNs
-    # rest of the root obj attributes (form `common_*' fields data)
-    while ( ( $key, $val ) = each %{$args} ) { p $key; p $val;
-      next if $key !~ /common_.*/ || $key =~ /common_File.*/;
-      ( $l, $r) = split(/_/, $key);
-      
-      $tmp = $r ne 'hwMac' ? $val : $self->macnorm({ mac => $val });
-      $tmp = 'unassigned' if $r eq 'hwAssignedTo' && $val eq '';
-      
-      push @{$add->{root}->{attrs}}, $r => $tmp;
+  $common_compart = '';
+  # rest of the root obj attributes (form `common_*' fields data)
+  while ( ( $key, $val ) = each %{$args} ) {
+    # p $key; p $val;
+    next if $key !~ /common_.*/ || $key =~ /common_File.*/;
+    ( $l, $r) = split(/_/, $key);
+    $tmp = $r ne 'hwMac' ? $val : $self->macnorm({ mac => $val });
+    
+    if ( $r eq 'hwAssignedTo' ) {
+      if ( $val eq '' ) {
+	$tmp = 'unassigned';
+      } elsif ( $val !~ /.*,$ldap_crud->{cfg}->{base}->{db}/ ) {
+	$tmp = sprintf('%s=%s,%s',
+		       $ldap_crud->{cfg}->{rdn}->{acc_root},
+		       $val,
+		       $ldap_crud->{cfg}->{base}->{acc_root});
+      } else {
+	$tmp = $val;
+      }
     }
-  # p $add; # ->{root};
-  
+
+    push @{$add->{root}->{attrs}}, $r => $tmp;
+
+    $common_compart = 'hw' . substr($val,9) if $r eq 'hwType' && $val =~ /comparts_.*/;
+
+  }
+
+  # add DN of common_compart object to the composite (root) object if set
+  if ( $common_compart && $args->{common_hwAssignedTo} ) {
+    $tmp = $ldap_crud->modify( $args->{common_hwAssignedTo},
+			       [ 'add' => [ $common_compart => $add->{root}->{dn}] ] );
+    push @{$return->{error}}, $tmp if $tmp;
+  }
+
     $add->{root}->{ldif} = $ldap_crud->add( $add->{root}->{dn}, $add->{root}->{attrs} );
     if ( $add->{root}->{ldif} ) {
       push @{$return->{error}},
@@ -258,8 +285,8 @@ sub create_inventory {
     } else {
       push @{$return->{success}}, sprintf('%s<br >', $add->{root}->{dn}) ;
     }
-  # }
-  # p $add; # p $return->{warning} = $add;
+
+  p $add; # p $return->{warning} = $add;
   return $return; # = { success => $add };
 }
 

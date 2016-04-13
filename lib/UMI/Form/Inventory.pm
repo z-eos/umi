@@ -4,7 +4,8 @@
 package UMI::Form::Inventory;
 
 use HTML::FormHandler::Moose;
-BEGIN { extends 'UMI::Form::LDAP'; with 'Tools'; }
+BEGIN { extends 'UMI::Form::LDAP';
+	with 'Tools', 'HTML::FormHandler::Render::RepeatableJs'; }
 
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable', 'StrongPassword' );
 
@@ -155,7 +156,8 @@ has_field 'common_hwAssignedTo'
        label => 'Assigned To', label_class => [ 'col-xs-1', ],
        element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
        element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'UID or DN, like &laquo;taf.taf2&raquo; or &laquo;uid=taf.taf2,ou=People,dc=umidb&raquo;' },
+       element_attr => { placeholder => 'UID or DN, like &laquo;taf.taf2&raquo; or &laquo;uid=taf.taf2,ou=People,dc=umidb&raquo;',
+		       title => 'UID or DN for person as assignee, DN for hwInventory object as assignee', },
      );
 
 has_field 'common_hwStatus'
@@ -586,226 +588,266 @@ has_block 'common'
 ######################################################################
 #== COMPART/S ========================================================
 ######################################################################
-has_field 'compart'
-  => ( type => 'Repeatable',
-       # setup_for_js => 1,
-       do_wrapper => 1,
-       wrapper_attr => { class => 'no-has-error' },
-       wrap_repeatable_element_method => \&wrap_compart_elements,
+has_field 'aux_add_compart'
+  => ( type => 'AddElement',
+       repeatable => 'compart',
+       value => 'Add new compart',
+       element_class => [ 'btn-success', ],
+       wrapper_class => [ qw{col-lg-4 col-md-4}, ],
      );
 
-has_field 'compart.rm-duplicate'
-  => ( type => 'Display',
-       html => '<div class=" rm-duplicate hidden">' .
-       '<a href="#" class="btn btn-danger btn-sm" title="Delete this section"><span class="fa fa-trash-o fa-lg"></span></a></div>',
+has_field 'compart'
+  => ( type => 'Repeatable',
+       setup_for_js => 1,
+       do_wrapper => 1,
+       element_wrapper_class => [ qw{controls}, ],
+       wrapper_attr => { class => 'no-has-error' },
+       # wrap_repeatable_element_method => \&wrap_compart_elements,
      );
+
+# sub wrap_compart_elements {
+#   my ( $self, $input, $subfield ) = @_;
+#   my $output = sprintf('%s%s%s', ! $subfield ? qq{\n<div class="duplicate">} : qq{\n<div class="duplicated">},
+# 		       $input,
+# 		       qq{</div>});
+# }
 
 #!!# ---
 has_field 'compart.hwType'
   => ( type => 'Select',
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'Compart', label_class => [ 'col-xs-1', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { 'data-name' => 'hwtype',
 			 'data-group' => 'compart', },
        empty_select => '--- Choose a Compart Type ---',
-       options => [
-		   { value => 'comparts_mb',  attributes => { 'data-relation' => 'comparts_mb' , },  label => 'Mother Board' },
+       options => [{ value => 'comparts_mb',  attributes => { 'data-relation' => 'comparts_mb' , },  label => 'Mother Board' },
 		   { value => 'comparts_if',  attributes => { 'data-relation' => 'comparts_if' , },  label => 'Interface (ether, bt, wlan)' },
 		   { value => 'comparts_cpu', attributes => { 'data-relation' => 'comparts_cpu', }, label => 'CPU' },
 		   { value => 'comparts_ram', attributes => { 'data-relation' => 'comparts_ram', }, label => 'RAM' },
-		   { value => 'comparts_disk', attributes => { 'data-relation' => 'comparts_disk', }, label => 'Disk (HDD, SSD)' },
-		  ],
+		   { value => 'comparts_disk', attributes => { 'data-relation' => 'comparts_disk', }, label => 'Disk (HDD, SSD)' },],
        # required => 1
+       wrapper_class => [ qw{col-xs-12}, ],
      );
 
 has_field 'compart.hwFileDmi'
   => ( type => 'Upload',
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'DMI', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_mb', 'comparts_ram', 'comparts_ram', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [  qw{col-xs-12 hidden relation comparts_mb comparts_ram comparts_ram}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'btn', 'btn-default', 'btn-sm', ],
        element_attr => { title => 'dmidecode output',
 			 'data-name' => 'hwfiledmi',
 			 'data-group' => 'compart',},
-       max_size => '50000' );
+       max_size => '50000',
+     );
 
 has_field 'compart.hwFileSmart'
   => ( type => 'Upload',
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'S.M.A.R.T.', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_disk', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_disk}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'btn', 'btn-default', 'btn-sm', ],
        element_attr => { title => 'smartctl output',
 			 'data-name' => 'hwfiledmi',
 			 'data-group' => 'compart',},
-       max_size => '50000' );
+       max_size => '50000',
+     );
 
 has_field 'compart.hwState'
   => ( type => 'Select',
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'State', label_class => [ 'col-xs-1', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'Initial state of the object',
 			 'autocomplete' => 'off',
 			 'data-name' => 'hwstate',
 			 'data-group' => 'compart', },
        options => [{ value => '', label => '--- Choose State ---'},
-		   { value => 'new', label => 'New'},
-		   { value => 'good', label => 'Good'},
-		   { value => 'bad', label => 'Bad'},
-		   { value => 'broken', label => 'Broken'},
-		   { value => 'burned', label => 'Burned'},
-		   { value => 'gleetches', label => 'Gleetches'},],
-       # required => 1
+		   { value => 'new', label => 'New' },
+		   { value => 'good', label => 'Good' },
+		   { value => 'bad', label => 'Bad' },
+		   { value => 'broken', label => 'Broken' },
+		   { value => 'burned', label => 'Burned' },
+		   { value => 'gleetches', label => 'Gleetches' },],
+       # required => 1,
+       wrapper_class => [ qw{col-xs-12}, ],
      );
 
 has_field 'compart.inventoryNumber'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'Inventory Number', label_class => [ 'col-xs-1', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => '533', 'data-name' => 'inventorynumber', 'data-group' => 'compart',},
+       wrapper_class => [ qw{col-xs-12}, ],
      );
 
 has_field 'compart.description'
   => ( type => 'TextArea',
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'Description', label_class => [ 'col-xs-1', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'Any description.',
 			 'autocomplete' => 'off', 'data-name' => 'description', 'data-group' => 'compart',},
-       cols => 30, rows => 1);
+       cols => 30, rows => 1,
+       wrapper_class => [ qw{col-xs-12}, ],
+     );
 
 has_field 'compart.hwManufacturer'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'Manufacturer', label_class => [ 'col-xs-1', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'Mikrotik', 'data-name' => 'hwmanufacturer', 'data-group' => 'compart',},
+       wrapper_class => [ qw{col-xs-12}, ],
      );
 
 has_field 'compart.hwModel'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'Model', label_class => [ 'col-xs-1', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'RouterBOARD cAP 2n', 'data-name' => 'hwmodel', 'data-group' => 'compart',},
+       wrapper_class => [ qw{col-xs-12}, ],
      );
 
 has_field 'compart.hwSerialNumber'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'Serial Number', label_class => [ 'col-xs-1', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => '654705AABCD3/533', 'data-name' => 'hwserialnumber', 'data-group' => 'compart',},
+       wrapper_class => [ qw{col-xs-12}, ],
      );
 
 #!!---
 has_field 'compart.hwRamSize'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'RAM Size', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_ram', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_ram}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => '64.0MiB', 'data-name' => 'ap', 'data-group' => 'compart', },
      );
 
 has_field 'compart.hwBankLocator'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'Bank Locator', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_ram', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_ram}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'BANK0', 'data-name' => 'ap', 'data-group' => 'compart', },
      );
 
 has_field 'compart.hwSpeed'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'Speed', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_ram', 'comparts_cpu', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_ram comparts_cpu}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => '400MHz', 'data-name' => 'ap', 'data-group' => 'compart', },
+       wrapper_class => [ qw{col-xs-12}, ],
      );
 
 has_field 'compart.hwProductName'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'Product Name', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_mb', 'comparts_ram', 'comparts_if', 'comparts_disk', 'comparts_ram', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_mb comparts_ram comparts_if comparts_disk comparts_ram}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => '880GMA-E45 (MS-7623)', 'data-name' => 'ap', 'data-group' => 'compart', },
      );
 
 has_field 'compart.hwBios'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'BIOS', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_mb', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_mb}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'some BIOS info', 'data-name' => 'ap', 'data-group' => 'compart', },
      );
 
 has_field 'compart.hwBiosVendor'
   => ( 
-       label => 'BIOS Vendor', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_mb', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
-       element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'American Megatrends Inc.', 'data-name' => 'ap', 'data-group' => 'compart', },
+      label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
+      label => 'BIOS Vendor', label_class => [ 'col-xs-1', ],
+      wrapper_class => [ qw{col-xs-12 hidden relation comparts_mb}, ],
+      element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
+      element_class => [ 'input-sm', ],
+      element_attr => { placeholder => 'American Megatrends Inc.', 'data-name' => 'ap', 'data-group' => 'compart', },
      );
 
 has_field 'compart.hwBiosVersion'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'BIOS Version', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_mb', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_mb}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'V17.5', 'data-name' => 'ap', 'data-group' => 'compart', },
      );
 
 has_field 'compart.hwBiosReleaseDate'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'BIOS Release Date', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_mb', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_mb}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => '06/17/2010', 'data-name' => 'ap', 'data-group' => 'compart', },
      );
 
 has_field 'compart.hwBiosRevision'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'BIOS Revision', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_mb', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_mb}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => '8.15', 'data-name' => 'ap', 'data-group' => 'compart', },
      );
 
 has_field 'compart.hwSpeedCpu'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'CPU Speed', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_cpu', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_cpu}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => '3100 MHz', 'data-name' => 'ap', 'data-group' => 'compart', },
      );
 
 has_field 'compart.hwSpeedRam'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'RAM Speed', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_ram', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_ram}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => '533 MHz', 'data-name' => 'ap', 'data-group' => 'compart', },
      );
 
 has_field 'compart.hwTypeIf'
   => ( type => 'Select',
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'Interface Type', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_if', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_if}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'Initial state of the object',
 			 'autocomplete' => 'off',
@@ -817,51 +859,55 @@ has_field 'compart.hwTypeIf'
 		   { value => 'wlan_ex', label => 'WiFi External'},
 		   { value => 'wlan_in', label => 'WiFi Internal'},
 		   { value => 'bt_ex', label => 'Bluetooth External'},
-		   { value => 'bt_in', label => 'Bluetooth Internal'},
-		  ],
+		   { value => 'bt_in', label => 'Bluetooth Internal'},],
      );
 
 has_field 'compart.hwSpeedIf'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'Interface Speed', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_if', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_if}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => '10/100/1000', 'data-name' => 'ap', 'data-group' => 'compart', },
      );
 
 has_field 'compart.hwSize'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'Size', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_mb', 'comparts_ram', 'comparts_if', 'comparts_disk', 'comparts_ram', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_mb comparts_ram comparts_if comparts_disk comparts_ram}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'mini/ATX for MB, 3.5" for Disk, e.t.c.', 'data-name' => 'ap', 'data-group' => 'compart', },
      );
 
 has_field 'compart.hwSizeDisk'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'Disk Size', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_disk', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_disk}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => '500 GB', 'data-name' => 'ap', 'data-group' => 'compart', },
      );
 
 has_field 'compart.hwBus'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'Bus', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_mb', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_mb}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'ISA, PCI, SATA, SAS, SCSI', 'data-name' => 'ap', 'data-group' => 'compart', },
      );
 
 has_field 'compart.hwMac'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'MAC', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_if', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_if}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'e.g. 44:8a:5b:d4:4e:0f or 44-8A-5B-D4-4E-0F (will be normalized to 448a5bd44e0f)',
 			 'data-name' => 'ap', 'data-group' => 'compart', },
@@ -869,121 +915,132 @@ has_field 'compart.hwMac'
 
 has_field 'compart.hwId'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'ID', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_mb', 'comparts_ram', 'comparts_disk', 'comparts_ram', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_mb comparts_ram comparts_disk comparts_ram}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => '63 0F 10 00 FF FB 8B 17', 'data-name' => 'ap', 'data-group' => 'compart', },
      );
 
 has_field 'compart.hwPartNumber'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'Part Number', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_mb', 'comparts_ram', 'comparts_if', 'comparts_disk', 'comparts_ram', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_mb comparts_ram comparts_if comparts_disk comparts_ram}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'GR1333D364L9/4G000', 'data-name' => 'ap', 'data-group' => 'compart', },
      );
 
 has_field 'compart.hwVersion'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'Version', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_mb', 'comparts_ram', 'comparts_if', 'comparts_disk', 'comparts_ram', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_mb comparts_ram comparts_if comparts_disk comparts_ram}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'V17.5', 'data-name' => 'ap', 'data-group' => 'compart', },
      );
 
 has_field 'compart.hwSignature'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'Signature', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_cpu', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_cpu}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'Family 16, Model 6, Stepping 3', 'data-name' => 'ap', 'data-group' => 'compart', },
      );
 
 has_field 'compart.hwUuid'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'UUID', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_mb', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_mb}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => '00000000-0000-0000-0000-6C626D0A5E5A', 'data-name' => 'ap', 'data-group' => 'compart', },
      );
 
 has_field 'compart.hwName'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'Name', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_mb', 'comparts_ram', 'comparts_if', 'comparts_disk', 'comparts_ram', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_mb comparts_ram comparts_if comparts_disk comparts_ram}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'some name', 'data-name' => 'ap', 'data-group' => 'compart', },
      );
 
 has_field 'compart.hwNameIf'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'Interface Name', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_if', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_if}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'eth, wlan', 'data-name' => 'ap', 'data-group' => 'compart', },
      );
 
 has_field 'compart.hwFamily'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'Family', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_mb', 'comparts_ram', 'comparts_if', 'comparts_disk', 'comparts_ram', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_mb comparts_ram comparts_if comparts_disk comparts_ram}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'like CPU family', 'data-name' => 'hwfamily', 'data-group' => 'compart',},
      );
 
 has_field 'compart.hwFccId'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'FCC ID', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_mb', 'comparts_ram', 'comparts_if', 'comparts_disk', 'comparts_ram', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_mb comparts_ram comparts_if comparts_disk comparts_ram}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'TV7RBCM2N', 'data-name' => 'ap', 'data-group' => 'compart', },
      );
 
 has_field 'compart.hwFirmware'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'Firmware', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_mb', 'comparts_ram', 'comparts_if', 'comparts_disk', 'comparts_ram', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_mb comparts_ram comparts_if comparts_disk comparts_ram}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => '3.22', 'data-name' => 'ap', 'data-group' => 'compart', },
      );
 
 has_field 'compart.hwFirmwareType'
   => ( apply => [ Printable ],
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
        label => 'Firmware Type', label_class => [ 'col-xs-1', ],
-       wrapper_class => [  'hidden', 'relation', 'comparts_mb', 'comparts_ram', 'comparts_if', 'comparts_disk', 'comparts_ram', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       wrapper_class => [ qw{col-xs-12 hidden relation comparts_mb comparts_ram comparts_if comparts_disk comparts_ram}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'ar9330L', 'data-name' => 'ap', 'data-group' => 'compart', },
      );
 #!!# ---
 
-sub wrap_compart_elements {
-  my ( $self, $input, $subfield ) = @_;
-  my $output = sprintf('%s%s%s', ! $subfield ? qq{\n<div class="duplicate">} : qq{\n<div class="duplicated">},
-		       $input,
-		       qq{</div>});
-}
+has_field 'compart.remove'
+  => ( type => 'RmElement',
+       value => 'Remove this (above fields) compart',
+       element_class => [ qw{btn-danger}, ],
+       element_wrapper_class => [ qw{col-xs-offset-2 col-xs-10 col-lg-5 col-md-5}, ],
+       wrapper_class => [ qw{well}, ],
+     );
 
 has_block 'compart'
   => ( tag => 'fieldset',
-       label => '<a href="#" class="btn btn-success btn-sm" data-duplicate="duplicate" title="Duplicate this section">' .
-       '<span class="fa fa-plus-circle fa-lg"></span></a>&nbsp;' .
-       'Compart/s&nbsp;<small class="text-muted"><em>(in case, no dedicated field found, write the data to the description)</em></small>',
-       render_list => [ 'compart', ],
+       label => 'Compart/s&nbsp;<small class="text-muted"><em>(in case, no dedicated field found, write the data to the description)</em></small>',
+       render_list => [ 'aux_add_compart', 'compart', ],
        class => [ 'tab-pane', 'fade', ],
        attr => { id => 'compart',
 		 'aria-labelledby' => "compart-tab",
 		 role => "tabpanel", },
+       wrapper_class => [ qw{col-xs-12}, ],
      );
 
 ######################################################################
@@ -1060,20 +1117,35 @@ sub validate {
       $passwd_acc_filter,
       $a1, $b1, $c1
      );
-
+  
   $ldap_crud = $self->ldap_crud;
-
   if ( defined $self->field('common_hwAssignedTo')->value && $self->field('common_hwAssignedTo')->value ne '') {
-    $assignedto = $self->field('common_hwAssignedTo')->value =~ /.*,$ldap_crud->{cfg}->{base}->{db}/ ?
-      $self->field('common_hwAssignedTo')->value :
-      sprintf('uid=%s,ou=People,%s',
-	      $self->field('common_hwAssignedTo')->value,
-	      $ldap_crud->{cfg}->{base}->{db});
-    $mesg =
-      $ldap_crud->search({ scope => 'base',
-  			   base => $assignedto, });
-    $self->field('common_hwAssignedTo')->add_error('No such user exist!')
-      if ! $mesg->count;
+    
+    if ( $self->field('common_hwType')->value !~ /comparts_.*/ ) {
+
+      $assignedto = $self->field('common_hwAssignedTo')->value =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ?
+	$self->field('common_hwAssignedTo')->value :
+	sprintf('%s=%s,%s',
+		$ldap_crud->{cfg}->{rdn}->{acc_root},
+		$self->field('common_hwAssignedTo')->value,
+		$ldap_crud->{cfg}->{base}->{acc_root});
+      $mesg =
+	$ldap_crud->search({ scope => 'base',
+			     base => $assignedto, });
+      $self->field('common_hwAssignedTo')->add_error('No such user exist!')
+	if ! $mesg->count;
+
+    } else {
+      if ( $self->field('common_hwAssignedTo')->value !~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ) {
+	$self->field('common_hwAssignedTo')->add_error('For comparts objects, AssignedTo field must contain DN of the inventory object it assigned to!');
+      } else {
+	$mesg =
+	  $ldap_crud->search({ scope => 'base',
+			       base => $self->field('common_hwAssignedTo')->value, });
+	$self->field('common_hwAssignedTo')->add_error('No such inventory object exist!')
+	  if ! $mesg->count;
+      }
+    }
   }
   
   # if ( $self->add_svc_acc eq '' ) {
