@@ -446,6 +446,32 @@
 </div>
 [% END %]
 
+[% IF inventory.size > 0 %]
+  <div class="panel panel-success">
+    <div class="panel-heading" id="heading_inventory">
+      <h3 class="panel-title">
+	<a class="collapsed" data-toggle="collapse"
+	   href="#collapse_inventory" aria-expanded="false" aria-controls="collapse_inventory">
+          <span class="fa fa-caret-square-o-down"></span>
+        </a>
+	<span class="fa fa-sitemap col-xs-offset-1">&nbsp;</span>Inventory
+      </h3>
+    </div>
+    <div id="collapse_inventory" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_inventory">
+      <div class="panel-body">
+	<table class="table table-condenced table-stripped table-hover">
+	  <thead><tr class="active"><th>Hardware Type</th><th>DN</th></tr></thead>
+	  <tbody>
+	    [% FOREACH x IN inventory %]
+	    <tr><td>[% x.hwType %]</td><td>[% x.dn %]</td></tr>
+	    [% END %]
+	  </tbody>
+	</table>
+      </div>
+    </div>
+  </div>
+[% END %]
+
 </div>
 
 <script> $(function(){ $('.svcDN').popover() }); </script>

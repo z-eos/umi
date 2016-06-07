@@ -142,7 +142,8 @@ sub proc :Path(proc) :Args(0) {
 	    if $mesg->is_error();
 	}
 	
-	$dn_depth = $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ? 5 : 3;
+	$dn_depth = $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 3;
+	$dn_depth += split(/,/, $ldap_crud->{cfg}->{base}->{acc_root});
 
 	$ttentries->{$_->dn}->{'mgmnt'} =
 	  {

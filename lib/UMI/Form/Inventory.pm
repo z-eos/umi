@@ -92,6 +92,10 @@ has_field 'common_hwType'
 	     attributes => { 'data-relation-prefix' => 'common_',
 			     'data-relation' => '', },
 	     label => 'consumable: Mouse' },
+	   { value => 'consumable_ms',
+	     attributes => { 'data-relation-prefix' => 'common_',
+			     'data-relation' => '', },
+	     label => 'consumable: Lead Power Extender (LPE)' },
 
 	   
 	   { value => 'singleboard_ap',
@@ -114,6 +118,10 @@ has_field 'common_hwType'
 	     attributes => { 'data-relation-prefix' => 'common_',
 			     'data-relation' => '', },
 	     label => 'singleboard: Printer', },
+	   { value => 'singleboard_ups',
+	     attributes => { 'data-relation-prefix' => 'common_',
+			     'data-relation' => '', },
+	     label => 'singleboard: Uninterruptable Power Supply (UPS)', },
 	   { value => 'singleboard_wrt',
 	     attributes => { 'data-relation-prefix' => 'common_',
 			     'data-relation' => '', },

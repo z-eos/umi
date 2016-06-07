@@ -1464,7 +1464,7 @@ sub modform :Path(modform) :Args(0) {
     $c->stash( template => 'nis/nisnetgroup.tt', );
     
   } elsif ( $params->{aux_dn_form_to_modify} =~ /$ldap_crud->{cfg}->{base}->{org}/ ) { ## ORGANIZATIONs
-    use UMI::Form::Org;
+    use UMI::Form::Org; p $init_obj;
     $form = UMI::Form::Org->new( init_object => $init_obj, );
     $c->stash( template => 'org/org_wrap.tt', );
   } else { ## REST

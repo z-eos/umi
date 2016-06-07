@@ -267,25 +267,25 @@ sub create_inventory {
 
   }
 
-  # add DN of common_compart object to the composite (root) object if set
+  # add DN of common_compart object to the composite (root) object if defined
   if ( $common_compart && $args->{common_hwAssignedTo} ) {
     $tmp = $ldap_crud->modify( $args->{common_hwAssignedTo},
 			       [ 'add' => [ $common_compart => $add->{root}->{dn}] ] );
     push @{$return->{error}}, $tmp if $tmp;
   }
 
-    $add->{root}->{ldif} = $ldap_crud->add( $add->{root}->{dn}, $add->{root}->{attrs} );
-    if ( $add->{root}->{ldif} ) {
-      push @{$return->{error}},
-	sprintf('Error during Composite inventory object %s creation occured: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s' .
-		$add->{root}->{dn},
-		$add->{root}->{ldif}->{html},
-		$add->{root}->{ldif}->{srv},
-		$add->{root}->{ldif}->{text});
-    } else {
-      push @{$return->{success}}, sprintf('%s<br >', $add->{root}->{dn}) ;
-    }
-
+  $add->{root}->{ldif} = $ldap_crud->add( $add->{root}->{dn}, $add->{root}->{attrs} );
+  if ( $add->{root}->{ldif} ) {
+    push @{$return->{error}},
+      sprintf('Error during Composite inventory object %s creation occured: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s' .
+	      $add->{root}->{dn},
+	      $add->{root}->{ldif}->{html},
+	      $add->{root}->{ldif}->{srv},
+	      $add->{root}->{ldif}->{text});
+  } else {
+    push @{$return->{success}}, sprintf('%s<br >', $add->{root}->{dn}) ;
+  }
+  
   p $add; # p $return->{warning} = $add;
   return $return; # = { success => $add };
 }

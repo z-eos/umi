@@ -97,11 +97,12 @@ sub index :Path :Args(0) {
       ->process( init_object => $init_obj,
 		 ldap_crud => $c->model('LDAP_CRUD'), );
   } else {
-    p $params;
+    # p $params;
     return unless $self->form
       ->process( posted => ($c->req->method eq 'POST'),
 		 params => $params,
 		 ldap_crud => $c->model('LDAP_CRUD'), );
+
     $self->form->add_svc_acc( defined $params->{add_svc_acc} && $params->{add_svc_acc} ne '' ? $params->{add_svc_acc} : '' );
     $c->stash( final_message => $self->create_account( $c->model('LDAP_CRUD'), $params ) );
   }
@@ -181,7 +182,7 @@ sub create_account {
 
     my $root_add_options =
       [
-       $ldap_crud->cfg->{rdn}->{acc_root} => $uid,
+       uid  => $uid, # $ldap_crud->cfg->{rdn}->{acc_root} => $uid,
        userPassword => $pwd->{root}->{ssha},
        telephoneNumber => $args->{person_telephonenumber},
        physicalDeliveryOfficeName => $args->{'person_office'},

@@ -830,18 +830,15 @@ before 'validate_form' => sub {
 sub validate {
   my $self = shift;
   my (
-      $cert,
-      $cert_msg,
-      $element,
-      $elementcmp,
-      $err,
-      $error,
+      $cert, $cert_msg,
+      $element, $elementcmp,
+      $mesg, $entry,
+      $err, $error,
       $field,
       $is_x509,
       $ldap_crud,
       $login_error_pfx,
       $logintmp,
-      $mesg,
       $passwd_acc_filter,
       $a1, $b1, $c1
      );
@@ -1215,6 +1212,7 @@ sub validate {
     #---[ ssh - ]------------------------------------------------
 
     #---[ OpenVPN + ]--------------------------------------------
+    my $ovpn_tmp;
     $i = 0;
     foreach $element ( $self->field('loginless_ovpn')->fields ) {
       if ((( defined $element->field('associateddomain')->value &&
@@ -1282,6 +1280,31 @@ sub validate {
 	}
       }
 
+      if ( defined $element->field('ifconfigpush')->value &&
+	   $element->field('ifconfigpush')->value =~ /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]) (([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9])$/ ) {
+	$ovpn_tmp = $self->vld_ifconfigpush({
+					     concentrator_fqdn => $element->field('associateddomain')->value,
+					     ifconfigpush => $element->field('ifconfigpush')->value,
+					     mode => lc( $element->field('devos')->value ) eq 'windows' ? 'net30' : '',
+					    });
+
+	$mesg =
+	  $ldap_crud->search({ filter => '(&(umiOvpnAddStatus=active)(umiOvpnCfgIfconfigPush=' .
+			       $element->field('ifconfigpush')->value . '))',
+			       base => $ldap_crud->cfg->{base}->{acc_root},
+			       attrs => [ 'umiOvpnCfgIfconfigPush' ], });
+	
+	if ( $mesg->count ) {
+	  $entry = $mesg->entry(0);
+	  $element->field('ifconfigpush')
+	    ->add_error( sprintf('The same addresses are used for account: <span class="mono"><b>%s</b></span>', $entry->dn) );
+	} elsif ( $ovpn_tmp ) {
+	  $element->field('ifconfigpush')->add_error( $ovpn_tmp->{error} );
+	}
+      } elsif ( defined $element->field('ifconfigpush')->value &&
+	   $element->field('ifconfigpush')->value !~ /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]) (([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9])$/ ) {
+	$element->field('ifconfigpush')->add_error( 'The input is not two IP addresses!' );
+      }
 
       #
       ## !!! add check for this cert existance !!! since when it is absent, PSGI falls

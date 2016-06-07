@@ -136,6 +136,11 @@ sub user_preferences :Path(user_prefs) :Args(0) {
   if ( $c->user_exists ) {
     my $ldap_crud = $c->model('LDAP_CRUD');
 
+    my $user_dn = sprintf('%s=%s,%s',
+			  $ldap_crud->cfg->{rdn}->{acc_root},
+			  $args->{uid},
+			  $ldap_crud->cfg->{base}->{acc_root});
+
     my ( $arg, $mesg, $return, $entry, $entries, $orgs, $domains, $fqdn,
 	 $physicaldeliveryofficename, $telephonenumber, $title, $mail, );
 
@@ -145,7 +150,8 @@ sub user_preferences :Path(user_prefs) :Args(0) {
     $entry = '';
     if ( defined $args->{uid} && $args->{uid} ne '' ) {
       $mesg = $ldap_crud->search( {
-				   base => sprintf('uid=%s,%s',
+				   base => sprintf('%s=%s,%s',
+						   $ldap_crud->cfg->{rdn}->{acc_root},
 						   $args->{uid},
 						   $ldap_crud->cfg->{base}->{acc_root}),
 				   scope => 'base',
@@ -332,6 +338,23 @@ sub user_preferences :Path(user_prefs) :Args(0) {
       undef $service_details;
     }
 
+    #=================================================================
+    # Inventory assigned to user
+    #
+    my ( @inventory );
+    $mesg = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{inventory},
+				  filter => sprintf('hwAssignedTo=%s', $user_dn), }
+			      );
+    if ( $mesg->code ) { $return->{error} .= sprintf('<li>Inventory %s</li>',
+						     $ldap_crud->err($mesg)->{html}); }
+    $entries = $mesg->as_struct;
+    foreach (keys (%{$entries})) {
+      push @inventory, { dn => $_, hwType => $entries->{$_}->{hwtype}->[0] };
+    }
+
+    #=================================================================
+    # FINISH
+    #
     # $c->stash( template => 'user/user_preferences.tt',
     $c->stash( template => 'user/user_preferences_neo.tt',
 	       auth_obj => $arg,
@@ -339,6 +362,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	       orgs => $orgs,
 	       fqdn => $fqdn,
 	       dhcp => $dhcp,
+	       inventory => \@inventory,
 	       service => $service,
 	       session => $c->session,
 	       final_message => $return, );

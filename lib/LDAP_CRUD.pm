@@ -2034,13 +2034,15 @@ sub _build_select_associateddomains {
   }
 
   my @entries = $mesg->sorted('associatedDomain');
-  my @i;
+  my (@i, @j);
   foreach my $entry ( @entries ) {
     @i = $entry->get_value('associatedDomain');
     foreach (@i) {
-      push @domains, { value => $_, label => $_, };
+      push @j, $_;
     }
   }
+  @domains = map { { value => $_, label => $_ } } sort @j;
+  
   return \@domains;
 }
 
@@ -2326,7 +2328,7 @@ p $arg;
 	 $arg->{service} eq '802.1x-eap-tls' ) ||
        $arg->{service} eq 'web' ) {
     $authorizedService = [];
-    $authorizedService = [ description => $arg->{description}, ];
+    $authorizedService = [ description => $arg->{description}, ]; # ??? looks like it is not needed ... except web may be ...
   } else {
     $authorizedService = [
 			  objectClass => $self->cfg->{objectClass}->{acc_svc_common},
@@ -2392,7 +2394,7 @@ p $arg;
     push @{$authorizedService},
       authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
       userPassword => $arg->{password}->{$arg->{service}}->{clear},
-      description => uc($arg->{service}) . ': ' . $arg->{'login'};
+      description => $arg->{description} ne '' ? $arg->{description} : sprints('%s: %s', uc($arg->{service}), $arg->{'login'});
 
     push @{$authorizedService},
       radiusprofiledn => $arg->{radiusprofiledn}

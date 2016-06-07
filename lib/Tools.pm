@@ -585,7 +585,7 @@ sub file_is {
 }
 
 
-=head file_dmi
+=head2 file_dmi
 
 reading input file ( output of dmidecode(8) ) and extracting DMI data
 
@@ -780,7 +780,7 @@ sub file_dmi {
 }
 
 
-=head file_smart
+=head2 file_smart
 
 reading input file ( output of `smartctl -i' ) and extracting
 S.M.A.R.T. data
@@ -875,7 +875,7 @@ sub file_smart {
 }
 
 
-=head is_searchable
+=head2 is_searchable
 
 checking the match of the search filter provided against user roles
 
@@ -913,6 +913,75 @@ sub is_searchable {
   }
   # p $arg;
   return $arg->{return};
+}
+
+
+=head2 vld_ifconfigpush
+
+validation of the addresses for ifconfigpush OpenVPN option
+
+    weather it is /30
+    or /32
+
+=cut
+
+sub vld_ifconfigpush {
+  my ($self, $args) = @_;
+  my $arg = {
+	     concentrator_fqdn => $args->{concentrator_fqdn},
+	     ifconfigpush => $args->{ifconfigpush},
+	     mode => $args->{mode} || 'net30',
+	    };
+
+  use Net::Netmask;
+
+  ( $arg->{l}, $arg->{r}) = split(/ /, $arg->{ifconfigpush});
+  
+  $arg->{vpn}->{net} = new Net::Netmask ('10.144/16');
+
+  if ( $arg->{mode} ne 'net30' && $arg->{vpn}->{net}->nth(1) eq $arg->{l} ) {
+    $arg->{return}->{error} = 'Left address can not be the address of VPN server itself.';
+  } elsif ( $arg->{vpn}->{net}->nth(1) eq $arg->{r} ) {
+    $arg->{return}->{error} = 'NONWIN CONFIG'; # $arg->{return} = 0;
+  } else {
+    $arg->{net} = new Net::Netmask ( $arg->{l} . '/30');
+    if ( ! $arg->{net}->match( $arg->{r} ) ) {
+      $arg->{return}->{error} = 'The second address does not belong to the expected ' . $arg->{net}->desc;
+    } elsif ( $arg->{l} eq $arg->{r} ) {
+      $arg->{return}->{error} = 'Local and Remote addresses can not be the same.';
+    } elsif ( $arg->{net}->match($arg->{r}) && $arg->{l} eq $arg->{net}->nth(1) && $arg->{r} eq $arg->{net}->nth(-2) ) {
+      $arg->{return}->{error} = 'WIN CONFIG'; # $arg->{return} = 0;
+    } elsif ( $arg->{net}->match($arg->{r}) && $arg->{l} ne $arg->{net}->nth(1) && $arg->{r} eq $arg->{net}->nth(-2) ) {
+      $arg->{return}->{error} = 'The first address is not a usable/host address of the expected ' . $arg->{net}->desc;
+    } elsif ( $arg->{net}->match($arg->{r}) && $arg->{l} eq $arg->{net}->nth(1) && $arg->{r} ne $arg->{net}->nth(-2) ) {
+      $arg->{return}->{error} = 'The second address is not a usable/host address of the expected ' . $arg->{net}->desc;
+    } elsif ( $arg->{net}->match($arg->{r}) && $arg->{l} eq $arg->{net}->nth(-2) && $arg->{r} eq $arg->{net}->nth(1) ) {
+      $arg->{return}->{error} = 'The addresses are missordered for the expected ' . $arg->{net}->desc;
+    } elsif ( $arg->{net}->match($arg->{r}) && $arg->{l} ne $arg->{net}->nth(1) && $arg->{r} ne $arg->{net}->nth(-2) ) {
+      $arg->{return}->{error} = 'The addresses are not usable/host addresses of the expected ' . $arg->{net}->desc;
+    } else {
+      $arg->{return}->{error} = 'Addresses does not belong to the same ( ' . $arg->{net}->desc . ' ) subnet.';
+    }
+  }
+
+  return $arg->{return};
+}
+
+
+=head2 search_result_item_as_button
+
+!!! TO BE FINISHED !!!
+
+wrapper to make a button from a search result item
+
+=cut
+
+sub search_result_item_as_button {
+  my ($self, $args) = @_;
+  return sprintf('<form role="form" method="POST" action="%s"><button type="submit" class="btn btn-link btn-info umi-search" title="account with the same addresses" name="ldap_subtree" value="%s"></button></form>',
+		 $args->{uri}, # $c->uri_for_action('searchby/index'),
+		 $args->{dn});
+
 }
 
 =head1 AUTHOR

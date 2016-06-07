@@ -172,7 +172,7 @@
 		  <i title="Service Account" class="umi-2-margin-left fa fa-leaf fa-lg[% blocked %]"></i>
 		  [% END %]
 
-		[% ELSIF entry.key.match('^cn=.*,cn=.*,.*,ou=Inventory') %]
+		[% ELSIF entry.key.match('^cn=.*,ou=Inventory') %]
 		<i title="Subject to Inventory" class="fa fa-tag [% brcl %]"></i>		  
 		[% ELSIF base_ico.${dn.ou} %]
 		<i title="Service Account Branch" class="[% base_ico.${dn.ou} %] fa-lg[% blocked %]"></i>
