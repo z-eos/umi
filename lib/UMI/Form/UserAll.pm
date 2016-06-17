@@ -1307,7 +1307,7 @@ sub validate {
       }
 
       #
-      ## !!! add check for this cert existance !!! since when it is absent, PSGI falls
+      ## !!! add check for this cert existance !!! since when it is absent in the input data, PSGI falls
       #
 
       $i++;

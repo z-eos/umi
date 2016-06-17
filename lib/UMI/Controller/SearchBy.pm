@@ -127,7 +127,9 @@ ask UMI admin for explanation/s.',
     # }
     
     if ( defined $params->{'ldapsearch_by_email'} ) {
-      $filter = sprintf("mail=%s", $filter_meta);
+      # $filter = sprintf("mail=%s", $filter_meta);
+      $filter = sprintf("|(mail=%s)(&(uid=%s)(authorizedService=mail@*))",
+			$filter_meta, $filter_meta );
       $base = $ldap_crud->cfg->{base}->{acc_root};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_jid'} ) {

@@ -26,12 +26,13 @@ requires 'Catalyst::Authentication::Store::LDAP';
 requires 'Net::LDAP';
 requires 'Lingua::Translit';
 requires 'Text::Unidecode';
-requires 'Crypt::GeneratePassword'; # it is required but don't see pkg installed
+requires 'Crypt::GeneratePassword'; # it is required but looks not available with `pkg install'
 requires 'Crypt::RSA';
 requires 'Digest::SHA1';
 requires 'MIME::Base64';
 requires 'GD::Barcode::QRcode';
 requires 'Net::SSH::Perl';
+requires 'Net::Netmask';
 
 test_requires 'Test::More' => '0.88';
 catalyst;

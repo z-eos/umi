@@ -923,6 +923,8 @@ validation of the addresses for ifconfigpush OpenVPN option
     weather it is /30
     or /32
 
+return either error message or 0 if validation has been successfully passed
+
 =cut
 
 sub vld_ifconfigpush {
@@ -931,18 +933,21 @@ sub vld_ifconfigpush {
 	     concentrator_fqdn => $args->{concentrator_fqdn},
 	     ifconfigpush => $args->{ifconfigpush},
 	     mode => $args->{mode} || 'net30',
+	     vpn_net => $args->{vpn_net} || '10.144/16', # !!! NEED TO BE FINISHED, now it is hardcode
 	    };
 
   use Net::Netmask;
 
   ( $arg->{l}, $arg->{r}) = split(/ /, $arg->{ifconfigpush});
-  
-  $arg->{vpn}->{net} = new Net::Netmask ('10.144/16');
+
+  $arg->{vpn}->{net} = new Net::Netmask ($arg->{vpn_net});
 
   if ( $arg->{mode} ne 'net30' && $arg->{vpn}->{net}->nth(1) eq $arg->{l} ) {
     $arg->{return}->{error} = 'Left address can not be the address of VPN server itself.';
   } elsif ( $arg->{vpn}->{net}->nth(1) eq $arg->{r} ) {
-    $arg->{return}->{error} = 'NONWIN CONFIG'; # $arg->{return} = 0;
+
+    $arg->{return} = 0; # $arg->{return}->{error} = 'NONWIN CONFIG';
+
   } else {
     $arg->{net} = new Net::Netmask ( $arg->{l} . '/30');
     if ( ! $arg->{net}->match( $arg->{r} ) ) {
@@ -950,7 +955,9 @@ sub vld_ifconfigpush {
     } elsif ( $arg->{l} eq $arg->{r} ) {
       $arg->{return}->{error} = 'Local and Remote addresses can not be the same.';
     } elsif ( $arg->{net}->match($arg->{r}) && $arg->{l} eq $arg->{net}->nth(1) && $arg->{r} eq $arg->{net}->nth(-2) ) {
-      $arg->{return}->{error} = 'WIN CONFIG'; # $arg->{return} = 0;
+
+      $arg->{return} = 0; # $arg->{return}->{error} = 'WIN CONFIG';
+      
     } elsif ( $arg->{net}->match($arg->{r}) && $arg->{l} ne $arg->{net}->nth(1) && $arg->{r} eq $arg->{net}->nth(-2) ) {
       $arg->{return}->{error} = 'The first address is not a usable/host address of the expected ' . $arg->{net}->desc;
     } elsif ( $arg->{net}->match($arg->{r}) && $arg->{l} eq $arg->{net}->nth(1) && $arg->{r} ne $arg->{net}->nth(-2) ) {
