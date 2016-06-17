@@ -104,6 +104,7 @@ sub index :Path :Args(0) {
 		 ldap_crud => $c->model('LDAP_CRUD'), );
 
     $self->form->add_svc_acc( defined $params->{add_svc_acc} && $params->{add_svc_acc} ne '' ? $params->{add_svc_acc} : '' );
+    $params->{action_searchby} = $c->uri_for_action('searchby/index');
     $c->stash( final_message => $self->create_account( $c->model('LDAP_CRUD'), $params ) );
   }
 }
@@ -216,11 +217,15 @@ sub create_account {
 		$ldif->{text});
     } else {
       push @{$final_message->{success}},
-	sprintf('<i class="fa fa-user fa-lg fa-fw"></i>&nbsp;<em>root account login:</em> &laquo;<strong class="text-success">%s</strong>&raquo; <em>password:</em> &laquo;<strong class="text-success mono">%s</strong>&raquo;',
+	sprintf('<i class="fa fa-user fa-lg fa-fw"></i>&nbsp;<em>root account login:</em> &laquo;<strong class="text-success">%s</strong>&raquo; <em>password:</em> &laquo;<strong class="text-success mono">%s</strong>&raquo;%s',
 		$uid,
-		$pwd->{root}->{'clear'}) ;
+		$pwd->{root}->{'clear'},
+		$self->search_result_item_as_button({ uri => $args->{action_searchby},
+						      dn => $root_add_dn,
+						      css_btn => 'btn-success',
+						      css_frm => 'pull-right' }) ) ;
     }
-
+p $final_message->{success};
   } else {
     #####################################################################################
     # ADDITIONAL service account (no root account creation, but using the existent one)

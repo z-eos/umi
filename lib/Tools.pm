@@ -977,17 +977,27 @@ sub vld_ifconfigpush {
 
 =head2 search_result_item_as_button
 
-!!! TO BE FINISHED !!!
+wrapper to make a form -> button for the data to be displayed
 
-wrapper to make a button from a search result item
+    uri holds form action
+    dn is object DN to be passed to the action
 
 =cut
 
 sub search_result_item_as_button {
   my ($self, $args) = @_;
-  return sprintf('<form role="form" method="POST" action="%s"><button type="submit" class="btn btn-link btn-info umi-search" title="account with the same addresses" name="ldap_subtree" value="%s"></button></form>',
-		 $args->{uri}, # $c->uri_for_action('searchby/index'),
-		 $args->{dn});
+
+  my $arg = { uri => $args->{uri},
+	      dn => $args->{dn},
+	      css_frm => $args->{css_frm} || '',
+	      css_btn => $args->{css_btn} || '', };
+  
+  return sprintf('<form role="form" method="POST" action="%s" class="%s"><button type="submit" class="btn %s umi-search" title="account with the same addresses" name="ldap_subtree" value="%s">%s</button></form>',
+		 $arg->{uri}, # $c->uri_for_action('searchby/index'),
+		 $arg->{css_frm},
+		 $arg->{css_btn},
+		 $arg->{dn},
+		 $arg->{dn});
 
 }
 

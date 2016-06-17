@@ -96,7 +96,7 @@
 	      data-order="[% site.searchby.menu.order.ldap_delete %]"
 	      data-toggle="modal"
 	      data-target="#modal_delete[% zufix %]">
-	<span class="fa fa-fw fa-trash text-danger"></span>
+	<span class="fa fa-fw fa-remove text-danger"></span>
 	delete
       </button>
     </li>
