@@ -184,6 +184,12 @@ ask UMI admin for explanation/s.',
 				   base => $base,
 				   filter => '(' . $filter . ')',
 				   sizelimit => $ldap_crud->cfg->{sizelimit},
+				   attrs => [ '*',
+					      'createTimestamp',
+					      'creatorsName',
+					      'modifiersName',
+					      'modifyTimestamp',
+					    ],
 				  });
 
     my @entries = $mesg->entries;
@@ -1372,9 +1378,9 @@ sub modify :Path(modify) :Args(0) {
   }
 
   if ( defined $modx && $#{$modx} > -1 ) {
-    p $modx;
+    # p $modx;
     $mesg = $ldap_crud->modify( $params->{dn}, $modx, );
-    $return->{error} .= $mesg->{html} if $mesg ne "0";
+    $return->{error} .= $mesg if $mesg ne "0";
     $return->{success} = 'Modification/s made:<pre>' .
       np($modx, caller_info => 0, colored => 0, index => 0) . '</pre>' if $mesg eq "0";
   } else {

@@ -1155,6 +1155,19 @@ sub validate {
       }
     }
   }
+
+#  if ( defined $self->field('common_hwType')->value && $self->field('common_hwAssignedTo')->value ne '') {
+#  }
+  # common_hwType == comparts_disk common_hwSerialNumber
+  # common_hwType == comparts_mb   common_hwUuid
+  # common_hwType == comparts_if   common_hwMac
+  # common_hwType == comparts_ram  common_hwSerialNumber
+
+  # compart hwType == comparts_disk compart hwSerialNumber
+  # compart hwType == comparts_mb   compart hwUuid
+  # compart hwType == comparts_if   compart hwMac
+  # compart hwType == comparts_ram  compart hwSerialNumber
+
   
   # if ( $self->add_svc_acc eq '' ) {
   #   $mesg =

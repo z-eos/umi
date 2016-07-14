@@ -115,6 +115,11 @@ sub proc :Path(proc) :Args(0) {
 
       #p $params;
       my @attrs = split(/,/, $params->{'show_attrs'});
+      push @attrs,
+	'createTimestamp',
+	'creatorsName',
+	'modifiersName',
+	'modifyTimestamp';
       $ldap_crud =
 	$c->model('LDAP_CRUD');
       my $mesg = $ldap_crud->search({
@@ -149,13 +154,13 @@ sub proc :Path(proc) :Args(0) {
 	  {
 	   is_blocked => $mesg->count,
 	   is_dn => scalar split(',', $_->dn) <= $dn_depth ? 1 : 0,
-	   is_account => $_->dn =~ /.*,$ldap_crud->cfg->{base}->{acc_root}/ ? 1 : 0,
-	   is_group => $_->dn =~ /.*,$ldap_crud->cfg->{base}->{group}/ ? 1 : 0,
-	   is_inventory => $_->dn =~ /.*,$ldap_crud->cfg->{base}->{inventory}/ ? 1 : 0,
-	   jpegPhoto => $_->dn =~ /.*,$ldap_crud->cfg->{base}->{acc_root}/ ? 1 : 0,
+	   is_account => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
+	   is_group => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{group}/ ? 1 : 0,
+	   is_inventory => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ? 1 : 0,
+	   jpegPhoto => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
 	   gitAclProject => $_->exists('gitAclProject') ? 1 : 0,
 	   userPassword => $_->exists('userPassword') ? 1 : 0,
-	   userDhcp => $_->dn =~ /.*,$ldap_crud->cfg->{base}->{acc_root}/ &&
+	   userDhcp => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ &&
 	   scalar split(',', $_->dn) <= 3 ? 1 : 0,
 	  };
 

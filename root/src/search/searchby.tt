@@ -185,8 +185,23 @@
 	    </div>
 	    <div id="collapse[% loop.index %]" class="panel-collapse collapse [% in %]">
 	      <div class="panel-body">
+		<div class="clearfix">
+		  <div class="text-muted pull-right">
+		    <div><small>
+		      [% ts = entry.value.attrs.createTimestamp.0.chunk(2) %]
+		      [% "$ts.0$ts.1-$ts.2-$ts.3 $ts.4:$ts.5:$ts.6" %] by <b>[% entry.value.attrs.creatorsName.0.split(',').0.split('=').1 %]</b>, created
+		    </small></div>
+		    [% IF entry.value.attrs.createTimestamp.0 != entry.value.attrs.modifyTimestamp.0 %]
+		    <div class="text-warning"><small>
+		      [% ts = entry.value.attrs.modifyTimestamp.0.chunk(2) %]
+		      [% "$ts.0$ts.1-$ts.2-$ts.3 $ts.4:$ts.5:$ts.6" %] by <b>[% entry.value.attrs.modifiersName.0.split(',').0.split('=').1 %]</b>, modified
+		    </small></div>
+		    [% END %]
+		  </div>
+		</div>
 		<dl class="dl-horizontal">
 		  [% FOREACH hattr IN entry.value.attrs %]
+		  [% NEXT IF hattr.key == 'creatorsName' || hattr.key == 'createTimestamp' || hattr.key == 'modifiersName' || hattr.key == 'modifyTimestamp' %]
 		  [% x=hattr.key %][% # attribute name %]
 		  <dt>
 		  [% IF hattr.key.match(';binary') %]
