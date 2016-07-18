@@ -238,8 +238,8 @@
 		        [% IF hattr.key == 'sshPublicKey' %]
 		          <div class="panel panel-default">
 			    <div class="panel-body"><small class="mono">[% i %]</small></div></div>
-			[% ELSE %]
-			    [% IF schema.${hattr.key} == 'distinguishedNameMatch' %]
+			  [% ELSE %]
+			    [% IF schema.${hattr.key} == 'distinguishedNameMatch' || schema.${hattr.key} == 'distinguishedName' %]
 			    [% v = '<form role="form" method="POST" action="' _ c.uri_for_action("searchby/index") _ '">' _
 			      '<button type="submit" class="btn btn-link btn-xs"' _
 				      'title="click to open this object" name="ldap_subtree" value="' _ 

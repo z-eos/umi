@@ -1283,12 +1283,13 @@ sub validate {
 
       if ( defined $element->field('ifconfigpush')->value &&
 	   $element->field('ifconfigpush')->value =~ /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]) (([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9])$/ ) {
-	$ovpn_tmp = $self->vld_ifconfigpush({
-					     concentrator_fqdn => $element->field('associateddomain')->value,
-					     ifconfigpush => $element->field('ifconfigpush')->value,
-					     mode => lc( $element->field('devos')->value ) eq 'windows' ? 'net30' : '',
-					    });
+	# $ovpn_tmp = $self->vld_ifconfigpush({
+	# 				     concentrator_fqdn => $element->field('associateddomain')->value,
+	# 				     ifconfigpush => $element->field('ifconfigpush')->value,
+	# 				     mode => lc( $element->field('devos')->value ) eq 'windows' ? 'net30' : '',
+	# 				    });
 
+	$ovpn_tmp = 0; # HARDCODE !!! logics of vld_ifconfigpush NEED TO BE FIXED !!!
 	$mesg =
 	  $ldap_crud->search({ filter => '(&(umiOvpnAddStatus=active)(umiOvpnCfgIfconfigPush=' .
 			       $element->field('ifconfigpush')->value . '))',

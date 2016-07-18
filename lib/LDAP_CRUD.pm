@@ -2559,8 +2559,12 @@ sub build_attr_equality {
   my $schema = $self->ldap->schema;
   
   foreach ( $schema->all_attributes ) {
-    $return->{$_->{name}} = $_->{equality}
-      if defined $_->{equality};
+    if ( defined $_->{equality} ) {
+      $return->{$_->{name}} = $_->{equality};
+    } elsif ( defined $_->{sup}) {
+      $return->{$_->{name}} = $_->{sup}->[0];
+    }
+    #p $_ if ! defined $_->{equality};
   }
   # p $return;
   return $return;

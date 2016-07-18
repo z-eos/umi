@@ -113,8 +113,9 @@ sub proc :Path(proc) :Args(0) {
 	return 0;
       }
 
-      #p $params;
-      my @attrs = split(/,/, $params->{'show_attrs'});
+      # p $params;
+      my @attrs = ( '*' );
+      @attrs = split(/,/, $params->{'show_attrs'}) if $params->{'show_attrs'} ne '';
       push @attrs,
 	'createTimestamp',
 	'creatorsName',
