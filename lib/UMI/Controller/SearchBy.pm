@@ -192,7 +192,7 @@ ask UMI admin for explanation/s.',
 					    ],
 				  });
 
-    my @entries = $mesg->entries;
+    my @entries = $params->{order_by} ne '' ? $mesg->sorted(split(/,/,$params->{order_by})) : $mesg->sorted('dn');
     if ( ! $mesg->count ) {
       if ( $self->is_ascii($params->{'ldapsearch_filter'}) &&
 	   $params->{'ldapsearch_by_name'} ne 1 ) {
@@ -208,7 +208,8 @@ ask UMI admin for explanation/s.',
       }
     }
 
-    my ( $ttentries, $attr, $tmp, $dn_depth );
+    my ( $ttentries, @ttentries_keys, $attr, $tmp, $dn_depth, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry );
+    my $blocked = 0;
     foreach (@entries) {
       # p $ldap_crud->obj_schema({ dn => $_->dn });
 
@@ -218,6 +219,7 @@ ask UMI admin for explanation/s.',
 						    $ldap_crud->cfg->{stub}->{group_blocked},
 						    substr( (reverse split /,/, $_->dn)[2], 4 )),
 				 });
+      $blocked = $mesg->count;
       $return->{error} .= $ldap_crud->err( $mesg )->{html}
 	if $mesg->is_error();
       # $tmp = $ldap_crud->canonical_dn_rev ( $_->dn );
@@ -226,9 +228,42 @@ ask UMI admin for explanation/s.',
       $dn_depth = $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 3;
       $dn_depth += split(/,/, $ldap_crud->{cfg}->{base}->{acc_root});
 
+      @root_arr = split(',', $_->dn);
+      $root_i = $#root_arr;
+      @root_dn = splice(@root_arr, -1 * $dn_depth);
+      $ttentries->{$tmp}->{root}->{dn} = join(',', @root_dn);
+
+      $root_i++;
+      if ( $root_i == $dn_depth ) {
+	$ttentries->{$tmp}->{root}->{givenName} = $_->get_value('givenName');
+	$ttentries->{$tmp}->{root}->{sn} = $_->get_value('sn');
+      } else {
+	$root_mesg = $ldap_crud->search({ dn => $ttentries->{$tmp}->{root}->{dn}, });
+	$return->{error} .= $ldap_crud->err( $root_mesg )->{html}
+	  if $root_mesg->is_error();
+	$root_entry = $root_mesg->entry(0);
+	$ttentries->{$tmp}->{root}->{givenName} = $root_entry->get_value('givenName');
+	$ttentries->{$tmp}->{root}->{sn} = $root_entry->get_value('sn');
+      }
+
+      # p $ttentries->{$tmp}->{root};
+
+      $to_utf_decode = $ttentries->{$tmp}->{root}->{givenName};
+      utf8::decode($to_utf_decode);
+      $ttentries->{$tmp}->{root}->{givenName} = $to_utf_decode;
+
+      $to_utf_decode = $ttentries->{$tmp}->{root}->{sn};
+      utf8::decode($to_utf_decode);
+      $ttentries->{$tmp}->{root}->{sn} = $to_utf_decode;
+
+      $#root_arr = -1;
+      $#root_dn = -1;
+
+      # p $ttentries->{$tmp}->{root};
+
       $ttentries->{$tmp}->{'mgmnt'} =
 	{
-	 is_blocked => $mesg->count,
+	 is_blocked => 	  $blocked,
 	 is_dn => scalar split(',', $tmp) <= $dn_depth ? 1 : 0,
 	 is_account => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
 	 is_group => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{group}/ ? 1 : 0,
@@ -240,7 +275,6 @@ ask UMI admin for explanation/s.',
 	 scalar split(',', $tmp) <= 3 ? 1 : 0,
 	};
 
-      my $to_utf_decode;
       foreach $attr (sort $_->attributes) {
 	$to_utf_decode = $_->get_value( $attr, asref => 1 );
 	map { utf8::decode($_); $_} @{$to_utf_decode};
@@ -259,6 +293,8 @@ ask UMI admin for explanation/s.',
 	  $ttentries->{$tmp}->{is_arr}->{$attr} = 1;
 	}
       }
+      push @ttentries_keys, $_->dn if $sort_order eq 'reverse';
+      $blocked = 0;
     }
 
     # suffix array of dn preparation to respect LDAP objects "inheritance"
@@ -268,10 +304,14 @@ ask UMI admin for explanation/s.',
     # this one to be used for history requests
     # my @ttentries_keys = sort { lc $a cmp lc $b } keys %{$ttentries};
 
-    my @ttentries_keys = $sort_order eq 'reverse' ?
-      map { scalar reverse } sort map { scalar reverse } keys %{$ttentries} :
-      sort { lc $a cmp lc $b } keys %{$ttentries};
+    # my @ttentries_keys = $sort_order eq 'reverse' ?
+    #   map { scalar reverse } sort map { scalar reverse } keys %{$ttentries} :
+    #   sort { lc $a cmp lc $b } keys %{$ttentries};
+
+    @ttentries_keys = sort { lc $a cmp lc $b } keys %{$ttentries} if $sort_order eq 'direct';
+
     # p $ttentries;
+
     $c->stash(
 	      template => 'search/searchby.tt',
 	      base_dn => $base,

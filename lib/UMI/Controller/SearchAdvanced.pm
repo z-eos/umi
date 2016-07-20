@@ -132,9 +132,11 @@ sub proc :Path(proc) :Args(0) {
 				    });
       my $return;
       $return->{warning} = $ldap_crud->err($mesg)->{html} if ! $mesg->count;
-      my @entries = $mesg->entries;
+      
+      my @entries = $params->{order_by} ne '' ? $mesg->sorted(split(/,/,$params->{order_by})) : $mesg->sorted('dn');
 
-      my ( $ttentries, $attr, $umilog, $dn_depth );
+      my ( $ttentries, @ttentries_keys, $attr, $umilog, $dn_depth, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry );
+      my $blocked = 0;
       foreach (@entries) {
 	$umilog = UMI->config->{ldap_crud_db_log};
 	if ( $_->dn !~ /$umilog/ ) {
@@ -144,6 +146,7 @@ sub proc :Path(proc) :Args(0) {
 							$ldap_crud->cfg->{stub}->{group_blocked},
 							substr( (reverse split /,/, $_->dn)[2], 4 )),
 				     });
+	  $blocked = $mesg->count;
 	  $return->{error} .= $ldap_crud->err( $mesg )->{html}
 	    if $mesg->is_error();
 	}
@@ -151,9 +154,42 @@ sub proc :Path(proc) :Args(0) {
 	$dn_depth = $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 3;
 	$dn_depth += split(/,/, $ldap_crud->{cfg}->{base}->{acc_root});
 
+	@root_arr = split(',', $_->dn);
+	$root_i = $#root_arr;
+	@root_dn = splice(@root_arr, -1 * $dn_depth);
+	$ttentries->{$_->dn}->{root}->{dn} = join(',', @root_dn);
+
+	$root_i++;
+	if ( $root_i == $dn_depth ) {
+	  $ttentries->{$_->dn}->{root}->{givenName} = $_->get_value('givenName');
+	  $ttentries->{$_->dn}->{root}->{sn} = $_->get_value('sn');
+	} else {
+	  $root_mesg = $ldap_crud->search({ dn => $ttentries->{$_->dn}->{root}->{dn}, });
+	  $return->{error} .= $ldap_crud->err( $root_mesg )->{html}
+	    if $root_mesg->is_error();
+	  $root_entry = $root_mesg->entry(0);
+	  $ttentries->{$_->dn}->{root}->{givenName} = $root_entry->get_value('givenName');
+	  $ttentries->{$_->dn}->{root}->{sn} = $root_entry->get_value('sn');
+	}
+
+	# p $ttentries->{$_->dn}->{root};
+
+	$to_utf_decode = $ttentries->{$_->dn}->{root}->{givenName};
+	utf8::decode($to_utf_decode);
+	$ttentries->{$_->dn}->{root}->{givenName} = $to_utf_decode;
+
+	$to_utf_decode = $ttentries->{$_->dn}->{root}->{sn};
+	utf8::decode($to_utf_decode);
+	$ttentries->{$_->dn}->{root}->{sn} = $to_utf_decode;
+
+	$#root_arr = -1;
+	$#root_dn = -1;
+
+	# p $ttentries->{$_->dn}->{root};
+
 	$ttentries->{$_->dn}->{'mgmnt'} =
 	  {
-	   is_blocked => $mesg->count,
+	   is_blocked => $blocked,
 	   is_dn => scalar split(',', $_->dn) <= $dn_depth ? 1 : 0,
 	   is_account => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
 	   is_group => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{group}/ ? 1 : 0,
@@ -165,7 +201,6 @@ sub proc :Path(proc) :Args(0) {
 	   scalar split(',', $_->dn) <= 3 ? 1 : 0,
 	  };
 
-	my $to_utf_decode;
 	foreach $attr (sort $_->attributes) {
 	  $to_utf_decode = $_->get_value( $attr, asref => 1 );
 	  map { utf8::decode($_); $_} @{$to_utf_decode};
@@ -184,34 +219,38 @@ sub proc :Path(proc) :Args(0) {
 	    $ttentries->{$_->dn}->{is_arr}->{$attr} = 1;
 	  }
 	}
+	push @ttentries_keys, $_->dn if $sort_order eq 'reverse';
+	$blocked = 0;
       }
-
       my $base_dn = sprintf('<kbd>%s</kbd>', $basedn);
       my $search_filter = sprintf('<kbd>%s</kbd>', $filter);
 
-    # suffix array of dn preparation to respect LDAP objects "inheritance"
-    # http://en.wikipedia.org/wiki/Suffix_array
-    # this one to be used for all except history requests
-    # my @ttentries_keys = map { scalar reverse } sort map { scalar reverse } keys %{$ttentries};
-    # this one to be used for history requests
-    # my @ttentries_keys = sort { lc $a cmp lc $b } keys %{$ttentries};
+      # suffix array of dn preparation to respect LDAP objects "inheritance"
+      # http://en.wikipedia.org/wiki/Suffix_array
+      # this one to be used for all except history requests
+      # my @ttentries_keys = map { scalar reverse } sort map { scalar reverse } keys %{$ttentries};
+      # this one to be used for history requests
+      # my @ttentries_keys = sort { lc $a cmp lc $b } keys %{$ttentries};
 
-    my @ttentries_keys = $sort_order eq 'reverse' ?
-      map { scalar reverse } sort map { scalar reverse } keys %{$ttentries} :
-      sort { lc $a cmp lc $b } keys %{$ttentries};
-      # p $ttentries;
-    $c->stash(
-	      template => 'search/searchby.tt',
-	      schema => $ldap_crud->attr_equality,
-	      base_dn => $base_dn,
-	      filter => $search_filter,
-	      entrieskeys => \@ttentries_keys,
-	      entries => $ttentries,
-	      services => $ldap_crud->cfg->{authorizedService},
-	      base_ico => $ldap_crud->cfg->{base}->{icon},
-	      final_message => $return,
-	      form => $self->form,
-	     );
+      # @ttentries_keys = $sort_order eq 'reverse' ?
+      # 	map { scalar reverse } sort map { scalar reverse } keys %{$ttentries} :
+      # 	sort { lc $a cmp lc $b } keys %{$ttentries};
+
+      @ttentries_keys = sort { lc $a cmp lc $b } keys %{$ttentries} if $sort_order eq 'direct';
+      
+      p @ttentries_keys;
+      $c->stash(
+		template => 'search/searchby.tt',
+		schema => $ldap_crud->attr_equality,
+		base_dn => $base_dn,
+		filter => $search_filter,
+		entrieskeys => \@ttentries_keys,
+		entries => $ttentries,
+		services => $ldap_crud->cfg->{authorizedService},
+		base_ico => $ldap_crud->cfg->{base}->{icon},
+		final_message => $return,
+		form => $self->form,
+	       );
     } else {
       $c->stash( template => 'signin.tt', );
     }
