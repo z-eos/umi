@@ -228,38 +228,40 @@ ask UMI admin for explanation/s.',
       $dn_depth = $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 3;
       $dn_depth += split(/,/, $ldap_crud->{cfg}->{base}->{acc_root});
 
-      @root_arr = split(',', $_->dn);
-      $root_i = $#root_arr;
-      @root_dn = splice(@root_arr, -1 * $dn_depth);
-      $ttentries->{$tmp}->{root}->{dn} = join(',', @root_dn);
+      if ( $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
+	@root_arr = split(',', $_->dn);
+	$root_i = $#root_arr;
+	@root_dn = splice(@root_arr, -1 * $dn_depth);
+	$ttentries->{$tmp}->{root}->{dn} = join(',', @root_dn);
 
-      $root_i++;
-      if ( $root_i == $dn_depth ) {
-	$ttentries->{$tmp}->{root}->{givenName} = $_->get_value('givenName');
-	$ttentries->{$tmp}->{root}->{sn} = $_->get_value('sn');
-      } else {
-	$root_mesg = $ldap_crud->search({ dn => $ttentries->{$tmp}->{root}->{dn}, });
-	$return->{error} .= $ldap_crud->err( $root_mesg )->{html}
-	  if $root_mesg->is_error();
-	$root_entry = $root_mesg->entry(0);
-	$ttentries->{$tmp}->{root}->{givenName} = $root_entry->get_value('givenName');
-	$ttentries->{$tmp}->{root}->{sn} = $root_entry->get_value('sn');
+	$root_i++;
+	if ( $root_i == $dn_depth ) {
+	  $ttentries->{$tmp}->{root}->{givenName} = $_->get_value('givenName');
+	  $ttentries->{$tmp}->{root}->{sn} = $_->get_value('sn');
+	} else {
+	  $root_mesg = $ldap_crud->search({ dn => $ttentries->{$tmp}->{root}->{dn}, });
+	  $return->{error} .= $ldap_crud->err( $root_mesg )->{html}
+	    if $root_mesg->is_error();
+	  $root_entry = $root_mesg->entry(0);
+	  $ttentries->{$tmp}->{root}->{givenName} = $root_entry->get_value('givenName');
+	  $ttentries->{$tmp}->{root}->{sn} = $root_entry->get_value('sn');
+	}
+
+	# p $ttentries->{$tmp}->{root};
+
+	$to_utf_decode = $ttentries->{$tmp}->{root}->{givenName};
+	utf8::decode($to_utf_decode);
+	$ttentries->{$tmp}->{root}->{givenName} = $to_utf_decode;
+
+	$to_utf_decode = $ttentries->{$tmp}->{root}->{sn};
+	utf8::decode($to_utf_decode);
+	$ttentries->{$tmp}->{root}->{sn} = $to_utf_decode;
+
+	$#root_arr = -1;
+	$#root_dn = -1;
+
+	# p $ttentries->{$tmp}->{root};
       }
-
-      # p $ttentries->{$tmp}->{root};
-
-      $to_utf_decode = $ttentries->{$tmp}->{root}->{givenName};
-      utf8::decode($to_utf_decode);
-      $ttentries->{$tmp}->{root}->{givenName} = $to_utf_decode;
-
-      $to_utf_decode = $ttentries->{$tmp}->{root}->{sn};
-      utf8::decode($to_utf_decode);
-      $ttentries->{$tmp}->{root}->{sn} = $to_utf_decode;
-
-      $#root_arr = -1;
-      $#root_dn = -1;
-
-      # p $ttentries->{$tmp}->{root};
 
       $ttentries->{$tmp}->{'mgmnt'} =
 	{

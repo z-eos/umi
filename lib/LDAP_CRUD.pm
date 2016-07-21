@@ -1160,7 +1160,8 @@ sub block {
   my @keys;
   my ( $msg, $msg_usr, $msg_add, $msg_chg, $ent_svc, $ent_chg, @blockgr );
 
-  $msg_usr = $self->search ( { base => $args->{dn}, } );
+  $msg_usr = $self->search ( { base => $args->{dn},
+			       sizelimit => 0, } );
   if ( $msg_usr->is_error() ) {
     $return->{error} = $self->err( $msg_usr )->{html};
   } else {
@@ -1194,7 +1195,7 @@ sub block {
 			     filter => sprintf('(&(cn=%s)(memberUid=%s))',
 					       $self->cfg->{stub}->{group_blocked},
 					       substr( (split /,/, $args->{dn})[0], 4 )),
-			   } );
+			     sizelimit => 0, } );
     if ( $msg->is_error() ) {    
       $return->{error} .= $self->err( $msg )->{html};
     } elsif ( $msg->count == 0) {
@@ -1213,6 +1214,7 @@ sub block {
       }
     }
   }
+  # p $return;
   return $return;
 }
 
@@ -1971,7 +1973,7 @@ has 'select_organizations' => ( traits => ['Array'],
 
 sub _build_select_organizations {
   my $self = shift;
-  my (@branches, @office);
+  my (@branches, @office, $to_utfy);
 
   my $mesg = $self->search({
 			    base => $self->{'cfg'}->{'base'}->{'org'},
@@ -1989,13 +1991,15 @@ sub _build_select_organizations {
 			  });
     my @branchOffices = $mesg->sorted( 'ou' );
     foreach my $branchOffice (@branchOffices) {
+      $to_utfy = sprintf("%s (%s @ %s)",
+			 $branchOffice->get_value ('ou'),
+			 $branchOffice->get_value ('physicaldeliveryofficename'),
+			 $branchOffice->get_value ('l')
+			);
+      utf8::decode($to_utfy);
       push @branches, {
 		       value => $branchOffice->dn,
-		       label => sprintf("%s (%s @ %s)",
-					$branchOffice->get_value ('ou'),
-					$branchOffice->get_value ('physicaldeliveryofficename'),
-					$branchOffice->get_value ('l')
-				       ),
+		       label => $to_utfy,
 		      };
     }
     push @office, {
@@ -2071,11 +2075,14 @@ sub _build_select_group {
     if ! $mesg->count;
 
   my @entries = $mesg->sorted('cn');
+  my $to_utfy;
   foreach my $entry ( @entries ) {
+    $to_utfy = sprintf('%s%s',
+		       $entry->get_value('cn'),
+		       $entry->exists('description') ? ' --- ' . $entry->get_value('description') : '');
+    utf8::decode($to_utfy);
     push @groups, { value => substr( (split /,/, $entry->dn)[0], 3),
-		    label => sprintf('%s%s',
-				     $entry->get_value('cn'),
-				     $entry->exists('description') ? ' --- ' . $entry->get_value('description') : ''),
+		    label => $to_utfy,
 		  };
   }
   return \@groups;
@@ -2110,11 +2117,14 @@ sub _build_select_radprofile {
 
   my @entries = $mesg->sorted('cn');
   my @i;
+  my $to_utfy;
   foreach my $entry ( @entries ) {
+    $to_utfy = sprintf('%s%s',
+		       $entry->get_value('cn'),
+		       $entry->exists('description') ? ' ---> ' . $entry->get_value('description') : '');
+    utf8::decode($to_utfy);
     push @rad_profiles, { value => $entry->dn,
-			  label => sprintf('%s%s',
-					   $entry->get_value('cn'),
-					   $entry->exists('description') ? ' ---> ' . $entry->get_value('description') : ''),
+			  label => $to_utfy,
 			};
   }
   return \@rad_profiles;
@@ -2148,11 +2158,14 @@ sub _build_select_radgroup {
 
   my @entries = $mesg->sorted('cn');
   my @i;
+  my $to_utfy;
   foreach my $entry ( @entries ) {
+    $to_utfy = sprintf('%s%s',
+		       $entry->get_value('cn'),
+		       $entry->exists('description') ? ' --- ' . $entry->get_value('description') : '');
+    utf8::decode($to_utfy);
     push @rad_groups, { value => $entry->dn,
-			label => sprintf('%s%s',
-					 $entry->get_value('cn'),
-					 $entry->exists('description') ? ' --- ' . $entry->get_value('description') : ''),
+			label => $to_utfy,
 		      };
   }
   return \@rad_groups;

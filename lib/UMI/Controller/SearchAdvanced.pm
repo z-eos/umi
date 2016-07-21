@@ -154,38 +154,40 @@ sub proc :Path(proc) :Args(0) {
 	$dn_depth = $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 3;
 	$dn_depth += split(/,/, $ldap_crud->{cfg}->{base}->{acc_root});
 
-	@root_arr = split(',', $_->dn);
-	$root_i = $#root_arr;
-	@root_dn = splice(@root_arr, -1 * $dn_depth);
-	$ttentries->{$_->dn}->{root}->{dn} = join(',', @root_dn);
+	if ( $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
+	  @root_arr = split(',', $_->dn);
+	  $root_i = $#root_arr;
+	  @root_dn = splice(@root_arr, -1 * $dn_depth);
+	  $ttentries->{$_->dn}->{root}->{dn} = join(',', @root_dn);
 
-	$root_i++;
-	if ( $root_i == $dn_depth ) {
-	  $ttentries->{$_->dn}->{root}->{givenName} = $_->get_value('givenName');
-	  $ttentries->{$_->dn}->{root}->{sn} = $_->get_value('sn');
-	} else {
-	  $root_mesg = $ldap_crud->search({ dn => $ttentries->{$_->dn}->{root}->{dn}, });
-	  $return->{error} .= $ldap_crud->err( $root_mesg )->{html}
-	    if $root_mesg->is_error();
-	  $root_entry = $root_mesg->entry(0);
-	  $ttentries->{$_->dn}->{root}->{givenName} = $root_entry->get_value('givenName');
-	  $ttentries->{$_->dn}->{root}->{sn} = $root_entry->get_value('sn');
+	  $root_i++;
+	  if ( $root_i == $dn_depth ) {
+	    $ttentries->{$_->dn}->{root}->{givenName} = $_->get_value('givenName');
+	    $ttentries->{$_->dn}->{root}->{sn} = $_->get_value('sn');
+	  } else {
+	    $root_mesg = $ldap_crud->search({ dn => $ttentries->{$_->dn}->{root}->{dn}, });
+	    $return->{error} .= $ldap_crud->err( $root_mesg )->{html}
+	      if $root_mesg->is_error();
+	    $root_entry = $root_mesg->entry(0);
+	    $ttentries->{$_->dn}->{root}->{givenName} = $root_entry->get_value('givenName');
+	    $ttentries->{$_->dn}->{root}->{sn} = $root_entry->get_value('sn');
+	  }
+
+	  # p $ttentries->{$_->dn}->{root};
+
+	  $to_utf_decode = $ttentries->{$_->dn}->{root}->{givenName};
+	  utf8::decode($to_utf_decode);
+	  $ttentries->{$_->dn}->{root}->{givenName} = $to_utf_decode;
+
+	  $to_utf_decode = $ttentries->{$_->dn}->{root}->{sn};
+	  utf8::decode($to_utf_decode);
+	  $ttentries->{$_->dn}->{root}->{sn} = $to_utf_decode;
+
+	  $#root_arr = -1;
+	  $#root_dn = -1;
+
+	  # p $ttentries->{$_->dn}->{root};
 	}
-
-	# p $ttentries->{$_->dn}->{root};
-
-	$to_utf_decode = $ttentries->{$_->dn}->{root}->{givenName};
-	utf8::decode($to_utf_decode);
-	$ttentries->{$_->dn}->{root}->{givenName} = $to_utf_decode;
-
-	$to_utf_decode = $ttentries->{$_->dn}->{root}->{sn};
-	utf8::decode($to_utf_decode);
-	$ttentries->{$_->dn}->{root}->{sn} = $to_utf_decode;
-
-	$#root_arr = -1;
-	$#root_dn = -1;
-
-	# p $ttentries->{$_->dn}->{root};
 
 	$ttentries->{$_->dn}->{'mgmnt'} =
 	  {
@@ -238,7 +240,7 @@ sub proc :Path(proc) :Args(0) {
 
       @ttentries_keys = sort { lc $a cmp lc $b } keys %{$ttentries} if $sort_order eq 'direct';
       
-      p @ttentries_keys;
+      # p @ttentries_keys;
       $c->stash(
 		template => 'search/searchby.tt',
 		schema => $ldap_crud->attr_equality,
