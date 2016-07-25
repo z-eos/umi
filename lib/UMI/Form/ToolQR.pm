@@ -29,6 +29,24 @@ has_field 'toqr'
        rows => 4,
      );
 
+has_field 'mod'
+  => ( type => 'Select',
+       label => 'Module Size',
+       label_class => [ 'col-xs-2', ],
+       element_wrapper_class => [ 'col-xs-10', 'col-lg-7', ],
+       element_attr => { title => 'Size of modules (QR code unit)', },
+       options => [{ value => '1', label => '1', },
+		   { value => '2', label => '2', },
+		   { value => '3', label => '3', },
+		   { value => '4', label => '4', },
+		   { value => '5', label => '5', selected => 'on', },
+		   { value => '6', label => '6', },
+		   { value => '7', label => '7', },
+		   { value => '8', label => '8', },
+		   { value => '9', label => '9', },
+		   { value => '10', label => '10', },],
+     );
+
 has_field 'aux_reset' => ( type => 'Reset',
 			   wrapper_class => [ 'col-xs-4' ],
 			   element_class => [ 'btn', 'btn-danger', 'btn-block', ],
@@ -44,7 +62,7 @@ has_block 'submitit' => ( tag => 'fieldset',
 			  label => '&nbsp;',
 			  class => [ 'container-fluid' ], );
 
-sub build_render_list {[ 'toqr', 'submitit' ]}
+sub build_render_list {[ 'toqr', 'mod', 'submitit' ]}
 
 ######################################################################
 # ====================================================================

@@ -53,7 +53,7 @@ sub index :Path :Args(0) {
 
     # $qr = $self->qrcode({ txt => $params->{toqr}, ecc => 'Q', ver => 6, mod => 8 });
     for( my $i = 0; $i < 41; $i++ ) {
-      $qr = $self->qrcode({ txt => $params->{toqr}, ver => $i, mod => 5 });
+      $qr = $self->qrcode({ txt => $params->{toqr}, ver => $i, mod => $params->{mod}, ecc => 'L' });
       last if ! exists $qr->{error};
     }
 
