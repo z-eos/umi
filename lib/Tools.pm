@@ -480,7 +480,7 @@ sub sshpubkey_parse_body {
   return 1;
 }
 
-=head2 qr
+=head2 qrcode
 
 QR Code generator
 
@@ -977,7 +977,7 @@ sub vld_ifconfigpush {
 
 =head2 search_result_item_as_button
 
-wrapper to make a form -> button for the data to be displayed
+wrapper to place a form into a button for the data to be displayed
 
     uri holds form action
     dn is object DN to be passed to the action

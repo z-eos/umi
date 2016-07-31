@@ -1,8 +1,11 @@
 [% META title = 'Catalyst/TT View!' %] 
 
-<div class="row">
-    <h3>Unified Management Interface (UMI) project <small><em>desctiption</em></small></h3>
+<div>
+  <h3>Unified Management Interface (UMI) project <small><em>desctiption</em></small></h3>
+  <br>
+</div>
 
+<div class="row">
   <div class="col-xs-6">
 
     <ul class="list-group">
