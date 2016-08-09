@@ -179,6 +179,8 @@ ask UMI admin for explanation/s.',
       $base = $params->{'ldapsearch_base'};
     }
 
+    $c->stats->profile(begin => "searchby_search");
+
     $params->{'filter'} = '(' . $filter . ')';
     my $mesg = $ldap_crud->search({
 				   base => $base,
@@ -193,6 +195,9 @@ ask UMI admin for explanation/s.',
 				  });
 
     my @entries = $params->{order_by} ne '' ? $mesg->sorted(split(/,/,$params->{order_by})) : $mesg->sorted('dn');
+
+    $c->stats->profile("search by filter requested");
+    
     if ( ! $mesg->count ) {
       if ( $self->is_ascii($params->{'ldapsearch_filter'}) &&
 	   $params->{'ldapsearch_by_name'} ne 1 ) {
@@ -222,6 +227,9 @@ ask UMI admin for explanation/s.',
       $blocked = $mesg->count;
       $return->{error} .= $ldap_crud->err( $mesg )->{html}
 	if $mesg->is_error();
+
+      $c->stats->profile('is-blocked search for <i class="text-muted">' . $_->dn . '</i>');
+
       # $tmp = $ldap_crud->canonical_dn_rev ( $_->dn );
       $tmp = $_->dn;
       # !!! HARDCODE how deep dn could be to be considered as root for each type of objects !!!
@@ -328,6 +336,9 @@ ask UMI admin for explanation/s.',
   } else {
     $c->stash( template => 'signin.tt', );
   }
+
+  $c->stats->profile(end => "searchby_search");
+
 }
 
 
@@ -356,11 +367,16 @@ sub proc :Path(proc) :Args(0) {
     #=====================================================================
     # Modify (all fields form)
     #=====================================================================
-      if (defined $params->{'ldap_modify'} && $params->{'ldap_modify'} ne '') {
+    if (defined $params->{'ldap_modify'} && $params->{'ldap_modify'} ne '') {
 
+      $c->stats->profile( begin => "searchby_modify" );
+  
       $mesg = $ldap_crud->search( { dn => $params->{ldap_modify} } );
       $return->{error} = $ldap_crud->err( $mesg )->{html} if ! $mesg->count;
       $entry_tmp = $mesg->entry(0);
+
+      $c->stats->profile('search for <i class="text-muted">' . $params->{ldap_modify} . '</i>');
+
       foreach $attr ( $entry_tmp->attributes ) {
 	if ( $attr =~ /;binary/ or
 	   $attr eq "userPKCS12" ) { ## !!! temporary stub !!! 	  next;
@@ -380,6 +396,9 @@ sub proc :Path(proc) :Args(0) {
 	  map { utf8::decode($_),$_ } @{$entry->{$attr}};
 	}
       }
+      
+      $c->stats->profile('all fields are ready');
+
       my $schema = $ldap_crud->obj_schema( { dn => $params->{ldap_modify} } );
       my ($is_single, $names);
       foreach my $objectClass (sort (keys $schema->{$params->{ldap_modify}})) {
@@ -400,6 +419,9 @@ sub proc :Path(proc) :Args(0) {
       foreach $attr ( $entry_tmp->attributes ) {
 	delete $names->{$attr};
       }
+
+      $c->stats->profile('schema is ready');
+
       ## here we work with the only one, single entry!!
       # p $is_single;
       # p $names;
@@ -418,6 +440,7 @@ sub proc :Path(proc) :Args(0) {
 		rdn => (split('=', (split(',', $params->{ldap_modify}))[0]))[0],
 	       );
 
+      $c->stats->profile( end => "searchby_modify" );
 
 #=====================================================================
 # Modify Groups of the user
@@ -1432,6 +1455,7 @@ sub modify :Path(modify) :Args(0) {
   $c->stash( template => 'search/modify.tt', # stub.tt',
 	     params => $params,
 	     final_message => $return, );
+
 }
 
 
