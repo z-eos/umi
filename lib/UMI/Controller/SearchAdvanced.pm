@@ -91,7 +91,7 @@ sub proc :Path(proc) :Args(0) {
 	  $filter = '(abc stub)';
 	}
 	$scope = 'sub';
-	$sort_order = 'direct';
+	$sort_order = 'straight';
       } elsif ( $c->check_any_user_role( qw/admin coadmin/ ) ||
 		$self->is_searchable({ base_dn => $params->{base_dn},
 				       filter => $params->{'search_filter'},
@@ -113,6 +113,8 @@ sub proc :Path(proc) :Args(0) {
 	return 0;
       }
 
+      $c->stats->profile( begin => "searchby_advanced_search" );
+
       # p $params;
       my @attrs = ( '*' );
       @attrs = split(/,/, $params->{'show_attrs'}) if $params->{'show_attrs'} ne '';
@@ -133,13 +135,15 @@ sub proc :Path(proc) :Args(0) {
       my $return;
       $return->{warning} = $ldap_crud->err($mesg)->{html} if ! $mesg->count;
       
-      my @entries = $params->{order_by} ne '' ? $mesg->sorted(split(/,/,$params->{order_by})) : $mesg->sorted('dn');
+      my @entries = defined $params->{order_by} &&
+	$params->{order_by} ne '' ? $mesg->sorted(split(/,/,$params->{order_by})) : $mesg->sorted('dn');
 
-      my ( $ttentries, @ttentries_keys, $attr, $umilog, $dn_depth, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry );
+      $c->stats->profile("search by filter requested");
+
+      my ( $ttentries, @ttentries_keys, $attr, $dn_depth, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry );
       my $blocked = 0;
       foreach (@entries) {
-	$umilog = UMI->config->{ldap_crud_db_log};
-	if ( $_->dn !~ /$umilog/ ) {
+	if ( $_->dn =~ /.*,$ldap_crud->cfg->{base}->{acc_root}/ ) {
 	  $mesg = $ldap_crud->search({
 				      base => $ldap_crud->cfg->{base}->{group},
 				      filter => sprintf('(&(cn=%s)(memberUid=%s))',
@@ -149,6 +153,8 @@ sub proc :Path(proc) :Args(0) {
 	  $blocked = $mesg->count;
 	  $return->{error} .= $ldap_crud->err( $mesg )->{html}
 	    if $mesg->is_error();
+
+	  $c->stats->profile('is-blocked search for <i class="text-muted">' . $_->dn . '</i>');
 	}
 	
 	$dn_depth = $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 3;
@@ -221,7 +227,7 @@ sub proc :Path(proc) :Args(0) {
 	    $ttentries->{$_->dn}->{is_arr}->{$attr} = 1;
 	  }
 	}
-	push @ttentries_keys, $_->dn if $sort_order eq 'reverse';
+	push @ttentries_keys, $_->dn if $sort_order eq 'reverse'; # for not history searches
 	$blocked = 0;
       }
       my $base_dn = sprintf('<kbd>%s</kbd>', $basedn);
@@ -238,8 +244,9 @@ sub proc :Path(proc) :Args(0) {
       # 	map { scalar reverse } sort map { scalar reverse } keys %{$ttentries} :
       # 	sort { lc $a cmp lc $b } keys %{$ttentries};
 
-      @ttentries_keys = sort { lc $a cmp lc $b } keys %{$ttentries} if $sort_order eq 'direct';
-      
+      @ttentries_keys = sort { lc $a cmp lc $b } keys %{$ttentries}
+	if $sort_order eq 'straight';
+
       # p @ttentries_keys;
       $c->stash(
 		template => 'search/searchby.tt',
@@ -256,6 +263,8 @@ sub proc :Path(proc) :Args(0) {
     } else {
       $c->stash( template => 'signin.tt', );
     }
+
+    $c->stats->profile( end => "searchby_advanced_search" );
   }
 
 =head1 AUTHOR

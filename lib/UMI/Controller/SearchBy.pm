@@ -117,7 +117,8 @@ ask UMI admin for explanation/s.',
       return 0;
     }
 
-    if ( $params->{'ldapsearch_filter'} eq '' ) {
+    if ( defined $params->{'ldapsearch_filter'} &&
+	 $params->{'ldapsearch_filter'} eq '' ) {
       $filter_meta = '*';
     } else {
       $filter_meta = $params->{'ldapsearch_filter'};
@@ -190,11 +191,10 @@ ask UMI admin for explanation/s.',
 					      'createTimestamp',
 					      'creatorsName',
 					      'modifiersName',
-					      'modifyTimestamp',
-					    ],
+					      'modifyTimestamp', ],
 				  });
-
-    my @entries = $params->{order_by} ne '' ? $mesg->sorted(split(/,/,$params->{order_by})) : $mesg->sorted('dn');
+    my @entries = defined $params->{order_by} &&
+      $params->{order_by} ne '' ? $mesg->sorted(split(/,/,$params->{order_by})) : $mesg->sorted('dn');
 
     $c->stats->profile("search by filter requested");
     
@@ -217,18 +217,20 @@ ask UMI admin for explanation/s.',
     my $blocked = 0;
     foreach (@entries) {
       # p $ldap_crud->obj_schema({ dn => $_->dn });
+      # p $_->dn;
+      if ( $_->dn =~ /.*,$ldap_crud->cfg->{base}->{acc_root}/ ) {
+	$mesg = $ldap_crud->search({
+				    base => $ldap_crud->cfg->{base}->{group},
+				    filter => sprintf('(&(cn=%s)(memberUid=%s))',
+						      $ldap_crud->cfg->{stub}->{group_blocked},
+						      substr( (reverse split /,/, $_->dn)[2], 4 )),
+				   });
+	$blocked = $mesg->count;
+	$return->{error} .= $ldap_crud->err( $mesg )->{html}
+	  if $mesg->is_error();
 
-      $mesg = $ldap_crud->search({
-				  base => $ldap_crud->cfg->{base}->{group},
-				  filter => sprintf('(&(cn=%s)(memberUid=%s))',
-						    $ldap_crud->cfg->{stub}->{group_blocked},
-						    substr( (reverse split /,/, $_->dn)[2], 4 )),
-				 });
-      $blocked = $mesg->count;
-      $return->{error} .= $ldap_crud->err( $mesg )->{html}
-	if $mesg->is_error();
-
-      $c->stats->profile('is-blocked search for <i class="text-muted">' . $_->dn . '</i>');
+	$c->stats->profile('is-blocked search for <i class="text-muted">' . $_->dn . '</i>');
+      }
 
       # $tmp = $ldap_crud->canonical_dn_rev ( $_->dn );
       $tmp = $_->dn;
@@ -303,7 +305,7 @@ ask UMI admin for explanation/s.',
 	  $ttentries->{$tmp}->{is_arr}->{$attr} = 1;
 	}
       }
-      push @ttentries_keys, $_->dn if $sort_order eq 'reverse';
+      push @ttentries_keys, $_->dn if $sort_order eq 'reverse'; # for not history searches
       $blocked = 0;
     }
 
@@ -318,7 +320,8 @@ ask UMI admin for explanation/s.',
     #   map { scalar reverse } sort map { scalar reverse } keys %{$ttentries} :
     #   sort { lc $a cmp lc $b } keys %{$ttentries};
 
-    @ttentries_keys = sort { lc $a cmp lc $b } keys %{$ttentries} if $sort_order eq 'direct';
+    @ttentries_keys = sort { lc $a cmp lc $b } keys %{$ttentries}
+      if $sort_order eq 'straight'; # for history searches
 
     # p $ttentries;
 
