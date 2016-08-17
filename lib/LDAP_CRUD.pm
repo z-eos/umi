@@ -1251,36 +1251,6 @@ sub block {
 }
 
 
-=head2 mod
-
-!!! DEPRECATED !!!
-
-modify method
-
-!!! DEPRECATED !!!
-
-=cut
-
-# sub mod {
-#   my ($self, $dn, $replace) = @_;
-
-#   my $callername = (caller(1))[3];
-#   $callername = 'main' if ! defined $callername;
-#   my $return = 'call to LDAP_CRUD->mod from ' . $callername . ': ';
-#   my $msg;
-#   if ( ! $self->dry_run ) {
-#     $msg = $self->ldap->modify ( $dn, replace => $replace, );
-#     if ($msg->is_error()) {
-#       $return .= $self->err( $msg )->{html};
-#     } else {
-#       $return = 0;
-#     }
-#   } else {
-#     $return = $msg->ldif;
-#   }
-#   return $return;
-# }
-
 =head2 modify
 
 Net::LDAP->modify( changes => ... ) wrapper
@@ -1293,7 +1263,7 @@ sub modify {
   if ( ! $self->dry_run ) {
     $msg = $self->ldap->modify ( $dn, changes => $changes, );
     if ($msg->is_error()) {
-      $return = $self->err( $msg )->{html};
+      $return = $self->err( $msg );
     } else { $return = 0; }
   } else { $return = $msg->ldif; }
   # p [ $dn, $changes, $return];

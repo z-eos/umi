@@ -933,7 +933,7 @@ sub mod_jpegPhoto {
 				   [ replace => [ jpegPhoto => [ $jpeg ], ], ], );
 
     if ( $mesg ne '0' ) {
-      $final_message->{error} = 'Error during jpegPhoto add/change occured: ' . $mesg;
+      $final_message->{error} = 'Error during jpegPhoto add/change occured: ' . $mesg->{html};
     } else {
       $final_message->{success} = '<b>jpegPhoto attribute is added/changed from file:</b>' .
 	'<dl class="dl-horizontal"><dt>name:</dt><dd>' . $arg->{jpegPhoto}->{'filename'} . '</dd>' .
@@ -945,60 +945,6 @@ sub mod_jpegPhoto {
   return $final_message;
 }
 
-
-#=====================================================================
-
-# =head1 mod_pwd
-
-# DEPRECATED? looks not used
-
-# modify password method
-
-# =cut
-
-
-# sub mod_pwd {
-#   my ( $self, $ldap_crud, $args ) = @_;
-
-#   my $arg = {
-# 	     mod_pwd_dn => $args->{mod_pwd_dn},
-# 	     password_init => $args->{password_init},
-# 	     password_cnfm => $args->{password_cnfm},
-# 	    };
-
-#   my ( $error_message, $success_message, $final_message );
-#   if ( $self->form_mod_pwd->validated && $self->form_mod_pwd->ran_validation ) {
-
-#     if ( $arg->{'password_init'} eq '' && $arg->{'password_cnfm'} eq '' ) {
-#       $arg->{password_gen} = $self->pwdgen;
-#     } elsif ( $arg->{'password_init'} ne '' && $arg->{'password_cnfm'} ne '' ) {
-#       $arg->{password_gen} = $self->pwdgen({ pwd => $arg->{'password_cnfm'} });
-#     }
-#     my $mesg = $ldap_crud->modify( $arg->{mod_pwd_dn},
-# 				   [ replace => [ userPassword => $arg->{password_gen}->{ssha}, ], ], );
-
-#     if ( $mesg ne '0' ) {
-#       $error_message = '<li>Error during password change occured: ' . $mesg . '</li>';
-#     } else {
-#       $success_message .= $arg->{password_gen}->{'clear'};
-#     }
-
-#     $final_message = '<div class="alert alert-success" role="alert">' .
-#       '<span style="font-size: 140%" class="glyphicon glyphicon-ok-sign">&nbsp;</span>' .
-# 	'<em>Password is changed and is:</em>&nbsp;' .
-# 	  '<kbd style="font-size: 150%; font-family: monospace;">' .
-# 	    $success_message . '</kbd></div>' if $success_message;
-#   }
-
-#   $final_message .= '<div class="alert alert-danger" role="alert">' .
-#     '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
-#       $error_message . '</ul></div>' if $error_message;
-
-#   return $final_message;
-# }
-
-
-#=====================================================================
 
 =head1 modify_userpassword
 
@@ -1194,7 +1140,7 @@ sub mod_groups {
 	  ->modify( $arg->{type} eq 'posixGroup' ? sprintf('cn=%s,%s', $_, $arg->{base}) : $_,
 		    \@groups_chg );
 	if ( $mesg ) {
-	  push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html};
+	  push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $mesg->{html};
 	} else {
 	  push @{$return->{success}},
 	    sprintf('<span class="%s">%s</span>',
@@ -1251,7 +1197,7 @@ sub mod_memberUid {
 			       [ replace => [ memberUid => \@a ] ],
 			      );
     if ( $mesg ) {
-      push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
+      push @{$return->{error}}, $mesg->{html};
     } else {
       $return->{success} = 'Group was modified.';
     }
@@ -1443,9 +1389,12 @@ sub modify :Path(modify) :Args(0) {
   if ( defined $modx && $#{$modx} > -1 ) {
     # p $modx;
     $mesg = $ldap_crud->modify( $params->{dn}, $modx, );
-    $return->{error} .= $mesg if $mesg ne "0";
-    $return->{success} = 'Modification/s made:<pre>' .
-      np($modx, caller_info => 0, colored => 0, index => 0) . '</pre>' if $mesg eq "0";
+    if ( $mesg ne "0" ) {
+      $return->{error} .= $mesg->{html};
+    } else {
+      $return->{success} = 'Modification/s made:<pre>' .
+	np($modx, caller_info => 0, colored => 0, index => 0) . '</pre>';
+    }
   } else {
     $return->{warning} = 'No change was performed!';
   }
@@ -1591,7 +1540,7 @@ sub modform :Path(modform) :Args(0) {
     if ( $chg eq '0' ) {
       $return->{success} = "$arg->{dn} was changed";
     } else {
-      $return->{error} = $chg;
+      $return->{error} = $chg->{html};
     }
   }
 
