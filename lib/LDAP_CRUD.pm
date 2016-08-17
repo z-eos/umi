@@ -24,39 +24,60 @@ use Net::LDAP::Util qw(
 			ldap_explode_dn
 			escape_filter_value
 			canonical_dn
+			generalizedTime_to_time
+			time_to_generalizedTime
 		     );
 
 use Try::Tiny;
 
+=head1 NAME
+
+LDAP_CRUD - base class for LDAP related actions
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION
+
+LDAP Create, Read, Update and Delete actions
+
+=head1 METHODS and FUNCTIONS
+
 =head2 cfg
 
-Related to LDAP DB objects configuration.
+Method to store configuration of objects to be processed
 
-each service described by hash like this:
-    I<service> => {
+I<services are described by hash like this:>
+
+authorizedService => {
+
        # whether login/password needed or not
-       I<auth> => 1 or 0,
-       I<descr> => 'Description seen in form select',
+       auth => 1 or 0,
+       descr => 'Description seen in form select',
+
        # to process or to not to process this service
-       I<disabled> => 1 or 0,
+       disabled => 1 or 0,
+
        # some predefined gidNumber
-       I<gidNumber> => 10106,
-       I<jpegPhoto_noavatar> => UMI->path_to('path', 'to', '/image.jpg'),
-       I<icon> => 'fa fa-lightbulb-o',
+       gidNumber => 10106,
+       jpegPhoto_noavatar => UMI->path_to('path', 'to', '/image.jpg'),
+       icon => 'fa fa-lightbulb-o',
+
        # must-contain fields for this service
-       I<data_fields> => 'login,password1,password2',
+       data_fields => 'login,password1,password2',
+
        # element wrapper class, presence of which is
        # applying umi-user-all.js to the element
-       I<data_relation> => 'passw',
+       data_relation => 'passw',
+
        # domains which demands prefix (one more level domain) like
        # service dedicated hosts
-       I<associateddomain_prefix> =>
-       {
-        'talax.startrek.in' => 'im.',
-       },
+       associateddomain_prefix =>
+           { 'talax.startrek.in' => 'im.', },
+
        # automatically added for some services
-       I<login_prefix> => 'rad-',
-      },
+       login_prefix => 'rad-',
+
+},
 
 =cut
 
@@ -429,7 +450,7 @@ sub _build_cfg {
 	  },
 	  err => {
 		  0 => '<i class="fa fa-search-minus fa-lg text-warning "></i>&nbsp;Looks like your request returned no result. Try to change query parameter/s.',
-		  50 => 'This situation needs your security officer and system administrator attention, please contact them to solve the issue.',
+		  50 => 'Do not panic! This situation needs your security officer and system administrator attention, please contact them to solve the issue.',
 		 },
 
 	  #=====================================================================
@@ -515,63 +536,68 @@ around 'ldap' =>
 
 =head2 last_uidNumber
 
-Last uidNumber for base ou=People,dc=umidb
+Method to get last uidNumber for base ou=People,dc=umidb
 
-to add error correction
+it uses sub last_seq_val()
 
 =cut
 
-has 'last_uidNumber' => (
-			 is       => 'ro',
-			 isa      => 'Str',
-			 required => 0, lazy => 1,
-			 builder  => 'build_last_uidNumber',
-			);
+has 'last_uidNumber' => ( is       => 'ro',
+			  isa      => 'Str',
+			  required => 0, lazy => 1,
+			  builder  => 'build_last_uidNumber', );
 
 sub build_last_uidNumber {
   my $self = shift;
-
-  my $callername = (caller(1))[3];
-  $callername = 'main' if ! defined $callername;
-  my $return = 'call to LDAP_CRUD->last_uidNumber from ' . $callername . ': ';
-
-  $self->reset_ldap;
-  my $mesg =
-    $self->ldap->search(
-			base   => $self->cfg->{base}->{acc_root},
-			scope  => 'one',
-			filter => '(uidNumber=*)',
-			attrs  => [ 'uidNumber' ],
-			deref => 'never',
-		       );
-
-  if ( $mesg->code ) {
-    $return .= $self->err( $mesg );
-  } else {
-    # my @uids_arr = sort { $a <=> $b } map { $_->get_value('uidNumber') } $mesg->entries;
-    my @uids_arr = $mesg->sorted ( 'uidNumber' );
-    $return = $uids_arr[$#uids_arr]->get_value( 'uidNumber' );
-  }
-  return $return;
+  return $self->last_seq_val({ base => $self->cfg->{base}->{acc_root},
+			       attr => 'uidNumber', });
 }
 
 =head2 last_gidNumber
 
-Last gidNumber for base ou=group,dc=umidb
+Method to get last gidNumber for base ou=group,dc=umidb
 
-to add error correction
+it uses sub last_seq_val()
 
 =cut
 
-has 'last_gidNumber' => (
-			 is       => 'ro',
-			 isa      => 'Str',
-			 required => 0, lazy => 1,
-			 builder  => 'build_last_gidNumber',
-			);
+has 'last_gidNumber' => ( is       => 'ro',
+			  isa      => 'Str',
+			  required => 0, lazy => 1,
+			  builder  => 'build_last_gidNumber', );
 
 sub build_last_gidNumber {
   my $self = shift;
+  return $self->last_seq_val({ base => $self->cfg->{base}->{acc_root},
+			       attr => 'gidNumber', });
+}
+
+
+=head2 last_seq_val
+
+find the latest number in sequence for one single attribute requested
+
+like for uidNumber or gidNumber
+
+on input it expects hash
+
+    base => base to search in (mandatory)
+    attr => attribute name to search for the latest seq number for (mandatory)
+    scope => scope (optional, default is `one')
+    deref => deref (optional, default is `never')
+
+return value in success is the last number in sequence of the attribute values
+
+return value in error is message from method err()
+
+=cut
+
+sub last_seq_val {
+  my ($self, $args) = @_;
+  my $arg = { base  => $args->{base},
+	      attr  => $args->{attr},
+	      scope => $args->{scope} || 'one',
+	      deref => $args->{deref} || 'never', };
 
   my $callername = (caller(1))[3];
   $callername = 'main' if ! defined $callername;
@@ -579,41 +605,48 @@ sub build_last_gidNumber {
 
   $self->reset_ldap;
   my $mesg =
-    $self->ldap->search(
-			base   => $self->cfg->{base}->{group},
-			scope  => 'one',
-			filter => '(gidNumber=*)',
-			attrs  => [ 'gidNumber' ],
-			deref => 'never',
-		       );
+    $self->ldap->search( base   => $arg->{base},
+			 scope  => $arg->{scope},
+			 filter => '(' . $arg->{attr} . '=*)',
+			 attrs  => [ $arg->{attr} ],
+			 deref => $arg->{deref}, );
 
   if ( $mesg->code ) {
     $return .= $self->err( $mesg );
   } else {
-    # my @gids_arr = sort { $a <=> $b } map { $_->get_value('gidNumber') } $mesg->entries;
-    my @gids_arr = $mesg->sorted ( 'gidNumber' );
-    $return = $gids_arr[$#gids_arr]->get_value( 'gidNumber' );
+    my @arr = $mesg->sorted ( $arg->{attr} );
+    $return = $arr[$#arr]->get_value( $arg->{attr} );
   }
   return $return;
 }
 
 =head2 last_seq
 
-find the latest index of the given RDN 
+find the latest index for sequential, complex R/DNs given
 
-for objects with RDN notation like: ABC-XXX
+for objects with RDN notation like: objectSuperName-XXX
 
-where ABC is name of the object class (like ram/cpu/mb/e.t.c. for
-inventory) and XXX is incremental index
+where objectSuperName is the name of the object class (like
+ram/cpu/mb/e.t.c. for inventory) and XXX is incremental index
+
+for example RAM modules has DNs like cn=ram-17,ou=Comparts,ou=hw,ou=Inventory,dc=umidb
+
+to find the latest RAM module we will search with
+
+    base => 'ou=Comparts,ou=hw,ou=Inventory,dc=umidb'
+    attr => 'cn',
+    filter => 'ram-*',
+
+if ram-17 is the last one, then number 17 will be returned
 
 =cut
 
 sub last_seq {
   my ($self, $args) = @_;
   my $arg = { base => $args->{base},
-	      filter => $args->{filter} || '(objectClass=*)',
-	      scope => $args->{scope} || 'one',
 	      attr => $args->{attr}, # one single attribute sequence of we calculate
+	      scope => $args->{scope} || 'one',
+	      filter => $args->{filter} || '(objectClass=*)',
 	      seq_pfx => $args->{seq_pfx},
 	      seq_cnt => 0, };
 
@@ -710,7 +743,6 @@ sub schema {
   
   return $schema;
 }
-
 
 =head2 search
 
@@ -1464,42 +1496,42 @@ LDAP object schema and data
 returned structure is hash of all mandatory and optional attributes of
 all objectClass-es of the object:
 
-$VAR1 = {
-  'DN1' => {
-    'objectClass1' => {
-      'must' => {
-        'mustAttr1' => {
-          'equality' => ...,
-          'desc' => ...,
-          'single-value' => ...,
-          'attr_value' => ...,
-          'max_length' => ...,
+    $VAR1 = {
+      'DN1' => {
+        'objectClass1' => {
+          'must' => {
+            'mustAttr1' => {
+              'equality' => ...,
+              'desc' => ...,
+              'single-value' => ...,
+              'attr_value' => ...,
+              'max_length' => ...,
+            },
+            'mustAttrN' {
+            ...
+            },
+           },
+           'may' => {
+             'mayAttr1' => {
+               'equality' => ...,
+               'desc' => ...,
+               'single-value' => ...,
+               'attr_value' => ...,
+               'max_length' => ...,
+             },
+             'mayAttrN' {
+             ...
+             },
+           },
         },
-        'mustAttrN' {
+        'objectClass2' => {
         ...
         },
-       },
-       'may' => {
-         'mayAttr1' => {
-           'equality' => ...,
-           'desc' => ...,
-           'single-value' => ...,
-           'attr_value' => ...,
-           'max_length' => ...,
-         },
-         'mayAttrN' {
-         ...
-         },
-       },
-    },
-    'objectClass2' => {
-    ...
-    },
-  },
-  'DN2' => {
-  ...
-  },
-}
+      },
+      'DN2' => {
+      ...
+      },
+    }
 
 Commonly, we will wish to use it for the single object to build the
 form to add or modify
@@ -2013,7 +2045,9 @@ sub _build_select_organizations {
 
 =head2 select_associateddomains
 
-options builder for select element of associateddomains
+Method, options builder for select element of associateddomains
+
+uses sub bld_select()
 
 =cut
 
@@ -2024,74 +2058,32 @@ has 'select_associateddomains' => ( traits => ['Array'],
 
 sub _build_select_associateddomains {
   my $self = shift;
-  my @domains; # = ( {value => '0', label => '--- select domain ---', selected => 'selected'} );
-  my $mesg = $self->search( { base => $self->cfg->{base}->{org},
-			      filter => 'associatedDomain=*',
-			      sizelimit => 0,
-			      attrs => ['associatedDomain' ],
-			    } );
-  my $err_message = '';
-  if ( ! $mesg->count ) {
-    $err_message = '<div class="alert alert-danger">' .
-      '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
-	$self->err($mesg) . '</ul></div>';
-  }
-
-  my @entries = $mesg->sorted('associatedDomain');
-  my (@i, @j);
-  foreach my $entry ( @entries ) {
-    @i = $entry->get_value('associatedDomain');
-    foreach (@i) {
-      push @j, $_;
-    }
-  }
-  @domains = map { { value => $_, label => $_ } } sort @j;
-  
-  return \@domains;
+  return $self->bld_select({ base => $self->cfg->{base}->{org}, attr => [ 'associatedDomain', 'associatedDomain', ], });
 }
 
 =head2 select_group
 
-options builder for select element of groups
+Method, options builder for select element of groups
+
+uses sub bld_select()
 
 =cut
 
 has 'select_group' => ( traits => ['Array'],
 			is => 'ro', isa => 'ArrayRef', required => 0, lazy => 1,
-			builder => '_build_select_group',
-	     );
+			builder => '_build_select_group', );
 
 sub _build_select_group {
   my $self = shift;
-  my @groups;
-  my $mesg = $self->search( { base => $self->cfg->{base}->{group},
-			      attrs => ['cn', 'description' ],
-			      sizelimit => 0,
-			      scope => 'one', } );
-  my $err_message = '';
-  $err_message = '<div class="alert alert-danger">' .
-    '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
-    $self->err($mesg) . '</ul></div>'
-    if ! $mesg->count;
-
-  my @entries = $mesg->sorted('cn');
-  my $to_utfy;
-  foreach my $entry ( @entries ) {
-    $to_utfy = sprintf('%s%s',
-		       $entry->get_value('cn'),
-		       $entry->exists('description') ? ' --- ' . $entry->get_value('description') : '');
-    utf8::decode($to_utfy);
-    push @groups, { value => substr( (split /,/, $entry->dn)[0], 3),
-		    label => $to_utfy,
-		  };
-  }
-  return \@groups;
+  return $self->bld_select({ base => $self->cfg->{base}->{group}, });
 }
 
 
 =head2 select_radprofile
 
-options builder for select element of rad-profiles
+Method, options builder for select element of rad-profiles
+
+uses sub bld_select()
 
 =cut
 
@@ -2102,37 +2094,14 @@ has 'select_radprofile' => ( traits => ['Array'],
 
 sub _build_select_radprofile {
   my $self = shift;
-  my @rad_profiles;
-  my $mesg = $self->search( { base => $self->cfg->{base}->{rad_profiles},
-			      attrs => ['cn', 'description' ],
-			      sizelimit => 0,
-			      scope => 'one',
-			    } );
-  my $err_message = '';
-  if ( ! $mesg->count ) {
-    $err_message = '<div class="alert alert-danger">' .
-      '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
-	$self->err($mesg) . '</ul></div>';
-  }
-
-  my @entries = $mesg->sorted('cn');
-  my @i;
-  my $to_utfy;
-  foreach my $entry ( @entries ) {
-    $to_utfy = sprintf('%s%s',
-		       $entry->get_value('cn'),
-		       $entry->exists('description') ? ' ---> ' . $entry->get_value('description') : '');
-    utf8::decode($to_utfy);
-    push @rad_profiles, { value => $entry->dn,
-			  label => $to_utfy,
-			};
-  }
-  return \@rad_profiles;
+  return $self->bld_select({ base => $self->cfg->{base}->{rad_profiles}, });
 }
 
 =head2 select_radgroup
 
-options builder for select element of rad-groups
+Method, options builder for select element of rad-groups
+
+uses sub bld_select()
 
 =cut
 
@@ -2143,32 +2112,69 @@ has 'select_radgroup' => ( traits => ['Array'],
 
 sub _build_select_radgroup {
   my $self = shift;
-  my @rad_groups;
-  my $mesg = $self->search( { base => $self->cfg->{base}->{rad_groups},
-			      attrs => ['cn', 'description' ],
-			      sizelimit => 0,
-			      scope => 'one',
-			    } );
+  return $self->bld_select({ base => $self->cfg->{base}->{rad_groups}, });
+}
+
+
+=head2 bld_select
+
+select options builder for select element, where this select form
+field needs only two attributes values
+
+    1. cn
+    2. description
+
+it constructs array for options generation like this
+
+    [0] {
+        label   "bind --- Bind Users",
+        value   "cn=bind,ou=group,dc=umidb"
+    },
+    [1] {
+        label   "blocked --- blocked users",
+        value   "cn=blocked,ou=group,dc=umidb"
+    },
+
+=cut
+
+sub bld_select {
+  my ($self, $args) = @_;
+  p my $arg = { base  => $args->{base},
+	      attr  => $args->{attr} || [ 'cn', 'description' ],
+	      filter => $args->{filter} || '(objectClass=*)',
+	      scope => $args->{scope} || 'one',
+	      sizelimit => $args->{sizelimit} || 0, };
+
+  my $callername = (caller(1))[3];
+  $callername = 'main' if ! defined $callername;
+  my $return = 'call to LDAP_CRUD->last_gidNumber from ' . $callername . ': ';
+
+  $self->reset_ldap;
+  my $mesg =
+    $self->search({ base   => $arg->{base},
+		    scope  => $arg->{scope},
+		    attrs  => $arg->{attr},
+		    filter => $arg->{filter},
+		    sizelimit => $arg->{sizelimit}, });
+
   my $err_message = '';
   if ( ! $mesg->count ) {
     $err_message = '<div class="alert alert-danger">' .
       '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
-	$self->err($mesg) . '</ul></div>';
+	$self->err($mesg)->{html} . '</ul></div>';
   }
 
-  my @entries = $mesg->sorted('cn');
-  my @i;
-  my $to_utfy;
-  foreach my $entry ( @entries ) {
-    $to_utfy = sprintf('%s%s',
-		       $entry->get_value('cn'),
-		       $entry->exists('description') ? ' --- ' . $entry->get_value('description') : '');
-    utf8::decode($to_utfy);
-    push @rad_groups, { value => $entry->dn,
-			label => $to_utfy,
-		      };
-  }
-  return \@rad_groups;
+  my @entries = $mesg->sorted( $arg->{attr}->[0] );
+  my @arr;
+  foreach ( @entries ) {
+    $arg->{toutfy} = sprintf('%s%s',
+			      $_->get_value( $arg->{attr}->[0] ),
+			      $_->exists('description') ? ' --- ' . $_->get_value( $arg->{attr}->[1] ) : '');
+    utf8::decode($arg->{toutfy});
+    push @arr, { value => $_->dn,
+		 label => $arg->{toutfy}, };
+  } p @arr;
+  return \@arr;
 }
 
 

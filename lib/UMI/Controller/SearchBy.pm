@@ -98,22 +98,16 @@ sub index :Path :Args(0) {
     } else {
       $base = $params->{ldapsearch_base};
     }
-    
-    if ( ! $c->check_any_user_role( qw/admin coadmin/ ) &&
-	 ! $self->is_searchable({ base_dn => $params->{ldapsearch_base},
-				  filter => $params->{'ldapsearch_filter'},
-				  roles => [ $c->user->roles ], }) ) {
-      $c->stash(
-		template => 'ldap_err.tt',
-		final_message => { error
-				   => sprintf('You are not allowed to search base dn:
-<h5>&laquo;<b><em>%s</em></b>&raquo;</h5> and/or filter:
-<h5>&laquo;<b><em>%s</em></b>&raquo;</h5>
 
-ask UMI admin for explanation/s.',
-					      $params->{'ldapsearch_base'},
-					      $params->{'ldapsearch_filter'} ), },
-	       );
+    if ( ! $c->check_any_user_role( qw/admin coadmin/ ) &&
+	 ! $self->is_searchable({ base_dn => $base,
+				  filter => $params->{ldapsearch_filter},
+				  roles => [ $c->user->roles ], }) ) {
+      $c->stash( template => 'ldap_err.tt',
+		 final_message => { error
+				    => sprintf('Your roles does not allow search by base dn:<h5>&laquo;<b><em>%s</em></b>&raquo;</h5> and/or filter:<h5>&laquo;<b><em>%s</em></b>&raquo;</h5>ask UMI admin for explanation/s.',
+					       $base,
+					       $params->{ldapsearch_filter} ), }, );
       return 0;
     }
 
@@ -218,6 +212,7 @@ ask UMI admin for explanation/s.',
     foreach (@entries) {
       # p $ldap_crud->obj_schema({ dn => $_->dn });
       # p $_->dn;
+
       if ( $_->dn =~ /.*,$ldap_crud->cfg->{base}->{acc_root}/ ) {
 	$mesg = $ldap_crud->search({
 				    base => $ldap_crud->cfg->{base}->{group},

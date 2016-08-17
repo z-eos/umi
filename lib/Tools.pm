@@ -877,15 +877,16 @@ sub file_smart {
 
 =head2 is_searchable
 
-checking the match of the search filter provided against user roles
+checking the match of the base DN and search filter provided against
+user roles
 
-user role constructed as `acl-<r/w>-KEYWORD> where KEYWORD is the
-pattern for the match
+user role name is expected to be constructed as `acl-<r/w>-KEYWORD>
+where KEYWORD is the pattern to match against the given DN and filter
 
-in other words, if KEYWORD for any of user roles matches the filter,
-the check is successfull
+in other words, if KEYWORD for any of user roles matches the filter or
+base DN, the check is successfull
 
-return 1 if match and 0 if not
+return 1 if search is allowed (match) and 0 if not
 
 input parameters are
 
@@ -910,6 +911,7 @@ sub is_searchable {
     $arg->{regex} = substr( $i, length $arg->{skip});
     $arg->{return}++ if $arg->{filter} =~ /$arg->{regex}/is ||
       $arg->{base_dn} =~ /$arg->{regex}/is;
+    # p $arg;
   }
   # p $arg;
   return $arg->{return};

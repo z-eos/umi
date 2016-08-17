@@ -36,7 +36,7 @@ sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
     if ( defined $c->session->{"auth_uid"} ) {
       my $params = $c->req->params;
-    
+
       $c->stash( template => 'search/search_advanced.tt',
       		 form => $self->form, );
 
@@ -101,15 +101,11 @@ sub proc :Path(proc) :Args(0) {
 	$scope = $params->{'search_scope'};
 	$sort_order = 'reverse';
       } else {
-	$c->stash(
-		  template => 'ldap_err.tt',
-		  final_message => { error
-				     => sprintf('you are not permited to search base dn:
-<h5>&laquo;<b><em>%s</em></b>&raquo;</h5> and/or filter:
-<h5>&laquo;<b><em>%s</em></b>&raquo;</h5>',
-						$params->{'base_dn'},
-						$params->{'search_filter'} ), },
-		 );
+	$c->stash( template => 'ldap_err.tt',
+		   final_message => { error
+				      => sprintf('Your roles does not allow search by base dn:<h5>&laquo;<b><em>%s</em></b>&raquo;</h5> and/or filter:<h5>&laquo;<b><em>%s</em></b>&raquo;</h5>ask UMI admin for explanation/s.',
+						 $params->{'base_dn'},
+						 $params->{'search_filter'} ), }, );
 	return 0;
       }
 
