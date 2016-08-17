@@ -99,18 +99,6 @@ sub index :Path :Args(0) {
       $base = $params->{ldapsearch_base};
     }
 
-    if ( ! $c->check_any_user_role( qw/admin coadmin/ ) &&
-	 ! $self->is_searchable({ base_dn => $base,
-				  filter => $params->{ldapsearch_filter},
-				  roles => [ $c->user->roles ], }) ) {
-      $c->stash( template => 'ldap_err.tt',
-		 final_message => { error
-				    => sprintf('Your roles does not allow search by base dn:<h5>&laquo;<b><em>%s</em></b>&raquo;</h5> and/or filter:<h5>&laquo;<b><em>%s</em></b>&raquo;</h5>ask UMI admin for explanation/s.',
-					       $base,
-					       $params->{ldapsearch_filter} ), }, );
-      return 0;
-    }
-
     if ( defined $params->{'ldapsearch_filter'} &&
 	 $params->{'ldapsearch_filter'} eq '' ) {
       $filter_meta = '*';
@@ -172,6 +160,18 @@ sub index :Path :Args(0) {
     } else {
       $filter = 'objectClass=*';
       $base = $params->{'ldapsearch_base'};
+    }
+
+    if ( ! $c->check_any_user_role( qw/admin coadmin/ ) &&
+	 ! $self->is_searchable({ base_dn => $base,
+				  filter => $filter,
+				  roles => [ $c->user->roles ], }) ) {
+      $c->stash( template => 'ldap_err.tt',
+		 final_message => { error
+				    => sprintf('Your roles does not allow search by base dn:<h5>&laquo;<b><em>%s</em></b>&raquo;</h5> and/or filter:<h5>&laquo;<b><em>%s</em></b>&raquo;</h5>ask UMI admin for explanation/s and provide above info.',
+					       $base,
+					       $filter ), }, );
+      return 0;
     }
 
     $c->stats->profile(begin => "searchby_search");

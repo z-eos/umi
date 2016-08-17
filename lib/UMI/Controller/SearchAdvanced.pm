@@ -71,8 +71,7 @@ sub proc :Path(proc) :Args(0) {
 
       $c->stash( template => 'search/searchby.tt', );
 
-      if ( defined $params->{search_history} && $params->{search_history} eq '1' &&
-	   $c->check_any_user_role( qw/admin coadmin/ ) ) {
+      if ( defined $params->{search_history} && $params->{search_history} eq '1' ) {
 	$basedn = UMI->config->{ldap_crud_db_log};
 	push @filter_arr, '(reqAuthzID=' . $params->{reqAuthzID} . ')' if $params->{reqAuthzID} ne '';
 	push @filter_arr, '(reqDn=' . $params->{reqDn} . ')' if $params->{reqDn} ne '';
@@ -92,20 +91,22 @@ sub proc :Path(proc) :Args(0) {
 	}
 	$scope = 'sub';
 	$sort_order = 'straight';
-      } elsif ( $c->check_any_user_role( qw/admin coadmin/ ) ||
-		$self->is_searchable({ base_dn => $params->{base_dn},
-				       filter => $params->{'search_filter'},
-				       roles => [ $c->user->roles ], }) ) {
+      } else {
 	$basedn = $params->{'base_dn'};
 	$filter = $params->{'search_filter'};
 	$scope = $params->{'search_scope'};
 	$sort_order = 'reverse';
-      } else {
+      }
+
+      if ( ! $c->check_any_user_role( qw/admin coadmin/ ) &&
+	   ! $self->is_searchable({ base_dn => $basedn,
+				    filter => $filter,
+				    roles => [ $c->user->roles ], }) ) {
 	$c->stash( template => 'ldap_err.tt',
 		   final_message => { error
-				      => sprintf('Your roles does not allow search by base dn:<h5>&laquo;<b><em>%s</em></b>&raquo;</h5> and/or filter:<h5>&laquo;<b><em>%s</em></b>&raquo;</h5>ask UMI admin for explanation/s.',
-						 $params->{'base_dn'},
-						 $params->{'search_filter'} ), }, );
+				      => sprintf('Your roles does not allow search by base dn:<h5>&laquo;<b><em>%s</em></b>&raquo;</h5> and/or filter:<h5>&laquo;<b><em>%s</em></b>&raquo;</h5>ask UMI admin for explanation/s and provide above info.',
+						 $basedn,
+						 $filter ), }, );
 	return 0;
       }
 
