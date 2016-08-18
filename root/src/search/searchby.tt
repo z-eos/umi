@@ -93,33 +93,26 @@
 	      [% ELSIF entry.key.match('Inventory') && entry.key.split(',').size <= ( 3 + num_of_dc)  %]
 	      [% root_of_rec = '<span class="fa fa-th-large"></span>' %]
 	      [% END %]
+
+	      [% # !!! HARDCODED customization, depends of DN structure !!! %]
+	      [% IF entry.key.match('People') %]
+	      [% root_obj_dn = entry.key.split(',').slice(-1 * ( 2 + num_of_dc), -1 ).join(',') %]
+	      [% ELSIF entry.key.match('Inventory') && entry.key.split(',').size > ( 3 + num_of_dc) %]
+	      [% root_obj_dn = entry.key.split(',').slice(-1 * ( 4 + num_of_dc), -1 ).join(',') %]
+	      [% ELSE %]
+	      [% root_obj_dn = entry.key %]
+	      [% END %]
 	      
 	      <form role="form" method="POST" action="[% c.uri_for_action('searchby/index') %]">
 		<button type="submit" class="btn btn-link umi-search visible-lg-block visible-md-block col-xs-1"
 			title="click to open root object of this account"
-			name="ldap_subtree"
-			[% # !!! HARDCODED customization, depends of DN structure !!! %]
-			value="[% IF entry.key.match('People') %]
-			[% entry.key.split(',').slice(-1 * ( 2 + num_of_dc), -1 ).join(',') %]
-			[% ELSIF entry.key.match('Inventory') && entry.key.split(',').size > ( 3 + num_of_dc) %]
-			[% entry.key.split(',').slice(-1 * ( 4 + num_of_dc), -1 ).join(',') %]
-			[% ELSE %]
-			[% entry.key %]
-			[% END %]">
+			name="ldap_subtree" value="[% root_obj_dn %]">
 		  <strong class="[% blocked %]">[% root_of_rec %]</strong>
 		</button>
 
 		<button type="submit" class="btn btn-link umi-search visible-xs-block visible-sm-block"
 			title="click to open root object of this account"
-			name="ldap_subtree"
-			[% # !!! HARDCODED customization, depends of DN structure !!! %]
-			value="[% IF entry.key.match('People') %]
-			[% entry.key.split(',').slice(-1 * ( 2 + num_of_dc), -1 ).join(',') %]
-			[% ELSIF entry.key.match('Inventory') && entry.key.split(',').size > ( 3 + num_of_dc) %]
-			[% entry.key.split(',').slice(-1 * ( 4 + num_of_dc), -1 ).join(',') %]
-			[% ELSE %]
-			[% entry.key %]
-			[% END %]">
+			name="ldap_subtree" value="[% root_obj_dn %]">
 		  <i class="[% blocked %] fa fa-play">&nbsp;&nbsp;</i>
 		</button>
 
