@@ -525,20 +525,23 @@ sub qrcode {
 remove white space/s from both ends of each, "delim" delimited
 substring of the input string (in most cases str is DN or RDN)
 
-INPUT: `  uid=abc ,  ou=ABC  ,dc=DDD '
-OUTPUT: `uid=abc,ou=ABC,dc=DDD'
+=head3 EXAMPLE
+
+    in: `  uid=abc ,  ou=ABC  ,dc=DDD '
+    ou: `uid=abc,ou=ABC,dc=DDD'
+
+    in: `  abcABCDDD '
+    ou: `abcABCDDD'
 
 =cut
 
 sub lrtrim {
   my ($self, $args) = @_;
-  my $arg = {
-	     str => $args->{str},
-	     delim => $args->{delim} || ',',
-	    };
+  my $arg = { str => $args->{str},
+	      delim => $args->{delim} || ',', };
   my @ar = split(/$arg->{delim}/, $arg->{str});
   $_ =~ s/^\s+|\s+$//g foreach @ar;
-  return join( $arg->{delim}, @ar);
+  return $#ar ? join( $arg->{delim}, @ar) : $ar[0];
 }
 
 
@@ -930,8 +933,7 @@ sub may_i {
       $arg->{base_dn} eq $arg->{dn};
     # p $arg->{base_dn}; p $arg->{user}->ldap_entry->dn;
   }
-  # p $arg;
-  delete $arg->{user}; p $arg;
+  # p $arg; # delete $arg->{user}; p $arg;
   return $arg->{return};
 }
 
