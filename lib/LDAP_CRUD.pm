@@ -2028,10 +2028,35 @@ has 'select_associateddomains' => ( traits => ['Array'],
 
 sub _build_select_associateddomains {
   my $self = shift;
-  return $self->bld_select({ base => $self->cfg->{base}->{org},
-			     attr => [ 'associatedDomain', 'associatedDomain', ],
-			     scope => 'sub',
-			     filter => '(associatedDomain=*)', });
+  # bld_select has to be fixed to deal with associatedDomains # return $self->bld_select({ base => $self->cfg->{base}->{org},
+  # bld_select has to be fixed to deal with associatedDomains # 			     attr => [ 'associatedDomain', 'associatedDomain', ],
+  # bld_select has to be fixed to deal with associatedDomains # 			     scope => 'sub',
+  # bld_select has to be fixed to deal with associatedDomains # 			     filter => '(associatedDomain=*)', });
+
+  my @domains; # = ( {value => '0', label => '--- select domain ---', selected => 'selected'} );
+  my $mesg = $self->search( { base => $self->cfg->{base}->{org},
+			      filter => 'associatedDomain=*',
+			      sizelimit => 0,
+			      attrs => ['associatedDomain' ],
+			    } );
+  my $err_message = '';
+  if ( ! $mesg->count ) {
+    $err_message = '<div class="alert alert-danger">' .
+      '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
+      $self->err($mesg) . '</ul></div>';
+  }
+
+  my @entries = $mesg->sorted('associatedDomain');
+  my (@i, @j);
+  foreach my $entry ( @entries ) {
+    @i = $entry->get_value('associatedDomain');
+    foreach (@i) {
+      push @j, $_;
+    }
+  }
+  @domains = map { { value => $_, label => $_ } } sort @j;
+  
+  return \@domains;
 }
 
 =head2 select_group
@@ -2137,7 +2162,7 @@ sub bld_select {
 	$self->err($mesg)->{html} . '</ul></div>';
   }
 
-  p my @entries = $mesg->sorted( $arg->{attr}->[0] );
+  my @entries = $mesg->sorted( $arg->{attr}->[0] );
   my @arr;
   foreach ( @entries ) {
     $arg->{toutfy} = sprintf('%s%s',
