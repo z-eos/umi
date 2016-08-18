@@ -104,7 +104,7 @@
 	      [% END %]
 	      
 	      <form role="form" method="POST" action="[% c.uri_for_action('searchby/index') %]">
-		<button type="submit" class="btn btn-link umi-search visible-lg-block visible-md-block col-xs-1"
+		<button type="submit" class="btn btn-link umi-search visible-lg-block visible-md-block col-xs-1 col-lg-2"
 			title="click to open root object of this account"
 			name="ldap_subtree" value="[% root_obj_dn %]">
 		  <strong class="[% blocked %]">[% root_of_rec %]</strong>
@@ -118,7 +118,7 @@
 
 	      </form>
 	      <p class="visible-lg-block visible-md-block"></p>
-	      <span class="h5 col-xs-offset-1"><b class="[% blocked %]" [% blocked_title %]>
+	      <span class="h5 col-xs-offset-1 col-lg-offset-0"><b class="[% blocked %]" [% blocked_title %]>
 		[% IF entry.value.mgmnt.is_dn && entry.key.match('People') %]
 		<span title="Root Account" class="fa fa-user fa-lg[% blocked %]"></span>
 

@@ -2028,7 +2028,10 @@ has 'select_associateddomains' => ( traits => ['Array'],
 
 sub _build_select_associateddomains {
   my $self = shift;
-  return $self->bld_select({ base => $self->cfg->{base}->{org}, attr => [ 'associatedDomain', 'associatedDomain', ], });
+  return $self->bld_select({ base => $self->cfg->{base}->{org},
+			     attr => [ 'associatedDomain', 'associatedDomain', ],
+			     scope => 'sub',
+			     filter => '(associatedDomain=*)', });
 }
 
 =head2 select_group
@@ -2117,7 +2120,7 @@ sub bld_select {
 
   my $callername = (caller(1))[3];
   $callername = 'main' if ! defined $callername;
-  my $return = 'call to LDAP_CRUD->last_gidNumber from ' . $callername . ': ';
+  my $return = 'call to LDAP_CRUD->bld_select from ' . $callername . ': ';
 
   $self->reset_ldap;
   my $mesg =
@@ -2134,7 +2137,7 @@ sub bld_select {
 	$self->err($mesg)->{html} . '</ul></div>';
   }
 
-  my @entries = $mesg->sorted( $arg->{attr}->[0] );
+  p my @entries = $mesg->sorted( $arg->{attr}->[0] );
   my @arr;
   foreach ( @entries ) {
     $arg->{toutfy} = sprintf('%s%s',
