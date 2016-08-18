@@ -523,7 +523,10 @@ sub qrcode {
 =head2 lrtrim
 
 remove white space/s from both ends of each, "delim" delimited
-substring of the input string
+substring of the input string (in most cases str is DN or RDN)
+
+INPUT: `  uid=abc ,  ou=ABC  ,dc=DDD '
+OUTPUT: `uid=abc,ou=ABC,dc=DDD'
 
 =cut
 
@@ -875,16 +878,22 @@ sub file_smart {
 }
 
 
-=head2 is_searchable
+=head2 may_i
 
-checking the match of the base DN and search filter provided against
-user roles
+replies question: "may I do this?"
+
+check the match of the base DN and search filter provided against user
+roles and user dn
 
 user role name is expected to be constructed as `acl-<r/w>-KEYWORD>
 where KEYWORD is the pattern to match against the given DN and filter
 
-in other words, if KEYWORD for any of user roles matches the filter or
+in other words
+
+- if KEYWORD for any of user roles matches the filter or
 base DN, the check is successfull
+
+- if user dn matches base DN, the check is suc1cessfull
 
 return 1 if search is allowed (match) and 0 if not
 
@@ -893,27 +902,36 @@ input parameters are
     base_dn - base DN for check
     filter  - filter for check
     skip - pattern to substract from each of the roles of the user
+    user => $c->user ( which is Catalyst::Authentication::Store::LDAP::User ) object
 
 =cut
 
-sub is_searchable {
+sub may_i {
   my ($self, $args) = @_;
-  my $arg = { base_dn => $args->{base_dn},
+  my $arg = { base_dn => $self->lrtrim({ str => $args->{base_dn} }),
 	      filter => $args->{filter},
+	      user => $args->{user},
+	      dn => $args->{user}->ldap_entry->dn,
 	      skip => $args->{skip} || 'acl-.-',
 	      return => 0, };
-  # my %roles = map { $_ => $_ =~ /$arg->{skip}/ ? 1 : 0  } @{$args->{roles}};
-  my %roles = map { $_ => 1 } @{$args->{roles}};
-  $arg->{roles} = \%roles;
 
+  my %roles = map { $_ => 1 } @{[ $arg->{user}->roles ]};
+  $arg->{roles} = \%roles;
+  $arg->{dn_arr} = [ split(',', $args->{user}->ldap_entry->dn) ];
+  $arg->{dn_left} = shift @{$arg->{dn_arr}};
+  $arg->{dn_right} = join(',', @{$arg->{dn_arr}});
+  
   foreach my $i ((keys %{$arg->{roles}})) {
     next if $i !~ /$arg->{skip}/is;
     $arg->{regex} = substr( $i, length $arg->{skip});
     $arg->{return}++ if $arg->{filter} =~ /$arg->{regex}/is ||
-      $arg->{base_dn} =~ /$arg->{regex}/is;
-    # p $arg;
+      $arg->{base_dn} =~ /$arg->{regex}/is ||
+      ( $arg->{filter} =~ /$arg->{dn_left}/is && $arg->{base_dn} =~ /$arg->{dn_right}/is ) ||
+      $arg->{base_dn} eq $arg->{dn};
+    # p $arg->{base_dn}; p $arg->{user}->ldap_entry->dn;
   }
   # p $arg;
+  delete $arg->{user}; p $arg;
   return $arg->{return};
 }
 

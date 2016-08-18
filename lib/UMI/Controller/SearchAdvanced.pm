@@ -99,9 +99,9 @@ sub proc :Path(proc) :Args(0) {
       }
 
       if ( ! $c->check_any_user_role( qw/admin coadmin/ ) &&
-	   ! $self->is_searchable({ base_dn => $basedn,
-				    filter => $filter,
-				    roles => [ $c->user->roles ], }) ) {
+	   ! $self->may_i({ base_dn => $basedn,
+			    filter => $filter,
+			    user => $c->user, }) ) {
 	$c->stash( template => 'ldap_err.tt',
 		   final_message => { error
 				      => sprintf('Your roles does not allow search by base dn:<h5>&laquo;<b><em>%s</em></b>&raquo;</h5> and/or filter:<h5>&laquo;<b><em>%s</em></b>&raquo;</h5>ask UMI admin for explanation/s and provide above info.',
