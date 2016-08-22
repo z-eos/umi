@@ -211,16 +211,16 @@ sub index :Path :Args(0) {
     my $blocked = 0;
     foreach (@entries) {
       # p $ldap_crud->obj_schema({ dn => $_->dn });
-      # p $_->dn;
+      #p $_->dn;
 
-      if ( $_->dn =~ /.*,$ldap_crud->cfg->{base}->{acc_root}/ ) {
+      if ( $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
 	$mesg = $ldap_crud->search({
 				    base => $ldap_crud->cfg->{base}->{group},
 				    filter => sprintf('(&(cn=%s)(memberUid=%s))',
 						      $ldap_crud->cfg->{stub}->{group_blocked},
 						      substr( (reverse split /,/, $_->dn)[2], 4 )),
 				   });
-	$blocked = $mesg->count;
+	p $blocked = $mesg->count;
 	$return->{error} .= $ldap_crud->err( $mesg )->{html}
 	  if $mesg->is_error();
 
@@ -318,7 +318,7 @@ sub index :Path :Args(0) {
     @ttentries_keys = sort { lc $a cmp lc $b } keys %{$ttentries}
       if $sort_order eq 'straight'; # for history searches
 
-    # p $ttentries;
+    p $ttentries;
 
     $c->stash(
 	      template => 'search/searchby.tt',

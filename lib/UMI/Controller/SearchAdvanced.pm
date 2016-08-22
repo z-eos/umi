@@ -140,7 +140,7 @@ sub proc :Path(proc) :Args(0) {
       my ( $ttentries, @ttentries_keys, $attr, $dn_depth, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry );
       my $blocked = 0;
       foreach (@entries) {
-	if ( $_->dn =~ /.*,$ldap_crud->cfg->{base}->{acc_root}/ ) {
+	if ( $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
 	  $mesg = $ldap_crud->search({
 				      base => $ldap_crud->cfg->{base}->{group},
 				      filter => sprintf('(&(cn=%s)(memberUid=%s))',
@@ -244,7 +244,7 @@ sub proc :Path(proc) :Args(0) {
       @ttentries_keys = sort { lc $a cmp lc $b } keys %{$ttentries}
 	if $sort_order eq 'straight';
 
-      # p @ttentries_keys;
+      # p $ttentries;
       $c->stash(
 		template => 'search/searchby.tt',
 		schema => $ldap_crud->attr_equality,
