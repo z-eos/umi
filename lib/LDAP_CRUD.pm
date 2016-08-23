@@ -1089,6 +1089,9 @@ sub del {
   $callername = 'main' if ! defined $callername;
   my $return; # = 'call to LDAP_CRUD->del from ' . $callername . ': ';
 
+  my $g_mod = $self->del_from_groups($dn);
+  push @{$return->{error}}, $g_mod->{error} if defined $g_mod->{error};
+
   if ( ! $self->dry_run ) {
     my $msg = $self->ldap->delete ( $dn );
     if ($msg->code) {
@@ -1122,6 +1125,9 @@ sub delr {
   $callername = 'main' if ! defined $callername;
   my $return; # = 'call to LDAP_CRUD->del from ' . $callername . ': ';
 
+  my $g_mod = $self->del_from_groups($dn);
+  push @{$return->{error}}, $g_mod->{error} if defined $g_mod->{error};
+
   if ( ! $self->dry_run ) {
     my $result = $self->ldap->search( base   => $dn,
 				      filter => "(objectclass=*)" );
@@ -1141,7 +1147,7 @@ sub delr {
     }
 
     # !!!
-    # her we need to clean all attributes of the different objects which
+    # here we need to clean all attributes of the different objects which
     # could contain DN of any object to be deleted
     # !!!
     
@@ -1165,6 +1171,133 @@ sub delr {
     # $self->ldap->unbind;
   } else {
     $return = 0;
+  }
+  return $return;
+}
+
+=head2 get_root_obj_dn
+
+method to determine root object DN
+
+in general it is the last coma separated fragment of the
+string after $self->{conf}->{base}->{acc_root} removal from the end of
+the string and the very $self->{conf}->{base}->{acc_root} joined with coma
+
+for example, if
+
+=over
+
+=item I<DN>
+
+authorizedService=xmpp@im.talax.startrek.in,uid=taf.taf,ou=People,dc=umidb
+
+=item I<$self-{conf}-{base}-{acc_root}>
+
+ou=People,dc=umidb
+
+=item I<the last coma separated fragment of the string>
+
+uid=taf.taf
+
+=item I<method returns>
+
+uid=taf.taf,ou=People,dc=umidb
+
+=back
+
+=cut
+
+sub get_root_obj_dn {
+  my ($self, $dn) = @_;
+  my @dn_arr = split(/,/, substr( $dn, 0, -1 * length($self->{cfg}->{base}->{acc_root}) ));
+  push my @root_obj_dn_arr, $self->{cfg}->{base}->{acc_root};
+  push @root_obj_dn_arr, pop @dn_arr;
+  return join(',', reverse @root_obj_dn_arr);
+}
+
+
+=head2 del_from_groups
+
+delete user from all
+
+=over
+
+=item I<posixGroup>
+
+if DN to delete is DN of the root object (now, memberUid is expected to be
+uid of the root object)
+
+=item I<groupOfNames>
+
+if DN to delete is DN of service or branch
+
+=back
+
+=cut
+
+
+sub del_from_groups {
+  my ($self, $dn) = @_;
+
+  my $callername = (caller(1))[3];
+  $callername = 'main' if ! defined $callername;
+  my $return; # = 'call to LDAP_CRUD->del_from_groups from ' . $callername . ': ';
+
+  my ($result, $res_entry, $group, $g_dn, $g_res, @g_memb_old, @g_memb_new, $mesg);
+  # p $dn;
+  # p $self->get_root_obj_dn($dn);
+  if ( $dn eq $self->get_root_obj_dn($dn) ) { # posixGroup first
+    # get uid from the root object
+    $result = $self->ldap->search( base   => $dn,
+				   filter => "(objectClass=*)",
+				   scope  => 'base',
+				   attrs  => [ 'uid' ] );
+    $res_entry = $result->entry(0);
+    my $uid = $res_entry->get_value( 'uid' );
+
+    # get all posixGroup-s where this uid is member
+    $result = $self->ldap->search( base   => $self->{cfg}->{base}->{db},
+				   filter => "(&(objectClass=posixGroup)(memberUid=$uid))",
+				   attrs  => [ 'cn' ],);
+    foreach $group ( $result->all_entries ) {
+      $g_dn = $group->dn;
+      $g_res = $self->ldap->search( base   => $g_dn,
+				    filter => "(objectClass=*)",
+				    scope  => 'base' );
+      @g_memb_old = $g_res->entry(0)->get_value('memberUid');
+      @g_memb_new = grep {$_ ne $uid} @g_memb_old;
+      # &p(\"$dn is root and belongs to posixGroup group $g_dn:");
+      # p @g_memb_old; p @g_memb_new;
+      $mesg = $self->modify( $g_dn,
+			     [ replace => [ memberUid => \@g_memb_new ] ], );
+      if ( $mesg ) {
+	push @{$return->{error}}, $mesg->{html};
+      } else {
+	$return->{success} = 'Group was modified.';
+      }
+    }
+  } else { # groupOfNames is second
+    # get all groupOfNames where this dn is member
+    $result = $self->ldap->search( base   => $self->{cfg}->{base}->{db},
+				   filter => "(&(objectClass=groupOfNames)(member=$dn))",
+				   attrs  => [ 'cn' ],);
+    foreach $group ( $result->all_entries ) {
+      $g_dn = $group->dn;
+      $g_res = $self->ldap->search( base   => $g_dn,
+				    filter => "(objectClass=*)",
+				    scope  => 'base' );
+      @g_memb_old = $g_res->entry(0)->get_value('member');
+      @g_memb_new = grep {$_ ne $dn} @g_memb_old;
+      # &p(\"$dn belongs to groupOfNames $g_dn:");
+      # p @g_memb_old; p @g_memb_new;
+      $mesg = $self->modify( $g_dn,
+			     [ replace => [ member => \@g_memb_new ] ], );
+      if ( $mesg ) {
+	push @{$return->{error}}, $mesg->{html};
+      } else {
+	$return->{success} = 'Group was modified.';
+      }
+    }
   }
   return $return;
 }
@@ -2137,7 +2270,7 @@ it constructs array for options generation like this
 
 sub bld_select {
   my ($self, $args) = @_;
-  p my $arg = { base  => $args->{base},
+  my $arg = { base  => $args->{base},
 	      attr  => $args->{attr} || [ 'cn', 'description' ],
 	      filter => $args->{filter} || '(objectClass=*)',
 	      scope => $args->{scope} || 'one',
@@ -2171,7 +2304,7 @@ sub bld_select {
     utf8::decode($arg->{toutfy});
     push @arr, { value => $_->dn,
 		 label => $arg->{toutfy}, };
-  } p @arr;
+  }
   return \@arr;
 }
 

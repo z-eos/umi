@@ -220,15 +220,17 @@ sub index :Path :Args(0) {
 						      $ldap_crud->cfg->{stub}->{group_blocked},
 						      substr( (reverse split /,/, $_->dn)[2], 4 )),
 				   });
-	p $blocked = $mesg->count;
+	$blocked = $mesg->count;
 	$return->{error} .= $ldap_crud->err( $mesg )->{html}
 	  if $mesg->is_error();
 
 	$c->stats->profile('is-blocked search for <i class="text-muted">' . $_->dn . '</i>');
       }
 
-      # $tmp = $ldap_crud->canonical_dn_rev ( $_->dn );
+      # p my $abc1 = $ldap_crud->canonical_dn_rev ( $_->dn );
+      # p $abc1 = $ldap_crud->get_root_obj_dn ( $_->dn );
       $tmp = $_->dn;
+
       # !!! HARDCODE how deep dn could be to be considered as root for each type of objects !!!
       $dn_depth = $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 3;
       $dn_depth += split(/,/, $ldap_crud->{cfg}->{base}->{acc_root});
@@ -318,7 +320,7 @@ sub index :Path :Args(0) {
     @ttentries_keys = sort { lc $a cmp lc $b } keys %{$ttentries}
       if $sort_order eq 'straight'; # for history searches
 
-    p $ttentries;
+    # p $ttentries;
 
     $c->stash(
 	      template => 'search/searchby.tt',
@@ -1043,7 +1045,7 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
 
 =head1 mod_groups
 
-modify groups object can/belong to method
+modify groups object can/belong to, method
 
 on input it expects hash with:
     obj_dn - DN of the object to manage group membership of
@@ -1079,7 +1081,7 @@ sub mod_groups {
   if ( ref($arg->{groups}) eq 'ARRAY' ) {
     foreach (@{$arg->{groups}}) { $arg->{groups_sel}->{$_} = 1; }
   }
-  $return;
+  # $return;
   $mesg = $ldap_crud->search( { base => $arg->{base},
 				filter => $arg->{type} eq 'posixGroup' ?
 				'memberUid=' . $arg->{uid} :
