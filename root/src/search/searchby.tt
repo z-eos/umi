@@ -11,7 +11,7 @@
 [% # child = '<i class="fa fa-fw ' _ fa_child _ ' text-default"></i>' %]
 [% child = '⬚' %]
 [% blocked = '' %]
-[% btn_blocked = '' %]
+[% btn_blocked = ' btn-link' %]
 [% blocked_title = '' %]
 
 [% IF entries.size == 1 %][% in='in' %][% chevron_toggle='up' %][% ELSE %][% in='' %][% chevron_toggle='down' %][% END %] [% # no keys suffix sort FOREACH entry IN entries %]
@@ -59,23 +59,27 @@
 
       [% root_of_rec = '<span class="fa fa-th-large"></span>' %]
       [% FOREACH entrykey IN entrieskeys %]
-      [% entry.key = entrykey
-         entry.value = entries.$entrykey %]
-      [% zufix = entry.key.split(',').1.split('=').1.replace('[@\.]', '_') _ '_' _ loop.index %]
-      [% dn = entry.key.split(',|=').hash %][% # preparing hash of each dn %]
+      [%   entry.key = entrykey
+           entry.value = entries.$entrykey %]
+      [%   zufix = entry.key.split(',').1.split('=').1.replace('[@\.]', '_') _ '_' _ loop.index %]
+      [%   dn = entry.key.split(',|=').hash %][% # preparing hash of each dn %]
       [% # USE dumper(indent=4, pad="<br>") %]<!-- <tr><td> -->[% # dumper.dump(dn.ou, base_ico.${dn.ou}) %]<!-- </td></tr> -->
-      [% IF entry.value.mgmnt.is_blocked %]
-      [% blocked = ' text-danger' %]
-      [% btn_blocked = ' btn-danger' %]
-      [% blocked_title = 'title="This DN was blocked! To unblock, remove root dn from the group &laquo;blocked&raquo; and manage each service account manualy (in general it is password change)."' %]
-      [% END %]
-      [% brcl = ' fa-lg umi-1-margin-left' %]
-      [% lfcl = ' umi-2-margin-left' %]
+      [%   IF entry.value.mgmnt.is_blocked %]
+      [%   blocked = ' text-danger' %]
+      [%   btn_blocked = ' btn-danger' %]
+      [%   blocked_title = 'NOTE: This DN was blocked! To unblock, remove root dn from the group &laquo;blocked&raquo; and manage each service account manualy (in general it is password change).' %]
+      [%   ELSE %]
+      [%   blocked = '' %]
+      [%   blocked_title = '' %]
+      [%   btn_blocked = ' btn-link' %]
+      [%   END %]
+      [%   brcl = ' fa-lg umi-1-margin-left' %]
+      [%   lfcl = ' umi-2-margin-left' %]
       <tr>
 	<td>
 	  [% num_of_dc = 0 %]
 	  [% FOREACH pat IN entry.key.split(',') %]
-          [% IF pat.match('dc=') %][% num_of_dc = num_of_dc + 1 %][% END %]
+          [%   IF pat.match('dc=') %][% num_of_dc = num_of_dc + 1 %][% END %]
 	  [% END %]
 	  <div class="panel-group umi-zerro-margin" id="accordion[% loop.index %]">
 	    [% IF entry.value.mgmnt.is_dn %]<div class="panel panel-info">
@@ -104,138 +108,74 @@
 	      [% END %]
 	      
 	      <form role="form" method="POST" action="[% c.uri_for_action('searchby/index') %]">
-		<button type="submit" class="btn btn-link umi-search visible-lg-block visible-md-block col-xs-1 col-lg-2"
-			title="click to open root object of this account"
+		<button type="submit" class="btn [% btn_blocked %] umi-search visible-lg-block visible-md-block col-xs-1 col-lg-2"
+			title="Click to open root object of this account. [% blocked_title %]"
 			name="ldap_subtree" value="[% root_obj_dn %]">
-		  <strong class="[% blocked %]">[% root_of_rec %]</strong>
+		  <strong class="[%# blocked %]">[% root_of_rec %]</strong>
 		</button>
 
 		<button type="submit" class="btn btn-link umi-search visible-xs-block visible-sm-block"
-			title="click to open root object of this account"
+			title="Click to open root object of this account. [% blocked_title %]"
 			name="ldap_subtree" value="[% root_obj_dn %]">
 		  <i class="[% blocked %] fa fa-play">&nbsp;&nbsp;</i>
 		</button>
 	      </form>
 	      
-	      <p class="visible-lg-block visible-md-block"></p>
-	      <span class="h5 col-xs-offset-1 col-lg-offset-0"><b [% blocked_title %]>
+	      <p class="visible-lg-block visible-md-block"></p>&nbsp;
+	      <span class="h5 col-xs-offset-1 col-lg-offset-0"><b title="[% blocked_title %]">
 		[% IF entry.value.mgmnt.is_dn && entry.key.match('People') %]
-		[%   IF blocked %]
-		<span class="fa-stack fa-lg">
-		  <i class="fa fa-certificate fa-stack-2x text-danger"></i>
-		  <i title="Root Account" class="fa fa-user fa-stack-1x"></i>
-		</span>
-		[%   ELSE %]
-		<span title="Root Account" class="fa fa-user fa-lg"></span>		
-		[%   END %]
-		
+		<span title="Root Account" class="fa fa-user fa-lg"></span>				
 		[% ELSIF entry.value.mgmnt.is_dn && entry.key.match('Inventory') %]
-		[%   IF blocked %]
-		<span class="fa-stack fa-lg">
-		  <i class="fa fa-square fa-stack-2x text-danger"></i>
-		  <i title="Root Object" class="fa fa-tags fa-stack-1x"></i>
-		</span>
-		[%   ELSE %]
 		<span title="Root Object" class="fa fa-tags fa-lg"></span>		
-		[%   END %]
-		
 		[% ELSIF entry.value.mgmnt.is_dn && entry.key.match('reqStart') %]
-		[%   IF blocked %]
-		<span class="fa-stack fa-lg">
-		  <i class="fa fa-square fa-stack-2x text-danger"></i>
-		  <i title="History Object" class="fa fa-history fa-stack-1x"></i>
-		</span>
-		[%   ELSE %]
 		<span title="History Object" class="fa fa-history fa-lg"></span>		
-		[%   END %]
-		
 		[% ELSIF entry.value.mgmnt.is_dn && ! entry.key.match('People') %]
-		[%   IF blocked %]
-		<span class="fa-stack fa-lg">
-		  <i class="fa fa-square fa-stack-2x text-danger"></i>
-		  <i title="Root Objectt" class="fa fa-star fa-stack-1x"></i>
-		</span>
-		[%   ELSE %]
 		<span title="Root Objectt" class="fa fa-star fa-lg"></span>		
-		[%   END %]
-
 		[% ELSIF entry.key.match('^author') %]
+		
 		[%   IF dn.authorizedService.match('mail') %]
-		[%     IF blocked %]
-		<span class="fa-stack fa-lg[% brcl %]">
-		  <i class="fa fa-square fa-stack-2x text-danger"></i>
-		  <i title="EMAIL Service Account Branch" class="[% services.mail.icon %] fa-stack-1x"></i>
-		</span>
-		[%     ELSE %]
 		<i title="EMAIL Service Account Branch" class="[% services.mail.icon %][% brcl %]"></i>
-		[%     END %]
-
 		[%   ELSIF dn.authorizedService.match('xmpp') %]
-		[%     IF blocked %]
-		<span class="fa-stack fa-lg[% brcl %]">
-		  <i class="fa fa-square fa-stack-2x text-danger"></i>
-		  <i title="XMPP (Jabber) Service Account Branch" class="[% services.xmpp.icon %] fa-stack-1x"></i>
-		</span>
-		[%     ELSE %]
 		<i title="XMPP (Jabber) Service Account Branch" class="[% services.xmpp.icon %][% brcl %]"></i>
-		[%     END %]
-
 		[%   ELSIF dn.authorizedService.match('ovpn') %]
-		<i title="OpenVPN Service Account Branch" class="[% services.ovpn.icon %][% brcl %][% blocked %]"></i>
+		<i title="OpenVPN Service Account Branch" class="[% services.ovpn.icon %][% brcl %]"></i>
 		[%   ELSIF dn.authorizedService.match('ssh') %]
-		<i title="SSH key Branch" class="[% services.ssh.icon %][% brcl %][% blocked %]"></i>
+		<i title="SSH key Branch" class="[% services.ssh.icon %][% brcl %]"></i>
 		[%   ELSIF dn.authorizedService.match('web') %]
-		<i title="Web Service Account Branch" class="[% services.web.icon %][% brcl %][% blocked %]"></i>
+		<i title="Web Service Account Branch" class="[% services.web.icon %][% brcl %]"></i>
 		[%   ELSIF dn.authorizedService.match('mac') %][% mac='802.1x-mac' %]
-		<i title="802.1x EAP-MD5 MAC AUTH Service Account Branch" class="[% services.$mac.icon %][% brcl %][% blocked %]"></i>
+		<i title="802.1x EAP-MD5 MAC AUTH Service Account Branch" class="[% services.$mac.icon %][% brcl %]"></i>
 		[%   ELSIF dn.authorizedService.match('eap') %][% eap='802.1x-eap-tls' %]
-		<i title="802.1x EAP-TLS AUTH Service Account Branch" class="[% services.$eap.icon %][% brcl %][% blocked %]"></i>
+		<i title="802.1x EAP-TLS AUTH Service Account Branch" class="[% services.$eap.icon %][% brcl %]"></i>
 		[%   ELSE %]
 		<i title="Service Account Branch" class="fa fa-code-fork fa-lg[% blocked %]"></i>
 		[%   END %]
 		    
 		[% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
 		[%   IF dn.authorizedService.match('mail') %]
-		[%     IF blocked %]
-		<span class="fa-stack [% lfcl %]">
-		  <i class="fa fa-square fa-stack-2x text-danger"></i>
-		  <i title="EMAIL Service Account" class="[% services.mail.icon %] fa-stack-1x"></i>
-		</span>
-		[%     ELSE %]
 		<i title="EMAIL Service Account" class="[% services.mail.icon %][% lfcl %]"></i>
-		[%     END %]
-		
 		[%   ELSIF dn.authorizedService.match('xmpp') %]
-		[%     IF blocked %]
-		<span class="fa-stack [% lfcl %]">
-		  <i class="fa fa-square fa-stack-2x text-danger"></i>
-		  <i title="XMPP (Jabber) Service Account" class="[% services.xmpp.icon %] fa-stack-1x"></i>
-		</span>
-		[%     ELSE %]
 		<i title="XMPP (Jabber) Service Account" class="[% services.xmpp.icon %][% lfcl %]"></i>
-		[%     END %]
-		
 		[%   ELSIF dn.authorizedService.match('ovpn') %]
-		<i title="OpenVPN Service Account" class="[% services.ovpn.icon %][% lfcl %][% blocked %]"></i>
+		<i title="OpenVPN Service Account" class="[% services.ovpn.icon %][% lfcl %]"></i>
 		[%   ELSIF dn.authorizedService.match('ssh') %]
-		<i title="SSH key" class="[% services.ssh.icon %][% lfcl %][% blocked %]"></i>
+		<i title="SSH key" class="[% services.ssh.icon %][% lfcl %]"></i>
 		[%   ELSIF dn.authorizedService.match('web') %]
-		<i title="Web Account" class="[% services.web.icon %][% lfcl %][% blocked %]"></i>
+		<i title="Web Account" class="[% services.web.icon %][% lfcl %]"></i>
 		[%   ELSIF dn.authorizedService.match('mac') %][% mac='802.1x-mac' %]
-		<i title="802.1x EAP-MD5 (MAC) AUTH Service Account" class="[% services.$mac.icon %][% lfcl %][% blocked %]"></i>
+		<i title="802.1x EAP-MD5 (MAC) AUTH Service Account" class="[% services.$mac.icon %][% lfcl %]"></i>
 		[%   ELSIF dn.authorizedService.match('eap') %][% eap='802.1x-eap-tls' %]
-		<i title="802.1x EAP-TLS AUTH Service Account" class="[% services.$eap.icon %][% lfcl %][% blocked %]"></i>
+		<i title="802.1x EAP-TLS AUTH Service Account" class="[% services.$eap.icon %][% lfcl %]"></i>
 		[%   ELSE %]
-		<i title="Service Account" class="umi-2-margin-left fa fa-leaf fa-lg[% blocked %]"></i>
+		<i title="Service Account" class="umi-2-margin-left fa fa-leaf fa-lg"></i>
 		[%   END %]
 
 		[% ELSIF entry.key.match('^cn=.*,ou=Inventory') %]
 		<i title="Subject to Inventory" class="fa fa-tag [% brcl %]"></i>		  
 		[% ELSIF base_ico.${dn.ou} %]
-		<i title="Service Account Branch" class="[% base_ico.${dn.ou} %] fa-lg[% blocked %]"></i>
+		<i title="Service Account Branch" class="[% base_ico.${dn.ou} %] fa-lg"></i>
 		[% ELSE %]
 		<i title="Service Account Branch" class="fa fa-code-fork fa-lg[% blocked %]"></i>
-		
 		[% END %]
 		[% entry.key %][%# .replace(',', ',&nbsp;') %][% # dn of the select result object %]
 	      </b></span>
@@ -325,8 +265,6 @@
 	    [% INCLUDE search/searchby_modals.tt %]
 	</td>
       </tr>
-      [% blocked = '' %]
-      [% blocked_title = '' %]
       [% END %]
     </tbody>
   </table>

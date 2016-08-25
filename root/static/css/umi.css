@@ -138,7 +138,13 @@ html,body {
   text-decoration: none;
 }
 
-.umi-search:hover, .umi-search:focus {
+/* .umi-search:hover, .umi-search:focus {
+   background-color: #F0F0F0;
+			     border-color: #F0F0F0;
+						   text-decoration: none;
+} */
+
+.umi-search.btn-link:hover, .umi-search:focus {
   background-color: #F0F0F0;
   border-color: #F0F0F0;
   text-decoration: none;
