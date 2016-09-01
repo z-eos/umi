@@ -1563,13 +1563,7 @@ single page with all user data assembled to the convenient view
 sub user_preferences :Path(user_preferences) :Args(0) {
   my ( $self, $c ) = @_;
   my $params = $c->req->parameters;
-
-  $c->controller('Root')
-    ->user_preferences( $c,
-			{
-			 uid => substr((split(',', $params->{'user_preferences'}))[0],4),
-			}
-		      );
+  $c->controller('Root')->user_preferences( $c, $params->{'user_preferences'} );
 }
 
 

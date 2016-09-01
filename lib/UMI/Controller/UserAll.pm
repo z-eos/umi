@@ -354,7 +354,6 @@ we skip empty (criteria is a concatenation of each field value) repeatable eleme
 	  next if $_->name =~ /aux_/ || $_->name eq 'remove';
 	  $is_svc_empty .= $_->value if defined $_->value;
 	}
-	 p $is_svc_empty;
 	next if $is_svc_empty eq ''; # avoid all empty services
 
 	#---------------------------------------------------------------------

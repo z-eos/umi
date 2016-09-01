@@ -132,14 +132,10 @@ sub download_from_ldap :Path(download_from_ldap) :Args(0) {
 }
 
 sub user_preferences :Path(user_prefs) :Args(0) {
-  my ( $self, $c, $args ) = @_;
+  my ( $self, $c, $user_dn ) = @_;
+  my @user_rdn = split('=', $user_dn);
   if ( $c->user_exists ) {
     my $ldap_crud = $c->model('LDAP_CRUD');
-
-    my $user_dn = sprintf('%s=%s,%s',
-			  $ldap_crud->cfg->{rdn}->{acc_root},
-			  $args->{uid},
-			  $ldap_crud->cfg->{base}->{acc_root});
 
     my ( $arg, $mesg, $return, $entry, $entries, $orgs, $domains, $fqdn,
 	 $physicaldeliveryofficename, $telephonenumber, $title, $mail, );
@@ -148,35 +144,32 @@ sub user_preferences :Path(user_prefs) :Args(0) {
     # user personal data
     #
     $entry = '';
-    if ( defined $args->{uid} && $args->{uid} ne '' ) {
-      $mesg = $ldap_crud->search( {
-				   base => sprintf('%s=%s,%s',
-						   $ldap_crud->cfg->{rdn}->{acc_root},
-						   $args->{uid},
-						   $ldap_crud->cfg->{base}->{acc_root}),
+    if ( defined $user_dn && $user_dn ne '' ) {
+      $mesg = $ldap_crud->search({ base => $user_dn,
 				   scope => 'base',
-				   attrs => [ qw(givenName
-						 sn
-						 title
-						 mail
-						 physicalDeliveryOfficeName
-						 telephoneNumber) ],
-				  } );
+				   attrs => [ qw( cn
+						  uid
+						  givenName
+						  sn
+						  title
+						  mail
+						  physicalDeliveryOfficeName
+						  telephoneNumber) ], });
       if ( $mesg->code ) {
 	$return->{error} .= sprintf('<li>personal info %s</li>',
 				    $ldap_crud->err($mesg)->{html});
       } else {
 	$entry = $mesg->entry(0);
 	$arg = {
-		uid => $args->{uid},
-		givenname => $entry->get_value('givenname'),
+		uid => $entry->get_value('uid'),
+		givenname => $entry->get_value('givenName'),
 		sn => $entry->get_value('sn'),
 		title => defined $entry->get_value('title') ? \@{[$entry->get_value('title')]} : ['N/A'],
 		physicaldeliveryofficename => \@{[$entry->get_value('physicaldeliveryofficename')]},
 		telephonenumber => defined $entry->get_value('telephonenumber') ?
 		\@{[$entry->get_value('telephonenumber')]} : ['N/A'],
 		mail => defined $entry->get_value('mail') ? \@{[$entry->get_value('mail')]} : ['N/A'],
-		roles => $args->{uid} eq $c->user ? \@{[$c->user->roles]} : 'a mere mortal',
+		roles => $entry->get_value( $user_rdn[0] ) eq $c->user ? \@{[$c->user->roles]} : 'a mere mortal',
 	       };
 	utf8::decode($arg->{givenname});
 	utf8::decode($arg->{sn});
@@ -246,10 +239,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
     #=================================================================
     # user jpegPhoto
     #
-    $mesg = $ldap_crud->search( { base => sprintf('%s=%s,%s',
-						  $ldap_crud->cfg->{rdn}->{acc_root},
-						  $arg->{uid},
-						  $ldap_crud->cfg->{base}->{acc_root}),
+    $mesg = $ldap_crud->search( { base => $user_dn,
 				  scope => 'base', } );
     if ( $mesg->code ) {
       $return->{error} .= sprintf('<li>jpegPhoto %s</li>',
@@ -259,7 +249,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
     use MIME::Base64;
     my $jpegPhoto = sprintf('<img alt="jpegPhoto of %s" src="data:image/jpg;base64,%s" class="img-responsive img-thumbnail bg-info" title="%s"/>',
 			    $entry->dn,
-			    encode_base64(join('',$entry->get_value('jpegphoto'))),
+			    encode_base64($entry->get_value('jpegPhoto')),
 			    $entry->dn,
 			   );
 
@@ -347,9 +337,21 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 			      );
     if ( $mesg->code ) { $return->{error} .= sprintf('<li>Inventory %s</li>',
 						     $ldap_crud->err($mesg)->{html}); }
+    my ($hwType_l, $hwType_r, $hwObj);
     $entries = $mesg->as_struct;
     foreach (keys (%{$entries})) {
-      push @inventory, { dn => $_, hwType => $entries->{$_}->{hwtype}->[0] };
+      $hwObj = $ldap_crud->show_inventory_item({ dn => $_ });
+      ($hwType_l, $hwType_r) = split('_', $entries->{$_}->{hwtype}->[0]);
+      push @inventory, { hwType =>
+			 sprintf( '<i title="%s" class="%s"></i> <mark class="h5"><b>I/N: %s</b></mark>',
+				  $ldap_crud->{cfg}->{hwType}->{$hwType_l}->{$hwType_r}->{descr},
+				  $ldap_crud->{cfg}->{hwType}->{$hwType_l}->{$hwType_r}->{icon},
+				  $entries->{$_}->{inventorynumber}->[0] ),
+			 dn => $_,
+			 hwObj => $hwObj,
+		       };
+      # push @inventory, { dn => $_, hwType => $entries->{$_}->{hwtype}->[0] };
+      p @inventory;
     }
 
     #=================================================================

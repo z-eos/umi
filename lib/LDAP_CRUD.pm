@@ -126,7 +126,7 @@ sub _build_cfg {
 			  registeredAddress => 1,
 			  sn => 1,
 			  st => 1,
-			  streen => 1,
+			  street => 1,
 			  title => 1,
 			 },
 	  
@@ -350,101 +350,101 @@ sub _build_cfg {
 	   singleboard => {
 			   dn_sfx => 'ou=SingleBoard,ou=hw,',
 			   ap => {
-				  descr => '',
+				  descr => 'singleboard inventory item, Access Point',
 				  disabled => 0,
-				  icon => 'fa fa-cog',
+				  icon => 'fa fa-lg fa-cog',
 				 },
 			   com  => {
-				    descr => '',
+				    descr => 'singleboard inventory item, commutator',
 				    disabled => 0,
-				    icon => 'fa fa-cog',
+				    icon => 'fa fa-lg fa-cog',
 				   },
 			   wrt => {
-				   descr => '',
+				   descr => 'singleboard inventory item, WRT',
 				   disabled => 0,
-				   icon => 'fa fa-cog',
+				   icon => 'fa fa-lg fa-cog',
 				  },
 			   monitor => {
-				       descr => '',
+				       descr => 'singleboard inventory item, monitor',
 				       disabled => 0,
-				       icon => 'fa fa-cog',
+				       icon => 'fa fa-lg fa-cog',
 				      },
 			   prn => {
-				   descr => '',
+				   descr => 'singleboard inventory item, printer',
 				   disabled => 0,
-				   icon => 'fa fa-cog',
+				   icon => 'fa fa-lg fa-cog',
 				  },
 			   mfu => {
-				   descr => '',
+				   descr => 'singleboard inventory item, MFU',
 				   disabled => 0,
-				   icon => 'fa fa-cog',
+				   icon => 'fa fa-lg fa-cog',
 				  },
 			  },
 	   composite => {
 			 dn_sfx => 'ou=Composite,ou=hw,',
 			 ws => {
-				descr => '',
+				descr => 'composite inventory item, workstation',
 				disabled => 0,
-				icon => 'fa fa-cog',
+				icon => 'fa fa-lg fa-desktop',
 			       },
 			 srv => {
-				 descr => '',
+				 descr => 'composite inventory item, server',
 				 disabled => 0,
-				 icon => 'fa fa-cog',
+				 icon => 'fa fa-lg fa-desktop',
 				},
 			},
 	   consumable => {
 			  dn_sfx => 'ou=Consumable,ou=hw,',
 			  kbd => {
-				  descr => '',
+				  descr => 'consumable inventory item, keyboard',
 				  disabled => 0,
-				  icon => 'fa fa-cog',
+				  icon => 'fa fa-lg fa-recycle',
 				 },
 			  ms => {
-				 descr => '',
+				 descr => 'consumable inventory item, mouse',
 				 disabled => 0,
-				 icon => 'fa fa-cog',
+				 icon => 'fa fa-lg fa-recycle',
 				},
 			  hs => {
-				 descr => '',
+				 descr => 'consumable inventory item, headset',
 				 disabled => 0,
-				 icon => 'fa fa-cog',
+				 icon => 'fa fa-lg fa-recycle',
 				},
 			 },
 	   compart => {
 		       dn_sfx => 'ou=Compart,ou=hw,',
 		       mb => {
-			      descr => '',
+			      descr => 'compart inventory item, motherboard',
 			      disabled => 0,
-			      icon => 'fa fa-cog',
+			      icon => 'fa fa-lg fa-cogs',
 			     },
 		       cpu => {
-			       descr => '',
+			       descr => 'compart inventory item, CPU',
 			       disabled => 0,
-			       icon => 'fa fa-cog',
+			       icon => 'fa fa-lg fa-cogs',
 			      },
 		       ram => {
-			       descr => '',
+			       descr => 'compart inventory item, RAM',
 			       disabled => 0,
-			       icon => 'fa fa-cog',
+			       icon => 'fa fa-lg fa-cogs',
 			      },
 		       disk => {
-			       descr => '',
+			       descr => 'compart inventory item, disk',
 			       disabled => 0,
-			       icon => 'fa fa-cog',
+			       icon => 'fa fa-lg fa-cogs',
 			      },
 		      },
 	   furniture => {
 			 dn_sfx => 'ou=Furniture,ou=hw,',
 			 tbl => {
-				 descr => '',
+				 descr => 'furniture inventory item, table',
 				 disabled => 0,
-				 icon => 'fa fa-cog',
+				 icon => 'fa fa-lg fa-bed',
 				},
 			 chr => {
-				 descr => '',
+				 descr => 'furniture inventory item, chair',
 				 disabled => 0,
-				 icon => 'fa fa-cog',
+				 icon => 'fa fa-lg fa-bed',
 				},
 			},
 	  },
@@ -2469,7 +2469,7 @@ sub create_account_branch_leaf {
   $arg->{dn} = sprintf('uid=%s,%s',
 		       $arg->{uid},
 		       $arg->{basedn});
-p $arg;
+
   my ($authorizedService, $sshkey, $authorizedService_add, $jpegPhoto_file, $sshPublicKey );
 
   if ( $arg->{service} eq 'ovpn' ||
@@ -2719,6 +2719,132 @@ sub build_attr_equality {
   # p $return;
   return $return;
 }
+
+
+=head2 show_inventory_item
+
+returns array ref of hashes where values are array refs too
+    ...
+    [4] {
+        hwRam   [
+            [0] "cn=ram-5,ou=Comparts,ou=hw,ou=Inventory,dc=umidb",
+            [1] "cn=ram-6,ou=Comparts,ou=hw,ou=Inventory,dc=umidb"
+        ]
+    }
+    ...
+
+=cut
+
+sub show_inventory_item {
+  my ($self, $args) = @_;
+  my $arg = { inventory_dn => $args->{dn}, };
+  my $mesg =
+    $self->search({ base   => $arg->{inventory_dn},
+		    scope  => 'base', });
+  my ( $entry, $hwType, $res, $return, $tmp_m, $tmp_e, $a, $b, $c, $d);
+  $return->{error} = $self->err($mesg)->{html} if ! $mesg->count;
+  $entry = $mesg->entry(0);
+  # removing from DN, all the rest up to the hwType
+  $hwType =
+    ldap_explode_dn( substr( $arg->{inventory_dn}, 0, -1 * (1 + length $self->{cfg}->{base}->{inventory})),
+		     reverse => 1);
+
+  if ( $hwType->[0]->{OU} eq 'Composite' ) {
+    $res = { CPU  => [],
+	     DISK => [],
+	     IF   => [],
+	     MB   => [],
+	     RAM  => [], };
+
+    $a = $entry->get_value( 'hwCpu', asref => 1 );
+    foreach $b ( @{$a} ) {
+      $tmp_m = $self->search({ base  => $b, scope => 'base', });
+      if ( ! $tmp_m->count ) {
+	push @{$return->{error}}, $self->err($tmp_m)->{html};
+      } else {
+	$tmp_e = $tmp_m->entry(0);
+	push @{$res->{CPU}}, { dn => $b, descr => $tmp_e->get_value('hwVersion') };
+      }
+    }
+
+    $a = $entry->get_value( 'hwMb', asref => 1 );
+    foreach $b ( @{$a} ) {
+      $tmp_m = $self->search({ base  => $b, scope => 'base', });
+      if ( ! $tmp_m->count ) {
+	push @{$return->{error}}, $self->err($tmp_m)->{html};
+      } else {
+	$tmp_e = $tmp_m->entry(0);
+	push @{$res->{MB}}, { dn => $b, descr =>
+			      sprintf('%s: %s',
+				      $tmp_e->get_value('hwManufacturer'),
+				      $tmp_e->get_value('hwProductName')), };
+      }
+    }
+
+    $a = $entry->get_value( 'hwIf', asref => 1 );
+    foreach $b ( @{$a} ) {
+      $tmp_m = $self->search({ base  => $b, scope => 'base', });
+      if ( ! $tmp_m->count ) {
+	push @{$return->{error}}, $self->err($tmp_m)->{html};
+      } else {
+	$tmp_e = $tmp_m->entry(0);
+	push @{$res->{IF}}, { dn => $b, descr =>
+			      sprintf('%s, %s, %s',
+				      $tmp_e->get_value('hwTypeIf'),
+				      $tmp_e->get_value('hwModel'),
+				      $tmp_e->get_value('hwManufacturer')), };
+      }
+    }
+
+    $a = $entry->get_value( 'hwDisk', asref => 1 );
+    foreach $b ( @{$a} ) {
+      $tmp_m = $self->search({ base  => $b, scope => 'base', });
+      if ( ! $tmp_m->count ) {
+	push @{$return->{error}}, $self->err($tmp_m)->{html};
+      } else {
+	$tmp_e = $tmp_m->entry(0);
+	($c,$d) = split(' bytes ', $tmp_e->get_value('hwSize'));
+	
+	push @{$res->{DISK}}, { dn => $b, descr =>
+				sprintf('%s: %s, %s',
+					$tmp_e->get_value('hwTypeDisk'),
+					$tmp_e->get_value('hwModel'),
+					$d ), };
+      }
+    }
+
+    $a = $entry->get_value( 'hwRam', asref => 1 );
+    foreach $b ( @{$a} ) {
+      $tmp_m = $self->search({ base  => $b, scope => 'base', });
+      if ( ! $tmp_m->count ) {
+	push @{$return->{error}}, $self->err($tmp_m)->{html};
+      } else {
+	$tmp_e = $tmp_m->entry(0);
+	push @{$res->{RAM}}, { dn => $b, descr =>
+				sprintf('%s: %s, %s, %s, %s',
+					$tmp_e->get_value('hwLocator'),
+					$tmp_e->get_value('hwSizeRam'),
+					$tmp_e->get_value('hwSpeedRam'),
+					$tmp_e->get_value('hwManufacturer'),
+					$tmp_e->get_value('hwPartNumber') ),
+			     };
+      }
+    }
+
+
+    
+    # push @{$return->{success}},
+    #   { CPU  => { dn => $a  }, },
+    #   { DISK => { dn => $entry->get_value( 'hwDisk', asref => 1 ) }, },
+    #   { IF   => { dn => $entry->get_value( 'hwIf', asref => 1 )   }, },
+    #   { MB   => { dn => $entry->get_value( 'hwMb', asref => 1 )   }, },
+    #   { RAM  => { dn => $entry->get_value( 'hwRam', asref => 1 )  }, };
+  }
+  $return->{success} = $res;
+  # p $res;
+  return $return;
+}
+
 
 
 

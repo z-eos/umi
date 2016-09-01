@@ -460,10 +460,20 @@
     <div id="collapse_inventory" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_inventory">
       <div class="panel-body">
 	<table class="table table-condenced table-stripped table-hover">
-	  <thead><tr class="active"><th>Hardware Type</th><th>DN</th></tr></thead>
+	  <thead><tr class="active"><th>Hardware Type</th><th>Item</th></tr></thead>
 	  <tbody>
 	    [% FOREACH x IN inventory %]
 	    <tr><td>[% x.hwType %]</td><td>[% x.dn %]</td></tr>
+	    <tr><td></td><td><dl class="dl-horizontal">
+	      [% FOREACH inv IN x.hwObj.success.pairs %]
+	      <dt>[% inv.key %]</dt>
+	      <dd><ul class="list-unstyled">
+		[% FOREACH invitemval IN inv.value %]
+		<li>[% invitemval.descr %]</li>
+		[% END %]
+	      </ul></dd>
+	      [% END %]
+	    </dl></td></tr>
 	    [% END %]
 	  </tbody>
 	</table>

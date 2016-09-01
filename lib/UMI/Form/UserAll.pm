@@ -529,18 +529,18 @@ has_field 'loginless_ssh.keyfile'
        wrapper_class => [ qw{col-xs-12}, ],
      );
 
-has_field 'loginless_ssh.description'
-  => ( type => 'TextArea',
-       label => 'Description',
-       label_class => [ 'col-xs-2', ],
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'Any description.',
-			 'autocomplete' => 'off',
-			 'data-group' => 'ssh', },
-       cols => 30, rows => 1,
-       wrapper_class => [ qw{col-xs-12}, ],
-     );
+# has_field 'loginless_ssh.description'
+#   => ( type => 'TextArea',
+#        label => 'Description',
+#        label_class => [ 'col-xs-2', ],
+#        element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
+#        element_class => [ 'input-sm', ],
+#        element_attr => { placeholder => 'Any description.',
+# 			 'autocomplete' => 'off',
+# 			 'data-group' => 'ssh', },
+#        cols => 30, rows => 1,
+#        wrapper_class => [ qw{col-xs-12}, ],
+#      );
 
 has_field 'loginless_ssh.remove'
   => ( type => 'RmElement',
