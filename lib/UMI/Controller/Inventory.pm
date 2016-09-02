@@ -81,6 +81,9 @@ sub create_inventory {
 
   $args->{common_hwAssignedTo} = 'unassigned'
     if defined $args->{common_hwAssignedTo} && $args->{common_hwAssignedTo} eq '';
+  $args->{common_inventoryNumber} = 'NA'
+    if ( defined $args->{common_inventoryNumber} && $args->{common_inventoryNumber} eq '' ) ||
+    ! defined $args->{common_inventoryNumber};
   
   my ( $file_is, $return, $hw, $tmp, $k, $key, $v, $val, $i, $j, $l, $r, $compart, $add, $hwAssignedTo, $common_compart );
 
@@ -168,6 +171,9 @@ sub create_inventory {
 	  push @{$add->{$key}->[$i]->{attrs}},
 	    description => defined $args->{common_description} ? $args->{common_description} : 'stub description';
 
+	  # push @{$add->{$key}->[$i]->{attrs}},
+	  #   inventoryNumber => defined $args->{common_inventoryNumber} ? $args->{common_inventoryNumber} : 'NA';
+
 	  while (($k, $v) = each %{$compart}) {
 	    push @{$add->{$key}->[$i]->{attrs}}, $k => $v if $v ne '';
 	  }
@@ -204,6 +210,7 @@ sub create_inventory {
       next if ! defined $compart->{ldif}->{hash}->{hwType};
       push @{$compart->{ldif}->{attrs}}, objectClass => $ldap_crud->{cfg}->{objectClass}->{inventory};
       push @{$compart->{ldif}->{attrs}}, hwStatus => 'assigned';
+
       if ( $hwAssignedTo ne '' ) {
 	push @{$compart->{ldif}->{attrs}}, hwAssignedTo => $hwAssignedTo;
       } elsif ( defined $args->{common_hwAssignedTo} && $args->{common_hwAssignedTo} ne '' ) {
@@ -235,6 +242,7 @@ sub create_inventory {
       push @{$add->{repeatable}}, $compart;
       delete $compart->{ldif};
     }
+
     #--- Repeatable field Compart stop ----------------------------------------
     
     #--- Composite or Single Compart stop -----------------------------------------------

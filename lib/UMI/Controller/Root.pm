@@ -245,13 +245,12 @@ sub user_preferences :Path(user_prefs) :Args(0) {
       $return->{error} .= sprintf('<li>jpegPhoto %s</li>',
 				  $ldap_crud->err($mesg)->{html});
     }
-    $entry = $mesg->entry(0);
+    $entry = $mesg->entry(0); my $tmppp = $entry->get_value('jpegPhoto'); p $tmppp;
     use MIME::Base64;
-    my $jpegPhoto = sprintf('<img alt="jpegPhoto of %s" src="data:image/jpg;base64,%s" class="img-responsive img-thumbnail bg-info" title="%s"/>',
-			    $entry->dn,
+    my $jpegPhoto = sprintf(' src="data:image/jpg;base64,%s" alt="jpegPhoto of %s" title="%s"/>',
 			    encode_base64($entry->get_value('jpegPhoto')),
 			    $entry->dn,
-			   );
+			    $entry->dn );
 
     #=================================================================
     # user DHCP stuff
@@ -343,11 +342,11 @@ sub user_preferences :Path(user_prefs) :Args(0) {
       $hwObj = $ldap_crud->show_inventory_item({ dn => $_ });
       ($hwType_l, $hwType_r) = split('_', $entries->{$_}->{hwtype}->[0]);
       push @inventory, { hwType =>
-			 sprintf( '<i title="%s" class="%s"></i> <mark class="h5"><b>I/N: %s</b></mark>',
+			 sprintf( '<i title="%s" class="%s"></i>',
 				  $ldap_crud->{cfg}->{hwType}->{$hwType_l}->{$hwType_r}->{descr},
-				  $ldap_crud->{cfg}->{hwType}->{$hwType_l}->{$hwType_r}->{icon},
-				  $entries->{$_}->{inventorynumber}->[0] ),
+				  $ldap_crud->{cfg}->{hwType}->{$hwType_l}->{$hwType_r}->{icon} ),
 			 dn => $_,
+			 inventoryNumber => $entries->{$_}->{inventorynumber}->[0],
 			 hwObj => $hwObj,
 		       };
       # push @inventory, { dn => $_, hwType => $entries->{$_}->{hwtype}->[0] };

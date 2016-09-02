@@ -24,7 +24,7 @@
     <div id="collapse_personal_data" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_personal_data">
       <div class="panel-body">
 	<div class="media">
-	  <div class="media-left">[% jpegPhoto %]</div>
+	  <div class="media-left"><img class="media-object bg-info" [% jpegPhoto %]</div>
 	  <div class="media-body">
 	    <dl class="dl-horizontal fa-ul">
 	      <li class="media-heading">
@@ -460,16 +460,16 @@
     <div id="collapse_inventory" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_inventory">
       <div class="panel-body">
 	<table class="table table-condenced table-stripped table-hover">
-	  <thead><tr class="active"><th>Hardware Type</th><th>Item</th></tr></thead>
+	  <thead><tr class="active"><th>Hardware Type</th><th>I/N</th><th>Item</th></tr></thead>
 	  <tbody>
 	    [% FOREACH x IN inventory %]
-	    <tr><td>[% x.hwType %]</td><td>[% x.dn %]</td></tr>
-	    <tr><td></td><td><dl class="dl-horizontal">
+	    <tr class="success"><td>[% x.hwType %]</td><td>[% x.inventoryNumber %]</td><td>[% x.dn %]</td></tr>
+	    <tr><td colspan="2"></td><td><dl class="dl-horizontal">
 	      [% FOREACH inv IN x.hwObj.success.pairs %]
 	      <dt>[% inv.key %]</dt>
 	      <dd><ul class="list-unstyled">
-		[% FOREACH invitemval IN inv.value %]
-		<li>[% invitemval.descr %]</li>
+		[% FOREACH inv_item_val IN inv.value %]
+		<li><span class="label label-default"><b>I/N: [% inv_item_val.inum %]</b></span> [% inv_item_val.descr %]</li>
 		[% END %]
 	      </ul></dd>
 	      [% END %]

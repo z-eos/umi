@@ -2723,15 +2723,65 @@ sub build_attr_equality {
 
 =head2 show_inventory_item
 
-returns array ref of hashes where values are array refs too
-    ...
-    [4] {
-        hwRam   [
-            [0] "cn=ram-5,ou=Comparts,ou=hw,ou=Inventory,dc=umidb",
-            [1] "cn=ram-6,ou=Comparts,ou=hw,ou=Inventory,dc=umidb"
-        ]
-    }
-    ...
+returns inventory item data array ref of hashes where values are array
+refs too
+
+for composite object it is:
+
+    dn                "cn=ws-3,ou=Composite,ou=hw,ou=Inventory,dc=umidb",
+    hwObj             {
+        success   {
+            CPU    [
+                [0] {
+                    descr   "AMD A10-7800 Radeon R7, 12 Compute Cores 4C+8G ",
+                    dn      "cn=cpu-3,ou=Comparts,ou=hw,ou=Inventory,dc=umidb"
+                    inum    "NA"
+                }
+            ],
+            DISK   [
+                [0] {
+                    descr   "SSD: KINGSTON SHFS37A240G, [240 GB]",
+                    dn      "cn=disk-3,ou=Comparts,ou=hw,ou=Inventory,dc=umidb"
+                    inum    "N123"
+                }
+            ],
+            IF     [
+                [0] {
+                    descr   "eth_in, RTL8111/8168/8411 PCI Express Gigabit Ethernet Controller, Realtek Semiconductor Co., Ltd.",
+                    dn      "cn=if-3,ou=Comparts,ou=hw,ou=Inventory,dc=umidb"
+                    inum    "A456"
+                }
+            ],
+            MB     [
+                [0] {
+                    descr   "MSI: A78M-E45 V2 (MS-7721)",
+                    dn      "cn=mb-3,ou=Comparts,ou=hw,ou=Inventory,dc=umidb"
+                    inum    "NA"
+                }
+            ],
+            RAM    [
+                [0] {
+                    descr   "DIMM 0: 8192 MB, 1333 MHz, A1_Manufacturer0, GY1600D364L10/8G",
+                    dn      "cn=ram-7,ou=Comparts,ou=hw,ou=Inventory,dc=umidb"
+                    inum    "R0A9M8"
+                },
+                [1] {
+                    descr   "DIMM 0: 8192 MB, 1333 MHz, A1_Manufacturer2, GY1600D364L10/8G",
+                    dn      "cn=ram-8,ou=Comparts,ou=hw,ou=Inventory,dc=umidb"
+                    inum    "NA"
+                }
+            ]
+        }
+    },
+    hwType            "<i title="composite inventory item, workstation" class="fa fa-lg fa-desktop"></i>",
+    inventoryNumber   "234-xdfsg8"
+
+for compart object it is:
+
+for singlrboard object it is:
+
+for furniture object it is:
+
 
 =cut
 
@@ -2763,7 +2813,10 @@ sub show_inventory_item {
 	push @{$return->{error}}, $self->err($tmp_m)->{html};
       } else {
 	$tmp_e = $tmp_m->entry(0);
-	push @{$res->{CPU}}, { dn => $b, descr => $tmp_e->get_value('hwVersion') };
+	push @{$res->{CPU}},
+	  { dn => $b,
+	    descr => $tmp_e->get_value('hwVersion'),
+	    inum => $tmp_e->exists('inventoryNumber') ? $tmp_e->get_value('inventoryNumber') : 'NA' };
       }
     }
 
@@ -2774,10 +2827,12 @@ sub show_inventory_item {
 	push @{$return->{error}}, $self->err($tmp_m)->{html};
       } else {
 	$tmp_e = $tmp_m->entry(0);
-	push @{$res->{MB}}, { dn => $b, descr =>
-			      sprintf('%s: %s',
-				      $tmp_e->get_value('hwManufacturer'),
-				      $tmp_e->get_value('hwProductName')), };
+	push @{$res->{MB}},
+	  { dn => $b,
+	    descr => sprintf('%s: %s',
+			     $tmp_e->get_value('hwManufacturer'),
+			     $tmp_e->get_value('hwProductName')),
+	    inum => $tmp_e->exists('inventoryNumber') ? $tmp_e->get_value('inventoryNumber') : 'NA' };
       }
     }
 
@@ -2788,11 +2843,14 @@ sub show_inventory_item {
 	push @{$return->{error}}, $self->err($tmp_m)->{html};
       } else {
 	$tmp_e = $tmp_m->entry(0);
-	push @{$res->{IF}}, { dn => $b, descr =>
-			      sprintf('%s, %s, %s',
-				      $tmp_e->get_value('hwTypeIf'),
-				      $tmp_e->get_value('hwModel'),
-				      $tmp_e->get_value('hwManufacturer')), };
+	push @{$res->{IF}},
+	  { dn => $b,
+	    descr => sprintf('%s, %s, %s',
+			     $tmp_e->get_value('hwTypeIf'),
+			     $tmp_e->get_value('hwModel'),
+			     $tmp_e->get_value('hwManufacturer')),
+	    inum => $tmp_e->exists('inventoryNumber') ? $tmp_e->get_value('inventoryNumber') : 'NA' };
+
       }
     }
 
@@ -2805,11 +2863,14 @@ sub show_inventory_item {
 	$tmp_e = $tmp_m->entry(0);
 	($c,$d) = split(' bytes ', $tmp_e->get_value('hwSize'));
 	
-	push @{$res->{DISK}}, { dn => $b, descr =>
-				sprintf('%s: %s, %s',
-					$tmp_e->get_value('hwTypeDisk'),
-					$tmp_e->get_value('hwModel'),
-					$d ), };
+	push @{$res->{DISK}},
+	  { dn => $b, descr =>
+	    sprintf('%s: %s, %s',
+		    $tmp_e->get_value('hwTypeDisk'),
+		    $tmp_e->get_value('hwModel'),
+		    $d ),
+	    inum => $tmp_e->exists('inventoryNumber') ? $tmp_e->get_value('inventoryNumber') : 'NA' };
+
       }
     }
 
@@ -2820,14 +2881,15 @@ sub show_inventory_item {
 	push @{$return->{error}}, $self->err($tmp_m)->{html};
       } else {
 	$tmp_e = $tmp_m->entry(0);
-	push @{$res->{RAM}}, { dn => $b, descr =>
-				sprintf('%s: %s, %s, %s, %s',
-					$tmp_e->get_value('hwLocator'),
-					$tmp_e->get_value('hwSizeRam'),
-					$tmp_e->get_value('hwSpeedRam'),
-					$tmp_e->get_value('hwManufacturer'),
-					$tmp_e->get_value('hwPartNumber') ),
-			     };
+	push @{$res->{RAM}},
+	  { dn => $b, descr =>
+	    sprintf('%s: %s, %s, %s, %s',
+		    $tmp_e->get_value('hwLocator'),
+		    $tmp_e->get_value('hwSizeRam'),
+		    $tmp_e->get_value('hwSpeedRam'),
+		    $tmp_e->get_value('hwManufacturer'),
+		    $tmp_e->get_value('hwPartNumber') ),
+	    inum => $tmp_e->exists('inventoryNumber') ? $tmp_e->get_value('inventoryNumber') : 'NA' };
       }
     }
 
