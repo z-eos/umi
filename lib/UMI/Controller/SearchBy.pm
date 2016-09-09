@@ -462,14 +462,14 @@ sub proc :Path(proc) :Args(0) {
       my $ldap_crud = $c->model('LDAP_CRUD');
 
       my $id;
-      if ( $ldap_crud->{cfg}->{rdn}->{acc_root} ne 'uid' ) {
+      # if ( $ldap_crud->{cfg}->{rdn}->{acc_root} ne 'uid' ) {
 	my $mesg = $ldap_crud->search( { base => $params->{'ldap_modify_group'},
 					 scope => 'base',
 					 attrs => [ 'uid' ], });
 	push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
 	  if $mesg->code != 0;
 	$id = $mesg->entry(0)->get_value( 'uid' );
-      }
+      # }
 
       if ( ! defined $params->{groups} && ! defined $params->{aux_submit} ) {
 	my ( $return, $base, $filter, $dn );
@@ -481,10 +481,10 @@ sub proc :Path(proc) :Args(0) {
 	  if $mesg->code != 0;
 
 	my @groups_usr = $mesg->sorted('cn');
-	foreach ( @groups_usr ) { push @{$params->{groups}}, substr( (split /,/, $_->dn)[0], 3); }
+	foreach ( @groups_usr ) { push @{$params->{groups}}, $_->dn; } #  substr( (split /,/, $_->dn)[0], 3); }
 	# $params->{groups} = undef;
       }
-
+      # p $params;
       $c->stash( template => 'user/user_mod_group.tt',
 		 form => $self->form_mod_groups,
 		 ldap_modify_group => $params->{'ldap_modify_group'}, );
@@ -1045,7 +1045,7 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
 
 =head1 mod_groups
 
-modify groups object can/belong to, method
+modify groups object is/can belong to, method
 
 on input it expects hash with:
     obj_dn - DN of the object to manage group membership of
@@ -1066,16 +1066,16 @@ sub mod_groups {
 	      is_submit => $args->{is_submit}, };
 
   my ( $mesg, $return);
-  if ( $ldap_crud->{cfg}->{rdn}->{acc_root} ne 'uid' ) {
+  # if ( $ldap_crud->{cfg}->{rdn}->{acc_root} ne 'uid' ) {
     $mesg = $ldap_crud->search( { base => $arg->{obj_dn},
 				  scope => 'base',
 				  attrs => [ 'uid' ], });
     push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
       if $mesg->code != 0;
     $arg->{uid} = $mesg->entry(0)->get_value( 'uid' );
-  } else {
-    $arg->{uid} = substr( (split /,/, $args->{mod_groups_dn})[0], 4 );
-  }
+  # } else {
+  #   $arg->{uid} = substr( (split /,/, $args->{mod_groups_dn})[0], 4 );
+  # }
 
   # hash with all selected for add/delete group/s
   if ( ref($arg->{groups}) eq 'ARRAY' ) {
@@ -1102,23 +1102,22 @@ sub mod_groups {
 
   my @groups_all = $mesg->sorted('cn');
   foreach ( @groups_all ) {
-    if ( $arg->{type} eq 'posixGroup' ) {
-      $arg->{groups_all}->{$_->get_value('cn')} = 0;
-      $arg->{groups_sel}->{$_->get_value('cn')} = 0
-	if ! defined $arg->{groups_sel}->{$_->get_value('cn')};
-      $arg->{groups_old}->{$_->get_value('cn')} =
-	# defined $g->{sprintf('cn=%s,%s',$_->get_value('cn'),$ldap_crud->cfg->{base}->{group})} ?
-	defined $g->{$_->dn} ? 1 : 0;
-    } else {
+    # if ( $arg->{type} eq 'posixGroup' ) {
+    #   $arg->{groups_all}->{$_->get_value('cn')} = 0;
+    #   $arg->{groups_sel}->{$_->get_value('cn')} = 0
+    # 	if ! defined $arg->{groups_sel}->{$_->get_value('cn')};
+    #   $arg->{groups_old}->{$_->get_value('cn')} =
+    # 	# defined $g->{sprintf('cn=%s,%s',$_->get_value('cn'),$ldap_crud->cfg->{base}->{group})} ?
+    # 	defined $g->{$_->dn} ? 1 : 0;
+    # } else {
       $arg->{groups_all}->{$_->dn} = 0;
       $arg->{groups_sel}->{$_->dn} = 0
 	if ! defined $arg->{groups_sel}->{$_->dn};
       $arg->{groups_old}->{$_->dn} =
 	defined $g->{$_->dn} ? 1 : 0;
-    }
+    # }
   }
 
-  # p $arg;
   # after submit
   if ( $arg->{is_submit} ) {
     my @groups_chg;
@@ -1136,19 +1135,23 @@ sub mod_groups {
 	  [ 'memberUid' => $arg->{uid} ] : [ 'member' => $arg->{obj_dn} ];
       }
       # p [sprintf('cn=%s,%s', $_, $arg->{base}), @groups_chg] if $#groups_chg > 0;
+      # p \@groups_chg;
       if ( $#groups_chg > 0) {
 	# p [sprintf('cn=%s,%s', $_, $arg->{base}), @groups_chg]
-	  $mesg = $ldap_crud
-	  ->modify( $arg->{type} eq 'posixGroup' ? sprintf('cn=%s,%s', $_, $arg->{base}) : $_,
-		    \@groups_chg );
+	# $mesg = $ldap_crud
+	#   ->modify( $arg->{type} eq 'posixGroup' ? sprintf('cn=%s,%s', $_, $arg->{base}) : $_,
+	# 	    \@groups_chg ); p $mesg;
+	$mesg = $ldap_crud
+	  ->modify( $_, \@groups_chg );
 	if ( $mesg ) {
-	  push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $mesg->{html};
+	  push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
 	} else {
 	  push @{$return->{success}},
 	    sprintf('<span class="%s">%s</span>',
 		    $groups_chg[0] eq 'add' ? 'text-success" title="added to' : 'text-danger" title="deleted from',
 		    $groups_chg[0] eq 'add' ? $_ : '<s>' . $_ . '</s>');
 	}
+	# p [ $return, $arg ];
       }
       $#groups_chg = -1;
     }

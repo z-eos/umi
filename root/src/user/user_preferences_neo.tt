@@ -269,8 +269,8 @@
 	Services
     </h3>
   </div>
-    <div id="collapse_service" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_service">
-  <div class="panel-body table-responsive">
+  <div id="collapse_service" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_service">
+    <div class="panel-body table-responsive">
       <table class="table table-condenced table-stripped table-hover">
 	<tbody>
 	  [% FOREACH y IN service %]
@@ -459,24 +459,40 @@
     </div>
     <div id="collapse_inventory" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_inventory">
       <div class="panel-body">
-	<table class="table table-condenced table-stripped table-hover">
-	  <thead><tr class="active"><th>Hardware Type</th><th>I/N</th><th>Item</th></tr></thead>
-	  <tbody>
-	    [% FOREACH x IN inventory %]
-	    <tr class="success"><td>[% x.hwType %]</td><td>[% x.inventoryNumber %]</td><td>[% x.dn %]</td></tr>
-	    <tr><td colspan="2"></td><td><dl class="dl-horizontal">
-	      [% FOREACH inv IN x.hwObj.success.pairs %]
-	      <dt>[% inv.key %]</dt>
-	      <dd><ul class="list-unstyled">
-		[% FOREACH inv_item_val IN inv.value %]
-		<li><span class="label label-default"><b>I/N: [% inv_item_val.inum %]</b></span> [% inv_item_val.descr %]</li>
-		[% END %]
-	      </ul></dd>
+	<div class="table-responsive">
+	  <table class="table table-condenced table-stripped table-hover">
+	    <thead>
+	      <tr class="active">
+		<th>Hardware Type</th>
+		<th title="Inventory Number">I/N</th>
+		<th>Item</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	      [% FOREACH x IN inventory %]
+	      <tr class="success"><td>[% x.hwType %]</td><td>[% x.inventoryNumber %]</td><td>[% x.dn %]</td></tr>
+	      <tr><td></td><td colspan="2">
+		<table class="table table-bordered table-condenced table-stripped table-hover">
+		  <thead>
+		    <tr class="active">
+		      <th class="text-right"">compart</th>
+		      <th class="text-center" title="Inventory Number">I/N</th>
+		      <th>Spec</th>
+		    </tr>
+		  </thead>
+		  <tbody>
+		    [% FOREACH inv IN x.hwObj.success.pairs %]
+		    [% FOREACH inv_item_val IN inv.value %]
+		    <tr><th class="text-right">[% inv.key %]</th><td class="text-center">[% inv_item_val.inum %]</td><td>[% inv_item_val.descr %]</td></tr>
+		    [% END %]
+		    [% END %]
+		  </tbody>
+		</table>
+	      </td></tr>
 	      [% END %]
-	    </dl></td></tr>
-	    [% END %]
-	  </tbody>
-	</table>
+	    </tbody>
+	  </table>
+	</div>
       </div>
     </div>
   </div>
