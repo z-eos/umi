@@ -137,7 +137,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
   if ( $c->user_exists ) {
     my $ldap_crud = $c->model('LDAP_CRUD');
 
-    my ( $arg, $mesg, $return, $entry, $entries, $orgs, $domains, $fqdn,
+    my ( $arg, $mesg, $return, $entry, $entries, $orgs, $domains, $fqdn, $o,
 	 $physicaldeliveryofficename, $telephonenumber, $title, $mail, );
 
     #=================================================================
@@ -153,6 +153,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 						  sn
 						  title
 						  mail
+						  o
 						  physicalDeliveryOfficeName
 						  telephoneNumber) ], });
       if ( $mesg->code ) {
@@ -165,6 +166,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 		givenname => $entry->get_value('givenName'),
 		sn => $entry->get_value('sn'),
 		title => defined $entry->get_value('title') ? \@{[$entry->get_value('title')]} : ['N/A'],
+		o => \@{[$entry->get_value('o', alloptions => 1)]},
 		physicaldeliveryofficename => \@{[$entry->get_value('physicaldeliveryofficename')]},
 		telephonenumber => defined $entry->get_value('telephonenumber') ?
 		\@{[$entry->get_value('telephonenumber')]} : ['N/A'],
@@ -175,6 +177,8 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	utf8::decode($arg->{sn});
       }
     } else {
+      $o = $c->user->has_attribute('o') ?
+	$c->user->o : 'N/A';
       $physicaldeliveryofficename = $c->user->has_attribute('physicaldeliveryofficename') ?
 	$c->user->physicaldeliveryofficename : 'N/A';
       $telephonenumber = $c->user->has_attribute('telephonenumber') ?
@@ -187,25 +191,25 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	      sn => $c->user->sn || 'N/A',
 	      title => $title,
 	      mail => $mail,
+	      o => $o,
 	      physicaldeliveryofficename => $physicaldeliveryofficename,
 	      telephonenumber => $telephonenumber,
 	      roles => \@{[$c->user->roles]} || 'N/A',
 	     };
     }
-
+    # p $arg;
     #=================================================================
     # user organizations
     #
-    my $physicalDeliveryOfficeName;
-    if ( ref($arg->{physicaldeliveryofficename}) eq 'ARRAY' ) {
-      foreach ( @{$arg->{physicaldeliveryofficename}} ) {
-	push @{$physicalDeliveryOfficeName}, $_;
+    if ( ref($arg->{o}) eq 'ARRAY' ) {
+      foreach ( @{$arg->{o}} ) {
+	push @{$o}, $_;
       }
     } else {
-      push @{$physicalDeliveryOfficeName}, $arg->{physicaldeliveryofficename};
+      push @{$o}, $arg->{o};
     }
 
-    foreach ( @{$physicalDeliveryOfficeName} ) {
+    foreach ( @{$o} ) {
       # here we need to fetch all org recursively to fill all data absent
       # if current object has no attribute needed (postOfficeBox or postalAddress or
       # any other, than we will use the one from it's ancestor
@@ -222,20 +226,11 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 		    $entries->{$_}->{l}->[0],
 		    $entries->{$_}->{st}->[0]
 		   );
-	  $mesg = $ldap_crud->search( { base => $_,
-					attrs => [ 'associatedDomain' ], } );
-	  if ( $mesg->code ) {
-	    $return->{error} .= sprintf('<li>associatedDomain/s %s</li>',
-					$ldap_crud->err($mesg)->{html});
-	  } else {
-	    $domains = $mesg->entry(0);
-	    @{$fqdn->{$entries->{$_}->{physicaldeliveryofficename}->[0]}} =
-		$domains->get_value('associatedDomain');
-	  }
+	  $fqdn->{$entries->{$_}->{physicaldeliveryofficename}->[0]} = $entries->{$_}->{associateddomain};
 	}
       }
     }
-
+    # p $orgs;
     #=================================================================
     # user jpegPhoto
     #
@@ -245,7 +240,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
       $return->{error} .= sprintf('<li>jpegPhoto %s</li>',
 				  $ldap_crud->err($mesg)->{html});
     }
-    $entry = $mesg->entry(0); my $tmppp = $entry->get_value('jpegPhoto'); p $tmppp;
+    $entry = $mesg->entry(0); my $tmppp = $entry->get_value('jpegPhoto');
     use MIME::Base64;
     my $jpegPhoto = sprintf(' src="data:image/jpg;base64,%s" alt="jpegPhoto of %s" title="%s"/>',
 			    encode_base64($entry->get_value('jpegPhoto')),
@@ -346,11 +341,11 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 				  $ldap_crud->{cfg}->{hwType}->{$hwType_l}->{$hwType_r}->{descr},
 				  $ldap_crud->{cfg}->{hwType}->{$hwType_l}->{$hwType_r}->{icon} ),
 			 dn => $_,
-			 inventoryNumber => $entries->{$_}->{inventorynumber}->[0],
+			 inventoryNumber => defined $entries->{$_}->{inventorynumber} ? $entries->{$_}->{inventorynumber}->[0] : 'NA',
 			 hwObj => $hwObj,
 		       };
       # push @inventory, { dn => $_, hwType => $entries->{$_}->{hwtype}->[0] };
-      p @inventory;
+      # p @inventory;
     }
 
     #=================================================================

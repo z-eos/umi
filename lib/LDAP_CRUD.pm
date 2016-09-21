@@ -444,7 +444,7 @@ sub _build_cfg {
 			 chr => {
 				 descr => 'furniture inventory item, chair',
 				 disabled => 0,
-				 icon => 'fa fa-lg fa-bed',
+				 icon => 'fa fa-lg fa-wheelchair',
 				},
 			},
 	  },
@@ -1463,6 +1463,7 @@ vCard export
 sub vcard {
   my ($self, $args) = @_;
   use POSIX qw(strftime);
+  use MIME::QuotedPrint;
   my $ts = strftime "%Y%m%d%H%M%S", localtime;
   my $arg = {
 	     dn => $args->{vcard_dn},
@@ -1473,44 +1474,42 @@ sub vcard {
   if ($msg->is_error()) {
     $return->{error} .= $self->err( $msg )->{html};
   } else {
-    $entry = $msg->entry(0);
-    $arg->{vcard}->{n} = sprintf('N:%s;%s;;;',
-				 $entry->get_value('sn'),
-				 $entry->get_value('givenName') );
-    $arg->{vcard}->{fn} = sprintf('FN:%s %s',
-				  $entry->get_value('givenName'),
-				  $entry->get_value('sn') );
-    $arg->{vcard}->{title} = sprintf('TITLE:%s', $entry->get_value('title') );
+    $entry = $msg->as_struct;
+    delete $entry->{$arg->{dn}}->{jpegphoto};
+    
+    $arg->{sn} = $self->utf2lat( $entry->{$arg->{dn}}->{sn}->[0] );
+    $arg->{givenName} = $self->utf2lat( $entry->{$arg->{dn}}->{givenname}->[0] );
+    $arg->{title} = $self->utf2lat( $entry->{$arg->{dn}}->{title}->[0] );
 
-    $arg->{vcard}->{o} = '';
-    if ( $entry->exists('o') ) {
-      my $orgs = $entry->get_value('o', asref => 1);
-      foreach ( @{$orgs} ) {
-	$tmp = $self->search ( { base => $_ } );
+    $arg->{vcard}->{n} = sprintf('N:%s;%s;;;', $arg->{givenName}, $arg->{sn} );
+    $arg->{vcard}->{fn} = sprintf('FN:%s %s', $arg->{givenName}, $arg->{sn} );
+    $arg->{vcard}->{title} = sprintf('TITLE:%s', $arg->{title} );
+
+    if ( $entry->{$arg->{dn}}->{o} ) {
+      foreach ( @{$entry->{$arg->{dn}}->{o}} ) {
+	$tmp = $self->search ( { base => $_, scope => 'base', } );
 	if ($tmp->is_error()) {
 	  $return->{error} .= $self->err( $tmp )->{html};
 	} else {
 	  my $org = $tmp->entry(0);
-	  $arg->{vcard}->{o} .= sprintf("ORG:%s\n", $org->get_value('physicalDeliveryOfficeName') );
+	  push @{$arg->{vcard}->{o}}, 'ORG:' . $self->utf2lat( $org->get_value('physicalDeliveryOfficeName'));
 	}
       }
     }
+    $arg->{vcard}->{o} = join("\n", @{$arg->{vcard}->{o}});
 
-    $arg->{vcard}->{telephonenumber} = '';
-    if ( $entry->exists('telephoneNumber') ) {
-      $tmp = $entry->get_value( 'telephoneNumber', asref => 1 );
-      foreach ( @{$tmp} ) {
-	$arg->{vcard}->{telephonenumber} .= 'TEL;TYPE=work:' . $_ . "\n";
+    if ( $entry->{$arg->{dn}}->{telephonenumber} ) {
+      foreach ( @{$entry->{$arg->{dn}}->{telephonenumber}} ) {
+	push @{$arg->{vcard}->{telephonenumber}}, sprintf('TEL;TYPE=work:%s', $_);
       }
     }
+    $arg->{vcard}->{telephonenumber} = join("\n", @{$arg->{vcard}->{telephonenumber}});
 
     my $scope = $arg->{dn} =~ /^.*authorizedService.*$/ ? 'sub' : 'one';
 
-    $arg->{vcard}->{email} = '';
-    if ( $entry->exists('email') ) {
-      $tmp = $entry->get_value( 'email', asref => 1 );
-      foreach ( @{$tmp} ) {
-	$arg->{vcard}->{email} .= 'EMAIL;WORK:' . $_ . "\n";
+    if ( $entry->{$arg->{dn}}->{mail} ) {
+      foreach ( @{$entry->{$arg->{dn}}->{mail}} ) {
+	push @{$arg->{email}}, 'EMAIL;WORK:' . $_;
       }
     }
     $branch = $self->ldap->search ( base => $arg->{dn}, scope => $scope, filter => 'authorizedService=mail@*', );
@@ -1527,15 +1526,15 @@ sub vcard {
 	    @leaves = $leaf->entries;
 	    foreach $leaf_entry ( @leaves ) {
 	      {
-		$arg->{vcard}->{email} .= 'EMAIL;TYPE=work:' . $leaf_entry->get_value('uid') . "\n";
+		push @{$arg->{email}}, 'EMAIL;TYPE=work:' . $leaf_entry->get_value('uid');
 	      }
 	    }
 	  }
 	}
       }
     }
+    $arg->{vcard}->{email} = join("\n", @{$arg->{email}}) if $arg->{email};
     
-    $arg->{vcard}->{xmpp} = '';
     $msg = $self->ldap->search ( base => $arg->{dn}, scope => $scope, filter => 'authorizedService=xmpp@*', );
     if ($msg->is_error()) {
       $return->{error} .= $self->err( $msg )->{html};
@@ -1548,22 +1547,23 @@ sub vcard {
 	} else {
 	  if ( $msg->count ) {
 	    my $a = $msg->entry(0);
-	    $arg->{vcard}->{xmpp} .= 'X-JABBER;TYPE=work:' . $a->get_value('uid') . "\n";
+	    push @{$arg->{xmpp}}, 'X-JABBER;TYPE=work:' . $a->get_value('uid');
 	  }
 	}
       }
     }
-    
-    $return->{vcard} = sprintf("\nBEGIN:VCARD\nVERSION:2.1\n%s\n%s\n%s\n",
+    $arg->{vcard}->{xmpp} = join("\n", @{$arg->{xmpp}}) if $arg->{xmpp};
+
+    $return->{vcard} = sprintf("BEGIN:VCARD\nVERSION:2.1\n%s\n%s\n%s\n",
 			       $arg->{vcard}->{n},
 			       $arg->{vcard}->{fn},
 			       $arg->{vcard}->{title}
 			      );
 
-    $return->{vcard} .= $arg->{vcard}->{telephonenumber} if $arg->{vcard}->{telephonenumber} ne '';
-    $return->{vcard} .= $arg->{vcard}->{email} if $arg->{vcard}->{email} ne '';
-    $return->{vcard} .= $arg->{vcard}->{xmpp} if $arg->{vcard}->{xmpp} ne '';
-    $return->{vcard} .= $arg->{vcard}->{o} if $arg->{vcard}->{o} ne '';
+    $return->{vcard} .= $arg->{vcard}->{telephonenumber} . "\n" if $arg->{vcard}->{telephonenumber} ne '';
+    $return->{vcard} .= $arg->{vcard}->{email} . "\n" if $arg->{vcard}->{email} ne '';
+    $return->{vcard} .= $arg->{vcard}->{xmpp} . "\n" if $arg->{vcard}->{xmpp} ne '';
+    $return->{vcard} .= $arg->{vcard}->{o} . "\n" if $arg->{vcard}->{o} ne '';
 
     $return->{success} .= sprintf('vCard generated for object with DN: <b class="mono"><em>%s</em></b>.', $arg->{dn} );
   }
@@ -1573,12 +1573,16 @@ sub vcard {
   use MIME::Base64;
   if ( $arg->{type} ne 'file' ) {
     use GD::Barcode::QRcode;
+    my $qr;
+    for( my $i = 0; $i < 41; $i++ ) {
+      $qr = $self->qrcode({ txt => $return->{vcard}, ver => $i, mod => 5 });
+      last if ! exists $qr->{error};
+    }
+
     $return->{qr} =
       sprintf('<img alt="QR for DN %s" src="data:image/jpg;base64,%s" class="img-responsive img-thumbnail" title="QR for DN %s"/>',
 	      $arg->{dn},
-	      encode_base64(GD::Barcode::QRcode
-			    ->new( $return->{vcard},
-				   { Ecc => 'Q', Version => 24, ModuleSize => 4 } )->plot->png ),
+	      $qr->{qr},
 	      $arg->{dn}
 	     );
   } else {
@@ -1586,8 +1590,8 @@ sub vcard {
       if $entry->exists('jpegPhoto');
   }
 
-  $return->{vcard} .= "REV:" . $ts . "Z\nEND:VCARD\n";
-  # p $return;
+  $return->{vcard} .= "REV:" . $ts . "Z\nEND:VCARD";
+  p $return->{vcard};
   return $return;
 }
 
@@ -2845,8 +2849,9 @@ sub show_inventory_item {
 	$tmp_e = $tmp_m->entry(0);
 	push @{$res->{IF}},
 	  { dn => $b,
-	    descr => sprintf('%s, %s, %s',
+	    descr => sprintf('%s, %s, %s, %s',
 			     $tmp_e->get_value('hwTypeIf'),
+			     $tmp_e->get_value('hwMac'),
 			     $tmp_e->get_value('hwModel'),
 			     $tmp_e->get_value('hwManufacturer')),
 	    inum => $tmp_e->exists('inventoryNumber') ? $tmp_e->get_value('inventoryNumber') : 'NA' };
@@ -2892,8 +2897,6 @@ sub show_inventory_item {
 	    inum => $tmp_e->exists('inventoryNumber') ? $tmp_e->get_value('inventoryNumber') : 'NA' };
       }
     }
-
-
     
     # push @{$return->{success}},
     #   { CPU  => { dn => $a  }, },
@@ -2901,6 +2904,15 @@ sub show_inventory_item {
     #   { IF   => { dn => $entry->get_value( 'hwIf', asref => 1 )   }, },
     #   { MB   => { dn => $entry->get_value( 'hwMb', asref => 1 )   }, },
     #   { RAM  => { dn => $entry->get_value( 'hwRam', asref => 1 )  }, };
+  } else {
+    $res = { DESCRIPTION  => [], };
+
+    push @{$res->{DESCRIPTION}},
+      { dn => $entry->dn,
+	descr => sprintf('model: %s; manufacturer: %s',
+			 $entry->exists('hwModel') ? $entry->get_value('hwModel') : 'NA',
+			 $entry->exists('hwManufacturer') ? $entry->get_value('hwManufacturer') : 'NA' ),
+	inum => $entry->exists('inventoryNumber') ? $entry->get_value('inventoryNumber') : 'NA' };
   }
   $return->{success} = $res;
   # p $res;

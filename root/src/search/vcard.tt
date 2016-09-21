@@ -23,9 +23,7 @@
 <br>
 <div class="row">
   <div class="col-xs-6">
-    <pre>
-      [% final_message.vcard %]
-    </pre>
+    <pre>[% final_message.vcard %]</pre>
   </div>
   <div class="col-xs-6">
       [% final_message.qr %]    
