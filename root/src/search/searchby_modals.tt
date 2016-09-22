@@ -70,13 +70,28 @@
 	</div>
 	<div class="modal-body clearfix form-group text-primary">
 	  <label for="dn_to_reassign_to" class="col-xs-2 text-right control-label">
-	    <abbr title="user root account DN user ID (here UID is &laquo;abc&raquo; while user root account DN is &laquo;uid=abc,ou=bla,dc=foo&raquo;) this object will be reassigned to">
-	      UID reassign to:
+	    <abbr title="&#xf071; DN or just UID
+
+&#xf085; SERVICES:
+user root account DN user ID (here UID is &laquo;abc&raquo; while user root account DN is &laquo;uid=abc,ou=bla,dc=foo&raquo;) this object will be reassigned to
+
+&#xf02c; INVENTORY:
+above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inventory,dc=umidb&raquo;
+">
+	      object ID, to reassign to:
 	    </abbr>
 	  </label>
 	  <div class="col-xs-10">
 	    <input type="text" class="input-sm form-control" id="dst_uid" name="dst_uid"
-		   placeholder="UID of the recipient">
+		   placeholder="DN or UID of the recipient"
+		   title="&#xf071; DN or just UID
+
+&#xf085; SERVICES:
+user root account DN user ID (here UID is &laquo;abc&raquo; while user root account DN is &laquo;uid=abc,ou=bla,dc=foo&raquo;) this object will be reassigned to
+
+&#xf02c; INVENTORY:
+above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inventory,dc=umidb&raquo;
+">
 	  </div>
 	</div>
 	<div class="modal-footer">
@@ -151,17 +166,24 @@
 	<div class="modal-body text-primary">
 	  vCard file contains user image/s if any, while QR code not.<br><br>
 	  <div class="radio">
-	    <span class="fa fa-file-o fa-sm col-xs-1 text-right"></span>
+	    <span class="fa fa-star-half-o fa-lg col-xs-1 text-right"></span>
 	    <label>
 	      <input type="radio" name="vcard_type" id="ldap_vcard1" value="qr_min" checked>
 	      minimal info vCard (name, email/s, IM id/s and telephone number/s)
 	    </label>
 	  </div>
 	  <div class="radio">
-	    <span class="fa fa-files-o fa-lg col-xs-1 text-right"></span>
+	    <span class="fa fa-star fa-lg col-xs-1 text-right"></span>
 	    <label>
 	      <input type="radio" name="vcard_type" id="ldap_vcard2" value="qr_max" disabled>
 	      full info vCard
+	    </label>
+	  </div>
+	  <div class="checkbox">
+	    <span class="fa fa-text-width fa-lg col-xs-1 text-right"></span>
+	    <label>
+	      <input type="checkbox" name="vcard_translit" value="1">
+	      to translit all to latin1
 	    </label>
 	  </div>
 	</div>
