@@ -105,6 +105,43 @@ sub utf2lat {
   }
 }
 
+=head2 utf2qp
+
+utf8 input (cyrillic in particular) to Quoted Printable
+
+on input we expect:
+
+    1. string to QP
+    2. 0 or 1 to denote whether to translit instead of QP
+
+on return is hash 
+
+    {
+      str => result string
+      type => qp or plain keyword denoting what type str is
+    }
+
+=cut
+
+sub utf2qp {
+  my ($self, $to_qp, $to_tr) = @_;
+  use MIME::QuotedPrint;
+  my $return;
+  if ( $self->is_ascii($to_qp) && ! $to_tr ) {
+    $return->{str} = encode_qp( $to_qp, '' );
+    $return->{type} = 'qp';
+  } elsif ( $self->is_ascii($to_qp) && $to_tr ) {
+    $return->{str} = $self->utf2lat( $to_qp );
+    $return->{type} = 'plain';
+  } else {
+    $return->{str} = $to_qp;
+    $return->{type} = 'plain';
+  }
+  return $return;
+}
+
+
+
 
 sub is_int {
   my ($self, $arg) = @_;

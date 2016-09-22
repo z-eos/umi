@@ -1469,107 +1469,92 @@ on input we expect
 sub vcard {
   my ($self, $args) = @_;
   use POSIX qw(strftime);
-  use MIME::QuotedPrint;
+  use MIME::Base64;
+
   my $ts = strftime "%Y%m%d%H%M%S", localtime;
   my $arg = { dn => $args->{vcard_dn},
 	      type => $args->{vcard_type},
 	      translit => $args->{vcard_translit} || 0, };
-  p $arg;
+
   my ($msg, $branch, @branches, $branch_entry, $leaf, @leaves, $leaf_entry, $entry, @entries, @vcard, $return, $tmp);
   $msg = $self->ldap->search ( base => $arg->{dn}, scope => 'base', filter => 'objectClass=*', );
   if ($msg->is_error()) {
     $return->{error} .= $self->err( $msg )->{html};
   } else {
-    $entry = $msg->as_struct;
-    delete $entry->{$arg->{dn}}->{jpegphoto};
-
     push @vcard, 'BEGIN:VCARD', 'VERSION:2.1';
+    $entry = $msg->as_struct;
+
+    $arg->{sn} = $self->utf2qp( $entry->{$arg->{dn}}->{sn}->[0], $arg->{translit} );
+    $arg->{givenName} = $self->utf2qp( $entry->{$arg->{dn}}->{givenname}->[0], $arg->{translit} );
     
-    # --- SN ----------------------------------------------------------
-    if ( $self->is_ascii($entry->{$arg->{dn}}->{sn}->[0]) && ! $arg->{translit} ) {
-      $arg->{sn}->{str} = encode_qp( $entry->{$arg->{dn}}->{sn}->[0], '' );
-      $arg->{sn}->{type} = 'qp';
-    } elsif ( $self->is_ascii($entry->{$arg->{dn}}->{sn}->[0]) && $arg->{translit} ) {
-      $arg->{sn}->{str} = $self->utf2lat( $entry->{$arg->{dn}}->{sn}->[0] );
-      $arg->{sn}->{type} = 'plain';
-    } else {
-      $arg->{sn}->{str} = $entry->{$arg->{dn}}->{sn}->[0];
-      $arg->{sn}->{type} = 'plain';
-    }
-    # --- GIVENNAME ---------------------------------------------------
-    if ( $self->is_ascii($entry->{$arg->{dn}}->{givenname}->[0]) && ! $arg->{translit} ) {
-      $arg->{givenName}->{str} = encode_qp( $entry->{$arg->{dn}}->{givenname}->[0], '' );
-      $arg->{givenName}->{type} = 'qp';
-    } elsif ( $self->is_ascii($entry->{$arg->{dn}}->{givenname}->[0]) && $arg->{translit} ) {
-      $arg->{givenName}->{str} = $self->utf2lat( $entry->{$arg->{dn}}->{givenname}->[0] );
-      $arg->{givenName}->{type} = 'plain';
-    } else {
-      $arg->{givenName}->{str} = $entry->{$arg->{dn}}->{givenname}->[0];
-      $arg->{givenName}->{type} = 'plain';
-    }
-    
-    $arg->{vcard}->{n} = sprintf('N%s:%s;%s;;;',
-				 $arg->{sn}->{type} eq 'qp' ? ';CHARSET=UTF-8;ENCODING=QUOTED-PRINTABLE' : '',
-				 $arg->{givenName}->{str}, $arg->{sn}->{str} );
-    push @vcard, $arg->{vcard}->{n};
+    push @vcard, sprintf('N%s:%s;%s;;;',
+			 $arg->{sn}->{type} eq 'qp' ? ';CHARSET=UTF-8;ENCODING=QUOTED-PRINTABLE' : '',
+			 $arg->{givenName}->{str}, $arg->{sn}->{str} );
+  use MIME::QuotedPrint;
+
     $tmp = $arg->{sn}->{type} eq 'qp' || $arg->{givenNme}->{type} eq 'qp' ?
       encode_qp( sprintf('%s %s', $entry->{$arg->{dn}}->{givenname}->[0], $entry->{$arg->{dn}}->{sn}->[0]), '' ) :
       sprintf('%s %s', $arg->{givenName}->{str}, $arg->{sn}->{str});
 
-    $arg->{vcard}->{fn} =
+    # $tmp = $self->utf2qp( sprintf('%s %s',
+    # 				  $entry->{$arg->{dn}}->{givenname}->[0],
+    # 				  $entry->{$arg->{dn}}->{sn}->[0]),
+    # 			  $arg->{translit} );
+    
+    push @vcard,
       sprintf('FN%s:%s',
-	      $arg->{sn}->{type} eq 'qp' || $arg->{givenNme}->{type} eq 'qp' ? ';CHARSET=UTF-8;ENCODING=QUOTED-PRINTABLE' : '',
-	      $tmp);
-    push @vcard, $arg->{vcard}->{fn};
+	      # $tmp->{type} eq 'qp' ?
+	      $arg->{sn}->{type} eq 'qp' || $arg->{givenNme}->{type} eq 'qp' ?
+	      ';CHARSET=UTF-8;ENCODING=QUOTED-PRINTABLE' : '',
+	      $tmp); # ->{str});
 
     # --- TITLE -------------------------------------------------------
     if ( $entry->{$arg->{dn}}->{title} ) {
-      foreach ( @{$entry->{$arg->{dn}}->{title}} ) {
-	if ( $self->is_ascii($_) && ! $arg->{translit} ) {
-	  $arg->{title}->{str} = encode_qp( $_, '' );
-	  $arg->{title}->{type} = 'qp';
-	} elsif ( $self->is_ascii($entry->{$arg->{dn}}->{title}->[0]) && $arg->{translit} ) {
-	  $arg->{title}->{str} = $self->utf2lat( $entry->{$arg->{dn}}->{title}->[0] );
-	  $arg->{title}->{type} = 'plain';
-	} else {
-	  $arg->{title}->{str} = $_;
-	  $arg->{title}->{type} = 'plain';
-	}
-	push @{$arg->{vcard}->{title}},
-	  sprintf('TITLE%s:%s',
-		  $arg->{title}->{type} eq 'qp' ? ';CHARSET=UTF-8;ENCODING=QUOTED-PRINTABLE' : '',
-		  $arg->{title}->{str}, $arg->{title}->{str} );
-      }
-      $arg->{vcard}->{title} = join("\n", @{$arg->{vcard}->{title}});
-      push @vcard, $arg->{vcard}->{title};
+      ## alas, for many cases vCard contains only one title per contact
+      # remove? #  foreach ( @{$entry->{$arg->{dn}}->{title}} ) {
+      # remove? #  	$arg->{title} = $self->utf2qp( $_, $arg->{translit} );
+      # remove? #  	push @{$arg->{vcard}->{title}},
+      # remove? #  	  sprintf('TITLE%s:%s',
+      # remove? #  		  $arg->{title}->{type} eq 'qp' ? ';CHARSET=UTF-8;ENCODING=QUOTED-PRINTABLE' : '',
+      # remove? #  		  $arg->{title}->{str}, $arg->{title}->{str} );
+      # remove? #  }
+      $arg->{title} = $self->utf2qp( $entry->{$arg->{dn}}->{title}->[0], $arg->{translit} );
+      push @vcard, 
+	sprintf('TITLE%s:%s',
+		$arg->{title}->{type} eq 'qp' ? ';CHARSET=UTF-8;ENCODING=QUOTED-PRINTABLE' : '',
+		$arg->{title}->{str}, $arg->{title}->{str} );
     }
 
     # --- ORGANIZATION ------------------------------------------------
     if ( $entry->{$arg->{dn}}->{o} ) {
-      foreach ( @{$entry->{$arg->{dn}}->{o}} ) {
-	$tmp = $self->search ( { base => $_, scope => 'base', } );
-	if ($tmp->is_error()) {
-	  $return->{error} .= $self->err( $tmp )->{html};
-	} else {
-	  my $org = $tmp->as_struct;
-	  if ( $self->is_ascii($org->{$_}->{physicaldeliveryofficename}->[0]) && ! $arg->{translit} ) {
-	    $arg->{o}->{str} = encode_qp( $org->{$_}->{physicaldeliveryofficename}->[0], '' );
-	    $arg->{o}->{type} = 'qp';
-	  } elsif ( $self->is_ascii($entry->{$arg->{dn}}->{o}->[0]) && $arg->{translit} ) {
-	    $arg->{o}->{str} = $self->utf2lat( $entry->{$arg->{dn}}->{o}->[0] );
-	    $arg->{o}->{type} = 'plain';
-	  } else {
-	    $arg->{o}->{str} = $org->{$_}->{physicaldeliveryofficename}->[0];
-	    $arg->{o}->{type} = 'plain';
-	  }
-	  push @{$arg->{vcard}->{o}},
-	    sprintf('ORG%s:%s',
-		    $arg->{o}->{type} eq 'qp' ? ';CHARSET=UTF-8;ENCODING=QUOTED-PRINTABLE' : '',
-		    $arg->{o}->{str}, $arg->{o}->{str} );
-	}
+      ## alas, for many cases vCard contains only one organization per contact
+      # remove? # foreach ( @{$entry->{$arg->{dn}}->{o}} ) {
+      # remove? # 	$tmp = $self->search ( { base => $_, scope => 'base', } );
+      # remove? # 	if ($tmp->is_error()) {
+      # remove? # 	  $return->{error} .= $self->err( $tmp )->{html};
+      # remove? # 	} else {
+      # remove? # 	  my $org = $tmp->as_struct;
+      # remove? # 	  $arg->{o} = $self->utf2qp( $org->{$_}->{physicaldeliveryofficename}->[0], $arg->{translit} );
+      # remove? # 	  push @{$arg->{vcard}->{o}},
+      # remove? # 	    sprintf('ORG%s:%s',
+      # remove? # 		    $arg->{o}->{type} eq 'qp' ? ';CHARSET=UTF-8;ENCODING=QUOTED-PRINTABLE' : '',
+      # remove? # 		    $arg->{o}->{str}, $arg->{o}->{str} );
+      # remove? # 	}
+      # remove? # }
+      # remove? # $arg->{vcard}->{o} = join("\n", @{$arg->{vcard}->{o}});
+      # remove? # push @vcard, $arg->{vcard}->{o};
+
+      $tmp = $self->search ( { base => $entry->{$arg->{dn}}->{o}->[0], scope => 'base', } );
+      if ($tmp->is_error()) {
+	$return->{error} .= $self->err( $tmp )->{html};
+      } else {
+	my $org = $tmp->as_struct;
+	$arg->{o} = $self->utf2qp( $org->{$entry->{$arg->{dn}}->{o}->[0]}->{physicaldeliveryofficename}->[0], $arg->{translit} );
+	push @vcard,
+	  sprintf('ORG%s:%s',
+		  $arg->{o}->{type} eq 'qp' ? ';CHARSET=UTF-8;ENCODING=QUOTED-PRINTABLE' : '',
+		  $arg->{o}->{str}, $arg->{o}->{str} );
       }
-      $arg->{vcard}->{o} = join("\n", @{$arg->{vcard}->{o}});
-      push @vcard, $arg->{vcard}->{o};
     }
 
     # --- TELEPHONENUMBER ---------------------------------------------
@@ -1592,7 +1577,7 @@ sub vcard {
     $branch = $self->ldap->search ( base => $arg->{dn}, scope => $scope, filter => 'authorizedService=mail@*', );
     if ($branch->is_error()) {
       $return->{error} .= $self->err( $branch )->{html};
-    } elsif ( $msg->count) {
+    } elsif ( $branch->count) {
       @branches = $branch->entries;
       foreach $branch_entry ( @branches ) {
 	$leaf = $self->search ( { base => $branch_entry->dn, scope => $scope ne 'one' ? 'base' : 'one', } );
@@ -1609,72 +1594,61 @@ sub vcard {
 	  }
 	}
       }
-      $arg->{vcard}->{email} = join("\n", @{$arg->{email}}) if $arg->{email};
-      push @vcard, $arg->{vcard}->{email};
+      push @vcard, join("\n", @{$arg->{email}});
     }
     
     # --- XMPP --------------------------------------------------------
-    $msg = $self->ldap->search ( base => $arg->{dn}, scope => $scope, filter => 'authorizedService=xmpp@*', );
-    if ($msg->is_error()) {
-      $return->{error} .= $self->err( $msg )->{html};
-    } elsif ( $msg->count) {
-      @entries = $msg->entries;
-      foreach $entry ( @entries ) {
-	$msg = $self->search ( { base => $entry->dn, scope => $scope ne 'one' ? 'base' : 'one', } );
-	if ($msg->is_error()) {
-	  $return->{error} .= $self->err( $msg )->{html};
+    $branch = $self->ldap->search ( base => $arg->{dn}, scope => $scope, filter => 'authorizedService=xmpp@*', );
+    if ($branch->is_error()) {
+      $return->{error} .= $self->err( $branch )->{html};
+    } elsif ( $branch->count) {
+      @branches = $branch->entries;
+      foreach $branch_entry ( @branches ) {
+	$leaf = $self->search ( { base => $branch_entry->dn, scope => $scope ne 'one' ? 'base' : 'one', } );
+	if ($leaf->is_error()) {
+	  $return->{error} .= $self->err( $leaf )->{html};
 	} else {
-	  if ( $msg->count ) {
-	    my $a = $msg->entry(0);
-	    push @{$arg->{xmpp}}, 'X-JABBER;TYPE=work:' . $a->get_value('uid');
+	  if ( $leaf->count ) {
+	    @leaves = $leaf->entries;
+	    foreach $leaf_entry ( @leaves ) {
+	      {
+		push @{$arg->{xmpp}}, 'X-JABBER;TYPE=work:' . $leaf_entry->get_value('uid');
+	      }
+	    }
 	  }
 	}
       }
-      $arg->{vcard}->{xmpp} = join("\n", @{$arg->{xmpp}}) if $arg->{xmpp};
-      push @vcard, $arg->{vcard}->{xmpp};
+      push @vcard, join("\n", @{$arg->{xmpp}});
     }
-
-    $return->{vcard} = sprintf("BEGIN:VCARD\nVERSION:2.1\n%s\n%s\n%s\n",
-			       $arg->{vcard}->{n},
-			       $arg->{vcard}->{fn},
-			       $arg->{vcard}->{title}
-			      );
-
-    $return->{vcard} .= $arg->{vcard}->{telephonenumber} . "\n" if $arg->{vcard}->{telephonenumber} ne '';
-    $return->{vcard} .= $arg->{vcard}->{email} . "\n" if $arg->{vcard}->{email} ne '';
-    $return->{vcard} .= $arg->{vcard}->{xmpp} . "\n" if $arg->{vcard}->{xmpp} ne '';
-    $return->{vcard} .= $arg->{vcard}->{o} . "\n" if $arg->{vcard}->{o} ne '';
 
     $return->{success} .= sprintf('vCard generated for object with DN: <b class="mono"><em>%s</em></b>.', $arg->{dn} );
   }
   $return->{outfile_name} = join('_', split(/,/,canonical_dn($arg->{dn}, casefold => 'none', reverse => 1, )));
   $return->{dn} = $arg->{dn};
   $return->{type} = $arg->{type};
-  use MIME::Base64;
+
+  if ( $arg->{type} eq 'file' ) {
+    push @vcard,
+      sprintf('PHOTO;ENCODING=BASE64;JPEG:%s',
+	      encode_base64( $entry->{$arg->{dn}}->{jpegphoto}->[0] ))
+      if $entry->{$arg->{dn}}->{jpegphoto};
+  }
+
+  push @vcard, 'REV:' . $ts . 'Z', 'END:VCARD';
+  $return->{vcard} = join("\n", @vcard);
+
   if ( $arg->{type} ne 'file' ) {
-    use GD::Barcode::QRcode;
     my $qr;
-    for( my $i = 0; $i < 41; $i++ ) {
+    for ( my $i = 0; $i < 41; $i++ ) {
       $qr = $self->qrcode({ txt => $return->{vcard}, ver => $i, mod => 5 });
       last if ! exists $qr->{error};
     }
-
+    
     $return->{qr} =
       sprintf('<img alt="QR for DN %s" src="data:image/jpg;base64,%s" class="img-responsive img-thumbnail" title="QR for DN %s"/>',
-	      $arg->{dn},
-	      $qr->{qr},
-	      $arg->{dn}
-	     );
-  } else {
-    $return->{vcard} .= "PHOTO;ENCODING=BASE64;JPEG:" . encode_base64($entry->get_value('jpegPhoto'))
-      if $entry->exists('jpegPhoto');
+	      $arg->{dn}, $qr->{qr}, $arg->{dn} );
   }
-
-  $return->{vcard} .= "REV:" . $ts . "Z\nEND:VCARD";
-  push @vcard, 'REV:' . $ts . 'Z', 'END:VCARD';
-  $return->{vcard} = join("\n", @vcard);
-  p @vcard;
-  # p $return;
+  # p @vcard; p $return->{vcard};
   return $return;
 }
 
