@@ -17,13 +17,14 @@
 	  data-umiact="/searchby/vcard_gen2f"
 	  title='save vCard bellow as file: [% final_message.outfile_name %]_vCard.txt'
 	  type="submit">
-    <span class="fa fa-download fa-lg"></span>
+    <span class="fa fa-download fa-lg">&nbsp;</span>&nbsp;vCard DOWNLOAD
   </button>
 </form>
 <br>
 <div class="row">
   <div class="col-xs-6">
     <pre>[% final_message.vcard %]</pre>
+    <i class="help-block">please note, often vCard consumers expect only one single organization and title fields, so, here it'll appear only first of all present for the user</i>
   </div>
   <div class="col-xs-6">
       [% final_message.qr %]    
