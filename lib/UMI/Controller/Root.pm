@@ -160,19 +160,34 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	$return->{error} .= sprintf('<li>personal info %s</li>',
 				    $ldap_crud->err($mesg)->{html});
       } else {
-	$entry = $mesg->entry(0);
+	# $entry = $mesg->entry(0);
+	# $arg = {
+	# 	uid => $entry->get_value('uid'),
+	# 	givenname => $entry->get_value('givenName'),
+	# 	sn => $entry->get_value('sn'),
+	# 	title => defined $entry->get_value('title') ? \@{[$entry->get_value('title')]} : ['N/A'],
+	# 	o => \@{[$entry->get_value('o', alloptions => 1)]},
+	# 	physicaldeliveryofficename => \@{[$entry->get_value('physicaldeliveryofficename')]},
+	# 	telephonenumber => defined $entry->get_value('telephonenumber') ?
+	# 	\@{[$entry->get_value('telephonenumber')]} : ['N/A'],
+	# 	mail => defined $entry->get_value('mail') ? \@{[$entry->get_value('mail')]} : ['N/A'],
+	# 	roles => $entry->get_value( $user_rdn[0] ) eq $c->user ? \@{[$c->user->roles]} : 'a mere mortal',
+	#        };
+
+	$entry = $mesg->as_struct;
 	$arg = {
-		uid => $entry->get_value('uid'),
-		givenname => $entry->get_value('givenName'),
-		sn => $entry->get_value('sn'),
-		title => defined $entry->get_value('title') ? \@{[$entry->get_value('title')]} : ['N/A'],
-		o => \@{[$entry->get_value('o', alloptions => 1)]},
-		physicaldeliveryofficename => \@{[$entry->get_value('physicaldeliveryofficename')]},
-		telephonenumber => defined $entry->get_value('telephonenumber') ?
-		\@{[$entry->get_value('telephonenumber')]} : ['N/A'],
-		mail => defined $entry->get_value('mail') ? \@{[$entry->get_value('mail')]} : ['N/A'],
-		roles => $entry->get_value( $user_rdn[0] ) eq $c->user ? \@{[$c->user->roles]} : 'a mere mortal',
+		uid => $entry->{$user_dn}->{uid}->[0],
+		givenname => $entry->{$user_dn}->{givenname}->[0],
+		sn => $entry->{$user_dn}->{sn}->[0],
+		title => defined $entry->{$user_dn}->{title} ? $entry->{$user_dn}->{title} : ['N/A'],
+		o => $entry->{$user_dn}->{o},
+		physicaldeliveryofficename => $entry->{$user_dn}->{physicaldeliveryofficename},
+		telephonenumber => defined $entry->{$user_dn}->{telephonenumber} ?
+		$entry->{$user_dn}->{telephonenumber} : ['N/A'],
+		mail => defined $entry->{$user_dn}->{mail} ? $entry->{$user_dn}->{mail} : ['N/A'],
+		roles => $entry->{$user_dn}->{$user_rdn[0]} eq $c->user ? \@{[$c->user->roles]} : 'a mere mortal',
 	       };
+
 	utf8::decode($arg->{givenname});
 	utf8::decode($arg->{sn});
       }
@@ -197,7 +212,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	      roles => \@{[$c->user->roles]} || 'N/A',
 	     };
     }
-    # p $arg;
+    p $arg;
     #=================================================================
     # user organizations
     #
@@ -209,7 +224,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
       push @{$o}, $arg->{o};
     }
 
-    foreach ( @{$o} ) {
+    foreach ( @{$arg->{o}} ) {
       # here we need to fetch all org recursively to fill all data absent
       # if current object has no attribute needed (postOfficeBox or postalAddress or
       # any other, than we will use the one from it's ancestor
