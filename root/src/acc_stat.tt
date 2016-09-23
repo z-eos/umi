@@ -1,0 +1,82 @@
+[% META title = 'Users Accounts Statistics'
+   link = '<link href="/static/css/jquery.dataTables.min.css" rel="stylesheet">' %] 
+
+<h3>Users Accounts Statistics <small><em> use Shift key to choose multiple columns sort order </em></small></h3>
+
+<table id="accounts" class="table display">
+  <thead>
+    <tr>
+      <th>Last name</th>
+      <th>First name</th>
+      <th>blocked</th>
+      <th>uid</th>
+      <th>service</th>
+      <th>fqdn</th>
+      <th>svc uid</th>
+      <th>svc cn</th>
+    </tr>
+  </thead>
+  <tbody>
+    [% FOREACH dn IN accounts.keys.sort %]
+    [% FOREACH svc IN accounts.$dn.authorizedService.keys.sort %]
+    [% FOREACH fqdn IN accounts.$dn.authorizedService.$svc.keys.sort %]
+    [% FOREACH svcacc IN accounts.$dn.authorizedService.$svc.$fqdn %]
+    <tr>
+      <td>[% accounts.$dn.sn %]</td>
+      <td>[% accounts.$dn.givenName %]</td>
+      <td>[% accounts.$dn.blocked %]</td>
+      <td>[% accounts.$dn.uid %]</td>
+      <td>[% svc %]</td>
+      <td>[% fqdn %]</td>
+      <td>[% svcacc.cn %]</td>
+      <td>[% svcacc.uid %]</td>
+    </tr>
+    [% END %]
+    [% END %]
+    [% END %]
+    [% END %]
+  </tbody>
+</table>
+
+<script src="/static/js/jquery.dataTables.min.js"></script>
+<script src="/static/js/dataTables.bootstrap.min.js"></script>
+<script>
+ var table = $('#accounts').DataTable({
+//   "columnDefs": [
+//     { "visible": false, "targets": 2 }
+//   ],
+   "order": [[ 2, 'asc' ]],
+   "displayLength": 25,
+   "drawCallback": function ( settings ) {
+     var api = this.api();
+     var rows = api.rows( {page:'current'} ).nodes();
+     var last=null;
+     
+     api.column(5, {page:'current'} ).data().each( function ( group, i ) {
+       if ( last !== group ) {
+         $(rows).eq( i ).before(
+           '<tr class="success group"><td colspan="8" class="text-muted"><b>'+group+'</b></td></tr>'
+         );
+         last = group;
+       }
+     } );
+   },
+   "createdRow": function ( row, data, index ) {
+     if ( data[2] == "1" ) {
+       $(row).addClass('danger');
+     }
+   }
+ } );
+ 
+ // Order by the grouping
+ $('#accounts tbody').on( 'click', 'tr.group', function () {
+   var currentOrder = table.order()[0];
+   if ( currentOrder[0] === 2 && currentOrder[1] === 'asc' ) {
+     table.order( [ 2, 'desc' ] ).draw();
+   }
+   else {
+     table.order( [ 2, 'asc' ] ).draw();
+   }
+ } );
+ 
+</script>

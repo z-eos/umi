@@ -91,6 +91,93 @@ sub sysinfo :Path(sysinfo) :Args(0) {
 	     sysinfo => $sysinfo, );
 }
 
+sub acc_stat :Path(acc_stat) :Args(0) {
+  my ( $self, $c ) = @_;
+  my ( $account, $accounts, $utf_givenName, $utf_sn,
+       $svc, @services, $service,
+       $mesg_blk, @mesg_blk_entries,
+       $mesg_svc, @mesg_svc_entries,
+       $authorizedService,
+       $return, );
+
+  my $ldap_crud = $c->model('LDAP_CRUD');
+  my $mesg = $ldap_crud->search({ base => $ldap_crud->{cfg}->{base}->{acc_root},
+				  scope => 'one',
+				  sizelimit => 0,
+				  attrs   => [ 'uid', 'givenName', 'sn', ],
+				  filter => '(objectClass=*)', });
+  if ( $mesg->code ) {
+    push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
+  } else {
+    foreach $account ( @{[$mesg->entries]} ) {
+      $utf_givenName = $account->get_value('uid');
+      $utf_sn = $account->get_value('givenName');
+      utf8::decode($utf_givenName);
+      utf8::decode($utf_sn);
+      $accounts->{$account->dn} = { uid => $account->get_value('uid'),
+				    givenName => $utf_givenName,
+				    sn => $utf_sn,
+				    authorizedService => {},
+				    blocked => 0, };
+
+      $mesg_blk = $ldap_crud->search({ base => $ldap_crud->{cfg}->{base}->{group},
+				       scope => 'one',
+				       filter => sprintf('(&(cn=blocked)(memberUid=%s))',
+							 $accounts->{$account->dn}->{uid}),
+				       attrs   => [ 'cn' ] });
+      if ( $mesg_blk->code ) {
+	push @{$return->{error}}, $ldap_crud->err($mesg_blk)->{html};
+      } else {
+	@mesg_blk_entries = $mesg_blk->entry(0);
+	$accounts->{$account->dn}->{blocked} = 1 if $mesg_blk->count;
+      }
+
+      $mesg_svc = $ldap_crud->search({ base => $account->dn,
+				       scope => 'one',
+				       filter => '(authorizedService=*)',
+				       attrs => [ 'authorizedService', ], });
+      if ( $mesg_svc->code ) {
+	push @{$return->{error}}, $ldap_crud->err($mesg_svc)->{html};
+      } else {
+	@mesg_svc_entries = $mesg_svc->entries;
+	foreach ( @mesg_svc_entries ) {
+	  $svc->{ (split('@', $_->get_value('authorizedService')))[0] } = 1;
+	}
+	@services = sort keys %{$svc};
+
+	$#mesg_svc_entries = -1;
+	foreach $service ( @services ) {
+	  $mesg_svc = $ldap_crud->search({ base => $account->dn,
+					   scope => 'sub',
+					   filter => sprintf('authorizedService=%s@*', $service),
+					   attrs => [ 'associatedDomain',
+						      'authorizedService',
+						      'cn',
+						      'uid' ], });
+	  if ( $mesg_svc->code ) {
+	    push @{$return->{error}}, $ldap_crud->err($mesg_svc)->{html};
+	  } else {
+	    @mesg_svc_entries = $mesg_svc->entries;
+	    if ($mesg_svc->count) {
+	      foreach ( @mesg_svc_entries ) {
+		next if ! $_->exists('associatedDomain');
+
+		push @{$accounts->{$account->dn}->{authorizedService}->{$service}
+			 ->{$_->get_value('associatedDomain')}},
+			 { uid => $_->exists('uid') ? $_->get_value('uid') : 'NA',
+			   cn  => $_->exists('cn')  ? $_->get_value('cn')  : 'NA', };
+	      }
+	    }
+	  }
+	}
+      }
+    }
+  }
+
+  $c->stash( template => 'acc_stat.tt',
+	     accounts => $accounts, );
+}
+
 =head2 download_from_ldap
 
 action to retrieve PKCS12 certificate from LDAP

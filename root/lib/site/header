@@ -342,6 +342,12 @@
 		system info
 	      </a>
 	    </li>
+            <li>
+	      <a href="[% c.uri_for('/acc_stat') %]">
+		<span class="fa fa-fw fa-bar-chart text-info"></span>
+		acc stat
+	      </a>
+	    </li>
 	    [% END %]
           </ul>
         </li>

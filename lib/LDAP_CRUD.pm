@@ -1566,9 +1566,9 @@ sub vcard {
       push @vcard, $arg->{vcard}->{telephonenumber};
     }
 
+    my $scope = $arg->{dn} =~ /^.*=.*,authorizedService.*$/ ? 'sub' : 'one';
+    
     # --- EMAIL -------------------------------------------------------
-    my $scope = $arg->{dn} =~ /^.*authorizedService.*$/ ? 'sub' : 'one';
-
     if ( $entry->{$arg->{dn}}->{mail} ) {
       foreach ( @{$entry->{$arg->{dn}}->{mail}} ) {
 	push @{$arg->{email}}, 'EMAIL;WORK:' . $_;
