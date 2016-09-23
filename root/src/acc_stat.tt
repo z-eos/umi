@@ -17,9 +17,9 @@
     </tr>
   </thead>
   <tbody>
-    [% FOREACH dn IN accounts.keys.sort %]
-    [% FOREACH svc IN accounts.$dn.authorizedService.keys.sort %]
-    [% FOREACH fqdn IN accounts.$dn.authorizedService.$svc.keys.sort %]
+    [% FOREACH dn IN accounts.keys %]
+    [% FOREACH svc IN accounts.$dn.authorizedService.keys %]
+    [% FOREACH fqdn IN accounts.$dn.authorizedService.$svc.keys %]
     [% FOREACH svcacc IN accounts.$dn.authorizedService.$svc.$fqdn %]
     <tr>
       <td>[% accounts.$dn.sn %]</td>
@@ -62,7 +62,7 @@
      } );
    },
    "createdRow": function ( row, data, index ) {
-     if ( data[2] == "1" ) {
+     if ( data[2] == 1 ) {
        $(row).addClass('danger');
      }
    }

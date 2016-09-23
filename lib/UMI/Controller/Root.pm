@@ -110,8 +110,8 @@ sub acc_stat :Path(acc_stat) :Args(0) {
     push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
   } else {
     foreach $account ( @{[$mesg->entries]} ) {
-      $utf_givenName = $account->get_value('uid');
-      $utf_sn = $account->get_value('givenName');
+      $utf_givenName = $account->get_value('givenName');
+      $utf_sn = $account->get_value('sn');
       utf8::decode($utf_givenName);
       utf8::decode($utf_sn);
       $accounts->{$account->dn} = { uid => $account->get_value('uid'),
