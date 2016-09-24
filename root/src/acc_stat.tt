@@ -15,7 +15,7 @@
 </div>
 </h3>
 
-<table id="accounts" class="table table-striped table-bordered">
+<table id="accounts" class="table table-striped table-bordered table-condensed">
   <thead>
     <tr class="text-uppercase info">
       <th>Last name</th>
@@ -46,8 +46,8 @@
     [% FOREACH fqdn IN accounts.$dn.authorizedService.$svc.keys %]
     [% FOREACH svcacc IN accounts.$dn.authorizedService.$svc.$fqdn %]
     <tr>
-      <td>[% accounts.$dn.sn %]</td>
-      <td>[% accounts.$dn.givenName %]</td>
+      <th>[% accounts.$dn.sn %]</th>
+      <th>[% accounts.$dn.givenName %]</th>
       <td>[% accounts.$dn.blocked %]</td>
       <td>[% accounts.$dn.uid %]</td>
       <td>[% svc %]</td>
@@ -90,7 +90,7 @@
    },
    "renderer": "bootstrap",
    "responsive": true,
-   "order": [[ 2, 'asc' ]],
+   "order": [[ 2, 'desc' ]],
    "displayLength": 25,
    "drawCallback": function ( settings ) {
      var api = this.api();
