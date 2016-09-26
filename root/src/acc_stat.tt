@@ -1,14 +1,10 @@
 [% META title = 'Users Accounts Statistics'
-   link = '<link href="/static/css/DataTables/jquery.dataTables.min.css" rel="stylesheet">'
-   link = '<link href="/static/css/DataTables/buttons.bootstrap.min.css" rel="stylesheet">'
-   link = '<link href="/static/css/DataTables/buttons.dataTables.min.css" rel="stylesheet">'
-   link = '<link href="/static/css/DataTables/buttons.jqueryui.min.css" rel="stylesheet">'
-   link = '<link href="/static/css/DataTables/dataTables.bootstrap.min.css" rel="stylesheet">'
+   link = '<link href="/static/css/DataTables/jquery.dataTables.min.css" rel="stylesheet" type="text/css"><link href="/static/css/DataTables/buttons.bootstrap.min.css" rel="stylesheet" type="text/css"><link href="/static/css/DataTables/buttons.dataTables.min.css" rel="stylesheet" type="text/css"><link href="/static/css/DataTables/buttons.jqueryui.min.css" rel="stylesheet" type="text/css"><link href="/static/css/DataTables/dataTables.bootstrap.min.css" rel="stylesheet" type="text/css">'
    %] 
 
-<h2>Users Accounts Statistics <small><em>you can order by multiple columns at the same time (shift click on a column (added the clicked column as a secondary, tertiary etc ordering column) </em></small></h2>
+<h2>Users Accounts Statistics <small><em>you can sort by multiple columns at the same time (shift click on a column (added the clicked column as a secondary, tertiary etc ordering column) </em></small></h2>
 
-<table id="accounts" class="table table-striped table-condensed">
+<table id="accounts" class="table table-condensed table-bordered">
   <thead>
     <tr class="text-uppercase info">
       <th>Last Name</th>
@@ -66,32 +62,47 @@
 <script>
 
  var table = $('#accounts').DataTable({
-   "dom": '<"well well-sm"i><"clearfix"<"pull-left btn-group"B><"pull-right"f>>rt<"clearfix"<"pull-left"l><"pull-right"p>>',
+   "dom": '<"well clearfix"i><"clearfix"<"pull-left btn-group"B><"pull-right"f>>rt<"clearfix"<"pull-left"l><"pull-right"p>>',
    "buttons": {
      "buttons": [
        {
 	 extend: 'copy',
-	 text: '<i title="Copy all data to clipboard" class="fa fa-copy fa-lg"></i>',
-	 className: 'btn btn-default',
-	 
+	 text: '<i title="Copy current page data to clipboard" class="fa fa-copy fa-lg"></i>',
+	 className: 'btn btn-info',
+	 exportOptions: {
+           modifier: {
+             page: 'current'
+           }
+         },
        },
        {
 	 extend: 'print',
 	 text: '<i title="Print current page" class="fa fa-print fa-lg"></i>',
-	 className: 'btn btn-default',
-	 autoPrint: false
+	 className: 'btn btn-info',
+	 autoPrint: false,
+	 exportOptions: {
+           modifier: {
+             page: 'current'
+           }
+         },
        },
        {
 	 extend: 'csv',
-	 text: '<i title="Download as CSV" class="fa fa-download fa-lg"></i>',
-	 className: 'btn btn-default',
+	 text: '<i title="Download current page as CSV file" class="fa fa-download fa-lg"></i>',
+	 className: 'btn btn-info',
+	 exportOptions: {
+           modifier: {
+             page: 'current'
+           }
+         },
        },
      ]
    },
    "renderer": "bootstrap",
    "responsive": true,
    "order": [[ 2, 'desc' ]],
-   "displayLength": 25,
+   //"displayLength": 25,
+   "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
    "drawCallback": function ( settings ) {
      var api = this.api();
      var rows = api.rows( {page:'current'} ).nodes();
@@ -127,5 +138,5 @@
      table.order( [ 2, 'asc' ] ).draw();
    }
  } );
- 
+
 </script>
