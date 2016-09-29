@@ -4,6 +4,8 @@
 
 <h2>Users Accounts Statistics <small><em>you can sort by multiple columns at the same time (shift click on a column (added the clicked column as a secondary, tertiary etc ordering column) </em></small></h2>
 
+[% INCLUDE ldap_err.tt %]
+
 <table id="accounts" class="table table-condensed table-bordered">
   <thead>
     <tr class="text-uppercase info">

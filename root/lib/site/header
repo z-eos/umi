@@ -343,7 +343,7 @@
 	      </a>
 	    </li>
             <li>
-	      <a href="[% c.uri_for('/acc_stat') %]">
+	      <a href="[% c.uri_for('/stat_acc') %]">
 		<span class="fa fa-fw fa-bar-chart text-info"></span>
 		acc stat
 	      </a>

@@ -100,6 +100,8 @@ __PACKAGE__->deny_access_unless_any( "/org",                 [ qw/admin coadmin 
 __PACKAGE__->deny_access_unless_any( "/inventory",           [ qw/admin coadmin acl-w-inventory/ ]);
 __PACKAGE__->deny_access_unless_any( "/nisnetgroup",         [ qw/admin coadmin/ ]);
 __PACKAGE__->deny_access_unless_any( "/org_root",            [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/stat_acc",            [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/stat_monitor",        [ qw/admin coadmin/ ]);
 
 # here we allow search to all members of admin, coadmin and operator groups, while the very permition to
 # search some LDAP filter or not is controlled by Tools::is_searchable method in Controller::SearchBy::index

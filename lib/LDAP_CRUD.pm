@@ -104,6 +104,7 @@ sub _build_cfg {
 		   rad_groups =>     'ou=groups,ou=RADIUS,' . UMI->config->{ldap_crud_db},
 		   rad_profiles =>   'ou=profiles,ou=RADIUS,' . UMI->config->{ldap_crud_db},
 		   workstations =>   'ou=workstations,' . UMI->config->{ldap_crud_db},
+		   monitor =>        'cn=Monitor',
 		   icon => {
 			    People => 'fa fa-user',
 			    DHCP => 'fa fa-sitemap',

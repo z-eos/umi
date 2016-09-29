@@ -78,20 +78,43 @@ sub sysinfo :Path(sysinfo) :Args(0) {
   $x{auth_pwd} = 'CENSORED';
   $x{auth_obj}->{userpassword} = 'CENSORED';
   use Data::Printer colored => 0;
+
+  my $return;
+  my $ldap_crud = $c->model('LDAP_CRUD');
+  my $mesg = $ldap_crud->search({ base => $ldap_crud->{cfg}->{base}->{monitor},
+				  scope => 'sub',
+				  sizelimit => 0,
+				  attrs   => [ '*', '+', ],
+				  filter => '(objectClass=*)', });
+  if ( $mesg->code ) {
+    push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
+  }
+  my $monitor = $mesg->as_struct;
+
   $sysinfo = {
 	      session => { title => 'Session',
 			   data => np(%x, colored => 0), },
 	      LDAP_CRUD_cfg => { title => 'LDAP_CRUD configuration ( $c->model(LDAP_CRUD)->cfg )',
 				 data => np($c->model('LDAP_CRUD')->cfg, colored => 0), },
+	      # look stat_monitor()
+	      monitor => { title => 'OpenLDAP daemon monotor',
+			   data => np($monitor, colored => 0), },
 	      # UMI_c => { title => 'UMI c',
 	      # 		      data => p($c, colored => 0), },
 	     };
 
   $c->stash( template => 'sysinfo.tt',
-	     sysinfo => $sysinfo, );
+	     sysinfo => $sysinfo,
+	     final_message => $return, );
 }
 
-sub acc_stat :Path(acc_stat) :Args(0) {
+=head2 stat_acc
+
+all accounts (root accounts) statistics
+
+=cut
+
+sub stat_acc :Path(stat_acc) :Args(0) {
   my ( $self, $c ) = @_;
 
   if ( $c->user_exists() ) {  
@@ -176,13 +199,90 @@ sub acc_stat :Path(acc_stat) :Args(0) {
       }
     }
 
-    $c->stash( template => 'acc_stat.tt',
-	       accounts => $accounts, );
+    $c->stash( template => 'stat_acc.tt',
+	       accounts => $accounts,
+	       final_message => $return,);
   } else {
     $c->stash( template => 'signin.tt', );
   }
 
 }
+
+
+=head2 stat_monitor
+
+method to provide information about the running status of the slapd(8) daemon
+
+for now it is used in sysinfo()
+
+=cut
+
+sub stat_monitor :Path(stat_monitor) :Args(0) {
+  my ( $self, $c ) = @_;
+  if ( $c->user_exists() ) {
+    my $return;
+    my $monitor;
+    my $ldap_crud = $c->model('LDAP_CRUD');
+    my $mesg = $ldap_crud->search({ base => 'cn=Databases,' . $ldap_crud->{cfg}->{base}->{monitor},
+				  scope => 'one',
+				  sizelimit => 0,
+				  attrs   => [ '*', '+', ],
+				  filter => '(objectClass=*)', });
+    if ( $mesg->code ) {
+      push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
+    } else {
+      foreach ( @{[$mesg->entries]} ) {
+	$monitor->{databases}->{ $_->get_value('cn') } =
+	  { monitoredInfo => $_->exists('monitoredInfo') ? $_->get_value('monitoredInfo') : 'NA',
+	    namingContexts => $_->exists('namingContexts') ? $_->get_value('namingContexts') : 'NA',
+	    entryDN => $_->exists('entryDN') ? $_->get_value('entryDN') : 'NA',
+	    olmBDBEntryCache => $_->exists('olmBDBEntryCache') ? $_->get_value('olmBDBEntryCache') : 'NA',
+	    olmBDBDNCache => $_->exists('olmBDBDNCache') ? $_->get_value('olmBDBDNCache') : 'NA',
+	    olmBDBIDLCache => $_->exists('olmBDBIDLCache') ? $_->get_value('olmBDBIDLCache') : 'NA',
+	    olmDbDirectory => $_->exists('olmDbDirectory') ? $_->get_value('olmDbDirectory') : 'NA',
+	    # seeAlso => $_->get_value('seeAlso', asref => 1 ),
+	    # monitorOverlay => $_->get_value('monitorOverlay', asref => 1 ),
+	  };
+      }
+    }
+
+    $mesg = $ldap_crud->search({ base => 'cn=Connections,' . $ldap_crud->{cfg}->{base}->{monitor},
+				 scope => 'one',
+				 sizelimit => 0,
+				 attrs   => [ '*', '+', ],
+				 filter => '(objectClass=*)', });
+    if ( $mesg->code ) {
+      push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
+    } else {
+      foreach ( @{[$mesg->entries]} ) {
+	$monitor->{connections}->{ $_->get_value('cn') } =
+	  { monitorConnectionNumber => $_->exists('monitorConnectionNumber') ? $_->get_value('monitorConnectionNumber') : 'NA',
+	    monitorConnectionProtocol => $_->exists('monitorConnectionProtocol') ? $_->get_value('monitorConnectionProtocol') : 'NA',
+	    monitorConnectionOpsReceived => $_->exists('monitorConnectionOpsReceived') ? $_->get_value('monitorConnectionOpsReceived') : 'NA',
+	    monitorConnectionOpsExecuting => $_->exists('monitorConnectionOpsExecuting') ? $_->get_value('monitorConnectionOpsExecuting') : 'NA',
+	    monitorConnectionOpsPending => $_->exists('monitorConnectionOpsPending') ? $_->get_value('monitorConnectionOpsPending') : 'NA',
+	    monitorConnectionOpsCompleted => $_->exists('monitorConnectionOpsCompleted') ? $_->get_value('monitorConnectionOpsCompleted') : 'NA',
+	    monitorConnectionGet => $_->exists('monitorConnectionGet') ? $_->get_value('monitorConnectionGet') : 'NA',
+	    monitorConnectionRead => $_->exists('monitorConnectionRead') ? $_->get_value('monitorConnectionRead') : 'NA',
+	    monitorConnectionWrite => $_->exists('monitorConnectionWrite') ? $_->get_value('monitorConnectionWrite') : 'NA',
+	    monitorConnectionMask => $_->exists('monitorConnectionMask') ? $_->get_value('monitorConnectionMask') : 'NA',
+	    monitorConnectionAuthzDN => $_->exists('monitorConnectionAuthzDN') ? $_->get_value('monitorConnectionAuthzDN') : 'NA',
+	    monitorConnectionListener => $_->exists('monitorConnectionListener') ? $_->get_value('monitorConnectionListener') : 'NA',
+	    monitorConnectionPeerDomain => $_->exists('monitorConnectionPeerDomain') ? $_->get_value('monitorConnectionPeerDomain') : 'NA',
+	    monitorConnectionPeerAddress => $_->exists('monitorConnectionPeerAddress') ? $_->get_value('monitorConnectionPeerAddress') : 'NA',
+	    monitorConnectionLocalAddress => $_->exists('monitorConnectionLocalAddress') ? $_->get_value('monitorConnectionLocalAddress') : 'NA',
+	    entryDN => $_->exists('entryDN') ? $_->get_value('entryDN') : 'NA', };
+      }
+    }
+
+    $c->stash( template => 'stat_monitor.tt',
+		 monitor => $monitor,
+		 final_message => $return, );
+  } else {
+    $c->stash( template => 'signin.tt', );
+  }
+}
+
 
 =head2 download_from_ldap
 

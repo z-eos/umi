@@ -7,7 +7,7 @@ use HTML::FormHandler::Moose;
 BEGIN { extends 'UMI::Form::LDAP';
 	with 'Tools', 'HTML::FormHandler::Render::RepeatableJs'; }
 
-use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable', 'StrongPassword' );
+use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable', 'StrongPassword', 'IPAddress' );
 
 use Data::Printer;
 
@@ -633,7 +633,7 @@ has_field 'loginless_ovpn.userCertificate'
      );
 
 has_field 'loginless_ovpn.ifconfigpush'
-  => ( apply => [ Printable ],
+  => ( apply => [ Printable, ],
        label => 'Ifconfig',
        label_class => [ 'col-xs-2', 'required', ],
        element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
@@ -1282,7 +1282,7 @@ sub validate {
       }
 
       if ( defined $element->field('ifconfigpush')->value &&
-	   $element->field('ifconfigpush')->value =~ /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]) (([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9])$/ ) {
+	   $element->field('ifconfigpush')->value =~ /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-5][0-9]) (([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-5][0-9])$/ ) {
 	# $ovpn_tmp = $self->vld_ifconfigpush({
 	# 				     concentrator_fqdn => $element->field('associateddomain')->value,
 	# 				     ifconfigpush => $element->field('ifconfigpush')->value,
@@ -1303,9 +1303,10 @@ sub validate {
 	} elsif ( $ovpn_tmp ) {
 	  $element->field('ifconfigpush')->add_error( $ovpn_tmp->{error} );
 	}
-      } elsif ( defined $element->field('ifconfigpush')->value &&
-	   $element->field('ifconfigpush')->value !~ /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]) (([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9])$/ ) {
-	$element->field('ifconfigpush')->add_error( 'The input is not two IP addresses!' );
+      }
+      elsif ( defined $element->field('ifconfigpush')->value &&
+      	   $element->field('ifconfigpush')->value !~ /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-5][0-9]) (([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-5][0-9])$/ ) {
+      	$element->field('ifconfigpush')->add_error( 'The input is not two IP addresses!' );
       }
 
       #

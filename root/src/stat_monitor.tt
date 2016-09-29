@@ -1,0 +1,46 @@
+[% META title = 'OpenLDAP Monitore Statistics' %] 
+
+<h2>OpenLDAP server Monitor Statistics <small><em>you can sort by multiple columns at the same time (shift click on a column (added the clicked column as a secondary, tertiary etc ordering column) </em></small></h2>
+
+[% INCLUDE ldap_err.tt %]
+
+<table id="accounts" class="table table-condensed table-bordered">
+  <thead>
+    <tr class="text-uppercase info">
+      <th>key</th>
+      <th>value</th>
+    </tr>
+  </thead>
+  <tbody>
+    [% FOREACH database IN monitor.databases.keys %]
+    <tr class="success"><th colspan="2">[% database %]</th></tr>
+    [% FOREACH pair IN monitor.databases.$database.pairs %]
+    <tr>
+      <th>[% pair.key %]</th>
+      <td>[% pair.value %]</td>
+    </tr>
+    [% END %]
+    [% END %]
+  </tbody>
+</table>
+
+<table id="databases" class="table table-condensed table-bordered">
+  <thead>
+    <tr class="text-uppercase info">
+      <th>key</th>
+      <th>value</th>
+    </tr>
+  </thead>
+  <tbody>
+    [% FOREACH connection IN monitor.connections.keys %]
+    <tr class="success"><th colspan="2">[% connection %]</th></tr>
+    [% FOREACH pair IN monitor.connections.$connection.pairs %]
+    <tr>
+      <th>[% pair.key %]</th>
+      <td>[% pair.value %]</td>
+    </tr>
+    [% END %]
+    [% END %]
+  </tbody>
+</table>
+
