@@ -155,7 +155,7 @@ has_field 'person_office'
        empty_select => '--- Choose an Office ---',
        element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
        element_class => [ 'input-sm', ],
-       options_method => \&offices,
+       options_method => \&physicaldeliveryofficename,
        required => 1 );
 
 has_field 'person_telephonenumber'
@@ -268,6 +268,7 @@ has_field 'aux_add_account'
        repeatable => 'account',
        value => 'Add new account',
        element_class => [ 'btn-success', ],
+       element_attr => { title => 'new account fields will be added to the bottom, bellow existent ones', },
        wrapper_class => [ qw{col-lg-4 col-md-4}, ],
      );
 
@@ -1334,6 +1335,12 @@ sub offices {
   my $self = shift;
   return unless $self->form->ldap_crud;
   return $self->form->ldap_crud->select_organizations;
+}
+
+sub physicaldeliveryofficename {
+  my $self = shift;
+  return unless $self->form->ldap_crud;
+  return $self->form->ldap_crud->select_offices;
 }
 
 # sub groups {

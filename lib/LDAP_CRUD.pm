@@ -2208,6 +2208,25 @@ sub _build_select_organizations {
   return \@office;
 }
 
+=head2 select_offices
+
+Method, options builder for selecting offices user can be assigned to
+
+uses sub bld_select()
+
+=cut
+
+has 'select_offices' => ( traits => ['Array'],
+			is => 'ro', isa => 'ArrayRef', required => 0, lazy => 1,
+			builder => '_build_select_offices', );
+
+sub _build_select_offices {
+  my $self = shift;
+  return $self->bld_select({ base => $self->cfg->{base}->{acc_root},
+			     attr => [ 'physicalDeliveryOfficeName', 'physicalDeliveryOfficeName' ]});
+}
+
+
 =head2 select_associateddomains
 
 Method, options builder for select element of associateddomains
@@ -2328,6 +2347,13 @@ it constructs array for options generation like this
         value   "cn=blocked,ou=group,dc=umidb"
     },
 
+DEFAULTS:
+
+      attr  => [ 'cn', 'description' ]
+      filter => '(objectClass=*)'
+      scope => 'one'
+      sizelimit => 0
+
 =cut
 
 sub bld_select {
@@ -2358,14 +2384,24 @@ sub bld_select {
   }
 
   my @entries = $mesg->sorted( $arg->{attr}->[0] );
-  my @arr;
-  foreach ( @entries ) {
-    $arg->{toutfy} = sprintf('%s%s',
-			      $_->get_value( $arg->{attr}->[0] ),
-			      $_->exists('description') ? ' --- ' . $_->get_value( $arg->{attr}->[1] ) : '');
-    utf8::decode($arg->{toutfy});
-    push @arr, { value => $_->dn,
-		 label => $arg->{toutfy}, };
+  my ( @arr, @arr_meta, $hash_uniq );
+
+  if ( $#{$arg->{attr}} == 1 ) {
+    @arr_meta = map { $_->get_value( $arg->{attr}->[0] ) } @entries;
+    # foreach ( @entries ) {
+    #   push @arr_meta, $_->get_value( $arg->{attr}->[0] );
+    # }
+    $hash_uniq->{$_} = 1 foreach ( @arr_meta );
+    @arr = map { value => $_, label => $_, }, sort keys %{$hash_uniq};
+  } else {
+    foreach ( @entries ) {
+      $arg->{toutfy} = sprintf('%s%s',
+			       $_->get_value( $arg->{attr}->[0] ),
+			       $_->exists('description') ? ' --- ' . $_->get_value( $arg->{attr}->[1] ) : '');
+      utf8::decode($arg->{toutfy});
+      push @arr, { value => $_->dn,
+		   label => $arg->{toutfy}, };
+    }
   }
   return \@arr;
 }

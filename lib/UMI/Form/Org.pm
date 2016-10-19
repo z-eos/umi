@@ -59,9 +59,9 @@ has_field 'ou'
       apply => [ NoSpaces, NotAllDigits, Printable, ],
       label => 'Org Unit',
       label_class => [ 'col-xs-2', ],
-      label_attr => { title => 'top level name of the organization as it is used in physicalDeliveryOfficeName value of users' },
+      label_attr => { title => 'short name as it is used in object DN' },
       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-      element_attr => { placeholder => 'fo01' },
+      element_attr => { placeholder => 'hrns-n-hvs' },
       required => 1,
      );
 
