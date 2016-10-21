@@ -933,8 +933,9 @@ sub reassign {
   $arg->{src} = { str => $args->{src_dn},
 		  is_branch => $args->{src_dn} =~ /^.*,authorizedService=/ ? 0 : 1, };
 
-  $arg->{dst}->{str} = $self->lrtrim( { str => $arg->{dst}->{str} } );
-  
+  $arg->{dst}->{str} = $self->lrtrim( { str => $arg->{dst}->{str},
+					tosplit => 1, } );
+
   # return error if dst DN not exist
   $arg->{garbage} = $self->search( { base  => $arg->{dst}->{str}, scope => 'base' } ); p $arg;
   if ( $arg->{garbage}->code ) {
@@ -1950,6 +1951,7 @@ sub params2attrs {
       $dn = sprintf('%s=%s,%s', $key, $val, $base);
     }
 
+    $val =~ s/^\s+|\s+$//g;
     push @{$attrs}, $key => $val;
   }
   # warn 'attributes prepared, dn: ' . $dn . '; $attrs:' . Dumper($attrs);
@@ -2338,14 +2340,10 @@ field needs only two attributes values
 
 it constructs array for options generation like this
 
-    [0] {
-        label   "bind --- Bind Users",
-        value   "cn=bind,ou=group,dc=umidb"
-    },
-    [1] {
-        label   "blocked --- blocked users",
-        value   "cn=blocked,ou=group,dc=umidb"
-    },
+    [0] { label   "bind --- Bind Users",
+          value   "cn=bind,ou=group,dc=umidb" },
+    [1] { label   "blocked --- blocked users",
+          value   "cn=blocked,ou=group,dc=umidb" },
 
 DEFAULTS:
 
@@ -2388,9 +2386,6 @@ sub bld_select {
 
   if ( $#{$arg->{attr}} == 1 ) {
     @arr_meta = map { $_->get_value( $arg->{attr}->[0] ) } @entries;
-    # foreach ( @entries ) {
-    #   push @arr_meta, $_->get_value( $arg->{attr}->[0] );
-    # }
     $hash_uniq->{$_} = 1 foreach ( @arr_meta );
     @arr = map { value => $_, label => $_, }, sort keys %{$hash_uniq};
   } else {

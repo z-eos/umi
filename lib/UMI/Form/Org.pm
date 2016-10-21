@@ -29,13 +29,24 @@ has_field 'aux_parent'
       options_method => \&parent_offices,
      );
 
-has_field 'physicalDeliveryOfficeName' 
+has_field 'physicalDeliveryOfficeName'
   => (
       apply => [ NotAllDigits, Printable, ],
       label => 'physicalDeliveryOfficeName',
       label_class => [ 'col-xs-2', ],
       label_attr => { title => 'official office name as it is known to the world' },
       element_attr => { placeholder => 'Horns & Hooves LLC' },
+      element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+      required => 1,
+     );
+
+has_field 'destinationIndicator'
+  => (
+      apply => [ NotAllDigits, Printable, ],
+      label => 'destinationIndicator',
+      label_class => [ 'col-xs-2', ],
+      label_attr => { title => 'code name of the office, organization occupies' },
+      element_attr => { placeholder => 'example: abc, yz04, kl-01' },
       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
       required => 1,
      );

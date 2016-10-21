@@ -559,8 +559,10 @@ sub qrcode {
 
 =head2 lrtrim
 
-remove white space/s from both ends of each, "delim" delimited
-substring of the input string (in most cases str is DN or RDN)
+remove white space/s from both ends of each string
+
+if string is "delim" delimited, then white space/s could be removed
+before and after the delimiter (in most cases str is DN or RDN)
 
 =head3 EXAMPLE
 
@@ -575,10 +577,17 @@ substring of the input string (in most cases str is DN or RDN)
 sub lrtrim {
   my ($self, $args) = @_;
   my $arg = { str => $args->{str},
-	      delim => $args->{delim} || ',', };
-  my @ar = split(/$arg->{delim}/, $arg->{str});
-  $_ =~ s/^\s+|\s+$//g foreach @ar;
-  return $#ar ? join( $arg->{delim}, @ar) : $ar[0];
+	      delim => $args->{delim} || ',',
+	      tosplit => $args->{tosplit} || 0, };
+  if ( $arg->{tosplit} ) {
+    my @ar = split(/$arg->{delim}/, $arg->{str});
+    $_ =~ s/^\s+|\s+$//g foreach @ar;
+    $arg->{res} = join( $arg->{delim}, @ar);
+  } else {
+    $arg->{str} =~ s/^\s+|\s+$//g;
+    $arg->{res} = $arg->{str};
+  }
+  return $arg->{res};
 }
 
 
