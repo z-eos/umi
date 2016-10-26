@@ -2210,25 +2210,6 @@ sub _build_select_organizations {
   return \@office;
 }
 
-=head2 select_offices
-
-Method, options builder for selecting offices user can be assigned to
-
-uses sub bld_select()
-
-=cut
-
-has 'select_offices' => ( traits => ['Array'],
-			is => 'ro', isa => 'ArrayRef', required => 0, lazy => 1,
-			builder => '_build_select_offices', );
-
-sub _build_select_offices {
-  my $self = shift;
-  return $self->bld_select({ base => $self->cfg->{base}->{acc_root},
-			     attr => [ 'physicalDeliveryOfficeName', 'physicalDeliveryOfficeName' ]});
-}
-
-
 =head2 select_associateddomains
 
 Method, options builder for select element of associateddomains
@@ -2330,6 +2311,26 @@ sub _build_select_radgroup {
 }
 
 
+=head2 select_offices
+
+Method, options builder for selecting offices user can be assigned to
+
+uses sub bld_select()
+
+=cut
+
+has 'select_offices' => ( traits => ['Array'],
+			is => 'ro', isa => 'ArrayRef', required => 0, lazy => 1,
+			builder => '_build_select_offices', );
+
+sub _build_select_offices {
+  my $self = shift;
+  return $self->bld_select({ base => $self->cfg->{base}->{org},
+			     attr => [ 'destinationIndicator', ]});
+  # 'physicalDeliveryOfficeName' ]});
+}
+
+
 =head2 bld_select
 
 select options builder for select element, where this select form
@@ -2384,7 +2385,13 @@ sub bld_select {
   my @entries = $mesg->sorted( $arg->{attr}->[0] );
   my ( @arr, @arr_meta, $hash_uniq );
 
-  if ( $#{$arg->{attr}} == 1 ) {
+  # !!! TO FINISH (need to do)
+  # attr0_val : attr0_val
+  # attr0_val : attr1_val
+  # dn : attr0_val
+  # dn : attr0_val + ... + attrX_val
+  
+  if ( $#{$arg->{attr}} == 0 ) {
     @arr_meta = map { $_->get_value( $arg->{attr}->[0] ) } @entries;
     $hash_uniq->{$_} = 1 foreach ( @arr_meta );
     @arr = map { value => $_, label => $_, }, sort keys %{$hash_uniq};
@@ -2392,7 +2399,7 @@ sub bld_select {
     foreach ( @entries ) {
       $arg->{toutfy} = sprintf('%s%s',
 			       $_->get_value( $arg->{attr}->[0] ),
-			       $_->exists('description') ? ' --- ' . $_->get_value( $arg->{attr}->[1] ) : '');
+			       $_->exists($arg->{attr}->[1]) ? ' --- ' . $_->get_value( $arg->{attr}->[1] ) : '');
       utf8::decode($arg->{toutfy});
       push @arr, { value => $_->dn,
 		   label => $arg->{toutfy}, };
