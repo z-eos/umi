@@ -214,12 +214,10 @@ sub index :Path :Args(0) {
       #p $_->dn;
 
       if ( $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
-	$mesg = $ldap_crud->search({
-				    base => $ldap_crud->cfg->{base}->{group},
-				    filter => sprintf('(&(cn=%s)(memberUid=%s))',
-						      $ldap_crud->cfg->{stub}->{group_blocked},
-						      substr( (reverse split /,/, $_->dn)[2], 4 )),
-				   });
+	$mesg = $ldap_crud->search({ base => $ldap_crud->cfg->{base}->{group},
+				     filter => sprintf('(&(cn=%s)(memberUid=%s))',
+						       $ldap_crud->cfg->{stub}->{group_blocked},
+						       substr( (reverse split /,/, $_->dn)[2], 4 )), });
 	$blocked = $mesg->count;
 	$return->{error} .= $ldap_crud->err( $mesg )->{html}
 	  if $mesg->is_error();
@@ -283,6 +281,14 @@ sub index :Path :Args(0) {
 	 userDhcp => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ &&
 	 scalar split(',', $tmp) <= 3 ? 1 : 0,
 	};
+
+      $mesg = $ldap_crud->search({ base => sprintf('ou=group,ou=system,%s', $ldap_crud->cfg->{base}->{db}),
+				   filter => sprintf('(&(cn=admin)(memberUid=%s))',
+						     substr( (reverse split /,/,
+							      $ttentries->{$tmp}->{root}->{dn})[2], 4 )), });
+      $ttentries->{$tmp}->{'mgmnt'}->{is_admin} = $mesg->count;
+      $return->{error} .= $ldap_crud->err( $mesg )->{html}
+	if $mesg->is_error();
 
       foreach $attr (sort $_->attributes) {
 	$to_utf_decode = $_->get_value( $attr, asref => 1 );

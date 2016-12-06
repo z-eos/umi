@@ -182,19 +182,22 @@ Method returns hash with cleartext and ssha coded password.
 
 sub pwdgen {
   my ( $self, $args ) = @_;
-  my $pwdgen = {
-		pwd => $args->{pwd},
-		len => $args->{len} || UMI->config->{pwd}->{len},
-		num => $args->{num} || UMI->config->{pwd}->{num},
-		cap => $args->{cap} || UMI->config->{pwd}->{cap},
-		cnt => $args->{cnt} || UMI->config->{pwd}->{cnt},
-		salt => $args->{salt} || UMI->config->{pwd}->{salt},
-		pronounceable => $args->{pronounceable} || UMI->config->{pwd}->{pronounceable},
-	       };
+  my $pwdgen =
+    {
+     pwd => $args->{pwd},
+     len => $args->{len} ne '' ? $args->{len} : UMI->config->{pwd}->{len},
+     num => $args->{num} ne '' ? $args->{num} : UMI->config->{pwd}->{num},
+     cap => $args->{cap} ne '' ? $args->{cap} : UMI->config->{pwd}->{cap},
+     cnt => $args->{cnt} ne '' ? $args->{cnt} : UMI->config->{pwd}->{cnt},
+     salt => $args->{salt} ne '' ? $args->{salt} : UMI->config->{pwd}->{salt},
+     pronounceable => $args->{pronounceable} ne '' ? $args->{pronounceable} : UMI->config->{pwd}->{pronounceable},
+    };
 
   $pwdgen->{len} = UMI->config->{pwd}->{lenp}
     if $pwdgen->{pronounceable} && $pwdgen->{len} > UMI->config->{pwd}->{lenp};
-  
+
+  p $args;
+  p $pwdgen;
   use Crypt::GeneratePassword qw(word word3 chars);
 
   if ( ( ! defined $pwdgen->{'pwd'} || $pwdgen->{'pwd'} eq '' )

@@ -170,7 +170,7 @@
 		    class="btn btn-default btn-sm dropdown-toggle"
 		    tabindex="14"
 		    data-toggle="dropdown"
-		    title="LDAP Select Bases">
+		    title="Predefined Search Bases">
 	      <span class="caret"></span>
 	    </button>
 	    <ul class="dropdown-menu dropdown-menu-right" role="menu" name="ldapsearch_base">

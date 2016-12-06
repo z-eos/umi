@@ -19,10 +19,16 @@
       </li>
       <li>
 	<h4>Each Org object contains one or more <i>associatedDomain</i> values,
-	  which define FQDNs related to the organization/office</h4>
+	  which defines FQDNs related to the organization/office</h4>
       </li>
       <li>
-	<h4>Each user root account has attribute <i>physicalDeliveryOfficeName</i> with DN of the office user belongs to</h4>
+	<h4>Each Org object contains one or more <i>destinationIndicator</i> values,
+	  which defines office code name, organization occupies. Any organization can
+	  occupies more than one office and can share office/s with other organization/s</h4>
+      </li>
+      <li>
+	<h4>Each user root account has attribute <i>physicalDeliveryOfficeName</i>
+	  with data from the <i>destinationIndicator</i> value/s</h4>
 	<dl class="dl-horizontal">
 	  <dt>...</dt>
 	  <dd>...</dd>
@@ -31,7 +37,7 @@
 	  <dt>sn:</dt>
 	  <dd>Doe</dd>
 	  <dt>physicalDeliveryOfficeName:</dt>
-	  <dd>ou=ship01,ou=headquarters,ou=starfleet,ou=Organizations,dc=umidb</dd>
+	  <dd>bo13</dd>
 	  <dt>...</dt>
 	  <dd>...</dd>
 	</dl>
