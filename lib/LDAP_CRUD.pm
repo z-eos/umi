@@ -220,6 +220,7 @@ sub _build_cfg {
 			  ovpn => [ qw(
 					top
 					organizationalRole
+					authorizedServiceObject
 					domainRelatedObject
 					strongAuthenticationUser
 					umiUserCertificate
@@ -2699,6 +2700,7 @@ sub create_account_branch_leaf {
     $authorizedService = [
 			  cn => substr($arg->{userCertificate}->{filename},0,-4),
 			  associatedDomain => $arg->{associatedDomain},
+			  authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
 			  objectClass => $self->cfg->{objectClass}->{ovpn},
 			  umiOvpnCfgIfconfigPush => $arg->{umiOvpnCfgIfconfigPush},
 			  umiOvpnAddStatus => $arg->{umiOvpnAddStatus},

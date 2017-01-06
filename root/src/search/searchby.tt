@@ -132,43 +132,20 @@
 		[% ELSIF entry.value.mgmnt.is_dn && ! entry.key.match('People') %]
 		<span title="Root Objectt" class="fa fa-star fa-lg"></span>		
 		[% ELSIF entry.key.match('^author') %]
-		
-		[%   IF dn.authorizedService.match('mail') %]
-		<i title="EMAIL Service Account Branch" class="[% services.mail.icon %][% brcl %]"></i>
-		[%   ELSIF dn.authorizedService.match('xmpp') %]
-		<i title="XMPP (Jabber) Service Account Branch" class="[% services.xmpp.icon %][% brcl %]"></i>
-		[%   ELSIF dn.authorizedService.match('ovpn') %]
-		<i title="OpenVPN Service Account Branch" class="[% services.ovpn.icon %][% brcl %]"></i>
-		[%   ELSIF dn.authorizedService.match('ssh') %]
-		<i title="SSH key Branch" class="[% services.ssh.icon %][% brcl %]"></i>
-		[%   ELSIF dn.authorizedService.match('web') %]
-		<i title="Web Service Account Branch" class="[% services.web.icon %][% brcl %]"></i>
-		[%   ELSIF dn.authorizedService.match('mac') %][% mac='802.1x-mac' %]
-		<i title="802.1x EAP-MD5 MAC AUTH Service Account Branch" class="[% services.$mac.icon %][% brcl %]"></i>
-		[%   ELSIF dn.authorizedService.match('eap') %][% eap='802.1x-eap-tls' %]
-		<i title="802.1x EAP-TLS AUTH Service Account Branch" class="[% services.$eap.icon %][% brcl %]"></i>
+
+		[% cur_svc = dn.authorizedService.split('@').0 %][% # ---= SERVICES START =--- %]
+		[%   IF services.$cur_svc.icon %]
+		<i title="[% services.$cur_svc.descr %] Service Account Branch" class="[% services.$cur_svc.icon %][% brcl %]"></i>
 		[%   ELSE %]
-		<i title="Service Account Branch" class="fa fa-code-fork fa-lg[% blocked %]"></i>
+		<i title="Service Account Branch" class="fa fa-code-fork[% brcl %][% blocked %]"></i>
 		[%   END %]
 		    
 		[% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
-		[%   IF dn.authorizedService.match('mail') %]
-		<i title="EMAIL Service Account" class="[% services.mail.icon %][% lfcl %]"></i>
-		[%   ELSIF dn.authorizedService.match('xmpp') %]
-		<i title="XMPP (Jabber) Service Account" class="[% services.xmpp.icon %][% lfcl %]"></i>
-		[%   ELSIF dn.authorizedService.match('ovpn') %]
-		<i title="OpenVPN Service Account" class="[% services.ovpn.icon %][% lfcl %]"></i>
-		[%   ELSIF dn.authorizedService.match('ssh') %]
-		<i title="SSH key" class="[% services.ssh.icon %][% lfcl %]"></i>
-		[%   ELSIF dn.authorizedService.match('web') %]
-		<i title="Web Account" class="[% services.web.icon %][% lfcl %]"></i>
-		[%   ELSIF dn.authorizedService.match('mac') %][% mac='802.1x-mac' %]
-		<i title="802.1x EAP-MD5 (MAC) AUTH Service Account" class="[% services.$mac.icon %][% lfcl %]"></i>
-		[%   ELSIF dn.authorizedService.match('eap') %][% eap='802.1x-eap-tls' %]
-		<i title="802.1x EAP-TLS AUTH Service Account" class="[% services.$eap.icon %][% lfcl %]"></i>
+		[%   IF services.$cur_svc.icon %]
+		<i title="[% services.$cur_svc.descr %] Service Account" class="[% services.$cur_svc.icon %][% lfcl %]"></i>
 		[%   ELSE %]
-		<i title="Service Account" class="umi-2-margin-left fa fa-leaf fa-lg"></i>
-		[%   END %]
+		<i title="Service Account" class="fa fa-leaf fa-lg[% lfcl %]"></i>
+		[%   END %]                                      [% # ---= SERVICES STOP  =--- %]
 
 		[% ELSIF entry.key.match('^cn=.*,ou=Inventory') %]
 		<i title="Subject to Inventory" class="fa fa-tag [% brcl %]"></i>		  

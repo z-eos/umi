@@ -97,7 +97,7 @@ sub sysinfo :Path(sysinfo) :Args(0) {
 	      LDAP_CRUD_cfg => { title => 'LDAP_CRUD configuration ( $c->model(LDAP_CRUD)->cfg )',
 				 data => np($c->model('LDAP_CRUD')->cfg, colored => 0), },
 	      # look stat_monitor()
-	      monitor => { title => 'OpenLDAP daemon monotor',
+	      monitor => { title => 'OpenLDAP daemon monitor',
 			   data => np($monitor, colored => 0), },
 	      # UMI_c => { title => 'UMI c',
 	      # 		      data => p($c, colored => 0), },
