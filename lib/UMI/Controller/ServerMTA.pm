@@ -21,8 +21,11 @@ MTA related Controller.
 IMPORTANT
 
 Here we assume, entire MTA related LDAP branch (in our case:
-ou=Sendmail, dc=umidb) has one core relay host (in our case:
-ou=relay.umi) which has attribute `host' with FQDN as value
+ou=Sendmail, dc=umidb) has one single core relay host (in our case:
+ou=relay.umi) which has attribute 
+
+    host => FQDN as value
+    businessCategory => corerelay as value
 
 =head1 METHODS
 

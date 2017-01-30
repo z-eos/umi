@@ -12,7 +12,7 @@
   <thead>
     <tr class="text-uppercase info">
       <th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">Domain</th>
-      <th>first MX</th>
+      <th title="the highest priority MX record">primary MX</th>
       <th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">SMARTHOST fqdn</th>
       <th>SMARTHOST ip</th>
     </tr>
@@ -20,7 +20,7 @@
   <tfoot>
     <tr class="text-uppercase info">
       <th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">Domain</th>
-      <th>first MX</th>
+      <th title="the highest priority MX record">primary MX</th>
       <th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">SMARTHOST fqdn</th>
       <th>SMARTHOST ip</th>
     </tr>
