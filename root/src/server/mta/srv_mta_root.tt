@@ -12,6 +12,7 @@
   <thead>
     <tr class="text-uppercase info">
       <th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">Domain</th>
+      <th>MX</th>
       <th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">SMARTHOST fqdn</th>
       <th>SMARTHOST ip</th>
     </tr>
@@ -19,6 +20,7 @@
   <tfoot>
     <tr class="text-uppercase info">
       <th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">Domain</th>
+      <th>MX</th>
       <th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">SMARTHOST fqdn</th>
       <th>SMARTHOST ip</th>
     </tr>
@@ -27,7 +29,8 @@
     [% FOREACH domain IN mta.keys %]
     <tr>
       <th>[% domain %]</th>
-      <th>[% mta.$domain.smarthost.fqdn %]</th>
+      <th>[% mta.$domain.smarthost.mx %]</th>
+      <td>[% mta.$domain.smarthost.fqdn %]</td>
       <td>[% mta.$domain.smarthost.ip %]</td>
     </tr>
     [% END %]
