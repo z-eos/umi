@@ -61,6 +61,11 @@ sub user_root :Path(user_root) :Args(0) {
     $c->stash( template => 'user/user_root.tt', );
 }
 
+sub server_mta_root :Path(server/mta/srv_mta_root) :Args(0) {
+    my ( $self, $c ) = @_;
+    $c->stash( template => 'server/mta/srv_mta_root.tt', );
+}
+
 sub group_root :Path(group_root) :Args(0) {
     my ( $self, $c ) = @_;
     $c->stash( template => 'group/group_root.tt', );

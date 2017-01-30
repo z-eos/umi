@@ -139,8 +139,9 @@
 		[%   ELSE %]
 		<i title="Service Account Branch" class="fa fa-code-fork[% brcl %][% blocked %]"></i>
 		[%   END %]
-		    
+		
 		[% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
+		[% cur_svc = dn.authorizedService.split('@').0 %]
 		[%   IF services.$cur_svc.icon %]
 		<i title="[% services.$cur_svc.descr %] Service Account" class="[% services.$cur_svc.icon %][% lfcl %]"></i>
 		[%   ELSE %]

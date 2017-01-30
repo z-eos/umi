@@ -1,0 +1,68 @@
+[% META title = 'MTA root'
+   link = '<link href="/static/css/DataTables/jquery.dataTables.min.css" rel="stylesheet" type="text/css"><link href="/static/css/DataTables/buttons.bootstrap.min.css" rel="stylesheet" type="text/css"><link href="/static/css/DataTables/buttons.dataTables.min.css" rel="stylesheet" type="text/css"><link href="/static/css/DataTables/buttons.jqueryui.min.css" rel="stylesheet" type="text/css"><link href="/static/css/DataTables/dataTables.bootstrap.min.css" rel="stylesheet" type="text/css">'
+   %]
+
+<div class="row">
+  <div class="col-md-10">
+    <h2 class="page-header">MTA related <small>manipulations</small></h2>
+
+    [% INCLUDE ldap_err.tt %]
+
+<table id="dataTableToDraw" class="table table-condensed table-bordered">
+  <thead>
+    <tr class="text-uppercase info">
+      <th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">Domain</th>
+      <th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">SMARTHOST fqdn</th>
+      <th>SMARTHOST ip</th>
+    </tr>
+  </thead>
+  <tfoot>
+    <tr class="text-uppercase info">
+      <th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">Domain</th>
+      <th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">SMARTHOST fqdn</th>
+      <th>SMARTHOST ip</th>
+    </tr>
+  </tfoot>
+  <tbody>
+    [% FOREACH domain IN mta.keys %]
+    <tr>
+      <th>[% domain %]</th>
+      <th>[% mta.$domain.smarthost.fqdn %]</th>
+      <td>[% mta.$domain.smarthost.ip %]</td>
+    </tr>
+    [% END %]
+  </tbody>
+</table>
+
+<!-- <img class=""
+       src="/static/images/server/mta/mail-complex-distributed.svg"
+       exify_initialized="true"
+       width="100%"
+       style="margin-top: 3px;margin-bottom: 3px;"> -->
+
+    
+  </div>
+  <div class="col-md-2">
+    <ul class="nav nav-pills nav-stacked">
+      <li>
+	<a href="[% c.uri_for('/servermta') %]" target="_top">
+	  <span class="fa-stack fa-lg">
+	    <i class="fa fa-refresh fa-stack-2x text-success"></i>
+	    <i class="fa fa-envelope fa-stack-1x"></i>
+	  </span>
+	  SMARTHOSTs
+	</a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<script src="/static/js/DataTables/jquery.dataTables.min.js"></script>
+<script src="/static/js/DataTables/buttons.html5.min.js"></script>
+<script src="/static/js/DataTables/buttons.jqueryui.min.js"></script>
+<script src="/static/js/DataTables/buttons.print.min.js"></script>
+<script src="/static/js/DataTables/dataTables.buttons.min.js"></script>
+<script src="/static/js/DataTables/buttons.bootstrap.min.js"></script>
+<script src="/static/js/DataTables/dataTables.bootstrap.min.js"></script>
+
+<script src="/static/js/umi-datatables.js"></script>

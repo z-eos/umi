@@ -312,7 +312,7 @@ sub fnorm {
   my ( $self, $field ) = @_;
   my $field_arr;
   if ( ref( $field ) ne 'ARRAY' ) {
-    push $field_arr, $field;
+    push @{$field_arr}, $field;
     return $field_arr;
   } else {
     return $field;

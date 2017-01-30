@@ -99,6 +99,7 @@ sub _build_cfg {
 		   group =>          'ou=group,' . UMI->config->{ldap_crud_db},
 		   inventory =>      'ou=hw,ou=Inventory,' . UMI->config->{ldap_crud_db},
 		   machines =>       'ou=machines,' . UMI->config->{ldap_crud_db},
+		   mta =>           'ou=Sendmail,' . UMI->config->{ldap_crud_db},
 		   netgroup =>       'ou=Netgroups,' . UMI->config->{ldap_crud_db},
 		   org =>            'ou=Organizations,' . UMI->config->{ldap_crud_db},
 		   rad_groups =>     'ou=groups,ou=RADIUS,' . UMI->config->{ldap_crud_db},
@@ -1141,7 +1142,7 @@ sub delr {
     # explode dn into an array and push them to indexed hash of arrays
     my %HoL;
     my $i = 0;
-    my $base = join('', pop [ split(",", $dn) ]);
+    my $base = join('', pop @{[ split(",", $dn) ]});
 
     for ( @dnlist ) {
       s/,$base//;
@@ -2756,7 +2757,7 @@ sub create_account_branch_leaf {
 		uc($arg->{service}), $mesg->{html}, $mesg->{srv}, $mesg->{text});
     } else {
       push @{$return->{success}},
-	sprintf('<i class="%s fa-fw"></i>&nbsp;<em>%s account login:</em> &laquo;<strong class="text-success">%s</strong>&raquo; <em>password:</em> &laquo;<strong class="text-success mono">%s</strong>&raquo;',
+	sprintf('<i class="%s fa-fw"></i>&nbsp;<em>%s account login:</em> <strong class="text-success">%s</strong> <em>password:</em> <strong class="text-success mono">%s</strong>',
 		$self->cfg->{authorizedService}->{$arg->{service}}->{icon},
 		$arg->{service},
 		(split(/=/,(split(/,/,$arg->{dn}))[0]))[1], # taking RDN value
