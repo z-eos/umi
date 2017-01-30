@@ -110,7 +110,7 @@ __PACKAGE__->deny_access_unless_any( "/searchby",            [ qw/admin coadmin 
 
 __PACKAGE__->deny_access_unless_any( "/searchby/ldif_gen",   [ qw/admin coadmin/ ]);
 __PACKAGE__->deny_access_unless_any( "/searchby/ldif_gen2f", [ qw/admin coadmin/ ]);
-__PACKAGE__->deny_access_unless_any( "/servermta",           [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/servermta",           [ qw/admin coadmin operator/ ]);
 __PACKAGE__->deny_access_unless_any( "/sysinfo",             [ qw/admin/ ]);
 
 __PACKAGE__->deny_access_unless_any( "/toolpwdgen",          [ qw/admin coadmin operator employee/ ]);
