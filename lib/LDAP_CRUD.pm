@@ -87,9 +87,13 @@ has 'cfg' => ( traits => ['Hash'], is => 'ro', isa => 'HashRef', builder => '_bu
 sub _build_cfg {
   my $self = shift;
 
+  # number of Domain Components for the DB
+  my @dc_count = ( UMI->config->{ldap_crud_db} =~ /dc=/g);
+  
   return {
 	  base => {
 		   db => UMI->config->{ldap_crud_db},
+		   dc_num => $#dc_count + 1,
 		   acc_root =>       'ou=People,' . UMI->config->{ldap_crud_db},
 		   acc_svc_branch => 'ou=People,' . UMI->config->{ldap_crud_db},
 		   acc_svc_common => 'ou=People,' . UMI->config->{ldap_crud_db},

@@ -207,7 +207,7 @@ sub index :Path :Args(0) {
       }
     }
 
-    my ( $ttentries, @ttentries_keys, $attr, $tmp, $dn_depth, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry );
+    my ( $ttentries, @ttentries_keys, $attr, $tmp, $dn_depth, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry, @root_groups );
     my $blocked = 0;
     foreach (@entries) {
       # p $ldap_crud->obj_schema({ dn => $_->dn });
@@ -225,12 +225,10 @@ sub index :Path :Args(0) {
 	$c->stats->profile('is-blocked search for <i class="text-muted">' . $_->dn . '</i>');
       }
 
-      # p my $abc1 = $ldap_crud->canonical_dn_rev ( $_->dn );
-      # p $abc1 = $ldap_crud->get_root_obj_dn ( $_->dn );
       $tmp = $_->dn;
 
-      # !!! HARDCODE how deep dn could be to be considered as root for each type of objects !!!
-      $dn_depth = $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 3;
+      # !!! HARDCODE how deep dn could be to be considered as some type of object, `3' is for what? :( !!!
+      $dn_depth = $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? $ldap_crud->{cfg}->{base}->{dc_num} : 3;
       $dn_depth += split(/,/, $ldap_crud->{cfg}->{base}->{acc_root});
 
       if ( $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
@@ -239,10 +237,13 @@ sub index :Path :Args(0) {
 	@root_dn = splice(@root_arr, -1 * $dn_depth);
 	$ttentries->{$tmp}->{root}->{dn} = join(',', @root_dn);
 
+	# here, for each entry we are preparing data of the root object it belongs to
 	$root_i++;
 	if ( $root_i == $dn_depth ) {
 	  $ttentries->{$tmp}->{root}->{givenName} = $_->get_value('givenName');
 	  $ttentries->{$tmp}->{root}->{sn} = $_->get_value('sn');
+	  $ttentries->{$tmp}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
+	    $_->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
 	} else {
 	  $root_mesg = $ldap_crud->search({ dn => $ttentries->{$tmp}->{root}->{dn}, });
 	  $return->{error} .= $ldap_crud->err( $root_mesg )->{html}
@@ -250,9 +251,9 @@ sub index :Path :Args(0) {
 	  $root_entry = $root_mesg->entry(0);
 	  $ttentries->{$tmp}->{root}->{givenName} = $root_entry->get_value('givenName');
 	  $ttentries->{$tmp}->{root}->{sn} = $root_entry->get_value('sn');
+	  $ttentries->{$tmp}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
+	    $root_entry->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
 	}
-
-	# p $ttentries->{$tmp}->{root};
 
 	$to_utf_decode = $ttentries->{$tmp}->{root}->{givenName};
 	utf8::decode($to_utf_decode);
@@ -282,14 +283,26 @@ sub index :Path :Args(0) {
 	 scalar split(',', $tmp) <= 3 ? 1 : 0,
 	};
 
+      my $qqq = { base => sprintf('ou=group,ou=system,%s', $ldap_crud->cfg->{base}->{db}),
+	  filter => sprintf('(memberUid=%s)',
+			    $ttentries->{$tmp}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }),
+		  attrs => [ $ldap_crud->{cfg}->{rdn}->{group} ], };
+      p $qqq;
+      # which groups this object root belongs to? !!! LOOKS BROKEN !!!
       $mesg = $ldap_crud->search({ base => sprintf('ou=group,ou=system,%s', $ldap_crud->cfg->{base}->{db}),
-				   filter => sprintf('(&(cn=admin)(memberUid=%s))',
-						     substr( (reverse split /,/,
-							      $ttentries->{$tmp}->{root}->{dn})[2], 4 )), });
-      $ttentries->{$tmp}->{'mgmnt'}->{is_admin} = $mesg->count;
-      $return->{error} .= $ldap_crud->err( $mesg )->{html}
-	if $mesg->is_error();
+				   filter => sprintf('(memberUid=%s)',
+						     $ttentries->{$tmp}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }),
+				   attrs => [ $ldap_crud->{cfg}->{rdn}->{group} ], });
 
+      if ( $mesg->is_error() ) {
+	$return->{error} .= $ldap_crud->err( $mesg )->{html};
+      } else {
+	@root_groups = $mesg->entries;
+	foreach ( @root_groups ) {
+	  $ttentries->{$tmp}->{'mgmnt'}->{root_obj_groups}->{ $_->get_value('cn') } = 1;
+	}
+      }
+p $ttentries->{$tmp}->{'mgmnt'}->{root_obj_groups};
       foreach $attr (sort $_->attributes) {
 	$to_utf_decode = $_->get_value( $attr, asref => 1 );
 	map { utf8::decode($_); $_} @{$to_utf_decode};

@@ -1,4 +1,4 @@
-[% IF ! c.check_user_roles('admin') && entry.value.mgmnt.is_admin %]
+[% IF ! c.check_user_roles('admin') && entry.value.mgmnt.root_obj_groups.admin %][% # does this entry belongs to admin? %]
 [% to_render = 0 %]
 [% ELSE %]
 [% to_render = 1 %]
