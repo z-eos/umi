@@ -98,10 +98,10 @@ sub index :Path :Args(0) {
 	    push @{$return->{error}}, $reslvr->errorstring;
 	  }
 
-	  $resolved = $reslvr->search($mx_a); p $resolved;
+	  $resolved = $reslvr->search($mx_a);
 	  if ($resolved) {
 	    foreach $rr ($resolved->answer) {
-	      $mx_ptr = $rr->ptrdname;
+	      $mx_ptr = $rr->ptrdname if $rr->type eq "PTR";
 	    }
 	  } else {
 	    push @{$return->{error}}, $reslvr->errorstring;
@@ -142,7 +142,8 @@ sub index :Path :Args(0) {
 	       mta => $mta,
 	       final_message => $return,);
 
-    p $mta;
+    $node = $fqdn = $ip = $mx = $mx_a = $mx_ptr = '';
+    # p $mta;
     # p $return;
 }
 
