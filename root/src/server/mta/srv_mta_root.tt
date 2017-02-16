@@ -29,7 +29,11 @@
     [% FOREACH domain IN mta.keys %]
     <tr>
       <th>[% domain %]</th>
-      <th>[% mta.$domain.smarthost.mx %]</th>
+      [% IF mta.$domain.smarthost.mx.fqdn != mta.$domain.smarthost.mx.ptr %]
+      [% mxclass = 'class="bg-warning"' %]
+      [% mxtitle = 'title="PTR: ' _ mta.$domain.smarthost.mx.ptr _ ' does not point to MX"' %]
+      [% END %]
+      <th [% mxclass %][% mxtitle %]>[% mta.$domain.smarthost.mx.fqdn %]</th>
       <td>[% mta.$domain.smarthost.fqdn %]</td>
       <td>[% mta.$domain.smarthost.ip %]</td>
     </tr>

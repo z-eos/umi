@@ -42,7 +42,7 @@ page to show all email domains, theirs MX-es and nodes serving as SMARTHOSTs
 
 sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
-    my ( $return, $mta, $entry, $relay, $node, $fqdn, $ip, @mx_arr, $mx );
+    my ( $return, $mta, $entry, $relay, $node, $fqdn, $ip, $rr, @mx_arr, $mx, $mx_ptr, $mx_a );
     my $default = 'default';
     my $reslvr = Net::DNS::Resolver->new;
     my $resolved;
@@ -82,8 +82,26 @@ sub index :Path :Args(0) {
 
 	  $resolved = $reslvr->search($node);
 	  if ($resolved) {
-	    foreach my $rr ($resolved->answer) {
+	    foreach $rr ($resolved->answer) {
 	      $ip = $rr->address if $rr->type eq "A";
+	    }
+	  } else {
+	    push @{$return->{error}}, $reslvr->errorstring;
+	  }
+
+	  $resolved = $reslvr->search($mx);
+	  if ($resolved) {
+	    foreach $rr ($resolved->answer) {
+	      $mx_a = $rr->address if $rr->type eq "A";
+	    }
+	  } else {
+	    push @{$return->{error}}, $reslvr->errorstring;
+	  }
+
+	  $resolved = $reslvr->search($mx_a); p $resolved;
+	  if ($resolved) {
+	    foreach $rr ($resolved->answer) {
+	      $mx_ptr = $rr->ptrdname;
 	    }
 	  } else {
 	    push @{$return->{error}}, $reslvr->errorstring;
@@ -91,7 +109,11 @@ sub index :Path :Args(0) {
 
 	  $mta->{$fqdn}->{smarthost} = { fqdn => $node,
 					 ip => $ip,
-					 mx => $mx, };
+					 mx => { fqdn => $mx,
+						 a => $mx_a,
+						 ptr => $mx_ptr,
+						 },
+					       };
 	  $#mx_arr = -1;
 	}
       }
@@ -107,7 +129,11 @@ sub index :Path :Args(0) {
       } else {
 	foreach $entry ( @{[$mesg->entries]} ) {
 	  $fqdn = $entry->get_value('sendmailMTAKey');
-	  $mta->{$fqdn}->{smarthost} = { fqdn => $default, ip => $default, mx => $default }
+	  $mta->{$fqdn}->{smarthost} = { fqdn => $default, ip => $default,
+					 mx => { fqdn => $default,
+						 a => $default,
+						 ptr => $default,},
+				       }
 	    if ! defined $mta->{$fqdn};
 	}
       }
@@ -116,7 +142,7 @@ sub index :Path :Args(0) {
 	       mta => $mta,
 	       final_message => $return,);
 
-    # p $mta;
+    p $mta;
     # p $return;
 }
 
