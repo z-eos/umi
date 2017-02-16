@@ -107,13 +107,16 @@ sub index :Path :Args(0) {
 	    push @{$return->{error}}, $reslvr->errorstring;
 	  }
 
-	  $mta->{$fqdn}->{smarthost} = { fqdn => $node,
-					 ip => $ip,
-					 mx => { fqdn => $mx,
-						 a => $mx_a,
-						 ptr => $mx_ptr,
-						 },
-					       };
+	  $mta->{$fqdn}->{smarthost} =
+	    { fqdn => $node,
+	      ip => $ip,
+	      mx => { fqdn => $mx,
+		      a => $mx_a,
+		      ptr => $mx_ptr,
+		      html_class => $mx eq $mx_ptr ? 'class="text-success"' : 'class="text-warning"',
+		      html_title => $mx eq $mx_ptr ? '' : sprintf('title="PTR: %s does not point to MX"', $mx_ptr),
+		    },
+	    };
 	  $#mx_arr = -1;
 	}
       }
@@ -129,7 +132,8 @@ sub index :Path :Args(0) {
       } else {
 	foreach $entry ( @{[$mesg->entries]} ) {
 	  $fqdn = $entry->get_value('sendmailMTAKey');
-	  $mta->{$fqdn}->{smarthost} = { fqdn => $default, ip => $default,
+	  $mta->{$fqdn}->{smarthost} = { fqdn => $default,
+					 ip => $default,
 					 mx => { fqdn => $default,
 						 a => $default,
 						 ptr => $default,},
