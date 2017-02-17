@@ -13,25 +13,52 @@
     <tr class="text-uppercase info">
       <th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">Domain</th>
       <th title="the highest priority MX record">primary MX</th>
-      <th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">SMARTHOST fqdn</th>
-      <th>SMARTHOST ip</th>
+      <th>SMARTHOST</th>
     </tr>
   </thead>
   <tfoot>
     <tr class="text-uppercase info">
       <th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">Domain</th>
       <th title="the highest priority MX record">primary MX</th>
-      <th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">SMARTHOST fqdn</th>
-      <th>SMARTHOST ip</th>
+      <th>SMARTHOST</th>
     </tr>
   </tfoot>
   <tbody>
     [% FOREACH domain IN mta.keys %]
+    [% id = 'collapse' _ loop.index %]
+    [% hd = 'heading' _ loop.index %]
     <tr>
       <th>[% domain %]</th>
-      <th><span [% mta.$domain.smarthost.mx.html_class %] [% mta.$domain.smarthost.mx.html_title %]>[% mta.$domain.smarthost.mx.fqdn %]</span></th>
-      <td>[% mta.$domain.smarthost.fqdn %]</td>
-      <td>[% mta.$domain.smarthost.ip %]</td>
+      <td>
+	<div class="panel panel-[% mta.$domain.smarthost.mx.html_class %] umi-zerro-margin">
+	  <div class="panel-heading clearfix" role="tab" id="[% hd %]">
+	    <h4 class="panel-title">
+	      <a role="button"
+		 data-toggle="collapse"
+		 href="#[% id %]"
+		 aria-expanded="true"
+		 aria-controls="[% id %]">
+		[% mta.$domain.smarthost.mx.fqdn %]
+	      </a>
+	    </h4>
+	  </div>
+	  <div id="[% id %]" class="panel-collapse collapse" role="tabpanel" aria-labelledby="[% hd %]">
+	    <div class="panel-body">
+	      <dl class="dl-horizontal">
+		<dt>MX FQDN</dt><dd>[% mta.$domain.smarthost.mx.fqdn %]</dd>
+		<dt>MX PTR</dt><dd>[% mta.$domain.smarthost.mx.ptr %]</dd>
+		<dt>MX A</dt><dd>[% mta.$domain.smarthost.mx.a %]</dd>
+	      </dl>
+	    </div>
+	  </div>
+	</div>
+      </td>
+      <td>
+	<dl class="dl-horizontal umi-zerro-margin">
+	  <dt>FQDN</dt><dd>[% mta.$domain.smarthost.fqdn %]</dd>
+	  <dt>IP</dt><dd>[% mta.$domain.smarthost.ip %]</dd>
+	</dl>
+      </td>
     </tr>
     [% END %]
   </tbody>
@@ -69,3 +96,7 @@
 <script src="/static/js/DataTables/dataTables.bootstrap.min.js"></script>
 
 <script src="/static/js/umi-datatables.js"></script>
+
+<script>
+ $(function () { $('[data-toggle="popover"]').popover() });
+</script>

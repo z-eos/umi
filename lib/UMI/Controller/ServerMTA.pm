@@ -113,8 +113,8 @@ sub index :Path :Args(0) {
 	      mx => { fqdn => $mx,
 		      a => $mx_a,
 		      ptr => $mx_ptr,
-		      html_class => $mx eq $mx_ptr ? 'class="text-success"' : 'class="text-warning"',
-		      html_title => $mx eq $mx_ptr ? '' : sprintf('title="PTR: %s does not point to MX"', $mx_ptr),
+		      html_class => $mx eq $mx_ptr ? 'success' : 'danger',
+		      html_title => $mx eq $mx_ptr ? '' : 'title="revers resolv fails',
 		    },
 	    };
 	  $#mx_arr = -1;
@@ -136,7 +136,9 @@ sub index :Path :Args(0) {
 					 ip => $default,
 					 mx => { fqdn => $default,
 						 a => $default,
-						 ptr => $default,},
+						 ptr => $default,
+						 html_class => 'info',
+						 html_title => 'title="default relay"',},
 				       }
 	    if ! defined $mta->{$fqdn};
 	}
