@@ -30,6 +30,9 @@ use Catalyst qw/
     StatusMessage
 /;
 
+#     Session::Store::File
+
+
 extends 'Catalyst';
 
 our $VERSION = '0.91';
@@ -42,9 +45,14 @@ __PACKAGE__
 	   disable_component_resolution_regex_fallback => 1,
 	   enable_catalyst_header => 1, # Send X-Catalyst header
 	   default_view => "Web",
-	   session => { storage => "/tmp/umi/sess-$^T-$>",
+	   session => { cookie_name => "umi_cookie",
+		        storage => "/tmp/umi/umi-session-t$^T-p$>",
 			flash_to_stash => 1,
-			cache_size => '10m',
+			compressor => 'lz4',
+			## Cache::FastMmap section PAGE SIZE AND KEY/VALUE LIMITS
+			# cache_size => '10m',
+			page_size => '512k',
+			num_pages => '1000',
 			# expire_time => '1d',
 			## init_file => 1, # causes need for re-login if PSGI reloaded during the form filling
 			unlink_on_exit => 1,

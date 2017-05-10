@@ -28,7 +28,7 @@
     [% id = 'collapse' _ loop.index %]
     [% hd = 'heading' _ loop.index %]
     <tr>
-      <th>[% domain %]</th>
+      <th><h4 class="umi-zerro-margin">[% domain %]</h4></th>
       <td>
 	<div class="panel panel-[% mta.$domain.smarthost.mx.html_class %] umi-zerro-margin">
 	  <div class="panel-heading clearfix" role="tab" id="[% hd %]">

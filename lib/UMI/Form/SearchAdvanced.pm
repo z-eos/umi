@@ -69,7 +69,8 @@ has_field 'reqMod'
        label_class => [ 'col-md-2', ],
        wrapper_class => [ 'searchhistory', ],
        element_wrapper_class => [ 'col-xs-10', 'col-lg-10', ],
-       element_attr => { placeholder => '*physicalDeliveryOfficeName:= ou=borg,*' },
+       element_attr => { placeholder => '*uid:+*john.doe*    or    *physicalDeliveryOfficeName:=*ou=borg,*',
+			 title => 'reqType add: *uid:+*john.goe*;    reqType modify: *physicalDeliveryOfficeName:= ou=borg,*;    reqType delete: has no reqMod'},
        rows => 1 );
 
 has_field 'reqMessage'

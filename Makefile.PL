@@ -9,7 +9,7 @@ use Module::Install::Catalyst; # Complain loudly if you don't have
 name 'UMI';
 all_from 'lib/UMI.pm';
 
-requires 'Catalyst::Runtime' => '5.90061';
+requires 'Catalyst::Runtime' => '5.90114';
 requires 'Catalyst::Plugin::ConfigLoader';
 requires 'Catalyst::Plugin::Static::Simple';
 requires 'Catalyst::Action::RenderView';
@@ -22,6 +22,7 @@ requires 'Catalyst::View::TT';
 requires 'Catalyst::View::JSON';
 requires 'Catalyst::Plugin::Unicode';
 requires 'Catalyst::Plugin::Authentication';
+requires 'Catalyst::Plugin::Session::Store::FastMmap';
 requires 'Catalyst::Authentication::Store::LDAP';
 requires 'Net::LDAP';
 requires 'Lingua::Translit';
@@ -33,8 +34,11 @@ requires 'MIME::Base64';
 requires 'GD::Barcode::QRcode';
 requires 'Net::SSH::Perl';
 requires 'Net::Netmask';
+requires 'Compress::LZ4';
+requires 'Cache::FastMmap';
+requires 'BSD::Resource';
 
-test_requires 'Test::More' => '0.88';
+test_requires 'Test::More' => '1.001014';
 catalyst;
 
 install_script glob('script/*.pl');

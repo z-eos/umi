@@ -31,7 +31,8 @@
   [% FOREACH attr_rest IN attrs_rest %]
   <div id="[% attr_rest.key %]" class="form-group hidden attrs-rest">
     <label class="col-sm-2 control-label">
-      [% IF schema.item(attr_rest.key) != 1 && 
+      [% # IF schema.item(attr_rest.key) != 1 && %]
+      [% IF c.session.ldap.obj_schema.item(attr_rest.key) != 1 && 
          attr_rest.key != rdn &&
          attr_rest.key != 'userPassword' &&
          ! attr_rest.key.match('userCertificate') &&
@@ -55,7 +56,8 @@
   [% FOREACH attr IN entries %]
   <div class="form-group">
     <label class="col-sm-2 control-label">
-      [% IF schema.item(attr.key) != 1 && 
+      [% # IF schema.item(attr.key) != 1 && %]
+      [% IF c.session.ldap.obj_schema.item(attr.key) != 1 && 
          attr.key != rdn &&
          attr.key != 'userPassword' &&
          ! attr.key.match('userCertificate') &&

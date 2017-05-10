@@ -347,7 +347,7 @@ p $ttentries->{$tmp}->{'mgmnt'}->{root_obj_groups};
 	      filter => $filter,
 	      entrieskeys => \@ttentries_keys,
 	      entries => $ttentries,
-	      schema => $ldap_crud->attr_equality,
+#	      schema => $ldap_crud->attr_equality,
 	      services => $ldap_crud->cfg->{authorizedService},
 	      base_ico => $ldap_crud->cfg->{base}->{icon},
 	      final_message => $return,
@@ -418,23 +418,36 @@ sub proc :Path(proc) :Args(0) {
       
       $c->stats->profile('all fields are ready');
 
-      my $schema = $ldap_crud->obj_schema( { dn => $params->{ldap_modify} } );
+# old way #       my $schema = $ldap_crud->obj_schema( { dn => $params->{ldap_modify} } );
       my ($is_single, $names);
-      foreach my $objectClass (sort (keys %{$schema->{$params->{ldap_modify}}})) {
-	foreach $attr (sort (keys %{$schema->{$params->{ldap_modify}}->{$objectClass}->{must}} )) {
+      foreach my $objectClass (sort @{$entry->{objectClass}}) { p $objectClass;
+# old way # 	foreach $attr (sort (keys %{$schema->{$params->{ldap_modify}}->{$objectClass}->{must}} )) {
+# old way # 	  next if $attr eq "objectClass";
+# old way # 	  $is_single->{$attr} =
+# old way # 	    $schema->{$params->{ldap_modify}}->{$objectClass}->{must}->{$attr}->{'single-value'};
+# old way # 	  $names->{$attr} = 0;
+# old way # 	}
+# old way # 	foreach $attr (sort (keys %{$schema->{$params->{ldap_modify}}->{$objectClass}->{may}} )) {
+# old way # 	  next if $attr eq "objectClass";
+# old way # 	  $is_single->{$attr} =
+# old way # 	    $schema->{$params->{ldap_modify}}->{$objectClass}->{may}->{$attr}->{'single-value'};
+# old way # 	  $names->{$attr} = 0;
+	# old way # 	}
+
+	foreach $attr (sort (keys %{$c->session->{ldap}->{obj_schema}->{$objectClass}->{must}} )) {
 	  next if $attr eq "objectClass";
 	  $is_single->{$attr} =
-	    $schema->{$params->{ldap_modify}}->{$objectClass}->{must}->{$attr}->{'single-value'};
+	    $c->session->{ldap}->{obj_schema}->{$objectClass}->{must}->{$attr}->{'single-value'};
 	  $names->{$attr} = 0;
 	}
-	foreach $attr (sort (keys %{$schema->{$params->{ldap_modify}}->{$objectClass}->{may}} )) {
+	foreach $attr (sort (keys %{$c->session->{ldap}->{obj_schema}->{$objectClass}->{may}} )) {
 	  next if $attr eq "objectClass";
 	  $is_single->{$attr} =
-	    $schema->{$params->{ldap_modify}}->{$objectClass}->{may}->{$attr}->{'single-value'};
+	    $c->session->{ldap}->{obj_schema}->{$objectClass}->{may}->{$attr}->{'single-value'};
 	  $names->{$attr} = 0;
 	}
       }
-
+p $names;
       foreach $attr ( $entry_tmp->attributes ) {
 	delete $names->{$attr};
       }

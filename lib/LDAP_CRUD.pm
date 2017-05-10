@@ -89,26 +89,26 @@ sub _build_cfg {
 
   # number of Domain Components for the DB
   my @dc_count = ( UMI->config->{ldap_crud_db} =~ /dc=/g);
-  
+
   return {
 	  base => {
 		   db => UMI->config->{ldap_crud_db},
 		   dc_num => $#dc_count + 1,
-		   acc_root =>       'ou=People,' . UMI->config->{ldap_crud_db},
-		   acc_svc_branch => 'ou=People,' . UMI->config->{ldap_crud_db},
-		   acc_svc_common => 'ou=People,' . UMI->config->{ldap_crud_db},
-		   alias =>          'ou=alias,' . UMI->config->{ldap_crud_db},
-		   dhcp =>           'ou=DHCP,' . UMI->config->{ldap_crud_db},
-		   gitacl =>         'ou=GitACL,' . UMI->config->{ldap_crud_db},
-		   group =>          'ou=group,' . UMI->config->{ldap_crud_db},
-		   inventory =>      'ou=hw,ou=Inventory,' . UMI->config->{ldap_crud_db},
-		   machines =>       'ou=machines,' . UMI->config->{ldap_crud_db},
-		   mta =>           'ou=Sendmail,' . UMI->config->{ldap_crud_db},
-		   netgroup =>       'ou=Netgroups,' . UMI->config->{ldap_crud_db},
-		   org =>            'ou=Organizations,' . UMI->config->{ldap_crud_db},
-		   rad_groups =>     'ou=groups,ou=RADIUS,' . UMI->config->{ldap_crud_db},
+		   acc_root =>       'ou=People,'             . UMI->config->{ldap_crud_db},
+		   acc_svc_branch => 'ou=People,'             . UMI->config->{ldap_crud_db},
+		   acc_svc_common => 'ou=People,'             . UMI->config->{ldap_crud_db},
+		   alias =>          'ou=alias,'              . UMI->config->{ldap_crud_db},
+		   dhcp =>           'ou=DHCP,'               . UMI->config->{ldap_crud_db},
+		   gitacl =>         'ou=GitACL,'             . UMI->config->{ldap_crud_db},
+		   group =>          'ou=group,'              . UMI->config->{ldap_crud_db},
+		   inventory =>      'ou=hw,ou=Inventory,'    . UMI->config->{ldap_crud_db},
+		   machines =>       'ou=machines,'           . UMI->config->{ldap_crud_db},
+		   mta =>            'ou=Sendmail,'           . UMI->config->{ldap_crud_db},
+		   netgroup =>       'ou=Netgroups,'          . UMI->config->{ldap_crud_db},
+		   org =>            'ou=Organizations,'      . UMI->config->{ldap_crud_db},
+		   rad_groups =>     'ou=groups,ou=RADIUS,'   . UMI->config->{ldap_crud_db},
 		   rad_profiles =>   'ou=profiles,ou=RADIUS,' . UMI->config->{ldap_crud_db},
-		   workstations =>   'ou=workstations,' . UMI->config->{ldap_crud_db},
+		   workstations =>   'ou=workstations,'       . UMI->config->{ldap_crud_db},
 		   monitor =>        'cn=Monitor',
 		   icon => {
 			    People => 'fa fa-user',
