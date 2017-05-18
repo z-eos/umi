@@ -420,7 +420,7 @@ sub proc :Path(proc) :Args(0) {
 
 # old way #       my $schema = $ldap_crud->obj_schema( { dn => $params->{ldap_modify} } );
       my ($is_single, $names);
-      foreach my $objectClass (sort @{$entry->{objectClass}}) { p $objectClass;
+      foreach my $objectClass (sort @{$entry->{objectClass}}) {
 # old way # 	foreach $attr (sort (keys %{$schema->{$params->{ldap_modify}}->{$objectClass}->{must}} )) {
 # old way # 	  next if $attr eq "objectClass";
 # old way # 	  $is_single->{$attr} =
@@ -447,7 +447,7 @@ sub proc :Path(proc) :Args(0) {
 	  $names->{$attr} = 0;
 	}
       }
-p $names;
+
       foreach $attr ( $entry_tmp->attributes ) {
 	delete $names->{$attr};
       }

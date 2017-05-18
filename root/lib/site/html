@@ -21,7 +21,8 @@
    [% content %]
 
    <div id="loaderfa">
-     <span class="fa fa-cog fa-spin fa-4x"></span>
+     <span class="fa fa-circle-o-notch fa-spin fa-5x fa-fw text-success" title="Loading ..."></span>
+     <span class="sr-only">Loading...</span>
    </div>
    
    <script type="text/javascript">  

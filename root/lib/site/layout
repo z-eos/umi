@@ -2,7 +2,7 @@
 [% PROCESS site/header %]
 </div>
 
-<div id="content">
+<div id="content" class=""> <!-- BEGIN content -->
 
   <noscript>
     <div class="panel panel-danger text-center">
@@ -17,7 +17,8 @@
   </noscript>
 
   [% content %]
-</div>
+  
+</div> <!-- END content -->
 
 <div id="footer">
 [% PROCESS site/footer %]

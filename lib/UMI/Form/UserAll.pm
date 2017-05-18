@@ -17,7 +17,7 @@ has 'namesake' => ( is => 'rw', );
 has 'autologin' => ( is => 'rw', );
 has 'add_svc_acc' => ( is => 'rw', ); # set if we add service account rather than new user
 
-sub build_form_element_class { [ 'form-horizontal', 'tab-content' ] }
+sub build_form_element_class { [ 'form-horizontal', 'tab-content', ] }
 
 sub build_update_subfields {
   by_flag => { repeatable => { do_wrapper => 1, do_label => 1 } }
@@ -601,8 +601,8 @@ has_field 'loginless_ovpn.status'
 			 'data-name' => 'status',
 			 'data-group' => 'loginless_ovpn', },
        options => [{ value => '', label => '--- Choose State ---'},
-		   { value => 'active', label => 'Active'},
-		   { value => 'blocked', label => 'Blocked'},
+		   { value => 'enabled', label => 'Enabled'},
+		   { value => 'disabled', label => 'Disabled'},
 		   { value => 'revoked', label => 'Revoked'}, ],
        wrapper_class => [ qw{col-xs-12}, ],
      );

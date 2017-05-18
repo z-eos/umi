@@ -47,15 +47,15 @@ __PACKAGE__
 	   default_view => "Web",
 	   session => { cookie_name => "umi_cookie",
 		        storage => "/tmp/umi/umi-session-t$^T-p$>",
-			flash_to_stash => 1,
-			compressor => 'lz4',
 			## Cache::FastMmap section PAGE SIZE AND KEY/VALUE LIMITS
 			# cache_size => '10m',
 			page_size => '512k',
 			num_pages => '1000',
+			compressor => 'lz4',
+			flash_to_stash => 1,
 			# expire_time => '1d',
-			## init_file => 1, # causes need for re-login if PSGI reloaded during the form filling
 			unlink_on_exit => 1,
+			## init_file => 1, # causes need for re-login if PSGI reloaded during the form filling
 		      },
 	   authentication =>
 	   {

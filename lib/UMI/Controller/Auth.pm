@@ -41,55 +41,6 @@ former, dynamic method, variant is at LDAP_CRUD->obj_schema
 
 sub signin :Path Global {
   my ( $self, $c ) = @_;
-
-  # use BSD::Resource;
-  # my $lim;
-  
-  # $lim->{as} = getrlimit(RLIMIT_AS);
-  # $lim->{core} = getrlimit(RLIMIT_CORE);
-  # $lim->{cpu} = getrlimit(RLIMIT_CPU);
-  # $lim->{data} = getrlimit(RLIMIT_DATA);
-  # $lim->{fsize} = getrlimit(RLIMIT_FSIZE);
-  # $lim->{memlock} = getrlimit(RLIMIT_MEMLOCK);
-  # $lim->{nofile} = getrlimit(RLIMIT_NOFILE);
-  # $lim->{nproc} = getrlimit(RLIMIT_NPROC);
-  # $lim->{ofile} = getrlimit(RLIMIT_OFILE);
-  # $lim->{openmax} = getrlimit(RLIMIT_OPEN_MAX);
-  # $lim->{rss} = getrlimit(RLIMIT_RSS);
-  # $lim->{stack} = getrlimit(RLIMIT_STACK);
-  # $lim->{vmem} = getrlimit(RLIMIT_VMEM);
-
-  # p $lim;
-  
-  # setrlimit(RLIMIT_AS, -1, -1);
-  # setrlimit(RLIMIT_CORE, -1, -1);
-  # setrlimit(RLIMIT_CPU, -1, -1);
-  # setrlimit(RLIMIT_DATA, -1, -1);
-  # setrlimit(RLIMIT_FSIZE, -1, -1);
-  # setrlimit(RLIMIT_MEMLOCK, -1, -1);
-  # setrlimit(RLIMIT_NOFILE, -1, -1);
-  # setrlimit(RLIMIT_NPROC, -1, -1);
-  # setrlimit(RLIMIT_OFILE, -1, -1);
-  # setrlimit(RLIMIT_OPEN_MAX, -1, -1);
-  # setrlimit(RLIMIT_RSS, -1, -1);
-  # setrlimit(RLIMIT_STACK, -1, -1);
-  # setrlimit(RLIMIT_VMEM, -1, -1);
-
-  # $lim->{as} = getrlimit(RLIMIT_AS);
-  # $lim->{core} = getrlimit(RLIMIT_CORE);
-  # $lim->{cpu} = getrlimit(RLIMIT_CPU);
-  # $lim->{data} = getrlimit(RLIMIT_DATA);
-  # $lim->{fsize} = getrlimit(RLIMIT_FSIZE);
-  # $lim->{memlock} = getrlimit(RLIMIT_MEMLOCK);
-  # $lim->{nofile} = getrlimit(RLIMIT_NOFILE);
-  # $lim->{nproc} = getrlimit(RLIMIT_NPROC);
-  # $lim->{ofile} = getrlimit(RLIMIT_OFILE);
-  # $lim->{openmax} = getrlimit(RLIMIT_OPEN_MAX);
-  # $lim->{rss} = getrlimit(RLIMIT_RSS);
-  # $lim->{stack} = getrlimit(RLIMIT_STACK);
-  # $lim->{vmem} = getrlimit(RLIMIT_VMEM);
-
-  # p $lim;
   
   $c->session->{auth_uid} = $c->req->param('auth_uid');
   $c->session->{auth_pwd} = $c->req->param('auth_pwd');

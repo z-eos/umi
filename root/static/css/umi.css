@@ -197,7 +197,7 @@ html,body {
   background: #fff url('/static/images/preloaders.net-MovingBlocks.GIF') no-repeat center center;
 }
 
-#loaderfa {
+/* #loaderfa {
   display: none;
   position: fixed;
   width: 54px;
@@ -211,6 +211,22 @@ html,body {
   border-radius: 100%;
   background: rgba(252, 252, 252, 0.37);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.48);
+} */
+
+#loaderfa {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  font-size: 12px;
+  text-align: center;
+  background: rgba(50, 50, 50, 0.8);
+}
+#loaderfa > span {
+    margin-top: 150px;
 }
 
 .clear {

@@ -11,10 +11,10 @@
 	<dl class="dl-horizontal">
 	  <dt>FName:</dt>
 	  <dd>First Name</dd>
-	  <dt>LName</dt>
+	  <dt>LName:</dt>
 	  <dd>Last Name</dd>
 	</dl>
-	all other fields are related to their services context
+	all other fields are related to their service/s context
       </li>
     </dl>
 
@@ -25,8 +25,8 @@
 	     <span class="fa fa-pluse-circle"></span>
 	     create new</a>
 	     </li> -->
-      <li><a href="[% c.uri_for('userall') %]" target="_top">
-	  <span class="fa fa-user-plus"></span>
+      <li><a href="[% c.uri_for('userall') %]" target="_top" title="Add new user">
+	  <span class="fa fa-user-plus fa-3x"></span>
 	  create new</a>
       </li>
     </ul>
