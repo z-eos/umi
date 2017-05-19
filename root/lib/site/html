@@ -30,6 +30,11 @@
     $('form').on('submit', showLoader);
     // window.onbeforeunload = showLoader;
     $(function(){ $('#loaderfa').hide(); });
+
+    window.addEventListener('onload', function() {
+    console.log('window-loaded');
+    });
+    
    </script>
 
  </body>
