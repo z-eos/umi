@@ -31,8 +31,9 @@
     // window.onbeforeunload = showLoader;
     $(function(){ $('#loaderfa').hide(); });
 
-    window.addEventListener('onload', function() {
+    window.addEventListener('load', function() {
     console.log('window-loaded');
+    //$('#loaderfa').hide();
     });
     
    </script>

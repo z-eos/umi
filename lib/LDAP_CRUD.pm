@@ -1489,7 +1489,7 @@ sub vcard {
   if ($msg->is_error()) {
     $return->{error} .= $self->err( $msg )->{html};
   } else {
-    push @vcard, 'BEGIN:VCARD', 'VERSION:2.1';
+    push @vcard, 'BEGIN:VCARD', 'VERSION:3.0';
     $entry = $msg->as_struct;
 
     $arg->{sn} = $self->utf2qp( $entry->{$arg->{dn}}->{sn}->[0], $arg->{translit} );
@@ -1568,19 +1568,36 @@ sub vcard {
     # --- TELEPHONENUMBER ---------------------------------------------
     if ( $entry->{$arg->{dn}}->{telephonenumber} ) {
       foreach ( @{$entry->{$arg->{dn}}->{telephonenumber}} ) {
-	push @{$arg->{vcard}->{telephonenumber}}, sprintf('TEL;TYPE=work:%s', $_);
+	push @{$arg->{vcard}->{telephonenumber}}, sprintf('TEL;TYPE=WORK,VOICE:%s', $_);
       }
       $arg->{vcard}->{telephonenumber} = join("\n", @{$arg->{vcard}->{telephonenumber}});
       push @vcard, $arg->{vcard}->{telephonenumber};
     }
+    if ( $entry->{$arg->{dn}}->{mobiletelephonenumber} ) {
+      foreach ( @{$entry->{$arg->{dn}}->{mobiletelephonenumber}} ) {
+	push @{$arg->{vcard}->{mobiletelephonenumber}}, sprintf('TEL;TYPE=CELL,TEXT:%s', $_);
+      }
+      $arg->{vcard}->{mobiletelephonenumber} = join("\n", @{$arg->{vcard}->{mobiletelephonenumber}});
+      push @vcard, $arg->{vcard}->{mobiletelephonenumber};
+    }
+    if ( $entry->{$arg->{dn}}->{mobile} ) {
+      foreach ( @{$entry->{$arg->{dn}}->{mobile}} ) {
+	push @{$arg->{vcard}->{mobile}}, sprintf('TEL;TYPE=CELL,TEXT:%s', $_);
+      }
+      $arg->{vcard}->{mobile} = join("\n", @{$arg->{vcard}->{mobile}});
+      push @vcard, $arg->{vcard}->{mobile};
+    }
 
+    
     my $scope = $arg->{dn} =~ /^.*=.*,authorizedService.*$/ ? 'sub' : 'one';
     
     # --- EMAIL -------------------------------------------------------
     if ( $entry->{$arg->{dn}}->{mail} ) {
       foreach ( @{$entry->{$arg->{dn}}->{mail}} ) {
-	push @{$arg->{email}}, 'EMAIL;WORK:' . $_;
+	push @{$arg->{vcard}->{email}}, sprintf('EMAIL;WORK:%s', $_);
       }
+      $arg->{vcard}->{email} = join("\n", @{$arg->{vcard}->{email}});
+      push @vcard, $arg->{vcard}->{email};
     }
     $branch = $self->ldap->search ( base => $arg->{dn}, scope => $scope, filter => 'authorizedService=mail@*', );
     if ($branch->is_error()) {
