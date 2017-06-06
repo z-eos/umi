@@ -19,11 +19,19 @@
  <body>
    
    [% content %]
-
-   <div id="loaderfa">
-     <span class="fa fa-circle-o-notch fa-spin fa-5x fa-fw text-success" title="Loading ..."></span>
-     <span class="sr-only">Loading...</span>
+   
+   <div class="progress" id="loaderfa">
+     <div class="progress-bar progress-bar-info progress-bar-striped active" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 75%">
+       <span class="sr-only">Processing ...</span>
+     </div>
    </div>
+
+<!-- <span class="loading">One moment please...</span><span>Information is being processed.</span> -->
+   
+   <!-- <div id="loaderfa"> -->
+   <!--   <span class="fa fa-cog fa-spin fa-5x fa-fw text-info" title="Loading ..."></span> -->
+   <!--   <span class="sr-only">Processing...</span> -->
+   <!-- </div> -->
    
    <script type="text/javascript">  
     function showLoader () { $('#loaderfa').show(200); }

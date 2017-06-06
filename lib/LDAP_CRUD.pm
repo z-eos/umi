@@ -1568,21 +1568,21 @@ sub vcard {
     # --- TELEPHONENUMBER ---------------------------------------------
     if ( $entry->{$arg->{dn}}->{telephonenumber} ) {
       foreach ( @{$entry->{$arg->{dn}}->{telephonenumber}} ) {
-	push @{$arg->{vcard}->{telephonenumber}}, sprintf('TEL;TYPE=WORK,VOICE:%s', $_);
+	push @{$arg->{vcard}->{telephonenumber}}, sprintf('TEL;TYPE=WORK:%s', $_);
       }
       $arg->{vcard}->{telephonenumber} = join("\n", @{$arg->{vcard}->{telephonenumber}});
       push @vcard, $arg->{vcard}->{telephonenumber};
     }
     if ( $entry->{$arg->{dn}}->{mobiletelephonenumber} ) {
       foreach ( @{$entry->{$arg->{dn}}->{mobiletelephonenumber}} ) {
-	push @{$arg->{vcard}->{mobiletelephonenumber}}, sprintf('TEL;TYPE=CELL,TEXT:%s', $_);
+	push @{$arg->{vcard}->{mobiletelephonenumber}}, sprintf('TEL;TYPE=CELL:%s', $_);
       }
       $arg->{vcard}->{mobiletelephonenumber} = join("\n", @{$arg->{vcard}->{mobiletelephonenumber}});
       push @vcard, $arg->{vcard}->{mobiletelephonenumber};
     }
     if ( $entry->{$arg->{dn}}->{mobile} ) {
       foreach ( @{$entry->{$arg->{dn}}->{mobile}} ) {
-	push @{$arg->{vcard}->{mobile}}, sprintf('TEL;TYPE=CELL,TEXT:%s', $_);
+	push @{$arg->{vcard}->{mobile}}, sprintf('TEL;TYPE=CELL:%s', $_);
       }
       $arg->{vcard}->{mobile} = join("\n", @{$arg->{vcard}->{mobile}});
       push @vcard, $arg->{vcard}->{mobile};
@@ -1594,7 +1594,7 @@ sub vcard {
     # --- EMAIL -------------------------------------------------------
     if ( $entry->{$arg->{dn}}->{mail} ) {
       foreach ( @{$entry->{$arg->{dn}}->{mail}} ) {
-	push @{$arg->{vcard}->{email}}, sprintf('EMAIL;WORK:%s', $_);
+	push @{$arg->{vcard}->{email}}, sprintf('EMAIL;TYPE=WORK:%s', $_);
       }
       $arg->{vcard}->{email} = join("\n", @{$arg->{vcard}->{email}});
       push @vcard, $arg->{vcard}->{email};
@@ -1613,7 +1613,7 @@ sub vcard {
 	    @leaves = $leaf->entries;
 	    foreach $leaf_entry ( @leaves ) {
 	      {
-		push @{$arg->{email}}, 'EMAIL;TYPE=work:' . $leaf_entry->get_value('uid');
+		push @{$arg->{email}}, 'EMAIL;TYPE=WORK:' . $leaf_entry->get_value('uid');
 	      }
 	    }
 	  }
@@ -1637,7 +1637,7 @@ sub vcard {
 	    @leaves = $leaf->entries;
 	    foreach $leaf_entry ( @leaves ) {
 	      {
-		push @{$arg->{xmpp}}, 'X-JABBER;TYPE=work:' . $leaf_entry->get_value('uid');
+		push @{$arg->{xmpp}}, 'X-JABBER;TYPE=WORK:' . $leaf_entry->get_value('uid');
 	      }
 	    }
 	  }
