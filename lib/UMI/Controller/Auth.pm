@@ -33,9 +33,13 @@ sub index :Path :Args(0) {
 
 =head2 signin
 
-schema is stored to session->ldap->obj_schema
+- schema is stored to session->ldap->obj_schema
 
 former, dynamic method, variant is at LDAP_CRUD->obj_schema
+
+- attributes equalities are stored in session->ldap->obj_schema_attr_equality
+
+former, dynamic method, variant is at LDAP_CRUD->attr_equality
 
 =cut
 
