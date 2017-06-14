@@ -284,8 +284,8 @@ sub index :Path :Args(0) {
 	};
 
       my $qqq = { base => sprintf('ou=group,ou=system,%s', $ldap_crud->cfg->{base}->{db}),
-	  filter => sprintf('(memberUid=%s)',
-			    $ttentries->{$tmp}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }),
+		  filter => sprintf('(memberUid=%s)',
+				    $ttentries->{$tmp}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }),
 		  attrs => [ $ldap_crud->{cfg}->{rdn}->{group} ], };
       p $qqq;
       # which groups this object root belongs to? !!! LOOKS BROKEN !!!
@@ -302,7 +302,7 @@ sub index :Path :Args(0) {
 	  $ttentries->{$tmp}->{'mgmnt'}->{root_obj_groups}->{ $_->get_value('cn') } = 1;
 	}
       }
-p $ttentries->{$tmp}->{'mgmnt'}->{root_obj_groups};
+# p $ttentries->{$tmp}->{'mgmnt'}->{root_obj_groups};
       foreach $attr (sort $_->attributes) {
 	$to_utf_decode = $_->get_value( $attr, asref => 1 );
 	map { utf8::decode($_); $_} @{$to_utf_decode};
@@ -347,7 +347,7 @@ p $ttentries->{$tmp}->{'mgmnt'}->{root_obj_groups};
 	      filter => $filter,
 	      entrieskeys => \@ttentries_keys,
 	      entries => $ttentries,
-#	      schema => $ldap_crud->attr_equality,
+	      schema => $c->session->{ldap}->{obj_schema_attr_equality},
 	      services => $ldap_crud->cfg->{authorizedService},
 	      base_ico => $ldap_crud->cfg->{base}->{icon},
 	      final_message => $return,

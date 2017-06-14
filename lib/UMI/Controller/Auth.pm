@@ -101,6 +101,14 @@ sub signin :Path Global {
       }
     }
 
+    foreach ( $schema->all_attributes ) {
+      if ( defined $_->{equality} ) {
+	$c->session->{ldap}->{obj_schema_attr_equality}->{$_->{name}} = $_->{equality};
+      } elsif ( defined $_->{sup}) {
+	$c->session->{ldap}->{obj_schema_attr_equality}->{$_->{name}} = $_->{sup}->[0];
+      }
+    }
+
     $c->stash( template => 'welcome.tt', );
   } else {
     $c->stash( template => 'signin.tt', );

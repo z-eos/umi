@@ -1680,6 +1680,9 @@ sub vcard {
 
 =head2 obj_schema
 
+!!! DEPRECATED !!! moved to the session data (in Controller/Auth.pm)
+
+
 LDAP object schema and data
 
 returned structure is hash of all mandatory and optional attributes of
@@ -2814,6 +2817,8 @@ sub create_account_branch_leaf {
 
 
 =head2 attr_equality
+
+!!! DEPRECATED !!! moved to the session data (in Controller/Auth.pm)
 
 each attribute equality of the whole schema, hash
 
