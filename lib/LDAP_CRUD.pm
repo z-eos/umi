@@ -110,15 +110,31 @@ sub _build_cfg {
 		   rad_profiles =>   'ou=profiles,ou=RADIUS,' . UMI->config->{ldap_crud_db},
 		   workstations =>   'ou=workstations,'       . UMI->config->{ldap_crud_db},
 		   monitor =>        'cn=Monitor',
+		   objects =>        [ qw(
+					   acc_root
+					   alias
+					   dhcp
+					   gitacl
+					   group
+					   inventory
+					   machines
+					   mta
+					   netgroup
+					   org
+					   rad_groups
+					   rad_profiles
+					   workstations
+					   monitor
+					) ],
 		   icon => {
-			    People => 'fa fa-user',
-			    DHCP => 'fa fa-sitemap',
-			    GitACL => 'fa fa-gavel',
-			    group => 'fa fa-group',
-			    inventory => 'fa fa-tag',
+			    People =>        'fa fa-user',
+			    DHCP =>          'fa fa-sitemap',
+			    GitACL =>        'fa fa-gavel',
+			    group =>         'fa fa-group',
+			    inventory =>     'fa fa-tag',
 			    Organizations => 'fa fa-industry',
-			    rad_groups => 'fa fa-group',
-			    rad_profiles => 'fa fa-cogs',
+			    rad_groups =>    'fa fa-group',
+			    rad_profiles =>  'fa fa-cogs',
 			   },
 		  },
 	  exclude_prefix => 'aux_',

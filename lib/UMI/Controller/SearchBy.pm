@@ -207,13 +207,18 @@ sub index :Path :Args(0) {
       }
     }
 
-    my ( $ttentries, @ttentries_keys, $attr, $tmp, $dn_depth, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry, @root_groups );
+    my ( $ttentries, @ttentries_keys, $attr, $tmp, $dn_depth, $dn_depthes, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry, @root_groups, $obj_item );
     my $blocked = 0;
-    foreach (@entries) {
-      # p $ldap_crud->obj_schema({ dn => $_->dn });
-      #p $_->dn;
 
-      if ( $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
+    # foreach $obj_item ( @{$ldap_crud->{cfg}->{base}->{objects}} ) {
+    #   $dn_depthes->{$obj_item} = split(/,/, $ldap_crud->{cfg}->{base}->{$obj_item}) + 1;
+    # }
+    
+    foreach (@entries) {
+      $tmp = $_->dn;
+      if ( $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
+	$dn_depth = scalar split(/,/, $ldap_crud->{cfg}->{base}->{acc_root}) + 1;
+	#      if ( $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
 	$mesg = $ldap_crud->search({ base => $ldap_crud->cfg->{base}->{group},
 				     filter => sprintf('(&(cn=%s)(memberUid=%s))',
 						       $ldap_crud->cfg->{stub}->{group_blocked},
@@ -223,15 +228,7 @@ sub index :Path :Args(0) {
 	  if $mesg->is_error();
 
 	$c->stats->profile('is-blocked search for <i class="text-muted">' . $_->dn . '</i>');
-      }
 
-      $tmp = $_->dn;
-
-      # !!! HARDCODE how deep dn could be to be considered as some type of object, `3' is for what? :( !!!
-      $dn_depth = $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? $ldap_crud->{cfg}->{base}->{dc_num} : 3;
-      $dn_depth += split(/,/, $ldap_crud->{cfg}->{base}->{acc_root});
-
-      if ( $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
 	@root_arr = split(',', $_->dn);
 	$root_i = $#root_arr;
 	@root_dn = splice(@root_arr, -1 * $dn_depth);
@@ -266,13 +263,46 @@ sub index :Path :Args(0) {
 	$#root_arr = -1;
 	$#root_dn = -1;
 
+	# my $qqq = { base => sprintf('ou=group,ou=system,%s', $ldap_crud->cfg->{base}->{db}),
+	# 		  filter => sprintf('(memberUid=%s)',
+	# 				    $ttentries->{$tmp}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }),
+	# 		  attrs => [ $ldap_crud->{cfg}->{rdn}->{group} ], };
+
+	p my $qqq = sprintf('(memberUid=%s)',
+			    $ttentries->{$tmp}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }); p $ldap_crud->{cfg}->{rdn}->{acc_root};
+
+	# which groups this object root belongs to? !!! LOOKS BROKEN !!!
+	$mesg = $ldap_crud->search({ base => sprintf('ou=group,ou=system,%s', $ldap_crud->cfg->{base}->{db}),
+				     filter => sprintf('(memberUid=%s)',
+						       $ttentries->{$tmp}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }),
+				     attrs => [ $ldap_crud->{cfg}->{rdn}->{group} ], });
+
+	if ( $mesg->is_error() ) {
+	  $return->{error} .= $ldap_crud->err( $mesg )->{html};
+	} else {
+	  @root_groups = $mesg->entries;
+	  foreach ( @root_groups ) {
+	    $ttentries->{$tmp}->{'mgmnt'}->{root_obj_groups}->{ $_->get_value('cn') } = 1;
+	  }
+	}
+	# p $ttentries->{$tmp}->{'mgmnt'}->{root_obj_groups};
+
+
 	# p $ttentries->{$tmp}->{root};
+
+
+
+      } elsif ( $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ) {
+	$dn_depth = scalar split(/,/, $ldap_crud->{cfg}->{base}->{inventory}) + 1;
+      } else {
+	# !!! HARDCODE how deep dn could be to be considered as some type of object, `3' is for what? :( !!!
+	$dn_depth = $ldap_crud->{cfg}->{base}->{dc_num} + 1;
       }
 
       $ttentries->{$tmp}->{'mgmnt'} =
 	{
 	 is_blocked => 	  $blocked,
-	 is_dn => scalar split(',', $tmp) <= $dn_depth ? 1 : 0,
+	 is_root => scalar split(',', $tmp) <= $dn_depth ? 1 : 0,
 	 is_account => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
 	 is_group => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{group}/ ? 1 : 0,
 	 is_inventory => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ? 1 : 0,
@@ -283,26 +313,6 @@ sub index :Path :Args(0) {
 	 scalar split(',', $tmp) <= 3 ? 1 : 0,
 	};
 
-      my $qqq = { base => sprintf('ou=group,ou=system,%s', $ldap_crud->cfg->{base}->{db}),
-		  filter => sprintf('(memberUid=%s)',
-				    $ttentries->{$tmp}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }),
-		  attrs => [ $ldap_crud->{cfg}->{rdn}->{group} ], };
-      p $qqq;
-      # which groups this object root belongs to? !!! LOOKS BROKEN !!!
-      $mesg = $ldap_crud->search({ base => sprintf('ou=group,ou=system,%s', $ldap_crud->cfg->{base}->{db}),
-				   filter => sprintf('(memberUid=%s)',
-						     $ttentries->{$tmp}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }),
-				   attrs => [ $ldap_crud->{cfg}->{rdn}->{group} ], });
-
-      if ( $mesg->is_error() ) {
-	$return->{error} .= $ldap_crud->err( $mesg )->{html};
-      } else {
-	@root_groups = $mesg->entries;
-	foreach ( @root_groups ) {
-	  $ttentries->{$tmp}->{'mgmnt'}->{root_obj_groups}->{ $_->get_value('cn') } = 1;
-	}
-      }
-# p $ttentries->{$tmp}->{'mgmnt'}->{root_obj_groups};
       foreach $attr (sort $_->attributes) {
 	$to_utf_decode = $_->get_value( $attr, asref => 1 );
 	map { utf8::decode($_); $_} @{$to_utf_decode};
@@ -339,7 +349,7 @@ sub index :Path :Args(0) {
     @ttentries_keys = sort { lc $a cmp lc $b } keys %{$ttentries}
       if $sort_order eq 'straight'; # for history searches
 
-    # p $ttentries;
+    p $ttentries;
 
     $c->stash(
 	      template => 'search/searchby.tt',

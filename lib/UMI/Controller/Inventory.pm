@@ -128,9 +128,9 @@ sub create_inventory {
   # if ( $l ne 'Comparts' ) { # comparts has individual DNs
     $add->{root}->{dn} = sprintf('cn=%s-%s,ou=%s,%s',
 				 $r,
-				 $ldap_crud->last_seq({ base => 'ou=' . $l . ',' . $ldap_crud->{cfg}->{base}->{inventory},
-							filter => '(cn=' . $r . '-*)',
-							attr => 'cn' ,
+				 $ldap_crud->last_seq({ base    => 'ou=' . $l . ',' . $ldap_crud->{cfg}->{base}->{inventory},
+							filter  => '(cn=' . $r . '-*)',
+							attr    => 'cn' ,
 							seq_pfx => $r . '-', }) + 1,
 				 $l,
 				 $ldap_crud->{cfg}->{base}->{inventory});
@@ -139,7 +139,7 @@ sub create_inventory {
     $hwAssignedTo = $add->{root}->{dn};
   # }
 
-  #--- Composite or Single Compart start ----------------------------------------------
+  #--- Composite, Comparts or Singleboard start ----------------------------------------------
   if ( $l eq 'Composite' || $l eq 'Comparts' || $l eq 'Singleboard' ) {
     if ( defined $hw->{success} ) { # initialized from files
       while ( ( $key, $val ) = each %{$hw->{success}} ) { # ->file_<dmi/lspci/pciconf/smartctl> value processing
@@ -242,11 +242,9 @@ sub create_inventory {
       push @{$add->{repeatable}}, $compart;
       delete $compart->{ldif};
     }
-
     #--- Repeatable field Compart stop ----------------------------------------
-    
-    #--- Composite or Single Compart stop -----------------------------------------------
   }
+  #--- Composite, Compart or Singleboard stop -----------------------------------------------
 
   $common_compart = '';
   # rest of the root obj attributes (form `common_*' fields data)
