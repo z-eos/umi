@@ -268,8 +268,8 @@ sub index :Path :Args(0) {
 	# 				    $ttentries->{$tmp}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }),
 	# 		  attrs => [ $ldap_crud->{cfg}->{rdn}->{group} ], };
 
-	p my $qqq = sprintf('(memberUid=%s)',
-			    $ttentries->{$tmp}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }); p $ldap_crud->{cfg}->{rdn}->{acc_root};
+	# p my $qqq = sprintf('(memberUid=%s)',
+	#		    $ttentries->{$tmp}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }); p $ldap_crud->{cfg}->{rdn}->{acc_root};
 
 	# which groups this object root belongs to? !!! LOOKS BROKEN !!!
 	$mesg = $ldap_crud->search({ base => sprintf('ou=group,ou=system,%s', $ldap_crud->cfg->{base}->{db}),
@@ -286,11 +286,7 @@ sub index :Path :Args(0) {
 	  }
 	}
 	# p $ttentries->{$tmp}->{'mgmnt'}->{root_obj_groups};
-
-
 	# p $ttentries->{$tmp}->{root};
-
-
 
       } elsif ( $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ) {
 	$dn_depth = scalar split(/,/, $ldap_crud->{cfg}->{base}->{inventory}) + 1;
@@ -349,7 +345,7 @@ sub index :Path :Args(0) {
     @ttentries_keys = sort { lc $a cmp lc $b } keys %{$ttentries}
       if $sort_order eq 'straight'; # for history searches
 
-    p $ttentries;
+    # p $ttentries;
 
     $c->stash(
 	      template => 'search/searchby.tt',

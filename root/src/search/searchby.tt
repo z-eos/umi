@@ -1,9 +1,26 @@
 [% META title = 'Search Simple Results' %]
 [% # stash.name %]
 
-<h2>
-  Search Simple Results<sup><abbr  title="not all objects could be found via predefined search items, to search for all objects use advanced search menu item!" class="initialism"><i class="fa fa-info-circle text-info"></i></abbr></sup> &nbsp; <small class="mono">base: [% base_dn %]; &nbsp;&nbsp; filter: [% filter %]</small>
-</h2>
+<div class="container-fluid">
+  <div class="row page-header">
+    <div class="col-xs-4 col-md-4">
+      <h1>
+	Search Simple Results
+	<sup>
+	  <abbr  title="not all objects could be found via predefined search items, to search for all objects use advanced search menu item!" class="initialism">
+	    <i class="fa fa-info-circle text-info"></i>
+	  </abbr>
+	</sup>
+      </h1>
+    </div>
+    <div class="col-xs-8 col-md-8"><br>
+      <dl class="dl-horizontal mono text-info">
+	<dt>base:</dt><dd>[% base_dn %]</dd>
+	<dt>filter:</dt><dd>[% filter %]</dd>
+      </dl>
+    </div>
+  </div>
+</div>
 
 [% INCLUDE ldap_err.tt %]
 

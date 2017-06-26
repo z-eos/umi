@@ -22,7 +22,7 @@
       aria-labelledby="dropdownMenuActions"
       role="menu">
     [% # data-order values are defined in root/lib/config/searchby_menu %]
-    [% IF entry.value.mgmnt.is_dn && entry.value.mgmnt.is_account %]
+    [% IF entry.value.mgmnt.is_root && entry.value.mgmnt.is_account %]
     <li>
       <form role="form" method="POST" action="[% c.uri_for_action('searchby/user_preferences') %]">
 	<button type="submit" class="btn btn-link"
@@ -98,7 +98,7 @@
 	delete
       </button>
     </li>
-    [% IF ! entry.value.mgmnt.is_dn %]
+    [% IF ! entry.value.mgmnt.is_root %]
     <li>
       <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
 	<button type="button" title="reassign to other root account (move this object to another root account)"
@@ -114,7 +114,7 @@
     </li>
     [% END %][% # to_render stop %]
     [% END %]
-    [% IF entry.key.match('mail') || entry.key.match('xmpp') || (entry.value.mgmnt.is_dn && entry.value.mgmnt.is_account) %]
+    [% IF entry.key.match('mail') || entry.key.match('xmpp') || (entry.value.mgmnt.is_root && entry.value.mgmnt.is_account) %]
     <li>
       <button type="button" title="export as vCard"
 	      class="btn btn-link"

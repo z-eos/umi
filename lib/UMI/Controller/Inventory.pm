@@ -268,6 +268,7 @@ sub create_inventory {
     }
 
     push @{$add->{root}->{attrs}}, $r => $tmp;
+    # p $r; p $tmp;
 
     $common_compart = 'hw' . substr($val,9) if $r eq 'hwType' && $val =~ /comparts_.*/;
 
@@ -291,7 +292,7 @@ sub create_inventory {
   } else {
     push @{$return->{success}}, sprintf('%s<br >', $add->{root}->{dn}) ;
   }
-  
+  p $args;
   p $add; # p $return->{warning} = $add;
   return $return; # = { success => $add };
 }
