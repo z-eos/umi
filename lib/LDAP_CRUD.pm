@@ -127,10 +127,12 @@ sub _build_cfg {
 					   monitor
 					) ],
 		   icon => {
-			    People =>        'fa fa-user',
+			    default =>       'fa fa-star',
+			    People =>        'fa fa-user-circle',
 			    DHCP =>          'fa fa-sitemap',
 			    GitACL =>        'fa fa-gavel',
 			    group =>         'fa fa-group',
+			    history =>       'fa fa-history',
 			    inventory =>     'fa fa-tag',
 			    Organizations => 'fa fa-industry',
 			    rad_groups =>    'fa fa-group',

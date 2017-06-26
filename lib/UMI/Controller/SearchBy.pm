@@ -345,7 +345,7 @@ sub index :Path :Args(0) {
     @ttentries_keys = sort { lc $a cmp lc $b } keys %{$ttentries}
       if $sort_order eq 'straight'; # for history searches
 
-    # p $ttentries;
+    p $ttentries;
 
     $c->stash(
 	      template => 'search/searchby.tt',
@@ -355,7 +355,7 @@ sub index :Path :Args(0) {
 	      entries => $ttentries,
 	      schema => $c->session->{ldap}->{obj_schema_attr_equality},
 	      services => $ldap_crud->cfg->{authorizedService},
-	      base_ico => $ldap_crud->cfg->{base}->{icon},
+	      base_icon => $ldap_crud->cfg->{base}->{icon},
 	      final_message => $return,
 	     );
   } else {
