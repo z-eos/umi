@@ -137,10 +137,11 @@ sub proc :Path(proc) :Args(0) {
 
       $c->stats->profile("search by filter requested");
 
-      my ( $ttentries, @ttentries_keys, $attr, $dn_depth, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry );
+      my ( $ttentries, @ttentries_keys, $attr, $dn_depth,  $dn_depthes, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry, @root_groups, $obj_item );
       my $blocked = 0;
       foreach (@entries) {
 	if ( $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
+	  $dn_depth += split(/,/, $ldap_crud->{cfg}->{base}->{acc_root}) + 1;
 	  $mesg = $ldap_crud->search({
 				      base => $ldap_crud->cfg->{base}->{group},
 				      filter => sprintf('(&(cn=%s)(memberUid=%s))',
@@ -152,21 +153,19 @@ sub proc :Path(proc) :Args(0) {
 	    if $mesg->is_error();
 
 	  $c->stats->profile('is-blocked search for <i class="text-muted">' . $_->dn . '</i>');
-	}
 	
-	$dn_depth = $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 3;
-	$dn_depth += split(/,/, $ldap_crud->{cfg}->{base}->{acc_root});
-
-	if ( $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
 	  @root_arr = split(',', $_->dn);
 	  $root_i = $#root_arr;
 	  @root_dn = splice(@root_arr, -1 * $dn_depth);
 	  $ttentries->{$_->dn}->{root}->{dn} = join(',', @root_dn);
 
+	  # here, for each entry we are preparing data of the root object it belongs to
 	  $root_i++;
 	  if ( $root_i == $dn_depth ) {
 	    $ttentries->{$_->dn}->{root}->{givenName} = $_->get_value('givenName');
 	    $ttentries->{$_->dn}->{root}->{sn} = $_->get_value('sn');
+	    $ttentries->{$_->dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
+	      $_->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
 	  } else {
 	    $root_mesg = $ldap_crud->search({ dn => $ttentries->{$_->dn}->{root}->{dn}, });
 	    $return->{error} .= $ldap_crud->err( $root_mesg )->{html}
@@ -174,6 +173,8 @@ sub proc :Path(proc) :Args(0) {
 	    $root_entry = $root_mesg->entry(0);
 	    $ttentries->{$_->dn}->{root}->{givenName} = $root_entry->get_value('givenName');
 	    $ttentries->{$_->dn}->{root}->{sn} = $root_entry->get_value('sn');
+	    $ttentries->{$_->dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
+	      $root_entry->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
 	  }
 
 	  # p $ttentries->{$_->dn}->{root};
@@ -190,12 +191,34 @@ sub proc :Path(proc) :Args(0) {
 	  $#root_dn = -1;
 
 	  # p $ttentries->{$_->dn}->{root};
+	  $mesg = $ldap_crud->search({ base => sprintf('ou=group,ou=system,%s', $ldap_crud->cfg->{base}->{db}),
+				       filter => sprintf('(memberUid=%s)',
+							 $ttentries->{$_->dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }),
+				       attrs => [ $ldap_crud->{cfg}->{rdn}->{group} ], });
+
+	  if ( $mesg->is_error() ) {
+	    $return->{error} .= $ldap_crud->err( $mesg )->{html};
+	  } else {
+	    @root_groups = $mesg->entries;
+	    foreach ( @root_groups ) {
+	      $ttentries->{$_->dn}->{'mgmnt'}->{root_obj_groups}->{ $_->get_value('cn') } = 1;
+	    }
+	  }
+	  # p $ttentries->{$_->dn}->{'mgmnt'}->{root_obj_groups};
+	  # p $ttentries->{$_->dn}->{root};
+	  
+	} elsif ( $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ) {
+	  $dn_depth = scalar split(/,/, $ldap_crud->{cfg}->{base}->{inventory}) + 1;
+	} else {
+	  # !!! HARDCODE how deep dn could be to be considered as some type of object, `3' is for what? :( !!!
+	  $dn_depth = $ldap_crud->{cfg}->{base}->{dc_num} + 1;
 	}
+
 
 	$ttentries->{$_->dn}->{'mgmnt'} =
 	  {
 	   is_blocked => $blocked,
-	   is_dn => scalar split(',', $_->dn) <= $dn_depth ? 1 : 0,
+	   is_root => scalar split(',', $_->dn) <= $dn_depth ? 1 : 0,
 	   is_account => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
 	   is_group => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{group}/ ? 1 : 0,
 	   is_inventory => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ? 1 : 0,
@@ -227,8 +250,6 @@ sub proc :Path(proc) :Args(0) {
 	push @ttentries_keys, $_->dn if $sort_order eq 'reverse'; # for not history searches
 	$blocked = 0;
       }
-      my $base_dn = sprintf('<kbd>%s</kbd>', $basedn);
-      my $search_filter = sprintf('<kbd>%s</kbd>', $filter);
 
       # suffix array of dn preparation to respect LDAP objects "inheritance"
       # http://en.wikipedia.org/wiki/Suffix_array
@@ -247,13 +268,13 @@ sub proc :Path(proc) :Args(0) {
       # p $ttentries;
       $c->stash(
 		template => 'search/searchby.tt',
-		schema => $ldap_crud->attr_equality,
-		base_dn => $base_dn,
-		filter => $search_filter,
+		base_dn => $basedn,
+		filter => $filter,
 		entrieskeys => \@ttentries_keys,
 		entries => $ttentries,
 		services => $ldap_crud->cfg->{authorizedService},
-		base_ico => $ldap_crud->cfg->{base}->{icon},
+		schema => $c->session->{ldap}->{obj_schema_attr_equality},
+		base_icon => $ldap_crud->cfg->{base}->{icon},
 		final_message => $return,
 		form => $self->form,
 	       );

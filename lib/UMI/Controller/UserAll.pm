@@ -175,7 +175,9 @@ sub create_account {
 
     my $root_add_dn = sprintf('%s=%s,%s',
 			      $ldap_crud->cfg->{rdn}->{acc_root},
-			      $uid,
+			      $ldap_crud->cfg->{rdn}->{acc_root} eq 'uid' ? $uid : sprintf('%s %s',
+											   $args->{person_givenname},
+											   $args->{person_sn}),
 			      $ldap_crud->cfg->{base}->{acc_root});
 
     # my $schema = $ldap_crud->schema;

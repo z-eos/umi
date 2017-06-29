@@ -114,7 +114,9 @@ sub sysinfo :Path(sysinfo) :Args(0) {
 
 =head2 stat_acc
 
-all accounts (root accounts) statistics
+each root account, all services listing
+
+no way to shorten the list to some specific service, yet
 
 =cut
 
@@ -151,6 +153,7 @@ sub stat_acc :Path(stat_acc) :Args(0) {
 
 	$mesg_blk = $ldap_crud->search({ base => $ldap_crud->{cfg}->{base}->{group},
 					 scope => 'one',
+					 sizelimit => 0,
 					 filter => sprintf('(&(cn=blocked)(memberUid=%s))',
 							   $accounts->{$account->dn}->{uid}),
 					 attrs   => [ 'cn' ] });
@@ -163,6 +166,7 @@ sub stat_acc :Path(stat_acc) :Args(0) {
 
 	$mesg_svc = $ldap_crud->search({ base => $account->dn,
 					 scope => 'one',
+					 sizelimit => 0,
 					 filter => '(authorizedService=*)',
 					 attrs => [ 'authorizedService', ], });
 	if ( $mesg_svc->code ) {
@@ -178,6 +182,7 @@ sub stat_acc :Path(stat_acc) :Args(0) {
 	  foreach $service ( @services ) {
 	    $mesg_svc = $ldap_crud->search({ base => $account->dn,
 					     scope => 'sub',
+					     sizelimit => 0,
 					     filter => sprintf('authorizedService=%s@*', $service),
 					     attrs => [ 'associatedDomain',
 							'authorizedService',

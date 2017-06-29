@@ -3,9 +3,9 @@
 
 <div class="container-fluid">
   <div class="row page-header">
-    <div class="col-xs-4 col-md-4">
+    <div class="col-xs-3 col-md-3">
       <h1>
-	Search Simple Results
+	Search Results
 	<sup>
 	  <abbr  title="not all objects could be found via predefined search items, to search for all objects use advanced search menu item!" class="initialism">
 	    <i class="fa fa-info-circle text-info"></i>
@@ -13,7 +13,7 @@
 	</sup>
       </h1>
     </div>
-    <div class="col-xs-8 col-md-8"><br>
+    <div class="col-xs-9 col-md-9"><br>
       <dl class="dl-horizontal mono text-info">
 	<dt>base:</dt><dd>[% base_dn %]</dd>
 	<dt>filter:</dt><dd>[% filter %]</dd>
@@ -99,7 +99,7 @@
           [%   IF pat.match('dc=') %][% num_of_dc = num_of_dc + 1 %][% END %]
 	  [% END %]
 	  <div class="panel-group umi-zerro-margin" id="accordion[% loop.index %]">
-	    [% IF entry.value.mgmnt.is_root || entry.value.mgmnt.is_inventory %]<div class="panel panel-info">
+	    [% IF (entry.value.mgmnt.is_root && entry.value.mgmnt.is_account) || ! entry.value.mgmnt.is_account %]<div class="panel panel-info">
 	    [% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]<div class="panel panel-success">
 	    [% ELSE %]<div class="panel panel-warning">
 	    [% END %]
@@ -127,7 +127,7 @@
 	      
 	      <form role="form" method="POST" action="[% c.uri_for_action('searchby/index') %]">
 		<button type="submit" class="btn [% btn_blocked %] umi-search visible-lg-block visible-md-block col-xs-1 col-lg-2"
-			title="Click to open root object of this account. [% blocked_title %]"
+			title="Click to open root object. [% blocked_title %]"
 			name="ldap_subtree" value="[% root_obj_dn %]">
 		  <strong class="[%# blocked %]">[% root_of_rec %]</strong>
 		</button>

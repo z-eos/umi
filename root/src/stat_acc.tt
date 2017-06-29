@@ -2,7 +2,14 @@
    link = '<link href="/static/css/DataTables/jquery.dataTables.min.css" rel="stylesheet" type="text/css"><link href="/static/css/DataTables/buttons.bootstrap.min.css" rel="stylesheet" type="text/css"><link href="/static/css/DataTables/buttons.dataTables.min.css" rel="stylesheet" type="text/css"><link href="/static/css/DataTables/buttons.jqueryui.min.css" rel="stylesheet" type="text/css"><link href="/static/css/DataTables/dataTables.bootstrap.min.css" rel="stylesheet" type="text/css">'
    %] 
 
-<h2>Users Accounts Statistics <small><em>you can sort by multiple columns at the same time (shift click on a column (added the clicked column as a secondary, tertiary etc ordering column) </em></small></h2>
+<div class="page-header">
+  <h2>
+    Users Accounts Statistics
+    <small><em>
+      you can sort by multiple columns at the same time (<b>Shift-click</b> on a column adds it as a secondary, tertiary etc ordering column)
+    </em></small>
+  </h2>
+</div>
 
 [% INCLUDE ldap_err.tt %]
 
