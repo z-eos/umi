@@ -140,15 +140,14 @@
 	      </form>
 	      
 	      <p class="visible-lg-block visible-md-block"></p>&nbsp;
-	      <span class="h5 col-xs-offset-1 col-lg-offset-0"><b title="[% blocked_title %]">
 		[% IF entry.value.mgmnt.is_root && entry.key.match('People') %]
-		<span title="Root Account" class="[% base_icon.People %] fa-lg"></span>				
+		<i title="Root Account" class="[% base_icon.People %] fa-lg fa-2x"></i>				
 		[% ELSIF entry.value.mgmnt.is_root && entry.key.match('Inventory') %]
-		<span title="Root Object" class="[% base_icon.inventory %] fa-lg"></span>		
+		<i title="Root Object" class="[% base_icon.inventory %] fa-lg"></i>		
 		[% ELSIF entry.value.mgmnt.is_root && entry.key.match('reqStart') %]
-		<span title="History Object" class="[% base_icon.history %] fa-lg"></span>		
+		<i title="History Object" class="[% base_icon.history %] fa-lg"></i>		
 		[% ELSIF entry.value.mgmnt.is_root && ! entry.key.match('People') %]
-		<span title="Root Objectt" class="[% base_icon.default %] fa-lg"></span>		
+		<i title="Root Objectt" class="[% base_icon.default %] fa-lg"></i>		
 		[% ELSIF entry.key.match('^author') %]
 
 		[% cur_svc = dn.authorizedService.split('@').0 %][% # ---= SERVICES START =--- %]
@@ -173,8 +172,12 @@
 		[% ELSE %]
 		<i title="Service Account Branch" class="fa fa-code-fork fa-lg[% blocked %]"></i>
 		[% END %]
-		[% entry.key %][%# .replace(',', ',&nbsp;') %][% # dn of the select result object %]
-	      </b></span>
+		<span class="
+		      [% IF entry.value.mgmnt.is_root && entry.key.match('People') %]
+		      h4[% ELSE %]h5[% END %] col-xs-offset-1 col-lg-offset-0">
+		<b title="[% blocked_title %]">
+		  [% entry.key %][%# .replace(',', ',&nbsp;') %][% # dn of the select result object %]
+		</b></span>
 	    </div>
 	    <div id="collapse[% loop.index %]" class="panel-collapse collapse [% in %]">
 	      <div class="panel-body">
