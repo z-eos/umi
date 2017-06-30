@@ -314,7 +314,7 @@ sub _build_cfg {
 		      auth => 1,
 		      descr => 'OTRS',
 		      disabled => 1,
-		      icon => 'fa fa-file-code-o',
+		      icon => 'fa fa-ticket',
 		      data_fields => 'login,password1,password2',
 		     },
 	   'web' => {

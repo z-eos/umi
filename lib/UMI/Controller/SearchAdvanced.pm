@@ -120,8 +120,8 @@ sub proc :Path(proc) :Args(0) {
 	'creatorsName',
 	'modifiersName',
 	'modifyTimestamp';
-      $ldap_crud =
-	$c->model('LDAP_CRUD');
+      
+      $ldap_crud = $c->model('LDAP_CRUD');
       my $mesg = $ldap_crud->search({
 				     base => $basedn,
 				     filter => $filter,
@@ -137,11 +137,11 @@ sub proc :Path(proc) :Args(0) {
 
       $c->stats->profile("search by filter requested");
 
-      my ( $ttentries, @ttentries_keys, $attr, $dn_depth,  $dn_depthes, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry, @root_groups, $obj_item );
+      my ( $ttentries, @ttentries_keys, $attr, $dn_depth,  $dn_depthes, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry, @root_groups, $obj_item, $tmp );
       my $blocked = 0;
       foreach (@entries) {
 	if ( $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
-	  $dn_depth += split(/,/, $ldap_crud->{cfg}->{base}->{acc_root}) + 1;
+	  $dn_depth = scalar split(/,/, $ldap_crud->{cfg}->{base}->{acc_root}) + 1;
 	  $mesg = $ldap_crud->search({
 				      base => $ldap_crud->cfg->{base}->{group},
 				      filter => sprintf('(&(cn=%s)(memberUid=%s))',
@@ -154,8 +154,8 @@ sub proc :Path(proc) :Args(0) {
 
 	  $c->stats->profile('is-blocked search for <i class="text-muted">' . $_->dn . '</i>');
 	
-	  @root_arr = split(',', $_->dn);
-	  $root_i = $#root_arr;
+	  @root_arr = split(',', $_->dn); p @root_arr;
+	  p $root_i = $#root_arr;
 	  @root_dn = splice(@root_arr, -1 * $dn_depth);
 	  $ttentries->{$_->dn}->{root}->{dn} = join(',', @root_dn);
 
