@@ -92,6 +92,13 @@
       [%   END %]
       [%   brcl = ' fa-lg umi-1-margin-left' %]
       [%   lfcl = ' umi-2-margin-left' %]
+      [%   IF entry.value.mgmnt.is_root && entry.key.match('People') %]
+      [%   entry_text_size = 'h4' %]
+      [%   ELSIF entry.key.match('^author') %]
+      [%   entry_text_size = 'h5' %]
+      [%   ELSE %]
+      [%   entry_text_size = 'h6' %]
+      [%   END %]
       <tr>
 	<td>
 	  [% num_of_dc = 0 %]
@@ -124,12 +131,12 @@
 	      [% ELSE %]
 	      [% root_obj_dn = entry.key %]
 	      [% END %]
-	      
+
 	      <form role="form" method="POST" action="[% c.uri_for_action('searchby/index') %]">
 		<button type="submit" class="btn [% btn_blocked %] umi-search visible-lg-block visible-md-block col-xs-1 col-lg-2"
 			title="Click to open root object. [% blocked_title %]"
 			name="ldap_subtree" value="[% root_obj_dn %]">
-		  <strong class="[%# blocked %]">[% root_of_rec %]</strong>
+		  <span class="[% entry_text_size %] [%# blocked %]"><b>[% root_of_rec %]</b></span>
 		</button>
 
 		<button type="submit" class="btn btn-link umi-search visible-xs-block visible-sm-block"
@@ -140,41 +147,41 @@
 	      </form>
 	      
 	      <p class="visible-lg-block visible-md-block"></p>&nbsp;
-		[% IF entry.value.mgmnt.is_root && entry.key.match('People') %]
-		<i title="Root Account" class="[% base_icon.People %] fa-lg fa-2x"></i>				
-		[% ELSIF entry.value.mgmnt.is_root && entry.key.match('Inventory') %]
-		<i title="Root Object" class="[% base_icon.inventory %] fa-lg"></i>		
-		[% ELSIF entry.value.mgmnt.is_root && entry.key.match('reqStart') %]
-		<i title="History Object" class="[% base_icon.history %] fa-lg"></i>		
-		[% ELSIF entry.value.mgmnt.is_root && ! entry.key.match('People') %]
-		<i title="Root Objectt" class="[% base_icon.default %] fa-lg"></i>		
-		[% ELSIF entry.key.match('^author') %]
+	      [% IF entry.value.mgmnt.is_root && entry.key.match('People') %]
+	      <i title="Root Account" class="[% base_icon.People %] fa-lg fa-2x"></i>
+	      [% ELSIF entry.value.mgmnt.is_root && entry.key.match('Inventory') %]
+	      <i title="Root Object" class="[% base_icon.inventory %] fa-lg"></i>		
+	      [% ELSIF entry.value.mgmnt.is_root && entry.key.match('reqStart') %]
+	      <i title="History Object" class="[% base_icon.history %] fa-lg"></i>		
+	      [% ELSIF entry.value.mgmnt.is_root && ! entry.key.match('People') %]
+	      <i title="Root Objectt" class="[% base_icon.default %] fa-lg"></i>		
+	      [% ELSIF entry.key.match('^author') %]
+	      
+	      [% # --- SERVICES START -------------------------------------------------------------------- %]
+	      [% cur_svc = dn.authorizedService.split('@').0 %]
+	      [%   IF services.$cur_svc.icon %]
+	      <i title="[% services.$cur_svc.descr %] Service Account Branch" class="[% services.$cur_svc.icon %] fa-lg fa-2x [% brcl %]"></i>
+	      [%   ELSE %]
+	      <i title="Service Account Branch" class="fa fa-code-fork[% brcl %][% blocked %]"></i>
+	      [%   END %]
+	      
+	      [% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
+	      [% cur_svc = dn.authorizedService.split('@').0 %]
+	      [%   IF services.$cur_svc.icon %]
+	      <i title="[% services.$cur_svc.descr %] Service Account" class="[% services.$cur_svc.icon %] fa-lg fa-2x [% lfcl %]"></i>
+	      [%   ELSE %]
+	      <i title="Service Account" class="fa fa-leaf fa-2x fa-lg[% lfcl %]"></i>
+	      [%   END %]
+              [% # --- SERVICES STOP  -------------------------------------------------------------------- %]
 
-		[% cur_svc = dn.authorizedService.split('@').0 %][% # ---= SERVICES START =--- %]
-		[%   IF services.$cur_svc.icon %]
-		<i title="[% services.$cur_svc.descr %] Service Account Branch" class="[% services.$cur_svc.icon %][% brcl %]"></i>
-		[%   ELSE %]
-		<i title="Service Account Branch" class="fa fa-code-fork[% brcl %][% blocked %]"></i>
-		[%   END %]
-		
-		[% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
-		[% cur_svc = dn.authorizedService.split('@').0 %]
-		[%   IF services.$cur_svc.icon %]
-		<i title="[% services.$cur_svc.descr %] Service Account" class="[% services.$cur_svc.icon %][% lfcl %]"></i>
-		[%   ELSE %]
-		<i title="Service Account" class="fa fa-leaf fa-lg[% lfcl %]"></i>
-		[%   END %]                                      [% # ---= SERVICES STOP  =--- %]
-
-		[% ELSIF entry.key.match('^cn=.*,ou=Inventory') %]
-		<i title="Subject to Inventory" class="fa fa-tag [% brcl %]"></i>		  
-		[% ELSIF base_ico.${dn.ou} %]
-		<i title="Service Account Branch" class="[% base_icon.${dn.ou} %] fa-lg"></i>
-		[% ELSE %]
-		<i title="Service Account Branch" class="fa fa-code-fork fa-lg[% blocked %]"></i>
-		[% END %]
-		<span class="
-		      [% IF entry.value.mgmnt.is_root && entry.key.match('People') %]
-		      h4[% END %] col-xs-offset-1 col-lg-offset-0">
+	      [% ELSIF entry.key.match('^cn=.*,ou=Inventory') %]
+	      <i title="Subject to Inventory" class="fa fa-tag [% brcl %]"></i>		  
+	      [% ELSIF base_ico.${dn.ou} %]
+	      <i title="Service Account Branch" class="[% base_icon.${dn.ou} %] fa-lg"></i>
+	      [% ELSE %]
+	      <i title="Service Account Branch" class="fa fa-code-fork fa-lg[% blocked %]"></i>
+	      [% END %]
+	      <span class="[% entry_text_size %] col-xs-offset-1 col-lg-offset-0">&nbsp;
 		<b title="[% blocked_title %]">
 		  [% entry.key %][%# .replace(',', ',&nbsp;') %][% # dn of the select result object %]
 		</b></span>

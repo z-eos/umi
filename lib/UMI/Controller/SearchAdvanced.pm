@@ -204,9 +204,6 @@ sub proc :Path(proc) :Args(0) {
 	      $ttentries->{$_->dn}->{'mgmnt'}->{root_obj_groups}->{ $_->get_value('cn') } = 1;
 	    }
 	  }
-	  # p $ttentries->{$_->dn}->{'mgmnt'}->{root_obj_groups};
-	  # p $ttentries->{$_->dn}->{root};
-	  
 	} elsif ( $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ) {
 	  $dn_depth = scalar split(/,/, $ldap_crud->{cfg}->{base}->{inventory}) + 1;
 	} else {
