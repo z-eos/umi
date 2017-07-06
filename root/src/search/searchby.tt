@@ -74,7 +74,7 @@
     </thead>
     <tbody>
 
-      [% root_of_rec = '<span class="fa fa-th-large"></span>' %]
+      [% root_of_rec = '<span class="fa fa-th-large fa-2x"></span>' %]
       [% FOREACH entrykey IN entrieskeys %]
       [%   entry.key = entrykey
            entry.value = entries.$entrykey %]
@@ -92,6 +92,7 @@
       [%   END %]
       [%   brcl = ' fa-lg umi-1-margin-left' %]
       [%   lfcl = ' umi-2-margin-left' %]
+      [% # DEFINING OBJECT TEXT SIZE %]
       [%   IF entry.value.mgmnt.is_root && entry.key.match('People') %]
       [%   entry_text_size = 'h4' %]
       [%   ELSIF entry.key.match('^author') %]
@@ -99,6 +100,22 @@
       [%   ELSE %]
       [%   entry_text_size = 'h6' %]
       [%   END %]
+      [% # DEFINING OBJECT PANEL COLOR %]      
+      [%   IF (entry.value.mgmnt.is_root && entry.value.mgmnt.is_account) || ! entry.value.mgmnt.is_account %]
+      [%   panel_color = 'panel-info' %]
+      [%   ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
+      [%   panel_color ='panel-success' %]
+      [%   ELSE %]
+      [%   panel_color = 'panel-warning' %]
+      [%   END %]
+      [% # CREATION/MODIFICATION DETAILS %]
+      [%   ts = entry.value.attrs.createTimestamp.0.chunk(2) %]
+      [%   c_ts = "$ts.0$ts.1-$ts.2-$ts.3 $ts.4:$ts.5:$ts.6" %]
+      [%   c_uid = entry.value.attrs.creatorsName.0.split(',').0.split('=').1 %]
+      [%   ts = entry.value.attrs.modifyTimestamp.0.chunk(2) %]
+      [%   m_ts = "$ts.0$ts.1-$ts.2-$ts.3 $ts.4:$ts.5:$ts.6" %]
+      [%   m_uid = entry.value.attrs.modifiersName.0.split(',').0.split('=').1 %]
+
       <tr>
 	<td>
 	  [% num_of_dc = 0 %]
@@ -106,21 +123,18 @@
           [%   IF pat.match('dc=') %][% num_of_dc = num_of_dc + 1 %][% END %]
 	  [% END %]
 	  <div class="panel-group umi-zerro-margin" id="accordion[% loop.index %]">
-	    [% IF (entry.value.mgmnt.is_root && entry.value.mgmnt.is_account) || ! entry.value.mgmnt.is_account %]<div class="panel panel-info">
-	    [% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]<div class="panel panel-success">
-	    [% ELSE %]<div class="panel panel-warning">
-	    [% END %]
-	    <div class="panel-heading clearfix umi-zerro-padding">
-	      [% INCLUDE search/searchby_menu_dropdown.tt %]
+	    <div class="panel [% panel_color %]">
+	      <div class="panel-heading clearfix umi-zerro-padding">
+		[% INCLUDE search/searchby_menu_dropdown.tt %]
 
 	      [% IF entry.key.match('People') %]
 	      [% root_of_rec = entry.value.root.sn _ ' ' _ entry.value.root.givenName %]
 	      [% # !!! HARDCODED customization, depends of DN structure !!! %]
 	      [% # ELSIF entry.value.mgmnt.is_root && entry.key.match('Inventory') && entry.key.split(',').size >  ( 3 + num_of_dc)  %]
 	      [% ELSIF entry.value.mgmnt.is_root && entry.value.mgmnt.is_inventory %]
-	      [% root_of_rec = entry.key.split(',').slice(-1 * ( 4 + num_of_dc), -1 ).0.split('=').1 %]
+	      [% root_of_rec = entry.key.split(',').slice(-1 * ( 3 + num_of_dc), -1 ).0.split('=').1 %]
 	      [% ELSIF entry.key.match('Inventory') && entry.key.split(',').size <= ( 3 + num_of_dc)  %]
-	      [% root_of_rec = '<span class="fa fa-th-large"></span>' %]
+	      [% root_of_rec = '<span class="fa fa-th-large fa-2x"></span>' %]
 	      [% END %]
 
 	      [% # !!! HARDCODED customization, depends of DN structure !!! %]
@@ -150,11 +164,11 @@
 	      [% IF entry.value.mgmnt.is_root && entry.key.match('People') %]
 	      <i title="Root Account" class="[% base_icon.People %] fa-lg fa-2x"></i>
 	      [% ELSIF entry.value.mgmnt.is_root && entry.key.match('Inventory') %]
-	      <i title="Root Object" class="[% base_icon.inventory %] fa-lg"></i>		
+	      <i title="Root Object" class="[% base_icon.inventory %] fa-lg fa-2x"></i>		
 	      [% ELSIF entry.value.mgmnt.is_root && entry.key.match('reqStart') %]
-	      <i title="History Object" class="[% base_icon.history %] fa-lg"></i>		
+	      <i title="History Object" class="[% base_icon.history %] fa-lg fa-2x"></i>		
 	      [% ELSIF entry.value.mgmnt.is_root && ! entry.key.match('People') %]
-	      <i title="Root Objectt" class="[% base_icon.default %] fa-lg"></i>		
+	      <i title="Root Objectt" class="[% base_icon.default %] fa-lg fa-2x"></i>		
 	      [% ELSIF entry.key.match('^author') %]
 	      
 	      [% # --- SERVICES START -------------------------------------------------------------------- %]
@@ -175,34 +189,32 @@
               [% # --- SERVICES STOP  -------------------------------------------------------------------- %]
 
 	      [% ELSIF entry.key.match('^cn=.*,ou=Inventory') %]
-	      <i title="Subject to Inventory" class="fa fa-tag [% brcl %]"></i>		  
+	      <i title="Subject to Inventory" class="fa fa-tag fa-2x [% brcl %]"></i>		  
 	      [% ELSIF base_ico.${dn.ou} %]
-	      <i title="Service Account Branch" class="[% base_icon.${dn.ou} %] fa-lg"></i>
+	      <i title="Service Account Branch" class="[% base_icon.${dn.ou} %] fa-lg fa-2x"></i>
 	      [% ELSE %]
-	      <i title="Service Account Branch" class="fa fa-code-fork fa-lg[% blocked %]"></i>
+	      <i title="Service Account Branch" class="fa fa-code-fork fa-2x fa-lg[% blocked %]"></i>
 	      [% END %]
 	      <span class="[% entry_text_size %] col-xs-offset-1 col-lg-offset-0">&nbsp;
 		<b title="[% blocked_title %]">
-		  [% entry.key %][%# .replace(',', ',&nbsp;') %][% # dn of the select result object %]
+		  [% entry.key.replace(',', ',&nbsp;&nbsp;') %][% # dn of the select result object %]
 		</b></span>
+	      
+	      <div class="pull-right">
+	      <small>
+	      <ul class="fa-ul">
+		<li title="created"><i class="fa-li fa fa-play-circle"></i>[% c_ts %] by <b>[% c_uid %]</b>&nbsp;</li>
+		[% IF entry.value.attrs.createTimestamp.0 != entry.value.attrs.modifyTimestamp.0 %]
+		<li title="modified"><i class="fa-li fa fa-stop-circle"></i>[% m_ts %] by <b>[% m_uid %]</b>&nbsp;</li>
+		[% END %]
+	      </ul>
+	      </small>
+	      </div>
 	    </div>
 	    <div id="collapse[% loop.index %]" class="panel-collapse collapse [% in %]">
 	      <div class="panel-body">
-		<div class="clearfix">
-		  <div class="text-muted pull-right">
-		    <div><small>
-		      [% ts = entry.value.attrs.createTimestamp.0.chunk(2) %]
-		      [% "$ts.0$ts.1-$ts.2-$ts.3 $ts.4:$ts.5:$ts.6" %] by <b>[% entry.value.attrs.creatorsName.0.split(',').0.split('=').1 %]</b>, created
-		    </small></div>
-		    [% IF entry.value.attrs.createTimestamp.0 != entry.value.attrs.modifyTimestamp.0 %]
-		    <div class="text-warning"><small>
-		      [% ts = entry.value.attrs.modifyTimestamp.0.chunk(2) %]
-		      [% "$ts.0$ts.1-$ts.2-$ts.3 $ts.4:$ts.5:$ts.6" %] by <b>[% entry.value.attrs.modifiersName.0.split(',').0.split('=').1 %]</b>, modified
-		    </small></div>
-		    [% END %]
-		  </div>
-		</div>
 		<dl class="dl-horizontal">
+		  <dt class="bg-info">dn:</dt><dd>[% entry.key %]</dd>
 		  [% FOREACH hattr IN entry.value.attrs %]
 		  [% NEXT IF hattr.key == 'creatorsName' || hattr.key == 'createTimestamp' || hattr.key == 'modifiersName' || hattr.key == 'modifyTimestamp' %]
 		  [% x=hattr.key %][% # attribute name %]
