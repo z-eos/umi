@@ -51,19 +51,18 @@
 	    </a>
 	    <a href="#"
 	       class="btn" role="button"
-	       title="Legend"
+	       title="ColorLegend"
 	       id="btnLegend"
 	       data-animation="false"
 	       data-trigger="hover"
-	       data-placement="bottom"
+	       data-placement="right"
 	       data-html="true"
 	       data-toggle="popover"
-	       data-original-title="Legend"
-	       data-content="<ul class='fa-ul'>
-	       <li class='text-info'><i class='fa-li fa fa-user'></i> root object</li>
-	       <li class='text-warning'><i class='fa-li fa fa-envelope'></i> service branch</li>
-	       <li class='text-success'><i class='fa-li fa fa-envelope'></i> service account</li>
-	       <li><i class='fa-li fa fa-check-square'></i><span class='label label-primary'> user input</span></li>
+	       data-original-title="ColorLegend"
+	       data-content="<ul class='list-group'>
+	       <li class='list-group-item list-group-item-info'>root object</li>
+	       <li class='list-group-item list-group-item-warning'>service branch</li>
+	       <li class='list-group-item list-group-item-success'>service account</li>
 	       </ul>"
 	       tabindex="0">
 	      <span class="fa fa-info-circle"></span>
@@ -73,7 +72,7 @@
       </tr>
     </thead>
     <tbody>
-
+      
       [% root_of_rec = '<span class="fa fa-th-large fa-2x"></span>' %]
       [% FOREACH entrykey IN entrieskeys %]
       [%   entry.key = entrykey
@@ -92,45 +91,52 @@
       [%   END %]
       [%   brcl = ' fa-lg umi-1-margin-left'
 	   lfcl = ' umi-2-margin-left' %]
-      [%   # DEFINING OBJECT TEXT SIZE %]
+      [%   # DEFINING OBJECT CLASSES ACCORDING THE RDN LEVEL %]
       [%   IF entry.value.mgmnt.is_root && entry.key.match('People') %]
-      [%   entry_text_size = 'h4' %]
+      [%   entry_text_size = 'h4'
+	   entry_icon_size = 'fa-lg fa-2x'
+	   root_of_rec_btn = 'col-lg-2 col-md-2 col-xs-1' %]
       [%   ELSIF entry.key.match('^author') %]
-      [%   entry_text_size = 'h5' %]
+      [%   entry_text_size = 'h5'
+	   entry_icon_size = 'fa-lg fa-1x'
+	   root_of_rec_btn = 'col-lg-2 col-md-2 col-xs-1' %]
       [%   ELSE %]
-      [%   entry_text_size = 'h6' %]
+      [%   entry_text_size = 'h6'
+	   entry_icon_size = 'fa-lg fa-1x'
+	   root_of_rec_btn = 'col-lg-2 col-md-2 col-xs-1' %]
       [%   END %]
       [%   # DEFINING OBJECT PANEL COLOR %]      
       [%   IF (entry.value.mgmnt.is_root && entry.value.mgmnt.is_account) || ! entry.value.mgmnt.is_account %]
-      [%   panel_color = 'panel-info' %]
-      [%   #tr_color = 'info' %]
+      [%   panel_color = 'bg-info text-info' %]
+      [%   tr_color = 'info' %]
       [%   ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
-      [%   panel_color ='panel-success' %]
-      [%   #tr_color = 'success' %]
+      [%   panel_color = 'bg-success text-success' %]
+      [%   tr_color = 'success' %]
       [%   ELSE %]
-      [%   panel_color = 'panel-warning' %]
-      [%   #tr_color = 'warning' %]
+      [%   panel_color = 'bg-warning text-warning' %]
+      [%   tr_color = 'warning' %]
       [%   END %]
-      [%   #IF entry.value.attrs.createTimestamp.0 != entry.value.attrs.modifyTimestamp.0 %]
-      [%   #panel_color = '' %]      
-      [%   #END %]
-      [%   # CREATION/MODIFICATION DETAILS
+      [%   # ??? IF entry.value.attrs.createTimestamp.0 != entry.value.attrs.modifyTimestamp.0 %]
+      [%   # ??? panel_color = '' %]      
+      [%   # ??? END %]
+      [%   # OBJECT CREATION/MODIFICATION DETAILS
            ts = entry.value.attrs.createTimestamp.0.chunk(2)
            c_ts = "$ts.0$ts.1-$ts.2-$ts.3 $ts.4:$ts.5:$ts.6"
            c_uid = entry.value.attrs.creatorsName.0.split(',').0.split('=').1
            ts = entry.value.attrs.modifyTimestamp.0.chunk(2)
            m_ts = "$ts.0$ts.1-$ts.2-$ts.3 $ts.4:$ts.5:$ts.6"
            m_uid = entry.value.attrs.modifiersName.0.split(',').0.split('=').1 %]
+      
+      [%   num_of_dc = 0 %]
+      [%   FOREACH pat IN entry.key.split(',') %]
+      [%     num_of_dc = num_of_dc + 1 IF pat.match('dc=') %]
+      [%   END %]
 
-      <tr class="[% #tr_color %]">
+      <tr class="[% # tr_color %]">
 	<td>
-	  [% num_of_dc = 0 %]
-	  [% FOREACH pat IN entry.key.split(',') %]
-          [%   num_of_dc = num_of_dc + 1 IF pat.match('dc=') %][% # num_of_dc = num_of_dc + 1 %][% # END %]
-	  [% END %]
 	  <div class="panel-group umi-zerro-margin" id="accordion[% loop.index %]">
-	    <div class="panel [% panel_color %]">
-	      <div class="panel-heading clearfix umi-zerro-padding">
+	    <div class="panel">
+	      <div class="panel-heading [% panel_color %] clearfix umi-zerro-padding">
 		[% INCLUDE search/searchby_menu_dropdown.tt %]
 
 		[% IF entry.key.match('People') %]
@@ -153,33 +159,33 @@
 		[% END %]
 
 		<form class="form-inline" role="form" method="POST" action="[% c.uri_for_action('searchby/index') %]">
-		  <button class="col-lg-2 col-md-2 col-xs-1 btn [% btn_blocked %] umi-search visible-lg-block visible-md-block"
+		  <button class="[% root_of_rec_btn %] btn [% btn_blocked %] umi-search visible-lg-block visible-md-block"
 			  title="Click to open root object. [% blocked_title %]"
 			  type="submit" name="ldap_subtree" value="[% root_obj_dn %]">
-		    <span class="[% entry_text_size %] [%# blocked %]"><b>[% root_of_rec %]</b></span>
+		    <span class="[% entry_text_size %] [%# blocked %] text-primary"><b>[% root_of_rec %]</b></span>
 		  </button>
 		  <button class="btn btn-link umi-search visible-xs-block visible-sm-block"
 			  title="Click to open root object of this account. [% blocked_title %]"
 			  type="submit" name="ldap_subtree" value="[% root_obj_dn %]">
-		    <i class="[% blocked %] fa fa-list-ul fa-2x">&nbsp;&nbsp;</i>
+		    <i class="[% blocked _ ' ' _ entry_icon_size %] fa fa-list-ul text-primary">&nbsp;&nbsp;</i>
 		  </button>
 		</form>
 		
 		<p class="visible-lg-block visible-md-block"></p>&nbsp;
 		[% IF entry.value.mgmnt.is_root && entry.key.match('People') %]
-		<i title="Root Account" class="[% base_icon.People %] fa-lg fa-2x"></i>
+		<i title="Root Account" class="[% base_icon.People _ ' ' _ entry_icon_size %]"></i>
 		[% ELSIF entry.value.mgmnt.is_root && entry.key.match('Inventory') %]
-		<i title="Root Object" class="[% base_icon.inventory %] fa-lg fa-2x"></i>		
+		<i title="Root Object" class="[% base_icon.inventory _ ' ' _ entry_icon_size %]"></i>		
 		[% ELSIF entry.value.mgmnt.is_root && entry.key.match('reqStart') %]
-		<i title="History Object" class="[% base_icon.history %] fa-lg fa-2x"></i>		
+		<i title="History Object" class="[% base_icon.history _ ' ' _ entry_icon_size %]"></i>		
 		[% ELSIF entry.value.mgmnt.is_root && ! entry.key.match('People') %]
-		<i title="Root Objectt" class="[% base_icon.default %] fa-lg fa-2x"></i>		
+		<i title="Root Objectt" class="[% base_icon.default _ ' ' _ entry_icon_size %]"></i>		
 		[% ELSIF entry.key.match('^author') %]
 		
 		[% # --- SERVICES START -------------------------------------------------------------------- %]
 		[% cur_svc = dn.authorizedService.split('@').0 %]
 		[%   IF services.$cur_svc.icon %]
-		<i title="[% services.$cur_svc.descr %] Service Account Branch" class="[% services.$cur_svc.icon %] fa-lg fa-2x [% brcl %]"></i>
+		<i title="[% services.$cur_svc.descr %] Service Account Branch" class="[% services.$cur_svc.icon _ ' ' _ entry_icon_size %] [% brcl %]"></i>
 		[%   ELSE %]
 		<i title="Service Account Branch" class="fa fa-code-fork[% brcl %][% blocked %]"></i>
 		[%   END %]
@@ -187,23 +193,22 @@
 		[% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
 		[% cur_svc = dn.authorizedService.split('@').0 %]
 		[%   IF services.$cur_svc.icon %]
-		<i title="[% services.$cur_svc.descr %] Service Account" class="[% services.$cur_svc.icon %] fa-lg fa-2x [% lfcl %]"></i>
+		<i title="[% services.$cur_svc.descr %] Service Account" class="[% services.$cur_svc.icon _ ' ' _ entry_icon_size %] [% lfcl %]"></i>
 		[%   ELSE %]
-		<i title="Service Account" class="fa fa-leaf fa-2x fa-lg[% lfcl %]"></i>
+		<i title="Service Account" class="fa fa-leaf [% lfcl _ ' ' _ entry_icon_size %]"></i>
 		[%   END %]
 		[% # --- SERVICES STOP  -------------------------------------------------------------------- %]
 
 		[% ELSIF entry.key.match('^cn=.*,ou=Inventory') %]
-		<i title="Subject to Inventory" class="fa fa-tag fa-2x [% brcl %]"></i>		  
+		<i title="Subject to Inventory" class="fa fa-tag [% brcl _ ' ' _ entry_icon_size %]"></i>		  
 		[% ELSIF base_ico.${dn.ou} %]
-		<i title="Service Account Branch" class="[% base_icon.${dn.ou} %] fa-lg fa-2x"></i>
+		<i title="Service Account Branch" class="[% base_icon.${dn.ou} _ ' ' _ entry_icon_size %]"></i>
 		[% ELSE %]
-		<i title="Service Account Branch" class="fa fa-code-fork fa-2x fa-lg[% blocked %]"></i>
+		<i title="Service Account Branch" class="fa fa-code-fork[% blocked _ ' ' _ entry_icon_size %]"></i>
 		[% END %]
-		<span class="[% entry_text_size %] col-xs-offset-1 col-lg-offset-0">&nbsp;
-		  <b title="[% blocked_title %]">
-		    [% entry.key.replace(',', ',&nbsp;&nbsp;') %][% # dn of the select result object %]
-		  </b>
+		[% # dn of the select result object %]
+		<span class="[% entry_text_size %] col-xs-offset-1 col-lg-offset-0" title="[% blocked_title %]">&nbsp;
+		  <b>[% entry.key.replace(',', ',&nbsp;&nbsp;') %]</b>
 		</span>
 
 		<small class="pull-right">
