@@ -82,7 +82,7 @@
 
       [%   IF entry.value.mgmnt.is_blocked %]
       [%   blocked = ' text-danger'
-           btn_blocked = ' btn-danger'
+           btn_blocked = ' bg-danger'
            blocked_title = 'NOTE: This DN was blocked! To unblock, remove root dn from the group &laquo;blocked&raquo; and manage each service account manualy (in general it is password change).' %]
       [%   ELSE %]
       [%   blocked = ''
