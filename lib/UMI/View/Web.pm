@@ -4,20 +4,23 @@ use strict;
 use utf8;
 use base 'Catalyst::View::TT';
 
-__PACKAGE__->config(
-		    INCLUDE_PATH => [
-				     UMI->path_to( 'root', 'src' ),
-				     UMI->path_to( 'root', 'lib' )
-				    ],
-		    PRE_PROCESS  => 'config/main',
-		    WRAPPER      => 'site/wrapper',
-		    ERROR        => 'error.tt2',
-		    TIMER        => 0,
-		    render_die   => 1,
-		    EVAL_PERL    => 1,
-		    ENCODING     => 'utf8',
-		    expose_methods => [ qw{ helper_cfg } ],
-		   );
+## moved to UMI.pm
+# __PACKAGE__->config(
+# 		    INCLUDE_PATH => [
+# 				     UMI->path_to( 'root', 'src' ),
+# 				     UMI->path_to( 'root', 'lib' )
+# 				    ],
+# 		    PRE_PROCESS  => 'config/main',
+# 		    WRAPPER      => 'site/wrapper',
+# 		    ERROR        => 'error.tt2',
+# 		    TIMER        => 0,
+# 		    render_die   => 1,
+# 		    EVAL_PERL    => 1,
+# 		    ENCODING     => 'utf8',
+# 		    PRE_CHOMP  => 1,
+# 		    POST_CHOMP  => 1,
+# 		    expose_methods => [ qw{ helper_cfg } ],
+# 		   );
 
 =head1 NAME
 

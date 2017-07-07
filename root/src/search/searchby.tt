@@ -77,22 +77,22 @@
       [% root_of_rec = '<span class="fa fa-th-large fa-2x"></span>' %]
       [% FOREACH entrykey IN entrieskeys %]
       [%   entry.key = entrykey
-           entry.value = entries.$entrykey %]
-      [%   zufix = entry.key.split(',').1.split('=').1.replace('[@\.]', '_') _ '_' _ loop.index %]
-      [%   dn = entry.key.split(',|=').hash %][% # preparing hash of each dn %]
-      [% # USE dumper(indent=4, pad="<br>") %]<!-- <tr><td> -->[% # dumper.dump(dn.ou, base_icon.${dn.ou}) %]<!-- </td></tr> -->
+           entry.value = entries.$entrykey
+           zufix = entry.key.split(',').1.split('=').1.replace('[@\.]', '_') _ '_' _ loop.index
+           dn = entry.key.split(',|=').hash %][% # preparing hash of each dn %]
+
       [%   IF entry.value.mgmnt.is_blocked %]
-      [%   blocked = ' text-danger' %]
-      [%   btn_blocked = ' btn-danger' %]
-      [%   blocked_title = 'NOTE: This DN was blocked! To unblock, remove root dn from the group &laquo;blocked&raquo; and manage each service account manualy (in general it is password change).' %]
+      [%   blocked = ' text-danger'
+           btn_blocked = ' btn-danger'
+           blocked_title = 'NOTE: This DN was blocked! To unblock, remove root dn from the group &laquo;blocked&raquo; and manage each service account manualy (in general it is password change).' %]
       [%   ELSE %]
-      [%   blocked = '' %]
-      [%   blocked_title = '' %]
-      [%   btn_blocked = ' btn-link' %]
+      [%   blocked = ''
+           blocked_title = ''
+	   btn_blocked = ' btn-link' %]
       [%   END %]
-      [%   brcl = ' fa-lg umi-1-margin-left' %]
-      [%   lfcl = ' umi-2-margin-left' %]
-      [% # DEFINING OBJECT TEXT SIZE %]
+      [%   brcl = ' fa-lg umi-1-margin-left'
+	   lfcl = ' umi-2-margin-left' %]
+      [%   # DEFINING OBJECT TEXT SIZE %]
       [%   IF entry.value.mgmnt.is_root && entry.key.match('People') %]
       [%   entry_text_size = 'h4' %]
       [%   ELSIF entry.key.match('^author') %]
@@ -100,187 +100,191 @@
       [%   ELSE %]
       [%   entry_text_size = 'h6' %]
       [%   END %]
-      [% # DEFINING OBJECT PANEL COLOR %]      
+      [%   # DEFINING OBJECT PANEL COLOR %]      
       [%   IF (entry.value.mgmnt.is_root && entry.value.mgmnt.is_account) || ! entry.value.mgmnt.is_account %]
       [%   panel_color = 'panel-info' %]
+      [%   #tr_color = 'info' %]
       [%   ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
       [%   panel_color ='panel-success' %]
+      [%   #tr_color = 'success' %]
       [%   ELSE %]
       [%   panel_color = 'panel-warning' %]
+      [%   #tr_color = 'warning' %]
       [%   END %]
-      [% # CREATION/MODIFICATION DETAILS %]
-      [%   ts = entry.value.attrs.createTimestamp.0.chunk(2) %]
-      [%   c_ts = "$ts.0$ts.1-$ts.2-$ts.3 $ts.4:$ts.5:$ts.6" %]
-      [%   c_uid = entry.value.attrs.creatorsName.0.split(',').0.split('=').1 %]
-      [%   ts = entry.value.attrs.modifyTimestamp.0.chunk(2) %]
-      [%   m_ts = "$ts.0$ts.1-$ts.2-$ts.3 $ts.4:$ts.5:$ts.6" %]
-      [%   m_uid = entry.value.attrs.modifiersName.0.split(',').0.split('=').1 %]
+      [%   #IF entry.value.attrs.createTimestamp.0 != entry.value.attrs.modifyTimestamp.0 %]
+      [%   #panel_color = '' %]      
+      [%   #END %]
+      [%   # CREATION/MODIFICATION DETAILS
+           ts = entry.value.attrs.createTimestamp.0.chunk(2)
+           c_ts = "$ts.0$ts.1-$ts.2-$ts.3 $ts.4:$ts.5:$ts.6"
+           c_uid = entry.value.attrs.creatorsName.0.split(',').0.split('=').1
+           ts = entry.value.attrs.modifyTimestamp.0.chunk(2)
+           m_ts = "$ts.0$ts.1-$ts.2-$ts.3 $ts.4:$ts.5:$ts.6"
+           m_uid = entry.value.attrs.modifiersName.0.split(',').0.split('=').1 %]
 
-      <tr>
+      <tr class="[% #tr_color %]">
 	<td>
 	  [% num_of_dc = 0 %]
 	  [% FOREACH pat IN entry.key.split(',') %]
-          [%   IF pat.match('dc=') %][% num_of_dc = num_of_dc + 1 %][% END %]
+          [%   num_of_dc = num_of_dc + 1 IF pat.match('dc=') %][% # num_of_dc = num_of_dc + 1 %][% # END %]
 	  [% END %]
 	  <div class="panel-group umi-zerro-margin" id="accordion[% loop.index %]">
 	    <div class="panel [% panel_color %]">
 	      <div class="panel-heading clearfix umi-zerro-padding">
 		[% INCLUDE search/searchby_menu_dropdown.tt %]
 
-	      [% IF entry.key.match('People') %]
-	      [% root_of_rec = entry.value.root.sn _ ' ' _ entry.value.root.givenName %]
-	      [% # !!! HARDCODED customization, depends of DN structure !!! %]
-	      [% # ELSIF entry.value.mgmnt.is_root && entry.key.match('Inventory') && entry.key.split(',').size >  ( 3 + num_of_dc)  %]
-	      [% ELSIF entry.value.mgmnt.is_root && entry.value.mgmnt.is_inventory %]
-	      [% root_of_rec = entry.key.split(',').slice(-1 * ( 3 + num_of_dc), -1 ).0.split('=').1 %]
-	      [% ELSIF entry.key.match('Inventory') && entry.key.split(',').size <= ( 3 + num_of_dc)  %]
-	      [% root_of_rec = '<span class="fa fa-th-large fa-2x"></span>' %]
-	      [% END %]
-
-	      [% # !!! HARDCODED customization, depends of DN structure !!! %]
-	      [% IF entry.key.match('People') %]
-	      [% root_obj_dn = entry.key.split(',').slice(-1 * ( 2 + num_of_dc), -1 ).join(',') %]
-	      [% ELSIF entry.key.match('Inventory') && entry.key.split(',').size > ( 3 + num_of_dc) %]
-	      [% root_obj_dn = entry.key.split(',').slice(-1 * ( 4 + num_of_dc), -1 ).join(',') %]
-	      [% ELSE %]
-	      [% root_obj_dn = entry.key %]
-	      [% END %]
-
-	      <form role="form" method="POST" action="[% c.uri_for_action('searchby/index') %]">
-		<button type="submit" class="btn [% btn_blocked %] umi-search visible-lg-block visible-md-block col-xs-1 col-lg-2"
-			title="Click to open root object. [% blocked_title %]"
-			name="ldap_subtree" value="[% root_obj_dn %]">
-		  <span class="[% entry_text_size %] [%# blocked %]"><b>[% root_of_rec %]</b></span>
-		</button>
-
-		<button type="submit" class="btn btn-link umi-search visible-xs-block visible-sm-block"
-			title="Click to open root object of this account. [% blocked_title %]"
-			name="ldap_subtree" value="[% root_obj_dn %]">
-		  <i class="[% blocked %] fa fa-play">&nbsp;&nbsp;</i>
-		</button>
-	      </form>
-	      
-	      <p class="visible-lg-block visible-md-block"></p>&nbsp;
-	      [% IF entry.value.mgmnt.is_root && entry.key.match('People') %]
-	      <i title="Root Account" class="[% base_icon.People %] fa-lg fa-2x"></i>
-	      [% ELSIF entry.value.mgmnt.is_root && entry.key.match('Inventory') %]
-	      <i title="Root Object" class="[% base_icon.inventory %] fa-lg fa-2x"></i>		
-	      [% ELSIF entry.value.mgmnt.is_root && entry.key.match('reqStart') %]
-	      <i title="History Object" class="[% base_icon.history %] fa-lg fa-2x"></i>		
-	      [% ELSIF entry.value.mgmnt.is_root && ! entry.key.match('People') %]
-	      <i title="Root Objectt" class="[% base_icon.default %] fa-lg fa-2x"></i>		
-	      [% ELSIF entry.key.match('^author') %]
-	      
-	      [% # --- SERVICES START -------------------------------------------------------------------- %]
-	      [% cur_svc = dn.authorizedService.split('@').0 %]
-	      [%   IF services.$cur_svc.icon %]
-	      <i title="[% services.$cur_svc.descr %] Service Account Branch" class="[% services.$cur_svc.icon %] fa-lg fa-2x [% brcl %]"></i>
-	      [%   ELSE %]
-	      <i title="Service Account Branch" class="fa fa-code-fork[% brcl %][% blocked %]"></i>
-	      [%   END %]
-	      
-	      [% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
-	      [% cur_svc = dn.authorizedService.split('@').0 %]
-	      [%   IF services.$cur_svc.icon %]
-	      <i title="[% services.$cur_svc.descr %] Service Account" class="[% services.$cur_svc.icon %] fa-lg fa-2x [% lfcl %]"></i>
-	      [%   ELSE %]
-	      <i title="Service Account" class="fa fa-leaf fa-2x fa-lg[% lfcl %]"></i>
-	      [%   END %]
-              [% # --- SERVICES STOP  -------------------------------------------------------------------- %]
-
-	      [% ELSIF entry.key.match('^cn=.*,ou=Inventory') %]
-	      <i title="Subject to Inventory" class="fa fa-tag fa-2x [% brcl %]"></i>		  
-	      [% ELSIF base_ico.${dn.ou} %]
-	      <i title="Service Account Branch" class="[% base_icon.${dn.ou} %] fa-lg fa-2x"></i>
-	      [% ELSE %]
-	      <i title="Service Account Branch" class="fa fa-code-fork fa-2x fa-lg[% blocked %]"></i>
-	      [% END %]
-	      <span class="[% entry_text_size %] col-xs-offset-1 col-lg-offset-0">&nbsp;
-		<b title="[% blocked_title %]">
-		  [% entry.key.replace(',', ',&nbsp;&nbsp;') %][% # dn of the select result object %]
-		</b></span>
-	      
-	      <div class="pull-right">
-	      <small>
-	      <ul class="fa-ul">
-		<li title="created"><i class="fa-li fa fa-play-circle"></i>[% c_ts %] by <b>[% c_uid %]</b>&nbsp;</li>
-		[% IF entry.value.attrs.createTimestamp.0 != entry.value.attrs.modifyTimestamp.0 %]
-		<li title="modified"><i class="fa-li fa fa-stop-circle"></i>[% m_ts %] by <b>[% m_uid %]</b>&nbsp;</li>
+		[% IF entry.key.match('People') %]
+		[% root_of_rec = entry.value.root.sn _ ' ' _ entry.value.root.givenName %]
+		[% # !!! HARDCODED customization, depends of DN structure !!! %]
+		[% # ELSIF entry.value.mgmnt.is_root && entry.key.match('Inventory') && entry.key.split(',').size >  ( 3 + num_of_dc)  %]
+		[% ELSIF entry.value.mgmnt.is_root && entry.value.mgmnt.is_inventory %]
+		[% root_of_rec = entry.key.split(',').slice(-1 * ( 3 + num_of_dc), -1 ).0.split('=').1 %]
+		[% ELSIF entry.key.match('Inventory') && entry.key.split(',').size <= ( 3 + num_of_dc)  %]
+		[% root_of_rec = '<span class="fa fa-th-large fa-2x"></span>' %]
 		[% END %]
-	      </ul>
-	      </small>
+
+		[% # !!! HARDCODED customization, depends of DN structure !!! %]
+		[% IF entry.key.match('People') %]
+		[% root_obj_dn = entry.key.split(',').slice(-1 * ( 2 + num_of_dc), -1 ).join(',') %]
+		[% ELSIF entry.key.match('Inventory') && entry.key.split(',').size > ( 3 + num_of_dc) %]
+		[% root_obj_dn = entry.key.split(',').slice(-1 * ( 4 + num_of_dc), -1 ).join(',') %]
+		[% ELSE %]
+		[% root_obj_dn = entry.key %]
+		[% END %]
+
+		<form class="form-inline" role="form" method="POST" action="[% c.uri_for_action('searchby/index') %]">
+		  <button class="col-lg-2 col-md-2 col-xs-1 btn [% btn_blocked %] umi-search visible-lg-block visible-md-block"
+			  title="Click to open root object. [% blocked_title %]"
+			  type="submit" name="ldap_subtree" value="[% root_obj_dn %]">
+		    <span class="[% entry_text_size %] [%# blocked %]"><b>[% root_of_rec %]</b></span>
+		  </button>
+		  <button class="btn btn-link umi-search visible-xs-block visible-sm-block"
+			  title="Click to open root object of this account. [% blocked_title %]"
+			  type="submit" name="ldap_subtree" value="[% root_obj_dn %]">
+		    <i class="[% blocked %] fa fa-list-ul fa-2x">&nbsp;&nbsp;</i>
+		  </button>
+		</form>
+		
+		<p class="visible-lg-block visible-md-block"></p>&nbsp;
+		[% IF entry.value.mgmnt.is_root && entry.key.match('People') %]
+		<i title="Root Account" class="[% base_icon.People %] fa-lg fa-2x"></i>
+		[% ELSIF entry.value.mgmnt.is_root && entry.key.match('Inventory') %]
+		<i title="Root Object" class="[% base_icon.inventory %] fa-lg fa-2x"></i>		
+		[% ELSIF entry.value.mgmnt.is_root && entry.key.match('reqStart') %]
+		<i title="History Object" class="[% base_icon.history %] fa-lg fa-2x"></i>		
+		[% ELSIF entry.value.mgmnt.is_root && ! entry.key.match('People') %]
+		<i title="Root Objectt" class="[% base_icon.default %] fa-lg fa-2x"></i>		
+		[% ELSIF entry.key.match('^author') %]
+		
+		[% # --- SERVICES START -------------------------------------------------------------------- %]
+		[% cur_svc = dn.authorizedService.split('@').0 %]
+		[%   IF services.$cur_svc.icon %]
+		<i title="[% services.$cur_svc.descr %] Service Account Branch" class="[% services.$cur_svc.icon %] fa-lg fa-2x [% brcl %]"></i>
+		[%   ELSE %]
+		<i title="Service Account Branch" class="fa fa-code-fork[% brcl %][% blocked %]"></i>
+		[%   END %]
+		
+		[% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
+		[% cur_svc = dn.authorizedService.split('@').0 %]
+		[%   IF services.$cur_svc.icon %]
+		<i title="[% services.$cur_svc.descr %] Service Account" class="[% services.$cur_svc.icon %] fa-lg fa-2x [% lfcl %]"></i>
+		[%   ELSE %]
+		<i title="Service Account" class="fa fa-leaf fa-2x fa-lg[% lfcl %]"></i>
+		[%   END %]
+		[% # --- SERVICES STOP  -------------------------------------------------------------------- %]
+
+		[% ELSIF entry.key.match('^cn=.*,ou=Inventory') %]
+		<i title="Subject to Inventory" class="fa fa-tag fa-2x [% brcl %]"></i>		  
+		[% ELSIF base_ico.${dn.ou} %]
+		<i title="Service Account Branch" class="[% base_icon.${dn.ou} %] fa-lg fa-2x"></i>
+		[% ELSE %]
+		<i title="Service Account Branch" class="fa fa-code-fork fa-2x fa-lg[% blocked %]"></i>
+		[% END %]
+		<span class="[% entry_text_size %] col-xs-offset-1 col-lg-offset-0">&nbsp;
+		  <b title="[% blocked_title %]">
+		    [% entry.key.replace(',', ',&nbsp;&nbsp;') %][% # dn of the select result object %]
+		  </b>
+		</span>
+
+		<small class="pull-right">
+		  <ul class="fa-ul umi-zerro-margin">
+		    <li title="created"><i class="fa-li fa fa-play-circle"></i>[% c_ts %] by <b>[% c_uid %]</b>&nbsp;</li>
+		    [% IF entry.value.attrs.createTimestamp.0 != entry.value.attrs.modifyTimestamp.0 %]
+		    <li title="modified"><i class="fa-li fa fa-stop-circle"></i>[% m_ts %] by <b>[% m_uid %]</b>&nbsp;</li>
+		    [% END %]
+		  </ul>
+		</small>
 	      </div>
 	    </div>
 	    <div id="collapse[% loop.index %]" class="panel-collapse collapse [% in %]">
 	      <div class="panel-body">
 		<dl class="dl-horizontal">
-		  <dt class="bg-info">dn:</dt><dd>[% entry.key %]</dd>
+		  <dt>dn:</dt><dd>[% entry.key %]</dd>
 		  [% FOREACH hattr IN entry.value.attrs %]
 		  [% NEXT IF hattr.key == 'creatorsName' || hattr.key == 'createTimestamp' || hattr.key == 'modifiersName' || hattr.key == 'modifyTimestamp' %]
 		  [% x=hattr.key %][% # attribute name %]
 		  <dt>
-		  [% IF hattr.key.match(';binary') %]
+		    [% IF hattr.key.match(';binary') %]
 		    [% hattr.key.substr(-7,7,'&nbsp;<abbr title="binary data"><span class="fa fa-file-zip-o text-info" title="binary data"></span></abbr>') %]&#58;
-		  [% ELSIF hattr.key == 'userPKCS12' %]
+		    [% ELSIF hattr.key == 'userPKCS12' %]
 		    [% hattr.key %]&nbsp;<abbr title="binary data"><span class="fa fa-file-zip-o text-info" title="binary data"></span></abbr>&#58;
-		  [% ELSE %]
+		    [% ELSE %]
 		    [% hattr.key %]&#58;
-		  [% END %]
+		    [% END %]
 		  </dt>
 		  <dd>
-		  [% IF hattr.key == 'userPassword' %]
+		    [% IF hattr.key == 'userPassword' %]
 		    [% aster = '<i class="fa fa-circle"></i>&nbsp;' %][% aster.repeat(8)%]
-		  [% ELSIF hattr.key.match('userCertificate;binary') %]
+		    [% ELSIF hattr.key.match('userCertificate;binary') %]
 		    <br><small class="pull-left"><em><dl class="dl-horizontal">
 		      [% FOREACH cert IN hattr.value %]
 		      [% NEXT IF cert.key == 'cert' %]
 		      [% NEXT IF cert.key == 'error' && ! cert.value %]
-		        <dt>[% cert.key %]</dt><dd class="mono">[% cert.value %]</dd>
+		      <dt>[% cert.key %]</dt><dd class="mono">[% cert.value %]</dd>
 		      [% END %]
 		    </dl></em></small>
 		    [% ELSIF hattr.key == 'userPKCS12' %]
-		      <kbd class="fa fa-file-o">&nbsp;Binary Data</kbd>
+		    <kbd class="fa fa-file-o">&nbsp;Binary Data</kbd>
 		    [% ELSIF hattr.key == 'jpegPhoto' %]
-		      [% # bellow, value of jpegPhoto attribute contains no  `<img class="' part
-		         # to set background class here according the object type: root or child %]
-		      [% IF entry.value.mgmnt.is_root %]
-		        <img class="bg-info [% hattr.value %]
+		    [% # bellow, value of jpegPhoto attribute contains no  `<img class="' part
+		       # to set background class here according the object type: root or child %]
+		    [% IF entry.value.mgmnt.is_root %]
+		    <img class="bg-info [% hattr.value %]
+			 [% ELSE %]
+		         <img class="bg-success [% hattr.value %]
+			 [% END %]
+			 [% ELSIF entry.value.is_arr.$x %]
+			 [% FOREACH i IN hattr.value %]
+		         [% IF hattr.key == 'sshPublicKey' %]
+		    <div class="panel panel-default">
+		      <div class="panel-body"><small class="mono">[% i %]</small></div></div>
+		    [% ELSE %]
+		      [% IF schema.${hattr.key} == 'distinguishedNameMatch' || schema.${hattr.key} == 'distinguishedName' %]
+		      [% v = '<form role="form" method="POST" action="' _ c.uri_for_action("searchby/index") _ '">' _
+			 '<button type="submit" class="btn btn-link btn-xs"' _
+			 'title="click to open this object" name="ldap_subtree" value="' _ 
+			 i _ '">' _ i _ '</button></form>' %]
 		      [% ELSE %]
-		        <img class="bg-success [% hattr.value %]
+		      [% v = i %]
 		      [% END %]
-		    [% ELSIF entry.value.is_arr.$x %]
-		      [% FOREACH i IN hattr.value %]
-		        [% IF hattr.key == 'sshPublicKey' %]
-		          <div class="panel panel-default">
-			    <div class="panel-body"><small class="mono">[% i %]</small></div></div>
-			  [% ELSE %]
-			    [% IF schema.${hattr.key} == 'distinguishedNameMatch' || schema.${hattr.key} == 'distinguishedName' %]
-			    [% v = '<form role="form" method="POST" action="' _ c.uri_for_action("searchby/index") _ '">' _
-			      '<button type="submit" class="btn btn-link btn-xs"' _
-				      'title="click to open this object" name="ldap_subtree" value="' _ 
-				       i _ '">' _ i _ '</button></form>' %]
-			    [% ELSE %]
-			    [% v = i %]
-			    [% END %]
-			    
-			    [% IF loop.last || v.match('form') %][% # if last element or button %]
-			    [% v %]
-			    [% ELSE %][% # not last element of array %]
-			    [% v %]<br>
-			    [% END %]
-			[% END %]
+		      
+		      [% IF loop.last || v.match('form') %][% # if last element or button %]
+		      [% v %]
+		      [% ELSE %][% # not last element of array %]
+		      [% v %]<br>
 		      [% END %]
-		  [% ELSE %]
-		  [% hattr.value %]
-		  [% END %]
+		      [% END %]
+		      [% END %]
+		      [% ELSE %]
+		      [% hattr.value %]
+		      [% END %]
 		  </dd>
 		  [% END %] [% # FOREACH hattr IN entry.value.attrs %]
 		</dl>
 	      </div>
 	    </div>
-	    </div>
-	    </div>
-	    [% INCLUDE search/searchby_modals.tt %]
+	  </div>
+	  [% INCLUDE search/searchby_modals.tt %]
 	</td>
       </tr>
       [% END %]
