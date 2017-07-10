@@ -43,6 +43,7 @@ page to show all email domains, theirs MX-es and nodes serving as SMARTHOSTs
 sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
     my ( $return, $mta, $entry, $relay, $node, $fqdn, $ip, $rr, @mx_arr, $mx, $mx_ptr, $mx_a );
+    $mx = $mx_a = $mx_ptr = '';
     my $default = 'default';
     my $reslvr = Net::DNS::Resolver->new;
     my $resolved;
@@ -73,50 +74,55 @@ sub index :Path :Args(0) {
 	  $node = (split(':',$entry->get_value('sendmailMTAMapValue')))[1];
 	  $fqdn = substr $entry->get_value('sendmailMTAKey'), 1;
 
+	  # all MX-es, assuming the first one to be the main
 	  @mx_arr = mx( $reslvr, $fqdn );
 	  if (@mx_arr) {
 	    $mx = $mx_arr[0]->exchange;
 	  } else {
-	    push @{$return->{error}}, $reslvr->errorstring;
+	    push @{$return->{error}}, $fqdn . ' MX: ' . $reslvr->errorstring;
 	  }
 
+	  # all node IP addresses
 	  $resolved = $reslvr->search($node);
 	  if ($resolved) {
 	    foreach $rr ($resolved->answer) {
 	      $ip = $rr->address if $rr->type eq "A";
 	    }
 	  } else {
-	    push @{$return->{error}}, $reslvr->errorstring;
+	    push @{$return->{error}}, $fqdn . ' IP: ' . $reslvr->errorstring;
 	  }
 
+	  # A record for MX
 	  $resolved = $reslvr->search($mx);
 	  if ($resolved) {
 	    foreach $rr ($resolved->answer) {
 	      $mx_a = $rr->address if $rr->type eq "A";
 	    }
 	  } else {
-	    push @{$return->{error}}, $reslvr->errorstring;
+	    push @{$return->{error}}, $fqdn . ' MX A: ' . $reslvr->errorstring;
 	  }
 
+	  # PTR for MX
 	  $resolved = $reslvr->search($mx_a);
 	  if ($resolved) {
 	    foreach $rr ($resolved->answer) {
 	      $mx_ptr = $rr->ptrdname if $rr->type eq "PTR";
 	    }
 	  } else {
-	    push @{$return->{error}}, $reslvr->errorstring;
+	    push @{$return->{error}}, $fqdn . ' MX IP: ' . $reslvr->errorstring;
 	  }
 
 	  $mta->{$fqdn}->{smarthost} =
 	    { fqdn => $node,
 	      ip => $ip,
-	      mx => { fqdn => $mx,
+	      mx => { fqdn => $mx ne '' ? $mx : 'No match for domain ' . $fqdn,
 		      a => $mx_a,
 		      ptr => $mx_ptr,
-		      html_class => $mx eq $mx_ptr ? 'success' : 'danger',
+		      html_class => $mx eq $mx_ptr && $mx ne '' ? 'success' : 'danger',
 		      html_title => $mx eq $mx_ptr ? '' : 'title="revers resolv fails',
 		    },
 	    };
+	  $node = $fqdn = $rr = $ip = $mx = $mx_a = $mx_ptr = '';
 	  $#mx_arr = -1;
 	}
       }
@@ -146,9 +152,8 @@ sub index :Path :Args(0) {
     }
     $c->stash( template => 'server/mta/srv_mta_root.tt',
 	       mta => $mta,
-	       final_message => $return,);
+	       final_message => $return, );
 
-    $node = $fqdn = $ip = $mx = $mx_a = $mx_ptr = '';
     # p $mta;
     # p $return;
 }
