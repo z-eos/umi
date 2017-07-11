@@ -44,20 +44,6 @@ var table = $('#dataTableToDraw').DataTable({
     "select": true,
     "displayLength": 25,
     "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
-    "drawCallback": function ( settings ) {
-	var api = this.api();
-	var rows = api.rows( {page:'current'} ).nodes();
-	var last=null;
-	
-	api.column(5, {page:'current'} ).data().each( function ( group, i ) {
-	    if ( last !== group ) {
-		$(rows).eq( i ).before(
-		    '<tr class="success group"><td colspan="8" class="text-muted"><b>'+group+'</b></td></tr>'
-		);
-		last = group;
-	    }
-	} );
-    },
     "infoCallback": function( settings, start, end, max, total, pre ) {
 	var infostr= start +' to '+ end +' of '+ total +' selected records from all, '+ max +' rows';
 	return infostr;
