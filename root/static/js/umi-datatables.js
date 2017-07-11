@@ -38,7 +38,7 @@ var table = $('#dataTableToDraw').DataTable({
     },
     "renderer": "bootstrap",
     "responsive": true,
-    "order": [[ 2, 'desc' ]],
+    "order": [[ 0, 'asc' ]],
     "paging": false,
     "scrolly": 400,
     "select": true,
