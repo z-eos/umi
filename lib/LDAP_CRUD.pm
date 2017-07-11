@@ -172,6 +172,7 @@ sub _build_cfg {
 		   icon_warning => 'fa fa-exclamation-triangle',
 		   icon_success => 'fa fa-check-circle',
 		   group_blocked => 'blocked',
+		   core_mta => 'relay.umi',
 		  },
 	  rdn => {
 		  org =>            'ou',
@@ -2299,6 +2300,47 @@ sub _build_select_associateddomains {
   
   return \@domains;
 }
+
+# to be used for service differentiated resources # =head2 select_authorizedservice_associateddomains
+# to be used for service differentiated resources # 
+# to be used for service differentiated resources # Method, options builder for select element of associateddomains for definite authorizedservice
+# to be used for service differentiated resources # 
+# to be used for service differentiated resources # uses sub bld_select()
+# to be used for service differentiated resources # 
+# to be used for service differentiated resources # =cut
+# to be used for service differentiated resources # 
+# to be used for service differentiated resources # has 'select_authorizedservice_associateddomains' => ( traits => ['Array'],
+# to be used for service differentiated resources # 	       is => 'ro', isa => 'ArrayRef', required => 0, lazy => 1,
+# to be used for service differentiated resources # 	       builder => '_build_select_authorizedservice_associateddomains',
+# to be used for service differentiated resources # 	     );
+# to be used for service differentiated resources # 
+# to be used for service differentiated resources # sub _build_select_authorizedservice_associateddomains {
+# to be used for service differentiated resources #   my $self = shift;
+# to be used for service differentiated resources #   my (@domains, $mesg);
+# to be used for service differentiated resources #   $mesg = $self->search( { base => sprintf('ou=%s,%s', $self->{cfg}->{stub}->{core_mta}, $self->{cfg}->{base}->{mta}),
+# to be used for service differentiated resources # 			   filter => '(&(sendmailMTAMapName=mailer)(sendmailMTAKey=*))',
+# to be used for service differentiated resources # 			   sizelimit => 0,
+# to be used for service differentiated resources # 			   attrs => ['sendmailMTAKey' ],
+# to be used for service differentiated resources # 			 } );
+# to be used for service differentiated resources #   my $err_message = '';
+# to be used for service differentiated resources #   if ( ! $mesg->count ) {
+# to be used for service differentiated resources #     $err_message = '<div class="alert alert-danger">' .
+# to be used for service differentiated resources #       '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
+# to be used for service differentiated resources #       $self->err($mesg) . '</ul></div>';
+# to be used for service differentiated resources #   }
+# to be used for service differentiated resources # 
+# to be used for service differentiated resources #   my @entries = $mesg->sorted('sendmailMTAKey');
+# to be used for service differentiated resources #   my (@i, @j);
+# to be used for service differentiated resources #   foreach my $entry ( @entries ) {
+# to be used for service differentiated resources #     @i = $entry->get_value('sendmailMTAKey');
+# to be used for service differentiated resources #     foreach (@i) {
+# to be used for service differentiated resources #       push @j, $_;
+# to be used for service differentiated resources #     }
+# to be used for service differentiated resources #   }
+# to be used for service differentiated resources #   @domains = map { { value => $_, label => $_ } } sort @j;
+# to be used for service differentiated resources # 
+# to be used for service differentiated resources #   return \@domains;
+# to be used for service differentiated resources # }
 
 =head2 select_group
 

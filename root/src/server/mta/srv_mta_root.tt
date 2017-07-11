@@ -8,69 +8,44 @@
 
     [% INCLUDE ldap_err.tt %]
 
-<table id="dataTableToDraw" class="table table-condensed table-bordered">
-  <thead>
-    <tr class="text-uppercase info">
-      <th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">Domain</th>
-      <th title="the highest priority MX record">primary MX</th>
-      <th>SMARTHOST</th>
-    </tr>
-  </thead>
-  <tfoot>
-    <tr class="text-uppercase info">
-      <th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">Domain</th>
-      <th title="the highest priority MX record">primary MX</th>
-      <th>SMARTHOST</th>
-    </tr>
-  </tfoot>
-  <tbody>
-    [% FOREACH domain IN mta.keys %]
-    [% id = 'collapse' _ loop.index %]
-    [% hd = 'heading' _ loop.index %]
-    <tr>
-      <th><h4 class="umi-zerro-margin">[% domain %]</h4></th>
-      <td>
-	<div class="panel panel-[% mta.$domain.smarthost.mx.html_class %] umi-zerro-margin">
-	  <div class="panel-heading clearfix" role="tab" id="[% hd %]">
-	    <h4 class="panel-title">
-	      <a role="button"
-		 data-toggle="collapse"
-		 href="#[% id %]"
-		 aria-expanded="true"
-		 aria-controls="[% id %]">
-		[% mta.$domain.smarthost.mx.fqdn %]
-	      </a>
-	    </h4>
-	  </div>
-	  <div id="[% id %]" class="panel-collapse collapse" role="tabpanel" aria-labelledby="[% hd %]">
-	    <div class="panel-body">
-	      <dl class="dl-horizontal">
-		<dt>MX FQDN</dt><dd>[% mta.$domain.smarthost.mx.fqdn %]</dd>
-		<dt>MX PTR</dt><dd>[% mta.$domain.smarthost.mx.ptr %]</dd>
-		<dt>MX A</dt><dd>[% mta.$domain.smarthost.mx.a %]</dd>
-	      </dl>
-	    </div>
-	  </div>
-	</div>
-      </td>
-      <td>
-	<dl class="dl-horizontal umi-zerro-margin">
-	  <dt>FQDN</dt><dd>[% mta.$domain.smarthost.fqdn %]</dd>
-	  <dt>IP</dt><dd>[% mta.$domain.smarthost.ip %]</dd>
-	</dl>
-      </td>
-    </tr>
-    [% END %]
-  </tbody>
-</table>
-
-<!-- <img class=""
-       src="/static/images/server/mta/mail-complex-distributed.svg"
-       exify_initialized="true"
-       width="100%"
-       style="margin-top: 3px;margin-bottom: 3px;"> -->
-
-    
+    <div class="table-responsive">
+      <table id="dataTableToDraw" class="table table-condensed table-hover">
+	<thead>
+	  <tr class="text-uppercase active">
+	    <th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">Domain</th>
+	    <th title="the highest priority MX record">primary MX</th>
+	    <th>IP of MX</th>
+	    <th>PTR of IP</th>
+	    <th>SMARTHOST FQDN</th>
+	    <th>SMARTHOST IP</th>
+	  </tr>
+	</thead>
+	<tfoot>
+	  <tr class="text-uppercase active">
+	    <th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">Domain</th>
+	    <th title="the highest priority MX record">primary MX</th>
+	    <th>IP of MX</th>
+	    <th>PTR of IP</th>
+	    <th>SMARTHOST FQDN</th>
+	    <th>SMARTHOST IP</th>
+	  </tr>
+	</tfoot>
+	<tbody>
+	  [% FOREACH domain IN mta.keys %]
+	  [% id = 'collapse' _ loop.index %]
+	  [% hd = 'heading' _ loop.index %]
+	  <tr class="[% mta.$domain.smarthost.mx.html_class %]">
+	    <th>[% domain %]</th>
+	    <td>[% mta.$domain.smarthost.mx.fqdn %]</td>
+	    <td>[% mta.$domain.smarthost.mx.a %]</td>
+	    <td>[% mta.$domain.smarthost.mx.ptr %]</td>
+	    <td>[% mta.$domain.smarthost.fqdn %]</td>
+	    <td>[% mta.$domain.smarthost.ip %]</td>
+	  </tr>
+	  [% END %]
+	</tbody>
+      </table>
+    </div>
   </div>
   <div class="col-md-2">
     <ul class="nav nav-pills nav-stacked">
