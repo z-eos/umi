@@ -6,7 +6,7 @@ var table = $('#dataTableToDraw').DataTable({
 	    {
 		extend: 'copy',
 		text: '<i title="Copy current page data to clipboard" class="fa fa-copy fa-lg"></i>',
-		className: 'btn btn-info',
+		className: 'btn btn-primary btn-sm',
 		exportOptions: {
 		    modifier: {
 			page: 'current'
@@ -16,7 +16,7 @@ var table = $('#dataTableToDraw').DataTable({
 	    {
 		extend: 'print',
 		text: '<i title="Print current page" class="fa fa-print fa-lg"></i>',
-		className: 'btn btn-info',
+		className: 'btn btn-primary btn-sm',
 		autoPrint: false,
 		exportOptions: {
 		    modifier: {
@@ -27,7 +27,7 @@ var table = $('#dataTableToDraw').DataTable({
 	    {
 		extend: 'csv',
 		text: '<i title="Download current page as CSV file" class="fa fa-download fa-lg"></i>',
-		className: 'btn btn-info',
+		className: 'btn btn-primary btn-sm',
 		exportOptions: {
 		    modifier: {
 			page: 'current'
