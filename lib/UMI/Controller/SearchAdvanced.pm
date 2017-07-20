@@ -215,6 +215,7 @@ sub proc :Path(proc) :Args(0) {
 	$ttentries->{$_->dn}->{'mgmnt'} =
 	  {
 	   is_blocked => $blocked,
+	   is_log => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{db_log}/ ? $_->get_value( 'reqType' ) : 'no',
 	   is_root => scalar split(',', $_->dn) <= $dn_depth ? 1 : 0,
 	   is_account => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
 	   is_group => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{group}/ ? 1 : 0,
@@ -269,8 +270,8 @@ sub proc :Path(proc) :Args(0) {
 		filter => $filter,
 		entrieskeys => \@ttentries_keys,
 		entries => $ttentries,
-		services => $ldap_crud->cfg->{authorizedService},
 		schema => $c->session->{ldap}->{obj_schema_attr_equality},
+		services => $ldap_crud->cfg->{authorizedService},
 		base_icon => $ldap_crud->cfg->{base}->{icon},
 		final_message => $return,
 		form => $self->form,
