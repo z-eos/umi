@@ -298,6 +298,7 @@ sub index :Path :Args(0) {
       $ttentries->{$tmp}->{'mgmnt'} =
 	{
 	 is_blocked => 	  $blocked,
+	 is_log => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{db_log}/ ? $_->get_value( 'reqType' ) : 'no',
 	 is_root => scalar split(',', $tmp) <= $dn_depth ? 1 : 0,
 	 is_account => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
 	 is_group => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{group}/ ? 1 : 0,
@@ -345,7 +346,9 @@ sub index :Path :Args(0) {
     @ttentries_keys = sort { lc $a cmp lc $b } keys %{$ttentries}
       if $sort_order eq 'straight'; # for history searches
 
-    # p $ttentries;
+    # foreach my $dn_s (keys ( %{$ttentries} )) {
+    #   p $ttentries->{$dn_s}->{mgmnt};
+    # }
 
     $c->stash(
 	      template => 'search/searchby.tt',

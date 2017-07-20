@@ -36,6 +36,10 @@ var table = $('#dataTableToDraw').DataTable({
 	    },
 	]
     },
+    "search": {
+	"regex": true,
+	"smart": true,
+    },
     "renderer": "bootstrap",
     "responsive": true,
     "order": [[ 0, 'asc' ]],

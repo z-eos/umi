@@ -26,12 +26,21 @@
 
 [% # fa_child = 'fa-circle-thin' %]
 [% # child = '<i class="fa fa-fw ' _ fa_child _ ' text-default"></i>' %]
-[% child = '⬚' %]
-[% blocked = '' %]
-[% btn_blocked = ' btn-link' %]
-[% blocked_title = '' %]
+[% child = '⬚'
+   blocked = ''
+   btn_blocked = ' btn-link'
+   blocked_title = ''
+   branch_class = ' fa-lg umi-1-margin-left'
+   leaf_class = ' umi-2-margin-left' %]
 
-[% IF entries.size == 1 %][% in='in' %][% chevron_toggle='up' %][% ELSE %][% in='' %][% chevron_toggle='down' %][% END %] [% # no keys suffix sort FOREACH entry IN entries %]
+[% IF entries.size == 1 %]
+[% in = 'in'
+   chevron_toggle = 'up' %]
+[% ELSE %]
+[% in = ''
+   chevron_toggle = 'down' %]
+[% END %]
+
 
 <div class="table-responsive umi-overflow-x-vis">
   <table class="table table-condensed">
@@ -75,10 +84,11 @@
       
       [% root_of_rec = '<span class="fa fa-th-large fa-2x"></span>' %]
       [% FOREACH entrykey IN entrieskeys %]
-      [%   entry.key = entrykey
+      [%   entry.key = entrykey    # dn of the current entry
            entry.value = entries.$entrykey
-           zufix = entry.key.split(',').1.split('=').1.replace('[@\.]', '_') _ '_' _ loop.index
-           dn = entry.key.split(',|=').hash %][% # preparing hash of each dn %]
+           dn = entry.key.split(',|=').hash    # here we preparing hash of each dn
+	   # here we preparing uniqe suffix to be added to objects id (like modals e.t.c.)
+           id_sufix = '_' _ entry.key.split(',').0.split('=').1.replace('[@\.]', '_') _ '_' _ loop.index %]
 
       [%   IF entry.value.mgmnt.is_blocked %]
       [%   blocked = ' text-danger'
@@ -89,9 +99,8 @@
            blocked_title = ''
 	   btn_blocked = ' btn-link' %]
       [%   END %]
-      [%   brcl = ' fa-lg umi-1-margin-left'
-	   lfcl = ' umi-2-margin-left' %]
-      [%   # DEFINING OBJECT CLASSES ACCORDING THE RDN LEVEL %]
+      
+      [% # === DEFINITION OF OBJECT CLASSES ACCORDING THE RDN === %]
       [%   IF entry.value.mgmnt.is_root && entry.key.match('People') %]
       [%   entry_text_size = 'h4'
 	   entry_icon_size = 'fa-lg fa-2x'
@@ -105,21 +114,22 @@
 	   entry_icon_size = 'fa-lg fa-1x'
 	   root_of_rec_btn = 'col-lg-2 col-md-2 col-xs-1' %]
       [%   END %]
-      [%   # DEFINING OBJECT PANEL COLOR %]      
+
+      [% # === DEFINING OBJECT PANEL COLOR === %]      
       [%   IF (entry.value.mgmnt.is_root && entry.value.mgmnt.is_account) || ! entry.value.mgmnt.is_account %]
-      [%   panel_color = 'bg-info text-info' %]
-      [%   tr_color = 'info' %]
+      [%   panel_color = 'bg-info text-info'
+           tr_color = 'info' %]
       [%   ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
-      [%   panel_color = 'bg-success text-success' %]
-      [%   tr_color = 'success' %]
+      [%   panel_color = 'bg-success text-success'
+           tr_color = 'success' %]
       [%   ELSE %]
-      [%   panel_color = 'bg-warning text-warning' %]
-      [%   tr_color = 'warning' %]
+      [%   panel_color = 'bg-warning text-warning'
+           tr_color = 'warning' %]
       [%   END %]
-      [%   # ??? IF entry.value.attrs.createTimestamp.0 != entry.value.attrs.modifyTimestamp.0 %]
-      [%   # ??? panel_color = '' %]      
-      [%   # ??? END %]
-      [%   # OBJECT CREATION/MODIFICATION DETAILS
+      
+      [%   # ??? panel_color = '' IF entry.value.attrs.createTimestamp.0 != entry.value.attrs.modifyTimestamp.0 %]
+
+      [%   # OBJECT CREATION/MODIFICATION TIMESTAMPs ATTRIBUTES
            ts = entry.value.attrs.createTimestamp.0.chunk(2)
            c_ts = "$ts.0$ts.1-$ts.2-$ts.3 $ts.4:$ts.5:$ts.6"
            c_uid = entry.value.attrs.creatorsName.0.split(',').0.split('=').1
@@ -129,8 +139,16 @@
       
       [%   num_of_dc = 0 %]
       [%   FOREACH pat IN entry.key.split(',') %]
-      [%     num_of_dc = num_of_dc + 1 IF pat.match('dc=') %]
+      [%     SET num_of_dc = num_of_dc + 1 IF pat.match('dc=') %]
       [%   END %]
+
+      [% # === DROPDOWN MENU AND MODALS RELATED LOGICS === %]
+      [%   # does current entry belong to admin? %]
+      [%   admin_owned = ! c.check_user_roles('admin') && entry.value.mgmnt.root_obj_groups.admin ? 0 : 1 %]
+      [%   # IS ENTRY RESIDES IN accesslog DB ? %]
+      [%   is_log_obj = entry.value.mgmnt.is_log.match('no') ? 0 : 1 %]	   
+      [%   # ROLLABLE BACK IF reqType IS modify %]
+      [%   to_rollback = entry.value.mgmnt.is_log.match('modify') ? 1 : 0 %]
 
       <tr class="[% # tr_color %]">
 	<td>
@@ -185,22 +203,22 @@
 		[% # --- SERVICES START -------------------------------------------------------------------- %]
 		[% cur_svc = dn.authorizedService.split('@').0 %]
 		[%   IF services.$cur_svc.icon %]
-		<i title="[% services.$cur_svc.descr %] Service Account Branch" class="[% services.$cur_svc.icon _ ' ' _ entry_icon_size %] [% brcl %]"></i>
+		<i title="[% services.$cur_svc.descr %] Service Account Branch" class="[% services.$cur_svc.icon _ ' ' _ entry_icon_size %] [% branch_class %]"></i>
 		[%   ELSE %]
-		<i title="Service Account Branch" class="fa fa-code-fork[% brcl %][% blocked %]"></i>
+		<i title="Service Account Branch" class="fa fa-code-fork[% branch_class %][% blocked %]"></i>
 		[%   END %]
 		
 		[% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
 		[% cur_svc = dn.authorizedService.split('@').0 %]
 		[%   IF services.$cur_svc.icon %]
-		<i title="[% services.$cur_svc.descr %] Service Account" class="[% services.$cur_svc.icon _ ' ' _ entry_icon_size %] [% lfcl %]"></i>
+		<i title="[% services.$cur_svc.descr %] Service Account" class="[% services.$cur_svc.icon _ ' ' _ entry_icon_size %] [% leaf_class %]"></i>
 		[%   ELSE %]
-		<i title="Service Account" class="fa fa-leaf [% lfcl _ ' ' _ entry_icon_size %]"></i>
+		<i title="Service Account" class="fa fa-leaf [% leaf_class _ ' ' _ entry_icon_size %]"></i>
 		[%   END %]
 		[% # --- SERVICES STOP  -------------------------------------------------------------------- %]
 
 		[% ELSIF entry.key.match('^cn=.*,ou=Inventory') %]
-		<i title="Subject to Inventory" class="fa fa-tag [% brcl _ ' ' _ entry_icon_size %]"></i>		  
+		<i title="Subject to Inventory" class="fa fa-tag [% branch_class _ ' ' _ entry_icon_size %]"></i>		  
 		[% ELSIF base_ico.${dn.ou} %]
 		<i title="Service Account Branch" class="[% base_icon.${dn.ou} _ ' ' _ entry_icon_size %]"></i>
 		[% ELSE %]
@@ -225,46 +243,45 @@
 	      <div class="panel-body">
 		<dl class="dl-horizontal">
 		  <dt>dn:</dt><dd>[% entry.key %]</dd>
-		  [% FOREACH hattr IN entry.value.attrs %]
-		  [% NEXT IF hattr.key == 'creatorsName' || hattr.key == 'createTimestamp' || hattr.key == 'modifiersName' || hattr.key == 'modifyTimestamp' %]
-		  [% x=hattr.key %][% # attribute name %]
+		  [% FOREACH h_attr IN entry.value.attrs    # h_attr stays for each attribute/value pair hash %]
+		  [% NEXT IF h_attr.key == 'creatorsName' ||
+		     h_attr.key == 'createTimestamp' ||
+		     h_attr.key == 'modifiersName' ||
+		     h_attr.key == 'modifyTimestamp' %]
+		  [% attr_name = h_attr.key    # attribute name %]
 		  <dt>
-		    [% IF hattr.key.match(';binary') %]
-		    [% hattr.key.substr(-7,7,'&nbsp;<abbr title="binary data"><span class="fa fa-file-zip-o text-info" title="binary data"></span></abbr>') %]&#58;
-		    [% ELSIF hattr.key == 'userPKCS12' %]
-		    [% hattr.key %]&nbsp;<abbr title="binary data"><span class="fa fa-file-zip-o text-info" title="binary data"></span></abbr>&#58;
+		    [% IF h_attr.key.match(';binary') %]
+		    [% h_attr.key.substr(-7,7,'&nbsp;<abbr title="binary data"><span class="fa fa-file-zip-o text-info" title="binary data"></span></abbr>') %]&#58;
+		    [% ELSIF h_attr.key == 'userPKCS12' %]
+		    [% h_attr.key %]&nbsp;<abbr title="binary data"><span class="fa fa-file-zip-o text-info" title="binary data"></span></abbr>&#58;
 		    [% ELSE %]
-		    [% hattr.key %]&#58;
+		    [% h_attr.key %]&#58;
 		    [% END %]
 		  </dt>
 		  <dd>
-		    [% IF hattr.key == 'userPassword' %]
+		    [% IF h_attr.key == 'userPassword' %]
 		    [% aster = '<i class="fa fa-circle"></i>&nbsp;' %][% aster.repeat(8)%]
-		    [% ELSIF hattr.key.match('userCertificate;binary') %]
+		    [% ELSIF h_attr.key.match('userCertificate;binary') %]
 		    <br><small class="pull-left"><em><dl class="dl-horizontal">
-		      [% FOREACH cert IN hattr.value %]
+		      [% FOREACH cert IN h_attr.value %]
 		      [% NEXT IF cert.key == 'cert' %]
 		      [% NEXT IF cert.key == 'error' && ! cert.value %]
 		      <dt>[% cert.key %]</dt><dd class="mono">[% cert.value %]</dd>
 		      [% END %]
 		    </dl></em></small>
-		    [% ELSIF hattr.key == 'userPKCS12' %]
+		    [% ELSIF h_attr.key == 'userPKCS12' %]
 		    <kbd class="fa fa-file-o">&nbsp;Binary Data</kbd>
-		    [% ELSIF hattr.key == 'jpegPhoto' %]
+		    [% ELSIF h_attr.key == 'jpegPhoto' %]
 		    [% # bellow, value of jpegPhoto attribute contains no  `<img class="' part
 		       # to set background class here according the object type: root or child %]
-		    [% IF entry.value.mgmnt.is_root %]
-		    <img class="bg-info [% hattr.value %]
-			 [% ELSE %]
-		         <img class="bg-success [% hattr.value %]
-			 [% END %]
-			 [% ELSIF entry.value.is_arr.$x %]
-			 [% FOREACH i IN hattr.value %]
-		         [% IF hattr.key == 'sshPublicKey' %]
+		    [% entry.value.mgmnt.is_root ? '<img class="bg-info ' _ h_attr.value : '<img class="bg-success ' _  h_attr.value %]
+			 [% ELSIF entry.value.is_arr.$attr_name %]
+			 [% FOREACH i IN h_attr.value %]
+		         [% IF h_attr.key == 'sshPublicKey' %]
 		    <div class="panel panel-default">
 		      <div class="panel-body"><small class="mono">[% i %]</small></div></div>
 		    [% ELSE %]
-		      [% IF schema.${hattr.key} == 'distinguishedNameMatch' || schema.${hattr.key} == 'distinguishedName' %]
+		      [% IF schema.${h_attr.key} == 'distinguishedNameMatch' || schema.${h_attr.key} == 'distinguishedName' %]
 		      [% v = '<form role="form" method="POST" action="' _ c.uri_for_action("searchby/index") _ '">' _
 			 '<button type="submit" class="btn btn-link btn-xs"' _
 			 'title="click to open this object" name="ldap_subtree" value="' _ 
@@ -281,10 +298,10 @@
 		      [% END %]
 		      [% END %]
 		      [% ELSE %]
-		      [% hattr.value %]
+		      [% h_attr.value %]
 		      [% END %]
 		  </dd>
-		  [% END %] [% # FOREACH hattr IN entry.value.attrs %]
+		  [% END %] [% # FOREACH h_attr IN entry.value.attrs %]
 		</dl>
 	      </div>
 	    </div>

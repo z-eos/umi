@@ -93,6 +93,7 @@ sub _build_cfg {
   return {
 	  base => {
 		   db => UMI->config->{ldap_crud_db},
+		   db_log => UMI->config->{ldap_crud_db_log},
 		   dc_num => $#dc_count + 1,
 		   acc_root =>       'ou=People,'             . UMI->config->{ldap_crud_db},
 		   acc_svc_branch => 'ou=People,'             . UMI->config->{ldap_crud_db},

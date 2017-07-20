@@ -15,6 +15,7 @@
      ldap_add_dhcp = "50"
      ldap_modify_jpegphoto = "60"
      ldap_history = "100"
+     ldap_rollback = "100"
      accmgmnt = "110"
      ldap_gitacl_reorder = "120"
      accmgmnt = "150"

@@ -1,9 +1,3 @@
-[% IF ! c.check_user_roles('admin') && entry.value.mgmnt.root_obj_groups.admin %][% # does this entry belongs to admin? %]
-[% to_render = 0 %]
-[% ELSE %]
-[% to_render = 1 %]
-[% END %]
-
 <button class="chevron_toggleable btn btn-link pull-left"
 	type="button" title="Collapse In/Out This Panel"
 	data-target="#collapse[% loop.index %]" data-toggle="collapse"
@@ -18,13 +12,17 @@
 	  title="Possible Actions Upon the Object">
     <span class="fa fa-cog text-primary"></span><span class="caret text-primary"></span>
   </button>
+  
   <ul class="dropdown-menu dropdown-menu-left bg-primary"
       aria-labelledby="dropdownMenuActions"
       role="menu">
-    [% # data-order values are defined in root/lib/config/searchby_menu %]
+    
+    [% # DATA-ORDER VALUES ARE DEFINED IN root/lib/config/searchby_menu %]
+
     [% IF entry.value.mgmnt.is_root && entry.value.mgmnt.is_account %]
     <li>
-      <form role="form" method="POST" action="[% c.uri_for_action('searchby/user_preferences') %]">
+      <form role="form" method="POST" 
+	    action="[% c.uri_for_action('searchby/user_preferences') %]">
 	<button type="submit" class="btn btn-link"
 		title="look user object subtree data"
 		value="[% entry.key %]"
@@ -35,22 +33,12 @@
 	</button>
       </form>
     </li>
+    [% IF admin_owned %]
     <li>
-      <button type="button" title="account global management page" class="btn btn-link disabled"
-	      value="[% entry.key %]"
-	      data-order="[% site.searchby.menu.order.accmgmnt %]"
-	      name="accmgmnt"
-	      data-toggle="modal"
-	      data-target="#accmgmntModal[% loop.index %]">
-	<span class="fa fa-fw fa-retweet text-danger"></span>
-	mgmnt all
-      </button>
-    </li>
-    [% IF to_render %]
-    <li>
-      <form role="form" method="POST" action="[% c.uri_for_action('userall/index') %]">
-	<button type="submit" title="add new service account"
-		class="btn btn-link"
+      <form role="form" method="POST" 
+	    action="[% c.uri_for_action('userall/index') %]">
+	<button type="submit" class="btn btn-link"
+		title="add new service account"
 		value="[% entry.key %]"
 		data-order="[% site.searchby.menu.order.add_svc_acc %]"
 		name="add_svc_acc">
@@ -60,7 +48,8 @@
       </form>
     </li>
     <li>
-      <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+      <form role="form" method="POST" 
+	    action="[% c.uri_for_action('searchby/proc') %]">
 	<button type="submit" class="btn btn-link"
 		title="modify group/s user belongs to"
 		value="[% entry.key %]"
@@ -79,41 +68,44 @@
 	      name="user_block"
 	      data-order="[% site.searchby.menu.order.user_block %]"
 	      data-toggle="modal"
-	      data-target="#modal_block[% zufix %]">
+	      data-target="#modal_block[% id_sufix %]">
 	<span class="fa fa-fw fa-ban text-danger"></span>
 	block
       </button>
     </li>
     [% END %]
     [% END %]
-    [% IF to_render %][% # to_render start %]
+
+    [% IF admin_owned && ! is_log_obj %][% # admin_owned start %]
     <li>
       <button type="button" title="delete object" class="btn btn-link"
 	      value="[% entry.key %]"
 	      name="ldap_delete"
 	      data-order="[% site.searchby.menu.order.ldap_delete %]"
 	      data-toggle="modal"
-	      data-target="#modal_delete[% zufix %]">
+	      data-target="#modal_delete[% id_sufix %]">
 	<span class="fa fa-fw fa-remove text-danger"></span>
 	delete
       </button>
     </li>
-    [% IF ! entry.value.mgmnt.is_root %]
+    [%   IF ! entry.value.mgmnt.is_root %]
     <li>
-      <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+      <form role="form" method="POST" 
+	    action="[% c.uri_for_action('searchby/proc') %]">
 	<button type="button" title="reassign to other root account (move this object to another root account)"
 		class="btn btn-link" value="[% entry.key %]"
 		name="chg_acc"
 		data-order="[% site.searchby.menu.order.chg_acc %]"
 		data-toggle="modal"
-		data-target="#reassignModal[% loop.index %]">
+		data-target="#modal_reassign[% id_sufix %]">
 	  <span class="fa fa-fw fa-exchange text-danger"></span>
 	  reassign
 	</button>
       </form>
     </li>
-    [% END %][% # to_render stop %]
-    [% END %]
+    [%   END %]
+    [% END %][% # admin_owned stop %]
+    
     [% IF entry.key.match('mail') || entry.key.match('xmpp') || (entry.value.mgmnt.is_root && entry.value.mgmnt.is_account) %]
     <li>
       <button type="button" title="export as vCard"
@@ -122,13 +114,14 @@
 	      data-order="[% site.searchby.menu.order.vcard %]"
 	      name="vcard"
 	      data-toggle="modal"
-	      data-target="#vcardModal[% loop.index %]">
+	      data-target="#modal_vcard[% id_sufix %]">
 	<span class="fa fa-fw fa-upload text-info"></span>
 	export vCard
       </button>
     </li>
     [% END %]
-    [% IF to_render %][% # to_render start %]
+
+    [% IF admin_owned %][% # admin_owned start %]
     <li>
       <button type="button" title="export as LDIF"
 	      class="btn btn-link"
@@ -136,16 +129,19 @@
 	      data-order="[% site.searchby.menu.order.ldap_ldif %]"
 	      name="ldap_ldif"
 	      data-toggle="modal"
-	      data-target="#ldifModal[% loop.index %]">
+	      data-target="#modal_ldif[% id_sufix %]">
 	<span class="fa fa-fw fa-upload text-info"></span>
 	export LDIF
       </button>
     </li>
+    [%   IF ! is_log_obj %]
     <li>
-      <form role="form" method="POST" action="[% c.uri_for_action('searchby/modform') %]">
+      <form role="form" method="POST" 
+	    action="[% c.uri_for_action('searchby/modform') %]">
 	<button type="submit" class="btn btn-link"
 		title="edit form (the one used for object creation)"
 		value="[% entry.key %]"
+		disabled="disabled"
 		data-order="[% site.searchby.menu.order.ldap_modify %]"
 		name="aux_dn_form_to_modify">
 	  <span class="fa fa-fw fa-edit text-warning"></span>
@@ -154,7 +150,8 @@
       </form>
     </li>
     <li>
-      <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+      <form role="form" method="POST" 
+	    action="[% c.uri_for_action('searchby/proc') %]">
 	<button type="submit" class="btn btn-link"
 		title="lowlevel LDAP object edit ( allattributes as are )"
 		value="[% entry.key %]"
@@ -166,7 +163,8 @@
       </form>
     </li>
     <li>
-      <form role="form" method="POST" action="[% c.uri_for_action('searchby/index') %]">
+      <form role="form" method="POST" 
+	    action="[% c.uri_for_action('searchby/index') %]">
 	<button type="submit" class="btn btn-link"
 		title="object changes flow history"
 		value="[% entry.key %]"
@@ -177,9 +175,25 @@
 	</button>
       </form>
     </li>
-    [% IF entry.value.mgmnt.is_group %]
+    [%   END %]
+    [%   IF to_rollback %]
     <li>
-      <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+      <button type="button" class="btn btn-link"
+	      title="rollback this object changes"
+	      value="[% entry.key %]"
+	      name="ldap_rollback"
+	      data-order="[% site.searchby.menu.order.ldap_rollback %]"
+	      data-toggle="modal"
+	      data-target="#modal_rollback[% id_sufix %]">
+	<span class="fa fa-fw fa-undo text-danger"></span>
+	rollback
+      </button>
+    </li>
+    [%   END %]
+    [%   IF entry.value.mgmnt.is_group %]
+    <li>
+      <form role="form" method="POST" 
+	    action="[% c.uri_for_action('searchby/proc') %]">
 	<button type="submit" title="modify group members" class="btn btn-link"
 		value="[% entry.key %]"
 		data-order="[% site.searchby.menu.order.ldap_modify_memberUid %]"
@@ -189,10 +203,11 @@
 	</button>
       </form>
     </li>
-    [% END %]
-    [% IF entry.key.match('802.1x-') %]
+    [%   END %]
+    [%   IF entry.key.match('802.1x-') %]
     <li>
-      <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+      <form role="form" method="POST" 
+	    action="[% c.uri_for_action('searchby/proc') %]">
 	<button type="submit" title="modify group members" class="btn btn-link"
 		value="[% entry.key %]"
 		data-order="[% site.searchby.menu.order.ldap_modify_rad_group %]"
@@ -202,10 +217,11 @@
 	</button>
       </form>
     </li>
-    [% END %]
-    [% IF entry.value.mgmnt.userPassword %]
+    [%   END %]
+    [%   IF entry.value.mgmnt.userPassword %]
     <li>
-      <form role="form" method="POST" action="[% c.uri_for_action('searchby/modify_userpassword') %]">
+      <form role="form" method="POST" 
+	    action="[% c.uri_for_action('searchby/modify_userpassword') %]">
 	<button type="submit" title="modify password" class="btn btn-link"
 		value="[% entry.key %]"
 		data-order="[% site.searchby.menu.order.ldap_modify_password %]"
@@ -215,10 +231,11 @@
 	</button>
       </form>
     </li>
-    [% END %]
-    [% IF entry.value.mgmnt.userDhcp %]
+    [%   END %]
+    [%   IF entry.value.mgmnt.userDhcp %]
     <li>
-      <form role="form" method="POST" action="[% c.uri_for_action('searchby/dhcp_add') %]">
+      <form role="form" method="POST" 
+	    action="[% c.uri_for_action('searchby/dhcp_add') %]">
 	<button type="submit" title="add DHCP (MAC to IP binding)" class="btn btn-link"
 		value="[% entry.key %]"
 		data-order="[% site.searchby.menu.order.ldap_add_dhcp %]"
@@ -228,10 +245,11 @@
 	</button>
       </form>
     </li>
-    [% END %]
-    [% IF entry.value.mgmnt.jpegPhoto %]
+    [%   END %]
+    [%   IF entry.value.mgmnt.jpegPhoto %]
     <li>
-      <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+      <form role="form" method="POST" 
+	    action="[% c.uri_for_action('searchby/proc') %]">
 	<button type="submit" class="btn btn-link"
 		title="change jpegPhoto"
 		value="[% entry.key %]"
@@ -242,11 +260,12 @@
 	</button>
       </form>
     </li>
-    [% END %]
+    [%   END %]
 
-    [% IF entry.value.mgmnt.gitAclProject %]
+    [%   IF entry.value.mgmnt.gitAclProject %]
     <li>
-      <form role="form" method="POST" action="[% c.uri_for_action('searchby/proc') %]">
+      <form role="form" method="POST" 
+	    action="[% c.uri_for_action('searchby/proc') %]">
 	<button type="submit" title="reorder gitAcl" class="btn btn-link"
 		value="[% entry.key %]"
 		data-order="[% site.searchby.menu.order.ldap_gitacl_reorder %]"
@@ -256,7 +275,7 @@
 	</button>
       </form>
     </li>
-    [% END %]
-    [% END %][% # to_render stop %]
+    [%   END %]
+    [% END %][% # admin_owned stop %]
   </ul>
 </div>
