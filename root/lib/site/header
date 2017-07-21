@@ -25,14 +25,25 @@
       <ul class="nav navbar-nav">
 	[% IF c.user_exists && c.session.auth_uid %]
 	[% IF c.check_user_roles('admin') || c.check_user_roles('coadmin') %]
-        <li class="dropdown" title="Configuration of Servers">
+        <li class="dropdown" title="Predefined Data Sets">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" tabindex="1">
 	    <span class="fa fa-list-alt"></span>
 	    <span class="caret"></span>
 	  </a>
           <ul class="dropdown-menu" role="menu">
+            <li class="dropdown-header">Statistics by:</li>
             <li>
-	      <a href="[% c.uri_for_action('/servermta/index') %]" tabindex="2">
+	      <a href="[% c.uri_for('/stat_acc') %]"
+		 tabindex="2"
+		 title="All accounts info in one single, huge, big and heavy table">
+		<span class="fa fa-fw fa-id-card-o"></span>
+		Accounts
+	      </a>
+	    </li>
+            <li>
+	      <a href="[% c.uri_for_action('/servermta/index') %]"
+		 tabindex="2"
+		 title="All MTAs info in one single table">
 		<span class="fa fa-fw fa-envelope-open"></span>
 		MTA
 	      </a>
@@ -355,12 +366,6 @@
 	      <a href="[% c.uri_for('/sysinfo') %]">
 		<span class="fa fa-fw fa-info-circle text-info"></span>
 		system info
-	      </a>
-	    </li>
-            <li>
-	      <a href="[% c.uri_for('/stat_acc') %]">
-		<span class="fa fa-fw fa-bar-chart text-info"></span>
-		acc stat
 	      </a>
 	    </li>
 	    [% END %]

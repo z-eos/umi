@@ -244,10 +244,12 @@
 		<dl class="dl-horizontal">
 		  <dt>dn:</dt><dd>[% entry.key %]</dd>
 		  [% FOREACH h_attr IN entry.value.attrs    # h_attr stays for each attribute/value pair hash %]
+
 		  [% NEXT IF h_attr.key == 'creatorsName' ||
 		     h_attr.key == 'createTimestamp' ||
 		     h_attr.key == 'modifiersName' ||
-		     h_attr.key == 'modifyTimestamp' %]
+		     h_attr.key == 'modifyTimestamp'    # here we skiping some technical attributes %]
+		  
 		  [% attr_name = h_attr.key    # attribute name %]
 		  <dt>
 		    [% IF h_attr.key.match(';binary') %]

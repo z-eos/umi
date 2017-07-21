@@ -77,11 +77,17 @@ sub accinfo :Path(accinfo) :Args(0) {
 
 sub sysinfo :Path(sysinfo) :Args(0) {
   my ( $self, $c ) = @_;
+
+  use Data::Printer colored => 0;
+
   my $sysinfo;
-  my %x = %{$c->session};
+  my %x = @{$c->dump_these};
+  # $x{dump_these} = $c->dump_these;
+  $x{calculate_initial_session_expires} = localtime($c->calculate_initial_session_expires);
+  $x{get_session_id} = localtime($c->get_session_id);
+  $x{session_expires} = localtime($c->session_expires);
   $x{auth_pwd} = 'CENSORED';
   $x{auth_obj}->{userpassword} = 'CENSORED';
-  use Data::Printer colored => 0;
 
   my $return;
   my $ldap_crud = $c->model('LDAP_CRUD');

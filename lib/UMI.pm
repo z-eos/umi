@@ -54,6 +54,8 @@ __PACKAGE__
 			compressor => 'lz4',
 			flash_to_stash => 1,
 			# expire_time => '1d',
+			expires => 28800, # 8 hours
+			verify_address => 1,
 			unlink_on_exit => 1,
 			## init_file => 1, # causes need for re-login if PSGI reloaded during the form filling
 		      },
@@ -94,17 +96,19 @@ __PACKAGE__
 					     UMI->path_to( 'root', 'src' ),
 					     UMI->path_to( 'root', 'lib' )
 					    ],
-			    PRE_PROCESS  => 'config/main',
-			    WRAPPER      => 'site/wrapper',
-			    ERROR        => 'error.tt2',
-			    TIMER        => 0,
-			    render_die   => 1,
-			    EVAL_PERL    => 1,
-			    ENCODING     => 'utf8',
-			    PRE_CHOMP  => 1,
-			    POST_CHOMP  => 1,
-			    TRIM => 1,
-			    expose_methods => [ qw{ helper_cfg } ],
+			    # DEBUG          => 'parser, provider, dirs, caller',
+			    # DEBUG_FORMAT   => "\n" . '<!-- TT DEBUG - file: $file; L$line; text: [% $text %] -->' . "\n",
+			    PRE_PROCESS    => 'config/main',
+			    PRE_CHOMP      => 1,
+			    POST_CHOMP     => 1,
+			    TRIM           => 1,
+			    WRAPPER        => 'site/wrapper',
+			    ERROR          => 'error.tt2',
+			    TIMER          => 0,
+			    EVAL_PERL      => 1,
+			    ENCODING       => 'utf8',
+			    expose_methods => [ qw{ helper_cfg } ], # provided in lib/UMI/View/Web.pm
+			    render_die     => 1,
 			  },
 	  );
 
