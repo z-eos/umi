@@ -35,8 +35,8 @@
             <li>
 	      <a href="[% c.uri_for('/stat_acc') %]"
 		 tabindex="2"
-		 title="All accounts info in one single, huge, big and heavy table">
-		<span class="fa fa-fw fa-id-card-o"></span>
+		 title="All accounts info in one single, huge, big, fat and heavy table">
+		<span class="fa fa-fw fa-id-card-o text-danger"></span>
 		Accounts
 	      </a>
 	    </li>

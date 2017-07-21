@@ -71,7 +71,7 @@ has_field 'person_simplified'
        label_class => [ 'col-xs-1', ],
        element_attr => { title => 'When checked, this checkbox causes user account been created in a simplified manner. Only Email and XMPP services will be created for FQDN choosen with Domain Name field in section Person bellow.',
 		       },
-       # element_wrapper_class => [ 'col-xs-offset-1', 'col-xs-11', 'col-lg-5', 'text-muted' ],
+       # element_wrapper_class => [ 'text-success', ],
        # wrapper_class => [],
      );
 
