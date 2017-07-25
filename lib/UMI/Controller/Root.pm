@@ -341,8 +341,9 @@ sub download_from_ldap :Path(download_from_ldap) :Args(0) {
 
 sub user_preferences :Path(user_prefs) :Args(0) {
   my ( $self, $c, $user_dn ) = @_;
-  my @user_rdn = split('=', $user_dn);
   if ( $c->user_exists ) {
+    p $c->user;
+    my @user_rdn = split('=', $user_dn); p @user_rdn;
     my $ldap_crud = $c->model('LDAP_CRUD');
 
     my ( $arg, $mesg, $return, $entry, $entries, $orgs, $domains, $fqdn, $o,
@@ -368,20 +369,6 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	$return->{error} .= sprintf('<li>personal info %s</li>',
 				    $ldap_crud->err($mesg)->{html});
       } else {
-	# $entry = $mesg->entry(0);
-	# $arg = {
-	# 	uid => $entry->get_value('uid'),
-	# 	givenname => $entry->get_value('givenName'),
-	# 	sn => $entry->get_value('sn'),
-	# 	title => defined $entry->get_value('title') ? \@{[$entry->get_value('title')]} : ['N/A'],
-	# 	o => \@{[$entry->get_value('o', alloptions => 1)]},
-	# 	physicaldeliveryofficename => \@{[$entry->get_value('physicaldeliveryofficename')]},
-	# 	telephonenumber => defined $entry->get_value('telephonenumber') ?
-	# 	\@{[$entry->get_value('telephonenumber')]} : ['N/A'],
-	# 	mail => defined $entry->get_value('mail') ? \@{[$entry->get_value('mail')]} : ['N/A'],
-	# 	roles => $entry->get_value( $user_rdn[0] ) eq $c->user ? \@{[$c->user->roles]} : 'a mere mortal',
-	#        };
-
 	$entry = $mesg->as_struct;
 	$arg = {
 		uid => $entry->{$user_dn}->{uid}->[0],
@@ -414,11 +401,12 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	      sn => $c->user->sn || 'N/A',
 	      title => $title,
 	      mail => $mail,
-	      o => $o,
+	      o => [ $o ],
 	      physicaldeliveryofficename => $physicaldeliveryofficename,
 	      telephonenumber => $telephonenumber,
 	      roles => \@{[$c->user->roles]} || 'N/A',
 	     };
+      undef $o;
     }
     p $arg;
     #=================================================================
@@ -457,8 +445,11 @@ sub user_preferences :Path(user_prefs) :Args(0) {
     #=================================================================
     # user jpegPhoto
     #
-    $mesg = $ldap_crud->search( { base => $user_dn,
-				  scope => 'base', } );
+    $mesg = $ldap_crud->search( { base => defined $user_dn && $user_dn ne '' ?
+				  $user_dn : $c->user->dn,
+				  # sprintf('uid=%s,%s', , $ldap_crud->{cfg}->{base}->{acc_root}),
+				  scope => 'base',
+				  attrs => [ 'jpegPhoto' ], } );
     if ( $mesg->code ) {
       $return->{error} .= sprintf('<li>jpegPhoto %s</li>',
 				  $ldap_crud->err($mesg)->{html});

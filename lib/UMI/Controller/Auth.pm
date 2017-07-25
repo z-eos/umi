@@ -53,13 +53,13 @@ sub signin :Path Global {
 			 id       => $c->session->{auth_uid},
 			 password => $c->session->{auth_pwd},
 			})) {
-    $c->session->{auth_obj} = $c->user->attributes('ashash');
-    delete $c->session->{auth_obj}->{jpegphoto};
+    ## moving to Session->__user # $c->session->{auth_obj} = $c->user->attributes('ashash');
+    ## moving to Session->__user # delete $c->session->{auth_obj}->{jpegphoto};
     # dending of what RDN type is used for auth e.g.uid, cn
     $c->session->{auth_uid} = eval '$c->user->' . UMI->config->{authentication}->{realms}->{ldap}->{store}->{user_field};
-    delete $c->session->{auth_roles};
-    push @{$c->session->{auth_roles}}, $c->user->roles;
-    $c->cache->set( 'auth_obj', $c->session->{auth_obj} );
+    ## moving to Session->__user # delete $c->session->{auth_roles};
+    ## moving to Session->__user # push @{$c->session->{auth_roles}}, $c->user->roles;
+    ## moving to Session->__user # $c->cache->set( 'auth_obj', $c->session->{auth_obj} );
     # p $c->session;
     # p $c->cache->get( 'auth_obj' );
 
