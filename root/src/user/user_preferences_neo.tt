@@ -1,3 +1,4 @@
+
 [% META title = 'User Account Info' %] 
 
 [% INCLUDE ldap_err.tt %]
@@ -5,7 +6,7 @@
 
 <div class="page-header">
   <h2>
-    <b>[% auth_obj.givenname %] [% auth_obj.sn %]</b> <small class="mono">(<i>UID: &laquo;[% auth_obj.uid %]&raquo; preferences)</i></small>
+    <b>[% auth_obj.givenname %]&nbsp;[% auth_obj.sn %]</b> <small class="mono">(<i>UID: &laquo;[% auth_obj.uid %]&raquo; preferences)</i></small>
   </h2>
 </div>
 
