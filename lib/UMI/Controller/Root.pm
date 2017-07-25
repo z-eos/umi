@@ -436,11 +436,11 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 		    $entries->{$_}->{l}->[0],
 		    $entries->{$_}->{st}->[0]
 		   );
-	  $fqdn->{$entries->{$_}->{physicaldeliveryofficename}->[0]} = $entries->{$_}->{associateddomain};
+	  $fqdn->{$entries->{$_}->{physicaldeliveryofficename}->[0]} = [ @{$entries->{$_}->{associateddomain}} ];
 	}
       }
     }
-    # p $orgs;
+    p $fqdn;
     #=================================================================
     # user jpegPhoto
     #
