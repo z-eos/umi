@@ -6,10 +6,10 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <form role="form" method="POST" action="[% c.uri_for_action('searchby/delete') %]">
-	<div class="modal-header">
-	  <h4 class="modal-title alert alert-danger" id="modal_delete[% id_sufix %]_label">
-	    <span class="fa fa-times-circle"></span>
-	    You are about to perform deletion of DN: <b>[% entry.key.replace(',', ', ') %]</b>
+	<div class="modal-header bg-danger text-danger">
+	  <h4 class="modal-title" id="modal_delete[% id_sufix %]_label">
+	    <span class="fa fa-exclamation-circle"></span>
+	    You are about to perform deletion of DN:<br><b>[% entry.key.replace(',', ', ') %]</b>
 	  </h4>
 	</div>
 	<div class="modal-body text-primary">
@@ -20,7 +20,7 @@
 	</div>
 	<div class="modal-footer">
 	  <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
-	  <button type="submit" class="btn btn-danger umi-btn-event umi-btn-ajax"  name="ldap_delete"
+	  <button type="submit" class="btn bg-danger text-danger umi-btn-event umi-btn-ajax"  name="ldap_delete"
 		  value="[% entry.key %]" data-action="delete">
 	    Yes, I really want to delete it and yes, I understand all consequences!
 	  </button>
@@ -39,10 +39,10 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <form role="form" method="POST" action="[% c.uri_for_action('searchby/delete') %]"><!-- === TO FINISH === -->
-	<div class="modal-header">
-	  <h4 class="modal-title alert alert-danger" id="modal_rollback[% id_sufix %]_label">
+	<div class="modal-header  bg-danger text-danger">
+	  <h4 class="modal-title" id="modal_rollback[% id_sufix %]_label">
 	    <span class="fa fa-times-circle"></span>
-	    You are about to perform last change rollback of DN: <b>[% entry.key.replace(',', ', ') %]</b>
+	    You are about to perform last change rollback of DN:<br><b>[% entry.key.replace(',', ', ') %]</b>
 	  </h4>
 	</div>
 	<div class="modal-body">
@@ -50,7 +50,7 @@
 	</div>
 	<div class="modal-footer">
 	  <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
-	  <button type="submit" class="btn btn-danger umi-btn-event umi-btn-ajax"  name="ldap_rollback"
+	  <button type="submit" class="btn  bg-danger text-danger umi-btn-event umi-btn-ajax"  name="ldap_rollback"
 		  value="[% entry.key %]" data-action="rollback">
 	    Yes, I really want to rollback it and yes, I understand all consequences!
 	  </button>
@@ -68,16 +68,16 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <form role="form" method="POST" action="[% c.uri_for_action('searchby/block') %]">
-	<div class="modal-header">
-	  <h4 class="h4 modal-title alert alert-danger" id="modal_block[% id_sufix %]_label">
+	<div class="modal-header  bg-danger text-danger">
+	  <h4 class="h4 modal-title" id="modal_block[% id_sufix %]_label">
 	    <span class="fa fa-ban"></span>
-	    You are about to block user with DN: <b>[% entry.key.replace(',', ', ') %]</b>
+	    You are about to block user with DN:<br><b>[% entry.key.replace(',', ', ') %]</b>
 	  </h4>
 	</div>
 	<!-- <div class="modal-body text-primary"></div> -->
 	<div class="modal-footer">
 	  <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
-	  <button type="submit" class="btn btn-danger umi-btn-event umi-btn-ajax"  name="user_block"
+	  <button type="submit" class="btn  bg-danger text-danger umi-btn-event umi-btn-ajax"  name="user_block"
 		  value="[% entry.key %]" data-action="block">
 	    Yes, I really want to block this user all accounts, and yes, I understand all consequences!
 	  </button>
@@ -94,10 +94,10 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <form role="form" method="POST" action="[% c.uri_for_action('searchby/reassign') %]">
-	<div class="modal-header">
-	  <h4 class="modal-title alert alert-danger" id="modal_reassign[% id_sufix %]_label">
+	<div class="modal-header  bg-danger text-danger">
+	  <h4 class="modal-title" id="modal_reassign[% id_sufix %]_label">
 	    <span class="fa fa-times-circle"></span>
-	    You are about to change root DN for: <b>[% entry.key.replace(',', ', ') %]</b>
+	    You are about to change root DN for:<br><b>[% entry.key.replace(',', ', ') %]</b>
 	  </h4>
 	</div>
 	<div class="modal-body clearfix form-group text-primary">
@@ -128,7 +128,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	</div>
 	<div class="modal-footer">
 	  <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
-	  <button type="submit" class="btn btn-danger umi-btn-event umi-btn-ajax"  name="src_dn"
+	  <button type="submit" class="btn  bg-danger text-danger umi-btn-event umi-btn-ajax"  name="src_dn"
 		  value="[% entry.key %]" data-action="reassign" >
 	    Yes, I really want to change it and yes, I understand all consequences!
 	  </button>
@@ -145,10 +145,10 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <form role="form" method="POST">
-	<div class="modal-header">
-	  <h4 class="modal-title alert alert-info" id="modal_ldif[% id_sufix %]_label">
+	<div class="modal-header  bg-info text-info">
+	  <h4 class="modal-title" id="modal_ldif[% id_sufix %]_label">
 	    <span class="fa fa-info-circle"></span>
-	    LDIF of DN: <b>[% entry.key.replace(',', ', ') %]</b>
+	    LDIF of DN:<br><b>[% entry.key.replace(',', ', ') %]</b>
 	  </h4>
 	</div>
 	<div class="modal-body text-primary">
@@ -170,7 +170,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	<div class="modal-footer">
 	  <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
 	  <button type="submit"
-		  class="btn btn-info umi-btn-event umi-btn-logic"
+		  class="btn  bg-info text-info umi-btn-event umi-btn-logic"
 		  data-umiact="/searchby/ldif_gen"
 		  name="ldap_ldif"
 		  value="[% entry.key %]">
@@ -189,23 +189,23 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <form role="form" method="POST">
-	<div class="modal-header">
-	  <h4 class="modal-title alert alert-info" id="modal_vcard[% id_sufix %]_label">
+	<div class="modal-header  bg-info text-info">
+	  <h4 class="modal-title" id="modal_vcard[% id_sufix %]_label">
 	    <span class="fa fa-files-o fa-lg"></span>
-	    vCard of DN: <b>[% entry.key.replace(',', ', ') %]</b>
+	    vCard of DN:<br><b>[% entry.key.replace(',', ', ') %]</b>
 	  </h4>
 	</div>
 	<div class="modal-body text-primary">
 	  vCard file contains user image/s if any, while QR code not.<br><br>
 	  <div class="radio">
-	    <span class="fa fa-star-half-o fa-lg col-xs-1 text-right"></span>
+	    <span class="fa fa-battery-quarter fa-lg col-xs-1 text-right"></span>
 	    <label>
 	      <input type="radio" name="vcard_type" id="ldap_vcard1" value="qr_min" checked>
 	      minimal info vCard (name, email/s, IM id/s and telephone number/s)
 	    </label>
 	  </div>
 	  <div class="radio">
-	    <span class="fa fa-star fa-lg col-xs-1 text-right"></span>
+	    <span class="fa fa-battery-full fa-lg col-xs-1 text-right"></span>
 	    <label>
 	      <input type="radio" name="vcard_type" id="ldap_vcard2" value="qr_max" disabled>
 	      full info vCard
@@ -222,7 +222,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	<div class="modal-footer">
 	  <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
 	  <button type="submit"
-		  class="btn btn-info umi-btn-event umi-btn-logic"
+		  class="btn  bg-info text-info umi-btn-event umi-btn-logic"
 		  data-umiact="/searchby/vcard_gen"
 		  name="vcard_dn"
 		  value="[% entry.key %]">
