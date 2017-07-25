@@ -343,7 +343,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
   my ( $self, $c, $user_dn ) = @_;
   if ( $c->user_exists ) {
     # p $c->user;
-    my @user_rdn = split('=', $user_dn); p @user_rdn;
+    my @user_rdn = split('=', $user_dn);
     my $ldap_crud = $c->model('LDAP_CRUD');
 
     my ( $arg, $mesg, $return, $entry, $entries, $orgs, $domains, $fqdn, $o,
@@ -423,7 +423,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
       # here we need to fetch all org recursively to fill all data absent
       # if current object has no attribute needed (postOfficeBox or postalAddress or
       # any other, than we will use the one from it's ancestor
-      $mesg = $ldap_crud->search( { base => $_, scope => 'base', sizelimit => 0} );
+      $mesg = $ldap_crud->search( { base => $_, scope => 'base' } );
       if ( $mesg->code ) {
 	$return->{error} .= '<li>organization/s<br>' . $ldap_crud->err($mesg)->{html};
       } else {
@@ -497,6 +497,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
     $mesg = $ldap_crud->search( { base => 'uid=' . $arg->{uid} . ',' .
 				  $ldap_crud->cfg->{base}->{acc_root},
 				  scope => 'one',
+				  sizelimit => 0,
 				  filter => 'authorizedService=*',
 				  attrs => [ 'authorizedService'],} );
     if ( $mesg->code ) {
