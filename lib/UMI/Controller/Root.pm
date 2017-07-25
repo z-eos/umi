@@ -382,9 +382,6 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 		mail => defined $entry->{$user_dn}->{mail} ? $entry->{$user_dn}->{mail} : ['N/A'],
 		roles => $entry->{$user_dn}->{$user_rdn[0]} eq $c->user ? \@{[$c->user->roles]} : 'a mere mortal',
 	       };
-
-	utf8::decode($arg->{givenname});
-	utf8::decode($arg->{sn});
       }
     } else {
       $o = $c->user->has_attribute('o') ?
@@ -408,7 +405,9 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	     };
       undef $o;
     }
-    p $arg;
+    utf8::decode($arg->{givenname});
+    utf8::decode($arg->{sn});
+    # p $arg;
     #=================================================================
     # user organizations
     #
