@@ -182,6 +182,7 @@
 	      title="rollback this object changes"
 	      value="[% entry.key %]"
 	      name="ldap_rollback"
+		disabled="disabled"
 	      data-order="[% site.searchby.menu.order.ldap_rollback %]"
 	      data-toggle="modal"
 	      data-target="#modal_rollback[% id_sufix %]">
@@ -255,7 +256,7 @@
 		value="[% entry.key %]"
 		data-order="[% site.searchby.menu.order.ldap_modify_jpegphoto %]"
 		name="ldap_modify_jpegphoto">
-	  <span class="fa fa-fw fa-image text-warning"></span>
+	  <span class="fa fa-fw fa-file-image-o text-warning"></span>
 	  image
 	</button>
       </form>

@@ -342,7 +342,7 @@ sub download_from_ldap :Path(download_from_ldap) :Args(0) {
 sub user_preferences :Path(user_prefs) :Args(0) {
   my ( $self, $c, $user_dn ) = @_;
   if ( $c->user_exists ) {
-    # p $c->user;
+    # p $c->user->supported_features;
     my @user_rdn = split('=', $user_dn);
     my $ldap_crud = $c->model('LDAP_CRUD');
 
@@ -436,11 +436,12 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 		    $entries->{$_}->{l}->[0],
 		    $entries->{$_}->{st}->[0]
 		   );
-	  $fqdn->{$entries->{$_}->{physicaldeliveryofficename}->[0]} = [ sort @{$entries->{$_}->{associateddomain}} ];
+	  $fqdn->{$entries->{$_}->{physicaldeliveryofficename}->[0]} = defined $entries->{$_}->{associateddomain} ?
+	    [ sort @{$entries->{$_}->{associateddomain}} ] : [];
 	}
       }
     }
-    p $fqdn;
+    # p $fqdn;
     #=================================================================
     # user jpegPhoto
     #

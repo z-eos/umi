@@ -129,12 +129,13 @@ sub _build_cfg {
 					) ],
 		   icon => {
 			    default =>       'fa fa-star',
-			    People =>        'fa fa-user-circle',
+			    People =>        'fa fa-user-circle-o',
 			    DHCP =>          'fa fa-sitemap',
 			    GitACL =>        'fa fa-gavel',
 			    group =>         'fa fa-group',
 			    history =>       'fa fa-history',
 			    inventory =>     'fa fa-tag',
+			    mta =>           'fa fa-envelope',
 			    Organizations => 'fa fa-industry',
 			    rad_groups =>    'fa fa-group',
 			    rad_profiles =>  'fa fa-cogs',
@@ -2456,10 +2457,10 @@ sub bld_select {
 
   $self->reset_ldap;
   my $mesg =
-    $self->search({ base   => $arg->{base},
-		    scope  => $arg->{scope},
-		    attrs  => $arg->{attr},
-		    filter => $arg->{filter},
+    $self->search({ base      => $arg->{base},
+		    scope     => $arg->{scope},
+		    attrs     => $arg->{attr},
+		    filter    => $arg->{filter},
 		    sizelimit => $arg->{sizelimit}, });
 
   my $err_message = '';

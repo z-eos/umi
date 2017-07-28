@@ -312,6 +312,12 @@
 		<span class="[% icon_class %] fa-tags"></span>&nbsp;inventory</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
+			value="[% helper_cfg('cfg_ldap_crud','base', 'mta') %]"
+			name="ldapsearch_base" tabindex="24"
+			title="filter pattern with base Sendmail">
+		<span class="[% icon_class %] fa-envelope"></span>&nbsp;Sendmail</button></li>
+	      <li class="bg-[% color %]">
+		<button type="submit" class="[% menu_item %][% color %]"
 			value="[% helper_cfg('cfg_ldap_crud','base', 'gitacl') %]"
 			name="ldapsearch_base" tabindex="25">
 		<span class="[% icon_class %] fa-gavel"></span>&nbsp;GitACL</button></li>

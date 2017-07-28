@@ -196,8 +196,8 @@ sub pwdgen {
   $pwdgen->{len} = UMI->config->{pwd}->{lenp}
     if $pwdgen->{pronounceable} && $pwdgen->{len} > UMI->config->{pwd}->{lenp};
 
-  p $args;
-  p $pwdgen;
+  # p $args;
+  # p $pwdgen;
   use Crypt::GeneratePassword qw(word word3 chars);
 
   if ( ( ! defined $pwdgen->{'pwd'} || $pwdgen->{'pwd'} eq '' )

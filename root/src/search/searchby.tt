@@ -193,9 +193,11 @@
 		[% IF entry.value.mgmnt.is_root && entry.key.match('People') %]
 		<i title="Root Account" class="[% base_icon.People _ ' ' _ entry_icon_size %]"></i>
 		[% ELSIF entry.value.mgmnt.is_root && entry.key.match('Inventory') %]
-		<i title="Root Object" class="[% base_icon.inventory _ ' ' _ entry_icon_size %]"></i>		
+		<i title="Inventory Root Object" class="[% base_icon.inventory _ ' ' _ entry_icon_size %]"></i>		
+		[% ELSIF entry.value.mgmnt.is_root && entry.key.match('Sendmail') %]
+		<i title="MTA Root Object" class="[% base_icon.mta _ ' ' _ entry_icon_size %]"></i>		
 		[% ELSIF entry.value.mgmnt.is_root && entry.key.match('reqStart') %]
-		<i title="History Object" class="[% base_icon.history _ ' ' _ entry_icon_size %]"></i>		
+		<i title="History Root Object" class="[% base_icon.history _ ' ' _ entry_icon_size %]"></i>		
 		[% ELSIF entry.value.mgmnt.is_root && ! entry.key.match('People') %]
 		<i title="Root Objectt" class="[% base_icon.default _ ' ' _ entry_icon_size %]"></i>		
 		[% ELSIF entry.key.match('^author') %]
@@ -219,6 +221,8 @@
 
 		[% ELSIF entry.key.match('^cn=.*,ou=Inventory') %]
 		<i title="Subject to Inventory" class="fa fa-tag [% branch_class _ ' ' _ entry_icon_size %]"></i>		  
+		[% ELSIF entry.key.match(',ou=Sendmail') %]
+		<i title="Subject to Sendmail" class="[% base_icon.mta _ ' ' _ branch_class _ ' ' _ entry_icon_size %]"></i>		  
 		[% ELSIF base_ico.${dn.ou} %]
 		<i title="Service Account Branch" class="[% base_icon.${dn.ou} _ ' ' _ entry_icon_size %]"></i>
 		[% ELSE %]
@@ -226,7 +230,10 @@
 		[% END %]
 		[% # dn of the select result object %]
 		<span class="[% entry_text_size %] col-xs-offset-1 col-lg-offset-0" title="[% blocked_title %]">&nbsp;
-		  <b>[% entry.key.replace(',', ',&nbsp;&nbsp;') %]</b>
+		  <b>
+		    [% # entry.key.replace(',', ',&nbsp;&nbsp;') %]
+		    [% entry.key.replace('uid=','').replace('authorizedService=','').split(',').slice(0,-3).join('&nbsp;&nbsp;<i class="fa fa-long-arrow-right" aria-hidden="true"></i>&nbsp;&nbsp;') %]
+		  </b>
 		</span>
 
 		<small class="pull-right">
@@ -243,6 +250,7 @@
 	      <div class="panel-body">
 		<dl class="dl-horizontal">
 		  <dt>dn:</dt><dd>[% entry.key %]</dd>
+		  
 		  [% FOREACH h_attr IN entry.value.attrs    # h_attr stays for each attribute/value pair hash %]
 
 		  [% NEXT IF h_attr.key == 'creatorsName' ||
@@ -255,52 +263,56 @@
 		    [% IF h_attr.key.match(';binary') %]
 		    [% h_attr.key.substr(-7,7,'&nbsp;<abbr title="binary data"><span class="fa fa-file-zip-o text-info" title="binary data"></span></abbr>') %]&#58;
 		    [% ELSIF h_attr.key == 'userPKCS12' %]
-		    [% h_attr.key %]&nbsp;<abbr title="binary data"><span class="fa fa-file-zip-o text-info" title="binary data"></span></abbr>&#58;
+		    [% h_attr.key.trim %]&nbsp;<abbr title="binary data"><span class="fa fa-file-zip-o text-info" title="binary data"></span></abbr>&#58;
 		    [% ELSE %]
-		    [% h_attr.key %]&#58;
+		    [% h_attr.key.trim %]&#58;
 		    [% END %]
 		  </dt>
 		  <dd>
 		    [% IF h_attr.key == 'userPassword' %]
 		    [% aster = '<i class="fa fa-circle"></i>&nbsp;' %][% aster.repeat(8)%]
 		    [% ELSIF h_attr.key.match('userCertificate;binary') %]
-		    <br><small class="pull-left"><em><dl class="dl-horizontal">
-		      [% FOREACH cert IN h_attr.value %]
-		      [% NEXT IF cert.key == 'cert' %]
-		      [% NEXT IF cert.key == 'error' && ! cert.value %]
-		      <dt>[% cert.key %]</dt><dd class="mono">[% cert.value %]</dd>
-		      [% END %]
-		    </dl></em></small>
+		    <br>
+		    <small class="pull-left">
+		      <em>
+			<dl class="dl-horizontal">
+			  [% FOREACH cert IN h_attr.value %]
+			  [%   NEXT IF cert.key == 'cert' %]
+			  [%   NEXT IF cert.key == 'error' && ! cert.value %]
+			  <dt>[% cert.key %]</dt><dd class="mono">[% cert.value %]</dd>
+			  [% END %]
+			</dl>
+		      </em>
+		    </small>
 		    [% ELSIF h_attr.key == 'userPKCS12' %]
 		    <kbd class="fa fa-file-o">&nbsp;Binary Data</kbd>
 		    [% ELSIF h_attr.key == 'jpegPhoto' %]
 		    [% # bellow, value of jpegPhoto attribute contains no  `<img class="' part
 		       # to set background class here according the object type: root or child %]
 		    [% entry.value.mgmnt.is_root ? '<img class="bg-info ' _ h_attr.value : '<img class="bg-success ' _  h_attr.value %]
-			 [% ELSIF entry.value.is_arr.$attr_name %]
-			 [% FOREACH i IN h_attr.value %]
-		         [% IF h_attr.key == 'sshPublicKey' %]
-		    <div class="panel panel-default">
-		      <div class="panel-body"><small class="mono">[% i %]</small></div></div>
-		    [% ELSE %]
-		      [% IF schema.${h_attr.key} == 'distinguishedNameMatch' || schema.${h_attr.key} == 'distinguishedName' %]
-		      [% v = '<form role="form" method="POST" action="' _ c.uri_for_action("searchby/index") _ '">' _
-			 '<button type="submit" class="btn btn-link btn-xs"' _
+		    [% ELSIF entry.value.is_arr.$attr_name %]
+		    [%   FOREACH i IN h_attr.value %]
+		    [%     IF h_attr.key == 'sshPublicKey' %]
+		    <div class="panel panel-default"><div class="panel-body"><small class="mono">[% i %]</small></div></div>
+		    [%     ELSE %]
+		      [%     IF schema.${h_attr.key} == 'distinguishedNameMatch' || schema.${h_attr.key} == 'distinguishedName' %]
+		      [%     v = '<form role="form" method="POST" action="' _ c.uri_for_action("searchby/index") _ '">' _
+	  		 '<button type="submit" class="btn btn-link btn-xs"' _
 			 'title="click to open this object" name="ldap_subtree" value="' _ 
 			 i _ '">' _ i _ '</button></form>' %]
-		      [% ELSE %]
-		      [% v = i %]
-		      [% END %]
+		      [%     ELSE %]
+		      [%     v = i %]
+		      [%     END %]
 		      
-		      [% IF loop.last || v.match('form') %][% # if last element or button %]
-		      [% v %]
-		      [% ELSE %][% # not last element of array %]
-		      [% v %]<br>
-		      [% END %]
-		      [% END %]
+		      [%     IF loop.last || v.match('form') %][% # if last element or button %]
+		      [%     v.trim %]
+		      [%     ELSE %][% # not last element of array %]
+		      [%     v.trim %]<br>
+		      [%     END %]
+		      [%   END %]
 		      [% END %]
 		      [% ELSE %]
-		      [% h_attr.value %]
+		      [% h_attr.value.trim %]
 		      [% END %]
 		  </dd>
 		  [% END %] [% # FOREACH h_attr IN entry.value.attrs %]
