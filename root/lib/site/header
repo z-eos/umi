@@ -24,7 +24,7 @@
     <div class="collapse navbar-collapse">
       <ul class="nav navbar-nav">
 	[% IF c.user_exists && c.session.auth_uid %]
-	[% IF c.check_user_roles('admin') || c.check_user_roles('coadmin') %]
+	[% IF c.check_any_user_role ( 'admin', 'coadmin') %]
         <li class="dropdown" title="Predefined Data Sets">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" tabindex="1">
 	    <span class="fa fa-list-alt"></span>
@@ -57,7 +57,7 @@
 	    <span class="caret"></span>
 	  </a>
           <ul class="dropdown-menu" role="menu">
-	    [% IF c.check_user_roles('admin') || c.check_user_roles('coadmin') %]
+	    [% IF c.check_any_user_role ('admin', 'coadmin') %]
             <li>
 	      <a href="[% c.uri_for_action('user_root') %]" tabindex="2">
 		<span class="fa fa-fw fa-user"></span>
@@ -79,7 +79,7 @@
 	      </a>
 	    </li>
 	    [% END %]
-	    [% IF c.check_user_roles('admin') || c.check_user_roles('coadmin') || c.check_user_roles('acl-w-organizations') %]
+	    [% IF c.check_any_user_role ('admin', 'coadmin', 'acl-w-organizations') %]
             <li>
 	      <a href="[% c.uri_for_action('org_root') %]" tabindex="4">
         	<span class="fa fa-fw fa-industry"></span>
@@ -87,7 +87,7 @@
 	      </a>
 	    </li>
 	    [% END %]
-	    [% IF c.check_user_roles('admin') || c.check_user_roles('coadmin') || c.check_user_roles('acl-w-inventory')  %]
+	    [% IF c.check_any_user_role ('admin', 'coadmin', 'acl-w-inventory')  %]
             <li>
 	      <a href="[% c.uri_for_action('/inventory/index') %]" tabindex="4">
         	<span class="fa fa-fw fa-tags"></span>
@@ -110,7 +110,7 @@
         	DNS
 	      </a>
 	    </li>[% END %]
-	    [% IF c.check_user_roles('admin') || c.check_user_roles('dhcp') %]
+	    [% IF c.check_any_user_role ('admin', 'coadmin', 'dhcp') %]
             <li class="disabled">
 	      <a href="[% c.uri_for_action('dhcp_root') %]" tabindex="7">
         	<span class="fa fa-fw fa-sitemap"></span>
@@ -139,10 +139,10 @@
 		QR
 	      </a>
 	    </li>
-            <li class="divider"></li>
 	    [% # -------------------------------------------------------- %]
-            <li class="dropdown-header">Tools Adm:</li>
 	    [% IF c.check_any_user_role( 'admin' ) %]
+            <li class="divider"></li>
+            <li class="dropdown-header">Tools Adm:</li>
             <li>
 	      <a href="[% c.uri_for_action('toolimportldif/index') %]" tabindex="8">
 		<span class="fa fa-fw fa-download text-info"></span>
@@ -154,7 +154,7 @@
         </li>
 	[% END %]
       </ul>
-      [% IF c.user_exists && c.user.roles.size > 0 %]
+      [% IF c.user_exists && c.check_any_user_role ('admin', 'coadmin') %]
       <form class="navbar-form navbar-left"
 	    role="form"
 	    id="searchby"

@@ -142,9 +142,14 @@
       [%     SET num_of_dc = num_of_dc + 1 IF pat.match('dc=') %]
       [%   END %]
 
+      [% # === ACLs ACLs ACLs ACLs ACLs ACLs ACLs ACLs === %]
       [% # === DROPDOWN MENU AND MODALS RELATED LOGICS === %]
-      [%   # does current entry belong to admin? %]
-      [%   admin_owned = ! c.check_user_roles('admin') && entry.value.mgmnt.root_obj_groups.admin ? 0 : 1 %]
+
+      [% #     does current entry belong to admin?
+           admin_owned = ! c.check_user_roles('admin') &&
+	     entry.value.mgmnt.root_obj_groups.admin.defined &&
+	     entry.value.mgmnt.root_obj_groups.admin == 1 ? 0 : 1 %]
+
       [%   # IS ENTRY RESIDES IN accesslog DB ? %]
       [%   is_log_obj = entry.value.mgmnt.is_log.match('no') ? 0 : 1 %]	   
       [%   # ROLLABLE BACK IF reqType IS modify %]

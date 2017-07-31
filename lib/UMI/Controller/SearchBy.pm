@@ -55,8 +55,6 @@ has 'form_add_svc_acc' => ( isa => 'UMI::Form::AddServiceAccount', is => 'rw',
 			    documentation => q{Form to add service account},
 			  );
 
-
-
 =head1 NAME
 
 UMI::Controller::SearchBy - Catalyst Controller
@@ -207,7 +205,7 @@ sub index :Path :Args(0) {
       }
     }
 
-    my ( $ttentries, @ttentries_keys, $attr, $tmp, $dn_depth, $dn_depthes, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry, @root_groups, $obj_item );
+    my ( $ttentries, @ttentries_keys, $attr, $tmp, $dn_depth, $dn_depthes, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry, @root_groups, $root_gr, $obj_item );
     my $blocked = 0;
 
     # foreach $obj_item ( @{$ldap_crud->{cfg}->{base}->{objects}} ) {
@@ -260,6 +258,9 @@ sub index :Path :Args(0) {
 	utf8::decode($to_utf_decode);
 	$ttentries->{$tmp}->{root}->{sn} = $to_utf_decode;
 
+## todo? # 	$ttentries->{$tmp}->{root}->{createTimestamp} = $self->ldap_date({ ts => $_->get_value('createTimestamp'), });
+## todo? # 	$ttentries->{$tmp}->{root}->{modifyTimestamp} = $self->ldap_date({ ts => $_->get_value('modifyTimestamp'), });
+	
 	$#root_arr = -1;
 	$#root_dn = -1;
 
@@ -282,7 +283,7 @@ sub index :Path :Args(0) {
 	} else {
 	  @root_groups = $mesg->entries;
 	  foreach ( @root_groups ) {
-	    $ttentries->{$tmp}->{'mgmnt'}->{root_obj_groups}->{ $_->get_value('cn') } = 1;
+	    $root_gr->{ $_->get_value('cn') } = 1;
 	  }
 	}
 	# p $ttentries->{$tmp}->{'mgmnt'}->{root_obj_groups};
@@ -303,6 +304,7 @@ sub index :Path :Args(0) {
 	 is_account => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
 	 is_group => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{group}/ ? 1 : 0,
 	 is_inventory => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ? 1 : 0,
+	 root_obj_groups => defined $root_gr ? $root_gr : undef,
 	 jpegPhoto => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
 	 gitAclProject => $_->exists('gitAclProject') ? 1 : 0,
 	 userPassword => $_->exists('userPassword') ? 1 : 0,
@@ -346,9 +348,9 @@ sub index :Path :Args(0) {
     @ttentries_keys = sort { lc $a cmp lc $b } keys %{$ttentries}
       if $sort_order eq 'straight'; # for history searches
 
-    # foreach my $dn_s (keys ( %{$ttentries} )) {
-    #   p $ttentries->{$dn_s}->{mgmnt};
-    # }
+    foreach my $dn_s (keys ( %{$ttentries} )) {
+      p $ttentries->{$dn_s}->{mgmnt};
+    }
 
     $c->stash(
 	      template => 'search/searchby.tt',

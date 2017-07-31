@@ -35,6 +35,35 @@ sub is_ascii {
   }
 }
 
+## todo? # =head2 ldap_date
+## todo? # 
+## todo? # to and fro LDAP timestamp parser
+## todo? # 
+## todo? # stolen from https://metacpan.org/pod/Catalyst::Model::LDAP::Entry
+## todo? # 
+## todo? # =cut
+## todo? # 
+## todo? # sub ldap_date {
+## todo? #   my ($self, $args) = @_;
+## todo? #   my $arg = { ts        => $args->{ts},
+## todo? # 	      patternp   => $args->{patternp} || '%Y%m%d%H%M%S%Z',
+## todo? # 	      patternf   => $args->{patternf} || '%F %T %Z',
+## todo? # 	      locale    => $args->{locale} || 'en_US',
+## todo? # 	      tz        => $args->{tz} || 'local',
+## todo? # 	      on_error  => $args->{on_error} || 'undef',
+## todo? # 	    };
+## todo? #   use DateTime::Format::Strptime qw(strftime);
+## todo? #   my $strp =
+## todo? #     DateTime::Format::Strptime->new( pattern   => $arg->{patternp},
+## todo? # 				     locale    => $arg->{locale},
+## todo? # 				     time_zone => $arg->{tz},
+## todo? # 				     on_error  => $arg->{on_error},
+## todo? # 				   );
+## todo? #   $arg->{ts_parsed} = $strp->strftime($arg->{patternf}, $strp->parse_datetime($arg->{ts}));
+## todo? #   p $strp->errmsg if $strp->{on_error} eq 'undef';
+## todo? #   p $arg->{ts_parsed};
+## todo? #   return $arg->{ts_parsed};
+## todo? # }
 
 =head2 regex
 

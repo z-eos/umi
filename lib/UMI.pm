@@ -141,10 +141,6 @@ __PACKAGE__->deny_access_unless_any( "/searchby/ldif_gen2f", [ qw/admin coadmin/
 __PACKAGE__->deny_access_unless_any( "/servermta",           [ qw/admin coadmin operator/ ]);
 __PACKAGE__->deny_access_unless_any( "/sysinfo",             [ qw/admin/ ]);
 
-__PACKAGE__->deny_access_unless_any( "/toolpwdgen",          [ qw/admin coadmin operator employee/ ]);
-__PACKAGE__->deny_access_unless_any( "/toolqr",              [ qw/admin coadmin operator employee/ ]);
-__PACKAGE__->deny_access_unless_any( "/tooltranslit",        [ qw/admin coadmin operator employee/ ]);
-
 __PACKAGE__->deny_access_unless_any( "/toolimportldif",      [ qw/admin/ ]);
 __PACKAGE__->deny_access_unless_any( "/user",                [ qw/admin coadmin acl-w-people/ ]);
 __PACKAGE__->deny_access_unless_any( "/userall",             [ qw/admin coadmin acl-w-people/ ]);
@@ -161,6 +157,10 @@ __PACKAGE__
 		     } );
 
 __PACKAGE__->allow_access("/searchby/modify_userpassword");
+__PACKAGE__->allow_access("/toolpwdgen");
+__PACKAGE__->allow_access("/toolqr");
+__PACKAGE__->allow_access("/tooltranslit");
+
 
 __PACKAGE__->acl_allow_root_internals;
 
