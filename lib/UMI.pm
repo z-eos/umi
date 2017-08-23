@@ -125,11 +125,11 @@ __PACKAGE__->deny_access_unless_any( "/gitacl_root",         [ qw/admin coadmin/
 __PACKAGE__->deny_access_unless_any( "/group",               [ qw/admin coadmin/ ]);
 __PACKAGE__->deny_access_unless_any( "/group_root",          [ qw/admin coadmin/ ]);
 __PACKAGE__->deny_access_unless_any( "/org",                 [ qw/admin coadmin acl-w-organizations/ ]);
+__PACKAGE__->deny_access_unless_any( "/org_root",            [ qw/admin coadmin acl-w-organizations/ ]);
 __PACKAGE__->deny_access_unless_any( "/inventory",           [ qw/admin coadmin acl-w-inventory/ ]);
 __PACKAGE__->deny_access_unless_any( "/nisnetgroup",         [ qw/admin coadmin/ ]);
-__PACKAGE__->deny_access_unless_any( "/org_root",            [ qw/admin coadmin/ ]);
-__PACKAGE__->deny_access_unless_any( "/stat_acc",            [ qw/admin coadmin/ ]);
-__PACKAGE__->deny_access_unless_any( "/stat_monitor",        [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/stat_acc",            [ qw/admin coadmin operator/ ]);
+__PACKAGE__->deny_access_unless_any( "/stat_monitor",        [ qw/admin coadmin operator/ ]);
 
 # here we allow search to all members of admin, coadmin and operator groups, while the very permition to
 # search some LDAP filter or not is controlled by Tools::is_searchable method in Controller::SearchBy::index
@@ -140,6 +140,7 @@ __PACKAGE__->deny_access_unless_any( "/searchby/ldif_gen",   [ qw/admin coadmin/
 __PACKAGE__->deny_access_unless_any( "/searchby/ldif_gen2f", [ qw/admin coadmin/ ]);
 __PACKAGE__->deny_access_unless_any( "/servermta",           [ qw/admin coadmin operator/ ]);
 __PACKAGE__->deny_access_unless_any( "/sysinfo",             [ qw/admin/ ]);
+__PACKAGE__->deny_access_unless_any( "/test",                [ qw/admin/ ]);
 
 __PACKAGE__->deny_access_unless_any( "/toolimportldif",      [ qw/admin/ ]);
 __PACKAGE__->deny_access_unless_any( "/user",                [ qw/admin coadmin acl-w-people/ ]);

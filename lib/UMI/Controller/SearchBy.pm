@@ -324,7 +324,7 @@ sub index :Path :Args(0) {
 		    $tmp,
 		    encode_base64(join('',@{$ttentries->{$tmp}->{attrs}->{$attr}})),
 		    $tmp);
-	  } elsif ( $attr eq 'userCertificate;binary' ) {
+	  } elsif ( $attr eq 'userCertificate;binary' || $attr eq 'cACertificate;binary' || $attr eq 'certificateRevocationList;binary' ) {
 	    $ttentries->{$tmp}->{attrs}->{$attr} = $self->cert_info({ cert => $_->get_value( $attr ) });
 	} elsif (ref $ttentries->{$tmp}->{attrs}->{$attr} eq 'ARRAY') {
 	  $ttentries->{$tmp}->{is_arr}->{$attr} = 1;

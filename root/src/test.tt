@@ -1,0 +1,8 @@
+[% META title = 'page to test code' %] 
+
+[% INCLUDE ldap_err.tt %]
+
+[% USE dumper() %]
+<pre>
+[% dumper.dump(final_message) %]
+</pre>

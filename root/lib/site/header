@@ -23,8 +23,8 @@
     </div>
     <div class="collapse navbar-collapse">
       <ul class="nav navbar-nav">
-	[% IF c.user_exists && c.session.auth_uid %]
-	[% IF c.check_any_user_role ( 'admin', 'coadmin') %]
+	[% IF c.user_exists && c.session.auth_uid # !!! to fix, looks like a stub %]
+	[% IF c.check_any_user_role ( 'admin', 'coadmin', 'operator') %]
         <li class="dropdown" title="Predefined Data Sets">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" tabindex="1">
 	    <span class="fa fa-list-alt"></span>
@@ -57,7 +57,7 @@
 	    <span class="caret"></span>
 	  </a>
           <ul class="dropdown-menu" role="menu">
-	    [% IF c.check_any_user_role ('admin', 'coadmin') %]
+	    [% IF c.check_any_user_role ('admin', 'coadmin', 'acl-w-people') %]
             <li>
 	      <a href="[% c.uri_for_action('user_root') %]" tabindex="2">
 		<span class="fa fa-fw fa-user"></span>
@@ -154,7 +154,7 @@
         </li>
 	[% END %]
       </ul>
-      [% IF c.user_exists && c.check_any_user_role ('admin', 'coadmin') %]
+      [% IF c.user_exists && c.check_any_user_role ('admin', 'coadmin', 'operator') %]
       <form class="navbar-form navbar-left"
 	    role="form"
 	    id="searchby"
@@ -177,11 +177,11 @@
 	  	 data-original-title="Legend"
 		 data-template="<div class='popover hidden-xs' role='tooltip'><div class='arrow'></div><h3 class='popover-title'></h3><div class='popover-content'></div></div>"
 	  	 data-content="<ul>
-	          <li>default sort criteria is <i class='text-info'>by name</i> (First/Last Name, uid and cn)</li>
-	  	  <li>for each search criteria, <i class='text-info'>objectClass=<i class='fa fa-asterisk'></i></i> is used if empty</li>
-	  	  <li>use <i class='fa fa-asterisk text-info'></i> as substring</li>
-		  <li>narrow search results for non &laquo;by ...&raquo; presets, by providing attribute in filter, like: <i class='text-info'>uid=<i class='fa fa-asterisk'></i>dreii.<i class='fa fa-asterisk'></i></i></li>
-		  <li>to search in access log, use base <i class='text-info'>[% helper_cfg('cfg_local','ldap_crud_db_log') %]</i></li>
+	         <li>default sort criteria is <i class='text-info'>by name</i> (First/Last Name, uid and cn)</li>
+	  	 <li>for each search criteria, <i class='text-info'>objectClass=<i class='fa fa-asterisk'></i></i> is used if empty</li>
+	  	 <li>use <i class='fa fa-asterisk text-info'></i> as substring</li>
+		 <li>narrow search results for non &laquo;by ...&raquo; presets, by providing attribute in filter, like: <i class='text-info'>uid=<i class='fa fa-asterisk'></i>dreii.<i class='fa fa-asterisk'></i></i></li>
+		 <li>to search in access log, use base <i class='text-info'>[% helper_cfg('cfg_local','ldap_crud_db_log') %]</i></li>
 	  	 </ul>"
 	  	 tabindex="12">
 	  <div class="input-group-btn">
@@ -199,15 +199,22 @@
 		    title="Predefined Search Bases">
 	      <span class="caret"></span>
 	    </button>
+
+	    <a href="[% c.uri_for('/searchadvanced') %]"
+	       title="advanced search"
+	       class="btn btn-default btn-sm" role="button">
+	      <span class="fa fa-magic"></span>
+	    </a>
+	    
 	    <ul class="dropdown-menu dropdown-menu-right" role="menu" name="ldapsearch_base">
 
 	      [% icon_class = "fa fa-fw" %]
 	      [% menu_item = "btn btn-block btn-xs umi-text-left btn-" %]
 	      [% color = "success" %]
 
-	      <li>
+	      <li class="disabled">
 		<a href="[% c.uri_for('/searchadvanced') %]" tabindex="2">
-		  <span class="[% icon_class %] fa-search-plus fa-lg"></span>&nbsp;advanced search
+		  <span class="[% icon_class %] fa-magic fa-lg"></span>&nbsp;advanced search
 		</a>
 	      </li>
 
@@ -216,43 +223,43 @@
 			value="1" tabindex="15"
 			name="ldapsearch_by_name"
 			title="filter pattern in givenName or sn or uid or cn">
-		<span class="[% icon_class %] fa-user"></span>&nbsp;by name</button></li>
+		  <span class="[% icon_class %] fa-user"></span>&nbsp;by name</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
 			value="1" tabindex="16"
 			name="ldapsearch_by_email"
 			title="filter pattern in mail">
-		<span class="[% icon_class %] fa-envelope"></span>&nbsp;by email</button></li>
+		  <span class="[% icon_class %] fa-envelope"></span>&nbsp;by email</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
 			value="1" tabindex="17"
 			name="ldapsearch_by_jid"
 			title="filter pattern in mail">
-		<span class="[% icon_class %] fa-lightbulb-o"></span>&nbsp;by JID</button></li>
+		  <span class="[% icon_class %] fa-lightbulb-o"></span>&nbsp;by JID</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
 			value="1" tabindex="18"
 			name="ldapsearch_by_ip"
 			title="filter pattern in ip address">
-		<span class="[% icon_class %] fa-code-fork"></span>&nbsp;by IP</button></li>
+		  <span class="[% icon_class %] fa-code-fork"></span>&nbsp;by IP</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
 			value="1" tabindex="19"
 			name="ldapsearch_by_mac"
 			title="filter pattern in MAC address">
-		<span class="[% icon_class %] fa-barcode"></span>&nbsp;by MAC</button></li>
+		  <span class="[% icon_class %] fa-barcode"></span>&nbsp;by MAC</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
 			value="1" tabindex="19"
 			name="ldapsearch_by_sn"
 			title="filter pattern in Serial Number address">
-		<span class="[% icon_class %] fa-barcode"></span>&nbsp;by S/N</button></li>
+		  <span class="[% icon_class %] fa-barcode"></span>&nbsp;by S/N</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
 			value="1" tabindex="20"
 			name="ldapsearch_by_telephone"
 			title="filter pattern in telephone number">
-		<span class="[% icon_class %] fa-phone"></span>&nbsp;by telephone</button></li>
+		  <span class="[% icon_class %] fa-phone"></span>&nbsp;by telephone</button></li>
 	      
 	      [% color = "info" %]
 
@@ -261,70 +268,70 @@
 			value="[% helper_cfg('cfg_ldap_crud','base', 'group') %]"
 			name="ldapsearch_base"
 			title="filter pattern with base Groups">
-		<span class="[% icon_class %] fa-group"></span>&nbsp;group</button></li>
+		  <span class="[% icon_class %] fa-group"></span>&nbsp;group</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
 			value="[% helper_cfg('cfg_ldap_crud','base', 'netgroup') %]"
 			name="ldapsearch_base"
 			title="filter pattern with base NisNetgroups">
-		<span class="[% icon_class %] fa-group"></span>&nbsp;netgroup</button></li>
+		  <span class="[% icon_class %] fa-group"></span>&nbsp;netgroup</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
 			value="[% helper_cfg('cfg_ldap_crud','base', 'acc_root') %]"
 			name="ldapsearch_base"
 			title="filter pattern with base People">
-		<span class="[% icon_class %] fa-user"></span>&nbsp;People</button></li>
+		  <span class="[% icon_class %] fa-user"></span>&nbsp;People</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
 			value="[% helper_cfg('cfg_ldap_crud','base', 'org') %]"
 			name="ldapsearch_base" tabindex="20"
 			title="filter pattern with base Organizations">
-		<span class="[% icon_class %] fa-industry"></span>&nbsp;Organizations</button></li>
+		  <span class="[% icon_class %] fa-industry"></span>&nbsp;Organizations</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
 			value="[% helper_cfg('cfg_ldap_crud','base', 'dhcp') %]"
 			name="ldapsearch_base" tabindex="21"
 			title="filter pattern with base DHCP">
-		<span class="[% icon_class %] fa-sitemap"></span>&nbsp;DHCP</button></li>
+		  <span class="[% icon_class %] fa-sitemap"></span>&nbsp;DHCP</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
 			value="[% helper_cfg('cfg_ldap_crud','base', 'alias') %]"
 			name="ldapsearch_base" tabindex="22"
 			title="filter pattern with base Aliases">
-		<span class="[% icon_class %] fa-files-o"></span>&nbsp;alias</button></li>
+		  <span class="[% icon_class %] fa-files-o"></span>&nbsp;alias</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
 			value="[% helper_cfg('cfg_ldap_crud','base', 'workstations') %]"
 			name="ldapsearch_base" tabindex="23"
 			title="filter pattern with base Workstations">
-		<span class="[% icon_class %] fa-desktop"></span>&nbsp;workstations</button></li>
+		  <span class="[% icon_class %] fa-desktop"></span>&nbsp;workstations</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
 			value="[% helper_cfg('cfg_ldap_crud','base', 'machines') %]"
 			name="ldapsearch_base" tabindex="24"
 			title="filter pattern with base Machines">
-		<span class="[% icon_class %] fa-server"></span>&nbsp;machines</button></li>
+		  <span class="[% icon_class %] fa-server"></span>&nbsp;machines</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
 			value="[% helper_cfg('cfg_ldap_crud','base', 'inventory') %]"
 			name="ldapsearch_base" tabindex="24"
 			title="filter pattern with base Inventory">
-		<span class="[% icon_class %] fa-tags"></span>&nbsp;inventory</button></li>
+		  <span class="[% icon_class %] fa-tags"></span>&nbsp;inventory</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
 			value="[% helper_cfg('cfg_ldap_crud','base', 'mta') %]"
 			name="ldapsearch_base" tabindex="24"
 			title="filter pattern with base Sendmail">
-		<span class="[% icon_class %] fa-envelope"></span>&nbsp;Sendmail</button></li>
+		  <span class="[% icon_class %] fa-envelope"></span>&nbsp;Sendmail</button></li>
 	      <li class="bg-[% color %]">
 		<button type="submit" class="[% menu_item %][% color %]"
 			value="[% helper_cfg('cfg_ldap_crud','base', 'gitacl') %]"
 			name="ldapsearch_base" tabindex="25">
-		<span class="[% icon_class %] fa-gavel"></span>&nbsp;GitACL</button></li>
+		  <span class="[% icon_class %] fa-gavel"></span>&nbsp;GitACL</button></li>
 
 	      [% color = "warning" %]
 
-	      <li>
+	      <li class="disabled">
 		<a href="[% c.uri_for('/searchadvanced') %]" tabindex="27">
 		  <span class="[% icon_class %] fa-stethoscope fa-lg"></span>&nbsp;audit
 		</a>
@@ -373,6 +380,9 @@
 		<span class="fa fa-fw fa-info-circle text-info"></span>
 		system info
 	      </a>
+	    </li>
+            <li>
+	      <a href="test"><span class="fa fa-fw fa-code">&nbsp;</span>test</a>
 	    </li>
 	    [% END %]
           </ul>

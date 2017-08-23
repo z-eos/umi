@@ -626,6 +626,60 @@ sub auto : Private {
   }
 }
 
+=head2 test
+
+page to test code snipets
+
+=cut
+
+sub test :Path(test) :Args(0) {
+    my ( $self, $c ) = @_;
+    my $ldap_crud = $c->model('LDAP_CRUD');
+
+    my $svc;
+    my $fqdn;
+
+    ## DHCP
+    # $svc = 'dhcp';
+    # $fqdn = 'voyager.startrek.in';
+    # filter => sprintf('(&(objectClass=dhcpSubnet)(dhcpOption=domain-name "%s"))', $fqdn),
+    # attrs => [ 'cn', 'dhcpNetMask', 'dhcpRange' ],
+    ## VPN
+    # $svc = 'vpn';
+    # $fqdn = 'talax.startrek.in';
+    # filter => sprintf('(&(authorizedService=ovpn@%s)(cn=*))', $fqdn),
+    # attrs => [ 'cn', 'umiOvpnCfgServer', 'umiOvpnCfgRoute' ],
+
+#	       final_message => $ldap_crud->ipam({ svc => 'vpn', fqdn => 'talax.startrek.in', what => 'all', })
+#	       testvar => $self->ipam_ip2dec('10.10.10.10')
+
+    # $svc = 'ovpn';
+    # $fqdn = 'talax.startrek.in';
+    $svc = 'dhcp';
+    $fqdn = 'voyager.startrek.in';
+
+    my $iu = $ldap_crud->ipam_used({ svc => $svc,
+				     fqdn => $fqdn,
+				     base => $ldap_crud->{cfg}->{base}->{$svc},
+				     # filter => sprintf('(&(authorizedService=ovpn@%s)(cn=*))', $fqdn),
+				     # attrs => [ 'cn', 'umiOvpnCfgServer', 'umiOvpnCfgRoute' ],
+
+				     filter => sprintf('(&(objectClass=dhcpSubnet)(dhcpOption=domain-name "%s"))', $fqdn),
+				     attrs => [ 'cn', 'dhcpNetMask', 'dhcpRange' ],
+
+
+				   });
+    
+    $c->stash( template => 'test.tt',
+	       final_message => $ldap_crud->ipam_first_free({ ipspace => $iu->{ipspace},
+	       						      ip_used => $iu->{ip_used},
+							      # tgt_net => '10.146.5.0/24',
+							      # req_msk => 30,
+	       						    }),
+	       # final_message => $iu,
+
+	     );
+}
 
 =head2 end
 

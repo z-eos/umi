@@ -276,7 +276,9 @@
 		  <dd>
 		    [% IF h_attr.key == 'userPassword' %]
 		    [% aster = '<i class="fa fa-circle"></i>&nbsp;' %][% aster.repeat(8)%]
-		    [% ELSIF h_attr.key.match('userCertificate;binary') %]
+		    [% ELSIF h_attr.key.match('userCertificate;binary') ||
+		       h_attr.key.match('certificateRevocationList;binary') ||
+		       h_attr.key.match('cACertificate;binary')%]
 		    <br>
 		    <small class="pull-left">
 		      <em>

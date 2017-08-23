@@ -31,14 +31,14 @@ has 'form' => (
 
 =head2 index
 
-strictly speaking - new object creation (ldapadd1)
+new object creation
 
 =cut
 
 
 sub index :Path :Args(0) {
   my ( $self, $c ) = @_;
-  if ( $c->check_user_roles('wheel')) {
+  
     $c->stash( template => 'dhcp/dhcp_wrap.tt',
 	       form => $self->form );
 
@@ -48,17 +48,7 @@ sub index :Path :Args(0) {
 			   params => $c->req->parameters,
 			   ldap_crud => $c->model('LDAP_CRUD'),
 			  );
-  } elsif ( defined $c->session->{auth_uid} ) {
-    if ( defined $c->session->{'unauthorized'}->{ $c->action } ) {
-      $c->session->{'unauthorized'}->{ $c->action } += 1;
-    } else {
-      $c->session->{'unauthorized'}->{ $c->action } = 1;
-    }
-    $c->stash( 'template' => 'unauthorized.tt',
-	       'unauth_action' => $c->action, );
-  } else {
-    $c->stash( template => 'signin.tt', );
-  }
+
 }
 
 
@@ -70,6 +60,7 @@ creates dhcp host configuration object (static dhcp lease)
     cn: ap1
     dhcphwaddress: ethernet 00:22:b0:62:d1:fb
     dhcpstatements: fixed-address 198.51.100.3
+    dhcpstatements: ddns-hostname U1408443894C9001-kathryn.janeway-0022b062d1fb
     objectclass: top
     objectclass: dhcpHost
     objectclass: uidObject
@@ -85,53 +76,67 @@ and resolving not used ip addresses from it
 sub create_dhcp_host {
   my  ( $self, $ldap_crud, $args ) = @_;
   my $return;
+  my $dhcpStatements;
 
   use Data::Printer;
 
-  my $dhcpStatements = $ldap_crud->dhcp_lease({ net => $args->{net} });
-  $return->{error} = sprintf('<li>%s</li>', $dhcpStatements->{error}) if ref($dhcpStatements) eq 'HASH';
+  # my $dhcpStatements = $ldap_crud->dhcp_lease({ net => $args->{net} });
+  # $return->{error} = sprintf('<li>%s</li>', $dhcpStatements->{error}) if ref($dhcpStatements) eq 'HASH';
 
-  my $arg = {
-	     dhcpHWAddress => $args->{dhcpHWAddress},
-	     uid => $args->{uid},
-	     net => $args->{net}, # FQDN for net new oject have to belong to
-	     dhcpStatements => $args->{dhcpStatements} || $dhcpStatements->[0],
-	     cn => $args->{cn} || $args->{dhcpHWAddress} =~ tr/://dr,
-	     dhcpComments => join(' ', $args->{dhcpComments}) || undef,
-	    };
+  my $iu = $ldap_crud->ipam_used({ svc => 'dhcp',
+				   fqdn => $args->{net},
+				   base => $ldap_crud->{cfg}->{base}->{dhcp},
+				   filter => sprintf('(&(objectClass=dhcpSubnet)(dhcpOption=domain-name "%s"))', $args->{net}),
+				   attrs => [ 'cn', 'dhcpNetMask', 'dhcpRange' ], });
 
-  $arg->{ldapadd_arg} = [
-			 dhcpHWAddress => sprintf('ethernet %s', $arg->{dhcpHWAddress}),
-			 uid => $arg->{uid},
-			 dhcpStatements => sprintf('fixed-address %s', $arg->{dhcpStatements}),
-			 cn => $arg->{cn},
-			 objectClass => $ldap_crud->cfg->{objectClass}->{dhcp},
-			];
-
-  push @{$arg->{ldapadd_arg}}, dhcpComments => $arg->{dhcpComments} if defined $arg->{dhcpComments};
-
-  my $nets = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{dhcp},
-				   filter => 'dhcpOption=domain-name "' . $arg->{net} . '"', } );
-
-  if ( $nets->count > 1 ) {
-    $return->{warning} = '<li>network <b>&laquo;' . $arg->{net} .'&raquo;</b> used more than one time in DHCP config!</li>';
-  }
-
-  my $net = $nets->entry(0);
-  $arg->{dn} = sprintf('cn=%s,%s', $arg->{cn}, $net->dn);
-
-  $nets = $ldap_crud->add( $arg->{dn}, $arg->{ldapadd_arg} );
-  if ( $nets ) {
-    $return->{error} .= sprintf('<li>error during <b>&laquo;%s&raquo;</b> configuration: %s</li>', $arg->{net}, $nets);
+  if ( defined $iu->{error} ) {
+    $return->{warning} = $iu->{error};
   } else {
-    $return->{success} =
-      sprintf('user <em><b>%s,%s</b></em> MAC: <em><b>%s</b></em> now bound to IP: <em><b>%s,%s</b></em>',
-	      $arg->{uid},
-	      $ldap_crud->cfg->{base}->{acc_root},
-	      $arg->{dhcpHWAddress},
-	      $arg->{dhcpStatements});
-  }
+    $dhcpStatements = $self->ipam_first_free({ ipspace => $iu->{ipspace},
+					       ip_used => $iu->{ip_used}, });
 
+    my $arg = {
+	       dhcpHWAddress => $args->{dhcpHWAddress},
+	       uid => $args->{uid},
+	       net => $args->{net}, # FQDN for net new oject have to belong to
+	       dhcpStatements => $args->{dhcpStatements} || $dhcpStatements,
+	       cn => $args->{cn} || $args->{uid} . '-' . $args->{dhcpHWAddress} =~ tr/://dr,
+	       dhcpComments => join(' ', $args->{dhcpComments}) || undef,
+	      };
+
+    $arg->{ldapadd_arg} = [
+			   dhcpHWAddress => sprintf('ethernet %s', $arg->{dhcpHWAddress}),
+			   uid => $arg->{uid},
+			   dhcpStatements => [ sprintf('fixed-address %s', $arg->{dhcpStatements}),
+					       sprintf('ddns-hostname "%s"', $arg->{cn}) ],
+			   cn => $arg->{cn},
+			   objectClass => $ldap_crud->cfg->{objectClass}->{dhcp},
+			  ];
+
+    push @{$arg->{ldapadd_arg}}, dhcpComments => $arg->{dhcpComments} if defined $arg->{dhcpComments};
+
+    my $nets = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{dhcp},
+				     filter => 'dhcpOption=domain-name "' . $arg->{net} . '"', } );
+
+    if ( $nets->count > 1 ) {
+      $return->{warning} = '<li>network <b>&laquo;' . $arg->{net} .'&raquo;</b> used more than one time in DHCP config!</li>';
+    }
+
+    my $net = $nets->entry(0);
+    $arg->{dn} = sprintf('cn=%s,%s', $arg->{cn}, $net->dn);
+
+    $nets = $ldap_crud->add( $arg->{dn}, $arg->{ldapadd_arg} );
+    if ( $nets ) {
+      $return->{error} .= sprintf('<li>error during <b>&laquo;%s&raquo;</b> configuration: %s</li>', $arg->{net}, $nets);
+    } else {
+      $return->{success} =
+	sprintf('user <em><b>%s,%s</b></em> MAC: <em><b>%s</b></em> now bound to IP: <em><b>%s,%s</b></em>',
+		$arg->{uid},
+		$ldap_crud->cfg->{base}->{acc_root},
+		$arg->{dhcpHWAddress},
+		$arg->{dhcpStatements});
+    }
+  }
   return $return;
 }
 

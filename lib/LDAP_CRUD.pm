@@ -30,6 +30,7 @@ use Net::LDAP::Util qw(
 
 use Try::Tiny;
 
+
 =head1 NAME
 
 LDAP_CRUD - base class for LDAP related actions
@@ -107,6 +108,7 @@ sub _build_cfg {
 		   mta =>            'ou=Sendmail,'           . UMI->config->{ldap_crud_db},
 		   netgroup =>       'ou=Netgroups,'          . UMI->config->{ldap_crud_db},
 		   org =>            'ou=Organizations,'      . UMI->config->{ldap_crud_db},
+		   ovpn =>           'ou=OpenVPN,'            . UMI->config->{ldap_crud_db},
 		   rad_groups =>     'ou=groups,ou=RADIUS,'   . UMI->config->{ldap_crud_db},
 		   rad_profiles =>   'ou=profiles,ou=RADIUS,' . UMI->config->{ldap_crud_db},
 		   workstations =>   'ou=workstations,'       . UMI->config->{ldap_crud_db},
@@ -122,6 +124,7 @@ sub _build_cfg {
 					   mta
 					   netgroup
 					   org
+					   ovpn
 					   rad_groups
 					   rad_profiles
 					   workstations
@@ -137,6 +140,7 @@ sub _build_cfg {
 			    inventory =>     'fa fa-tag',
 			    mta =>           'fa fa-envelope',
 			    Organizations => 'fa fa-industry',
+			    OpenVPN =>       'fa fa-sitemap',
 			    rad_groups =>    'fa fa-group',
 			    rad_profiles =>  'fa fa-cogs',
 			   },
@@ -166,8 +170,8 @@ sub _build_cfg {
 	  stub => {
 		   homeDirectory => '/nonexistent',
 		   loginShell => '/sbin/nologin',
-		   gidNumber => 10012,
-		   group => 'employee',
+		   gidNumber => UMI->config->{default}->{gidNumber},
+		   group => UMI->config->{default}->{group},
 		   noavatar_mgmnt => UMI->path_to('root', 'static', 'images', '/avatar-mgmnt.png'),
 		   icon => 'fa fa-user-circle',
 		   icon_error => 'fa fa-exclamation-circle',
@@ -209,7 +213,7 @@ sub _build_cfg {
 							 simpleSecurityObject
 							 authorizedServiceObject
 							 radiusprofile
-							 strongAuthenticationUser
+							 pkiUser
 							 umiUserCertificate
 						      ) ],
 			  acc_svc_common => [ qw(
@@ -248,7 +252,7 @@ sub _build_cfg {
 					organizationalRole
 					authorizedServiceObject
 					domainRelatedObject
-					strongAuthenticationUser
+					pkiUser
 					umiUserCertificate
 					umiOvpnCfg
 				     ) ],
@@ -2160,6 +2164,147 @@ sub dhcp_lease {
   }
 }
 
+=head2 ipam_used
+
+IP Addresses Used
+
+info gathered:
+
+    - available (unused) IP addresses
+    - used ip addresses
+
+arguments (returned with results as well) expected:
+
+     svc: type STRING
+          service identificator
+
+    fqdn: fqdn of the network provided by `svc' service
+
+    base: type STRING
+          base to do search against, in general it is LDAP_CRUD::cfg->{base}->{}
+
+  filter: type STRING
+          filter to do search with
+          for DHCP
+          (&(objectClass=dhcpSubnet)(dhcpOption=domain-name "FQDN related to the subnet"))
+          for OpenVPN
+          (&(authorizedService=ovpn@FQDN.related.to.the.subnet)(cn=*))
+
+   attrs: type ARRAYREF
+          attributes to return
+
+method returns such a hash:
+
+    {
+      arg       {
+        attrs    [
+          [0] "cn",
+          [1] "umiOvpnCfgServer",
+          [2] "umiOvpnCfgRoute"
+        ],
+        base     "ou=OpenVPN,dc=umidb",
+        filter   "(&(authorizedService=ovpn@talax.startrek.in)(cn=*))",
+        fqdn     "talax.startrek.in",
+        svc      "ovpn"
+      },
+      ip_used   [
+        [0] "10.34.5.5/30"
+      ],
+      ipspace   [
+        [0] "10.32.0.0/16",
+        [1] "10.32.0.0/12"
+      ]
+    }
+
+=cut
+
+sub ipam_used {
+  my ( $self, $args ) = @_;
+  my $arg = { svc    => $args->{svc} || 'ovpn',
+	      fqdn   => $args->{fqdn},
+	      base   => $args->{base},
+	      filter => $args->{filter},
+	      attrs  => $args->{attrs},
+	    };
+  my $return;
+  $return->{arg} = $arg;
+
+  my ( $key, $val, $k, $v, $l, $r, $tmp, $entry_svc, $entry_dhcp, $entry_ovpn, $ipspace, $ip_used );
+  
+  if ( $arg->{svc} ne 'dhcp' && $arg->{svc} ne 'ovpn' ) {
+    $return->{error} = 'ipam_used(): incorrect value of option: svc.';
+    return $return;
+  }
+  
+  my $mesg_svc = $self->search({ base   => $arg->{base},
+				 filter => $arg->{filter},
+				 attrs  => $arg->{attrs}, });
+  if (! $mesg_svc->count) {
+    $return->{error} = sprintf("ipam_used(): No %s configuration for %s found .", uc( $arg->{svc} ), $arg->{fqdn});
+    return $return;
+  } else {
+    foreach $entry_svc (@{[ $mesg_svc->as_struct ]}) {
+      while ( ($key, $val) = each %{$entry_svc} ) {
+	# SERVICE: DHCP -----------------------------------------------
+	if ( $arg->{svc} eq 'dhcp' ) {
+	  push @{$return->{ipspace}}, $val->{cn}->[0] . '/' . $val->{dhcpnetmask}->[0];
+	  my $mesg_dhcp = $self->search({ base   => $key,
+					  filter => 'dhcpStatements=fixed-address*',
+					  attrs  => [ 'dhcpStatements', 'dhcpHWAddress' ], });
+	  if (! $mesg_dhcp->count) {
+	    $return->{error} = sprintf("ipam_used(): Some %s dn: %s configuration missed or incorrect.", uc( $arg->{svc} ), $key);
+	    return $return;
+	  } else {
+	    foreach $entry_dhcp (@{[ $mesg_dhcp->as_struct ]}) {
+	      push @{$return->{ip_used}}, (split(/ /, $v->{dhcpstatements}->[0]))[1] . '/32'
+		while ( ($k, $v) = each %{$entry_dhcp} );
+	    }
+	  }
+	}
+	# SERVICE: OpenVPN --------------------------------------------
+	elsif ( $arg->{svc} eq 'ovpn' ) {
+	  ($l, $r) = split(/ /, $val->{umiovpncfgserver}->[0]);
+
+	  push @{$return->{ipspace}}, $l . '/' . $self->ipam_msk_ip2dec($r);
+
+	  foreach (@{ $val->{umiovpncfgroute} }) {
+	    ($l, $r) = split(/ /, $val->{umiovpncfgroute}->[0]);
+	    push @{$return->{ipspace}}, $l . '/' . $self->ipam_msk_ip2dec($r);
+	  }
+
+	  my $mesg_ovpn = $self->search({ base   => $self->{cfg}->{base}->{acc_root},
+					  filter => $arg->{filter},
+					  attrs  => [ 'umiOvpnCfgIfconfigPush', 'umiOvpnCfgIroute' ], });
+	  if (! $mesg_ovpn->count) {
+	    $return->{error} = sprintf("ipam_used(): Some %s dn: %s configuration missed or incorrect.", uc( $arg->{svc} ), $key);
+	    return $return;
+	  } else {
+	    foreach $entry_ovpn (@{[ $mesg_ovpn->as_struct ]}) {
+	      while ( ($k, $v) = each %{$entry_ovpn} ) {
+		($l, $r) = split(/ /, $v->{umiovpncfgifconfigpush}->[0]);
+
+		push
+		  @{$return->{ip_used}},
+		  $self->ipam_ip2dec($r) - $self->ipam_ip2dec($l) == 1 ?
+		  $l . '/30' : $l . '/32';
+		if ( defined $v->{umiovpncfgiroute} ) {
+		  foreach (@{ $v->{umiovpncfgiroute} }) {
+		    ($l, $r) = split(/ /, $_);
+		    push @{$return->{ip_used}}, $l . '/' . $self->ipam_msk_ip2dec($r);
+		  }
+		}
+	      }
+	    }
+	  }
+	}
+      } # while end
+    } # foreach end
+  }
+  return $return;
+}
+
+
+
 ######################################################################
 # SELECT elements options builders
 ######################################################################
@@ -2284,11 +2429,10 @@ sub _build_select_associateddomains {
 			      attrs => ['associatedDomain' ],
 			    } );
   my $err_message = '';
-  if ( ! $mesg->count ) {
-    $err_message = '<div class="alert alert-danger">' .
-      '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
-      $self->err($mesg) . '</ul></div>';
-  }
+  $err_message = '<div class="alert alert-danger">' .
+    '<i class="' . $self->{cfg}->{stub}->{icon_error} . '"></i><ul>' .
+    $self->err($mesg) . '</ul></div>'
+      if ! $mesg->count;
 
   my @entries = $mesg->sorted('associatedDomain');
   my (@i, @j);
@@ -2296,6 +2440,51 @@ sub _build_select_associateddomains {
     @i = $entry->get_value('associatedDomain');
     foreach (@i) {
       push @j, $_;
+    }
+  }
+  @domains = map { { value => $_, label => $_ } } sort @j;
+  
+  return \@domains;
+}
+
+=head2 select_dhcp_associateddomains
+
+Method, options builder for select element of dhcp domain names
+assigned to networks served by dhcp
+
+Here we assume: one dhcpSubnet -> one dhcpOption=domain-name "*"
+
+=cut
+
+has 'select_dhcp_associateddomains' => ( traits => ['Array'],
+	       is => 'ro', isa => 'ArrayRef', required => 0, lazy => 1,
+	       builder => '_build_select_dhcp_associateddomains',
+	     );
+
+sub _build_select_dhcp_associateddomains {
+  my $self = shift;
+
+  my @domains = ( {value => '0', label => '--- select domain ---', selected => 'selected'} );
+  my $mesg = $self->search( { base => $self->cfg->{base}->{dhcp},
+			      filter => '(&(objectClass=dhcpSubnet)(dhcpOption=domain-name "*"))',
+			      sizelimit => 0,
+			      attrs => [ 'dhcpOption' ],
+			    } );
+  my $err_message = '';
+
+  $err_message = '<div class="alert alert-danger">' .
+    '<i class="' . $self->{cfg}->{stub}->{icon_error} . '"></i><ul>' .
+    $self->err($mesg) . '</ul></div>'
+    if ! $mesg->count;
+
+  my @entries = $mesg->sorted('dhcpOption');
+  my (@i, @j);
+  foreach my $entry ( @entries ) {
+    @i = $entry->get_value('dhcpOption');
+    foreach (@i) {
+      # to skip underlying objects dhcpOption values different from domain-name
+      push @j, substr((split(/ /, $_))[1], 1, -1)
+	if $_ =~ /domain-name ".*"/;
     }
   }
   @domains = map { { value => $_, label => $_ } } sort @j;
@@ -2445,10 +2634,10 @@ DEFAULTS:
 
 sub bld_select {
   my ($self, $args) = @_;
-  my $arg = { base  => $args->{base},
-	      attr  => $args->{attr} || [ 'cn', 'description' ],
-	      filter => $args->{filter} || '(objectClass=*)',
-	      scope => $args->{scope} || 'one',
+  my $arg = { base      => $args->{base},
+	      attr      => $args->{attr} || [ 'cn', 'description' ],
+	      filter    => $args->{filter} || '(objectClass=*)',
+	      scope     => $args->{scope} || 'one',
 	      sizelimit => $args->{sizelimit} || 0, };
 
   my $callername = (caller(1))[3];
@@ -2466,7 +2655,7 @@ sub bld_select {
   my $err_message = '';
   if ( ! $mesg->count ) {
     $err_message = '<div class="alert alert-danger">' .
-      '<span style="font-size: 140%" class="icon_error-oct" aria-hidden="true"></span><ul>' .
+      '<i class="' . $self->{cfg}->{stub}->{icon_error} . '"></i><ul>' .
 	$self->err($mesg)->{html} . '</ul></div>';
   }
 

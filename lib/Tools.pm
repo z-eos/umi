@@ -7,6 +7,7 @@ use Moose::Role;
 use utf8;
 use Data::Printer;
 use Try::Tiny;
+use Net::CIDR::Set;
 
 =head1 NAME
 
@@ -34,6 +35,108 @@ sub is_ascii {
     return 0;
   }
 }
+
+=head2 ipam_dec2ip
+
+decimal IP to a dotted IP converter
+
+stolen from http://ddiguru.com/blog/25-ip-address-conversions-in-perl
+
+=cut
+
+sub ipam_dec2ip {
+  my ($self, $arg) = @_;
+  return join '.', unpack 'C4', pack 'N', $arg;
+}
+
+=head2 ipam_ip2dec
+
+dotted IP to a decimal IP converter
+
+stolen from http://ddiguru.com/blog/25-ip-address-conversions-in-perl
+
+=cut
+
+sub ipam_ip2dec {
+  my ($self, $arg) = @_;
+  return unpack N => pack 'C4' => split /\./ => $arg;
+}
+
+# pow: exp( log( $self->ip2dec($arg) ) / 2 )
+sub ipam_msk_ip2dec {
+  my ($self, $arg) = @_;
+  return (unpack 'B*' => pack 'N' => $self->ipam_ip2dec($arg)) =~ tr/1/1/;
+}
+
+
+=head2 ipam_first_free
+
+first available CIDR (according the desired network and netmask) from the service ip space
+
+input data is hash
+
+    ipspace: type ARRAYREF
+             array reference to CIDRs of the service ip space (VPN pool 
+             of the addresses assigned to clients, DHCP networks, e.t.c.)
+
+    ip_used: type ARRAYREF
+             array reference to CIDRs of ip addresses used for the service
+
+    tgt_net: type STRING 
+             subnet (of I<ipspace>) address in CIDR notation, the free
+             address found to be from if not set, then the very I<ipspace>
+             assumed
+
+    req_msk: type INT
+             netmask, in CIDR notation, of the requested ip space (default is 32)
+
+First, we calculate I<free> addresses set, it is new set containing all the
+addresses that are present in I<pool> set but not I<used> set.
+
+Second, we calculate I<nsec> (from intersection) addresses set, it is
+new set that is the intersection of a I<trgt> and I<free> sets. This is
+equivalent to a logical AND between sets. It contains only the addresses
+present both, in I<trgt> and I<free> sets.
+
+Finaly, we check each of the addresses of the I<free> set in ascending
+order, to find the CIDR with netmask requested, available. The first 
+match is returned.
+
+Addresses ending with 0 or 255 are ignored in case /32 address is desired.
+
+If no match found, then 0 is returned.
+
+=cut
+
+sub ipam_first_free {
+  my ($self, $args) = @_;
+  my $arg = { ipspace => $args->{ipspace},
+	      ip_used => $args->{ip_used},
+	      tgt_net => $args->{tgt_net} || $args->{ipspace}->[0],
+	      req_msk => $args->{req_msk} || 32, };
+  my $pool = Net::CIDR::Set->new;
+  $pool->add( $_ )
+    foreach (@{ $arg->{ipspace} });
+
+  my $used = Net::CIDR::Set->new;
+  $used->add( $_ )
+    foreach (@{ $arg->{ip_used} });
+
+  my $free = $pool->diff( $used );
+
+  my $trgt = Net::CIDR::Set->new;
+  $trgt->add( $arg->{tgt_net} );
+
+  my $nsec = $trgt->intersection( $free );
+
+  foreach ( $nsec->as_array( $nsec->iterate_addresses ) ) {
+    next if $arg->{req_msk} == 32 && $_ =~ /^.*\.[0,255]$/;
+    next if ! $free->contains( $_ . '/' . $arg->{req_msk} );
+    return $_;
+  }
+  return 0;
+}
+
 
 ## todo? # =head2 ldap_date
 ## todo? # 
@@ -1027,6 +1130,10 @@ return either error message or 0 if validation has been successfully passed
 
 =cut
 
+##
+### TO BE REFACTORIED !!! to Net::CIDR::Set
+##
+
 sub vld_ifconfigpush {
   my ($self, $args) = @_;
   my $arg = {
@@ -1038,33 +1145,33 @@ sub vld_ifconfigpush {
 
   use Net::Netmask;
 
-  ( $arg->{l}, $arg->{r}) = split(/ /, $arg->{ifconfigpush});
+  my ( $l, $r ) = split(/ /, $arg->{ifconfigpush});
 
   $arg->{vpn}->{net} = new Net::Netmask ($arg->{vpn_net});
 
-  if ( $arg->{mode} ne 'net30' && $arg->{vpn}->{net}->nth(1) eq $arg->{l} ) {
+  if ( $arg->{mode} ne 'net30' && $arg->{vpn}->{net}->nth(1) eq $l ) {
     $arg->{return}->{error} = 'Left address can not be the address of VPN server itself.';
-  } elsif ( $arg->{vpn}->{net}->nth(1) eq $arg->{r} ) {
+  } elsif ( $arg->{vpn}->{net}->nth(1) eq $r ) {
 
     $arg->{return} = 0; # $arg->{return}->{error} = 'NONWIN CONFIG';
 
   } else {
-    $arg->{net} = new Net::Netmask ( $arg->{l} . '/30');
-    if ( ! $arg->{net}->match( $arg->{r} ) ) {
+    $arg->{net} = new Net::Netmask ( $l . '/30');
+    if ( ! $arg->{net}->match( $r ) ) {
       $arg->{return}->{error} = 'The second address does not belong to the expected ' . $arg->{net}->desc;
-    } elsif ( $arg->{l} eq $arg->{r} ) {
+    } elsif ( $l eq $r ) {
       $arg->{return}->{error} = 'Local and Remote addresses can not be the same.';
-    } elsif ( $arg->{net}->match($arg->{r}) && $arg->{l} eq $arg->{net}->nth(1) && $arg->{r} eq $arg->{net}->nth(-2) ) {
+    } elsif ( $arg->{net}->match($r) && $l eq $arg->{net}->nth(1) && $r eq $arg->{net}->nth(-2) ) {
 
       $arg->{return} = 0; # $arg->{return}->{error} = 'WIN CONFIG';
       
-    } elsif ( $arg->{net}->match($arg->{r}) && $arg->{l} ne $arg->{net}->nth(1) && $arg->{r} eq $arg->{net}->nth(-2) ) {
+    } elsif ( $arg->{net}->match($r) && $l ne $arg->{net}->nth(1) && $r eq $arg->{net}->nth(-2) ) {
       $arg->{return}->{error} = 'The first address is not a usable/host address of the expected ' . $arg->{net}->desc;
-    } elsif ( $arg->{net}->match($arg->{r}) && $arg->{l} eq $arg->{net}->nth(1) && $arg->{r} ne $arg->{net}->nth(-2) ) {
+    } elsif ( $arg->{net}->match($r) && $l eq $arg->{net}->nth(1) && $r ne $arg->{net}->nth(-2) ) {
       $arg->{return}->{error} = 'The second address is not a usable/host address of the expected ' . $arg->{net}->desc;
-    } elsif ( $arg->{net}->match($arg->{r}) && $arg->{l} eq $arg->{net}->nth(-2) && $arg->{r} eq $arg->{net}->nth(1) ) {
+    } elsif ( $arg->{net}->match($r) && $l eq $arg->{net}->nth(-2) && $r eq $arg->{net}->nth(1) ) {
       $arg->{return}->{error} = 'The addresses are missordered for the expected ' . $arg->{net}->desc;
-    } elsif ( $arg->{net}->match($arg->{r}) && $arg->{l} ne $arg->{net}->nth(1) && $arg->{r} ne $arg->{net}->nth(-2) ) {
+    } elsif ( $arg->{net}->match($r) && $l ne $arg->{net}->nth(1) && $r ne $arg->{net}->nth(-2) ) {
       $arg->{return}->{error} = 'The addresses are not usable/host addresses of the expected ' . $arg->{net}->desc;
     } else {
       $arg->{return}->{error} = 'Addresses does not belong to the same ( ' . $arg->{net}->desc . ' ) subnet.';
@@ -1100,7 +1207,6 @@ sub search_result_item_as_button {
 		 $arg->{dn});
 
 }
-
 
 =head1 AUTHOR
 
