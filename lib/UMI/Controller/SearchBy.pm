@@ -3,8 +3,7 @@
 
 package UMI::Controller::SearchBy;
 
-use Net::LDAP::Util qw(	generalizedTime_to_time ldap_explode_dn );
-use POSIX qw(strftime);
+use Net::LDAP::Util qw(	ldap_explode_dn );
 
 use utf8;
 use Moose;
@@ -266,12 +265,10 @@ sub index :Path :Args(0) {
 	utf8::decode($ttentries->{$dn}->{root}->{sn});
 
 	$ttentries->{$dn}->{root}->{ts} =
-	  { createTimestamp =>
-	    strftime( "%Y-%m-%d %H:%M:%S", gmtime( generalizedTime_to_time(  $_->get_value('createTimestamp') ))),
-	    creatorsName => ldap_explode_dn($_->get_value('creatorsName'))->[0]->{UID},
-	    modifyTimestamp =>
-	    strftime( "%Y-%m-%d %H:%M:%S", gmtime( generalizedTime_to_time(  $_->get_value('modifyTimestamp') ))),
-	    modifiersName => ldap_explode_dn($_->get_value('modifiersName'))->[0]->{UID}, };
+	  { createTimestamp => $self->generalizedtime_fr({ ts => $_->get_value('createTimestamp') }),
+	    creatorsName    => ldap_explode_dn( $_->get_value('creatorsName') )->[0]->{UID},
+	    modifyTimestamp => $self->generalizedtime_fr({ ts => $_->get_value('modifyTimestamp') }),
+	    modifiersName   => ldap_explode_dn( $_->get_value('modifiersName') )->[0]->{UID}, };
 	
 	$#root_arr = $#root_dn = -1;
 
@@ -348,9 +345,9 @@ sub index :Path :Args(0) {
     @ttentries_keys = sort { lc $a cmp lc $b } keys %{$ttentries}
       if $sort_order eq 'straight'; # for history searches
 
-    foreach my $dn_s (keys ( %{$ttentries} )) {
-      p $ttentries->{$dn_s}->{mgmnt};
-    }
+    # foreach my $dn_s (keys ( %{$ttentries} )) {
+    #   p $ttentries->{$dn_s}->{mgmnt};
+    # }
 
     $c->stash(
 	      template => 'search/searchby.tt',

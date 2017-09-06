@@ -8,6 +8,8 @@ use utf8;
 use Data::Printer;
 use Try::Tiny;
 use Net::CIDR::Set;
+use Net::LDAP::Util qw(	generalizedTime_to_time ldap_explode_dn );
+use POSIX qw(strftime);
 
 =head1 NAME
 
@@ -1207,6 +1209,31 @@ sub search_result_item_as_button {
 		 $arg->{dn},
 		 $arg->{dn});
 
+}
+
+
+=head2 generalizedtime_fr
+
+wrapper to Net::LDAP::Util generalizedTime_to_time function
+
+on input it expects
+
+    format => strftime(3) conversion specifications
+    ts => generalizedTime string, in general it match the template 
+          "YYYYmmddHH[MM[SS]][(./,)d...](Z|(+/-)HH[MM])"
+    gmt => the returned value is localized or not, default 1 (yes)
+
+=cut
+
+sub generalizedtime_fr {
+  my ($self, $args) = @_;
+
+  my $arg = { format => $args->{format} || "%Y-%m-%d %H:%M:%S",
+	      ts => $args->{ts},
+	      gmt => $args->{gmt} || '1', };
+
+  return $arg->{gmt} ? strftime( $arg->{format}, gmtime( generalizedTime_to_time( $arg->{ts} ))) :
+    strftime( $arg->{format}, localtime( generalizedTime_to_time( $arg->{ts} )));
 }
 
 =head1 AUTHOR
