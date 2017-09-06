@@ -129,14 +129,6 @@
       
       [%   # ??? panel_color = '' IF entry.value.attrs.createTimestamp.0 != entry.value.attrs.modifyTimestamp.0 %]
 
-      [%   # OBJECT CREATION/MODIFICATION TIMESTAMPs ATTRIBUTES
-           ts = entry.value.attrs.createTimestamp.0.chunk(2)
-           c_ts = "$ts.0$ts.1-$ts.2-$ts.3 $ts.4:$ts.5:$ts.6"
-           c_uid = entry.value.attrs.creatorsName.0.split(',').0.split('=').1
-           ts = entry.value.attrs.modifyTimestamp.0.chunk(2)
-           m_ts = "$ts.0$ts.1-$ts.2-$ts.3 $ts.4:$ts.5:$ts.6"
-           m_uid = entry.value.attrs.modifiersName.0.split(',').0.split('=').1 %]
-      
       [%   num_of_dc = 0 %]
       [%   FOREACH pat IN entry.key.split(',') %]
       [%     SET num_of_dc = num_of_dc + 1 IF pat.match('dc=') %]
@@ -243,9 +235,9 @@
 
 		<small class="pull-right">
 		  <ul class="fa-ul umi-zerro-margin">
-		    <li title="created"><i class="fa-li fa fa-play-circle"></i>[% c_ts %] by <b>[% c_uid %]</b>&nbsp;</li>
+		    <li title="created, GMT"><i class="fa-li fa fa-play-circle"></i>[% entry.value.root.ts.createTimestamp %] by <b>[% entry.value.root.ts.creatorsName %]</b>&nbsp;</li>
 		    [% IF entry.value.attrs.createTimestamp.0 != entry.value.attrs.modifyTimestamp.0 %]
-		    <li title="modified"><i class="fa-li fa fa-stop-circle"></i>[% m_ts %] by <b>[% m_uid %]</b>&nbsp;</li>
+		    <li title="modified, GMT"><i class="fa-li fa fa-stop-circle"></i>[%  entry.value.root.ts.modifyTimestamp %] by <b>[% entry.value.root.ts.modifiersName %]</b>&nbsp;</li>
 		    [% END %]
 		  </ul>
 		</small>

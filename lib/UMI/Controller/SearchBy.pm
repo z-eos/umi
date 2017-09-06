@@ -3,6 +3,9 @@
 
 package UMI::Controller::SearchBy;
 
+use Net::LDAP::Util qw(	generalizedTime_to_time ldap_explode_dn );
+use POSIX qw(strftime);
+
 use utf8;
 use Moose;
 use namespace::autoclean;
@@ -205,18 +208,23 @@ sub index :Path :Args(0) {
       }
     }
 
-    my ( $ttentries, @ttentries_keys, $attr, $tmp, $dn_depth, $dn_depthes, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry, @root_groups, $root_gr, $obj_item );
+    my ( $ttentries, @ttentries_keys, $attr, $tmp, $dn, $dn_depth, $dn_depthes, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry, @root_groups, $root_gr, $obj_item );
     my $blocked = 0;
+    my $is_userPassword = 0;
 
-    # foreach $obj_item ( @{$ldap_crud->{cfg}->{base}->{objects}} ) {
-    #   $dn_depthes->{$obj_item} = split(/,/, $ldap_crud->{cfg}->{base}->{$obj_item}) + 1;
-    # }
-    
     foreach (@entries) {
-      $tmp = $_->dn;
-      if ( $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
+      $dn = $_->dn;
+      if ( $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
 	$dn_depth = scalar split(/,/, $ldap_crud->{cfg}->{base}->{acc_root}) + 1;
-	#      if ( $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
+
+	foreach $tmp ( @{$_->get_value('objectClass', asref => 1)} ) {
+	  $is_userPassword = 1
+	    if exists $c->session->{ldap}->{obj_schema}->{$tmp}->{may}->{userPassword} ||
+	    exists $c->session->{ldap}->{obj_schema}->{$tmp}->{must}->{userPassword};
+	}
+	
+	# is this user blocked?
+	$c->stats->profile('is-blocked search for <i class="text-muted">' . $_->dn . '</i>');
 	$mesg = $ldap_crud->search({ base => $ldap_crud->cfg->{base}->{group},
 				     filter => sprintf('(&(cn=%s)(memberUid=%s))',
 						       $ldap_crud->cfg->{stub}->{group_blocked},
@@ -224,58 +232,52 @@ sub index :Path :Args(0) {
 	$blocked = $mesg->count;
 	$return->{error} .= $ldap_crud->err( $mesg )->{html}
 	  if $mesg->is_error();
-
-	$c->stats->profile('is-blocked search for <i class="text-muted">' . $_->dn . '</i>');
-
 	@root_arr = split(',', $_->dn);
 	$root_i = $#root_arr;
 	@root_dn = splice(@root_arr, -1 * $dn_depth);
-	$ttentries->{$tmp}->{root}->{dn} = join(',', @root_dn);
+	$ttentries->{$dn}->{root}->{dn} = join(',', @root_dn);
 
 	# here, for each entry we are preparing data of the root object it belongs to
 	$root_i++;
 	if ( $root_i == $dn_depth ) {
-	  $ttentries->{$tmp}->{root}->{givenName} = $_->get_value('givenName');
-	  $ttentries->{$tmp}->{root}->{sn} = $_->get_value('sn');
-	  $ttentries->{$tmp}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
+	  $ttentries->{$dn}->{root}->{givenName} = $_->get_value('givenName');
+	  $ttentries->{$dn}->{root}->{sn} = $_->get_value('sn');
+	  $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
 	    $_->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
 	} else {
-	  $root_mesg = $ldap_crud->search({ dn => $ttentries->{$tmp}->{root}->{dn}, });
+	  $root_mesg = $ldap_crud->search({ dn => $ttentries->{$dn}->{root}->{dn}, });
 	  $return->{error} .= $ldap_crud->err( $root_mesg )->{html}
 	    if $root_mesg->is_error();
 	  $root_entry = $root_mesg->entry(0);
-	  $ttentries->{$tmp}->{root}->{givenName} = $root_entry->get_value('givenName');
-	  $ttentries->{$tmp}->{root}->{sn} = $root_entry->get_value('sn');
-	  $ttentries->{$tmp}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
+	  $ttentries->{$dn}->{root}->{givenName} = $root_entry->get_value('givenName');
+	  $ttentries->{$dn}->{root}->{sn} = $root_entry->get_value('sn');
+	  $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
 	    $root_entry->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
 	}
 
-	$to_utf_decode = $ttentries->{$tmp}->{root}->{givenName};
-	utf8::decode($to_utf_decode);
-	$ttentries->{$tmp}->{root}->{givenName} = $to_utf_decode;
+	# until confirmed next line alternative # $to_utf_decode = $ttentries->{$dn}->{root}->{givenName};
+	# until confirmed next line alternative # utf8::decode($to_utf_decode);
+	# until confirmed next line alternative # $ttentries->{$dn}->{root}->{givenName} = $to_utf_decode;
+	utf8::decode($ttentries->{$dn}->{root}->{givenName});
 
-	$to_utf_decode = $ttentries->{$tmp}->{root}->{sn};
-	utf8::decode($to_utf_decode);
-	$ttentries->{$tmp}->{root}->{sn} = $to_utf_decode;
+	# until confirmed next line alternative # $to_utf_decode = $ttentries->{$dn}->{root}->{sn};
+	# until confirmed next line alternative # utf8::decode($to_utf_decode);
+	# until confirmed next line alternative # $ttentries->{$dn}->{root}->{sn} = $to_utf_decode;
+	utf8::decode($ttentries->{$dn}->{root}->{sn});
 
-## todo? # 	$ttentries->{$tmp}->{root}->{createTimestamp} = $self->ldap_date({ ts => $_->get_value('createTimestamp'), });
-## todo? # 	$ttentries->{$tmp}->{root}->{modifyTimestamp} = $self->ldap_date({ ts => $_->get_value('modifyTimestamp'), });
+	$ttentries->{$dn}->{root}->{ts} =
+	  { createTimestamp =>
+	    strftime( "%Y-%m-%d %H:%M:%S", gmtime( generalizedTime_to_time(  $_->get_value('createTimestamp') ))),
+	    creatorsName => ldap_explode_dn($_->get_value('creatorsName'))->[0]->{UID},
+	    modifyTimestamp =>
+	    strftime( "%Y-%m-%d %H:%M:%S", gmtime( generalizedTime_to_time(  $_->get_value('modifyTimestamp') ))),
+	    modifiersName => ldap_explode_dn($_->get_value('modifiersName'))->[0]->{UID}, };
 	
-	$#root_arr = -1;
-	$#root_dn = -1;
+	$#root_arr = $#root_dn = -1;
 
-	# my $qqq = { base => sprintf('ou=group,ou=system,%s', $ldap_crud->cfg->{base}->{db}),
-	# 		  filter => sprintf('(memberUid=%s)',
-	# 				    $ttentries->{$tmp}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }),
-	# 		  attrs => [ $ldap_crud->{cfg}->{rdn}->{group} ], };
-
-	# p my $qqq = sprintf('(memberUid=%s)',
-	#		    $ttentries->{$tmp}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }); p $ldap_crud->{cfg}->{rdn}->{acc_root};
-
-	# which groups this object root belongs to? !!! LOOKS BROKEN !!!
 	$mesg = $ldap_crud->search({ base => sprintf('ou=group,ou=system,%s', $ldap_crud->cfg->{base}->{db}),
 				     filter => sprintf('(memberUid=%s)',
-						       $ttentries->{$tmp}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }),
+						       $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }),
 				     attrs => [ $ldap_crud->{cfg}->{rdn}->{group} ], });
 
 	if ( $mesg->is_error() ) {
@@ -286,48 +288,46 @@ sub index :Path :Args(0) {
 	    $root_gr->{ $_->get_value('cn') } = 1;
 	  }
 	}
-	# p $ttentries->{$tmp}->{'mgmnt'}->{root_obj_groups};
-	# p $ttentries->{$tmp}->{root};
-
-      } elsif ( $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ) {
+      } elsif ( $dn =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ) {
 	$dn_depth = scalar split(/,/, $ldap_crud->{cfg}->{base}->{inventory}) + 1;
       } else {
 	# !!! HARDCODE how deep dn could be to be considered as some type of object, `3' is for what? :( !!!
 	$dn_depth = $ldap_crud->{cfg}->{base}->{dc_num} + 1;
       }
 
-      $ttentries->{$tmp}->{'mgmnt'} =
+      $ttentries->{$dn}->{'mgmnt'} =
 	{
 	 is_blocked => 	  $blocked,
-	 is_log => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{db_log}/ ? $_->get_value( 'reqType' ) : 'no',
-	 is_root => scalar split(',', $tmp) <= $dn_depth ? 1 : 0,
-	 is_account => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
-	 is_group => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{group}/ ? 1 : 0,
-	 is_inventory => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ? 1 : 0,
+	 is_log => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{db_log}/ ? $_->get_value( 'reqType' ) : 'no',
+	 is_root => scalar split(',', $dn) <= $dn_depth ? 1 : 0,
+	 is_account => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
+	 is_group => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{group}/ ? 1 : 0,
+	 is_inventory => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ? 1 : 0,
 	 root_obj_groups => defined $root_gr ? $root_gr : undef,
-	 jpegPhoto => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
+	 jpegPhoto => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
 	 gitAclProject => $_->exists('gitAclProject') ? 1 : 0,
-	 userPassword => $_->exists('userPassword') ? 1 : 0,
-	 userDhcp => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ &&
-	 scalar split(',', $tmp) <= 3 ? 1 : 0,
+	 # userPassword => $_->exists('userPassword') ? 1 : 0,
+	 userPassword => $is_userPassword,
+	 userDhcp => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ &&
+	 scalar split(',', $dn) <= 3 ? 1 : 0,
 	};
 
       foreach $attr (sort $_->attributes) {
 	$to_utf_decode = $_->get_value( $attr, asref => 1 );
 	map { utf8::decode($_); $_} @{$to_utf_decode};
-	$ttentries->{$tmp}->{attrs}->{$attr} = $to_utf_decode;
+	$ttentries->{$dn}->{attrs}->{$attr} = $to_utf_decode;
 
 	if ( $attr eq 'jpegPhoto' ) {
 	  use MIME::Base64;
-	  $ttentries->{$tmp}->{attrs}->{$attr} =
+	  $ttentries->{$dn}->{attrs}->{$attr} =
 	    sprintf('img-thumbnail" alt="jpegPhoto of %s" src="data:image/jpg;base64,%s" title="%s" />',
-		    $tmp,
-		    encode_base64(join('',@{$ttentries->{$tmp}->{attrs}->{$attr}})),
-		    $tmp);
+		    $dn,
+		    encode_base64(join('',@{$ttentries->{$dn}->{attrs}->{$attr}})),
+		    $dn);
 	  } elsif ( $attr eq 'userCertificate;binary' || $attr eq 'cACertificate;binary' || $attr eq 'certificateRevocationList;binary' ) {
-	    $ttentries->{$tmp}->{attrs}->{$attr} = $self->cert_info({ cert => $_->get_value( $attr ) });
-	} elsif (ref $ttentries->{$tmp}->{attrs}->{$attr} eq 'ARRAY') {
-	  $ttentries->{$tmp}->{is_arr}->{$attr} = 1;
+	    $ttentries->{$dn}->{attrs}->{$attr} = $self->cert_info({ cert => $_->get_value( $attr ) });
+	} elsif (ref $ttentries->{$dn}->{attrs}->{$attr} eq 'ARRAY') {
+	  $ttentries->{$dn}->{is_arr}->{$attr} = 1;
 	}
       }
       push @ttentries_keys, $_->dn if $sort_order eq 'reverse'; # for not history searches
