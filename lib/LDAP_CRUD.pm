@@ -1962,6 +1962,8 @@ sub obj_mod {
 
 =head2 params2attrs
 
+??? candidate for removal ???
+
 crawls all $c->req->params and prepares attrs hash ref of dn and attrs
 to be fed to ->add for object creation
 
@@ -2464,9 +2466,9 @@ has 'select_dhcp_associateddomains' => ( traits => ['Array'],
 sub _build_select_dhcp_associateddomains {
   my $self = shift;
 
-  my @domains = ( {value => '0', label => '--- select domain ---', selected => 'selected'} );
+  my @domains;
   my $mesg = $self->search( { base => $self->cfg->{base}->{dhcp},
-			      filter => '(&(objectClass=dhcpSubnet)(dhcpOption=domain-name "*"))',
+			      filter => '(&(objectClass=dhcpSubnet)(dhcpOption=domain-name *))',
 			      sizelimit => 0,
 			      attrs => [ 'dhcpOption' ],
 			    } );
@@ -2482,13 +2484,14 @@ sub _build_select_dhcp_associateddomains {
   foreach my $entry ( @entries ) {
     @i = $entry->get_value('dhcpOption');
     foreach (@i) {
-      # to skip underlying objects dhcpOption values different from domain-name
+      # to skip underlying objects dhcpOption values different from `domain-name'
       push @j, substr((split(/ /, $_))[1], 1, -1)
-	if $_ =~ /domain-name ".*"/;
+  	if $_ =~ /domain-name ".*"/;
     }
   }
-  @domains = map { { value => $_, label => $_ } } sort @j;
-  
+  unshift @j, '--- select network assigned domain ---';
+  @domains = map { { value => $_, label => $_ } } @j;
+
   return \@domains;
 }
 

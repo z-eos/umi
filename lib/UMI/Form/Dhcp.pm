@@ -8,6 +8,8 @@ extends 'UMI::Form::LDAP';
 
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable', 'IPAddress' );
 
+use Data::Printer;
+
 sub build_form_element_class { [ 'form-horizontal' ] }
 
 sub html_attributes {

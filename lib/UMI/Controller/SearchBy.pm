@@ -412,6 +412,7 @@ sub proc :Path(proc) :Args(0) {
 	   $attr eq "userPKCS12" ) { ## !!! temporary stub !!! 	  next;
 	  $entry->{$attr} = "BINARY DATA";
 	} elsif ( $attr eq 'jpegPhoto' ) {
+### !!! to refactory to something like  $jpeg = $self->file2var( $file, $final_message );
 	  use MIME::Base64;
 	  $entry->{$attr} = sprintf('data:image/jpg;base64,%s',
 				    encode_base64(join('',
@@ -419,8 +420,7 @@ sub proc :Path(proc) :Args(0) {
 						 )
 				   );
 	} elsif ( $attr eq 'userPassword' ) {
-	  next;
-	#   $entry->{$attr} = '*' x 8;
+	  next;	#   $entry->{$attr} = '*' x 8;
 	} else {
 	  $entry->{$attr} = $entry_tmp->get_value($attr, asref => 1);
 	  map { utf8::decode($_),$_ } @{$entry->{$attr}};
@@ -429,22 +429,8 @@ sub proc :Path(proc) :Args(0) {
       
       $c->stats->profile('all fields are ready');
 
-# old way #       my $schema = $ldap_crud->obj_schema( { dn => $params->{ldap_modify} } );
       my ($is_single, $names);
       foreach my $objectClass (sort @{$entry->{objectClass}}) {
-# old way # 	foreach $attr (sort (keys %{$schema->{$params->{ldap_modify}}->{$objectClass}->{must}} )) {
-# old way # 	  next if $attr eq "objectClass";
-# old way # 	  $is_single->{$attr} =
-# old way # 	    $schema->{$params->{ldap_modify}}->{$objectClass}->{must}->{$attr}->{'single-value'};
-# old way # 	  $names->{$attr} = 0;
-# old way # 	}
-# old way # 	foreach $attr (sort (keys %{$schema->{$params->{ldap_modify}}->{$objectClass}->{may}} )) {
-# old way # 	  next if $attr eq "objectClass";
-# old way # 	  $is_single->{$attr} =
-# old way # 	    $schema->{$params->{ldap_modify}}->{$objectClass}->{may}->{$attr}->{'single-value'};
-# old way # 	  $names->{$attr} = 0;
-	# old way # 	}
-
 	foreach $attr (sort (keys %{$c->session->{ldap}->{obj_schema}->{$objectClass}->{must}} )) {
 	  next if $attr eq "objectClass";
 	  $is_single->{$attr} =
@@ -458,10 +444,11 @@ sub proc :Path(proc) :Args(0) {
 	  $names->{$attr} = 0;
 	}
       }
-
-      foreach $attr ( $entry_tmp->attributes ) {
-	delete $names->{$attr};
-      }
+      
+# to remove after check of the next row code #       foreach $attr ( $entry_tmp->attributes ) {
+# to remove after check of the next row code # 	delete $names->{$attr};
+# to remove after check of the next row code #       }
+      delete $names->{$_} foreach ( $entry_tmp->attributes );
 
       $c->stats->profile('schema is ready');
 
@@ -1021,62 +1008,58 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
   						defined $params->{pwd_num} ||
   						defined $params->{pronounceable} );
 
-  my $arg = {
+  p my $arg = {
 	     mod_pwd_dn => $params->{ldap_modify_password},
 	     password_init => $params->{password_init},
 	     password_cnfm => $params->{password_cnfm},
 	    };
-
   my ( $return, $pwd );
-  if ( $self->form_mod_pwd->validated && $self->form_mod_pwd->ran_validation ) {
+  my $ldap_crud = $c->model('LDAP_CRUD');
+  my ( $is_pwd_msg, $is_pwd, $modify_action );
+  $is_pwd_msg = $ldap_crud->search({ base => $arg->{mod_pwd_dn}, attr => [ 'userPassword', ], });
+  if ( ! $is_pwd_msg->count ) {
+    $return->{error} = 'no object with DN: <b>&laquo;' .
+      $arg->{mod_pwd_dn} . '&raquo;</b> found!';
+  } else {
+    $is_pwd = $is_pwd_msg->entry(0);
+    $arg->{pwd_orig} = $is_pwd->get_value('userPassword');
+    
+    if ( $self->form_mod_pwd->validated && $self->form_mod_pwd->ran_validation ) {
 
-    if ( $arg->{password_init} eq '' && $arg->{password_cnfm} eq '' ) {
-      $arg->{password_gen} = $self->pwdgen({ len => $params->{'pwd_len'},
-					     num => $params->{'pwd_num'},
-					     cap => $params->{'pwd_cap'},
-					     pronounceable => defined $params->{pronounceable} ? $params->{pronounceable} : 0, });
-    } elsif ( $arg->{'password_init'} ne '' && $arg->{'password_cnfm'} ne '' ) {
-      $arg->{password_gen} = $self->pwdgen({ pwd => $arg->{'password_cnfm'} });
-    }
-
-    $pwd = $arg->{mod_pwd_dn} =~ /.*authorizedService=802.1x-mac.*/ ? $arg->{password_gen}->{clear} : $arg->{password_gen}->{ssha};
-    my $mesg = $c->model('LDAP_CRUD')->modify( $arg->{mod_pwd_dn},
-					       [ replace => [ 'userPassword' => $pwd, ], ], );
-
-    if ( $mesg ne '0' ) {
-      $return->{error} = '<li>Error during password change occured: ' . $mesg->{html} . '</li>';
-    } else {
-      $return->{success} = 'Password generated:<table class="table table-vcenter">' .
-	'<tr><td width="50%"><h1 class="mono text-center">' .
-	$arg->{password_gen}->{clear} . '</h1></td><td class="text-center" width="50%">';
-
-      my $qr;
-      for( my $i = 0; $i < 41; $i++ ) {
-	$qr = $self->qrcode({ txt => $arg->{password_gen}->{clear}, ver => $i, mod => 5 });
-	last if ! exists $qr->{error};
+      if ( $arg->{password_init} eq '' && $arg->{password_cnfm} eq '' ) {
+	$arg->{password_gen} = $self->pwdgen({ len => $params->{'pwd_len'},
+					       num => $params->{'pwd_num'},
+					       cap => $params->{'pwd_cap'},
+					       pronounceable => defined $params->{pronounceable} ? $params->{pronounceable} : 0, });
+      } elsif ( $arg->{'password_init'} ne '' && $arg->{'password_cnfm'} ne '' ) {
+	$arg->{password_gen} = $self->pwdgen({ pwd => $arg->{'password_cnfm'} });
       }
+    
+      $pwd = $arg->{mod_pwd_dn} =~ /.*authorizedService=802.1x-mac.*/ ? $arg->{password_gen}->{clear} : $arg->{password_gen}->{ssha};
+      $modify_action = defined $arg->{pwd_orig} && $arg->{pwd_orig} ne '' ?
+	[ replace => [ 'userPassword' => $pwd, ], ] :
+	[ add => [ 'userPassword' => $pwd, ], ] ;
+      my $mesg = $ldap_crud->modify( $arg->{mod_pwd_dn}, $modify_action );
 
-      $return->{error} = $qr->{error} if $qr->{error};
-      $return->{success} .= sprintf('<img alt="password QR" src="data:image/jpg;base64,%s" title="password QR"/>',
-					   $qr->{qr} );
-      $return->{success} .= '</td></tr></table>';
+      if ( $mesg ne '0' ) {
+	$return->{error} = '<li>Error during password change occured: ' . $mesg->{html} . '</li>';
+      } else {
+	$return->{success} = 'Password generated:<table class="table table-vcenter">' .
+	  '<tr><td width="50%"><h1 class="mono text-center">' .
+	  $arg->{password_gen}->{clear} . '</h1></td><td class="text-center" width="50%">';
 
+	my $qr;
+	for ( my $i = 0; $i < 41; $i++ ) {
+	  $qr = $self->qrcode({ txt => $arg->{password_gen}->{clear}, ver => $i, mod => 5 });
+	  last if ! exists $qr->{error};
+	}
 
-#       my $qr = $self->qrcode({ txt => $arg->{password_gen}->{'clear'}, ver => 2, mod => 5 });
-#       if ( exists $qr->{error} ) {
-# 	$return->{error} = $qr->{error};
-#       } else {
-# 	$return->{success} = sprintf('<table class="table table-condensed table-vcenter">
-# <tr><td><h1 class="mono text-center">%s</h1></td><td class="text-center">
-# <img alt="no QR Code was generated for: %s" 
-#        src="data:image/jpg;base64,%s" 
-#        class="img-responsive"
-#        title="QR Code for user input"/></td></tr></table>',
-# 				     $arg->{password_gen}->{'clear'},
-# 				     $arg->{password_gen}->{'clear'},
-# 				     $qr->{qr} );
-#       }
+	$return->{error} = $qr->{error} if $qr->{error};
+	$return->{success} .= sprintf('<img alt="password QR" class="img-responsive img-thumbnail bg-success" src="data:image/jpg;base64,%s" title="password QR"/>',
+				      $qr->{qr} );
+	$return->{success} .= '</td></tr></table>';
 
+      }
     }
   }
   # p $arg;

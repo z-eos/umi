@@ -9,6 +9,8 @@ BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 
 use UMI::Form::Dhcp;
 
+use Data::Printer;
+
 =head1 NAME
 
 UMI::Controller::Dhcp - Catalyst Controller
@@ -38,7 +40,7 @@ new object creation
 
 sub index :Path :Args(0) {
   my ( $self, $c ) = @_;
-  
+
     $c->stash( template => 'dhcp/dhcp_wrap.tt',
 	       form => $self->form );
 
@@ -48,7 +50,6 @@ sub index :Path :Args(0) {
 			   params => $c->req->parameters,
 			   ldap_crud => $c->model('LDAP_CRUD'),
 			  );
-
 }
 
 
@@ -66,8 +67,7 @@ creates dhcp host configuration object (static dhcp lease)
     objectclass: uidObject
     uid: U1408443894C9001-kathryn.janeway
 
-we are taking net (fqdn for ip network assigned to some organization)
-and resolving not used ip addresses from it
+we are taking net from the form and resolving it's not used ip addresses 
 
 =cut
 
@@ -78,7 +78,9 @@ sub create_dhcp_host {
   my $return;
   my $dhcpStatements;
 
-  use Data::Printer;
+  # p $args;
+  # p $_->name foreach(@{$self->form->fields});
+
 
   # my $dhcpStatements = $ldap_crud->dhcp_lease({ net => $args->{net} });
   # $return->{error} = sprintf('<li>%s</li>', $dhcpStatements->{error}) if ref($dhcpStatements) eq 'HASH';

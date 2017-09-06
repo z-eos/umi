@@ -80,7 +80,8 @@ input data is hash
              of the addresses assigned to clients, DHCP networks, e.t.c.)
 
     ip_used: type ARRAYREF
-             array reference to CIDRs of ip addresses used for the service
+             array reference to CIDRs of ip addresses used already and/or 
+             not to be used for some reason
 
     tgt_net: type STRING 
              subnet (of I<ipspace>) address in CIDR notation, the free

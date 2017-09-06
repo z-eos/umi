@@ -44,7 +44,7 @@
 	      <a href="[% c.uri_for_action('/servermta/index') %]"
 		 tabindex="2"
 		 title="All MTAs info in one single table">
-		<span class="fa fa-fw fa-envelope-open"></span>
+		<span class="fa fa-fw fa-server"></span>
 		MTA
 	      </a>
 	    </li>
