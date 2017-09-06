@@ -297,18 +297,18 @@ sub index :Path :Args(0) {
 
       $ttentries->{$dn}->{'mgmnt'} =
 	{
-	 is_blocked => 	  $blocked,
-	 is_log => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{db_log}/ ? $_->get_value( 'reqType' ) : 'no',
-	 is_root => scalar split(',', $dn) <= $dn_depth ? 1 : 0,
-	 is_account => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
-	 is_group => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{group}/ ? 1 : 0,
-	 is_inventory => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ? 1 : 0,
+	 is_blocked      => $blocked,
+	 is_log          => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{db_log}/ ? $_->get_value( 'reqType' ) : 'no',
+	 is_root         => scalar split(',', $dn) <= $dn_depth ? 1 : 0,
+	 is_account      => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
+	 is_group        => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{group}/ ? 1 : 0,
+	 is_inventory    => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ? 1 : 0,
 	 root_obj_groups => defined $root_gr ? $root_gr : undef,
-	 jpegPhoto => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
-	 gitAclProject => $_->exists('gitAclProject') ? 1 : 0,
+	 jpegPhoto       => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
+	 gitAclProject   => $_->exists('gitAclProject') ? 1 : 0,
 	 # userPassword => $_->exists('userPassword') ? 1 : 0,
-	 userPassword => $is_userPassword,
-	 userDhcp => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ &&
+	 userPassword    => $is_userPassword,
+	 userDhcp        => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ &&
 	 scalar split(',', $dn) <= 3 ? 1 : 0,
 	};
 

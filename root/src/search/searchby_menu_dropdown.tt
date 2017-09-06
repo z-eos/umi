@@ -219,7 +219,7 @@
       </form>
     </li>
     [%   END %]
-    [%   IF entry.value.mgmnt.userPassword %]
+    [%   IF entry.value.mgmnt.userPassword && ! entry.key.match('^author') %]
     <li>
       <form role="form" method="POST" 
 	    action="[% c.uri_for_action('searchby/modify_userpassword') %]">
