@@ -1,0 +1,7 @@
+[%
+   site.icons = {
+      toggle      = 'fa-caret-'
+      toggle_up   = 'fa-caret-up'
+      toggle_down = 'fa-caret-down'
+   }
+-%]
