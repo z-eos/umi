@@ -1,12 +1,12 @@
 [% IF admin_owned && ! is_log_obj %]
 <!-- #### Modal: Delete start -->
-<div class="modal" id="modal_delete[% id_sufix %]"
+<div class="modal modal-danger" id="modal_delete[% id_sufix %]"
      tabindex="-1" role="dialog" aria-labelledby="modal_delete[% id_sufix %]_label"
      aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <form role="form" method="POST" action="[% c.uri_for_action('searchby/delete') %]">
-	<div class="modal-header bg-danger text-danger">
+	<div class="modal-header">
 	  <h4 class="modal-title" id="modal_delete[% id_sufix %]_label">
 	    <span class="fa fa-exclamation-circle"></span>
 	    You are about to perform deletion of DN:<br><b>[% entry.key.replace(',', ', ') %]</b>
@@ -20,7 +20,7 @@
 	</div>
 	<div class="modal-footer">
 	  <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
-	  <button type="submit" class="btn bg-danger text-danger umi-btn-event umi-btn-ajax"  name="ldap_delete"
+	  <button type="submit" class="btn bg-danger umi-btn-event umi-btn-ajax"  name="ldap_delete"
 		  value="[% entry.key %]" data-action="delete">
 	    Yes, I really want to delete it and yes, I understand all consequences!
 	  </button>
@@ -33,13 +33,13 @@
 
 [% IF to_rollback %]
 <!-- #### Modal: RollBack start -->
-<div class="modal" id="modal_rollback[% id_sufix %]"
+<div class="modal modal-danger" id="modal_rollback[% id_sufix %]"
      tabindex="-1" role="dialog" aria-labelledby="modal_rollback[% id_sufix %]_label"
      aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <form role="form" method="POST" action="[% c.uri_for_action('searchby/delete') %]"><!-- === TO FINISH === -->
-	<div class="modal-header  bg-danger text-danger">
+	<div class="modal-header">
 	  <h4 class="modal-title" id="modal_rollback[% id_sufix %]_label">
 	    <span class="fa fa-times-circle"></span>
 	    You are about to perform last change rollback of DN:<br><b>[% entry.key.replace(',', ', ') %]</b>
@@ -50,7 +50,7 @@
 	</div>
 	<div class="modal-footer">
 	  <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
-	  <button type="submit" class="btn  bg-danger text-danger umi-btn-event umi-btn-ajax"  name="ldap_rollback"
+	  <button type="submit" class="btn bg-danger umi-btn-event umi-btn-ajax"  name="ldap_rollback"
 		  value="[% entry.key %]" data-action="rollback">
 	    Yes, I really want to rollback it and yes, I understand all consequences!
 	  </button>
@@ -62,13 +62,13 @@
 [% END %]
 
 <!-- #### Modal: Block start -->
-<div class="modal" id="modal_block[% id_sufix %]"
+<div class="modal modal-danger" id="modal_block[% id_sufix %]"
      tabindex="-1" role="dialog" aria-labelledby="modal_block[% id_sufix %]_label"
      aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <form role="form" method="POST" action="[% c.uri_for_action('searchby/block') %]">
-	<div class="modal-header  bg-danger text-danger">
+	<div class="modal-header">
 	  <h4 class="h4 modal-title" id="modal_block[% id_sufix %]_label">
 	    <span class="fa fa-ban"></span>
 	    You are about to block user with DN:<br><b>[% entry.key.replace(',', ', ') %]</b>
@@ -77,7 +77,7 @@
 	<!-- <div class="modal-body text-primary"></div> -->
 	<div class="modal-footer">
 	  <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
-	  <button type="submit" class="btn  bg-danger text-danger umi-btn-event umi-btn-ajax"  name="user_block"
+	  <button type="submit" class="btn bg-danger umi-btn-event umi-btn-ajax"  name="user_block"
 		  value="[% entry.key %]" data-action="block">
 	    Yes, I really want to block this user all accounts, and yes, I understand all consequences!
 	  </button>
@@ -88,13 +88,13 @@
 </div><!-- #### Modal: Block end -->
 
 <!-- #### Modal: Reassign Root Account start -->
-<div class="modal" id="modal_reassign[% id_sufix %]"
+<div class="modal modal-danger" id="modal_reassign[% id_sufix %]"
      tabindex="-1" role="dialog" aria-labelledby="modal_reassign[% id_sufix %]_label"
      aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <form role="form" method="POST" action="[% c.uri_for_action('searchby/reassign') %]">
-	<div class="modal-header  bg-danger text-danger">
+	<div class="modal-header">
 	  <h4 class="modal-title" id="modal_reassign[% id_sufix %]_label">
 	    <span class="fa fa-times-circle"></span>
 	    You are about to change root DN for:<br><b>[% entry.key.replace(',', ', ') %]</b>
@@ -128,7 +128,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	</div>
 	<div class="modal-footer">
 	  <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
-	  <button type="submit" class="btn  bg-danger text-danger umi-btn-event umi-btn-ajax"  name="src_dn"
+	  <button type="submit" class="btn bg-danger umi-btn-event umi-btn-ajax"  name="src_dn"
 		  value="[% entry.key %]" data-action="reassign" >
 	    Yes, I really want to change it and yes, I understand all consequences!
 	  </button>
@@ -139,13 +139,13 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 </div><!-- #### Modal: Reassign Root Account end -->
 
 <!-- #### Modal: LDIF start -->
-<div class="modal" id="modal_ldif[% id_sufix %]"
+<div class="modal modal-info" id="modal_ldif[% id_sufix %]"
      tabindex="-1" role="dialog" aria-labelledby="modal_ldif[% id_sufix %]_label"
      aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <form role="form" method="POST">
-	<div class="modal-header  bg-info text-info">
+	<div class="modal-header">
 	  <h4 class="modal-title" id="modal_ldif[% id_sufix %]_label">
 	    <span class="fa fa-info-circle"></span>
 	    LDIF of DN:<br><b>[% entry.key.replace(',', ', ') %]</b>
@@ -170,7 +170,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	<div class="modal-footer">
 	  <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
 	  <button type="submit"
-		  class="btn  bg-info text-info umi-btn-event umi-btn-logic"
+		  class="btn bg-info umi-btn-event umi-btn-logic"
 		  data-umiact="/searchby/ldif_gen"
 		  name="ldap_ldif"
 		  value="[% entry.key %]">
@@ -183,13 +183,13 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 </div><!-- #### Modal: LDIF end -->
 
 <!-- #### Modal: vCard start -->
-<div class="modal" id="modal_vcard[% id_sufix %]"
+<div class="modal modal-info" id="modal_vcard[% id_sufix %]"
      tabindex="-1" role="dialog" aria-labelledby="modal_vcard[% id_sufix %]_label"
      aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <form role="form" method="POST">
-	<div class="modal-header  bg-info text-info">
+	<div class="modal-header">
 	  <h4 class="modal-title" id="modal_vcard[% id_sufix %]_label">
 	    <span class="fa fa-files-o fa-lg"></span>
 	    vCard of DN:<br><b>[% entry.key.replace(',', ', ') %]</b>
@@ -222,7 +222,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	<div class="modal-footer">
 	  <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
 	  <button type="submit"
-		  class="btn  bg-info text-info umi-btn-event umi-btn-logic"
+		  class="btn bg-info umi-btn-event umi-btn-logic"
 		  data-umiact="/searchby/vcard_gen"
 		  name="vcard_dn"
 		  value="[% entry.key %]">

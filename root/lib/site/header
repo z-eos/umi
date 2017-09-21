@@ -1,437 +1,205 @@
 <!-- BEGIN site/header -->
-<nav class="navbar navbar-default navbar-fixed-top bg-primary" role="navigation">
-  <div class="container">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="logo" href="/">
-	<img class="pull-left logo"
-	     src="/static/images/umi-logo.50x50.png"
-	     exify_initialized="true"
-	     width="40px"
-	     style="margin-top: 3px;margin-bottom: 3px;">
-      </a>
-      <a class="navbar-brand" href="/" tabindex="-1">
-	&nbsp;
-	<span class="visible-xs-inline visible-sm-inline"><b>UmI</b></span>
-	<span class="visible-md-inline visible-lg-inline"><b>UNIFIED management INTERFACE</b></span>
-      </a>
-    </div>
-    <div class="collapse navbar-collapse">
-      <ul class="nav navbar-nav">
-	[% IF c.user_exists && c.session.auth_uid # !!! to fix, looks like a stub %]
-	[% IF c.check_any_user_role ( 'admin', 'coadmin', 'operator') %]
-        <li class="dropdown" title="Predefined Data Sets">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" tabindex="1">
-	    <span class="fa fa-list-alt"></span>
-	    <span class="caret"></span>
-	  </a>
-          <ul class="dropdown-menu" role="menu">
-            <li class="dropdown-header">Statistics by:</li>
-            <li>
-	      <a href="[% c.uri_for('/stat_acc') %]"
-		 tabindex="2"
-		 title="All accounts info in one single, huge, big, fat and heavy table">
-		<span class="fa fa-fw fa-id-card-o text-danger"></span>
-		Accounts
-	      </a>
-	    </li>
-            <li>
-	      <a href="[% c.uri_for_action('/servermta/index') %]"
-		 tabindex="2"
-		 title="All MTAs info in one single table">
-		<span class="fa fa-fw fa-server"></span>
-		MTA
-	      </a>
-	    </li>
-	  </ul>
-	</li>
-	[% END %]
-        <li class="dropdown" title="Tools">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" tabindex="1">
-	    <span class="fa fa-th"></span>
-	    <span class="caret"></span>
-	  </a>
-          <ul class="dropdown-menu" role="menu">
-	    [% IF c.check_any_user_role ('admin', 'coadmin', 'acl-w-people') %]
-            <li>
-	      <a href="[% c.uri_for_action('user_root') %]" tabindex="2">
-		<span class="fa fa-fw fa-user"></span>
-		User
-	      </a>
-	    </li>
-	    [% END %]
-	    [% IF c.check_user_roles('admin') %]
-            <li>
-	      <a href="[% c.uri_for_action('group_root') %]" tabindex="3">
-        	<span class="fa fa-fw fa-group"> </span>
-        	Group
-	      </a>
-	    </li>
-            <li>
-	      <a href="[% c.uri_for_action('nisnetgroup/index') %]" tabindex="3">
-        	<span class="fa fa-fw fa-group"> </span>
-        	NIS NetGroup
-	      </a>
-	    </li>
-	    [% END %]
-	    [% IF c.check_any_user_role ('admin', 'coadmin', 'acl-w-organizations') %]
-            <li>
-	      <a href="[% c.uri_for_action('org_root') %]" tabindex="4">
-        	<span class="fa fa-fw fa-industry"></span>
-        	Org
-	      </a>
-	    </li>
-	    [% END %]
-	    [% IF c.check_any_user_role ('admin', 'coadmin', 'acl-w-inventory')  %]
-            <li>
-	      <a href="[% c.uri_for_action('/inventory/index') %]" tabindex="4">
-        	<span class="fa fa-fw fa-tags"></span>
-        	Inventory
-	      </a>
-	    </li>
-	    [% END %]
-	    [% IF c.check_user_roles('admin') %]
-            <li>
-	      <a href="[% c.uri_for_action('gitacl/index') %]" tabindex="5">
-        	<span class="fa fa-fw fa-gavel"></span>
-        	GitACL
-	      </a>
-	    </li>
-	    [% END %]
-	    [% IF c.check_user_roles('admin') %]
-            <li class="disabled">
-	      <a href="#" tabindex="6">
-        	<span class="fa fa-fw fa-globe"></span>
-        	DNS
-	      </a>
-	    </li>[% END %]
-	    [% IF c.check_any_user_role ('admin', 'coadmin', 'dhcp') %]
-            <li class="disabled">
-	      <a href="[% c.uri_for_action('dhcp_root') %]" tabindex="7">
-        	<span class="fa fa-fw fa-sitemap"></span>
-        	DHCP
-	      </a>
-	    </li>
-	    [% END %]
-	    [% # -------------------------------------------------------- %]
-            <li class="divider"></li>
-            <li class="dropdown-header">Tools Pub:</li>
-            <li>
-	      <a href="[% c.uri_for_action('tooltranslit/index') %]" tabindex="8">
-		<span class="fa fa-fw fa-text-width text-info"></span>
-		Translit
-	      </a>
-	    </li>
-            <li>
-	      <a href="[% c.uri_for_action('toolpwdgen/index') %]" tabindex="8">
-		<span class="fa fa-fw fa-user-secret text-info"></span>
-		Pwdgen
-	      </a>
-	    </li>
-            <li>
-	      <a href="[% c.uri_for_action('toolqr/index') %]" tabindex="8">
-		<span class="fa fa-fw fa-qrcode text-info"></span>
-		QR
-	      </a>
-	    </li>
-	    [% # -------------------------------------------------------- %]
-	    [% IF c.check_any_user_role( 'admin' ) %]
-            <li class="divider"></li>
-            <li class="dropdown-header">Tools Adm:</li>
-            <li>
-	      <a href="[% c.uri_for_action('toolimportldif/index') %]" tabindex="8">
-		<span class="fa fa-fw fa-download text-info"></span>
-		LDIF Import
-	      </a>
-	    </li>
-	    [% END %]
-          </ul>
-        </li>
-	[% END %]
-      </ul>
-      [% IF c.user_exists && c.check_any_user_role ('admin', 'coadmin', 'operator') %]
-      <form class="navbar-form navbar-left"
-	    role="form"
-	    id="searchby"
-	    method="POST"
-	    action="[% c.uri_for_action('/searchby/index') %]">
+<header class="app-header navbar navbar-dark bg-dark">
+    <a class="navbar-brand bg-dark" href="/"></a>
+    [% IF c.user_exists && c.session.auth_uid # !!! to fix, looks like a stub %]
+    <a class="navbar-toggler sidebar-minimizer d-md-down-none" href="#" type="submit"><i class="fa fa-bars"></i></a>
+    <!-- <button class="navbar-toggler sidebar-minimizer d-md-down-none" type="button"><i class="fa fa-bars"></i></button> -->
+    [% END %]
+    [% IF c.user_exists && c.check_any_user_role ('admin', 'coadmin', 'operator') %]
+    <form class="form-inline ml-auto"
+	  role="form"
+	  id="searchby"
+	  method="POST"
+	  action="[% c.uri_for_action('/searchby/index') %]">
+      
+      <!-- <div class="input-group"> -->
+	<input type="text"
+	       size="50%"
+	       class="form-control"
+	       id="ldapsearch_filter"
+	       name="ldapsearch_filter"
+	       title="LDAP search filter input field"
+	       placeholder='*Vasya*Pupkin*'
+	       data-animation="false"
+	       data-trigger="hover"
+	       data-placement="bottom"
+	       data-html="true"
+	       data-toggle="popover"
+	       data-original-title="Legend"
+	       data-template="<div class='popover hidden-xs' role='tooltip'><div class='arrow'></div><h3 class='popover-title'></h3><div class='popover-content'></div></div>"
+	       data-content="<ul>
+	       <li>default sort criteria is <i class='text-info'>by name</i> (First/Last Name, uid and cn)</li>
+	       <li>for each search criteria, <i class='text-info'>objectClass=<i class='fa fa-asterisk'></i></i> is used if empty</li>
+	       <li>use <i class='fa fa-asterisk text-info'></i> as substring</li>
+	       <li>narrow search results for non &laquo;by ...&raquo; presets, by providing attribute in filter, like: <i class='text-info'>uid=<i class='fa fa-asterisk'></i>dreii.<i class='fa fa-asterisk'></i></i></li>
+	       <li>to search in access log, use base <i class='text-info'>[% helper_cfg('cfg_local','ldap_crud_db_log') %]</i></li>
+	       </ul>">
 
-	<div class="input-group">
-	  
-	  <input type="text"
-	  	 class="form-control"
-	  	 id="ldapsearch_filter"
-	  	 name="ldapsearch_filter"
-	  	 title="LDAP search filter input field"
-		 placeholder='*Vasya*Pupkin*'
-	  	 data-animation="false"
-	  	 data-trigger="hover"
-	  	 data-placement="left"
-	  	 data-html="true"
-	         data-toggle="popover"
-	  	 data-original-title="Legend"
-		 data-template="<div class='popover hidden-xs' role='tooltip'><div class='arrow'></div><h3 class='popover-title'></h3><div class='popover-content'></div></div>"
-	  	 data-content="<ul>
-	         <li>default sort criteria is <i class='text-info'>by name</i> (First/Last Name, uid and cn)</li>
-	  	 <li>for each search criteria, <i class='text-info'>objectClass=<i class='fa fa-asterisk'></i></i> is used if empty</li>
-	  	 <li>use <i class='fa fa-asterisk text-info'></i> as substring</li>
-		 <li>narrow search results for non &laquo;by ...&raquo; presets, by providing attribute in filter, like: <i class='text-info'>uid=<i class='fa fa-asterisk'></i>dreii.<i class='fa fa-asterisk'></i></i></li>
-		 <li>to search in access log, use base <i class='text-info'>[% helper_cfg('cfg_local','ldap_crud_db_log') %]</i></li>
-	  	 </ul>"
-	  	 tabindex="12">
-	  <div class="input-group-btn">
-	    <button type="submit"
-		    class="btn btn-default btn-sm"
-		    value="1" tabindex="13"
+	<!-- <div class="input-group-btn"> -->
+	<div class="btn-group">
+	  <button type="submit" 
+		  class="btn btn-secondary"
+		  value="1" tabindex="13"
+		  name="ldapsearch_by_name"
+		  title="Search &laquo;by name&raquo;">
+	    <i class="fa fa-search"></i>
+	  </button>
+	  <button type="submit" 
+		  class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
+		  data-toggle="dropdown" 
+		  aria-haspopup="false" 
+		  aria-expanded="false">
+	    <span class="sr-only">Toggle Dropdown</span>
+	  </button>
+
+	  [% icon_class = "fa fa-fw" %]
+	  [% menu_item = "dropdown-item btn btn-secondary " %]
+	  [% color = "bg-success" %]
+
+	  <div class="dropdown-menu dropdown-menu-right">
+	    <button type="submit" class="[% menu_item %][% color %]"
 		    name="ldapsearch_by_name"
-		    title="Search &laquo;by name&raquo;">
-	      <span class="fa fa-search"></span>
+	      title="filter pattern in givenName or sn or uid or cn">
+	      <i class="[% icon_class %] fa-user"></i> by name
 	    </button>
-	    <button type="submit"
-		    class="btn btn-default btn-sm dropdown-toggle"
-		    tabindex="14"
-		    data-toggle="dropdown"
-		    title="Predefined Search Bases">
-	      <span class="caret"></span>
+	    <button type="submit" class="[% menu_item %][% color %]"
+		    name="ldapsearch_by_email"
+		    title="filter pattern in mail">
+	      <i class="[% icon_class %] fa-envelope"></i> by mail
 	    </button>
-
-	    <a href="[% c.uri_for('/searchadvanced') %]"
-	       title="advanced search"
-	       class="btn btn-default btn-sm" role="button">
-	      <span class="fa fa-magic"></span>
-	    </a>
+	    <button type="submit" class="[% menu_item %][% color %]"
+		    name="ldapsearch_by_jid"
+		    title="filter pattern in mail">
+	      <i class="[% icon_class %] fa-lightbulb-o"></i> by JID
+	    </button>
+	    <button type="submit" class="[% menu_item %][% color %]"
+		    name="ldapsearch_by_ip"
+		    title="filter pattern in ip address">
+	      <i class="[% icon_class %] fa-code-fork"></i> by IP
+	    </button>
+	    <button type="submit" class="[% menu_item %][% color %]"
+		    name="ldapsearch_by_mac"
+		    title="filter pattern in MAC address">
+	      <i class="[% icon_class %] fa-barcode"></i> by MAC
+	    </button>
+	    <button type="submit" class="[% menu_item %][% color %]"
+		    name="ldapsearch_by_sn"
+		    title="filter pattern in Serial Number address">
+	      <i class="[% icon_class %] fa-barcode"></i> by S/N
+	    </button>
+	    <button type="submit" class="[% menu_item %][% color %]"
+		    name="ldapsearch_by_telephone"
+		    title="filter pattern in telephone number">
+	      <i class="[% icon_class %] fa-phone"></i> by phone num
+	    </button>
 	    
-	    <ul class="dropdown-menu dropdown-menu-right" role="menu" name="ldapsearch_base">
+	    [% color = "bg-info" %]
 
-	      [% icon_class = "fa fa-fw" %]
-	      [% menu_item = "btn btn-block btn-xs umi-text-left btn-" %]
-	      [% color = "success" %]
-
-	      <li class="disabled">
-		<a href="[% c.uri_for('/searchadvanced') %]" tabindex="2">
-		  <span class="[% icon_class %] fa-magic fa-lg"></span>&nbsp;advanced search
-		</a>
-	      </li>
-
-	      <li class="bg-[% color %]">
-		<button type="submit" class="[% menu_item %][% color %]"
-			value="1" tabindex="15"
-			name="ldapsearch_by_name"
-			title="filter pattern in givenName or sn or uid or cn">
-		  <span class="[% icon_class %] fa-user"></span>&nbsp;by name</button></li>
-	      <li class="bg-[% color %]">
-		<button type="submit" class="[% menu_item %][% color %]"
-			value="1" tabindex="16"
-			name="ldapsearch_by_email"
-			title="filter pattern in mail">
-		  <span class="[% icon_class %] fa-envelope"></span>&nbsp;by email</button></li>
-	      <li class="bg-[% color %]">
-		<button type="submit" class="[% menu_item %][% color %]"
-			value="1" tabindex="17"
-			name="ldapsearch_by_jid"
-			title="filter pattern in mail">
-		  <span class="[% icon_class %] fa-lightbulb-o"></span>&nbsp;by JID</button></li>
-	      <li class="bg-[% color %]">
-		<button type="submit" class="[% menu_item %][% color %]"
-			value="1" tabindex="18"
-			name="ldapsearch_by_ip"
-			title="filter pattern in ip address">
-		  <span class="[% icon_class %] fa-code-fork"></span>&nbsp;by IP</button></li>
-	      <li class="bg-[% color %]">
-		<button type="submit" class="[% menu_item %][% color %]"
-			value="1" tabindex="19"
-			name="ldapsearch_by_mac"
-			title="filter pattern in MAC address">
-		  <span class="[% icon_class %] fa-barcode"></span>&nbsp;by MAC</button></li>
-	      <li class="bg-[% color %]">
-		<button type="submit" class="[% menu_item %][% color %]"
-			value="1" tabindex="19"
-			name="ldapsearch_by_sn"
-			title="filter pattern in Serial Number address">
-		  <span class="[% icon_class %] fa-barcode"></span>&nbsp;by S/N</button></li>
-	      <li class="bg-[% color %]">
-		<button type="submit" class="[% menu_item %][% color %]"
-			value="1" tabindex="20"
-			name="ldapsearch_by_telephone"
-			title="filter pattern in telephone number">
-		  <span class="[% icon_class %] fa-phone"></span>&nbsp;by telephone</button></li>
-	      
-	      [% color = "info" %]
-
-	      <li class="bg-[% color %]">
-		<button type="submit" class="[% menu_item %][% color %]"
-			value="[% helper_cfg('cfg_ldap_crud','base', 'group') %]"
-			name="ldapsearch_base"
-			title="filter pattern with base Groups">
-		  <span class="[% icon_class %] fa-group"></span>&nbsp;group</button></li>
-	      <li class="bg-[% color %]">
-		<button type="submit" class="[% menu_item %][% color %]"
-			value="[% helper_cfg('cfg_ldap_crud','base', 'netgroup') %]"
-			name="ldapsearch_base"
-			title="filter pattern with base NisNetgroups">
-		  <span class="[% icon_class %] fa-group"></span>&nbsp;netgroup</button></li>
-	      <li class="bg-[% color %]">
-		<button type="submit" class="[% menu_item %][% color %]"
-			value="[% helper_cfg('cfg_ldap_crud','base', 'acc_root') %]"
-			name="ldapsearch_base"
-			title="filter pattern with base People">
-		  <span class="[% icon_class %] fa-user"></span>&nbsp;People</button></li>
-	      <li class="bg-[% color %]">
-		<button type="submit" class="[% menu_item %][% color %]"
-			value="[% helper_cfg('cfg_ldap_crud','base', 'org') %]"
-			name="ldapsearch_base" tabindex="20"
-			title="filter pattern with base Organizations">
-		  <span class="[% icon_class %] fa-industry"></span>&nbsp;Organizations</button></li>
-	      <li class="bg-[% color %]">
-		<button type="submit" class="[% menu_item %][% color %]"
-			value="[% helper_cfg('cfg_ldap_crud','base', 'dhcp') %]"
-			name="ldapsearch_base" tabindex="21"
-			title="filter pattern with base DHCP">
-		  <span class="[% icon_class %] fa-sitemap"></span>&nbsp;DHCP</button></li>
-	      <li class="bg-[% color %]">
-		<button type="submit" class="[% menu_item %][% color %]"
-			value="[% helper_cfg('cfg_ldap_crud','base', 'alias') %]"
-			name="ldapsearch_base" tabindex="22"
-			title="filter pattern with base Aliases">
-		  <span class="[% icon_class %] fa-files-o"></span>&nbsp;alias</button></li>
-	      <li class="bg-[% color %]">
-		<button type="submit" class="[% menu_item %][% color %]"
-			value="[% helper_cfg('cfg_ldap_crud','base', 'workstations') %]"
-			name="ldapsearch_base" tabindex="23"
-			title="filter pattern with base Workstations">
-		  <span class="[% icon_class %] fa-desktop"></span>&nbsp;workstations</button></li>
-	      <li class="bg-[% color %]">
-		<button type="submit" class="[% menu_item %][% color %]"
-			value="[% helper_cfg('cfg_ldap_crud','base', 'machines') %]"
-			name="ldapsearch_base" tabindex="24"
-			title="filter pattern with base Machines">
-		  <span class="[% icon_class %] fa-server"></span>&nbsp;machines</button></li>
-	      <li class="bg-[% color %]">
-		<button type="submit" class="[% menu_item %][% color %]"
-			value="[% helper_cfg('cfg_ldap_crud','base', 'inventory') %]"
-			name="ldapsearch_base" tabindex="24"
-			title="filter pattern with base Inventory">
-		  <span class="[% icon_class %] fa-tags"></span>&nbsp;inventory</button></li>
-	      <li class="bg-[% color %]">
-		<button type="submit" class="[% menu_item %][% color %]"
-			value="[% helper_cfg('cfg_ldap_crud','base', 'mta') %]"
-			name="ldapsearch_base" tabindex="24"
-			title="filter pattern with base Sendmail">
-		  <span class="[% icon_class %] fa-envelope"></span>&nbsp;Sendmail</button></li>
-	      <li class="bg-[% color %]">
-		<button type="submit" class="[% menu_item %][% color %]"
-			value="[% helper_cfg('cfg_ldap_crud','base', 'gitacl') %]"
-			name="ldapsearch_base" tabindex="25">
-		  <span class="[% icon_class %] fa-gavel"></span>&nbsp;GitACL</button></li>
-
-	      [% color = "warning" %]
-
-	      <li class="disabled">
-		<a href="[% c.uri_for('/searchadvanced') %]" tabindex="27">
-		  <span class="[% icon_class %] fa-stethoscope fa-lg"></span>&nbsp;audit
-		</a>
-	      </li>
-	    </ul>
+	    <button type="submit" class="[% menu_item %][% color %]"
+		    value="[% helper_cfg('cfg_ldap_crud','base', 'group') %]"
+		    name="ldapsearch_base"
+		    title="filter pattern with base Groups">
+	      <i class="[% icon_class %] fa-group"></i> group
+	    </button>
+	    <button type="submit" class="[% menu_item %][% color %]"
+		    value="[% helper_cfg('cfg_ldap_crud','base', 'netgroup') %]"
+		    name="ldapsearch_base"
+		    title="filter pattern with base NisNetgroups">
+	      <i class="[% icon_class %] fa-group"></i> netgroup
+	    </button>
+	    <button type="submit" class="[% menu_item %][% color %]"
+		    value="[% helper_cfg('cfg_ldap_crud','base', 'acc_root') %]"
+		    name="ldapsearch_base"
+		    title="filter pattern with base People">
+	      <i class="[% icon_class %] fa-user"></i> people
+	    </button>
+	    <button type="submit" class="[% menu_item %][% color %]"
+		    value="[% helper_cfg('cfg_ldap_crud','base', 'org') %]"
+		    name="ldapsearch_base" tabindex="20"
+		    title="filter pattern with base Organizations">
+	      <i class="[% icon_class %] fa-industry"></i> organization
+	    </button>
+	    <button type="submit" class="[% menu_item %][% color %]"
+		    value="[% helper_cfg('cfg_ldap_crud','base', 'dhcp') %]"
+		    name="ldapsearch_base" tabindex="21"
+		    title="filter pattern with base DHCP">
+	      <i class="[% icon_class %] fa-sitemap"></i> DHCP
+	    </button>
+	    <button type="submit" class="[% menu_item %][% color %]"
+		    name="ldapsearch_base" tabindex="22"
+		    title="filter pattern with base Aliases">
+	      <i class="[% icon_class %] fa-files-o"></i> alias
+	    </button>
+	    <button type="submit" class="[% menu_item %][% color %]"
+		    value="[% helper_cfg('cfg_ldap_crud','base', 'workstations') %]"
+		    name="ldapsearch_base" tabindex="23"
+		    title="filter pattern with base Workstations">
+	      <i class="[% icon_class %] fa-desktop"></i> workstations
+	    </button>
+	    <button type="submit" class="[% menu_item %][% color %]"
+		    value="[% helper_cfg('cfg_ldap_crud','base', 'machines') %]"
+		    name="ldapsearch_base" tabindex="24"
+		    title="filter pattern with base Machines">
+	      <i class="[% icon_class %] fa-server"></i> machines
+	    </button>
+	    <button type="submit" class="[% menu_item %][% color %]"
+		    value="[% helper_cfg('cfg_ldap_crud','base', 'inventory') %]"
+		    name="ldapsearch_base" tabindex="24"
+		    title="filter pattern with base Inventory">
+	      <i class="[% icon_class %] fa-tags"></i> inventory
+	    </button>
+	    <button type="submit" class="[% menu_item %][% color %]"
+		    value="[% helper_cfg('cfg_ldap_crud','base', 'mta') %]"
+		    name="ldapsearch_base" tabindex="24"
+		    title="filter pattern with base Sendmail">
+	      <i class="[% icon_class %] fa-envelope"></i> sendmail
+	    </button>
+	    <button type="submit" class="[% menu_item %][% color %]"
+		    value="[% helper_cfg('cfg_ldap_crud','base', 'gitacl') %]"
+		    name="ldapsearch_base" tabindex="25">
+	      <i class="[% icon_class %] fa-gavel"></i> GitACL
+	    </button>
 	  </div>
+	  <button href="[% c.uri_for('/searchadvanced') %]"
+		  title="advanced search"
+		  class="btn btn-secondary" role="button">
+	    <span class="fa fa-magic"></span>
+	  </button>
 	</div>
-      </form>
+	<!-- </div> -->
+	<!-- </div> -->
+    </form>
+    [% END %]
+    [% # -------------------------------------------------------- %]
+    <ul class="nav navbar-nav ml-auto">
+      [% IF c.user %]
+      <li class="nav-item dropdown">
+      	<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-user-circle"></i> [% c.user() %]</a>
+	<div class="dropdown-menu">
+	    <a class="dropdown-item" href="/user_prefs"><i class="fa fa-cogs"></i> Profie</a>
+	    <a class="dropdown-item" href="[% c.uri_for('/auth/signout') %]" title="Sign Out"><i class="fa fa-sign-out"></i> Sign Out</a>
+	</div>
+      </li>
+      [% ELSE %]
+      <li class="nav-item">
+	<a href="[% c.uri_for('/auth/signin') %]" title="Sign In"><i class="fa fa-sign-in"></i></a>
+      </li>
       [% END %]
-      [% # -------------------------------------------------------- %]
-      <ul class="nav navbar-nav">
-        <li class="dropdown" title="Info">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-	    <span class="fa fa-info-circle"></span>
-	    <span class="caret"></span>
-	  </a>
-          <ul class="dropdown-menu" role="menu">
-            <li>
-	      <a href="about"><span class="fa fa-fw fa-question-circle">&nbsp;</span>help</a>
-	    </li>
-            <li>
-	      <a href="https://github.com/z-eos/umi/wiki"><span class="fa fa-fw fa-wikipedia-w"></span>&nbsp;UMI wiki</a>
-	    </li>
-            <li>
-	      <a href="[% helper_cfg('cfg_local','header','help', 'item2', 'url') %]">
-		<span class="fa fa-fw [% helper_cfg('cfg_local','header','help', 'item2', 'ico') %]">&nbsp;</span>
-		[% helper_cfg('cfg_local','header','help', 'item2', 'txt') %]</a>
-	    </li>
-            <li class="divider"></li>
-            <li>
-	      <a href="#"><span class="fa fa-fw fa-comments-o">&nbsp;</span>chat</a>
-	    </li>
-            <li>
-	      <a href="#"><span class="fa fa-fw fa-envelope-o">&nbsp;</span>email</a>
-	    </li>
-            <li>
-	      <a href="#"><span class="fa fa-fw fa-mobile">&nbsp;</span>telephone</a>
-	    </li>
-            <li>
-	      <a href="#"><span class="fa fa-fw fa-bug text-danger">&nbsp;</span>bug</a>
-	    </li>
-	    [% IF c.check_user_roles('admin') %]
-            <li class="divider"></li>
-            <li>
-	      <a href="[% c.uri_for('/sysinfo') %]">
-		<span class="fa fa-fw fa-info-circle text-info"></span>
-		system info
-	      </a>
-	    </li>
-            <li>
-	      <a href="test"><span class="fa fa-fw fa-code">&nbsp;</span>test</a>
-	    </li>
-	    [% END %]
-          </ul>
-        </li>
-      </ul>
-      [% # -------------------------------------------------------- %]
-      <ul class="nav navbar-nav navbar-right">
-	[% IF c.user %]
-        <li class="dropdown float-right">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-	    <span class="fa fa-user-circle"></span>&nbsp;
-	    [% c.user() %]
-	    <span class="caret"></span>
-	  </a>
-          <ul class="dropdown-menu" role="menu">
-            <!-- <li> -->
-	    <!--   <a href="[% c.uri_for_action('accinfo') %]"> -->
-	    <!-- 	<span class="fa fa-list-alt disabled"></span> -->
-	    <!-- 	Account Info -->
-	    <!--   </a> -->
-	    <!-- </li> -->
-            <li>
-	      <a href="/user_prefs" tabindex="30">
-		<span class="fa fa-cogs"></span>
-		Preferences
-	      </a>
-	    </li>
-          </ul>
-        </li>
-        <li>
-	  <a href="[% c.uri_for('/auth/signout') %]" title="Sign Out">
-	    <span class="fa fa-sign-out"></span>
-	  </a>
-	</li>
-	[% ELSE %]
-        <li>
-	  <a href="[% c.uri_for('/auth/signin') %]" title="Sign In">
-	    <span class="fa fa-sign-in"></span>
-	  </a>
-	</li>
-	[% END %]
-      </ul>
-    </div><!--/.nav-collapse -->
+      [% IF c.user %]
+      <li class="nav-item">
+	<!-- <button class="navbar-toggler aside-menu-toggle" type="button"><i class="fa fa-bars"></i></button> -->
+      </li>
+      [% END %]
+    </ul>
+    <!-- <button class="navbar-toggler aside-menu-toggler" type="button"><i class="fa fa-bars"></i></button> -->
+    <a class="navbar-toggler aside-menu-toggler" href="#" title="currently have no idea how to use it but it is a cool feature"><i class="fa fa-bars"></i></a>
   </div>
-</nav>
+</header>
 
-<script>
+<script type="text/javascript">
  $(function () { $('#ldapsearch_filter').popover() });
- $(function () { $('[data-toggle="tooltip"]').tooltip() });
+ $(function () { $('#ldapsearch_filter').tooltip() });
+// $(function () { $('[data-toggle="tooltip"]').tooltip() });
 </script>
 
 <!-- END site/header -->

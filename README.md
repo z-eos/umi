@@ -7,4 +7,4 @@ to imagine what it planned to be, have a look at screenshots  (one of the varian
 Copyright (c) 2014 [Zeus Panchenko](https://github.com/z-eos)
 
 ----
-[![CatalystFramework](https://raw.githubusercontent.com/z-eos/umi/master/doc/catalyst_logo.png)](http://www.catalystframework.org)
+![Catalystframework](http://wiki.catalystframework.org/wiki-static/catalyst.png)

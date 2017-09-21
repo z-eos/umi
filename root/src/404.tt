@@ -1,22 +1,25 @@
 [% META title = 'UNAUTHORIZED' %]
 
-<div class="panel panel-warning">
-  <div class="panel-heading">
-    <h1 class="panel-title">
-    	<span class="glyphicon glyphicon-warning-sign"></span>
-    	Requested page was not found!</h1>
-  </div>
-  <div class="panel-body">
-    <p>Dear <strong class="text-info"><em>[% c.user.username %]</em></strong>, it is your attempt number
-    [% c.session.unauthorized.$unauth_action %] to access 
-    <strong class="text-info">&laquo;[% unauth_action %]&raquo;</strong>, page!</p>
-    [% IF c.session.unauthorized.$unauth_action < 6 %]
-        <p class="text-warning"><span class="glyphicon glyphicon-eye-close">&nbsp;</span>
-	We hope it is mistake and you have got here unintentionaly, so no persecution will be arisen.</p>
-    [% ELSE %]
-       <p class="text-danger"><span class="glyphicon glyphicon-eye-open">&nbsp;</span>
-       It looks not a mistake and you have got here rather intentionaly, so the issue will be reported.</p>
-    [% END %]
-    </dl>
+
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="clearfix">
+      <h1 class="float-left display-3 mr-4">404</h1>
+      <h4 class="pt-3">Oops
+	<strong class="text-info">
+	  <em>
+	    [% c.user.username %]
+	  </em>
+	</strong>! You're lost.</h4>
+      <p class="text-muted">The page you are looking for was not found yet/already/don't know why ...</p>
+    </div>
+    <div class="input-prepend input-group disabled">
+      <span class="input-group-addon"><i class="fa fa-search"></i>
+      </span>
+      <input disabled id="prependedInput" class="form-control" size="16" type="text" placeholder="What are you looking for?">
+      <span class="input-group-btn">
+        <button disabled class="btn btn-info" type="button">Search</button>
+      </span>
+    </div>
   </div>
 </div>

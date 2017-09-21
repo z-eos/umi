@@ -264,11 +264,13 @@ sub index :Path :Args(0) {
 	# until confirmed next line alternative # $ttentries->{$dn}->{root}->{sn} = $to_utf_decode;
 	utf8::decode($ttentries->{$dn}->{root}->{sn});
 
+	p my $c_name = ldap_explode_dn( $_->get_value('creatorsName') );
+	p my $m_name = ldap_explode_dn( $_->get_value('modifiersName') );
 	$ttentries->{$dn}->{root}->{ts} =
 	  { createTimestamp => $self->generalizedtime_fr({ ts => $_->get_value('createTimestamp') }),
-	    creatorsName    => ldap_explode_dn( $_->get_value('creatorsName') )->[0]->{UID},
+	    creatorsName    => $c_name->[0]->{UID},
 	    modifyTimestamp => $self->generalizedtime_fr({ ts => $_->get_value('modifyTimestamp') }),
-	    modifiersName   => ldap_explode_dn( $_->get_value('modifiersName') )->[0]->{UID}, };
+	    modifiersName   => $m_name->[0]->{UID}, };
 	
 	$#root_arr = $#root_dn = -1;
 

@@ -1,61 +1,68 @@
 <!-- BEGIN site/footer -->
+<footer class="app-footer">
 
-<div class="container">
+  <i class="fa fa-arrow-circle-down text-success"></i>
+  
+  [% INCLUDE stat.tt %]
+
   [% IF c.user_exists %]
-  <div class=col-sm-4>
-    <small><em>
-	<ul>
-	  <li><a href="https://metacpan.org/release/Catalyst-Runtime">
-	      Catalyst::Runtime
-	  </a></li>
-	  <li><a href="https://metacpan.org/pod/Catalyst::Authentication::Store::LDAP">
-	      Catalyst::Authentication::Store::LDAP
-	  </a></li>
-	  <li><a href="https://metacpan.org/release/HTML-FormHandler">
-	      HTML::FormHandler
-	  </a></li>
-	  <li><a href="https://metacpan.org/pod/distribution/HTML-FormHandler/lib/HTML/FormHandler/Manual/Reference.pod">
-	      HTML::FormHandler::Manual::Reference
-	  </a></li>
-	</ul>
-    </em></small>
-  </div>
-  <div class=col-sm-4>
-    <small><em>
-	<ul>
-	  <li><a href="https://metacpan.org/release/perl-ldap">
-	      Net::LDAP
-	  </a></li>
-	  <li><a href="https://metacpan.org/pod/Net::LDAP::Control::PreRead">
-	      Net::LDAP::Control::PreRead
-	  </a></li>
-	  <li><a href="https://metacpan.org/pod/Catalyst::Plugin::Authentication#c-user">
-	      Catalyst::Plugin::Authentication
-	  </a></li>
-	  <li><a href="https://metacpan.org/pod/Catalyst::Authentication::Store::LDAP::User#Special-Keywords">
-	      Catalyst::Authentication::Store::LDAP::User
-	  </a></li>
-	</ul>
-    </em></small>
-  </div>
-  <div class=col-sm-4>
-    <small><em>
-	<ul>
-	  <li><a href="https://metacpan.org/pod/Catalyst::Manual">
-	    Catalyst::Manual
-	  </a></li>
-	  <li><a href="https://metacpan.org/release/Template-Toolkit">Template::Toolkit</a></li>
-	  <li><a href="#"> footer col No.3 item No.3 </a></li>
-	  <li><a href="#"> UMI @ <span class="fa fa-github"></span> </a></li>
-	</ul>
-    </em></small>
-  </div>
+
+  <table class="table table-hover table-condensed">
+    <tbody>
+      <tr class="text-center">
+	<td>
+	  <a href="https://metacpan.org/release/Catalyst-Runtime">Catalyst::Runtime</a>
+	</td>
+	<td>
+	  <a href="https://metacpan.org/pod/Catalyst::Authentication::Store::LDAP">
+	    Catalyst::Authentication::Store::LDAP
+	  </a>
+	</td>
+	<td>
+	  <a href="https://metacpan.org/release/HTML-FormHandler">HTML::FormHandler</a>
+	</td>
+	<td>
+	  <a href="https://metacpan.org/pod/distribution/HTML-FormHandler/lib/HTML/FormHandler/Manual/Reference.pod">
+	    HTML::FormHandler::Manual::Reference
+	  </a>
+	</td>
+      </tr>
+      <tr class="text-center">
+	<td>
+	  <a href="https://metacpan.org/release/perl-ldap">Net::LDAP</a>
+	</td>
+	<td>
+	  <a href="https://metacpan.org/pod/Net::LDAP::Control::PreRead">Net::LDAP::Control::PreRead</a>
+	</td>
+	<td>
+	  <a href="https://metacpan.org/pod/Catalyst::Plugin::Authentication#c-user">
+	  Catalyst::Plugin::Authentication
+	  </a>
+	</td>
+	<td>
+	  <a href="https://metacpan.org/pod/Catalyst::Authentication::Store::LDAP::User#Special-Keywords">
+	  Catalyst::Authentication::Store::LDAP::User
+	  </a>
+	</td>
+      </tr>
+      <tr class="text-center">
+	<td>
+	  <a href="https://metacpan.org/pod/Catalyst::Manual">Catalyst::Manual</a>
+	</td>
+	<td>
+	  <a href="https://metacpan.org/release/Template-Toolkit">Template::Toolkit</a>
+	</td>
+	<td>
+	  <a href="#"> footer col No.3 item No.3 </a>
+	</td>
+	<td>
+	  <a href="#"> UMI @ <span class="fa fa-github"></span> </a>
+	</td>
+      </tr>
+    </tbody>
+  </table>
+
   [% END %]
-</div>
 
-[% INCLUDE stat.tt %]
-
-<script src="/static/js/bootstrap.min.js"></script>
-<script src="/static/js/umi-header.js"></script>
-
+</footer>
 <!-- END site/footer -->

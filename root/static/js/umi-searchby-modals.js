@@ -67,7 +67,10 @@ $(function(){
 	    if (!$form || !$form.length) return applyError(obj, options.noFormEventMsg), false;
 	    var hidden = createHiddenButton(obj);
 	    var type = createHiddenButton("type", "json");
-	    $form.append(hidden).append(type);
+	    // if not exists then append
+	    if (!$("input[type='hidden'][name='type']", $form).length) { 
+		$form.append(hidden).append(type);
+	    }
 	    var data = $form.serialize();
 	    var $tr = obj.parents("tr");
 	    var action = obj.data("action");

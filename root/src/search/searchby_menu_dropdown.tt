@@ -1,8 +1,8 @@
-<button class="chevron_toggleable btn btn-link pull-left"
+<button class="chevron_toggleable btn btn-secondary btn-link pull-left"
 	type="button" title="Collapse In/Out This Panel"
 	data-target="#collapse[% loop.index %]" data-toggle="collapse"
 	data-parent="#accordion[% loop.index %]">
-  <span id="chevron_switcher" class="fa fa-toggle-[% chevron_toggle %] text-primary"></span>
+  <span id="chevron_switcher" class="fa [% global.icon_toggle %][% chevron_toggle %]"></span>
 </button>
 
 <div class="dropdown pull-left">
@@ -10,10 +10,10 @@
 	  type="button" id="dropdownMenuActions"
 	  data-toggle="dropdown"
 	  title="Possible Actions Upon the Object">
-    <span class="fa fa-cog text-primary"></span><span class="caret text-primary"></span>
+    <span class="fa fa-cog"></span>
   </button>
   
-  <ul class="dropdown-menu dropdown-menu-left bg-primary"
+  <ul class="dropdown-menu dropdown-menu-left"
       aria-labelledby="dropdownMenuActions"
       role="menu">
     

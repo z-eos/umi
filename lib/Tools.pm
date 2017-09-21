@@ -1218,10 +1218,10 @@ wrapper to Net::LDAP::Util generalizedTime_to_time function
 
 on input it expects
 
-    format => strftime(3) conversion specifications
-    ts => generalizedTime string, in general it match the template 
-          "YYYYmmddHH[MM[SS]][(./,)d...](Z|(+/-)HH[MM])"
-    gmt => the returned value is localized or not, default 1 (yes)
+    format => string of strftime(3) conversion specifications
+    ts     => generalizedTime string, in general it match the template 
+              "YYYYmmddHH[MM[SS]][(./,)d...](Z|(+/-)HH[MM])"
+    gmt    => returned value is localized or not, default 1 (yes)
 
 =cut
 

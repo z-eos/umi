@@ -2,14 +2,21 @@
 <html lang="en">
  <head>
    <meta charset="utf-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
    <meta name="description" content='UMI is intended to be rather flexible, though still "high level" (for use by not qualified personell), LDAP stored data, "simple" and "user-friendly" UI. https://github.com/z-eos/umi'>
    <meta name="author" content="">
 
    <title>[% template.title or site.title %]</title>
 
-   <link rel="icon" type="image/x-icon" href="/favicon.ico">
-   <link href="/static/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+   <link rel="icon" type="image/x-icon" href="/static/images/favicon.png">
+   
+   <!-- Icons -->
+   <link href="/static/css/font-awesome.min.css" rel="stylesheet">
+
+   <!-- CoreUI Main styles for this application -->
+   <link href="/static/css/style.css" rel="stylesheet">
+
    <link href="/static/css/bootstrap.css" rel="stylesheet" type="text/css">
    <link href="/static/css/nprogress.css" rel="stylesheet" type="text/css">
    [% template.link %]
@@ -18,7 +25,12 @@
    <script src="/static/js/jquery.min.js"></script>
    <script src="/static/js/nprogress.js"></script>   
  </head>
- <body>
+ <body class="app header-fixed navbar-fixed sidebar-fixed sidebar-minimized fixed-nav aside-menu-hidden">
+ <!-- <body class="navbar-fixed sidebar-nav fixed-nav aside-menu-fixed aside-menu-hidden"> -->
+
+   [% global.icon_toggle      = 'fa-caret-'
+      global.icon_toggle_up   = 'fa-caret-up'
+      global.icon_toggle_down = 'fa-caret-down' %]
    
    [% content %]
 
@@ -26,5 +38,11 @@
     $('form').on('submit', function() { NProgress.start(); });
     window.addEventListener('pageshow', function() { NProgress.done(); });    
    </script>
+   <script>
+    $('.chevron_toggleable').on('click', function() {
+      $(this).find('.fa').toggleClass('[% global.icon_toggle_down %]').toggleClass('[% global.icon_toggle_up %]')
+    });
+   </script>
+
  </body>
 </html>

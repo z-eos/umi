@@ -45,6 +45,11 @@ sub about :Path(about) :Args(0) {
     $c->stash( template => 'about.tt', );
 }
 
+sub motto :Path(motto) :Args(0) {
+    my ( $self, $c ) = @_;
+    $c->stash( template => 'motto.tt', );
+}
+
 sub gitacl_root :Path(gitacl_root) :Args(0) {
     my ( $self, $c ) = @_;
     $c->stash( template => 'gitacl/gitacl_wrap.tt', );
@@ -608,6 +613,7 @@ sub default :Path {
     my ( $self, $c ) = @_;
     # $c->response->body( 'Page not found' );
     $c->stash( template => '404.tt', );
+    # p $c->action->list_extra_info;
     $c->response->status(404);
 }
 

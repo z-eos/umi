@@ -5,7 +5,7 @@
       <a class="chevron_toggleable btn btn-danger pull-left"
 	 href="#" title="Collapse In/Out This Panel" data-target="#collapseErr"
 	 data-toggle="collapse" data-parent="#accordion">
-	<span class="fa fa-toggle-up"></span>
+	<i class="fa [% global.icon_toggle_up %]"></i>
       </a>
       <h4>&nbsp;&nbsp;<span class="fa fa-exclamation-circle">&nbsp;</span>Error!</h4>
     </div>
@@ -68,9 +68,3 @@
 </div>
 <br>
 [% END %]
-
-<script>
- $('.chevron_toggleable').on('click', function() {
-   $(this).find('.fa').toggleClass('fa-toggle-down').toggleClass('fa-toggle-up')
- });
-</script>

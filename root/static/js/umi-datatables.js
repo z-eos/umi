@@ -1,6 +1,6 @@
 
 var table = $('#dataTableToDraw').DataTable({
-    "dom": '<"well well-sm clearfix"i><"clearfix"<"pull-left btn-group"B><"pull-right"f>>rt<"clearfix"<"pull-left"l><"pull-right"p>>',
+    "dom": '<"h6 col-12"i><"row container-fluid"<"col-6 pull-left btn-group"B><"col-6 pull-right"f>>rt<"row container-fluid clearfix"<"col-2"l><"col-10"p>>',
     "buttons": {
 	"buttons": [
 	    {
@@ -36,18 +36,21 @@ var table = $('#dataTableToDraw').DataTable({
 	    },
 	]
     },
+    "renderer": {
+        "header": "bootstrap",
+        "pageButton": "bootstrap",
+    },
     "search": {
 	"regex": true,
 	"smart": true,
     },
-    "renderer": "bootstrap",
     "responsive": true,
     "order": [[ 0, 'asc' ]],
-    "paging": false,
-    "scrolly": 400,
+    // "paging": false,
+    // "scrolly": 400,
     "select": true,
-    "displayLength": 25,
-    "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+    // "displayLength": 25,
+    "lengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
     "infoCallback": function( settings, start, end, max, total, pre ) {
 	var infostr= start +' to '+ end +' of '+ total +' selected records from all, '+ max +' rows';
 	return infostr;
@@ -57,10 +60,12 @@ var table = $('#dataTableToDraw').DataTable({
 	    $(row).addClass('danger');
 	}
     },
+    // "serverSide": true,
+    "pagingType": "simple_numbers"
 } );
 
 // Order by the grouping
-$('#accounts tbody').on( 'click', 'tr.group', function () {
+$('#dataTableToDraw tbody').on( 'click', 'tr.group', function () {
     var currentOrder = table.order()[0];
     if ( currentOrder[0] === 2 && currentOrder[1] === 'asc' ) {
 	table.order( [ 2, 'desc' ] ).draw();

@@ -9,7 +9,7 @@ use base 'Catalyst::View::JSON';
 __PACKAGE__->config({
 		     # allow_callback  => 1,
 		     # callback_param  => 'cb',
-		     expose_stash    => [ qw( success message ) ],
+		     expose_stash    => [ qw( success message tree ) ],
 		    });
 
 =head1 NAME

@@ -1,24 +1,22 @@
 [% META title = 'Search Simple Results' %]
 [% # stash.name %]
 
-<div class="container-fluid">
-  <div class="row page-header">
-    <div class="col-xs-3 col-md-3">
-      <h1>
-	Search Results
-	<sup>
-	  <abbr  title="not all objects could be found via predefined search items, to search for all objects use advanced search menu item!" class="initialism">
-	    <i class="fa fa-info-circle text-info"></i>
-	  </abbr>
-	</sup>
-      </h1>
-    </div>
-    <div class="col-xs-9 col-md-9"><br>
-      <dl class="dl-horizontal mono text-info">
-	<dt>base:</dt><dd>[% base_dn %]</dd>
-	<dt>filter:</dt><dd>[% filter %]</dd>
-      </dl>
-    </div>
+<div class="row page-header">
+  <div class="col-xs-3 col-md-3">
+    <h1>
+      Search Results
+      <sup>
+	<abbr  title="not all objects could be found via predefined search items, to search for all objects use advanced search menu item!" class="initialism">
+	  <i class="fa fa-info-circle text-info"></i>
+	</abbr>
+      </sup>
+    </h1>
+  </div>
+  <div class="col-xs-9 col-md-9"><br>
+    <dl class="dl-horizontal mono text-info">
+      <dt>base:</dt><dd>[% base_dn %]</dd>
+      <dt>filter:</dt><dd>[% filter %]</dd>
+    </dl>
   </div>
 </div>
 
@@ -56,25 +54,25 @@
 	       data-toggle="collapse"
 	       data-parent="#accordion"
 	       tabindex="0">
-	      <span class="fa fa-toggle-[% chevron_toggle %]"></span>
+	      <span class="fa [% global.icon_toggle %][% chevron_toggle %]"></span>
 	    </a>
 	    <a href="#"
 	       class="btn" role="button"
 	       title="ColorLegend"
 	       id="btnLegend"
 	       data-animation="false"
-	       data-trigger="hover"
+	       data-trigger="click"
 	       data-placement="right"
 	       data-html="true"
 	       data-toggle="popover"
 	       data-original-title="ColorLegend"
-	       data-content="<ul class='list-group'>
+	       data-content="<ul class='list-unstyled list-group'>
 	       <li class='list-group-item list-group-item-info'>root object</li>
 	       <li class='list-group-item list-group-item-warning'>service branch</li>
 	       <li class='list-group-item list-group-item-success'>service account</li>
 	       </ul>"
 	       tabindex="0">
-	      <span class="fa fa-info-circle"></span>
+	      <i class="fa fa-info-circle"></i>
 	    </a>
 	  </div>
 	</td>
@@ -150,8 +148,8 @@
       <tr class="[% # tr_color %]">
 	<td>
 	  <div class="panel-group umi-zerro-margin" id="accordion[% loop.index %]">
-	    <div class="panel">
-	      <div class="panel-heading [% panel_color %] clearfix umi-zerro-padding">
+	    <div class="panel panel-[% tr_color %]">
+	      <div class="panel-heading [% # panel_color %] clearfix umi-zerro-padding">
 		[% INCLUDE search/searchby_menu_dropdown.tt %]
 
 		[% IF entry.key.match('People') %]
@@ -177,14 +175,13 @@
 		  <button class="[% root_of_rec_btn %] btn [% btn_blocked %] umi-search visible-lg-block visible-md-block"
 			  title="Click to open root object. [% blocked_title %]"
 			  type="submit" name="ldap_subtree" value="[% root_obj_dn %]">
-		    <span class="[% entry_text_size %] [%# blocked %] text-primary"><b>[% root_of_rec %]</b></span>
+		    <span class="[% entry_text_size %] [%# blocked %]"><b>[% root_of_rec %]</b></span>
 		  </button>
 		  <button class="btn btn-link umi-search visible-xs-block visible-sm-block"
 			  title="Click to open root object of this account. [% blocked_title %]"
 			  type="submit" name="ldap_subtree" value="[% root_obj_dn %]">
-		    <i class="[% blocked _ ' ' _ entry_icon_size %] fa fa-list-ul text-primary">&nbsp;&nbsp;</i>
+		    <i class="[% blocked _ ' ' _ entry_icon_size %] fa fa-list-ul">&nbsp;&nbsp;</i>
 		  </button>
-		</form>
 		
 		<p class="visible-lg-block visible-md-block"></p>&nbsp;
 		[% IF entry.value.mgmnt.is_root && entry.key.match('People') %]
@@ -226,21 +223,29 @@
 		<i title="Service Account Branch" class="fa fa-code-fork[% blocked _ ' ' _ entry_icon_size %]"></i>
 		[% END %]
 		[% # dn of the select result object %]
-		<span class="[% entry_text_size %] col-xs-offset-1 col-lg-offset-0" title="[% blocked_title %]">&nbsp;
+
+		<div class="col [% entry_text_size %] col-xs-offset-1 col-lg-offset-0" title="[% blocked_title %]">&nbsp;
 		  <b>
 		    [% # entry.key.replace(',', ',&nbsp;&nbsp;') %]
 		    [% entry.key.replace('uid=','').replace('authorizedService=','').split(',').slice(0,-3).join('&nbsp;&nbsp;<i class="fa fa-ellipsis-h"></i>&nbsp;&nbsp;') %]
 		  </b>
-		</span>
+		</div>
 
-		<small class="pull-right">
+		<div class=" pull-right">
+		<small>
 		  <ul class="fa-ul umi-zerro-margin">
-		    <li title="created, GMT"><i class="fa-li fa fa-play-circle"></i>[% entry.value.root.ts.createTimestamp %] by <b>[% entry.value.root.ts.creatorsName %]</b>&nbsp;</li>
+		    <li title="created, GMT"><i class="fa-li fa fa-play-circle"></i>
+		      [% entry.value.root.ts.createTimestamp %] by <b>[% entry.value.root.ts.creatorsName %]</b>&nbsp;
+		    </li>
 		    [% IF entry.value.attrs.createTimestamp.0 != entry.value.attrs.modifyTimestamp.0 %]
-		    <li title="modified, GMT"><i class="fa-li fa fa-stop-circle"></i>[%  entry.value.root.ts.modifyTimestamp %] by <b>[% entry.value.root.ts.modifiersName %]</b>&nbsp;</li>
+		    <li title="modified, GMT"><i class="fa-li fa fa-stop-circle"></i>
+		      [%  entry.value.root.ts.modifyTimestamp %] by <b>[% entry.value.root.ts.modifiersName %]</b>&nbsp;
+		    </li>
 		    [% END %]
 		  </ul>
 		</small>
+		</div>
+		</form>
 	      </div>
 	    </div>
 	    <div id="collapse[% loop.index %]" class="panel-collapse collapse [% in %]">
@@ -328,19 +333,14 @@
 </div>
 
 <script>
- $('.chevron_toggleable').on('click', function() {
-   $(this).find('.fa').toggleClass('fa-toggle-down').toggleClass('fa-toggle-up')
+ $('.collapse_in_out').on('click', function() {
+   $("[id^=collapse]").toggleClass('panel-collapse collapse in').toggleClass('panel-collapse collapse')
+   $("[id^=chevron_switcher]").toggleClass('[% global.icon_toggle_down %]').toggleClass('[% global.icon_toggle_up %]')
  });
 </script>
 
 <script>
- $('.collapse_in_out').on('click', function() {
-   $("[id^=collapse]").toggleClass('panel-collapse collapse in').toggleClass('panel-collapse collapse')
-   $("[id^=chevron_switcher]").toggleClass('fa-toggle-down').toggleClass('fa-toggle-up')
- });
+ $(function(){ $('#btnLegend').popover() });
 </script>
 
-<script> $(function(){ $('#btnLegend').popover() }); </script>
-
 <script src="/static/js/umi-ddmenu-sort.js"></script>
-<script src="/static/js/umi-searchby-modals.js"></script>
