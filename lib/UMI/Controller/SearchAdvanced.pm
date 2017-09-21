@@ -2,6 +2,9 @@
 #
 
 package UMI::Controller::SearchAdvanced;
+
+use Net::LDAP::Util qw(	ldap_explode_dn );
+
 use Moose;
 use namespace::autoclean;
 
@@ -137,9 +140,17 @@ sub proc :Path(proc) :Args(0) {
 
       $c->stats->profile("search by filter requested");
 
-      my ( $ttentries, @ttentries_keys, $attr, $dn_depth,  $dn_depthes, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry, @root_groups, $obj_item, $tmp );
+      my ( $ttentries, @ttentries_keys, $attr, $dn_depth,  $dn_depthes, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry, @root_groups, $obj_item, $tmp, $c_name, $m_name );
       my $blocked = 0;
       foreach (@entries) {
+	$c_name = ldap_explode_dn( $_->get_value('creatorsName'), casefold => 'none' );
+	$m_name = ldap_explode_dn( $_->get_value('modifiersName'), casefold => 'none' );
+	$ttentries->{$_->dn}->{root}->{ts} =
+	  { createTimestamp => $self->generalizedtime_fr({ ts => $_->get_value('createTimestamp') }),
+	    creatorsName    => defined $c_name->[0]->{uid} ? $c_name->[0]->{uid} : $c_name->[0]->{cn},
+	    modifyTimestamp => $self->generalizedtime_fr({ ts => $_->get_value('modifyTimestamp') }),
+	    modifiersName   => defined $m_name->[0]->{uid} ? $m_name->[0]->{uid} : $m_name->[0]->{cn}, };
+
 	if ( $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
 	  $dn_depth = scalar split(/,/, $ldap_crud->{cfg}->{base}->{acc_root}) + 1;
 	  $mesg = $ldap_crud->search({
@@ -179,16 +190,17 @@ sub proc :Path(proc) :Args(0) {
 
 	  # p $ttentries->{$_->dn}->{root};
 
-	  $to_utf_decode = $ttentries->{$_->dn}->{root}->{givenName};
-	  utf8::decode($to_utf_decode);
-	  $ttentries->{$_->dn}->{root}->{givenName} = $to_utf_decode;
+	  # $to_utf_decode = $ttentries->{$_->dn}->{root}->{givenName};
+	  # utf8::decode($to_utf_decode);
+	  # $ttentries->{$_->dn}->{root}->{givenName} = $to_utf_decode;
+	  utf8::decode($ttentries->{$_->dn}->{root}->{givenName});
 
-	  $to_utf_decode = $ttentries->{$_->dn}->{root}->{sn};
-	  utf8::decode($to_utf_decode);
-	  $ttentries->{$_->dn}->{root}->{sn} = $to_utf_decode;
+	  # $to_utf_decode = $ttentries->{$_->dn}->{root}->{sn};
+	  # utf8::decode($to_utf_decode);
+	  # $ttentries->{$_->dn}->{root}->{sn} = $to_utf_decode;
+	  utf8::decode($ttentries->{$_->dn}->{root}->{sn});
 
-	  $#root_arr = -1;
-	  $#root_dn = -1;
+	  $#root_arr = $#root_dn = -1;
 
 	  # p $ttentries->{$_->dn}->{root};
 	  $mesg = $ldap_crud->search({ base => sprintf('ou=group,ou=system,%s', $ldap_crud->cfg->{base}->{db}),

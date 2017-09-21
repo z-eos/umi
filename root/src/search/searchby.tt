@@ -54,7 +54,7 @@
 	       data-toggle="collapse"
 	       data-parent="#accordion"
 	       tabindex="0">
-	      <span class="fa [% global.icon_toggle %][% chevron_toggle %]"></span>
+	      <span class="fa [% site.icons.toggle %][% chevron_toggle %]"></span>
 	    </a>
 	    <a href="#"
 	       class="btn" role="button"

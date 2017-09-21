@@ -2,7 +2,7 @@
 	type="button" title="Collapse In/Out This Panel"
 	data-target="#collapse[% loop.index %]" data-toggle="collapse"
 	data-parent="#accordion[% loop.index %]">
-  <span id="chevron_switcher" class="fa [% global.icon_toggle %][% chevron_toggle %]"></span>
+  <span id="chevron_switcher" class="fa [% site.icons.toggle %][% chevron_toggle %]"></span>
 </button>
 
 <div class="dropdown pull-left">

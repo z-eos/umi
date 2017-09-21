@@ -27,10 +27,6 @@
  </head>
  <body class="app header-fixed navbar-fixed sidebar-fixed sidebar-minimized fixed-nav aside-menu-hidden">
  <!-- <body class="navbar-fixed sidebar-nav fixed-nav aside-menu-fixed aside-menu-hidden"> -->
-
-   [% global.icon_toggle      = 'fa-caret-'
-      global.icon_toggle_up   = 'fa-caret-up'
-      global.icon_toggle_down = 'fa-caret-down' %]
    
    [% content %]
 
@@ -40,7 +36,7 @@
    </script>
    <script>
     $('.chevron_toggleable').on('click', function() {
-      $(this).find('.fa').toggleClass('[% global.icon_toggle_down %]').toggleClass('[% global.icon_toggle_up %]')
+      $(this).find('.fa').toggleClass('[% site.icons.toggle_down %]').toggleClass('[% site.icons.toggle_up %]')
     });
    </script>
 

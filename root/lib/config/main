@@ -18,6 +18,7 @@
 
    # load up any other configuration items
    PROCESS config/col
+   	 + config/icons
          + config/url
 	 + config/searchby_menu;
 

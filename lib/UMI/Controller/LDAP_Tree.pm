@@ -42,13 +42,13 @@ sub index :Path :Args(0) {
 				  attrs => [ 'fakeAttr' ],
 				  filter => '(objectClass=*)', });
 
-  p $root = $mesg->as_struct;
+  $root = $mesg->as_struct;
 
 
-  my $mesg = $ldap_crud->search({ base => $ldap_crud->{cfg}->{base}->{db},
-				  scope => 'one',
-				  sizelimit => 0,
-				  filter => '(objectClass=*)', });
+  $mesg = $ldap_crud->search({ base => $ldap_crud->{cfg}->{base}->{db},
+			       scope => 'one',
+			       sizelimit => 0,
+			       filter => '(objectClass=*)', });
   if ( $mesg->code ) {
     push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
     $c->stash( template => 'tree/tree.tt',

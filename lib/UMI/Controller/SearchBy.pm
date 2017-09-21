@@ -5,7 +5,7 @@ package UMI::Controller::SearchBy;
 
 use Net::LDAP::Util qw(	ldap_explode_dn );
 
-use utf8;
+#use utf8;
 use Moose;
 use namespace::autoclean;
 
@@ -207,12 +207,20 @@ sub index :Path :Args(0) {
       }
     }
 
-    my ( $ttentries, @ttentries_keys, $attr, $tmp, $dn, $dn_depth, $dn_depthes, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry, @root_groups, $root_gr, $obj_item );
+    my ( $ttentries, @ttentries_keys, $attr, $tmp, $dn, $dn_depth, $dn_depthes, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry, @root_groups, $root_gr, $obj_item, $c_name, $m_name );
     my $blocked = 0;
     my $is_userPassword = 0;
 
     foreach (@entries) {
       $dn = $_->dn;
+      $c_name = ldap_explode_dn( $_->get_value('creatorsName'), casefold => 'none' );
+      $m_name = ldap_explode_dn( $_->get_value('modifiersName'), casefold => 'none' );
+      p $ttentries->{$dn}->{root}->{ts} =
+	{ createTimestamp => $self->generalizedtime_fr({ ts => $_->get_value('createTimestamp') }),
+	  creatorsName    => defined $c_name->[0]->{uid} ? $c_name->[0]->{uid} : $c_name->[0]->{cn},
+	  modifyTimestamp => $self->generalizedtime_fr({ ts => $_->get_value('modifyTimestamp') }),
+	  modifiersName   => defined $m_name->[0]->{uid} ? $m_name->[0]->{uid} : $m_name->[0]->{cn}, };
+
       if ( $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
 	$dn_depth = scalar split(/,/, $ldap_crud->{cfg}->{base}->{acc_root}) + 1;
 
@@ -264,14 +272,6 @@ sub index :Path :Args(0) {
 	# until confirmed next line alternative # $ttentries->{$dn}->{root}->{sn} = $to_utf_decode;
 	utf8::decode($ttentries->{$dn}->{root}->{sn});
 
-	p my $c_name = ldap_explode_dn( $_->get_value('creatorsName') );
-	p my $m_name = ldap_explode_dn( $_->get_value('modifiersName') );
-	$ttentries->{$dn}->{root}->{ts} =
-	  { createTimestamp => $self->generalizedtime_fr({ ts => $_->get_value('createTimestamp') }),
-	    creatorsName    => $c_name->[0]->{UID},
-	    modifyTimestamp => $self->generalizedtime_fr({ ts => $_->get_value('modifyTimestamp') }),
-	    modifiersName   => $m_name->[0]->{UID}, };
-	
 	$#root_arr = $#root_dn = -1;
 
 	$mesg = $ldap_crud->search({ base => sprintf('ou=group,ou=system,%s', $ldap_crud->cfg->{base}->{db}),
