@@ -1,0 +1,88 @@
+[% META title = 'Catalyst/TT View!' %] 
+
+<h3>Motto of UMI user <small><em>chant it day long ...</em></small></h3>
+
+<div class="row">
+  <div class="col-xs-6">
+
+    <ul class="list-group">
+      <li class="list-group-item list-group-item-primary">
+	<ol>
+	  <li><b>Tooltips are my best friends!</b></li>
+	  <li><b>I do read tooltips!</b></li>
+	  <li><b>Before asking a question, complaining or arguing, <b>I DO READ TOOLTIPS</b>!</b></li>
+	</ol>
+      </li>
+      <li class="list-group-item list-group-item-success">
+	<ol>
+	  <li><b>Tooltips are my best friends!</b></li>
+	  <li><b>I do read tooltips!</b></li>
+	  <li><b>Before asking a question, complaining or arguing, <b>I DO READ TOOLTIPS</b>!</b></li>
+	</ol>
+      </li>
+      <li class="list-group-item list-group-item-info">
+	<ol>
+	  <li><b>Tooltips are my best friends!</b></li>
+	  <li><b>I do read tooltips!</b></li>
+	  <li><b>Before asking a question, complaining or arguing, <b>I DO READ TOOLTIPS</b>!</b></li>
+	</ol>
+      </li>
+      <li class="list-group-item list-group-item-warning">
+	<ol>
+	  <li><b>Tooltips are my best friends!</b></li>
+	  <li><b>I do read tooltips!</b></li>
+	  <li><b>Before asking a question, complaining or arguing, <b>I DO READ TOOLTIPS</b>!</b></li>
+	</ol>
+      </li>
+      <li class="list-group-item list-group-item-danger">
+	<ol>
+	  <li><b>Tooltips are my best friends!</b></li>
+	  <li><b>I do read tooltips!</b></li>
+	  <li><b>Before asking a question, complaining or arguing, <b>I DO READ TOOLTIPS</b>!</b></li>
+	</ol>
+      </li>
+    </ul>
+    
+  </div>
+  <div class="col-xs-6">
+
+    <ul class="list-group">
+      <li class="list-group-item list-group-item-danger">
+	<ol>
+	  <li><b>Tooltips are my best friends!</b></li>
+	  <li><b>I do read tooltips!</b></li>
+	  <li><b>Before asking a question, complaining or arguing, <b>I DO READ TOOLTIPS</b>!</b></li>
+	</ol>
+      </li>
+      <li class="list-group-item list-group-item-warning">
+	<ol>
+	  <li><b>Tooltips are my best friends!</b></li>
+	  <li><b>I do read tooltips!</b></li>
+	  <li><b>Before asking a question, complaining or arguing, <b>I DO READ TOOLTIPS</b>!</b></li>
+	</ol>
+      </li>
+      <li class="list-group-item list-group-item-info">
+	<ol>
+	  <li><b>Tooltips are my best friends!</b></li>
+	  <li><b>I do read tooltips!</b></li>
+	  <li><b>Before asking a question, complaining or arguing, <b>I DO READ TOOLTIPS</b>!</b></li>
+	</ol>
+      </li>
+      <li class="list-group-item list-group-item-success">
+	<ol>
+	  <li><b>Tooltips are my best friends!</b></li>
+	  <li><b>I do read tooltips!</b></li>
+	  <li><b>Before asking a question, complaining or arguing, <b>I DO READ TOOLTIPS</b>!</b></li>
+	</ol>
+      </li>
+      <li class="list-group-item list-group-item-primary">
+	<ol>
+	  <li><b>Tooltips are my best friends!</b></li>
+	  <li><b>I do read tooltips!</b></li>
+	  <li><b>Before asking a question, complaining or arguing, <b>I DO READ TOOLTIPS</b>!</b></li>
+	</ol>
+      </li>
+    </ul>
+    
+  </div>
+</div>

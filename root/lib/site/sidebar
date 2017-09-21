@@ -1,0 +1,187 @@
+<div class="sidebar">
+  <nav class="sidebar-nav">
+    <ul class="nav">
+
+      <li class="nav-item nav-dropdown">
+	<a class="nav-link nav-dropdown-toggle" href="#"><i class="fa fa-binoculars"></i> Analyze</a>
+	<ul class="nav-dropdown-items">
+          <li class="nav-item">
+	    <a class="nav-link" href="[% c.uri_for('/stat_acc') %]"
+	       title="All accounts info in one single,huge,big,fat and heavy table">
+	      <i class="fa fa-fw fa-id-card-o"></i>
+	      Accounts
+	    </a>
+	  </li>
+          <li class="nav-item">
+	    <a class="nav-link" href="[% c.uri_for_action('/servermta/index') %]"
+	       tabindex="2"
+	       title="All MTAs info in one single table">
+	      <i class="fa fa-fw fa-server"></i>
+	      MTA
+	    </a>
+	  </li>
+	</ul>
+      </li>
+
+      <li class="nav-item nav-dropdown">
+	<a class="nav-link nav-dropdown-toggle" href="#"><i class="fa fa-wrench"></i> Tools</a>
+	<ul class="nav-dropdown-items">
+          <li class="nav-item">
+	    <a class="nav-link" href="[% c.uri_for_action('tooltranslit/index') %]">
+	      <i class="fa fa-fw fa-text-width"></i>
+	      Translit
+	    </a>
+	  </li>
+          <li class="nav-item">
+	    <a class="nav-link" href="[% c.uri_for_action('toolpwdgen/index') %]">
+	      <i class="fa fa-fw fa-user-secret"></i>
+	      Pwdgen
+	    </a>
+	  </li>
+          <li class="nav-item">
+	    <a class="nav-link" href="[% c.uri_for_action('toolqr/index') %]">
+	      <i class="fa fa-fw fa-qrcode"></i>
+	      QR
+	    </a>
+	  </li>
+	  [% IF c.check_user_roles('admin') %]
+	  <li class="nav-item">
+	    <a class="nav-link" href="[% c.uri_for('/sysinfo') %]">
+	      <i class="fa fa-fw fa-info-circle"></i>
+	      system info
+	    </a>
+	  </li>
+	  <li class="nav-item">
+	    <a class="nav-link" href="test"><i class="fa fa-fw fa-code">&nbsp;</i>test</a>
+	  </li>
+          <li class="nav-item">
+	    <a class="nav-link" href="[% c.uri_for_action('toolimportldif/index') %]">
+	      <i class="fa fa-fw fa-download"></i>
+	      LDIF Import
+	    </a>
+	  </li>
+	  [% END %]
+	</ul>
+      </li>
+
+      <li class="nav-item nav-dropdown">
+	<a class="nav-link nav-dropdown-toggle" href="#"><i class="fa fa-th"></i> Objects</a>
+	<ul class="nav-dropdown-items">
+          <li class="nav-item">
+	  </li>
+	  [% IF c.check_any_user_role ('admin', 'coadmin', 'acl-w-people') %]
+          <li class="nav-item">
+	    <a class="nav-link" href="[% c.uri_for_action('user_root') %]" tabindex="2">
+	      <i class="fa fa-fw fa-user"></i>
+	      User
+	    </a>
+	  </li>
+	  [% END %]
+	  [% IF c.check_user_roles('admin') %]
+          <li class="nav-item">
+	    <a class="nav-link" href="[% c.uri_for_action('group_root') %]" tabindex="3">
+              <i class="fa fa-fw fa-group"> </i>
+              Group
+	    </a>
+	  </li>
+          <li class="nav-item">
+	    <a class="nav-link" href="[% c.uri_for_action('nisnetgroup/index') %]" tabindex="3">
+              <i class="fa fa-fw fa-group"> </i>
+              NIS NetGroup
+	    </a>
+	  </li>
+          <li class="nav-item">
+	    <a class="nav-link" href="[% c.uri_for_action('gitacl/index') %]" tabindex="5">
+              <i class="fa fa-fw fa-gavel"></i>
+              GitACL
+	    </a>
+	  </li>
+          <li class="nav-item disabled">
+	    <a class="nav-link" href="#" tabindex="6">
+              <i class="fa fa-fw fa-globe"></i>
+              DNS
+	    </a>
+	  </li>
+	  [% END %]
+	  [% IF c.check_any_user_role ('admin', 'coadmin', 'acl-w-organizations') %]
+          <li class="nav-item">
+	    <a class="nav-link" href="[% c.uri_for_action('org_root') %]" tabindex="4">
+              <i class="fa fa-fw fa-industry"></i>
+              Org
+	    </a>
+	  </li>
+	  [% END %]
+	  [% IF c.check_any_user_role ('admin', 'coadmin', 'acl-w-inventory')  %]
+          <li class="nav-item">
+	    <a class="nav-link" href="[% c.uri_for_action('/inventory/index') %]" tabindex="4">
+              <i class="fa fa-fw fa-tags"></i>
+              Inventory
+	    </a>
+	  </li>
+	  [% END %]
+	  [% IF c.check_any_user_role ('admin', 'coadmin', 'dhcp') %]
+          <li class="nav-item disabled">
+	    <a class="nav-link" href="[% c.uri_for_action('dhcp_root') %]" tabindex="7">
+              <i class="fa fa-fw fa-sitemap"></i>
+              DHCP
+	    </a>
+	  </li>
+	  [% END %]
+	  
+	</ul>
+      </li>
+
+      [% IF c.check_user_roles('admin') %]
+      <li class="divider"></li>
+      <li class="divider"></li>
+
+      <li class="nav-item nav-dropdown">
+	<a class="nav-link nav-dropdown-toggle" href="#"><i class="fa fa-tree"></i> LDAP tree</a>
+	<ul disabled class="nav-dropdown-items">
+	  <li class="nav-item">
+	    <a class="nav-link" href="[% c.uri_for_action('/ldap_tree/index') %]"
+	       target="_top">
+	      <i class="fa fa-star-o"></i> dc=ibs
+	    </a>
+	  </li>
+	</ul>
+      </li>
+      [% END %]
+      
+      <li class="divider"></li>
+      
+      <li class="nav-item nav-dropdown">
+	<a class="nav-link nav-dropdown-toggle" href="#"><i class="fa fa-info-circle"></i> Info</a>
+	<ul class="nav-dropdown-items">
+	  <li class="nav-item">
+	    <a class="nav-link" href="[% c.uri_for('/motto') %]"><i class="fa fa-hand-spock-o"></i> user's motto</a>
+	  </li>
+	  <li class="nav-item">
+	    <a class="nav-link" href="#"><i class="fa fa-question-circle"></i> help</a>
+	  </li>
+	  <li class="nav-item">
+	    <a class="nav-link" href="https://github.com/z-eos/umi/wiki"><i class="fa fa-fw fa-wikipedia-w"></i> UMI wiki</a>
+	  </li>
+	  <li class="nav-item">
+	    <a class="nav-link" href="[% helper_cfg('cfg_local','header','help', 'item2', 'url') %]">
+	      <i class="fa fa-fw [% helper_cfg('cfg_local','header','help', 'item2', 'ico') %]"></i>
+	    [% helper_cfg('cfg_local','header','help', 'item2', 'txt') %]</a>
+	  </li>
+	  <li class="nav-item">
+	    <a class="nav-link" href="#"><i class="fa fa-fw fa-comments-o"></i> chat</a>
+	  </li>
+	  <li class="nav-item">
+	    <a class="nav-link" href="#"><i class="fa fa-fw fa-envelope-o"></i> email</a>
+	  </li>
+	  <li class="nav-item">
+	    <a class="nav-link" href="#"><i class="fa fa-fw fa-mobile"></i> telephone</a>
+	  </li>
+	  <li class="nav-item">
+	    <a class="nav-link" href="#"><i class="fa fa-fw fa-bug text-danger"></i> bug</a>
+	  </li>
+	</ul>
+      </li>
+      
+    </ul>
+  </nav>
+</div> <!-- sidebar -->
