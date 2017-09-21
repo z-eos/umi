@@ -10,7 +10,7 @@
     [% IF final_message.error %]
     <div class="panel panel-danger">
       <div class="panel-heading">
-        <h4><span class="glyphicon glyphicon-exclamation-sign">&nbsp;</span>Error!</h4>
+        <h4><span class="fa fa-exclamation-circle">&nbsp;</span>Error!</h4>
       </div>
       <div class="panel-body">
         <ul>
@@ -27,7 +27,7 @@
     [% ELSIF final_message.warning %]
     <div class="panel panel-warning">
       <div class="panel-heading">
-        <h4><span class="glyphicon glyphicon-warning-sign">&nbsp;</span>Warning!</h4>
+        <h4><span class="fa fa-warning">&nbsp;</span>Warning!</h4>
       </div>
       <div class="panel-body">
           [% final_message.warning %]
@@ -37,7 +37,7 @@
     [% IF final_message.success %]
     <div class="panel panel-success">
       <div class="panel-heading">
-        <h4><span class="glyphicon glyphicon-ok-sign">&nbsp;</span>Success!</h4>
+        <h4><span class="fa fa-check-circle">&nbsp;</span>Success!</h4>
       </div>
       <div class="panel-body mono">
           [% final_message.success %]
@@ -51,7 +51,7 @@
   <div class="col-md-2">
     <ul class="nav nav-pills nav-stacked">
       <li><a href="[% c.uri_for('/group') %]">
-	  <span class="glyphicon glyphicon-plus-sign text-success"></span>
+	  <span class="fa fa-plus-circle text-success"></span>
 	  create new</a>
       </li>
     </ul>
@@ -64,12 +64,12 @@ $(function(){
     $('#memberUid').multiSelect({
 	keepOrder: true,
 
-	// selectableHeader: "<button type='button' class='btn btn-block btn-info'><span class='glyphicon glyphicon-tags'>&nbsp;</span><b>Available Members</b></button><div class='input-group search-input'><div class='input-group-addon search-input'><span class='glyphicon glyphicon-search'></span></div><input type='text' class='form-control search-input' autocomplete='off' placeholder='try \"um\"'></div></div>",
+	// selectableHeader: "<button type='button' class='btn btn-block btn-info'><span class='fa fa-tags'>&nbsp;</span><b>Available Members</b></button><div class='input-group search-input'><div class='input-group-addon search-input'><span class='fa fa-search'></span></div><input type='text' class='form-control search-input' autocomplete='off' placeholder='try \"um\"'></div></div>",
 
-	// selectionHeader: "<button type='button' class='btn btn-block btn-success'><span class='glyphicon glyphicon-tags'>&nbsp;</span><b>Selected Members</b></button><div class='input-group'><div class='input-group-addon'><span class='glyphicon glyphicon-search'></span></div><input type='text' class='form-control search-input' autocomplete='off' placeholder='try \"adm\"'></div></div>",
+	// selectionHeader: "<button type='button' class='btn btn-block btn-success'><span class='fa fa-tags'>&nbsp;</span><b>Selected Members</b></button><div class='input-group'><div class='input-group-addon'><span class='fa fa-search'></span></div><input type='text' class='form-control search-input' autocomplete='off' placeholder='try \"adm\"'></div></div>",
 
-	selectableHeader: "<button type='button' class='btn btn-block btn-info'><span class='glyphicon glyphicon-tags'>&nbsp;</span><b>Available Members</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",
-	selectionHeader: "<button type='button' class='btn btn-block btn-success'><span class='glyphicon glyphicon-tags'>&nbsp;</span><b>Selected Members</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",
+	selectableHeader: "<button type='button' class='btn btn-block btn-info'><span class='fa fa-tags'>&nbsp;</span><b>Available Members</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",
+	selectionHeader: "<button type='button' class='btn btn-block btn-success'><span class='fa fa-tags'>&nbsp;</span><b>Selected Members</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",
 
 	// selectableFooter: "<div class='text-info text-center'><em><small>members available</em></small></div>",
 	// selectionFooter: "<div class='text-success text-center'><em><small>members choosen</em></small></div>",

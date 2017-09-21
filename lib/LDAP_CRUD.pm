@@ -1946,7 +1946,7 @@ sub obj_mod {
     warn sprintf('object dn: %s wasn notmodified! errors: %s', $attrs->{'dn'}, $mesg);
   } else {
     $message .= '<div class="alert alert-success">' .
-      '<span style="font-size: 140%" class="glyphicon glyphicon-ok-sign"></span>' .
+      '<span style="font-size: 140%" class="fa fa-check-circle"></span>' .
 	'&nbsp;Object <em>&laquo;' . $self->utf2lat( $params->{'physicalDeliveryOfficeName'} ) .
 	    '&raquo;</em> of type <em>&laquo;' . $type .
 	      '&raquo;</em> was successfully modified.</div>';

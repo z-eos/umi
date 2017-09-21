@@ -44,8 +44,8 @@ $(function(){
     $('#memberNisNetgroup').multiSelect({
 	keepOrder: true,
 
-	selectableHeader: "<button type='button' class='btn btn-block btn-info'><span class='glyphicon glyphicon-tags'>&nbsp;</span><b>Available Subgroups</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",
-	selectionHeader: "<button type='button' class='btn btn-block btn-success'><span class='glyphicon glyphicon-tags'>&nbsp;</span><b>Selected Subgroups</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",
+	selectableHeader: "<button type='button' class='btn btn-block btn-info'><span class='fa fa-tags'>&nbsp;</span><b>Available Subgroups</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",
+	selectionHeader: "<button type='button' class='btn btn-block btn-success'><span class='fa fa-tags'>&nbsp;</span><b>Selected Subgroups</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",
 
 	// selectableFooter: "<div class='text-info text-center'><em><small>members available</em></small></div>",
 	// selectionFooter: "<div class='text-success text-center'><em><small>members choosen</em></small></div>",

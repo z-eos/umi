@@ -127,7 +127,6 @@ has_field 'aux_submit' => (
 			   element_class => [ 'btn', 'btn-success', 'btn-block', ],
 			   # label => '&nbsp;',
 			   # label_class => [ 'col-xs-2', ],
-			   # value => '<span class="glyphicon glyphicon-plus-sign"></span> Submit',
 			   value => 'Submit'
 			  );
 

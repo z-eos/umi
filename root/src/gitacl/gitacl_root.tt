@@ -63,7 +63,7 @@
   <div class="col-md-2">
     <ul class="nav nav-pills nav-stacked">
       <li><a href="[% c.uri_for('gitacl') %]">
-	  <span class="glyphicon glyphicon-plus-sign text-success"></span>
+	  <span class="fa fa-check-circle text-success"></span>
 	  create new</a>
       </li>
     </ul>

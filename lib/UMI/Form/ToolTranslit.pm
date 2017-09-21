@@ -40,7 +40,6 @@ has_field 'aux_submit' => (
 			   wrapper_class => [ 'col-xs-8'],
 			   element_class => [ 'btn', 'btn-success', 'btn-block', ],
 			   # label_no_filter => 1,
-			   # value => '<span class="glyphicon glyphicon-plus-sign"></span> Submit',
 			   value => 'Submit'
 			  );
 
@@ -62,7 +61,7 @@ sub validate {
   my $self = shift;
 
   # if ( $self->field('password1')->value ne $self->field('password2')->value ) {
-  #   $self->field('password2')->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;password and its confirmation does not match');
+  #   $self->field('password2')->add_error('<span class="fa fa-exclamation-circle"></span>&nbsp;password and its confirmation does not match');
   # }
 
   # my $ldap_crud = $self->ldap_crud;
@@ -84,7 +83,7 @@ sub validate {
   # 			  );
 
   # if ($mesg->count) {
-  #   my $err = '<span class="glyphicon glyphicon-exclamation-sign"></span> Fname+Lname+Login exists';
+  #   my $err = '<span class="fa fa-exclamation-circle"></span> Fname+Lname+Login exists';
   #   $self->field('fname')->add_error($err);
   #   $self->field('lname')->add_error($err);
   #   $self->field('login')->add_error($err);

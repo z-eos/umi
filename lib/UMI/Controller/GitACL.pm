@@ -177,7 +177,7 @@ sub create_gitacl {
 
     my $final_message;
     $final_message = '<div class="alert alert-success">' .
-      '<span style="font-size: 140%" class="glyphicon glyphicon-ok-sign"></span>' .
+      '<span style="font-size: 140%" class="fa fa-check-circle"></span>' .
 	'&nbsp;<em>' . $success_message . '<ul></div>' if $success_message;
 
     $final_message .= '<div class="alert alert-danger">' .

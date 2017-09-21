@@ -38,6 +38,7 @@
 
 <script src="/static/js/jquery.min.js"></script>
 <script src="/static/js/bootstrap.min.js"></script>
+<script src="/static/js/vue.js"></script>
 
 <!-- GenesisUI main scripts -->
 <script src="/static/js/app.js"></script>
@@ -51,5 +52,5 @@
 <script src="/static/js/umi-user-all.js"></script>  
 <script src="/static/js/umi-multiselect.js"></script>
 
-<script src="/static/js/jquery.multi-select.js" type="text/javascript"></script>
-<script src="/static/js/jquery.quicksearch.js" type="text/javascript"></script>
+<script src="/static/js/jquery.multi-select.js"></script>
+<script src="/static/js/jquery.quicksearch.js"></script>

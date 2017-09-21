@@ -17,13 +17,13 @@ $(function(){
     $('#groups').multiSelect({
 	keepOrder: true,
 
-	// selectableHeader: '<button type="button" class="btn btn-block btn-info"><span class="glyphicon glyphicon-tags">&nbsp;</span><b>Available groups</b></button>',
-	// selectionHeader: '<button type="button" class="btn btn-block btn-success"><span class="glyphicon glyphicon-tags">&nbsp;</span><b>Selected groups</b></button>',
+	// selectableHeader: '<button type="button" class="btn btn-block btn-info"><span class="fa fa-tags">&nbsp;</span><b>Available groups</b></button>',
+	// selectionHeader: '<button type="button" class="btn btn-block btn-success"><span class="fa fa-tags">&nbsp;</span><b>Selected groups</b></button>',
 	// selectableFooter: "<div class='text-info text-center'><em><small>@ first run: all available groups</em></small></div>",
 	// selectionFooter: "<div class='text-success text-center'><em><small>@ first run: user belongs to</em></small></div>",
 
-	selectableHeader: "<button type='button' class='btn btn-block btn-info'><span class='glyphicon glyphicon-tags'>&nbsp;</span><b>Available Groups</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",
-	selectionHeader: "<button type='button' class='btn btn-block btn-success'><span class='glyphicon glyphicon-tags'>&nbsp;</span><b>Groups User Belongs To</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",
+	selectableHeader: "<button type='button' class='btn btn-block btn-info'><span class='fa fa-tags'>&nbsp;</span><b>Available Groups</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",
+	selectionHeader: "<button type='button' class='btn btn-block btn-success'><span class='fa fa-tags'>&nbsp;</span><b>Groups User Belongs To</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",
 
 	afterInit: function(ms){
 	    var that = this,

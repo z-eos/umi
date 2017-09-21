@@ -74,7 +74,7 @@ sub validate {
   my $self = shift;
 
   # if ( $self->field('groups')->value eq '' ) {
-  #   $self->field('groups')->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;File to be uploaded is mandatory!');
+  #   $self->field('groups')->add_error('<span class="fa fa-exclamation-circle"></span>&nbsp;File to be uploaded is mandatory!');
   # }
 
 # if ( not $self->field('office')->value ) {

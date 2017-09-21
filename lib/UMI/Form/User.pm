@@ -311,12 +311,12 @@ if ( defined $self->field('office')->value &&
 		       });
   my ( $err, $error );
   if ($mesg->count) {
-    $err = '<span class="glyphicon glyphicon-exclamation-sign"></span> Root uid <em>&laquo;' .
+    $err = '<span class="fa fa-exclamation-circle"></span> Root uid <em>&laquo;' .
       $self->field('login')->value . '&raquo;</em> exists';
     $self->field('login')->add_error($err);
 
     $err = '<div class="alert alert-danger">' .
-      '<span style="font-size: 140%" class="glyphicon glyphicon-exclamation-sign"></span>' .
+      '<span style="font-size: 140%" class="fa fa-exclamation-circle"></span>' .
 	'&nbsp;Account with the same root uid <strong>&laquo;' . $self->field('login')->value . '&raquo;</strong>,' .
 	    ' already exists!</div>';
   }

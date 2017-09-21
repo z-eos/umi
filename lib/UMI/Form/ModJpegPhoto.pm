@@ -69,7 +69,7 @@ sub validate {
 #    if ! defined $self->field('avatar')->value && defined $self->field('aux_submit')->value && $self->field('aux_submit')->value eq 'Submit';
 
 # if ( not $self->field('office')->value ) {
-#     $self->field('office')->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span>&nbsp;office is mandatory!');
+#     $self->field('office')->add_error('<span class="fa fa-exclamation-circle"></span>&nbsp;office is mandatory!');
 #   }
 
 
@@ -88,7 +88,7 @@ sub validate {
 # 		      );
 
 #   if ($mesg->count) {
-#     my $err = '<span class="glyphicon glyphicon-exclamation-sign"></span> Fname+Lname+Login exists';
+#     my $err = '<span class="fa fa-exclamation-circle"></span> Fname+Lname+Login exists';
 #     $self->field('givenname')->add_error($err);
 #     $self->field('sn')->add_error($err);
 #     $self->field('login')->add_error($err);

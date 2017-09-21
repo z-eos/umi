@@ -86,7 +86,7 @@ sub validate {
 			base => $ldap_crud->cfg->{base}->{group},
 			attrs => [ 'cn' ],
 		       });
-  $self->field('cn')->add_error('<span class="glyphicon glyphicon-exclamation-sign"></span> Group with name <em>&laquo;' .
+  $self->field('cn')->add_error('<span class="fa fa-exclamation-circle"></span> Group with name <em>&laquo;' .
 				$self->utf2lat( $self->field('cn')->value ) .
 				'&raquo;</em> already exists.') if ($mesg->count);
 }

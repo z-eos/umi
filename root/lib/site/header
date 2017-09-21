@@ -161,11 +161,11 @@
 	      <i class="[% icon_class %] fa-gavel"></i> GitACL
 	    </button>
 	  </div>
-	  <button href="[% c.uri_for('/searchadvanced') %]"
+	  <a href="[% c.uri_for('/searchadvanced') %]"
 		  title="advanced search"
 		  class="btn btn-secondary" role="button">
-	    <span class="fa fa-magic"></span>
-	  </button>
+	    <i class="fa fa-magic"></i>
+	  </a>
 	</div>
 	<!-- </div> -->
 	<!-- </div> -->

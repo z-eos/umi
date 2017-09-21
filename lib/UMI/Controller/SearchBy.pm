@@ -215,7 +215,7 @@ sub index :Path :Args(0) {
       $dn = $_->dn;
       $c_name = ldap_explode_dn( $_->get_value('creatorsName'), casefold => 'none' );
       $m_name = ldap_explode_dn( $_->get_value('modifiersName'), casefold => 'none' );
-      p $ttentries->{$dn}->{root}->{ts} =
+      $ttentries->{$dn}->{root}->{ts} =
 	{ createTimestamp => $self->generalizedtime_fr({ ts => $_->get_value('createTimestamp') }),
 	  creatorsName    => defined $c_name->[0]->{uid} ? $c_name->[0]->{uid} : $c_name->[0]->{cn},
 	  modifyTimestamp => $self->generalizedtime_fr({ ts => $_->get_value('modifyTimestamp') }),
