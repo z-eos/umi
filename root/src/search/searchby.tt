@@ -1,8 +1,8 @@
 [% META title = 'Search Simple Results' %]
 [% # stash.name %]
 
-<div class="row page-header">
-  <div class="col-xs-3 col-md-3">
+<div class="row">
+  <div class="col-xs-6 col-sm-6 col-md-3 col-lg-3">
     <h1>
       Search Results
       <sup>
@@ -12,7 +12,7 @@
       </sup>
     </h1>
   </div>
-  <div class="col-xs-9 col-md-9"><br>
+  <div class="col-xs-6 col-sm-6 col-md-9 col-lg-9"><br>
     <dl class="dl-horizontal mono text-info">
       <dt>base:</dt><dd>[% base_dn %]</dd>
       <dt>filter:</dt><dd>[% filter %]</dd>
@@ -180,7 +180,7 @@
 		  <button class="btn btn-link umi-search visible-xs-block visible-sm-block"
 			  title="Click to open root object of this account. [% blocked_title %]"
 			  type="submit" name="ldap_subtree" value="[% root_obj_dn %]">
-		    <i class="[% blocked _ ' ' _ entry_icon_size %] fa fa-list-ul">&nbsp;&nbsp;</i>
+		    <i class="[% blocked _ ' ' _ entry_icon_size %] fa [% site.icons.root_obj %]">&nbsp;&nbsp;</i>
 		  </button>
 		
 		<p class="visible-lg-block visible-md-block"></p>&nbsp;
