@@ -408,6 +408,7 @@ sub file2var {
 data taken, generally, from
 
 openssl x509 -in target.crt -text -noout
+openssl req  -in target.crt -text -noout
 
 =cut
 
@@ -415,22 +416,60 @@ openssl x509 -in target.crt -text -noout
 sub cert_info {
   my ( $self, $args ) = @_;
   my $arg = {
+	     attr => $args->{attr} || 'userCertificate;binary',
 	     cert => $args->{cert},
 	     ts => defined $args->{ts} && $args->{ts} ? $args->{ts} : "%a %b %e %H:%M:%S %Y",
 	    };
 
-  use Crypt::X509;
-  my $x509 = Crypt::X509->new( cert => join('', $arg->{cert}) );
   use POSIX qw(strftime);
-  return {
-	  'Subject' => join(',',@{$x509->Subject}),
-	  'Issuer' => join(',',@{$x509->Issuer}),
-	  'S/N' => $x509->serial,
-	  'Not Before' => strftime ($arg->{ts}, localtime($x509->not_before)),
-	  'Not  After' => strftime ($arg->{ts}, localtime( $x509->not_after)),
-	  'error' => $x509->error ? sprintf('Error on parsing Certificate: %s', $x509->error) : undef,
-	  'cert' => $arg->{cert},
-	 };
+  use Crypt::X509;
+  use Crypt::X509::CRL;
+
+  my ( $cert, $key, $hex, $return );
+  if ( $arg->{attr} eq 'userCertificate;binary' ||
+       $arg->{attr} eq 'cACertificate;binary' ) {
+    $cert = Crypt::X509->new( cert => join('', $arg->{cert}) );
+    if ( $cert->error ) {
+      return { 'error' => sprintf('Error on parsing Certificate: %s', $cert->error) };
+    } else {
+      return  {
+	       'Subject' => join(',',@{$cert->Subject}),
+	       'CN' => $cert->subject_cn,
+	       'Issuer' => join(',',@{$cert->Issuer}),
+	       'S/N' => $cert->serial,
+	       'Not Before' => strftime ($arg->{ts}, localtime($cert->not_before)),
+	       'Not  After' => strftime ($arg->{ts}, localtime( $cert->not_after)),
+	       'cert' => $arg->{cert},
+	       'error' => undef,
+	      };
+    }
+  } elsif ( $arg->{attr} eq 'certificateRevocationList;binary' ) {
+    $cert = Crypt::X509::CRL->new( crl => $arg->{cert} );
+    if ( $cert->error ) {
+      return { 'error' => sprintf('Error on parsing CertificateRevocationList: %s', $cert->error) };
+    } else {
+      $arg->{sn} = $cert->revocation_list;
+      foreach $key (sort (keys %{$arg->{sn}} )) {
+	$hex = sprintf("%X", $key);
+	$hex = length($hex) % 2 ? '0' . $hex : $hex;
+	$arg->{sn}->{$key}->{sn_hex} = $hex;
+	$arg->{sn}->{$key}->{revocationDate} =
+	  strftime ($arg->{ts}, localtime($arg->{sn}->{$key}->{revocationDate}));
+      }
+      return {
+	      'Issuer' => join(',',@{$cert->Issuer}),
+	      'AuthIssuer' => join(',',@{$cert->authorityCertIssuer}),
+	      'RevokedCertificates' => $arg->{sn},
+	      'Update This' => strftime ($arg->{ts}, localtime($cert->this_update)),
+	      'Update Next' => strftime ($arg->{ts}, localtime( $cert->next_update)),
+	      'error' => undef,
+	      'cert' => $arg->{cert},
+	     };
+    }
+  } else {
+    return { 'error' => sprintf('Not known to us certificate type'), };
+  }
+
 }
 
 

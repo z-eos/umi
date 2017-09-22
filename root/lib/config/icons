@@ -1,7 +1,9 @@
 [%
    site.icons = {
+      field_add   = 'fa-plus-circle'
       toggle      = 'fa-caret-'
       toggle_up   = 'fa-caret-up'
       toggle_down = 'fa-caret-down'
+      binary_data = 'fa-file-zip-o'
    }
 -%]

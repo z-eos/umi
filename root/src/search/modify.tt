@@ -37,7 +37,9 @@
          attr_rest.key != 'userPassword' &&
          ! attr_rest.key.match('userCertificate') &&
          attr_rest.key != 'jpegPhoto' %]
-      [% attr_rest.key %]&nbsp;<a class="element-add" href="#" title="add value"><span class="fa fa-plus-square text-success"></span></a>
+      [% attr_rest.key %]&nbsp;<a class="element-add" href="#" title="add value">
+      <i class="fa [% site.icons.field_add %] text-success"></i>
+      </a>
       [% ELSE %]
       [% attr_rest.key %]
       [% END %]
@@ -62,7 +64,7 @@
          attr.key != 'userPassword' &&
          ! attr.key.match('userCertificate') &&
          attr.key != 'jpegPhoto' %]
-      [% attr.key %]&nbsp;<a class="element-add" href="#" title="add value"><span class="fa fa-plus-square text-success"></span></a>
+      [% attr.key %]&nbsp;<a class="element-add" href="#" title="add value"><i class="fa fa-plus-circle text-success"></i></a>
       [% ELSE %]
       [% attr.key %]
       [% END %]
@@ -72,7 +74,9 @@
       <img alt="jpegPhoto of [% modify %]" src="[% attr.value %]" class="img-thumbnail pull-left" title="[% modify %]">
       <input type="file" class="btn btn-default" name="[% attr.key %]" accept="image/jpeg, image/png"></input>
 
-      [% ELSIF attr.key == 'userCertificate;binary' %]
+      [% ELSIF attr.key == 'userCertificate;binary' ||
+	 attr.key == 'cACertificate;binary' ||
+	 attr.key == 'certificateRevocationList;binary' %]
       <input type="file" class="btn btn-default" name="[% attr.key %]" accept=".der"></input>
 
       [% ELSIF attr.key == 'userPassword' %]

@@ -251,8 +251,8 @@ sub proc :Path(proc) :Args(0) {
 		      $_->dn,
 		      encode_base64(join('',@{$ttentries->{$_->dn}->{attrs}->{$attr}})),
 		      $_->dn);
-	  } elsif ( $attr eq 'userCertificate;binary' ) {
-	    $ttentries->{$_->dn}->{attrs}->{$attr} = $self->cert_info({ cert => $_->get_value( $attr ) });
+	  } elsif ( $attr eq 'userCertificate;binary' || $attr eq 'cACertificate;binary' || $attr eq 'certificateRevocationList;binary' ) {
+	    $ttentries->{$_->dn}->{attrs}->{$attr} = $self->cert_info({ attr => $attr, cert => $_->get_value( $attr ) });
 	  } elsif (ref $ttentries->{$_->dn}->{attrs}->{$attr} eq 'ARRAY') {
 	    $ttentries->{$_->dn}->{is_arr}->{$attr} = 1;
 	  }

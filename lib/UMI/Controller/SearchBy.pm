@@ -324,7 +324,7 @@ sub index :Path :Args(0) {
 		    encode_base64(join('',@{$ttentries->{$dn}->{attrs}->{$attr}})),
 		    $dn);
 	  } elsif ( $attr eq 'userCertificate;binary' || $attr eq 'cACertificate;binary' || $attr eq 'certificateRevocationList;binary' ) {
-	    $ttentries->{$dn}->{attrs}->{$attr} = $self->cert_info({ cert => $_->get_value( $attr ) });
+	    $ttentries->{$dn}->{attrs}->{$attr} = $self->cert_info({ attr => $attr, cert => $_->get_value( $attr ) });
 	} elsif (ref $ttentries->{$dn}->{attrs}->{$attr} eq 'ARRAY') {
 	  $ttentries->{$dn}->{is_arr}->{$attr} = 1;
 	}
@@ -1356,16 +1356,22 @@ sub modify :Path(modify) :Args(0) {
 
   my $entry = $mesg->entry(0);
 
-  my ($jpeg, $attr, $val, $orig, $delete, $add);
+  my ($jpeg, $binary, $attr, $val, $orig, $cert_info);
+  my $add = undef;
+  my $moddn = undef;
+  my $delete = undef;
   my $replace = undef;
   foreach $attr ( sort ( keys %{$params} )) {
     next if $attr =~ /$ldap_crud->{cfg}->{exclude_prefix}/ ||
       $attr eq 'dn' ||
       $attr =~ /userPassword/; ## !! stub, not processed yet !!
-    if ( $attr eq "jpegPhoto" ) {
-      $params->{jpegPhoto} = $c->req->upload('jpegPhoto');
+    if ( $attr eq 'jpegPhoto' ||
+	 $attr eq 'cACertificate' ||
+	 $attr eq 'certificateRevocationList' ||
+	 $attr eq 'userCertificate' ) {
+      $params->{$attr} = $c->req->upload($attr);
     }
-
+    
     $val  = $params->{$attr};
     $orig = $entry->get_value($attr);
     
@@ -1385,19 +1391,34 @@ sub modify :Path(modify) :Args(0) {
     }
 
     # what to do or to not to do?
-    if ( $val eq '' && defined $entry->get_value($attr) ) {
+    if ( $attr eq 'jpegPhoto' && $val ne '' ) {
+      $jpeg = $self->file2var( $val->{'tempname'}, $return );
+      return $jpeg if ref($jpeg) eq 'HASH' && defined $jpeg->{error};
+      push @{$replace}, $attr => [ $jpeg ];
+    } elsif ( ( $attr eq 'cACertificate' ||
+		$attr eq 'certificateRevocationList' ||
+		$attr eq 'userCertificate' ) && $val ne '' ) {
+      $binary = $self->file2var( $val->{'tempname'}, $return );
+      return $binary if ref($binary) eq 'HASH' && defined $binary->{error};
+      push @{$replace}, $attr . ';binary' => [ $binary ];
+      $cert_info =
+	$self->cert_info({ cert => $binary, ts => "%Y%m%d%H%M%S", });
+      push @{$replace}, 'umiUserCertificateSn' => '' . $cert_info->{'S/N'};
+      push @{$replace}, 'umiUserCertificateNotBefore' => '' . $cert_info->{'Not Before'};
+      push @{$replace}, 'umiUserCertificateNotAfter' => '' . $cert_info->{'Not  After'};
+      push @{$replace}, 'umiUserCertificateSubject' => '' . $cert_info->{'Subject'};
+      push @{$replace}, 'umiUserCertificateIssuer' => '' . $cert_info->{'Issuer'};
+      $moddn = 'cn=' . $cert_info->{'CN'};
+    } elsif ( $val eq '' && defined $entry->get_value($attr) ) {
       push @{$delete}, $attr => [];
     } elsif ( $val ne '' && ! defined $entry->get_value($attr) ) {
+      # !!! ??? is it necessary here? can we leave it instead of replacing by itself
       if ( $attr eq 'jpegPhoto' ) {
 	$jpeg = $self->file2var( $val->{'tempname'}, $return );
 	return $jpeg if ref($jpeg) eq 'HASH' && defined $jpeg->{error};
 	$val = [ $jpeg ];
       }
       push @{$add}, $attr => $val;
-    } elsif ( $attr eq 'jpegPhoto' && $val ne "" ) {
-      $jpeg = $self->file2var( $val->{'tempname'}, $return );
-      return $jpeg if ref($jpeg) eq 'HASH' && defined $jpeg->{error};
-      push @{$replace}, $attr => [ $jpeg ];
     } elsif ( ref($val) eq "ARRAY" && $#{$val} > -1 ) {
       push @{$replace}, $attr => $val;
     } elsif ( ref($val) ne "ARRAY" && $val ne "" ) { # && $val ne $orig ) {
@@ -1420,13 +1441,21 @@ sub modify :Path(modify) :Args(0) {
     # p $modx;
     $mesg = $ldap_crud->modify( $params->{dn}, $modx, );
     if ( $mesg ne "0" ) {
-      $return->{error} .= $mesg->{html};
+      push @{$return->{error}}, $mesg->{html};
     } else {
-      $return->{success} = 'Modification/s made:<pre>' .
+      if ( defined $moddn && $moddn ne '' ) {
+	$mesg = $ldap_crud->moddn( $params->{dn}, $moddn, );
+	if ( $mesg ne "0" ) {
+	  push @{$return->{error}}, $mesg->{html};
+	} else {
+	  push @{$return->{success}}, 'RDN changed<br><br>';
+	}
+      }
+      push @{$return->{success}}, 'Modification/s made:<pre>' .
 	np($modx, caller_info => 0, colored => 0, index => 0) . '</pre>';
     }
   } else {
-    $return->{warning} = 'No change was performed!';
+    push @{$return->{warning}}, 'No change was performed!';
   }
 
   $c->stash( template => 'search/modify.tt', # stub.tt',

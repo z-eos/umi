@@ -25,7 +25,12 @@
    <script src="/static/js/jquery.min.js"></script>
    <script src="/static/js/nprogress.js"></script>   
  </head>
- <body class="app header-fixed navbar-fixed sidebar-fixed sidebar-minimized fixed-nav aside-menu-hidden">
+ [% IF c.user_exists %]
+ [% body_class = 'app header-fixed navbar-fixed sidebar-fixed sidebar-minimized fixed-nav aside-menu-hidden' %]
+ [% ELSE %]
+ [% body_class = '' %]
+ [% END %]
+ <body class="[% body_class %]">
  <!-- <body class="navbar-fixed sidebar-nav fixed-nav aside-menu-fixed aside-menu-hidden"> -->
    
    [% content %]

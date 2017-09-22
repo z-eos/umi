@@ -853,6 +853,34 @@ sub add {
 }
 
 
+=head2 moddn
+
+Net::LDAP->moddn wrapper
+
+=cut
+
+sub moddn {
+  my ($self, $dn, $opts) = @_;
+
+  my $callername = (caller(1))[3];
+  $callername = 'main' if ! defined $callername;
+  my $return;
+  my $msg;
+  if ( ! $self->dry_run ) {
+    $msg = $self->ldap->moddn ( $dn, newrdn => $opts, deleteoldrdn => 1, );
+    if ($msg->is_error()) {
+      $return = $self->err( $msg );
+      $return->{caller} = 'call to LDAP_CRUD->moddn from ' . $callername . ': ';
+    } else {
+      $return = 0;
+    }
+  } else {
+    $return = $msg->ldif;
+  }
+  return $return;
+}
+
+
 sub ldif_read {
   my ($self, $args) = @_;
   my $arg = {

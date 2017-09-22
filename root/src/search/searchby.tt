@@ -263,9 +263,10 @@
 		  [% attr_name = h_attr.key    # attribute name %]
 		  <dt>
 		    [% IF h_attr.key.match(';binary') %]
-		    [% h_attr.key.substr(-7,7,'&nbsp;<abbr title="binary data"><span class="fa fa-file-zip-o text-info" title="binary data"></span></abbr>') %]&#58;
+		    [% bindata = '&nbsp;<abbr title="binary data"><i class="fa ' _ site.icons.binary_data _ ' text-info" title="binary data"></i></abbr>' %]
+		    [% h_attr.key.replace(';binary', bindata) %]&#58;
 		    [% ELSIF h_attr.key == 'userPKCS12' %]
-		    [% h_attr.key.trim %]&nbsp;<abbr title="binary data"><span class="fa fa-file-zip-o text-info" title="binary data"></span></abbr>&#58;
+		    [% h_attr.key.trim %]&nbsp;<abbr title="binary data"><span class="fa [% binary_data %] text-info" title="binary data"></span></abbr>&#58;
 		    [% ELSE %]
 		    [% h_attr.key.trim %]&#58;
 		    [% END %]
@@ -283,7 +284,29 @@
 			  [% FOREACH cert IN h_attr.value %]
 			  [%   NEXT IF cert.key == 'cert' %]
 			  [%   NEXT IF cert.key == 'error' && ! cert.value %]
-			  <dt>[% cert.key %]</dt><dd class="mono">[% cert.value %]</dd>
+			  [%     IF h_attr.key.match('certificateRevocationList;binary') &&
+			     cert.key.match('RevokedCertificates') %]
+			  <dt>[%   cert.key %]</dt><dd class="mono">
+			    <table class="table table-condensed table-striped">
+			      <thead>
+				<tr class="info">
+				  <th>S/N<sub>10</sub></th>
+				  <th>S/N<sub>hex</sub></th>
+				  <th><i class="fa fa-calendar"></i></th>
+				</tr>
+			      </thead>
+			      [% FOREACH key IN cert.value.keys.sort %]
+			      <tr>
+				<td>[% key %]</td>
+				<td>[% cert.value.$key.sn_hex %]</td>
+				<td>[% cert.value.$key.revocationDate %]</td>
+			      </tr>
+			      [% END %]
+			    </table>
+			  </dd>
+			  [%     ELSE %]
+			  <dt>[%   cert.key %]</dt><dd class="mono">[% cert.value %]</dd>
+			  [%     END %]
 			  [% END %]
 			</dl>
 		      </em>
