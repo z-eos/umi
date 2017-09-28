@@ -1275,6 +1275,20 @@ sub generalizedtime_fr {
     strftime( $arg->{format}, localtime( generalizedTime_to_time( $arg->{ts} )));
 }
 
+=head2 store_data
+
+dirty hack to store user requst object to disk file
+
+=cut
+
+sub store_data {
+  my ($self, $args) = @_;
+  my $arg = { data => $args->{data},
+	      file => $args->{file}, };
+  use Storable;
+  store $arg->{data}, $arg->{file};
+}
+
 =head1 AUTHOR
 
 Zeus

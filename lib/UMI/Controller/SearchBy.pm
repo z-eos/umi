@@ -84,7 +84,7 @@ sub index :Path :Args(0) {
   if ( defined $c->user_exists ) {
     my ( $params, $ldap_crud, $filter, $filter_meta, $filter_translitall, $base, $return );
     my $sort_order = 'reverse';
-    
+
     $params = $c->req->params;
     $ldap_crud = $c->model('LDAP_CRUD');
 

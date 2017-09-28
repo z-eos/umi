@@ -1,91 +1,12 @@
-[% META title = 'Catalyst/TT View!' %] 
+[% META title = 'welcome' %] 
 
-<div>
-  <h3>Unified Management Interface (UMI) project <small><em>desctiption</em></small></h3>
-  <br>
-</div>
+<br>
 
-<div class="row">
-  <div class="col-xs-6">
-
-    <ul class="list-group">
-      <li class="list-group-item list-group-item-primary">
-	<ol>
-	  <li><b>Tooltips are your best friends!</b></li>
-	  <li><b>Do read tooltips!</b></li>
-	  <li><b>Before asking a question, complaining or arguing, <b>DO READ TOOLTIPS</b>!</b></li>
-	</ol>
-      </li>
-      <li class="list-group-item list-group-item-success">
-	<ol>
-	  <li><b>Tooltips are your best friends!</b></li>
-	  <li><b>Do read tooltips!</b></li>
-	  <li><b>Before asking a question, complaining or arguing, <b>DO READ TOOLTIPS</b>!</b></li>
-	</ol>
-      </li>
-      <li class="list-group-item list-group-item-info">
-	<ol>
-	  <li><b>Tooltips are your best friends!</b></li>
-	  <li><b>Do read tooltips!</b></li>
-	  <li><b>Before asking a question, complaining or arguing, <b>DO READ TOOLTIPS</b>!</b></li>
-	</ol>
-      </li>
-      <li class="list-group-item list-group-item-warning">
-	<ol>
-	  <li><b>Tooltips are your best friends!</b></li>
-	  <li><b>Do read tooltips!</b></li>
-	  <li><b>Before asking a question, complaining or arguing, <b>DO READ TOOLTIPS</b>!</b></li>
-	</ol>
-      </li>
-      <li class="list-group-item list-group-item-danger">
-	<ol>
-	  <li><b>Tooltips are your best friends!</b></li>
-	  <li><b>Do read tooltips!</b></li>
-	  <li><b>Before asking a question, complaining or arguing, <b>DO READ TOOLTIPS</b>!</b></li>
-	</ol>
-      </li>
-    </ul>
-    
-  </div>
-  <div class="col-xs-6">
-
-    <ul class="list-group">
-      <li class="list-group-item list-group-item-danger">
-	<ol>
-	  <li><b>Tooltips are your best friends!</b></li>
-	  <li><b>Do read tooltips!</b></li>
-	  <li><b>Before asking a question, complaining or arguing, <b>DO READ TOOLTIPS</b>!</b></li>
-	</ol>
-      </li>
-      <li class="list-group-item list-group-item-warning">
-	<ol>
-	  <li><b>Tooltips are your best friends!</b></li>
-	  <li><b>Do read tooltips!</b></li>
-	  <li><b>Before asking a question, complaining or arguing, <b>DO READ TOOLTIPS</b>!</b></li>
-	</ol>
-      </li>
-      <li class="list-group-item list-group-item-info">
-	<ol>
-	  <li><b>Tooltips are your best friends!</b></li>
-	  <li><b>Do read tooltips!</b></li>
-	  <li><b>Before asking a question, complaining or arguing, <b>DO READ TOOLTIPS</b>!</b></li>
-	</ol>
-      </li>
-      <li class="list-group-item list-group-item-success">
-	<ol>
-	  <li><b>Tooltips are your best friends!</b></li>
-	  <li><b>Do read tooltips!</b></li>
-	  <li><b>Before asking a question, complaining or arguing, <b>DO READ TOOLTIPS</b>!</b></li>
-	</ol>
-      </li>
-      <li class="list-group-item list-group-item-primary">
-	<ol>
-	  <li><b>Tooltips are your best friends!</b></li>
-	  <li><b>Do read tooltips!</b></li>
-	  <li><b>Before asking a question, complaining or arguing, <b>DO READ TOOLTIPS</b>!</b></li>
-	</ol>
-      </li>
-    </ul>
-    
+<div class="card text-white bg-warning mb-3" style="max-width: 40rem;">
+  <div class="card-header">Do chant</div>
+  <div class="card-body">
+    <h3 class="card-title"><b>Do chant user's <a href="/motto">motto</a>!</b></h3>
+    <p class="card-text">it is as simple as important to do that each time any question arise ...</p>
+    <a href="/motto" class="card-link">the motto</a>
   </div>
 </div>

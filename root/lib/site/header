@@ -172,7 +172,34 @@
     </form>
     [% END %]
     [% # -------------------------------------------------------- %]
+
+    [% IF c.user %]
     <ul class="nav navbar-nav ml-auto">
+      [% IF navbar_note.size %]
+      <li class="nav-item dropdown">
+	<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">
+	  <i class="fa fa-bell icon-bell"></i>
+	  <span class="badge badge-pill badge-danger bg-danger"><small>[% navbar_note.size %]</small></span>
+	</a>
+	<div class="dropdown-menu dropdown-menu-right">
+	  <div class="dropdown-header text-center text-dark">
+	    <strong>You have [% navbar_note.size %] notification</strong>
+	  </div>
+	  [% FOREACH note IN navbar_note %]
+	  <a href="#" class="dropdown-item">
+	    <i class="fa [% note.icon %] text-[% note.color %]"></i> [% note.note %]
+	  </a>
+	  [% END %]
+	</div>
+      </li>
+      [% ELSE %]
+      <li class="nav-item">
+	<div class="nav-link">
+	  <i class="fa fa-bell-o"></i>
+	</div>
+      </li>
+      [% END %]
+      [% END %]
       [% IF c.user %]
       <li class="nav-item dropdown">
       	<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-user-circle"></i> [% c.user() %]</a>

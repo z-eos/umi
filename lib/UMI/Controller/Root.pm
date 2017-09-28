@@ -695,11 +695,38 @@ Attempt to render a view, if needed.
 
 sub end : ActionClass('RenderView') {
   my ( $self, $c ) = @_;
+
+  my $size = 0;
+  my $navbar_note;
+  if ( defined $c->user ) {
+    my $r;
+    $r->{req} = $c->req->params;
+    # $r->{stash} = $c->stash;
+    my @a = split(/\//, UMI->config->{session}->{storage});
+    my $b = join('/', $a[0],$a[1],$a[2]);
+    use POSIX qw(strftime);
+    my $now = strftime "%Y%m%d%H%M%S", localtime;
+    p my $file = sprintf("%s/store-data_%s_%s_%s.perl-storable",
+			 $b,
+			 $c->user->uid,
+			 $c->req->action eq '/' ? 'reinit' : $c->req->action,
+			 $now);
+    $c->stats->profile(begin => "store_data in the end");
+    $self->store_data({ data => $r, file => $file, });
+
+    use File::Find;
+    find(sub { $size += -s if -f $_ }, $b);
+    push @{$navbar_note}, { note => sprintf("session storage %.1f Mb", $size / 1024 / 1024),
+			    color => $size > UMI->config->{session_storage_size} ? 'danger' : 'info',
+			    icon => 'fa-trash-o' };
+  }
+  
   my @rep = $c->stats->report;
   my $stats = { debug => UMI->config->{debug}->{level},
 		elapsed => $c->stats->elapsed,
 		report => \@rep };
-  $c->stash( stats => $stats );
+  $c->stash( stats => $stats,
+	     navbar_note => $navbar_note );
   
   # if ( $c->error and $c->error->[-1] eq "access denied" ) {
   #   $c->error(0); # clear the error
