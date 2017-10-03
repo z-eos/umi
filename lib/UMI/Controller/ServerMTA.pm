@@ -42,9 +42,9 @@ page to show all email domains, theirs MX-es and nodes serving as SMARTHOSTs
 
 sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
-    my ( $return, $mta, $entry, $relay, $node, $fqdn, $ip, $rr, @mx_arr, $mx, $mx_ptr, $mx_a );
+    my ( $return, $mta, $mtadescr, $smarthost, $entry, $relay, $node, $fqdn, $ip, $rr, @mx_arr, $mx, $mx_ptr, $mx_a );
     $mx = $mx_a = $mx_ptr = '';
-    my $default = 'default';
+    my $default;
     my $reslvr = Net::DNS::Resolver->new;
     my $resolved;
     
@@ -53,14 +53,24 @@ sub index :Path :Args(0) {
     my $mesg = $ldap_crud->search({ base => $ldap_crud->{cfg}->{base}->{mta},
 				    sub => 'one',
 				    sizelimit => 0,
-				    attrs   => [ 'host', ],
+				    attrs   => [ 'destinationIndicator', 'host', 'description' ],
 				    filter => '(businessCategory=corerelay)', });
     if ( $mesg->code ) {
       push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
     } else {
       $entry = $mesg->entry(0);
       $relay = $entry->get_value('host');
-
+      $mta->{default}->{smarthost}->{fqdn}   = $entry->get_value('destinationIndicator');
+      $mta->{default}->{description} = $entry->get_value('description');
+      $resolved = $reslvr->search( $mta->{default}->{smarthost}->{fqdn});
+      if ($resolved) {
+	foreach $rr ($resolved->answer) {
+	   $mta->{default}->{smarthost}->{ip} = $rr->address if $rr->type eq "A";
+	}
+      } else {
+	push @{$return->{error}}, $fqdn . ' IP: ' . $reslvr->errorstring;
+      }
+      
       $mesg = $ldap_crud->search({ base => 'sendmailMTAMapName=smarttable,ou=' . $relay . ',' .
 				   $ldap_crud->{cfg}->{base}->{mta},
 				   sub => 'children',
@@ -112,7 +122,7 @@ sub index :Path :Args(0) {
 	    push @{$return->{error}}, $fqdn . ' MX IP: ' . $reslvr->errorstring;
 	  }
 
-	  $mta->{$fqdn}->{smarthost} =
+	  $mta->{custom}->{$fqdn}->{smarthost} =
 	    { fqdn => $node,
 	      ip => $ip,
 	      mx => { fqdn => $mx ne '' ? $mx : 'No match for domain ' . $fqdn,
@@ -138,11 +148,11 @@ sub index :Path :Args(0) {
       } else {
 	foreach $entry ( @{[$mesg->entries]} ) {
 	  $fqdn = $entry->get_value('sendmailMTAKey');
-	  $mta->{$fqdn}->{smarthost} = { fqdn => $default,
-					 ip => $default,
-					 mx => { fqdn => $default,
-						 a => $default,
-						 ptr => $default,
+	  $mta->{custom}->{$fqdn}->{smarthost} = { fqdn => $mta->{default}->{smarthost}->{fqdn},
+					 ip => $mta->{default}->{smarthost}->{ip},
+					 mx => { fqdn => $mta->{default}->{smarthost}->{fqdn},
+						 a => $mta->{default}->{smarthost}->{ip},
+						 ptr => $mta->{default}->{smarthost}->{fqdn},
 						 html_class => 'info',
 						 html_title => 'title="default relay"',},
 				       }

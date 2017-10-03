@@ -706,10 +706,12 @@ sub end : ActionClass('RenderView') {
     my $b = join('/', $a[0],$a[1],$a[2]);
     use POSIX qw(strftime);
     my $now = strftime "%Y%m%d%H%M%S", localtime;
+    my $action = $c->req->action;
+    $action =~ s|/|_|g;
     p my $file = sprintf("%s/store-data_%s_%s_%s.perl-storable",
 			 $b,
 			 $c->user->uid,
-			 $c->req->action eq '/' ? 'reinit' : $c->req->action,
+			 $action,
 			 $now);
     $c->stats->profile(begin => "store_data in the end");
     $self->store_data({ data => $r, file => $file, });

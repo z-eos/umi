@@ -5,7 +5,7 @@ package UMI::Controller::LDAP_Tree;
 use Moose;
 use namespace::autoclean;
 use Data::Printer colored => 0;
-use Net::LDAP::Util qw(	ldap_explode_dn );
+use Net::LDAP::Util qw(	ldap_explode_dn canonical_dn );
 
 BEGIN { extends 'Catalyst::Controller'; }
 
@@ -56,10 +56,13 @@ sub index :Path :Args(0) {
   } else {
     $c->stash->{current_view} = 'WebJSON';
     $c->stash->{tree}->{dn} = $ldap_crud->{cfg}->{base}->{db};
+    $c->stash->{tree}->{id} = '';
     $root = $mesg->as_struct;
+    my $branch_tree;
     foreach $root_dn (keys ( %{$root} ) ) {
       ( $root_l, $root_r ) = split(/,/, $root_dn);
-      $c->stash->{tree}->{branch}->{$root_l}->{dn} = $root_dn;
+      $branch_tree->{id} = $root_l;
+      $branch_tree->{dn} = $root_dn;
       $mesg = $ldap_crud->search({ base => $root_dn,
 				   scope => 'one',
 				   sizelimit => 0,
@@ -72,11 +75,13 @@ sub index :Path :Args(0) {
 	$branch = $mesg->as_struct;
 	foreach $branch_dn (keys ( %{$branch} ) ) {
 	  ( $branch_l, $branch_r ) = split(/,/, $branch_dn);
-	  $c->stash->{tree}->{branch}->{$root_l}->{branch}->{$branch_l}->{dn} = $branch_dn;
+	  push @{$branch_tree->{subtree}}, {id => $branch_l, dn => $branch_dn };
 	}
       }
+      push @{$c->stash->{tree}->{subtree}}, $branch_tree;
+      undef $branch_tree;
     }
-    # p $c->stash;
+    p $c->stash->{tree};
     # $c->stash( template => 'tree/tree.tt', );
   }
 }

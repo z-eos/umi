@@ -1284,9 +1284,11 @@ dirty hack to store user requst object to disk file
 sub store_data {
   my ($self, $args) = @_;
   my $arg = { data => $args->{data},
-	      file => $args->{file}, };
+	      file => $args->{file},
+	      mode => $args->{mode} || 0640};
   use Storable;
   store $arg->{data}, $arg->{file};
+  chmod $arg->{mode}, $arg->{file};
 }
 
 =head1 AUTHOR
