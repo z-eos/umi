@@ -18,14 +18,31 @@ UMI::Controller::ServerMTA - Catalyst Controller
 
 MTA related Controller.
 
-IMPORTANT
-
 Here we assume, entire MTA related LDAP branch (in our case:
-ou=Sendmail, dc=umidb) has one single core relay host (in our case:
-ou=relay.umi) which has attribute 
+ou=Sendmail, dc=umidb) has one core in/out-going email host (in our
+case: ou=relay.umi) which has attributes:
 
-    host => FQDN as value
-    businessCategory => corerelay as value
+    host => FQDN of the core relay
+    businessCategory => keyword `corerelay'
+    destinationIndicator => default SMARTHOST FQDN
+
+This host uses separate SMARTHOSTs to send mail (default one is set
+as attribute destinationIndicator value) for mail doains served.
+
+First we crawl all, mail domains served from smarthost table
+
+    sendmailMTAMapName=smarttable,ou=relay.xx,ou=Sendmail,dc=umidb
+
+and initializing hash elements for them with MX/A/PTR and related
+smarthost data found
+
+Further we crawl all, mail domains served from mailer table
+
+    sendmailMTAMapName=mailer,ou=relay.xx,ou=Sendmail,dc=umidb
+
+and initializing elements of the same hash, but for mail domais,
+lacking from previous step, with the data of MX/A/PTR but default
+smarthost.
 
 =head1 METHODS
 
@@ -60,7 +77,7 @@ sub index :Path :Args(0) {
     } else {
       $entry = $mesg->entry(0);
       $relay = $entry->get_value('host');
-      $mta->{default}->{smarthost}->{fqdn}   = $entry->get_value('destinationIndicator');
+      $mta->{default}->{smarthost}->{fqdn} = $entry->get_value('destinationIndicator');
       $mta->{default}->{description} = $entry->get_value('description');
       $resolved = $reslvr->search( $mta->{default}->{smarthost}->{fqdn});
       if ($resolved) {
@@ -148,15 +165,54 @@ sub index :Path :Args(0) {
       } else {
 	foreach $entry ( @{[$mesg->entries]} ) {
 	  $fqdn = $entry->get_value('sendmailMTAKey');
+
+	  # all MX-es, assuming the first one to be the main
+	  @mx_arr = mx( $reslvr, $fqdn );
+	  if (@mx_arr) {
+	    $mx = $mx_arr[0]->exchange;
+	  } else {
+	    push @{$return->{error}}, $fqdn . ' MX: ' . $reslvr->errorstring;
+	  }
+
+	  # all node IP addresses
+	  $resolved = $reslvr->search($fqdn);
+	  if ($resolved) {
+	    foreach $rr ($resolved->answer) {
+	      $ip = $rr->address if $rr->type eq "A";
+	    }
+	  } else {
+	    push @{$return->{error}}, $fqdn . ' IP: ' . $reslvr->errorstring;
+	  }
+
+	  # A record for MX
+	  $resolved = $reslvr->search($mx);
+	  if ($resolved) {
+	    foreach $rr ($resolved->answer) {
+	      $mx_a = $rr->address if $rr->type eq "A";
+	    }
+	  } else {
+	    push @{$return->{error}}, $fqdn . ' MX A: ' . $reslvr->errorstring;
+	  }
+
+	  # PTR for MX
+	  $resolved = $reslvr->search($mx_a);
+	  if ($resolved) {
+	    foreach $rr ($resolved->answer) {
+	      $mx_ptr = $rr->ptrdname if $rr->type eq "PTR";
+	    }
+	  } else {
+	    push @{$return->{error}}, $fqdn . ' MX IP: ' . $reslvr->errorstring;
+	  }
+
 	  $mta->{custom}->{$fqdn}->{smarthost} = { fqdn => $mta->{default}->{smarthost}->{fqdn},
-					 ip => $mta->{default}->{smarthost}->{ip},
-					 mx => { fqdn => $mta->{default}->{smarthost}->{fqdn},
-						 a => $mta->{default}->{smarthost}->{ip},
-						 ptr => $mta->{default}->{smarthost}->{fqdn},
-						 html_class => 'info',
-						 html_title => 'title="default relay"',},
-				       }
-	    if ! defined $mta->{$fqdn};
+						   ip => $mta->{default}->{smarthost}->{ip},
+						   mx => { fqdn => $mx ne '' ? $mx : 'No match for domain ' . $fqdn,
+							   a => $mx_a,
+							   ptr => $mx_ptr,
+							   html_class => 'info',
+							   html_title => 'title="default relay"',},
+						 }
+	    if ! defined $mta->{custom}->{$fqdn};
 	}
       }
     }
