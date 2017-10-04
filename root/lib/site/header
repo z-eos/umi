@@ -3,7 +3,7 @@
 <header class="app-header navbar navbar-dark bg-dark">
     <a class="navbar-brand bg-dark" href="/"></a>
     [% IF c.user_exists && c.session.auth_uid # !!! to fix, looks like a stub %]
-    <a class="navbar-toggler sidebar-minimizer d-md-down-none" href="#" type="submit"><i class="fa fa-bars"></i></a>
+    <a class="navbar-toggler sidebar-minimizer" href="#" type="submit"><i class="fa fa-bars"></i></a>
     <!-- <button class="navbar-toggler sidebar-minimizer d-md-down-none" type="button"><i class="fa fa-bars"></i></button> -->
     [% END %]
     [% IF c.user_exists && c.check_any_user_role ('admin', 'coadmin', 'operator') %]
@@ -16,7 +16,7 @@
       <!-- <div class="input-group"> -->
 	<input type="text"
 	       size="50%"
-	       class="form-control"
+	       class="form-control col-sm-3 col-xs-3 col-md-7 col-lg-9"
 	       id="ldapsearch_filter"
 	       name="ldapsearch_filter"
 	       title="LDAP search filter input field"

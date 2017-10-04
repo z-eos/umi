@@ -36,26 +36,29 @@ sub index :Path :Args(0) {
 
   my $ldap_crud = $c->model('LDAP_CRUD');
 
-  my $mesg = $ldap_crud->search({ base => $ldap_crud->{cfg}->{base}->{db},
-				  scope => 'sub',
+  my $params = $c->req->params;
+  my $arg = { base => $params->{base} || $ldap_crud->{cfg}->{base}->{db},
+	      filter => $params->{filter} || '(objectClass=*)', };
+
+  # # first we crawl 
+  # my $mesg = $ldap_crud->search({ base => $arg->{base},
+  # 				  scope => 'sub',
+  # 				  sizelimit => 0,
+  # 				  attrs => [ 'fakeAttr' ],
+  # 				  filter => $arg->{filter}, });
+  # p $root = $mesg->as_struct;
+
+  my $mesg = $ldap_crud->search({ base => $arg->{base},
+				  scope => 'one',
 				  sizelimit => 0,
-				  attrs => [ 'fakeAttr' ],
-				  filter => '(objectClass=*)', });
-
-  $root = $mesg->as_struct;
-
-
-  $mesg = $ldap_crud->search({ base => $ldap_crud->{cfg}->{base}->{db},
-			       scope => 'one',
-			       sizelimit => 0,
-			       filter => '(objectClass=*)', });
+				  filter => $arg->{filter}, });
   if ( $mesg->code ) {
     push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
     $c->stash( template => 'tree/tree.tt',
 	       final_message => $return, );
   } else {
     $c->stash->{current_view} = 'WebJSON';
-    $c->stash->{tree}->{dn} = $ldap_crud->{cfg}->{base}->{db};
+    $c->stash->{tree}->{dn} = $arg->{base};
     $c->stash->{tree}->{id} = '';
     $root = $mesg->as_struct;
     my $branch_tree;
@@ -81,10 +84,11 @@ sub index :Path :Args(0) {
       push @{$c->stash->{tree}->{subtree}}, $branch_tree;
       undef $branch_tree;
     }
-    p $c->stash->{tree};
+    #p $c->stash->{tree};
     # $c->stash( template => 'tree/tree.tt', );
   }
 }
+
 
 
 =encoding utf8

@@ -1,6 +1,14 @@
 
 var table = $('#dataTableToDraw').DataTable({
-    "dom": '<"h6 col-12"i><"row container-fluid"<"col-6 pull-left btn-group"B><"col-6 pull-right"f>>rt<"row container-fluid clearfix"<"col-2"l><"col-10"p>>',
+    // "dom": "<'h6 col-12'i><'row container-fluid'<'col-6 pull-left btn-group'B><'col-6 pull-right'f>>" +
+    // 	"rt" + "<'row container-fluid clearfix'<'col-2'l><'col-10'p>>",
+
+    "dom": "<'h6 col-12'i><'row container-fluid col-12'<'col-6 pull-left btn-group'B><'col-6 pull-right'f>>" +
+	"rt" + "<'row container-fluid clearfix'<'col-2'l><'col-10'p>>",
+
+    // "dom": "<'row container-fluid'<'col-sm-6'l><'col-sm-6'f>>" +
+    // 	"<'row container-fluid'<'col-sm-12'tr>>" +
+    // 	"<'row container-fluid'<'col-sm-5 h6'i><'col-sm-7'p>>",
     "buttons": {
 	"buttons": [
 	    {

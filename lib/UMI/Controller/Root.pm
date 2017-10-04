@@ -708,7 +708,7 @@ sub end : ActionClass('RenderView') {
     my $now = strftime "%Y%m%d%H%M%S", localtime;
     my $action = $c->req->action;
     $action =~ s|/|_|g;
-    p my $file = sprintf("%s/store-data_%s_%s_%s.perl-storable",
+    my $file = sprintf("%s/store-data_%s_%s_%s.perl-storable",
 			 $b,
 			 $c->user->uid,
 			 $action,
