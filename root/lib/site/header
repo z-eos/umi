@@ -11,7 +11,7 @@
 	  role="form"
 	  id="searchby"
 	  method="POST"
-	  action="[% c.uri_for_action('/searchby/index') %]">
+	  action="/searchby">
       
       <!-- <div class="input-group"> -->
 	<input type="text"
@@ -161,7 +161,7 @@
 	      <i class="[% icon_class %] fa-gavel"></i> GitACL
 	    </button>
 	  </div>
-	  <a href="[% c.uri_for('/searchadvanced') %]"
+	  <a href="/searchadvanced"
 		  title="advanced search"
 		  class="btn btn-secondary" role="button">
 	    <i class="fa fa-magic"></i>
@@ -205,12 +205,12 @@
       	<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-user-circle"></i> [% c.user() %]</a>
 	<div class="dropdown-menu">
 	    <a class="dropdown-item" href="/user_prefs"><i class="fa fa-cogs"></i> Profie</a>
-	    <a class="dropdown-item" href="[% c.uri_for('/auth/signout') %]" title="Sign Out"><i class="fa fa-sign-out"></i> Sign Out</a>
+	    <a class="dropdown-item" href="/auth/signout" title="Sign Out"><i class="fa fa-sign-out"></i> Sign Out</a>
 	</div>
       </li>
       [% ELSE %]
       <li class="nav-item">
-	<a href="[% c.uri_for('/auth/signin') %]" title="Sign In"><i class="fa fa-sign-in"></i></a>
+	<a href="/auth/signin" title="Sign In"><i class="fa fa-sign-in"></i></a>
       </li>
       [% END %]
       [% IF c.user %]

@@ -5,7 +5,7 @@
      aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <form role="form" method="POST" action="[% c.uri_for_action('searchby/delete') %]">
+      <form role="form" method="POST" action="/searchby/delete">
 	<div class="modal-header">
 	  <h4 class="modal-title" id="modal_delete[% id_sufix %]_label">
 	    <span class="fa fa-exclamation-circle"></span>
@@ -38,7 +38,7 @@
      aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <form role="form" method="POST" action="[% c.uri_for_action('searchby/delete') %]"><!-- === TO FINISH === -->
+      <form role="form" method="POST" action="/searchby/delete"><!-- === TO FINISH === -->
 	<div class="modal-header">
 	  <h4 class="modal-title" id="modal_rollback[% id_sufix %]_label">
 	    <span class="fa fa-times-circle"></span>
@@ -67,7 +67,7 @@
      aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <form role="form" method="POST" action="[% c.uri_for_action('searchby/block') %]">
+      <form role="form" method="POST" action="/searchby/block">
 	<div class="modal-header">
 	  <h4 class="h4 modal-title" id="modal_block[% id_sufix %]_label">
 	    <span class="fa fa-ban"></span>
@@ -93,7 +93,7 @@
      aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <form role="form" method="POST" action="[% c.uri_for_action('searchby/reassign') %]">
+      <form role="form" method="POST" action="/searchby/reassign">
 	<div class="modal-header">
 	  <h4 class="modal-title" id="modal_reassign[% id_sufix %]_label">
 	    <span class="fa fa-times-circle"></span>

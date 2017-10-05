@@ -55,5 +55,5 @@
 <script src="/static/js/jquery.multi-select.js"></script>
 <script src="/static/js/jquery.quicksearch.js"></script>
 
-<script src="/static/js/DataTables/jquery.dataTables.min.js"></script>
-<script src="/static/js/DataTables/dataTables.bootstrap.min.js"></script>
+<script src="/static/js/dt-jquery.dataTables.min.js"></script>
+<script src="/static/js/dt-dataTables.bootstrap.min.js"></script>

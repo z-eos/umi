@@ -1,5 +1,5 @@
 [% META title = 'Users Accounts Statistics'
-   link = '<link href="/static/css/DataTables/jquery.dataTables.min.css" rel="stylesheet" type="text/css"><link href="/static/css/DataTables/buttons.bootstrap.min.css" rel="stylesheet" type="text/css"><link href="/static/css/DataTables/buttons.dataTables.min.css" rel="stylesheet" type="text/css"><link href="/static/css/DataTables/buttons.jqueryui.min.css" rel="stylesheet" type="text/css"><link href="/static/css/DataTables/dataTables.bootstrap.min.css" rel="stylesheet" type="text/css">'
+   link = '<link href="/static/css/dt-dataTables.bootstrap.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-buttons.jqueryui.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-buttons.dataTables.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-buttons.bootstrap.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-select.dataTables.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-select.bootstrap.min.css" rel="stylesheet" type="text/css">'
    %] 
 
 <div class="page-header">
@@ -13,60 +13,62 @@
 
 [% INCLUDE ldap_err.tt %]
 
-<table id="dataTableToDraw" class="table table-condensed table-bordered">
-  <thead>
-    <tr class="text-uppercase info">
-      <th>Last Name</th>
-      <th>First Name</th>
-      <th>blocked</th>
-      <th>root uid</th>
-      <th>service</th>
-      <th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">fqdn</th>
-      <th>svc uid</th>
-      <th>svc cn</th>
-    </tr>
-  </thead>
-  <tfoot>
-    <tr class="text-uppercase info">
-      <th>Last Name</th>
-      <th>First Name</th>
-      <th>blocked</th>
-      <th>root uid</th>
-      <th>service</th>
-      <th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">fqdn</th>
-      <th>svc uid</th>
-      <th>svc cn</th>
-    </tr>
-  </tfoot>
-  <tbody>
-    [% FOREACH dn IN accounts.keys %]
-    [% FOREACH svc IN accounts.$dn.authorizedService.keys %]
-    [% FOREACH fqdn IN accounts.$dn.authorizedService.$svc.keys %]
-    [% FOREACH svcacc IN accounts.$dn.authorizedService.$svc.$fqdn %]
-    <tr>
-      <th>[% accounts.$dn.sn %]</th>
-      <th>[% accounts.$dn.givenName %]</th>
-      <td>[% accounts.$dn.blocked %]</td>
-      <td>[% accounts.$dn.uid %]</td>
-      <td>[% svc %]</td>
-      <td>[% fqdn %]</td>
-      <td>[% svcacc.cn %]</td>
-      <td>[% svcacc.uid %]</td>
-    </tr>
-    [% END %]
-    [% END %]
-    [% END %]
-    [% END %]
-  </tbody>
-</table>
+<div class="table-responsive">
+  <table id="dataTableToDraw" class="table table-condensed table-bordered">
+    <thead>
+      <tr class="text-uppercase info">
+	<th>Last Name</th>
+	<th>First Name</th>
+	<th>blocked</th>
+	<th>root uid</th>
+	<th>service</th>
+	<th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">fqdn</th>
+	<th>svc uid</th>
+	<th>svc cn</th>
+      </tr>
+    </thead>
+    <tfoot>
+      <tr class="text-uppercase info">
+	<th>Last Name</th>
+	<th>First Name</th>
+	<th>blocked</th>
+	<th>root uid</th>
+	<th>service</th>
+	<th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">fqdn</th>
+	<th>svc uid</th>
+	<th>svc cn</th>
+      </tr>
+    </tfoot>
+    <tbody>
+      [% FOREACH dn IN accounts.keys %]
+      [% FOREACH svc IN accounts.$dn.authorizedService.keys %]
+      [% FOREACH fqdn IN accounts.$dn.authorizedService.$svc.keys %]
+      [% FOREACH svcacc IN accounts.$dn.authorizedService.$svc.$fqdn %]
+      <tr>
+	<th>[% accounts.$dn.sn %]</th>
+	<th>[% accounts.$dn.givenName %]</th>
+	<td>[% accounts.$dn.blocked %]</td>
+	<td>[% accounts.$dn.uid %]</td>
+	<td>[% svc %]</td>
+	<td>[% fqdn %]</td>
+	<td>[% svcacc.cn %]</td>
+	<td>[% svcacc.uid %]</td>
+      </tr>
+      [% END %]
+      [% END %]
+      [% END %]
+      [% END %]
+    </tbody>
+  </table>
+</div>
 
-<script src="/static/js/DataTables/jquery.dataTables.min.js"></script>
-<script src="/static/js/DataTables/buttons.html5.min.js"></script>
-<script src="/static/js/DataTables/buttons.jqueryui.min.js"></script>
-<script src="/static/js/DataTables/buttons.print.min.js"></script>
-<script src="/static/js/DataTables/dataTables.buttons.min.js"></script>
-<script src="/static/js/DataTables/buttons.bootstrap.min.js"></script>
-<script src="/static/js/DataTables/dataTables.bootstrap.min.js"></script>
+<script src="/static/js/dt-jquery.dataTables.min.js"></script>
+<script src="/static/js/dt-buttons.html5.min.js"></script>
+<script src="/static/js/dt-buttons.jqueryui.min.js"></script>
+<script src="/static/js/dt-buttons.print.min.js"></script>
+<script src="/static/js/dt-dataTables.buttons.min.js"></script>
+<script src="/static/js/dt-buttons.bootstrap.min.js"></script>
+<script src="/static/js/dt-dataTables.bootstrap.min.js"></script>
 
 <script src="/static/js/umi-datatables.js"></script>
 

@@ -21,11 +21,11 @@
   </div>
   <div class="col-md-2">
     <ul class="nav nav-pills nav-stacked">
-      <!-- <li><a href="[% c.uri_for('user') %]">
+      <!-- <li><a href="/user_root">
 	     <span class="fa fa-pluse-circle"></span>
 	     create new</a>
 	     </li> -->
-      <li><a href="[% c.uri_for('userall') %]" target="_top" title="Add new user">
+      <li><a href="/userall" target="_top" title="Add new user">
 	  <span class="fa fa-user-plus fa-3x"></span>
 	  create new</a>
       </li>

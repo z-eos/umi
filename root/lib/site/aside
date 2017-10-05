@@ -18,7 +18,7 @@
     <div class="tab-pane active" id="tree" role="tabpanel">
       [% IF c.check_user_roles('admin') %]
       <div class="callout m-0 py-2 text-muted text-center bg-light text-uppercase">
-	<a class="nav-link" href="[% c.uri_for_action('/ldap_tree/index') %]">
+	<a class="nav-link" href="/ldap_tree">
           <small><b>LDAP tree crawler</b></small>
 	</a>
       </div>

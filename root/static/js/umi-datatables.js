@@ -3,8 +3,8 @@ var table = $('#dataTableToDraw').DataTable({
     // "dom": "<'h6 col-12'i><'row container-fluid'<'col-6 pull-left btn-group'B><'col-6 pull-right'f>>" +
     // 	"rt" + "<'row container-fluid clearfix'<'col-2'l><'col-10'p>>",
 
-    "dom": "<'h6 col-12'i><'row container-fluid col-12'<'col-6 pull-left btn-group'B><'col-6 pull-right'f>>" +
-	"rt" + "<'row container-fluid clearfix'<'col-2'l><'col-10'p>>",
+    "dom": "<'h6 col-12'i><'row col'<'col-auto mr-auto btn-group'B><'col-auto'f>>" +
+	"rt" + "<'row col'<'col-auto mr-auto'l><'col-auto'p>>",
 
     // "dom": "<'row container-fluid'<'col-sm-6'l><'col-sm-6'f>>" +
     // 	"<'row container-fluid'<'col-sm-12'tr>>" +
@@ -44,14 +44,21 @@ var table = $('#dataTableToDraw').DataTable({
 	    },
 	]
     },
+    "language": {
+	"search": "<i class='fa fa-search fa-lg'></i>",
+	"lengthMenu": "_MENU_",
+	"paginate": {
+            "first": "<i class='fa fa-fast-backward fa-lg'></i>",
+            "last": "<i class='fa fa-fast-forward fa-lg'></i>",
+            "next": "<i class='fa fa-step-forward fa-lg'></i>",
+            "previous": "<i class='fa fa-step-backward fa-lg'></i>", },
+    },
     "renderer": {
         "header": "bootstrap",
-        "pageButton": "bootstrap",
-    },
+        "pageButton": "bootstrap", },
     "search": {
 	"regex": true,
-	"smart": true,
-    },
+	"smart": true, },
     "responsive": true,
     "order": [[ 0, 'asc' ]],
     // "paging": false,
@@ -69,7 +76,7 @@ var table = $('#dataTableToDraw').DataTable({
 	}
     },
     // "serverSide": true,
-    "pagingType": "simple_numbers"
+    "pagingType": "full_numbers"
 } );
 
 // Order by the grouping

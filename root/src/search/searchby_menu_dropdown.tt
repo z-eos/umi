@@ -22,7 +22,7 @@
     [% IF entry.value.mgmnt.is_root && entry.value.mgmnt.is_account %]
     <li>
       <form role="form" method="POST" 
-	    action="[% c.uri_for_action('searchby/user_preferences') %]">
+	    action="/searchby/user_preferences">
 	<button type="submit" class="btn btn-link"
 		title="look user object subtree data"
 		value="[% entry.key %]"
@@ -36,7 +36,7 @@
     [% IF admin_owned %]
     <li>
       <form role="form" method="POST" 
-	    action="[% c.uri_for_action('userall/index') %]">
+	    action="/userall/index">
 	<button type="submit" class="btn btn-link"
 		title="add new service account"
 		value="[% entry.key %]"
@@ -49,7 +49,7 @@
     </li>
     <li>
       <form role="form" method="POST" 
-	    action="[% c.uri_for_action('searchby/proc') %]">
+	    action="/searchby/proc">
 	<button type="submit" class="btn btn-link"
 		title="modify group/s user belongs to"
 		value="[% entry.key %]"
@@ -91,7 +91,7 @@
     [%   IF ! entry.value.mgmnt.is_root %]
     <li>
       <form role="form" method="POST" 
-	    action="[% c.uri_for_action('searchby/proc') %]">
+	    action="/searchby/proc">
 	<button type="button" title="reassign to other root account (move this object to another root account)"
 		class="btn btn-link" value="[% entry.key %]"
 		name="chg_acc"
@@ -137,7 +137,7 @@
     [%   IF ! is_log_obj %]
     <li>
       <form role="form" method="POST" 
-	    action="[% c.uri_for_action('searchby/modform') %]">
+	    action="/searchby/modform">
 	<button type="submit" class="btn btn-link"
 		title="edit form (the one used for object creation)"
 		value="[% entry.key %]"
@@ -151,7 +151,7 @@
     </li>
     <li>
       <form role="form" method="POST" 
-	    action="[% c.uri_for_action('searchby/proc') %]">
+	    action="/searchby/proc">
 	<button type="submit" class="btn btn-link"
 		title="lowlevel LDAP object edit ( allattributes as are )"
 		value="[% entry.key %]"
@@ -164,7 +164,7 @@
     </li>
     <li>
       <form role="form" method="POST" 
-	    action="[% c.uri_for_action('searchby/index') %]">
+	    action="/searchby/index">
 	<button type="submit" class="btn btn-link"
 		title="object changes flow history"
 		value="[% entry.key %]"
@@ -194,7 +194,7 @@
     [%   IF entry.value.mgmnt.is_group %]
     <li>
       <form role="form" method="POST" 
-	    action="[% c.uri_for_action('searchby/proc') %]">
+	    action="/searchby/proc">
 	<button type="submit" title="modify group members" class="btn btn-link"
 		value="[% entry.key %]"
 		data-order="[% site.searchby.menu.order.ldap_modify_memberUid %]"
@@ -208,7 +208,7 @@
     [%   IF entry.key.match('802.1x-') %]
     <li>
       <form role="form" method="POST" 
-	    action="[% c.uri_for_action('searchby/proc') %]">
+	    action="/searchby/proc">
 	<button type="submit" title="modify group members" class="btn btn-link"
 		value="[% entry.key %]"
 		data-order="[% site.searchby.menu.order.ldap_modify_rad_group %]"
@@ -222,7 +222,7 @@
     [%   IF entry.value.mgmnt.userPassword && ! entry.key.match('^author') %]
     <li>
       <form role="form" method="POST" 
-	    action="[% c.uri_for_action('searchby/modify_userpassword') %]">
+	    action="/searchby/modify_userpassword">
 	<button type="submit" title="modify password" class="btn btn-link"
 		value="[% entry.key %]"
 		data-order="[% site.searchby.menu.order.ldap_modify_password %]"
@@ -236,7 +236,7 @@
     [%   IF entry.value.mgmnt.userDhcp %]
     <li>
       <form role="form" method="POST" 
-	    action="[% c.uri_for_action('searchby/dhcp_add') %]">
+	    action="/searchby/dhcp_add">
 	<button type="submit" title="add DHCP (MAC to IP binding)" class="btn btn-link"
 		value="[% entry.key %]"
 		data-order="[% site.searchby.menu.order.ldap_add_dhcp %]"
@@ -250,7 +250,7 @@
     [%   IF entry.value.mgmnt.jpegPhoto %]
     <li>
       <form role="form" method="POST" 
-	    action="[% c.uri_for_action('searchby/proc') %]">
+	    action="/searchby/proc">
 	<button type="submit" class="btn btn-link"
 		title="change jpegPhoto"
 		value="[% entry.key %]"
@@ -266,7 +266,7 @@
     [%   IF entry.value.mgmnt.gitAclProject %]
     <li>
       <form role="form" method="POST" 
-	    action="[% c.uri_for_action('searchby/proc') %]">
+	    action="/searchby/proc">
 	<button type="submit" title="reorder gitAcl" class="btn btn-link"
 		value="[% entry.key %]"
 		data-order="[% site.searchby.menu.order.ldap_gitacl_reorder %]"

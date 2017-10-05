@@ -6,14 +6,14 @@
 	<a class="nav-link nav-dropdown-toggle" href="#"><i class="fa fa-binoculars"></i> Analyze</a>
 	<ul class="nav-dropdown-items">
           <li class="nav-item">
-	    <a class="nav-link" href="[% c.uri_for('/stat_acc') %]"
+	    <a class="nav-link" href="/stat_acc"
 	       title="All accounts info in one single,huge,big,fat and heavy table">
 	      <i class="fa fa-fw fa-id-card-o"></i>
 	      Accounts
 	    </a>
 	  </li>
           <li class="nav-item">
-	    <a class="nav-link" href="[% c.uri_for_action('/servermta/index') %]"
+	    <a class="nav-link" href="/servermta"
 	       tabindex="2"
 	       title="All MTAs info in one single table">
 	      <i class="fa fa-fw fa-server"></i>
@@ -27,26 +27,26 @@
 	<a class="nav-link nav-dropdown-toggle" href="#"><i class="fa fa-wrench"></i> Tools</a>
 	<ul class="nav-dropdown-items">
           <li class="nav-item">
-	    <a class="nav-link" href="[% c.uri_for_action('tooltranslit/index') %]">
+	    <a class="nav-link" href="/tooltranslit">
 	      <i class="fa fa-fw fa-text-width"></i>
 	      Translit
 	    </a>
 	  </li>
           <li class="nav-item">
-	    <a class="nav-link" href="[% c.uri_for_action('toolpwdgen/index') %]">
+	    <a class="nav-link" href="/toolpwdgen">
 	      <i class="fa fa-fw fa-user-secret"></i>
 	      Pwdgen
 	    </a>
 	  </li>
           <li class="nav-item">
-	    <a class="nav-link" href="[% c.uri_for_action('toolqr/index') %]">
+	    <a class="nav-link" href="/toolqr">
 	      <i class="fa fa-fw fa-qrcode"></i>
 	      QR
 	    </a>
 	  </li>
 	  [% IF c.check_user_roles('admin') %]
 	  <li class="nav-item">
-	    <a class="nav-link" href="[% c.uri_for('/sysinfo') %]">
+	    <a class="nav-link" href="/sysinfo">
 	      <i class="fa fa-fw fa-info-circle"></i>
 	      system info
 	    </a>
@@ -55,7 +55,7 @@
 	    <a class="nav-link" href="test"><i class="fa fa-fw fa-code">&nbsp;</i>test</a>
 	  </li>
           <li class="nav-item">
-	    <a class="nav-link" href="[% c.uri_for_action('toolimportldif/index') %]">
+	    <a class="nav-link" href="/toolimportldif">
 	      <i class="fa fa-fw fa-download"></i>
 	      LDIF Import
 	    </a>
@@ -71,7 +71,7 @@
 	  </li>
 	  [% IF c.check_any_user_role ('admin', 'coadmin', 'acl-w-people') %]
           <li class="nav-item">
-	    <a class="nav-link" href="[% c.uri_for_action('user_root') %]" tabindex="2">
+	    <a class="nav-link" href="/user_root" tabindex="2">
 	      <i class="fa fa-fw fa-user"></i>
 	      User
 	    </a>
@@ -79,19 +79,19 @@
 	  [% END %]
 	  [% IF c.check_user_roles('admin') %]
           <li class="nav-item">
-	    <a class="nav-link" href="[% c.uri_for_action('group_root') %]" tabindex="3">
+	    <a class="nav-link" href="/group_root" tabindex="3">
               <i class="fa fa-fw fa-group"> </i>
               Group
 	    </a>
 	  </li>
           <li class="nav-item">
-	    <a class="nav-link" href="[% c.uri_for_action('nisnetgroup/index') %]" tabindex="3">
+	    <a class="nav-link" href="/nisnetgroup" tabindex="3">
               <i class="fa fa-fw fa-group"> </i>
               NIS NetGroup
 	    </a>
 	  </li>
           <li class="nav-item">
-	    <a class="nav-link" href="[% c.uri_for_action('gitacl/index') %]" tabindex="5">
+	    <a class="nav-link" href="/gitacl" tabindex="5">
               <i class="fa fa-fw fa-gavel"></i>
               GitACL
 	    </a>
@@ -105,7 +105,7 @@
 	  [% END %]
 	  [% IF c.check_any_user_role ('admin', 'coadmin', 'acl-w-organizations') %]
           <li class="nav-item">
-	    <a class="nav-link" href="[% c.uri_for_action('org_root') %]" tabindex="4">
+	    <a class="nav-link" href="/org_root" tabindex="4">
               <i class="fa fa-fw fa-industry"></i>
               Org
 	    </a>
@@ -113,7 +113,7 @@
 	  [% END %]
 	  [% IF c.check_any_user_role ('admin', 'coadmin', 'acl-w-inventory')  %]
           <li class="nav-item">
-	    <a class="nav-link" href="[% c.uri_for_action('/inventory/index') %]" tabindex="4">
+	    <a class="nav-link" href="/inventory" tabindex="4">
               <i class="fa fa-fw fa-tags"></i>
               Inventory
 	    </a>
@@ -121,7 +121,7 @@
 	  [% END %]
 	  [% IF c.check_any_user_role ('admin', 'coadmin', 'dhcp') %]
           <li class="nav-item disabled">
-	    <a class="nav-link" href="[% c.uri_for_action('dhcp_root') %]" tabindex="7">
+	    <a class="nav-link" href="/dhcp_root" tabindex="7">
               <i class="fa fa-fw fa-sitemap"></i>
               DHCP
 	    </a>
@@ -139,7 +139,7 @@
 	<a class="nav-link nav-dropdown-toggle" href="#"><i class="fa fa-tree"></i> LDAP tree</a>
 	<ul disabled class="nav-dropdown-items">
 	  <li class="nav-item">
-	    <a class="nav-link" href="[% c.uri_for_action('/ldap_tree/index') %]"
+	    <a class="nav-link" href="/ldap_tree"
 	       target="_top">
 	      <i class="fa fa-star-o"></i> dc=ibs
 	    </a>
@@ -154,7 +154,7 @@
 	<a class="nav-link nav-dropdown-toggle" href="#"><i class="fa fa-info-circle"></i> Info</a>
 	<ul class="nav-dropdown-items">
 	  <li class="nav-item">
-	    <a class="nav-link" href="[% c.uri_for('/motto') %]"><i class="fa fa-hand-spock-o"></i> user's motto</a>
+	    <a class="nav-link" href="/motto"><i class="fa fa-hand-spock-o"></i> user's motto</a>
 	  </li>
 	  <li class="nav-item">
 	    <a class="nav-link" href="#"><i class="fa fa-question-circle"></i> help</a>
