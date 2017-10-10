@@ -86,7 +86,7 @@
            entry.value = entries.$entrykey
            dn = entry.key.split(',|=').hash    # here we preparing hash of each dn
 	   # here we preparing uniqe suffix to be added to objects id (like modals e.t.c.)
-           id_sufix = '_' _ entry.key.split(',').0.split('=').1.replace('[@\.]', '_') _ '_' _ loop.index %]
+           id_sufix = '_' _ entry.key.split(',').0.split('=').1.replace('[@:\.]', '_') _ '_' _ loop.index %]
 
       [%   IF entry.value.mgmnt.is_blocked %]
       [%   blocked = ' text-danger'

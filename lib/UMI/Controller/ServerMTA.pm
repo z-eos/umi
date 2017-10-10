@@ -269,8 +269,8 @@ sub index :Path :Args(0) {
 	    mx => { fqdn => $mx ne '' ? $mx : 'No match for domain ' . $fqdn,
 		    a => $mx_a,
 		    ptr => $mx_ptr,
-		    html_class => $mx eq $mx_ptr && $mx ne '' ? 'info' : 'danger',
-		    html_title => $mx eq $mx_ptr ? 'default relay' : 'revers resolv fails', },
+		    html_class => 'info',
+		    html_title => 'default relay', },
 	  } if ! defined $mta->{custom}->{$fqdn};
       }
     }
