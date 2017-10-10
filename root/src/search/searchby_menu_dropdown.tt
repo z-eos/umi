@@ -36,7 +36,7 @@
     [% IF admin_owned %]
     <li>
       <form role="form" method="POST" 
-	    action="/userall/index">
+	    action="/userall">
 	<button type="submit" class="btn btn-link"
 		title="add new service account"
 		value="[% entry.key %]"
@@ -164,7 +164,7 @@
     </li>
     <li>
       <form role="form" method="POST" 
-	    action="/searchby/index">
+	    action="/searchby">
 	<button type="submit" class="btn btn-link"
 		title="object changes flow history"
 		value="[% entry.key %]"

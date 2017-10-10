@@ -4,6 +4,7 @@
 package UMI::Controller::Root;
 use Moose;
 use namespace::autoclean;
+use Data::Printer colored => 0;
 
 BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 
@@ -639,52 +640,72 @@ page to test code snipets
 =cut
 
 sub test :Path(test) :Args(0) {
-    my ( $self, $c ) = @_;
-    my $ldap_crud = $c->model('LDAP_CRUD');
+  my ( $self, $c ) = @_;
+  my $ldap_crud = $c->model('LDAP_CRUD');
 
-    my $svc;
-    my $fqdn;
+# DHCP STUFF #     my $svc;
+# DHCP STUFF #     my $fqdn;
+# DHCP STUFF # 
+# DHCP STUFF #     ## DHCP
+# DHCP STUFF #     # $svc = 'dhcp';
+# DHCP STUFF #     # $fqdn = 'voyager.startrek.in';
+# DHCP STUFF #     # filter => sprintf('(&(objectClass=dhcpSubnet)(dhcpOption=domain-name "%s"))', $fqdn),
+# DHCP STUFF #     # attrs => [ 'cn', 'dhcpNetMask', 'dhcpRange' ],
+# DHCP STUFF #     ## VPN
+# DHCP STUFF #     # $svc = 'vpn';
+# DHCP STUFF #     # $fqdn = 'talax.startrek.in';
+# DHCP STUFF #     # filter => sprintf('(&(authorizedService=ovpn@%s)(cn=*))', $fqdn),
+# DHCP STUFF #     # attrs => [ 'cn', 'umiOvpnCfgServer', 'umiOvpnCfgRoute' ],
+# DHCP STUFF # 
+# DHCP STUFF # #	       final_message => $ldap_crud->ipam({ svc => 'vpn', fqdn => 'talax.startrek.in', what => 'all', })
+# DHCP STUFF # #	       testvar => $self->ipam_ip2dec('10.10.10.10')
+# DHCP STUFF # 
+# DHCP STUFF #     # $svc = 'ovpn';
+# DHCP STUFF #     # $fqdn = 'talax.startrek.in';
+# DHCP STUFF #     $svc = 'dhcp';
+# DHCP STUFF #     $fqdn = 'voyager.startrek.in';
+# DHCP STUFF # 
+# DHCP STUFF #     my $iu = $ldap_crud->ipam_used({ svc => $svc,
+# DHCP STUFF # 				     fqdn => $fqdn,
+# DHCP STUFF # 				     base => $ldap_crud->{cfg}->{base}->{$svc},
+# DHCP STUFF # 				     # filter => sprintf('(&(authorizedService=ovpn@%s)(cn=*))', $fqdn),
+# DHCP STUFF # 				     # attrs => [ 'cn', 'umiOvpnCfgServer', 'umiOvpnCfgRoute' ],
+# DHCP STUFF # 
+# DHCP STUFF # 				     filter => sprintf('(&(objectClass=dhcpSubnet)(dhcpOption=domain-name "%s"))', $fqdn),
+# DHCP STUFF # 				     attrs => [ 'cn', 'dhcpNetMask', 'dhcpRange' ],
+# DHCP STUFF # 
+# DHCP STUFF # 
+# DHCP STUFF # 				   });
+# DHCP STUFF #     
+# DHCP STUFF #     $c->stash( template => 'test.tt',
+# DHCP STUFF # 	       final_message => $ldap_crud->ipam_first_free({ ipspace => $iu->{ipspace},
+# DHCP STUFF # 	       						      ip_used => $iu->{ip_used},
+# DHCP STUFF # 							      # tgt_net => '10.146.5.0/24',
+# DHCP STUFF # 							      # req_msk => 30,
+# DHCP STUFF # 	       						    }),
+# DHCP STUFF # 	       # final_message => $iu,
+# DHCP STUFF # 
+# DHCP STUFF # 	     );
 
-    ## DHCP
-    # $svc = 'dhcp';
-    # $fqdn = 'voyager.startrek.in';
-    # filter => sprintf('(&(objectClass=dhcpSubnet)(dhcpOption=domain-name "%s"))', $fqdn),
-    # attrs => [ 'cn', 'dhcpNetMask', 'dhcpRange' ],
-    ## VPN
-    # $svc = 'vpn';
-    # $fqdn = 'talax.startrek.in';
-    # filter => sprintf('(&(authorizedService=ovpn@%s)(cn=*))', $fqdn),
-    # attrs => [ 'cn', 'umiOvpnCfgServer', 'umiOvpnCfgRoute' ],
+  use Net::LDAP::Util qw(	ldap_explode_dn canonical_dn );
+  
+  my $params = $c->req->params;
+  my $arg = { base => $params->{base} || $ldap_crud->{cfg}->{base}->{db},
+	      filter => $params->{filter} || '(objectClass=*)', };
 
-#	       final_message => $ldap_crud->ipam({ svc => 'vpn', fqdn => 'talax.startrek.in', what => 'all', })
-#	       testvar => $self->ipam_ip2dec('10.10.10.10')
+  my $mesg = $ldap_crud->search({ base => $arg->{base},
+				  scope => 'sub',
+				  sizelimit => 0,
+				  attrs => [ 'fakeAttr' ],
+				  filter => $arg->{filter}, });
+  my $tree;
+  foreach my $entry ( @{[$mesg->entries]} ) {
+    $tree = $self->tree_build({ dn => $entry->dn, });
+  }
 
-    # $svc = 'ovpn';
-    # $fqdn = 'talax.startrek.in';
-    $svc = 'dhcp';
-    $fqdn = 'voyager.startrek.in';
-
-    my $iu = $ldap_crud->ipam_used({ svc => $svc,
-				     fqdn => $fqdn,
-				     base => $ldap_crud->{cfg}->{base}->{$svc},
-				     # filter => sprintf('(&(authorizedService=ovpn@%s)(cn=*))', $fqdn),
-				     # attrs => [ 'cn', 'umiOvpnCfgServer', 'umiOvpnCfgRoute' ],
-
-				     filter => sprintf('(&(objectClass=dhcpSubnet)(dhcpOption=domain-name "%s"))', $fqdn),
-				     attrs => [ 'cn', 'dhcpNetMask', 'dhcpRange' ],
-
-
-				   });
-    
-    $c->stash( template => 'test.tt',
-	       final_message => $ldap_crud->ipam_first_free({ ipspace => $iu->{ipspace},
-	       						      ip_used => $iu->{ip_used},
-							      # tgt_net => '10.146.5.0/24',
-							      # req_msk => 30,
-	       						    }),
-	       # final_message => $iu,
-
-	     );
+  $c->stash( template => 'test.tt',
+	     final_message => $tree,
+	   );
 }
 
 =head2 end

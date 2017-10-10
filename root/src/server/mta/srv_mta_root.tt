@@ -44,8 +44,12 @@
 	<td>[% mta.custom.$domain.smarthost.mx.fqdn %]</td>
 	<td>[% mta.custom.$domain.smarthost.mx.a %]</td>
 	<td>[% mta.custom.$domain.smarthost.mx.ptr %]</td>
-	<td>[% mta.custom.$domain.smarthost.fqdn %]</td>
-	<td>[% mta.custom.$domain.smarthost.ip %]</td>
+	<td title="[% mta.custom.$domain.smarthost.mx.html_title %]">
+	  [% mta.custom.$domain.smarthost.fqdn %]
+	</td>
+	<td title="[% mta.custom.$domain.smarthost.mx.html_title %]">
+	  [% mta.custom.$domain.smarthost.ip %]
+	</td>
       </tr>
       [% END %]
     </tbody>

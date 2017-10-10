@@ -11,6 +11,9 @@ use Net::CIDR::Set;
 use Net::LDAP::Util qw(	generalizedTime_to_time ldap_explode_dn );
 use POSIX qw(strftime);
 
+# ??? # use Scalar::Util;
+# ??? # use List::Util;
+
 =head1 NAME
 
 UMI::Tools
@@ -1275,6 +1278,58 @@ sub generalizedtime_fr {
     strftime( $arg->{format}, localtime( generalizedTime_to_time( $arg->{ts} )));
 }
 
+
+=head2 dns_resolver
+
+Net::DNS wrapper to resolve A, MX and PTR mainly
+
+=cut
+
+sub dns_resolver {
+  my ($self, $args) = @_;
+  my $arg = { fqdn   => $args->{fqdn},
+	      type   => $args->{type},
+	      name   => $args->{name},
+	      legend => $args->{legend},
+	      rcode  => $args->{rcode}, };
+  use Net::DNS;
+  my $r = Net::DNS::Resolver->new;
+  my $rr = $r->search($arg->{name});
+  my $return;
+  if ( defined $rr) {
+    foreach ($rr->answer) {
+      if ( $arg->{type} eq 'PTR' ) {
+	$return->{success} = $_->ptrdname if $_->type eq $arg->{type};
+      } elsif ( $arg->{type} eq 'A' ) {
+	$return->{success} = $_->address if $_->type eq $arg->{type};
+      } elsif ( $arg->{type} eq 'MX' ) {
+	my @mx_arr = mx( $r, $arg->{fqdn} );
+	if (@mx_arr) {
+	  $return->{success} = $mx_arr[0]->exchange;
+	} else {
+	  $return->{error} = sprintf("<i class='h6'>dns_resolver()</i>: %s %s: %s ( %s )",
+				     $arg->{fqdn},
+				     $arg->{legend},
+				     $arg->{rcode}->{ $r->errorstring }->{descr},
+				     $r->errorstring );
+	}
+      }
+    }
+  } else {
+    if ( $r->errorstring eq 'NOERROR') {
+    }
+    $return->{error} = sprintf("<i class='h6'>dns_resolver()</i>: %s %s: %s ( %s )",
+			       $arg->{fqdn},
+			       $arg->{legend},
+			       $arg->{rcode}->{ $r->errorstring }->{descr},
+			       $r->errorstring );
+  }
+  # p $arg->{fqdn}; p $r;
+  # p $return;
+  return $return;
+}
+
+
 =head2 store_data
 
 dirty hack to store user requst object to disk file
@@ -1290,6 +1345,24 @@ sub store_data {
   store $arg->{data}, $arg->{file};
   chmod $arg->{mode}, $arg->{file};
 }
+
+
+sub tree_buid {
+  my ($self, $args) = @_;
+  my $arg = { dn => $args->{dn}, };
+  my $tree;
+  use List::Util qw( pairs );
+
+  my $explodn = ldap_explode_dn( $arg->{dn}, casefold => 'none', reverse => 1 );
+  
+  foreach ( pairs @{$explodn} ) {
+    push @{$tree}, { dn => $_->key . '=' . $_->value };
+  }
+
+  
+}
+
+
 
 =head1 AUTHOR
 

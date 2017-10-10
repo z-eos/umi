@@ -162,6 +162,8 @@ sub index :Path :Args(0) {
       $base = $params->{'ldapsearch_base'};
     }
 
+    my $scope = defined $params->{ldapsearch_scope} ? $params->{ldapsearch_scope} : 'sub';
+    
     if ( ! $c->check_any_user_role( qw/admin coadmin/ ) &&
 	 ! $self->may_i({ base_dn => $base,
 			  filter => $filter,
@@ -181,6 +183,7 @@ sub index :Path :Args(0) {
 				   base => $base,
 				   filter => '(' . $filter . ')',
 				   sizelimit => $ldap_crud->cfg->{sizelimit},
+				   scope => $scope,
 				   attrs => [ '*',
 					      'createTimestamp',
 					      'creatorsName',
