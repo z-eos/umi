@@ -1743,12 +1743,17 @@ sub block :Path(block) :Args(0) {
     $c->forward('View::TT');
   } else {
     if ( $params->{type} eq 'json' ) {
-      $c->stash(
-		current_view => 'WebJSON',
-		success => 'true',
-		message => 'OK',
-		final_message => $msg,
-	       );
+      $c->stash->{current_view} = 'WebJSON';
+      $c->stash->{success} = ref($msg) ne 'HASH' ? 1 : 0;
+      if ( ref($msg) ne 'HASH' ) {
+	$c->stash->{message} = 'OK';
+      } elsif ( ref($msg) eq 'HASH' && $#{$msg->{error}} > -1 ) {
+	$c->stash->{message} = sprintf('<div class="panel panel-error text-left text-error"><div class="panel-heading text-center"><b>Error! Just close the window and inform administrator.</b></div><div class="panel-body">%s</div></div><br>',
+				       $msg->{error}->[0]->{html});
+      } elsif ( ref($msg) eq 'HASH' && $#{$msg->{warning}} > -1 ) {
+	$c->stash->{message} = sprintf('<div class="panel panel-warning text-left text-warning"><div class="panel-heading text-center"><b>Warning! Just close the window! Nothing else!</b></div><div class="panel-body">%s</div></div><br>',
+				       $msg->{warning}->[0]->{html});
+      }
     } else {
       $c->stash(
 		# template => 'search/delete.tt',

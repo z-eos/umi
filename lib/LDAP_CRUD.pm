@@ -1434,7 +1434,7 @@ sub block {
 	push @blockgr, substr( (split /,/, $args->{dn})[0], 4 );
 	$ent_chg = $self->modify( $blockgr_dn,
 				  [ replace => [ memberUid => \@blockgr, ],], );
-	if ( $ent_chg != 0 && defined $ent_chg->{error} ) {
+	if ( $ent_chg->code != 0 && defined $ent_chg->{error} ) {
 	  $return->{error} .= $self->err( $ent_chg )->{html};
 	}
       }

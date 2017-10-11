@@ -272,6 +272,7 @@ sub index :Path :Args(0) {
 		    html_class => 'info',
 		    html_title => 'default relay', },
 	  } if ! defined $mta->{custom}->{$fqdn};
+	$fqdn = $ip = $mx = $mx_a = $mx_ptr = '';
       }
     }
   }
