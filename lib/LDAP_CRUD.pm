@@ -1386,35 +1386,6 @@ sub block {
   my @keys;
   my ( $msg, $msg_usr, $msg_add, $msg_chg, $ent_svc, $ent_chg, @blockgr );
 
-  # is this user in block group?
-  my $blockgr_dn =
-    sprintf('cn=%s,%s',
-	    $self->cfg->{stub}->{group_blocked},
-	    $self->cfg->{base}->{group});
-  
-  $msg = $self->search ( { base => $self->cfg->{base}->{group},
-			   filter => sprintf('(&(cn=%s)(memberUid=%s))',
-					     $self->cfg->{stub}->{group_blocked},
-					     substr( (split /,/, $args->{dn})[0], 4 )),
-			   sizelimit => 0, } );
-  if ( $msg->is_error() ) {    
-    $return->{error} .= $self->err( $msg )->{html};
-  } elsif ( $msg->count == 0) {
-    $msg_chg = $self->search ( { base => $blockgr_dn, } );
-    if ( $msg_chg->is_error() ) {
-      $return->{error} .= $self->err( $msg_chg )->{html};
-    } else {
-      $ent_chg = $self->modify( $blockgr_dn,
-				[ add =>
-				  [ memberUid => substr( (split /,/, $args->{dn})[0], 4 ), ], ], );
-      if ( ref($msg) eq 'HASH' ) {
-	$return->{error} .= $ent_chg->{html};
-      } else {
-	$return->{success} .= $args->{dn} . " successfully blocked.\n";
-      }
-    }
-  }
-
   $msg_usr = $self->search ( { base => $args->{dn},
 			       sizelimit => 0, } );
   if ( $msg_usr->is_error() ) {
@@ -1447,6 +1418,36 @@ sub block {
       }
     }
   }
+
+  # is this user in block group?
+  my $blockgr_dn =
+    sprintf('cn=%s,%s',
+	    $self->cfg->{stub}->{group_blocked},
+	    $self->cfg->{base}->{group});
+  
+  $msg = $self->search ( { base => $self->cfg->{base}->{group},
+			   filter => sprintf('(&(cn=%s)(memberUid=%s))',
+					     $self->cfg->{stub}->{group_blocked},
+					     substr( (split /,/, $args->{dn})[0], 4 )),
+			   sizelimit => 0, } );
+  if ( $msg->is_error() ) {    
+    $return->{error} .= $self->err( $msg )->{html};
+  } elsif ( $msg->count == 0) {
+    $msg_chg = $self->search ( { base => $blockgr_dn, } );
+    if ( $msg_chg->is_error() ) {
+      $return->{error} .= $self->err( $msg_chg )->{html};
+    } else {
+      $ent_chg = $self->modify( $blockgr_dn,
+				[ add =>
+				  [ memberUid => substr( (split /,/, $args->{dn})[0], 4 ), ], ], );
+      if ( ref($ent_chg) eq 'HASH' ) {
+	$return->{error} .= $ent_chg->{html};
+      } else {
+	$return->{success} .= $args->{dn} . " successfully blocked.\n";
+      }
+    }
+  }
+
   # p $return;
   return $return;
 }
