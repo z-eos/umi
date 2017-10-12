@@ -76,11 +76,13 @@
 	</div>
 	<!-- <div class="modal-body text-primary"></div> -->
 	<div class="modal-footer">
-	  <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
-	  <button type="submit" class="btn bg-danger umi-btn-event umi-btn-ajax"  name="user_block"
-		  value="[% entry.key %]" data-action="block">
-	    Yes, I really want to block this user all accounts, and yes, I understand all consequences!
-	  </button>
+	  <div>
+	    <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
+	    <button type="submit" class="btn bg-danger umi-btn-event umi-btn-ajax"  name="user_block"
+		    value="[% entry.key %]" data-action="block">
+	      Yes, I really want to block this user all accounts, and yes, I understand all consequences!
+	    </button>
+	  </div>
 	</div>
       </form>
     </div>

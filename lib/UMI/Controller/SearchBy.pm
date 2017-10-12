@@ -1732,41 +1732,24 @@ sub block :Path(block) :Args(0) {
   my $args = $c->req->parameters;
   my $params = { dn => $args->{user_block},
 		 type => $args->{type}, };
-  my $msg = $c->model('LDAP_CRUD')->block( $params );
+  my $err = $c->model('LDAP_CRUD')->block( $params );
 
-  if ( $msg != 0 && defined $msg->{error} ) {
-    $c->stash(
-	      current_view => 'Web',
-  	      template => 'search/delete.tt',
-  	      final_message => $msg,
-  	     );
-    $c->forward('View::TT');
-  } else {
-    if ( $params->{type} eq 'json' ) {
-      $c->stash->{current_view} = 'WebJSON';
-      $c->stash->{success} = ref($msg) ne 'HASH' ? 1 : 0;
-      if ( ref($msg) ne 'HASH' ) {
-	$c->stash->{message} = 'OK';
-      } elsif ( ref($msg) eq 'HASH' && $#{$msg->{error}} > -1 ) {
-	$c->stash->{message} = sprintf('<div class="panel panel-error text-left text-error"><div class="panel-heading text-center"><b>Error! Just close the window and inform administrator.</b></div><div class="panel-body">%s</div></div><br>',
-				       $msg->{error}->[0]->{html});
-      } elsif ( ref($msg) eq 'HASH' && $#{$msg->{warning}} > -1 ) {
-	$c->stash->{message} = sprintf('<div class="panel panel-warning text-left text-warning"><div class="panel-heading text-center"><b>Warning! Just close the window! Nothing else!</b></div><div class="panel-body">%s</div></div><br>',
-				       $msg->{warning}->[0]->{html});
-      }
+  if ( $params->{type} eq 'json' ) {
+    $c->stash->{current_view} = 'WebJSON';
+    if ( ref($err) eq 'HASH' && ! defined $err->{error} ) {
+      $c->stash->{success} = 1;
+      $c->stash->{message} = 'OK';
+    } elsif ( ref($err) eq 'HASH' || ref($err) eq 'ARRAY' ) { # && $#{$err->{error}} > -1 ) {
+      $c->stash->{success} = 0;
+      $c->stash->{message} = $self->msg2html({ type => 'panel',
+					       data => $err->{error} });
     } else {
-      $c->stash(
-		# template => 'search/delete.tt',
-		# delete => $params->{'ldap_delete'},
-		# recursive => defined $params->{'ldap_delete_recursive'} &&
-		# $params->{'ldap_delete_recursive'} eq 'on' ? '1' : '0',
-		err => $msg,
-		type => $params->{'type'},
-	       );
+      $c->stash( template => 'stub.tt',
+		 err => $err,
+		 params => $params, );
     }
   }
 }
-
 
 
 #=====================================================================

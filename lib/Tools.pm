@@ -278,6 +278,40 @@ sub utf2qp {
   return $return;
 }
 
+=head2 msg2html
+
+format message to HTML code
+
+=cut
+
+sub msg2html {
+  my ($self, $args) = @_;
+  my $arg =
+    { type => $args->{type} || 'panel',
+      data => $args->{data},
+      element => { panel => { root => '<div class="panel panel-error text-left text-error">',
+			      heading => '<div class="panel-heading text-center">',
+			      body => '<div class="panel-body">', },
+		   alert => { root => '<div class="alert alert-danger modal-body" role="alert">', },
+		 },
+      start_modal => '<b>Error! Just close the window and inform administrator.</b>',
+    };
+  my $return;
+  if ( $arg->{type} eq 'panel' ) {
+    $return = sprintf("%s%s%s</div>%s%s</div></div>",
+		      $arg->{element}->{panel}->{root},
+		      $arg->{element}->{panel}->{heading},
+		      $arg->{start_modal},
+		      $arg->{element}->{panel}->{body},
+		      $arg->{data});
+  } elsif ( $arg->{type} eq 'alert' ) {
+    $return = sprintf("%s%s%s</div></div>",
+		      $arg->{element}->{alert}->{root},
+		      $arg->{start_modal},
+		      $arg->{data});
+  }
+  return $return;
+}
 
 
 
@@ -322,13 +356,13 @@ sub pwdgen {
   my ( $self, $args ) = @_;
   my $pwdgen =
     {
-     pwd => $args->{pwd},
-     len => $args->{len} ne '' ? $args->{len} : UMI->config->{pwd}->{len},
-     num => $args->{num} ne '' ? $args->{num} : UMI->config->{pwd}->{num},
-     cap => $args->{cap} ne '' ? $args->{cap} : UMI->config->{pwd}->{cap},
-     cnt => $args->{cnt} ne '' ? $args->{cnt} : UMI->config->{pwd}->{cnt},
-     salt => $args->{salt} ne '' ? $args->{salt} : UMI->config->{pwd}->{salt},
-     pronounceable => $args->{pronounceable} ne '' ? $args->{pronounceable} : UMI->config->{pwd}->{pronounceable},
+     pwd  => $args->{pwd}  || undef,
+     len  => $args->{len}  || UMI->config->{pwd}->{len},
+     num  => $args->{num}  || UMI->config->{pwd}->{num},
+     cap  => $args->{cap}  || UMI->config->{pwd}->{cap},
+     cnt  => $args->{cnt}  || UMI->config->{pwd}->{cnt},
+     salt => $args->{salt} || UMI->config->{pwd}->{salt},
+     pronounceable => $args->{pronounceable} || UMI->config->{pwd}->{pronounceable},
     };
 
   $pwdgen->{len} = UMI->config->{pwd}->{lenp}
@@ -1278,6 +1312,35 @@ sub generalizedtime_fr {
     strftime( $arg->{format}, localtime( generalizedTime_to_time( $arg->{ts} )));
 }
 
+=head2 dns_rcode
+
+DNS RCODEs RFC2929
+
+=cut
+
+has 'dns_rcode' => ( traits => ['Hash'], is => 'ro', isa => 'HashRef', builder => '_build_dns_rcode', );
+
+sub _build_dns_rcode {
+  my $self = shift;
+  return { NOERROR  => { dec =>  0, RFC => 1035, descr => 'No Error', },
+	   FORMERR  => { dec =>  1, RFC => 1035, descr => 'Format Error', },
+	   SERVFAIL => { dec =>  2, RFC => 1035, descr => 'Server Failure', },
+	   NXDOMAIN => { dec =>  3, RFC => 1035, descr => 'Non-Existent Domain', },
+	   NOTIMP   => { dec =>  4, RFC => 1035, descr => 'Not Implemented', },
+	   REFUSED  => { dec =>  5, RFC => 1035, descr => 'Query Refused', },
+	   YXDOMAIN => { dec =>  6, RFC => 2136, descr => 'Name Exists when it should not',},
+	   YXRRSET  => { dec =>  7, RFC => 2136, descr => 'RR Set Exists when it should not',},
+	   NXRRSET  => { dec =>  8, RFC => 2136, descr => 'RR Set that should exist does not', },
+	   NOTAUTH  => { dec =>  9, RFC => 2136, descr => 'Server Not Authoritative for zone', },
+	   NOTZONE  => { dec => 10, RFC => 2136, descr => 'Name not contained in zone', },
+	   BADVERS  => { dec => 16, RFC => 2671, descr => 'Bad OPT Version', },
+	   BADSIG   => { dec => 16, RFC => 2845, descr => 'TSIG Signature Failure', },
+	   BADKEY   => { dec => 17, RFC => 2845, descr => 'Key not recognized', },
+	   BADTIME  => { dec => 18, RFC => 2845, descr => 'Signature out of time window', },
+	   BADMODE  => { dec => 19, RFC => 2930, descr => 'Bad TKEY Mode', },
+	   BADNAME  => { dec => 20, RFC => 2930, descr => 'Duplicate key name', },
+	   BADALG   => { dec => 21, RFC => 2930, descr => 'Algorithm not supported', }, };
+}
 
 =head2 dns_resolver
 
@@ -1310,7 +1373,7 @@ sub dns_resolver {
 	  $return->{error} = sprintf("<i class='h6'>dns_resolver()</i>: %s %s: %s ( %s )",
 				     $arg->{fqdn},
 				     $arg->{legend},
-				     $arg->{rcode}->{ $r->errorstring }->{descr},
+				     $self->dns_rcode->{ $r->errorstring }->{descr},
 				     $r->errorstring );
 	}
       }
@@ -1321,7 +1384,7 @@ sub dns_resolver {
     $return->{error} = sprintf("<i class='h6'>dns_resolver()</i>: %s %s: %s ( %s )",
 			       $arg->{fqdn},
 			       $arg->{legend},
-			       $arg->{rcode}->{ $r->errorstring }->{descr},
+			       $self->dns_rcode->{ $r->errorstring }->{descr},
 			       $r->errorstring );
   }
   # p $arg->{fqdn}; p $r;

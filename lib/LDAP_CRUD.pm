@@ -1386,6 +1386,35 @@ sub block {
   my @keys;
   my ( $msg, $msg_usr, $msg_add, $msg_chg, $ent_svc, $ent_chg, @blockgr );
 
+  # is this user in block group?
+  my $blockgr_dn =
+    sprintf('cn=%s,%s',
+	    $self->cfg->{stub}->{group_blocked},
+	    $self->cfg->{base}->{group});
+  
+  $msg = $self->search ( { base => $self->cfg->{base}->{group},
+			   filter => sprintf('(&(cn=%s)(memberUid=%s))',
+					     $self->cfg->{stub}->{group_blocked},
+					     substr( (split /,/, $args->{dn})[0], 4 )),
+			   sizelimit => 0, } );
+  if ( $msg->is_error() ) {    
+    $return->{error} .= $self->err( $msg )->{html};
+  } elsif ( $msg->count == 0) {
+    $msg_chg = $self->search ( { base => $blockgr_dn, } );
+    if ( $msg_chg->is_error() ) {
+      $return->{error} .= $self->err( $msg_chg )->{html};
+    } else {
+      $ent_chg = $self->modify( $blockgr_dn,
+				[ add =>
+				  [ memberUid => substr( (split /,/, $args->{dn})[0], 4 ), ], ], );
+      if ( ref($msg) eq 'HASH' ) {
+	$return->{error} .= $ent_chg->{html};
+      } else {
+	$return->{success} .= $args->{dn} . " successfully blocked.\n";
+      }
+    }
+  }
+
   $msg_usr = $self->search ( { base => $args->{dn},
 			       sizelimit => 0, } );
   if ( $msg_usr->is_error() ) {
@@ -1398,7 +1427,11 @@ sub block {
 	$userPassword = $self->pwdgen;
 	$msg = $self->modify( $ent_svc->dn,
 			      [ replace => [ userPassword => $userPassword->{ssha}, ], ], );
-	$return->{error} .= $self->err( $msg )->{html} if ref($msg) eq 'HASH';
+	if ( ref($msg) eq 'HASH' ) {
+	  $return->{error} .= $msg->{html};
+	} else {
+	  $return->{success} .= $ent_svc->dn . "\n";
+	}
       }
 
       if ( $ent_svc->exists('sshPublicKey') ) {
@@ -1406,36 +1439,10 @@ sub block {
 	@keys = map { $_ !~ /^from="127.0.0.1" / ? sprintf('from="127.0.0.1" %s', $_) : $_ } @userPublicKeys;
 	$msg = $self->modify( $ent_svc->dn,
 			      [ replace => [ sshPublicKey => \@keys, ],], );
-	$return->{error} .= $self->err( $msg )->{html} if ref($msg) eq 'HASH';
-      }
-      $return->{success} .= $ent_svc->dn . "\n";
-    }
-
-    # is this user in block group?
-    my $blockgr_dn =
-      sprintf('cn=%s,%s',
-	      $self->cfg->{stub}->{group_blocked},
-	      $self->cfg->{base}->{group});
-
-    $msg = $self->search ( { base => $self->cfg->{base}->{group},
-			     filter => sprintf('(&(cn=%s)(memberUid=%s))',
-					       $self->cfg->{stub}->{group_blocked},
-					       substr( (split /,/, $args->{dn})[0], 4 )),
-			     sizelimit => 0, } );
-    if ( $msg->is_error() ) {    
-      $return->{error} .= $self->err( $msg )->{html};
-    } elsif ( $msg->count == 0) {
-      $msg_chg = $self->search ( { base => $blockgr_dn, } );
-      if ( $msg_chg->is_error() ) {
-	$return->{error} .= $self->err( $msg_chg )->{html};
-      } else {
-	$ent_chg = $msg_chg->entry(0);
-	@blockgr = $ent_chg->get_value('memberUid');
-	push @blockgr, substr( (split /,/, $args->{dn})[0], 4 );
-	$ent_chg = $self->modify( $blockgr_dn,
-				  [ replace => [ memberUid => \@blockgr, ],], );
-	if ( $ent_chg->code != 0 && defined $ent_chg->{error} ) {
-	  $return->{error} .= $self->err( $ent_chg )->{html};
+	if ( ref($msg) eq 'HASH' ) {
+	  $return->{error} .= $msg->{html};
+	} else {
+	  $return->{success} .= $ent_svc->dn . "\n";
 	}
       }
     }
