@@ -1150,7 +1150,7 @@ sub del {
   $callername = 'main' if ! defined $callername;
   my $return; # = 'call to LDAP_CRUD->del from ' . $callername . ': ';
 
-  my $g_mod = $self->del_from_groups($dn);
+  p my $g_mod = $self->del_from_groups($dn);
   push @{$return->{error}}, $g_mod->{error} if defined $g_mod->{error};
 
   if ( ! $self->dry_run ) {
@@ -1334,7 +1334,7 @@ sub del_from_groups {
       if ( $mesg ) {
 	push @{$return->{error}}, $mesg->{html};
       } else {
-	$return->{success} = 'Group was modified.';
+	$return->{success} = sprintf("Group %s was modified.", $g_dn->get_value('cn'));
       }
     }
   } else { # groupOfNames is second
@@ -1344,22 +1344,16 @@ sub del_from_groups {
 				   attrs  => [ 'cn' ],);
     foreach $group ( $result->all_entries ) {
       $g_dn = $group->dn;
-      $g_res = $self->ldap->search( base   => $g_dn,
-				    filter => "(objectClass=*)",
-				    scope  => 'base' );
-      @g_memb_old = $g_res->entry(0)->get_value('member');
-      @g_memb_new = grep {$_ ne $dn} @g_memb_old;
-      # &p(\"$dn belongs to groupOfNames $g_dn:");
-      # p @g_memb_old; p @g_memb_new;
       $mesg = $self->modify( $g_dn,
-			     [ replace => [ member => \@g_memb_new ] ], );
+			     [ delete => [ member => $dn ] ], );
       if ( $mesg ) {
 	push @{$return->{error}}, $mesg->{html};
       } else {
-	$return->{success} = 'Group was modified.';
+	$return->{success} = sprintf("Group %s was modified.", $group->get_value('cn'));
       }
     }
   }
+  # p $return;
   return $return;
 }
 
@@ -1456,6 +1450,8 @@ sub block {
 =head2 modify
 
 Net::LDAP->modify( changes => ... ) wrapper
+
+NOTE: it returns hash of $self->err rather than Net::LDAP::Message !
 
 =cut
 

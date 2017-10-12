@@ -1654,11 +1654,8 @@ sub delete :Path(delete) :Args(0) {
     if ( ref($err) ne 'HASH' ) {
       $c->stash->{message} = 'OK';
     } elsif ( ref($err) eq 'HASH' && $#{$err->{error}} > -1 ) {
-      $c->stash->{message} = sprintf('<div class="panel panel-error text-left text-error"><div class="panel-heading text-center"><b>Error! Just close the window and try again!</b></div><div class="panel-body">%s</div></div><br>',
-				     $err->{error}->[0]->{html});
-    } elsif ( ref($err) eq 'HASH' && $#{$err->{warning}} > -1 ) {
-      $c->stash->{message} = sprintf('<div class="panel panel-warning text-left text-warning"><div class="panel-heading text-center"><b>Warning! Just close the window! Nothing else!</b></div><div class="panel-body">%s</div></div><br>',
-				     $err->{warning}->[0]->{html});
+      $c->stash->{message} = $self->msg2html({ type => 'panel',
+					       data => $err->{error}->[0]->{html} });
     }
   } else {
     $c->stash(
@@ -1681,32 +1678,20 @@ object reassign to another root DN
 
 sub reassign :Path(reassign) :Args(0) {
   my ( $self, $c ) = @_;
-  p my $params = $c->req->parameters;
+  my $params = $c->req->parameters;
 
-  p my $err = $c->model('LDAP_CRUD')->reassign($params);
-  p ref($err);
-  
+  my $err = $c->model('LDAP_CRUD')->reassign($params);
+
   if ( $params->{type} eq 'json' ) {
     $c->stash->{current_view} = 'WebJSON';
     $c->stash->{success} = ref($err) ne 'HASH' && ref($err) ne 'ARRAY' ? 1 : 0;
 
-    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     if ( ref($err) ne 'HASH' && ref($err) ne 'ARRAY' ) {
       $c->stash->{message} = 'OK';
     } elsif ( (ref($err) eq 'HASH' || ref($err) eq 'ARRAY' ) && $#{$err->{error}} > -1 ) {
       $c->stash->{success} = 0;
-      $c->stash->{message} = sprintf('<div class="panel panel-danger text-left text-error">
-  <div class="panel-heading text-center"><b>Error! Just close the window and try again!</b></div>
-  <div class="panel-body">%s</div>
-</div>',
-      				     $err->{error}->[0]->{html});
-    } elsif ( ( ref($err) eq 'HASH' || ref($err) eq 'ARRAY' ) && $#{$err->{warning}} > -1 ) {
-      $c->stash->{success} = $err->{warning}->[0]->{code} == 68 ? 1 : 0;
-      $c->stash->{message} = sprintf('<div class="panel panel-warning text-left text-warning">
-  <div class="panel-heading text-center"><b>Warning! Just close the window! Nothing else!</b></div>
-  <div class="panel-body">%s</div>
-</div>',
-				     $err->{warning}->[0]->{html});
+      $c->stash->{message} = $self->msg2html({ type => 'panel',
+					       data => $err->{error}->[0]->{html} });
     }
   } else {
     $c->stash( template => 'stub.tt',
@@ -1714,7 +1699,6 @@ sub reassign :Path(reassign) :Args(0) {
 	       err => $err, );
   }
 }
-
 
 
 #=====================================================================
