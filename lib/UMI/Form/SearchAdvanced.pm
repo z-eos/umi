@@ -24,8 +24,10 @@ has_field 'search_history'
   => ( type => 'Checkbox',
        # checkbox_value => '0',
        label => 'search history',
+       # label_class => [ 'switch', 'switch-text', 'switch-success', ],
        wrapper_class => [ 'checkbox', ],
-       element_wrapper_class => [ 'col-xs-3', 'col-xs-offset-2', 'col-lg-1', ],
+       element_wrapper_class => [ 'col-xs-offset-2', 'col-10' ],
+       # element_class => [ qw(switch-input), ],
        element_attr => { title => 'When checked, this checkbox causes additional fields to search by in history.',}, );
 
 has_field 'base_dn'

@@ -178,6 +178,7 @@ sub _build_cfg {
 		   icon_warning => 'fa fa-exclamation-triangle',
 		   icon_success => 'fa fa-check-circle',
 		   group_blocked => 'blocked',
+		   group_blocked_gid => 20001,
 		   core_mta => 'relay.umi',
 		  },
 	  rdn => {
@@ -1150,7 +1151,7 @@ sub del {
   $callername = 'main' if ! defined $callername;
   my $return; # = 'call to LDAP_CRUD->del from ' . $callername . ': ';
 
-  p my $g_mod = $self->del_from_groups($dn);
+  my $g_mod = $self->del_from_groups($dn);
   push @{$return->{error}}, $g_mod->{error} if defined $g_mod->{error};
 
   if ( ! $self->dry_run ) {
@@ -1410,6 +1411,17 @@ sub block {
 	  $return->{success} .= $ent_svc->dn . "\n";
 	}
       }
+
+      if ( $ent_svc->exists('umiOvpnAddStatus') ) {
+	$msg = $self->modify( $ent_svc->dn,
+			      [ replace => [ umiOvpnAddStatus => 'disabled', ], ], );
+	if ( ref($msg) eq 'HASH' ) {
+	  $return->{error} .= $msg->{html};
+	} else {
+	  $return->{success} .= $ent_svc->dn . "\n";
+	}
+      }
+
     }
   }
 
