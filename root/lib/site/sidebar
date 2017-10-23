@@ -131,23 +131,6 @@
 	</ul>
       </li>
 
-      [% IF c.check_user_roles('admin') %]
-      <li class="divider"></li>
-      <li class="divider"></li>
-
-      <li class="nav-item nav-dropdown">
-	<a class="nav-link nav-dropdown-toggle" href="#"><i class="fa fa-tree"></i> LDAP tree</a>
-	<ul disabled class="nav-dropdown-items">
-	  <li class="nav-item">
-	    <a class="nav-link" href="/ldap_tree"
-	       target="_top">
-	      <i class="fa fa-star-o"></i> dc=ibs
-	    </a>
-	  </li>
-	</ul>
-      </li>
-      [% END %]
-      
       <li class="divider"></li>
       
       <li class="nav-item nav-dropdown">
@@ -180,8 +163,7 @@
 	    <a class="nav-link" href="#"><i class="fa fa-fw fa-bug text-danger"></i> bug</a>
 	  </li>
 	</ul>
-      </li>
-      
+      </li>      
     </ul>
   </nav>
 </div> <!-- sidebar -->

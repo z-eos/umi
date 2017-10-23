@@ -86,7 +86,7 @@
            entry.value = entries.$entrykey
            dn = entry.key.split(',|=').hash    # here we preparing hash of each dn
 	   # here we preparing uniqe suffix to be added to objects id (like modals e.t.c.)
-           id_sufix = '_' _ entry.key.split(',').0.split('=').1.replace('[@:\.]', '_') _ '_' _ loop.index %]
+           id_sufix = '_' _ entry.key.split(',').0.split('=').1.replace('[@:\. ]', '_') _ '_' _ loop.index %]
 
       [%   IF entry.value.mgmnt.is_blocked %]
       [%   blocked = ' text-danger'
@@ -182,11 +182,12 @@
 			  type="submit" name="ldap_subtree" value="[% root_obj_dn %]">
 		    <i class="[% blocked _ ' ' _ entry_icon_size %] fa [% site.icons.root_obj %]">&nbsp;&nbsp;</i>
 		  </button>
-		
 		<p class="visible-lg-block visible-md-block"></p>&nbsp;
 
-		[% icon_color = '' %]
+		
+		[% # --- DISABLED ANYTHING DETECTION TO COLOR ICON AND TEXT --- %]
 		[% # if certificate and is not enabled then color to danger %]
+		[% icon_color = '' %]
 		[% IF entry.value.attrs.exists('umiOvpnAddStatus') && entry.value.attrs.umiOvpnAddStatus.0 != 'enabled' %]
 		[% icon_color = 'text-danger' %]
 		[% END %]
@@ -230,8 +231,8 @@
 		[% ELSE %]
 		<i title="Service Account Branch" class="fa fa-code-fork[% blocked _ ' ' _ entry_icon_size %]"></i>
 		[% END %]
+		
 		[% # dn of the select result object %]
-
 		<div class="col [% entry_text_size %] col-xs-offset-1 col-lg-offset-0" title="[% blocked_title %]">&nbsp;
 		  <b class="[% icon_color %]">
 		    [% # entry.key.replace(',', ',&nbsp;&nbsp;') %]
@@ -269,7 +270,7 @@
 		     h_attr.key == 'modifyTimestamp'    # here we skiping some technical attributes %]
 		  
 		  [% attr_name = h_attr.key    # attribute name %]
-		  [% IF h_attr.key == 'umiOvpnAddStatus' && h_attr.value != 'enabled' %]
+		  [% IF h_attr.key == 'umiOvpnAddStatus' && h_attr.value.0 != 'enabled' %]
 		  [% d_class = 'bg-danger' %]
 		  [% END %]
 		  <dt class="[% d_class %]">

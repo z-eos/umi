@@ -1,6 +1,9 @@
 [% IF template.name.match('\.(css|js|txt)');
      debug("Passing page through as text: $template.name");
      content;
+   ELSIF htmlonly == '1';
+     debug("Passing page through as text: $template.name since htmlonly parameter is set");
+     content;
    ELSE;
      debug("Applying HTML page layout wrappers to $template.name\n");
      content WRAPPER site/html + site/layout;

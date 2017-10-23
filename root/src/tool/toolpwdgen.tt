@@ -1,7 +1,7 @@
 [% META title = 'Password Generator' %]
 
 <div class="page-header">
-  <h2><i class="fa fa-user-secret fa-lg"></i> Password Generator Form <small><em class="mono">completely random or random pronounceable word</em></small></h2>
+  <h2><i class="fa fa-unlock-alt fa-lg"></i> Password Generator Form <small><em class="mono">completely random or random pronounceable word</em></small></h2>
 </div>
 
 [% INCLUDE ldap_err.tt %]

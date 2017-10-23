@@ -18,7 +18,7 @@
 	</div>
       </div>
     </noscript>
-    <div class="container-fluid">
+    <div class="container-fluid" id="tree-view">
       
 [% END %]
       
@@ -26,7 +26,7 @@
       
 [% IF c.user %]  
 
-    </div>    
+    </div>
   </main>
 
 [% PROCESS site/aside %]
@@ -57,3 +57,39 @@
 
 <script src="/static/js/dt-jquery.dataTables.min.js"></script>
 <script src="/static/js/dt-dataTables.bootstrap.min.js"></script>
+
+<!-- LDAP tree related (Vue based) -->
+<script type="text/x-template" id="template-tree-item">
+  <li class="tree-item" :class="{opened: opened, closed: !opened}">
+    <div class="tree-point">
+      <!-- <div class="tree-item-status" v-if="tree.subtree" @click="checkBranches"> -->
+      <div class="tree-item-status" @click="checkBranches">
+	<i class="text-muted fa [% site.icons.toggle_right %]" v-if="!opened"></i>
+	<i class="text-muted fa [% site.icons.toggle_down %]" v-if="opened"></i>
+      </div>
+      <!-- <a class="tree-item-link" "'/searchby?htmlonly=1&ldapsearch_base=' + tree.dn">{{ tree.id }}</a> -->
+      <a class="tree-item-link" @click="showItem">{{ tree.id }}</a>
+      <i class="fa [% site.icons.searchby_subtree %] text-muted" @click="showItemBranch"></i>
+    </div>
+    
+    <ul v-if="tree.subtree" class="tree" :class="{opened: opened, closed: !opened}">
+      <tree-item
+	:tree="subtree" 
+	v-for="(subtree, index) in tree.subtree" 
+	key="subtree.index"></tree-item>
+    </ul>
+  </li>
+</script> 
+
+<script type="text/x-template" id="template-tree">
+  <ul class="tree-root tree h6">
+    <tree-item
+      :tree="subtree" 
+      v-for="(subtree, index) in tree.subtree" 
+      key="subtree.index"></tree-item>
+  </ul>
+</script>
+<script src="/static/js/app/service/api.js"></script>
+<script src="/static/js/app/component/tree-item.component.js"></script>
+<script src="/static/js/app/component/tree.component.js"></script>
+<script src="/static/js/app/app.js"></script>

@@ -164,7 +164,7 @@
 	  <a href="/searchadvanced"
 		  title="advanced search"
 		  class="btn btn-secondary" role="button">
-	    <i class="fa fa-magic"></i>
+	    <i class="fa fa-search-plus"></i>
 	  </a>
 	</div>
 	<!-- </div> -->

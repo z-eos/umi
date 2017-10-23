@@ -4,11 +4,17 @@
    %]
 
 <div class="page-header">
-  <h2>Modify All Fields <small><em>of DN: [% modify %]</em></small></h2>
+  <h2>Modify All Fields <small><em>of DN: [% params.dn %]</em></small></h2>
 </div>
 
 [% INCLUDE ldap_err.tt %]
 
+[% # USE dumper %]
+<!-- <pre> -->
+  [% # dumper.dump(params, final_message ) %]
+<!-- </pre> -->
+
+[% IF ! final_message.exists('success') || final_message.success.empty %]
 <form method="POST"
       enctype="multipart/form-data"
       class="form-horizontal"
@@ -155,3 +161,4 @@
  });
  
 </script> 
+[% END %]

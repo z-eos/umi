@@ -42,7 +42,7 @@
 		value="[% entry.key %]"
 		data-order="[% site.searchby.menu.order.add_svc_acc %]"
 		name="add_svc_acc">
-	  <span class="fa fa-fw fa-plus-square text-success"></span>
+	  <span class="fa fa-fw fa-plus text-success"></span>
 	  new service
 	</button>
       </form>
@@ -84,7 +84,7 @@
 	      data-order="[% site.searchby.menu.order.ldap_delete %]"
 	      data-toggle="modal"
 	      data-target="#modal_delete[% id_sufix %]">
-	<span class="fa fa-fw fa-remove text-danger"></span>
+	<span class="fa fa-fw fa-trash-o text-danger"></span>
 	delete
       </button>
     </li>
@@ -98,7 +98,7 @@
 		data-order="[% site.searchby.menu.order.chg_acc %]"
 		data-toggle="modal"
 		data-target="#modal_reassign[% id_sufix %]">
-	  <span class="fa fa-fw fa-exchange text-danger"></span>
+	  <span class="fa fa-fw fa-recycle text-danger"></span>
 	  reassign
 	</button>
       </form>
@@ -227,7 +227,7 @@
 		value="[% entry.key %]"
 		data-order="[% site.searchby.menu.order.ldap_modify_password %]"
 		name="ldap_modify_password" tabindex="1">
-	  <span class="fa fa-fw fa-user-secret text-warning"></span>
+	  <span class="fa fa-fw fa-unlock-alt text-danger"></span>
 	  password
 	</button>
       </form>

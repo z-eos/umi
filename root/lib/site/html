@@ -21,7 +21,8 @@
    <link href="/static/css/nprogress.css" rel="stylesheet" type="text/css">
    [% template.link %]
    <link href="/static/css/umi.css" rel="stylesheet">
-   
+   <link href="/static/css/umi-tree.css" rel="stylesheet">
+
    <script src="/static/js/jquery.min.js"></script>
    <script src="/static/js/nprogress.js"></script>   
  </head>

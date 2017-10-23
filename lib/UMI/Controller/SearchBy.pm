@@ -364,6 +364,7 @@ sub index :Path :Args(0) {
 	      services => $ldap_crud->cfg->{authorizedService},
 	      base_icon => $ldap_crud->cfg->{base}->{icon},
 	      final_message => $return,
+	      htmlonly => defined $params->{htmlonly} && $params->{htmlonly} == 1 ? 1 : 0,
 	     );
   } else {
     $c->stash( template => 'signin.tt', );
@@ -1010,7 +1011,7 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
   						defined $params->{pwd_num} ||
   						defined $params->{pronounceable} );
 
-  p my $arg = {
+  my $arg = {
 	     mod_pwd_dn => $params->{ldap_modify_password},
 	     password_init => $params->{password_init},
 	     password_cnfm => $params->{password_cnfm},
@@ -1036,7 +1037,7 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
       } elsif ( $arg->{'password_init'} ne '' && $arg->{'password_cnfm'} ne '' ) {
 	$arg->{password_gen} = $self->pwdgen({ pwd => $arg->{'password_cnfm'} });
       }
-    
+
       $pwd = $arg->{mod_pwd_dn} =~ /.*authorizedService=802.1x-mac.*/ ? $arg->{password_gen}->{clear} : $arg->{password_gen}->{ssha};
       $modify_action = defined $arg->{pwd_orig} && $arg->{pwd_orig} ne '' ?
 	[ replace => [ 'userPassword' => $pwd, ], ] :
@@ -1398,9 +1399,8 @@ sub modify :Path(modify) :Args(0) {
       $jpeg = $self->file2var( $val->{'tempname'}, $return );
       return $jpeg if ref($jpeg) eq 'HASH' && defined $jpeg->{error};
       push @{$replace}, $attr => [ $jpeg ];
-    } elsif ( ( $attr eq 'cACertificate' ||
-		$attr eq 'certificateRevocationList' ||
-		$attr eq 'userCertificate' ) && $val ne '' ) {
+
+    } elsif ( $attr eq 'userCertificate' && $val ne '' ) {
       $binary = $self->file2var( $val->{'tempname'}, $return );
       return $binary if ref($binary) eq 'HASH' && defined $binary->{error};
       push @{$replace}, $attr . ';binary' => [ $binary ];
@@ -1412,6 +1412,11 @@ sub modify :Path(modify) :Args(0) {
       push @{$replace}, 'umiUserCertificateSubject' => '' . $cert_info->{'Subject'};
       push @{$replace}, 'umiUserCertificateIssuer' => '' . $cert_info->{'Issuer'};
       $moddn = 'cn=' . $cert_info->{'CN'};
+    } elsif ( ( $attr eq 'cACertificate' ||
+		$attr eq 'certificateRevocationList' ) && $val ne '' ) {
+      $binary = $self->file2var( $val->{'tempname'}, $return );
+      return $binary if ref($binary) eq 'HASH' && defined $binary->{error};
+      push @{$replace}, $attr . ';binary' => [ $binary ];
     } elsif ( $val eq '' && defined $entry->get_value($attr) ) {
       push @{$delete}, $attr => [];
     } elsif ( $val ne '' && ! defined $entry->get_value($attr) ) {

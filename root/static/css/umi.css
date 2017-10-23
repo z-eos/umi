@@ -86,15 +86,24 @@ html,body {
   padding: 0 3px 0 0;
 }
 
-.requiredwhen:after {
-    /* content: "\e146"; */
-    content: "\e034";
-    font-family: "Glyphicons Halflings";
+.content-plus-circle:after {
+    content: "\f055";
+    font-family: "FontAwesome";
     font-size: 70%;
-    color: #E99002;
-    vertical-align: top;
-    margin: 0px 0px 0px 5px;
-    padding: 0 5px 0 0;
+//    color: #fff;
+    vertical-align: 60%;
+    margin: 0 0 0 -4px;
+    padding: 0 0 0 0;
+}
+
+.content-ellipsis-v:after {
+    content: "\f142";
+    font-family: "FontAwesome";
+    font-size: 70%;
+//    color: #fff;
+    vertical-align: 60%;
+    margin: 0 0 0 0;
+    padding: 0 0 0 0;
 }
 
 .blocked:after {
@@ -129,7 +138,7 @@ html,body {
 
 
 .mono {
-    font-family: "monospace";
+    font-family: monospace;
     word-break: break-all;
 }
 
@@ -312,6 +321,23 @@ html,body {
 
 /* .app-header.navbar .navbar-toggler {
    color: #ffffff; } */
+
+.app-body .sidebar {
+  flex: 0 0 200px;
+  order: -1;
+}
+
+.app-body .aside-menu {
+  flex: 0 0 350px;
+}
+
+.aside-menu {
+  color: #fff;
+}
+
+.aside-menu-hidden .aside-menu {
+  margin-right: -350px;
+}
 
 .app-header.navbar .navbar-brand {
     background-image: url("../images/logo.png");

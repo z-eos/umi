@@ -444,8 +444,8 @@ sub file2var {
 
 data taken, generally, from
 
-openssl x509 -in target.crt -text -noout
-openssl req  -in target.crt -text -noout
+    openssl x509 -in target.crt -text -noout
+    openssl crl  -inform der -in crl.der -text -noout
 
 =cut
 
