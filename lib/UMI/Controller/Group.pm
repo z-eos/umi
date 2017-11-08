@@ -54,7 +54,7 @@ sub index :Path :Args(0) {
 						       cn => $params->{cn},
 						       descr => $params->{descr},
 						       memberUid => $params->{memberUid},
-						      })
+						      }),
 	       );
 
     # } elsif ( defined $c->session->{"auth_uid"} ) {

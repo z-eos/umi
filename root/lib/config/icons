@@ -7,6 +7,6 @@
       toggle_right     = 'fa-caret-right'
       binary_data      = 'fa-file-zip-o'
       root_obj         = 'fa-mortar-board'
-      searchby_subtree = 'fa-code-fork'
+      searchby_subtree = 'fa-ellipsis-h'
    }
 -%]

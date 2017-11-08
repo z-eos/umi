@@ -178,7 +178,7 @@ sub index :Path :Args(0) {
 
     $c->stats->profile(begin => "searchby_search");
 
-    $params->{'filter'} = '(' . $filter . ')';
+    p $params->{'filter'} = '(' . $filter . ')';
     my $mesg = $ldap_crud->search({
 				   base => $base,
 				   filter => '(' . $filter . ')',
@@ -353,6 +353,8 @@ sub index :Path :Args(0) {
     # foreach my $dn_s (keys ( %{$ttentries} )) {
     #   p $ttentries->{$dn_s}->{mgmnt};
     # }
+    
+    p $c->request->cookies;
 
     $c->stash(
 	      template => 'search/searchby.tt',
@@ -364,7 +366,6 @@ sub index :Path :Args(0) {
 	      services => $ldap_crud->cfg->{authorizedService},
 	      base_icon => $ldap_crud->cfg->{base}->{icon},
 	      final_message => $return,
-	      htmlonly => defined $params->{htmlonly} && $params->{htmlonly} == 1 ? 1 : 0,
 	     );
   } else {
     $c->stash( template => 'signin.tt', );
@@ -987,6 +988,8 @@ modify userPassword method
 
 if no password provided, then it will be auto-generated
 
+if provided, then the first password field is used
+
 =cut
 
 
@@ -1009,14 +1012,14 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
   						defined $params->{pwd_cap} ||
   						defined $params->{pwd_len} ||
   						defined $params->{pwd_num} ||
+  						defined $params->{checkonly} ||
   						defined $params->{pronounceable} );
 
-  my $arg = {
-	     mod_pwd_dn => $params->{ldap_modify_password},
-	     password_init => $params->{password_init},
-	     password_cnfm => $params->{password_cnfm},
-	    };
-  my ( $return, $pwd );
+  my $arg = { mod_pwd_dn    => $params->{ldap_modify_password},
+	      password_init => $params->{password_init},
+	      password_cnfm => $params->{password_cnfm},
+	      checkonly     => $params->{checkonly} || 0, };
+  my ( $return, $pwd, $mesg, $entry );
   my $ldap_crud = $c->model('LDAP_CRUD');
   my ( $is_pwd_msg, $is_pwd, $modify_action );
   $is_pwd_msg = $ldap_crud->search({ base => $arg->{mod_pwd_dn}, attr => [ 'userPassword', ], });
@@ -1030,26 +1033,54 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
     if ( $self->form_mod_pwd->validated && $self->form_mod_pwd->ran_validation ) {
 
       if ( $arg->{password_init} eq '' && $arg->{password_cnfm} eq '' ) {
-	$arg->{password_gen} = $self->pwdgen({ len => $params->{'pwd_len'},
-					       num => $params->{'pwd_num'},
-					       cap => $params->{'pwd_cap'},
-					       pronounceable => defined $params->{pronounceable} ? $params->{pronounceable} : 0, });
-      } elsif ( $arg->{'password_init'} ne '' && $arg->{'password_cnfm'} ne '' ) {
-	$arg->{password_gen} = $self->pwdgen({ pwd => $arg->{'password_cnfm'} });
+	$arg->{password_gen} =
+	  $self->pwdgen({ len => $params->{'pwd_len'},
+			  num => $params->{'pwd_num'},
+			  cap => $params->{'pwd_cap'},
+			  pronounceable => defined $params->{pronounceable} ? $params->{pronounceable} : 0, });
+      } elsif ( $arg->{'password_init'} ne '' ) {
+	$arg->{password_gen} = $self->pwdgen({ pwd => $arg->{'password_init'} });
       }
 
-      $pwd = $arg->{mod_pwd_dn} =~ /.*authorizedService=802.1x-mac.*/ ? $arg->{password_gen}->{clear} : $arg->{password_gen}->{ssha};
-      $modify_action = defined $arg->{pwd_orig} && $arg->{pwd_orig} ne '' ?
-	[ replace => [ 'userPassword' => $pwd, ], ] :
-	[ add => [ 'userPassword' => $pwd, ], ] ;
-      my $mesg = $ldap_crud->modify( $arg->{mod_pwd_dn}, $modify_action );
+      if ( ! $arg->{checkonly} ) {
+	$pwd = $arg->{mod_pwd_dn} =~ /.*authorizedService=802.1x-mac.*/ ? $arg->{password_gen}->{clear} : $arg->{password_gen}->{ssha};
+	$modify_action = defined $arg->{pwd_orig} && $arg->{pwd_orig} ne '' ?
+	  [ replace => [ 'userPassword' => $pwd, ], ] :
+	  [ add => [ 'userPassword' => $pwd, ], ] ;
+	$mesg = $ldap_crud->modify( $arg->{mod_pwd_dn}, $modify_action );
+      } else {
+	$mesg = $ldap_crud->search( { base => $arg->{mod_pwd_dn},
+				      scope => 'base',
+				      attrs => [ 'userPassword' ], } );
+	$return->{error} .= $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
+	  if ! $mesg->count;
+	$entry = $mesg->as_struct;
+	$arg->{password_match} =
+	  $entry->{ $arg->{mod_pwd_dn} }->{userpassword}->[0] eq $arg->{password_gen}->{ssha}
+	  ? 1 : 0;
+	$mesg = 0;
+      }
 
+      my $qr_bg = 'bg-success';
       if ( $mesg ne '0' ) {
 	$return->{error} = '<li>Error during password change occured: ' . $mesg->{html} . '</li>';
       } else {
-	$return->{success} = 'Password generated:<table class="table table-vcenter">' .
-	  '<tr><td width="50%"><h1 class="mono text-center">' .
-	  $arg->{password_gen}->{clear} . '</h1></td><td class="text-center" width="50%">';
+	if ( $arg->{checkonly} && $arg->{password_match} ) {
+	  $mesg = '<div class="alert alert-success text-center" role="alert"><h3><b>Supplied password matches curent one</b></h3></div>';
+	} elsif ( $arg->{checkonly} && ! $arg->{password_match} ) {
+	  $qr_bg = 'bg-warning';
+	  $mesg = '<div class="alert alert-warning text-center" role="alert"><h3><b>Supplied password does not match curent one</b></h3></div>';
+	} elsif ( ! $arg->{checkonly} ) {
+	  $mesg = 'Password generated:';
+	}
+	#p $entry;
+	#p $arg->{password_gen}->{ssha};
+
+	$return->{success} = sprintf('%s<table class="table table-vcenter">' .
+				     '<tr><td width="50%"><h1 class="mono text-center">%s</h1></td><td class="text-center" width="50%">',
+				     $mesg,
+				     $arg->{password_gen}->{clear},
+				    );
 
 	my $qr;
 	for ( my $i = 0; $i < 41; $i++ ) {
@@ -1058,7 +1089,8 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
 	}
 
 	$return->{error} = $qr->{error} if $qr->{error};
-	$return->{success} .= sprintf('<img alt="password QR" class="img-responsive img-thumbnail bg-success" src="data:image/jpg;base64,%s" title="password QR"/>',
+	$return->{success} .= sprintf('<img alt="password QR" class="img-responsive img-thumbnail %s" src="data:image/jpg;base64,%s" title="password QR"/>',
+				      $qr_bg,
 				      $qr->{qr} );
 	$return->{success} .= '</td></tr></table>';
 
@@ -1468,7 +1500,8 @@ sub modify :Path(modify) :Args(0) {
 
   $c->stash( template => 'search/modify.tt', # stub.tt',
 	     params => $params,
-	     final_message => $return, );
+	     final_message => $return,
+	   );
 
 }
 

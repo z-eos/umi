@@ -1,4 +1,4 @@
-<div class="sidebar">
+<div id="sidebar" class="sidebar">
   <nav class="sidebar-nav">
     <ul class="nav">
 
@@ -34,7 +34,7 @@
 	  </li>
           <li class="nav-item">
 	    <a class="nav-link" href="/toolpwdgen">
-	      <i class="fa fa-fw fa-user-secret"></i>
+	      <i class="fa fa-fw fa-unlock-alt"></i>
 	      Pwdgen
 	    </a>
 	  </li>
@@ -71,7 +71,7 @@
 	  </li>
 	  [% IF c.check_any_user_role ('admin', 'coadmin', 'acl-w-people') %]
           <li class="nav-item">
-	    <a class="nav-link" href="/user_root" tabindex="2">
+	    <a class="nav-link" href="/userall" tabindex="2">
 	      <i class="fa fa-fw fa-user"></i>
 	      User
 	    </a>
@@ -79,7 +79,7 @@
 	  [% END %]
 	  [% IF c.check_user_roles('admin') %]
           <li class="nav-item">
-	    <a class="nav-link" href="/group_root" tabindex="3">
+	    <a class="nav-link" href="/group" tabindex="3">
               <i class="fa fa-fw fa-group"> </i>
               Group
 	    </a>
@@ -105,7 +105,7 @@
 	  [% END %]
 	  [% IF c.check_any_user_role ('admin', 'coadmin', 'acl-w-organizations') %]
           <li class="nav-item">
-	    <a class="nav-link" href="/org_root" tabindex="4">
+	    <a class="nav-link" href="/org" tabindex="4">
               <i class="fa fa-fw fa-industry"></i>
               Org
 	    </a>
@@ -121,7 +121,7 @@
 	  [% END %]
 	  [% IF c.check_any_user_role ('admin', 'coadmin', 'dhcp') %]
           <li class="nav-item disabled">
-	    <a class="nav-link" href="/dhcp_root" tabindex="7">
+	    <a class="nav-link" href="/dhcp" tabindex="7">
               <i class="fa fa-fw fa-sitemap"></i>
               DHCP
 	    </a>
@@ -140,7 +140,7 @@
 	    <a class="nav-link" href="/motto"><i class="fa fa-hand-spock-o"></i> user's motto</a>
 	  </li>
 	  <li class="nav-item">
-	    <a class="nav-link" href="#"><i class="fa fa-question-circle"></i> help</a>
+	    <a class="nav-link" href="/about"><i class="fa fa-question-circle"></i> help</a>
 	  </li>
 	  <li class="nav-item">
 	    <a class="nav-link" href="https://github.com/z-eos/umi/wiki"><i class="fa fa-fw fa-wikipedia-w"></i> UMI wiki</a>

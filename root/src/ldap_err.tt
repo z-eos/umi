@@ -55,7 +55,7 @@
 [% IF final_message.success %]
 <div class="panel panel-success">
   <div class="panel-heading clearfix umi-zerro-padding">
-    <h4>&nbsp;&nbsp;<span class="fa fa-check-circle">&nbsp;</span>Success!</h4>
+    <h4>&nbsp;&nbsp;<span class="fa fa-check-circle">&nbsp;</span>Success! [% final_message.title %]</h4>
   </div>
   <div class="panel-body">
     <ul class="list-unstyled">

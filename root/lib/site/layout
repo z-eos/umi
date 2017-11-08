@@ -18,7 +18,7 @@
 	</div>
       </div>
     </noscript>
-    <div class="container-fluid" id="tree-view">
+    <div class="container-fluid" id="workingfield">
       
 [% END %]
       
@@ -36,9 +36,13 @@
 [% PROCESS site/footer %]
 [% END %]
 
-<script src="/static/js/jquery.min.js"></script>
-<script src="/static/js/bootstrap.min.js"></script>
 <script src="/static/js/vue.js"></script>
+<script src="/static/js/nprogress.js"></script>   
+<script src="/static/js/umi-core-ajax.js"></script>   
+
+
+<script src="/static/js/dt-jquery.dataTables.min.js"></script>
+<script src="/static/js/dt-dataTables.bootstrap.min.js"></script>
 
 <!-- GenesisUI main scripts -->
 <script src="/static/js/app.js"></script>
@@ -49,14 +53,9 @@
 <script src="/static/js/umi-header.js"></script>
 <script src="/static/js/umi-searchby-modals.js"></script>
 
-<script src="/static/js/umi-user-all.js"></script>  
-<script src="/static/js/umi-multiselect.js"></script>
-
 <script src="/static/js/jquery.multi-select.js"></script>
 <script src="/static/js/jquery.quicksearch.js"></script>
-
-<script src="/static/js/dt-jquery.dataTables.min.js"></script>
-<script src="/static/js/dt-dataTables.bootstrap.min.js"></script>
+<!-- <script src="/static/js/umi-multiselect.js"></script> -->
 
 <!-- LDAP tree related (Vue based) -->
 <script type="text/x-template" id="template-tree-item">
@@ -67,7 +66,6 @@
 	<i class="text-muted fa [% site.icons.toggle_right %]" v-if="!opened"></i>
 	<i class="text-muted fa [% site.icons.toggle_down %]" v-if="opened"></i>
       </div>
-      <!-- <a class="tree-item-link" "'/searchby?htmlonly=1&ldapsearch_base=' + tree.dn">{{ tree.id }}</a> -->
       <a class="tree-item-link" @click="showItem">{{ tree.id }}</a>
       <i class="fa [% site.icons.searchby_subtree %] text-muted" @click="showItemBranch"></i>
     </div>

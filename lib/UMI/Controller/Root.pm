@@ -43,7 +43,7 @@ sub index :Path :Args(0) {
 
 sub about :Path(about) :Args(0) {
     my ( $self, $c ) = @_;
-    $c->stash( template => 'about.tt', );
+    $c->stash( template => 'about.tt',);
 }
 
 sub motto :Path(motto) :Args(0) {
@@ -135,7 +135,7 @@ no way to shorten the list to some specific service, yet
 sub stat_acc :Path(stat_acc) :Args(0) {
   my ( $self, $c ) = @_;
 
-  if ( $c->user_exists() ) {  
+  if ( $c->user_exists() ) {
     my ( $account, $accounts, $utf_givenName, $utf_sn,
 	 $svc, @services, $service,
 	 $mesg_blk, @mesg_blk_entries,
@@ -143,6 +143,8 @@ sub stat_acc :Path(stat_acc) :Args(0) {
 	 $authorizedService,
 	 $return, );
 
+    my $params = $c->req->params;
+    
     my $ldap_crud = $c->model('LDAP_CRUD');
     my $mesg = $ldap_crud->search({ base => $ldap_crud->{cfg}->{base}->{acc_root},
 				    scope => 'one',
@@ -728,6 +730,7 @@ sub end : ActionClass('RenderView') {
     use POSIX qw(strftime);
     my $now = strftime "%Y%m%d%H%M%S", localtime;
     my $action = $c->req->action;
+    
     $action =~ s|/|_|g;
     my $file = sprintf("%s/store-data_%s_%s_%s.perl-storable",
 			 $b,
@@ -749,8 +752,10 @@ sub end : ActionClass('RenderView') {
 		elapsed => $c->stats->elapsed,
 		report => \@rep };
   $c->stash( stats => $stats,
+	     is_ajax => defined $c->request->headers->header('X-Requested-With') &&
+	     lc( $c->request->headers->header('X-Requested-With') ) eq lc( 'XMLHttpRequest' ) ? 1 : 0,
 	     navbar_note => $navbar_note );
-  
+
   # if ( $c->error and $c->error->[-1] eq "access denied" ) {
   #   $c->error(0); # clear the error
   #   # access denied

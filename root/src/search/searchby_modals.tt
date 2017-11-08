@@ -67,7 +67,7 @@
      aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <form role="form" method="POST" action="/searchby/block">
+      <form role="form" method="POST" class="formajaxer" action="/searchby/block">
 	<div class="modal-header">
 	  <h4 class="h4 modal-title" id="modal_block[% id_sufix %]_label">
 	    <span class="fa fa-ban"></span>
@@ -78,8 +78,10 @@
 	<div class="modal-footer">
 	  <div>
 	    <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
-	    <button type="submit" class="btn bg-danger umi-btn-event umi-btn-ajax"  name="user_block"
-		    value="[% entry.key %]" data-action="block">
+	    <button type="submit" class="btn bg-danger umi-btn-event umi-btn-ajax"
+		    name="user_block" value="[% entry.key %]"
+		    onClick="$(modal_block[% id_sufix %]).modal('hide')"
+		    data-action="block">
 	      Yes, I really want to block this user all accounts, and yes, I understand all consequences!
 	    </button>
 	  </div>
@@ -95,10 +97,10 @@
      aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <form role="form" method="POST" action="/searchby/reassign">
+      <form role="form" method="POST" action="/searchby/reassign" class="formajaxer">
 	<div class="modal-header">
 	  <h4 class="modal-title" id="modal_reassign[% id_sufix %]_label">
-	    <span class="fa fa-times-circle"></span>
+	    <span class="fa fa-recycle"></span>
 	    You are about to change root DN for:<br><b>[% entry.key.replace(',', ', ') %]</b>
 	  </h4>
 	</div>
@@ -131,7 +133,9 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	<div class="modal-footer">
 	  <div>
 	    <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
-	    <button type="submit" class="btn bg-danger umi-btn-event umi-btn-ajax"  name="src_dn"
+	    <button type="submit" class="btn bg-danger umi-btn-event umi-btn-ajax"
+		    onClick="$(modal_reassign[% id_sufix %]).modal('hide')"
+		    name="src_dn"
 		    value="[% entry.key %]" data-action="reassign" >
 	      Yes, I really want to change it and yes, I understand all consequences!
 	    </button>
@@ -148,7 +152,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
      aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <form role="form" method="POST">
+      <form role="form" method="POST" class="formajaxer">
 	<div class="modal-header">
 	  <h4 class="modal-title" id="modal_ldif[% id_sufix %]_label">
 	    <span class="fa fa-info-circle"></span>
@@ -174,6 +178,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	<div class="modal-footer">
 	  <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
 	  <button type="submit"
+		  onClick="$(modal_ldif[% id_sufix %]).modal('hide')"
 		  class="btn bg-info umi-btn-event umi-btn-logic"
 		  data-umiact="/searchby/ldif_gen"
 		  name="ldap_ldif"
@@ -192,7 +197,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
      aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <form role="form" method="POST">
+      <form role="form" method="POST" class="formajaxer">
 	<div class="modal-header">
 	  <h4 class="modal-title" id="modal_vcard[% id_sufix %]_label">
 	    <span class="fa fa-files-o fa-lg"></span>
@@ -226,6 +231,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	<div class="modal-footer">
 	  <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
 	  <button type="submit"
+		  onClick="$(modal_vcard[% id_sufix %]).modal('hide')"
 		  class="btn bg-info umi-btn-event umi-btn-logic"
 		  data-umiact="/searchby/vcard_gen"
 		  name="vcard_dn"

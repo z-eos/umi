@@ -16,7 +16,7 @@
 
 [% INCLUDE ldap_err.tt %]
 
-<form id="[% form.name %]" class="umi-margings-fixer form-horizontal tab-content" method="post" enctype="multipart/form-data">
+<form id="[% form.name %]" class="formajaxer umi-margings-fixer form-horizontal tab-content" method="post" enctype="multipart/form-data" action="/userall">
 <!-- <form class="form-horizontal tab-content" method="post" enctype="multipart/form-data"> -->
 
   [% form.field('add_svc_acc').render %]
@@ -53,8 +53,8 @@
 	  <!-- <span class="fa fa-user-plus fa-lg"></span>
 	      <span class="visible-lg-inline">Login</span> -->
 	  <span class="fa-stack fa-fw">
-	    <i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>
-	    <i class="fa fa-user pull-right fa-stack-1x"></i>
+	    <i class="fa fa-cog fa-stack-2x text-muted umi-opacity02"></i>
+	    <i class="fa fa-lock pull-right fa-stack-1x"></i>
 	  </span>
 	  <span class="visible-lg-inline visible-md-inline">&nbsp;&nbsp;</span>
 	  <span class="visible-lg-inline visible-md-inline">&nbsp;Pass</span>
@@ -70,11 +70,11 @@
 	      <i class="fa fa-user-times fa-stack-1x"></i>
 	      </span> -->
 	  <span class="fa-stack fa-fw">
-	    <i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>
-	    <i class="fa fa-user-times pull-right fa-stack-1x"></i>
+	    <i class="fa fa-cog fa-stack-2x text-muted umi-opacity02"></i>
+	    <i class="fa fa-unlock pull-right fa-stack-1x"></i>
 	  </span>
 	  <!-- <span class="fa fa-user-times fa-lg"></span> -->
-	  <span class="caret"></span>
+	  <!-- <span class="caret"></span> -->
 	  <span class="visible-lg-inline visible-md-inline">NoPass</span>
 	</a>
 	<ul id="umiSec-contents" aria-labelledby="umiSec"
@@ -144,14 +144,18 @@
 
 [% IF form.field('add_svc_acc').value %]
 <script type="text/javascript">
-        /* 
-        --- FORM USED FOR AN EXISTENT DN ------------------------------------------
-        dn for account service to be added to, was selected in searchby form
-        */
+ /* --- FORM USED FOR AN EXISTENT DN ------------------------------------------
+    dn for account service to be added to, was selected in searchby form
+  * --------------------------------------------------------------------------- */
 
-        $('.addsvcacc').hide(300);
-        $('#auth').addClass('in').addClass('active');
-        $('#person').removeClass('in').removeClass('active');
-        </script>
+ $('.addsvcacc').hide(300);
+ $('#auth').addClass('in').addClass('active');
+ $('#person').removeClass('in').removeClass('active');
+</script>
 [% END %]
 
+<script src="/static/js/umi-user-all.js"></script>  
+
+<script src="/static/js/jquery.multi-select.js"></script>
+<script src="/static/js/jquery.quicksearch.js"></script>
+<script src="/static/js/umi-multiselect.js"></script>

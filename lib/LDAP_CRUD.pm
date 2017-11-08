@@ -283,7 +283,7 @@ sub _build_cfg {
 		      disabled => 0,
 		      homeDirectory_prefix => '/mail/fast/imap/',
 		      gidNumber => 26,
-		      icon => 'fa fa-envelope-o',
+		      icon => 'fa fa-envelope',
 		      data_fields => 'login,logindescr,password1,password2',
 		      data_relation => 'passw',
 		     },

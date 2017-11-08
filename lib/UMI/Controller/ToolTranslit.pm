@@ -56,7 +56,7 @@ sub index :Path :Args(0) {
     }
 
     $final_message->{success} .= '</dl>';
-    $c->stash( final_message => $final_message );
+    $c->stash( final_message => $final_message, );
 }
 
 =head1 AUTHOR

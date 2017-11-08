@@ -22,7 +22,7 @@
 	<span class="fa fa-user col-xs-offset-1">&nbsp;</span>Personal data
       </h3>
     </div>
-    <div id="collapse_personal_data" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_personal_data">
+    <div id="collapse_personal_data" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_personal_data">
       <div class="panel-body">
 	<div class="media">
 	  <div class="media-left"><img class="media-object bg-info" [% jpegPhoto %]</div>
@@ -77,7 +77,7 @@
 	<span class="fa fa-industry col-xs-offset-1">&nbsp;</span>Organization/s
       </h3>
     </div>
-    <div id="collapse_org" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_org">
+    <div id="collapse_org" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_org">
       <div class="panel-body">
 	[% FOREACH org IN orgs %]
 
@@ -91,7 +91,7 @@
 	      <span class="fa fa-industry fa-xs col-xs-offset-1">&nbsp;</span>[% org.key %]
 	    </h3>
 	  </div>
-	  <div id="collapse_org_[% org.key.replace('[\. ]', '') %]" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_org_[% org.key.replace('[\. ]', '') %]">
+	  <div id="collapse_org_[% org.key.replace('[\. ]', '') %]" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_org_[% org.key.replace('[\. ]', '') %]">
 	    <div class="panel-body">
 	      <dl class="dl-horizontal fa-ul">
 		<li><span class="fa fa-li fa-envelope"></span>[% org.value %]</li>
@@ -128,7 +128,7 @@
 	<span class="fa fa-sitemap col-xs-offset-1">&nbsp;</span>DHCP
       </h3>
     </div>
-    <div id="collapse_dhcp" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_dhcp">
+    <div id="collapse_dhcp" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_dhcp">
       <div class="panel-body">
 	[% IF c.check_user_roles('wheel') || c.check_user_roles('wheel') %]
 	<form role="form" method="POST"
@@ -270,7 +270,7 @@
 	Services
     </h3>
   </div>
-  <div id="collapse_service" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_service">
+  <div id="collapse_service" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_service">
     <div class="panel-body table-responsive">
       <table class="table table-condenced table-stripped table-hover">
 	<tbody>
@@ -458,7 +458,7 @@
 	<span class="fa fa-sitemap col-xs-offset-1">&nbsp;</span>Inventory
       </h3>
     </div>
-    <div id="collapse_inventory" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_inventory">
+    <div id="collapse_inventory" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_inventory">
       <div class="panel-body">
 	<div class="table-responsive">
 	  <table class="table table-condenced table-stripped table-hover">

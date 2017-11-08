@@ -105,7 +105,7 @@ sub index :Path :Args(0) {
 
     $self->form->add_svc_acc( defined $params->{add_svc_acc} && $params->{add_svc_acc} ne '' ? $params->{add_svc_acc} : '' );
     $params->{action_searchby} = $c->uri_for_action('searchby/index');
-    $c->stash( final_message => $self->create_account( $c->model('LDAP_CRUD'), $params ) );
+    $c->stash( final_message => $self->create_account( $c->model('LDAP_CRUD'), $params ), );
   }
 }
 

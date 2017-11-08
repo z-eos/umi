@@ -8,7 +8,7 @@ BEGIN { extends 'UMI::Form::LDAP'; with 'Tools'; }
 
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable' );
 
-sub build_form_element_class { [ 'form-horizontal', ] }
+sub build_form_element_class { [ qw(form-horizontal formajaxer) ] }
 
 # has '+item_class' => ( default =>'ModJpegPhoto' );
 has '+enctype' => ( default => 'multipart/form-data');

@@ -8,6 +8,10 @@ BEGIN { extends 'UMI::Form::LDAP'; with 'Tools'; }
 
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable' );
 
+has '+action' => ( default => '/searchby/proc' );
+
+sub build_form_element_class { [ qw(formajaxer) ] }
+
 has '+item_class' => ( default =>'Group' );
 
 has_field 'cn' => ( apply => [ NoSpaces, NotAllDigits, Printable ],

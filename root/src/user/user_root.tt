@@ -25,7 +25,7 @@
 	     <span class="fa fa-pluse-circle"></span>
 	     create new</a>
 	     </li> -->
-      <li><a href="/userall" target="_top" title="Add new user">
+      <li><a href="/userall" title="Add new user">
 	  <span class="fa fa-user-plus fa-3x"></span>
 	  create new</a>
       </li>

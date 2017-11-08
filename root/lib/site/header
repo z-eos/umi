@@ -1,175 +1,199 @@
 [% # -*- mode: web; -*- %]
 <!-- BEGIN site/header -->
-<header class="app-header navbar navbar-dark bg-dark">
-    <a class="navbar-brand bg-dark" href="/"></a>
+<header class="app-header navbar navbar-dark bg-dark" id="header">
+    <a id="navbarbrand" class="navbar-brand bg-dark" href="/"></a>
     [% IF c.user_exists && c.session.auth_uid # !!! to fix, looks like a stub %]
-    <a class="navbar-toggler sidebar-minimizer" href="#" type="submit"><i class="fa fa-bars"></i></a>
+    <a class="navbar-toggler sidebar-minimizer btn btn-link borderless" href="#"><i class="fa fa-bars"></i></a>
     <!-- <button class="navbar-toggler sidebar-minimizer d-md-down-none" type="button"><i class="fa fa-bars"></i></button> -->
     [% END %]
     [% IF c.user_exists && c.check_any_user_role ('admin', 'coadmin', 'operator') %]
-    <form class="form-inline ml-auto"
+    <form class="form-inline ml-auto formajaxer"
 	  role="form"
 	  id="searchby"
 	  method="POST"
 	  action="/searchby">
       
       <!-- <div class="input-group"> -->
-	<input type="text"
-	       size="50%"
-	       class="form-control col-sm-3 col-xs-3 col-md-7 col-lg-9 mono"
-	       id="ldapsearch_filter"
-	       name="ldapsearch_filter"
-	       title="LDAP search filter input field"
-	       placeholder='*Vasya*Pupkin*'
-	       data-animation="false"
-	       data-trigger="hover"
-	       data-placement="bottom"
-	       data-html="true"
-	       data-toggle="popover"
-	       data-original-title="Legend"
-	       data-template="<div class='popover hidden-xs' role='tooltip'><div class='arrow'></div><h3 class='popover-title'></h3><div class='popover-content'></div></div>"
-	       data-content="<ul>
-	       <li>default sort criteria is <i class='text-info'>by name</i> (First/Last Name, uid and cn)</li>
-	       <li>for each search criteria, <i class='text-info'>objectClass=<i class='fa fa-asterisk'></i></i> is used if empty</li>
-	       <li>use <i class='fa fa-asterisk text-info'></i> as substring</li>
-	       <li>narrow search results for non &laquo;by ...&raquo; presets, by providing attribute in filter, like: <i class='text-info'>uid=<i class='fa fa-asterisk'></i>dreii.<i class='fa fa-asterisk'></i></i></li>
-	       <li>to search in access log, use base <i class='text-info'>[% helper_cfg('cfg_local','ldap_crud_db_log') %]</i></li>
-	       </ul>">
+      <input type="text"
+	     size="50%"
+	     class="form-control col-sm-3 col-xs-3 col-md-7 col-lg-9 mono"
+	     id="ldapsearch_filter"
+	     name="ldapsearch_filter"
+	     title="LDAP search filter input field"
+	     placeholder='*Vasya*Pupkin*'
+	     data-animation="false"
+	     data-trigger="hover"
+	     data-placement="bottom"
+	     data-html="true"
+	     data-toggle="popover"
+	     data-original-title="Legend"
+	     data-template="<div class='popover hidden-xs' role='tooltip'><div class='arrow'></div><h3 class='popover-title'></h3><div class='popover-content'></div></div>"
+	     data-content="<ul>
+	     <li>default sort criteria is <i class='text-info'>by name</i> (First/Last Name, uid and cn)</li>
+	     <li>for each search criteria, <i class='text-info'>objectClass=<i class='fa fa-asterisk'></i></i> is used if empty</li>
+	     <li>use <i class='fa fa-asterisk text-info'></i> as substring</li>
+	     <li>narrow search results for non &laquo;by ...&raquo; presets, by providing attribute in filter, like: <i class='text-info'>uid=<i class='fa fa-asterisk'></i>dreii.<i class='fa fa-asterisk'></i></i></li>
+	     <li>to search in access log, use base <i class='text-info'>[% helper_cfg('cfg_local','ldap_crud_db_log') %]</i></li>
+	     </ul>">
 
+      <input type="hidden" name="ldap_base_case" id="ldap_base_case" >
+      
 	<!-- <div class="input-group-btn"> -->
-	<div class="btn-group">
-	  <button type="submit" 
-		  class="btn btn-secondary"
-		  value="1" tabindex="13"
-		  name="ldapsearch_by_name"
-		  title="Search &laquo;by name&raquo;">
-	    <i class="fa fa-search"></i>
-	  </button>
-	  <button type="submit" 
+      <div class="btn-group">
+	<button type="submit" class="btn btn-secondary"
+		onClick="document.getElementById('ldap_base_case').value=this.value"
+                value="ldapsearch_by_name" tabindex="13"
+                title="Search &laquo;by name&raquo;">
+          <i class="fa fa-search"></i>
+        </button>
+	<!-- <div onClick="window.Service.api.updateViewSearchBy('ldapsearch_by_name=1',document.getElementById('ldapsearch_filter').value)"
+	       class="btn btn-secondary">
+	       <i class="fa fa-search"></i>
+	       </div> -->
+	  
+	  <div type="submit" 
 		  class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
 		  data-toggle="dropdown" 
 		  aria-haspopup="false" 
 		  aria-expanded="false">
-	    <span class="sr-only">Toggle Dropdown</span>
-	  </button>
+	    <i class="sr-only">Toggle Dropdown</i>
+	  </div>
 
 	  [% icon_class = "fa fa-fw" %]
 	  [% menu_item = "dropdown-item btn btn-secondary " %]
 	  [% color = "bg-success" %]
 
 	  <div class="dropdown-menu dropdown-menu-right">
+
 	    <button type="submit" class="[% menu_item %][% color %]"
-		    name="ldapsearch_by_name"
-	      title="filter pattern in givenName or sn or uid or cn">
+		    onClick="document.getElementById('ldap_base_case').value=this.value"
+		    value="ldapsearch_by_name"
+		    title="filter pattern in givenName or sn or uid or cn">
 	      <i class="[% icon_class %] fa-user"></i> by name
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
-		    name="ldapsearch_by_email"
+		    onClick="document.getElementById('ldap_base_case').value=this.value"
+		    value="ldapsearch_by_email"
 		    title="filter pattern in mail">
 	      <i class="[% icon_class %] fa-envelope"></i> by mail
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
-		    name="ldapsearch_by_jid"
+		    onClick="document.getElementById('ldap_base_case').value=this.value"
+		    value="ldapsearch_by_jid"
 		    title="filter pattern in mail">
 	      <i class="[% icon_class %] fa-lightbulb-o"></i> by JID
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
-		    name="ldapsearch_by_ip"
+		    onClick="document.getElementById('ldap_base_case').value=this.value"
+		    value="ldapsearch_by_ip"
 		    title="filter pattern in ip address">
 	      <i class="[% icon_class %] fa-code-fork"></i> by IP
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
-		    name="ldapsearch_by_mac"
+		    onClick="document.getElementById('ldap_base_case').value=this.value"
+		    value="ldapsearch_by_mac"
 		    title="filter pattern in MAC address">
 	      <i class="[% icon_class %] fa-barcode"></i> by MAC
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
-		    name="ldapsearch_by_sn"
+		    onClick="document.getElementById('ldap_base_case').value=this.value"
+		    value="ldapsearch_by_sn"
 		    title="filter pattern in Serial Number address">
 	      <i class="[% icon_class %] fa-barcode"></i> by S/N
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
-		    name="ldapsearch_by_telephone"
+		    onClick="document.getElementById('ldap_base_case').value=this.value"
+		    value="ldapsearch_by_telephone"
 		    title="filter pattern in telephone number">
 	      <i class="[% icon_class %] fa-phone"></i> by phone num
 	    </button>
-	    
+	    	    
 	    [% color = "bg-info" %]
 
 	    <button type="submit" class="[% menu_item %][% color %]"
+		    onClick="document.getElementById('ldap_base_case').value=this.value"
 		    value="[% helper_cfg('cfg_ldap_crud','base', 'group') %]"
-		    name="ldapsearch_base"
 		    title="filter pattern with base Groups">
 	      <i class="[% icon_class %] fa-group"></i> group
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
+		    onClick="document.getElementById('ldap_base_case').value=this.value"
 		    value="[% helper_cfg('cfg_ldap_crud','base', 'netgroup') %]"
-		    name="ldapsearch_base"
 		    title="filter pattern with base NisNetgroups">
 	      <i class="[% icon_class %] fa-group"></i> netgroup
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
-		    value="[% helper_cfg('cfg_ldap_crud','base', 'acc_root') %]"
+		    onClick="document.getElementById('ldap_base_case').value=this.value"
 		    name="ldapsearch_base"
+		    value="[% helper_cfg('cfg_ldap_crud','base', 'acc_root') %]"
 		    title="filter pattern with base People">
 	      <i class="[% icon_class %] fa-user"></i> people
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
+		    onClick="document.getElementById('ldap_base_case').value=this.value"
 		    value="[% helper_cfg('cfg_ldap_crud','base', 'org') %]"
-		    name="ldapsearch_base" tabindex="20"
+		    tabindex="20"
 		    title="filter pattern with base Organizations">
 	      <i class="[% icon_class %] fa-industry"></i> organization
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
+		    onClick="document.getElementById('ldap_base_case').value=this.value"
 		    value="[% helper_cfg('cfg_ldap_crud','base', 'dhcp') %]"
-		    name="ldapsearch_base" tabindex="21"
+		    tabindex="21"
 		    title="filter pattern with base DHCP">
 	      <i class="[% icon_class %] fa-sitemap"></i> DHCP
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
-		    name="ldapsearch_base" tabindex="22"
+		    onClick="document.getElementById('ldap_base_case').value=this.value"
+		    tabindex="22"
 		    title="filter pattern with base Aliases">
 	      <i class="[% icon_class %] fa-files-o"></i> alias
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
+		    onClick="document.getElementById('ldap_base_case').value=this.value"
 		    value="[% helper_cfg('cfg_ldap_crud','base', 'workstations') %]"
-		    name="ldapsearch_base" tabindex="23"
+		    tabindex="23"
 		    title="filter pattern with base Workstations">
 	      <i class="[% icon_class %] fa-desktop"></i> workstations
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
+		    onClick="document.getElementById('ldap_base_case').value=this.value"
 		    value="[% helper_cfg('cfg_ldap_crud','base', 'machines') %]"
-		    name="ldapsearch_base" tabindex="24"
+		    tabindex="24"
 		    title="filter pattern with base Machines">
 	      <i class="[% icon_class %] fa-server"></i> machines
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
+		    onClick="document.getElementById('ldap_base_case').value=this.value"
 		    value="[% helper_cfg('cfg_ldap_crud','base', 'inventory') %]"
-		    name="ldapsearch_base" tabindex="24"
+		    tabindex="24"
 		    title="filter pattern with base Inventory">
 	      <i class="[% icon_class %] fa-tags"></i> inventory
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
+		    onClick="document.getElementById('ldap_base_case').value=this.value"
 		    value="[% helper_cfg('cfg_ldap_crud','base', 'mta') %]"
-		    name="ldapsearch_base" tabindex="24"
+		    tabindex="24"
 		    title="filter pattern with base Sendmail">
 	      <i class="[% icon_class %] fa-envelope"></i> sendmail
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
+		    onClick="document.getElementById('ldap_base_case').value=this.value"
 		    value="[% helper_cfg('cfg_ldap_crud','base', 'gitacl') %]"
-		    name="ldapsearch_base" tabindex="25">
+		    tabindex="25">
 	      <i class="[% icon_class %] fa-gavel"></i> GitACL
 	    </button>
 	  </div>
 	  <a href="/searchadvanced"
-		  title="advanced search"
-		  class="btn btn-secondary" role="button">
+	     class="btn btn-secondary"
+	    title="advanced search">
 	    <i class="fa fa-search-plus"></i>
 	  </a>
 	</div>
 	<!-- </div> -->
 	<!-- </div> -->
     </form>
+
     [% END %]
     [% # -------------------------------------------------------- %]
 
@@ -220,7 +244,7 @@
       [% END %]
     </ul>
     <!-- <button class="navbar-toggler aside-menu-toggler" type="button"><i class="fa fa-bars"></i></button> -->
-    <a class="navbar-toggler aside-menu-toggler" href="#" title="currently have no idea how to use it but it is a cool feature"><i class="fa fa-bars"></i></a>
+    <a class="navbar-toggler aside-menu-toggler btn btn-link borderless" href="#" title="currently have no idea how to use it but it is a cool feature"><i class="fa fa-bars"></i></a>
   </div>
 </header>
 

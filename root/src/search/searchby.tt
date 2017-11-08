@@ -1,3 +1,4 @@
+[% # -*- mode: web -*- %]
 [% META title = 'Search Simple Results' %]
 [% # stash.name %]
 
@@ -47,14 +48,13 @@
 	<td colspan=2>
 	  <div class="btn-group" role="group">
 	    <a href="#"
-	       class="chevron_toggleable collapse_in_out btn" role="button"
-	       type="button"
+	       class="chevron_toggleable collapse_in_out btn btn-link" role="button"
 	       title="Collapse In/Out Each Element On This Page"
 	       data-target="#collapse"
 	       data-toggle="collapse"
 	       data-parent="#accordion"
 	       tabindex="0">
-	      <span class="fa [% site.icons.toggle %][% chevron_toggle %]"></span>
+	      <span id="chevron_switcher" class="fa [% site.icons.toggle %][% chevron_toggle %]"></span>
 	    </a>
 	    <a href="#"
 	       class="btn" role="button"
@@ -171,91 +171,93 @@
 		[% root_obj_dn = entry.key %]
 		[% END %]
 
-		<form class="form-inline" role="form" method="POST" action="/searchby">
+		<form class="formajaxer" role="form" method="POST" action="/searchby">
+		  <input type="hidden"  name="ldap_subtree" value="[% root_obj_dn %]">
 		  <button class="[% root_of_rec_btn %] btn [% btn_blocked %] umi-search visible-lg-block visible-md-block"
 			  title="Click to open root object. [% blocked_title %]"
-			  type="submit" name="ldap_subtree" value="[% root_obj_dn %]">
+			  type="submit">
 		    <span class="[% entry_text_size %] [%# blocked %]"><b>[% root_of_rec %]</b></span>
 		  </button>
 		  <button class="btn btn-link umi-search visible-xs-block visible-sm-block"
 			  title="Click to open root object of this account. [% blocked_title %]"
-			  type="submit" name="ldap_subtree" value="[% root_obj_dn %]">
+			  type="submit">
 		    <i class="[% blocked _ ' ' _ entry_icon_size %] fa [% site.icons.root_obj %]">&nbsp;&nbsp;</i>
 		  </button>
-		<p class="visible-lg-block visible-md-block"></p>&nbsp;
-
-		
-		[% # --- DISABLED ANYTHING DETECTION TO COLOR ICON AND TEXT --- %]
-		[% # if certificate and is not enabled then color to danger %]
-		[% icon_color = '' %]
-		[% IF entry.value.attrs.exists('umiOvpnAddStatus') && entry.value.attrs.umiOvpnAddStatus.0 != 'enabled' %]
-		[% icon_color = 'text-danger' %]
-		[% END %]
+		</form>
+		<div class="btn btn-link umi-search">
+		  <!-- p class="visible-lg-block visible-md-block"></p>&nbsp; -->
+		  
+		  [% # --- DISABLED ANYTHING DETECTION TO COLOR ICON AND TEXT --- %]
+		  [% # if certificate and is not enabled then color to danger %]
+		  [% icon_color = '' %]
+		  [% IF entry.value.attrs.exists('umiOvpnAddStatus') && entry.value.attrs.umiOvpnAddStatus.0 != 'enabled' %]
+		  [% icon_color = 'text-danger' %]
+		  [% END %]
 
 		  
-		[% IF entry.value.mgmnt.is_root && entry.key.match('People') %]
-		<i title="Root Account" class="[% base_icon.People _ ' ' _ entry_icon_size %]"></i>
-		[% ELSIF entry.value.mgmnt.is_root && entry.key.match('Inventory') %]
-		<i title="Inventory Root Object" class="[% base_icon.inventory _ ' ' _ entry_icon_size %]"></i>		
-		[% ELSIF entry.value.mgmnt.is_root && entry.key.match('Sendmail') %]
-		<i title="MTA Root Object" class="[% base_icon.mta _ ' ' _ entry_icon_size %]"></i>		
-		[% ELSIF entry.value.mgmnt.is_root && entry.key.match('reqStart') %]
-		<i title="History Root Object" class="[% base_icon.history _ ' ' _ entry_icon_size %]"></i>		
-		[% ELSIF entry.value.mgmnt.is_root && ! entry.key.match('People') %]
-		<i title="Root Objectt" class="[% base_icon.default _ ' ' _ entry_icon_size %]"></i>		
-		[% ELSIF entry.key.match('^author') %]
-		
-		[% # --- SERVICES START -------------------------------------------------------------------- %]		
-		[% cur_svc = dn.authorizedService.split('@').0 %]
-		[%   IF services.$cur_svc.icon %]
-		<i title="[% services.$cur_svc.descr %] Service Account Branch" class="[% services.$cur_svc.icon _ ' ' _ entry_icon_size %] [% branch_class %]"></i>
-		[%   ELSE %]
-		<i title="Service Account Branch" class="fa fa-code-fork[% branch_class %][% blocked %]"></i>
-		[%   END %]
-		
-		[% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
-		[% cur_svc = dn.authorizedService.split('@').0 %]
-		[%   IF services.$cur_svc.icon %]
-		<i title="[% services.$cur_svc.descr %] Service Account" class="[% services.$cur_svc.icon _ ' ' _ entry_icon_size _ ' ' _ icon_color %] [% leaf_class %]"></i>
-		[%   ELSE %]
-		<i title="Service Account" class="fa fa-leaf [% leaf_class _ ' ' _ entry_icon_size %]"></i>
-		[%   END %]
-		[% # --- SERVICES STOP  -------------------------------------------------------------------- %]
+		  [% IF entry.value.mgmnt.is_root && entry.key.match('People') %]
+		  <i title="Root Account" class="[% base_icon.People _ ' ' _ entry_icon_size %]"></i>
+		  [% ELSIF entry.value.mgmnt.is_root && entry.key.match('Inventory') %]
+		  <i title="Inventory Root Object" class="[% base_icon.inventory _ ' ' _ entry_icon_size %]"></i>		
+		  [% ELSIF entry.value.mgmnt.is_root && entry.key.match('Sendmail') %]
+		  <i title="MTA Root Object" class="[% base_icon.mta _ ' ' _ entry_icon_size %]"></i>		
+		  [% ELSIF entry.value.mgmnt.is_root && entry.key.match('reqStart') %]
+		  <i title="History Root Object" class="[% base_icon.history _ ' ' _ entry_icon_size %]"></i>		
+		  [% ELSIF entry.value.mgmnt.is_root && ! entry.key.match('People') %]
+		  <i title="Root Objectt" class="[% base_icon.default _ ' ' _ entry_icon_size %]"></i>		
+		  [% ELSIF entry.key.match('^author') %]
+		  
+		  [% # --- SERVICES START -------------------------------------------------------------------- %]		
+		  [% cur_svc = dn.authorizedService.split('@').0 %]
+		  [%   IF services.$cur_svc.icon %]
+		  <i title="[% services.$cur_svc.descr %] Service Account Branch" class="[% services.$cur_svc.icon _ ' ' _ entry_icon_size %] [% branch_class %]"></i>
+		  [%   ELSE %]
+		  <i title="Service Account Branch" class="fa fa-code-fork[% branch_class %][% blocked %]"></i>
+		  [%   END %]
+		  
+		  [% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
+		  [% cur_svc = dn.authorizedService.split('@').0 %]
+		  [%   IF services.$cur_svc.icon %]
+		  <i title="[% services.$cur_svc.descr %] Service Account" class="[% services.$cur_svc.icon _ ' ' _ entry_icon_size _ ' ' _ icon_color %] [% leaf_class %]"></i>
+		  [%   ELSE %]
+		  <i title="Service Account" class="fa fa-leaf [% leaf_class _ ' ' _ entry_icon_size %]"></i>
+		  [%   END %]
+		  [% # --- SERVICES STOP  -------------------------------------------------------------------- %]
 
-		[% ELSIF entry.key.match('^cn=.*,ou=Inventory') %]
-		<i title="Subject to Inventory" class="fa fa-tag [% branch_class _ ' ' _ entry_icon_size %]"></i>		  
-		[% ELSIF entry.key.match(',ou=Sendmail') %]
-		<i title="Subject to Sendmail" class="[% base_icon.mta _ ' ' _ branch_class _ ' ' _ entry_icon_size %]"></i>		  
-		[% ELSIF base_ico.${dn.ou} %]
-		<i title="Service Account Branch" class="[% base_icon.${dn.ou} _ ' ' _ entry_icon_size %]"></i>
-		[% ELSE %]
-		<i title="Service Account Branch" class="fa fa-code-fork[% blocked _ ' ' _ entry_icon_size %]"></i>
-		[% END %]
-		
+		  [% ELSIF entry.key.match('^cn=.*,ou=Inventory') %]
+		  <i title="Subject to Inventory" class="fa fa-tag [% branch_class _ ' ' _ entry_icon_size %]"></i>		  
+		  [% ELSIF entry.key.match(',ou=Sendmail') %]
+		  <i title="Subject to Sendmail" class="[% base_icon.mta _ ' ' _ branch_class _ ' ' _ entry_icon_size %]"></i>		  
+		  [% ELSIF base_ico.${dn.ou} %]
+		  <i title="Service Account Branch" class="[% base_icon.${dn.ou} _ ' ' _ entry_icon_size %]"></i>
+		  [% ELSE %]
+		  <i title="Service Account Branch" class="fa fa-code-fork[% blocked _ ' ' _ entry_icon_size %]"></i>
+		  [% END %]
+		</div>
 		[% # dn of the select result object %]
-		<div class="col [% entry_text_size %] col-xs-offset-1 col-lg-offset-0" title="[% blocked_title %]">&nbsp;
-		  <b class="[% icon_color %]">
-		    [% # entry.key.replace(',', ',&nbsp;&nbsp;') %]
-		    [% entry.key.replace('uid=','').replace('authorizedService=','').split(',').slice(0,-3).join('&nbsp;&nbsp;<i class="fa fa-ellipsis-h"></i>&nbsp;&nbsp;') %]
-		  </b>
-		</div>
-
-		<div class=" pull-right">
-		<small>
-		  <ul class="fa-ul umi-zerro-margin">
-		    <li title="created, GMT"><i class="fa-li fa fa-play-circle"></i>
-		      [% entry.value.root.ts.createTimestamp %] by <b>[% entry.value.root.ts.creatorsName %]</b>&nbsp;
-		    </li>
-		    [% IF entry.value.attrs.createTimestamp.0 != entry.value.attrs.modifyTimestamp.0 %]
-		    <li title="modified, GMT"><i class="fa-li fa fa-stop-circle"></i>
-		      [%  entry.value.root.ts.modifyTimestamp %] by <b>[% entry.value.root.ts.modifiersName %]</b>&nbsp;
-		    </li>
-		    [% END %]
-		  </ul>
-		</small>
-		</div>
-		</form>
-	      </div>
+		<div class="btn btn-link umi-search" title="[% blocked_title %]">&nbsp;
+		    <b class="[% icon_color  # _ ' ' _ entry_text_size %]">
+		      [% # entry.key.replace(',', ',&nbsp;&nbsp;') %]
+		      [% entry.key.replace('uid=','').replace('authorizedService=','').split(',').slice(0,-3).join('&nbsp;&nbsp;<i class="fa fa-ellipsis-h"></i>&nbsp;&nbsp;') %]
+		    </b>
+		  </div>
+	    </div> <!-- searchby_menu_dropdown.tt btn-group div -->
+	    <div class="col-2 pull-right">
+	      <small>
+		<ul class="fa-ul umi-zerro-margin">
+		  <li title="created, GMT"><i class="fa-li fa fa-play-circle"></i>
+		    [% entry.value.root.ts.createTimestamp %] by <b>[% entry.value.root.ts.creatorsName %]</b>&nbsp;
+		  </li>
+		  [% IF entry.value.attrs.createTimestamp.0 != entry.value.attrs.modifyTimestamp.0 %]
+		  <li title="modified, GMT"><i class="fa-li fa fa-stop-circle"></i>
+		    [%  entry.value.root.ts.modifyTimestamp %] by <b>[% entry.value.root.ts.modifiersName %]</b>&nbsp;
+		  </li>
+		  [% END %]
+		</ul>
+	      </small>
+	    </div>
+	    </div> <!-- searchby_menu_dropdown.tt row div -->
+	    </div>
 	    </div>
 	    <div id="collapse[% loop.index %]" class="panel-collapse collapse [% in %]">
 	      <div class="panel-body">
@@ -335,7 +337,7 @@
 		    <div class="panel panel-default"><div class="panel-body"><small class="mono">[% i %]</small></div></div>
 		    [%     ELSE %]
 		      [%     IF schema.${h_attr.key} == 'distinguishedNameMatch' || schema.${h_attr.key} == 'distinguishedName' %]
-		      [%     v = '<form role="form" method="POST" action="/searchby">' _
+		      [%     v = '<form role="form" method="POST" action="/searchby" class="formajaxer">' _
 	  		 '<button type="submit" class="btn btn-link btn-xs"' _
 			 'title="click to open this object" name="ldap_subtree" value="' _ 
 			 i _ '">' _ i _ '</button></form>' %]
@@ -368,9 +370,12 @@
 </div>
 
 <script>
+ /*! 
+  * searchby result/s un/collaps-er
+  */    
  $('.collapse_in_out').on('click', function() {
-   $("[id^=collapse]").toggleClass('panel-collapse collapse in').toggleClass('panel-collapse collapse')
-   $("[id^=chevron_switcher]").toggleClass('[% global.icon_toggle_down %]').toggleClass('[% global.icon_toggle_up %]')
+   $("[id^=collapse]").toggleClass('panel-collapse collapse in').toggleClass('panel-collapse collapse');
+   $("[id^=chevron_switcher]").toggleClass('[% site.icons.toggle_down %]').toggleClass('[% site.icons.toggle_up %]');
  });
 </script>
 

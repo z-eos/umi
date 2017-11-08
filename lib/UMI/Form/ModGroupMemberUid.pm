@@ -11,7 +11,7 @@ use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printabl
 # has '+item_class' => ( default =>'ModGroupMemberUid' );
 has '+action' => ( default => '/searchby/proc' );
 
-# sub build_form_element_class { [ 'form-horizontal' ] }
+sub build_form_element_class { [ 'formajaxer' ] }
 
 has_field 'ldap_modify_memberUid' => ( type => 'Hidden', );
 

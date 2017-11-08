@@ -178,6 +178,10 @@ html,body {
   opacity: 0.5;
 }
 
+.umi-opacity02 {
+  opacity: 0.2;
+}
+
 .umi-overflow-x-vis {
   overflow-x: visible;
 }
@@ -206,41 +210,6 @@ html,body {
   background: #fff url('/static/images/preloaders.net-MovingBlocks.GIF') no-repeat center center;
 }
 
-/* #loaderfa {
-  display: none;
-  position: fixed;
-  width: 54px;
-  height: 54px;
-  z-index: 9999;
-  left: 2px;
-  top: 2px;
-  font-size: 12px;
-  line-height: 74px;
-  text-align: center;
-  border-radius: 100%;
-  background: rgba(252, 252, 252, 0.37);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.48);
-} */
-
-/* 
-#loaderfa {
-  display: none;
-  position: fixed;
-  z-index: 9999;
-  width: 90%;
-  height: 80%;
-  top: 10%;
-  right: 0;
-  bottom: 0;
-  left: 5%;
-  font-size: 12px;
-  text-align: center;
-  background: rgba(70, 70, 70, 0.8);
-}
-#loaderfa > span {
-    margin-top: 50%;
-}
-*/
 #loaderfa {
   display: none;
   position: fixed;
@@ -314,10 +283,21 @@ html,body {
 
 /* -------------------------------
 
-   KLUDGE fixes of CoreUI theme
+   KLUDGE patches to Bootstrap
 
    ------------------------------- */
 
+.btn:not(.btn-secondary) {
+  border: none;
+}
+
+
+
+/* -------------------------------
+
+   KLUDGE fixes of CoreUI theme
+
+   ------------------------------- */
 
 /* .app-header.navbar .navbar-toggler {
    color: #ffffff; } */

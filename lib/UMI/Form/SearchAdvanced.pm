@@ -10,7 +10,9 @@ BEGIN { extends 'UMI::Form::LDAP'; with 'Tools'; }
 
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable' );
 
-sub build_form_element_class { [ 'form-horizontal', ] }
+has '+action' => ( default => '/searchadvanced/proc' );
+
+sub build_form_element_class { [ qw(form-horizontal formajaxer) ] }
 
 sub html_attributes {
   my ( $self, $field, $type, $attr ) = @_;
@@ -18,13 +20,11 @@ sub html_attributes {
     if $type eq 'label' && $field->required;
 }
 
-has '+action' => ( default => '/searchadvanced/proc' );
-
 has_field 'search_history'
   => ( type => 'Checkbox',
        # checkbox_value => '0',
        label => 'search history',
-       # label_class => [ 'switch', 'switch-text', 'switch-success', ],
+       #label_class => [ 'switch', 'switch-text', 'switch-success', ],
        wrapper_class => [ 'checkbox', ],
        element_wrapper_class => [ 'col-xs-offset-2', 'col-10' ],
        # element_class => [ qw(switch-input), ],

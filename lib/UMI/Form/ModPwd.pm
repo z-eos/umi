@@ -9,11 +9,26 @@ BEGIN { extends 'UMI::Form::LDAP'; with 'Tools'; }
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable', 'PositiveNum' );
 
 has '+item_class' => ( default =>'ModPwd' );
-# has '+action' => ( default => '/searchby/proc' );
+has '+action' => ( default => '/searchby/modify_userpassword' );
 
-sub build_form_element_class { [ 'form-horizontal' ] }
+sub build_form_element_class { [ 'form-horizontal formajaxer' ] }
 
 has_field 'ldap_modify_password' => ( type => 'Hidden', );
+
+has_field 'checkonly'
+  => (
+      type => 'Checkbox',
+      label => 'Check Only',
+      label_class => [ 'col-xs-2' ],
+      element_wrapper_class => [ qw( col-xs-3 col-xs-offset-2 col-lg-1 ) ],
+      element_class => [ qw( disabler-checkbox
+			     disableable
+			     disabled-if-pwddefault
+			     disabled-if-pwdpronounceable ), ],
+      element_attr => { title => 'Check password against current one.',
+			'data-mode' => "pwdcheckonly", },
+      wrapper_class => [ 'deactivate-bottom', ],
+     );
 
 has_field 'password_init'
   => ( type => 'Password',
@@ -21,8 +36,12 @@ has_field 'password_init'
        minlength => 7, maxlength => 128,
        label => 'New Password',
        label_class => [ 'col-xs-2' ],
-       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-       element_attr => { placeholder => 'Password', },
+       element_wrapper_class => [ qw( col-xs-10 col-lg-5 ) ],
+       element_class => [ qw( disabler-input
+			      disableable
+			      disabled-if-pwdpronounceable ), ],
+       element_attr => { placeholder => 'Password',
+			 'data-mode' => 'pwddefault', },
        wrapper_class => [ 'deactivate-bottom', ],
      );
 
@@ -32,8 +51,13 @@ has_field 'password_cnfm'
        minlength => 7, maxlength => 128,
 			       label => 'Confirm Password',
        label_class => [ 'col-xs-2' ],
-       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-       element_attr => { placeholder => 'Confirm Password', },
+       element_wrapper_class => [ qw(col-xs-10 col-lg-5 ) ],
+       element_class => [ qw( disabler-input
+			      disableable
+			      disabled-if-pwdcheckonly
+			      disabled-if-pwdpronounceable ), ],
+       element_attr => { placeholder => 'Confirm Password',
+			 'data-mode' => 'pwddefault', },
        wrapper_class => [ 'deactivate-bottom', ],
      );
 
@@ -49,11 +73,16 @@ has_field 'pronounceable'
   => (
       type => 'Checkbox',
       label => 'Pronounceable',
-      label_class => [ 'col-xs-2', ],
-      wrapper_class => [ 'checkbox', ],
-      element_wrapper_class => [ 'col-xs-3', 'col-xs-offset-2', 'col-lg-1', ],
+      label_class => [ 'col-xs-2' ],
+#      wrapper_class => [ 'checkbox', ],
+      element_wrapper_class => [ qw( col-xs-3 col-xs-offset-2 col-lg-1 ) ],
+      element_class => [ qw( disabler-checkbox
+			     disableable
+			     disabled-if-pwdcheckonly
+			     disabled-if-pwddefault ) ],
       element_attr => { title => 'Completely random word if unchecked, othervise max lengh is ' .
-			UMI->config->{pwd}->{lenp} },
+			UMI->config->{pwd}->{lenp},
+			'data-mode' => "pwdpronounceable", },
       wrapper_class => [ 'deactivate-top', ],
      );
 
@@ -63,9 +92,15 @@ has_field 'pwd_len'
       apply => [ NoSpaces, PositiveNum ],
       label => 'Password Length',
       label_class => [ 'col-xs-2', ],
-      element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-      element_attr => { placeholder => 'max ' . UMI->config->{pwd}->{len} . ' for completely random and max ' .
-			UMI->config->{pwd}->{lenp} . ' for pronounceable' },
+      element_wrapper_class => [ qw( col-xs-10 col-lg-5 ) ],
+      element_class => [ qw( disabler-input
+			     disableable
+			     disabled-if-pwdcheckonly
+			     disabled-if-pwddefault ) ],
+      element_attr => { placeholder => 'max ' . UMI->config->{pwd}->{len} .
+			' for completely random and max ' .
+			UMI->config->{pwd}->{lenp} . ' for pronounceable',
+			'data-mode' => "pwdpronounceable", },
       wrapper_class => [ 'deactivate-top', ],
      );
 
@@ -75,9 +110,14 @@ has_field 'pwd_cap'
       apply => [ NoSpaces, PositiveNum ],
       label => 'Capital Characters',
       label_class => [ 'col-xs-2', ],
-      element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+      element_wrapper_class => [ qw( col-xs-10 col-lg-5 ) ],
+      element_class => [ qw( disabler-input
+			     disableable
+			     disabled-if-pwdcheckonly
+			     disabled-if-pwddefault ) ],
       element_attr => { placeholder => 'max ' . UMI->config->{pwd}->{cap},
-			title => 'up to this many characters will be upper case' },
+			title => 'up to this many characters will be upper case',
+			'data-mode' => "pwdpronounceable", },
       wrapper_class => [ 'deactivate-top', ],
      );
 
@@ -87,9 +127,14 @@ has_field 'pwd_num'
       apply => [ NoSpaces, PositiveNum ],
       label => 'Numbers And Spec. Characters',
       label_class => [ 'col-xs-2', ],
-      element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+      element_wrapper_class => [ qw( col-xs-10 col-lg-5 ) ],
+      element_class => [ qw( disabler-input
+			     disableable
+			     disabled-if-pwdcheckonly
+			     disabled-if-pwddefault ) ],
       element_attr => { placeholder => 'max ' . UMI->config->{pwd}->{num},
-			title => 'up to that many, numbers and special characters will occur in the password' },
+			title => 'up to that many, numbers and special characters will occur in the password',
+			'data-mode' => "pwdpronounceable", },
       wrapper_class => [ 'deactivate-top', ],
      );
 
@@ -110,7 +155,7 @@ has_block 'submitit' => ( tag => 'fieldset',
 			  class => [ 'container-fluid' ]
 			);
 
-sub build_render_list {[ 'ldap_modify_password', 'password_init', 'password_cnfm', 'pronounceable', 'pwd_len', 'pwd_cap', 'pwd_num', 'submitit' ]}
+sub build_render_list {[ 'checkonly', 'ldap_modify_password', 'password_init', 'password_cnfm', 'pronounceable', 'pwd_len', 'pwd_cap', 'pwd_num', 'submitit' ]}
 
 sub html_attributes {
   my ( $self, $field, $type, $attr ) = @_;
@@ -136,11 +181,13 @@ sub validate {
 
   if ( defined $self->field('password_init')->value &&
        defined $self->field('password_cnfm')->value &&
+       ! defined $self->field('checkonly')->value &&
        ($self->field('password_init')->value ne $self->field('password_cnfm')->value)
      ) {
     $self->field('password_init')
       ->add_error('password and confirmation does not match');
-  } elsif ( (defined $self->field('password_init')->value &&
+  } elsif ( ! defined $self->field('checkonly')->value &&
+	    (defined $self->field('password_init')->value &&
 	     ! defined $self->field('password_cnfm')->value ) ||
 	    (defined $self->field('password_init')->value &&
 	     defined $self->field('password_cnfm')->value &&
@@ -148,7 +195,8 @@ sub validate {
 	      $self->field('password_cnfm')->value eq '' ) ) ) {
     $self->field('password_cnfm')
       ->add_error('confirmation is mandatory if password present');
-  } elsif ( (! defined $self->field('password_init')->value &&
+  } elsif ( ! defined $self->field('checkonly')->value &&
+	    (! defined $self->field('password_init')->value &&
 	     defined $self->field('password_cnfm')->value ) ||
 	    (defined $self->field('password_init')->value &&
 	     defined $self->field('password_cnfm')->value &&

@@ -13,11 +13,12 @@ use Data::Printer;
 
 # has '+error_message' => ( default => 'There were errors in your form.' );has '+item_class' => ( default =>'UserAll' );
 has '+enctype' => ( default => 'multipart/form-data');
+has '+action' => ( default => '/userall');
 has 'namesake' => ( is => 'rw', );
 has 'autologin' => ( is => 'rw', );
 has 'add_svc_acc' => ( is => 'rw', ); # set if we add service account rather than new user
 
-sub build_form_element_class { [ 'form-horizontal', 'tab-content', ] }
+sub build_form_element_class { [ qw(form-horizontal tab-content formajaxer) ] }
 
 sub build_update_subfields {
   by_flag => { repeatable => { do_wrapper => 1, do_label => 1 } }
@@ -42,8 +43,8 @@ has_field 'add_svc_acc' => ( type => 'Hidden', );
 has_field 'person_givenname'
   => ( apply => [ NoSpaces ],
        label => 'FName',
-       label_class => [ 'col-xs-1', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       label_class => [ 'col-xs-1', 'col-sm-1', 'col-md-1', 'col-lg-1',  ],
+       element_wrapper_class => [ 'col-xs-11', 'col-sm-11', 'col-md-11', 'col-lg-11', ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'John' },
        required => 1 );
@@ -51,8 +52,8 @@ has_field 'person_givenname'
 has_field 'person_sn'
   => ( apply => [ NoSpaces ],
        label => 'LName',
-       label_class => [ 'col-xs-1', ],
-       element_wrapper_class => [ 'col-xs-11', 'col-lg-5', ],
+       label_class => [ 'col-xs-1', 'col-sm-1', 'col-md-1', 'col-lg-1',  ],
+       element_wrapper_class => [ 'col-xs-11', 'col-sm-11', 'col-md-11', 'col-lg-11', ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'Doe' },
        required => 1 );
@@ -269,7 +270,7 @@ has_field 'aux_add_account'
        value => 'Add new account',
        element_class => [ 'btn-success', ],
        element_attr => { title => 'new account fields will be added to the bottom, bellow existent ones', },
-       wrapper_class => [ qw{col-lg-4 col-md-4}, ],
+       wrapper_class => [ qw{col-lg-2 col-md-2}, ],
      );
 
 has_field 'account'
@@ -1217,6 +1218,9 @@ sub validate {
     my $ovpn_tmp;
     $i = 0;
     foreach $element ( $self->field('loginless_ovpn')->fields ) {
+      foreach my $tmpname ($element->field('userCertificate')) {
+	p $tmpname; # field('userCertificate');
+      }
       if ((( defined $element->field('associateddomain')->value &&
 	     defined $element->field('userCertificate')->value &&
 	     defined $element->field('ifconfigpush')->value &&

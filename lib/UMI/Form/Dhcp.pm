@@ -10,7 +10,9 @@ use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printabl
 
 use Data::Printer;
 
-sub build_form_element_class { [ 'form-horizontal' ] }
+has '+action' => ( default => '/dhcp' );
+
+sub build_form_element_class { [ qw(form-horizontal formajaxer) ] }
 
 sub html_attributes {
   my ( $self, $field, $type, $attr ) = @_;

@@ -165,8 +165,8 @@ sub proc :Path(proc) :Args(0) {
 
 	  $c->stats->profile('is-blocked search for <i class="text-muted">' . $_->dn . '</i>');
 	
-	  @root_arr = split(',', $_->dn); p @root_arr;
-	  p $root_i = $#root_arr;
+	  @root_arr = split(',', $_->dn);
+	  $root_i = $#root_arr;
 	  @root_dn = splice(@root_arr, -1 * $dn_depth);
 	  $ttentries->{$_->dn}->{root}->{dn} = join(',', @root_dn);
 

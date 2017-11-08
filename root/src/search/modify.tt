@@ -11,13 +11,13 @@
 
 [% # USE dumper %]
 <!-- <pre> -->
-  [% # dumper.dump(params, final_message ) %]
+  [% # dumper.dump(params) %]
 <!-- </pre> -->
 
 [% IF ! final_message.exists('success') || final_message.success.empty %]
 <form method="POST"
       enctype="multipart/form-data"
-      class="form-horizontal"
+      class="form-horizontal formajaxer"
       action="/searchby/modify">
   <input type="hidden" name="dn" id="dn" value="[% modify %]">
 

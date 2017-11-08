@@ -4,7 +4,7 @@ $.fn.sort = function (sortType) {
 	    return typeof sortType === 'function' ? sortType( $(el1), $(el2) ) : false;	
 	}));
     })
-	};
+};
 
 var sortFn = {
     byOrder: function (el1, el2) {

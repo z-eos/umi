@@ -60,6 +60,9 @@ page to show all email domains, theirs MX-es and nodes serving as SMARTHOSTs
 sub index :Path :Args(0) {
   my ( $self, $c ) = @_;
   my ( $return, $mta, $mtadescr, $smarthost, $entry, $relay, $ip, $rr, @mx_arr, $mx, $mx_ptr, $mx_a );
+
+  my $params = $c->req->params;
+  
   my $node; # smarthost node mail domain served by
   my $fqdn; # mail domain
   $mx = $mx_a = $mx_ptr = '';

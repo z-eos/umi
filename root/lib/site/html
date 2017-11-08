@@ -23,8 +23,10 @@
    <link href="/static/css/umi.css" rel="stylesheet">
    <link href="/static/css/umi-tree.css" rel="stylesheet">
 
-   <script src="/static/js/jquery.min.js"></script>
-   <script src="/static/js/nprogress.js"></script>   
+<script src="/static/js/jquery.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+
+   
  </head>
  [% IF c.user_exists %]
  [% body_class = 'app header-fixed navbar-fixed sidebar-fixed sidebar-minimized fixed-nav aside-menu-hidden' %]
@@ -32,18 +34,18 @@
  [% body_class = '' %]
  [% END %]
  <body class="[% body_class %]">
- <!-- <body class="navbar-fixed sidebar-nav fixed-nav aside-menu-fixed aside-menu-hidden"> -->
    
    [% content %]
-
-   <script type="text/javascript">  
-    $('form').on('submit', function() { NProgress.start(); });
-    window.addEventListener('pageshow', function() { NProgress.done(); });    
-   </script>
-   <script>
-    $('.chevron_toggleable').on('click', function() {
-      $(this).find('.fa').toggleClass('[% site.icons.toggle_down %]').toggleClass('[% site.icons.toggle_up %]')
-    });
+ 
+   <script type="text/javascript">
+    /*! 
+     * searchby result/s un/fold-er
+     */    
+    /* $('.chevron_toggleable').on('click', function() {
+       //$('#chevron_switcher').on('click', function() {
+       console.log('toggggggggle');
+       $(this).find('.fa').toggleClass('[% site.icons.toggle_down %]').toggleClass('[% site.icons.toggle_up %]')
+       }); */
    </script>
 
  </body>

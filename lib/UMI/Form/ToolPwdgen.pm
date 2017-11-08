@@ -9,9 +9,9 @@ BEGIN { extends 'UMI::Form::LDAP'; with 'Tools'; }
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable', 'PositiveNum' );
 
 has '+item_class' => ( default =>'ToolPwdgen' );
-# has '+action' => ( default => '/searchby/proc' );
+has '+action' => ( default => '/toolpwdgen' );
 
-sub build_form_element_class { [ 'form-horizontal' ] }
+sub build_form_element_class { [ 'form-horizontal formajaxer' ] }
 
 has_field 'pronounceable'
   => (
