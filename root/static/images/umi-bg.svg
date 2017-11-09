@@ -1,1 +1,46 @@
-bg-wiki-bock-graph.svg
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="351px" height="225px" viewBox="0 0 351 225" enable-background="new 0 0 351 225" xml:space="preserve">
+<line fill="none" stroke="#000000" x1="201.552" y1="104.562" x2="233.689" y2="48.9"/>
+<line fill="none" stroke="#000000" x1="279" y1="72" x2="333" y2="18"/>
+<rect x="279" y="18" fill="none" stroke="#000000" width="54" height="54"/>
+<polyline fill="none" stroke="#000000" points="279,72 243,104.562 201.552,104.562 201.552,153 "/>
+<polygon fill="none" stroke="#000000" points="137.279,104.562 169.416,48.9 201.552,104.562 "/>
+<polygon fill="none" stroke="#000000" points="168.863,205.663 201,150 233.136,205.663 "/>
+<polygon fill="none" stroke="#000000" points="131.136,21.088 99,76.75 66.863,21.088 "/>
+<polygon fill="none" stroke="#000000" points="75.342,149.562 60.721,104.562 99,76.75 137.279,104.562 122.658,149.562 "/>
+<polyline fill="none" stroke="#000000" points="122.658,149.562 99,76.75 75.342,149.562 137.279,104.562 122.658,149.562
+	60.721,104.562 137.279,104.562 "/>
+<circle fill="#FF0000" stroke="#000000" cx="99" cy="76.75" r="6"/>
+<circle fill="#FF0000" stroke="#000000" cx="169.416" cy="48.9" r="6"/>
+<circle fill="#FF0000" stroke="#000000" cx="233.689" cy="48.9" r="6"/>
+<circle fill="#FF0000" stroke="#000000" cx="201.552" cy="104.562" r="6"/>
+<circle fill="#FF0000" stroke="#000000" cx="233.136" cy="205.663" r="6"/>
+<circle fill="#FF0000" stroke="#000000" cx="279" cy="72" r="6"/>
+<circle fill="#FF0000" stroke="#000000" cx="201" cy="150" r="6"/>
+<circle fill="#FF0000" stroke="#000000" cx="137.279" cy="104.562" r="6"/>
+<circle fill="#FF0000" stroke="#000000" cx="168.863" cy="205.663" r="6"/>
+<circle fill="#FF0000" stroke="#000000" cx="131.136" cy="21.088" r="6"/>
+<circle fill="#FF0000" stroke="#000000" cx="122.658" cy="149.562" r="6"/>
+<circle fill="#FF0000" stroke="#000000" cx="60.721" cy="104.562" r="6"/>
+<polyline fill="none" stroke="#000000" points="261,171 270,135 243,104.562 "/>
+<line fill="none" stroke="#000000" x1="306" y1="126" x2="270" y2="135"/>
+<circle fill="#FF0000" stroke="#000000" cx="243" cy="104.562" r="6"/>
+<circle fill="#FF0000" stroke="#000000" cx="270" cy="135" r="6"/>
+<circle fill="#FF0000" stroke="#000000" cx="306" cy="126" r="6"/>
+<circle fill="#FF0000" stroke="#000000" cx="261" cy="171" r="6"/>
+<line fill="none" stroke="#000000" x1="279" y1="18" x2="333" y2="72"/>
+<circle fill="#FF0000" stroke="#000000" cx="279" cy="18" r="6"/>
+<circle fill="#FF0000" stroke="#000000" cx="333" cy="72" r="6"/>
+<circle fill="#FF0000" stroke="#000000" cx="333" cy="18" r="6"/>
+<line fill="none" stroke="#000000" x1="21.342" y1="203.561" x2="75.342" y2="149.561"/>
+<rect x="21.342" y="149.561" fill="none" stroke="#000000" width="54" height="54"/>
+<circle fill="#FF0000" stroke="#000000" cx="21.342" cy="203.561" r="6"/>
+<line fill="none" stroke="#000000" x1="21.342" y1="149.561" x2="75.342" y2="203.561"/>
+<circle fill="#FF0000" stroke="#000000" cx="21.342" cy="149.561" r="6"/>
+<circle fill="#FF0000" stroke="#000000" cx="75.342" cy="203.562" r="6"/>
+<circle fill="#FF0000" stroke="#000000" cx="66.863" cy="21.088" r="6"/>
+<path fill="none" stroke="#000000" d="M201.552,104.562"/>
+<circle fill="#FF0000" stroke="#000000" cx="75.342" cy="149.562" r="6"/>
+</svg>
