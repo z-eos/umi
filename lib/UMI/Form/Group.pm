@@ -43,8 +43,14 @@ sub options_memberUid {
 
   my @memberUid_all = $mesg->sorted('uid');
 
+  my $codepagenorm;
   foreach ( @memberUid_all ) {
-    push @memberUid, { value => $_->get_value('uid'), label => sprintf('%s (%s %s)', $_->get_value('uid'), $_->get_value('givenName'), $_->get_value('sn')), };
+    $codepagenorm = sprintf('%s (%s %s)',
+			    $_->get_value('uid'),
+			    $_->get_value('givenName'),
+			    $_->get_value('sn'));
+    utf8::decode($codepagenorm);
+    push @memberUid, { value => $_->get_value('uid'), label => $codepagenorm, };
   }
   return \@memberUid;
 }
