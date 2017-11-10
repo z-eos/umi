@@ -3,6 +3,8 @@
    link = '<link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">'
 %]
 
+<link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">
+
 [% INCLUDE ldap_err.tt %]
 
 <h2>New Group Creation Form <small><em>all stuff</em></small></h2>

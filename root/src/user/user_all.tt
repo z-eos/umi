@@ -3,6 +3,8 @@
    link = '<link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">'
 %]
 
+<link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">
+
 <div class="page-header">
   <h2>[% IF ! form.field('add_svc_acc').value %]Root And [% ELSE %]Additional [% END %]Services Object/s Creation Form[% IF form.field('add_svc_acc').value %] for user: [% form.field('add_svc_acc').value %][% END %]
     <small>

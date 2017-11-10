@@ -8,7 +8,6 @@
   width: 100%;
   height: 100%;
   z-index: -1;
-/*  background-image: url(/static/images/bg-product-page-connections-diagram.svg); */
   background-image: url(/static/images/umi-bg.svg);
   background-position: fixed;
   background-size: cover;
@@ -69,19 +68,6 @@ html,body {
 /* .error { */
 /*     color: [% site.col.error %]; */
 /* } */
-
-
- // .required:after {
- //   /* content: "\e146"; */
- //   /* content: "\e034"; flag */
- //   content: "\e044";
- //   font-family: "Glyphicons Halflings";
- //   font-size: 60%;
- //   color: #E74C3C;
- //   vertical-align: top;
- //   margin: 0px 0px 0px 3px;
- //   padding: 0 3px 0 0;
- // }
 
 .required:after {
   content: "\f06a";
@@ -166,8 +152,8 @@ html,body {
 
 /* .umi-search:hover, .umi-search:focus {
    background-color: #F0F0F0;
-			     border-color: #F0F0F0;
-						   text-decoration: none;
+   border-color: #F0F0F0;
+   text-decoration: none;
 } */
 
 .umi-search.btn-link:hover, .umi-search:focus {
@@ -201,40 +187,6 @@ html,body {
 
 .umi-overflow-x-vis {
   overflow-x: visible;
-}
-
-.js div#preloader {
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 9999;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  opacity: .6;
-  background: #fff url('/static/images/preloaders.net-MovingBlocks.GIF') no-repeat center center;
-}
-
-#loader {
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 9999;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  opacity: .6;
-  background: #fff url('/static/images/preloaders.net-MovingBlocks.GIF') no-repeat center center;
-}
-
-#loaderfa {
-  display: none;
-  position: fixed;
-  z-index: 9999;
-  width: 100%;
-  height: 16pt;
-  top: 40pt;
-  left: 0;
 }
 
 .clear {
@@ -358,6 +310,19 @@ select.form-control:not([size]):not([multiple]) {
   content: "\f0d9"; 
   font-family: "FontAwesome";
 }
+
+/* -------------------------------
+
+   Text::Diff::HTML
+
+   ------------------------------- */
+
+.file span { display: block; }
+.file .fileheader, .file .hunkheader {color: #888; }
+.file .hunk .ctx { background: #eee;}
+.file .hunk ins { background: #dfd; text-decoration: none; display: block; }
+.file .hunk del { background: #fdd; text-decoration: none; display: block; }
+
 
 /* -------------------------------
 

@@ -2,8 +2,9 @@
  * AJAX to render any change 
  */    
 var handleResponce = function(html) {
-    console.log('RESPONCE: handleResponce');
     NProgress.start();
+
+    console.log('RESPONCE: handleResponce');
 
     $('#workingfield').html(html);
     
@@ -44,8 +45,6 @@ var handleResponce = function(html) {
 $('#sidebar,#workingfield,#header').on('click', 'a:not([href^="#"],[href="/"])', function(e) {
     e.preventDefault();
 
-    NProgress.start();
-
     var a = this;
     var href = a.getAttribute('href');
 
@@ -60,8 +59,6 @@ $('#sidebar,#workingfield,#header').on('click', 'a:not([href^="#"],[href="/"])',
  */    
 $('form.formajaxer').on('submit', function(e) {
     e.preventDefault();
-
-    NProgress.start();
 
     var d = this;
     

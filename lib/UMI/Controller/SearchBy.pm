@@ -178,7 +178,7 @@ sub index :Path :Args(0) {
 
     $c->stats->profile(begin => "searchby_search");
 
-    p $params->{'filter'} = '(' . $filter . ')';
+    $params->{'filter'} = '(' . $filter . ')';
     my $mesg = $ldap_crud->search({
 				   base => $base,
 				   filter => '(' . $filter . ')',
@@ -265,14 +265,7 @@ sub index :Path :Args(0) {
 	    $root_entry->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
 	}
 
-	# until confirmed next line alternative # $to_utf_decode = $ttentries->{$dn}->{root}->{givenName};
-	# until confirmed next line alternative # utf8::decode($to_utf_decode);
-	# until confirmed next line alternative # $ttentries->{$dn}->{root}->{givenName} = $to_utf_decode;
 	utf8::decode($ttentries->{$dn}->{root}->{givenName});
-
-	# until confirmed next line alternative # $to_utf_decode = $ttentries->{$dn}->{root}->{sn};
-	# until confirmed next line alternative # utf8::decode($to_utf_decode);
-	# until confirmed next line alternative # $ttentries->{$dn}->{root}->{sn} = $to_utf_decode;
 	utf8::decode($ttentries->{$dn}->{root}->{sn});
 
 	$#root_arr = $#root_dn = -1;
@@ -314,9 +307,11 @@ sub index :Path :Args(0) {
 	 scalar split(',', $dn) <= 3 ? 1 : 0,
 	};
 
+      my $diff = undef;
       foreach $attr (sort $_->attributes) {
 	$to_utf_decode = $_->get_value( $attr, asref => 1 );
 	map { utf8::decode($_); $_} @{$to_utf_decode};
+	@{$to_utf_decode} = sort @{$to_utf_decode};
 	$ttentries->{$dn}->{attrs}->{$attr} = $to_utf_decode;
 
 	if ( $attr eq 'jpegPhoto' ) {
@@ -326,12 +321,38 @@ sub index :Path :Args(0) {
 		    $dn,
 		    encode_base64(join('',@{$ttentries->{$dn}->{attrs}->{$attr}})),
 		    $dn);
-	  } elsif ( $attr eq 'userCertificate;binary' || $attr eq 'cACertificate;binary' || $attr eq 'certificateRevocationList;binary' ) {
-	    $ttentries->{$dn}->{attrs}->{$attr} = $self->cert_info({ attr => $attr, cert => $_->get_value( $attr ) });
+	} elsif ( $attr eq 'userCertificate;binary' ||
+		  $attr eq 'cACertificate;binary' ||
+		  $attr eq 'certificateRevocationList;binary' ) {
+	  $ttentries->{$dn}->{attrs}->{$attr} = $self->cert_info({ attr => $attr, cert => $_->get_value( $attr ) });
+	#} elsif ( $attr eq 'reqMod' || $attr eq 'reqOld' ) {
+	  #my $ta = $_->get_value( $attr, asref => 1 );
+	  #my @te = sort @{$ta};
+	  #p \@te;
+	  # $ttentries->{$dn}->{attrs}->{$attr} = $_->get_value( $attr, asref => 1 );
 	} elsif (ref $ttentries->{$dn}->{attrs}->{$attr} eq 'ARRAY') {
 	  $ttentries->{$dn}->{is_arr}->{$attr} = 1;
 	}
+
+	if ( $_->get_value( 'objectClass' ) eq 'auditModify' &&
+	    ( $attr eq 'reqMod' || $attr eq 'reqOld' ) ) {
+	  foreach $tmp ( @{ $ttentries->{$dn}->{attrs}->{$attr} } ) {
+	    $diff->{$attr} .= sprintf("%s\n", $tmp)
+	      if $tmp !~ /.*entryCSN.*/ &&
+	      $tmp !~ /.*modifiersName.*/ &&
+	      $tmp !~ /.*modifyTimestamp.*/ &&
+	      $tmp !~ /.*creatorsName.*/ &&
+	      $tmp !~ /.*createTimestamp.*/ ;
+	  }
+	}
       }
+
+      use Text::Diff;
+      $tmp = diff \$diff->{reqOld}, \$diff->{reqMod}, { STYLE => 'Text::Diff::HTML' }
+      	if defined $diff->{reqMod} &&  defined $diff->{reqMod};
+      $ttentries->{$dn}->{attrs}->{reqOldModDiff} = '<pre>' . $tmp . '</pre>';
+      undef $diff;
+      
       push @ttentries_keys, $_->dn if $sort_order eq 'reverse'; # for not history searches
       $blocked = 0;
     }
@@ -354,7 +375,7 @@ sub index :Path :Args(0) {
     #   p $ttentries->{$dn_s}->{mgmnt};
     # }
     
-    p $c->request->cookies;
+    # p $c->request->cookies;
 
     $c->stash(
 	      template => 'search/searchby.tt',
@@ -533,8 +554,6 @@ sub proc :Path(proc) :Args(0) {
 			       { mod_groups_dn => $params->{ldap_modify_group},
 				 base => $ldap_crud->cfg->{base}->{group},
 				 groups => $groups,
-				 is_submit => defined $params->{aux_submit} &&
-				 $params->{aux_submit} eq 'Submit' ? 1 : 0,
 				 type => 'posixGroup', } ), );
 
 #=====================================================================
@@ -1123,8 +1142,7 @@ sub mod_groups {
   my $arg = { obj_dn => $args->{mod_groups_dn},
 	      groups => $args->{groups},
 	      base => defined $args->{base} ? $args->{base} : $ldap_crud->cfg->{base}->{group},
-	      type => defined $args->{type} ? $args->{type} : 'posixGroup',
-	      is_submit => $args->{is_submit}, };
+	      type => defined $args->{type} ? $args->{type} : 'posixGroup', };
 
   my ( $mesg, $return);
   # if ( $ldap_crud->{cfg}->{rdn}->{acc_root} ne 'uid' ) {
@@ -1180,7 +1198,7 @@ sub mod_groups {
   }
 
   # after submit
-  if ( $arg->{is_submit} ) {
+  if ( ref($arg->{groups}) eq 'ARRAY' ) {
     my @groups_chg;
     foreach (keys %{$arg->{groups_all}}) {
       # submited data equals to the data from DB - nothing to do

@@ -3,6 +3,8 @@
    link = '<link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">'
 %]
 
+<link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">
+
 <div class="page-header">
   <h2>User Groups Modification Form <small><em class="mono">for user: [% ldap_modify_group %]</em></small></h2>
 </div>

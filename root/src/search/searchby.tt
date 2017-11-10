@@ -86,7 +86,7 @@
            entry.value = entries.$entrykey
            dn = entry.key.split(',|=').hash    # here we preparing hash of each dn
 	   # here we preparing uniqe suffix to be added to objects id (like modals e.t.c.)
-           id_sufix = '_' _ entry.key.split(',').0.split('=').1.replace('[@:\. ]', '_') _ '_' _ loop.index %]
+           id_sufix = '_' _ entry.key.split(',').0.split('=').1.replace('[-@:\. ]', '_') _ '_' _ loop.index %]
 
       [%   IF entry.value.mgmnt.is_blocked %]
       [%   blocked = ' text-danger'
@@ -155,7 +155,6 @@
 		[% IF entry.key.match('People') %]
 		[% root_of_rec = entry.value.root.sn _ ' ' _ entry.value.root.givenName %]
 		[% # !!! HARDCODED customization, depends of DN structure !!! %]
-		[% # ELSIF entry.value.mgmnt.is_root && entry.key.match('Inventory') && entry.key.split(',').size >  ( 3 + num_of_dc)  %]
 		[% ELSIF entry.value.mgmnt.is_root && entry.value.mgmnt.is_inventory %]
 		[% root_of_rec = entry.key.split(',').slice(-1 * ( 3 + num_of_dc), -1 ).0.split('=').1 %]
 		[% ELSIF entry.key.match('Inventory') && entry.key.split(',').size <= ( 3 + num_of_dc)  %]
@@ -237,8 +236,20 @@
 		[% # dn of the select result object %]
 		<div class="btn btn-link umi-search" title="[% blocked_title %]">&nbsp;
 		    <b class="[% icon_color  # _ ' ' _ entry_text_size %]">
-		      [% # entry.key.replace(',', ',&nbsp;&nbsp;') %]
+		      [% IF entry.key.match('People') %]
 		      [% entry.key.replace('uid=','').replace('authorizedService=','').split(',').slice(0,-3).join('&nbsp;&nbsp;<i class="fa fa-ellipsis-h"></i>&nbsp;&nbsp;') %]
+		      [% ELSIF entry.key.match('reqStart') %]
+		      [%   IF entry.value.attrs.reqType.0 == 'add' %]
+		      <i class="fa fa-lg fa-plus-circle" title="Request type: Add"></i>
+		      [%   ELSIF entry.value.attrs.reqType.0 == 'delete' %]
+		      <i class="fa fa-lg fa-times-circle" title="Request type: Delete"></i>
+		      [%   ELSIF entry.value.attrs.reqType.0 == 'modify' %]
+		      <i class="fa fa-lg fa-edit" title="Request type: Modify"></i>
+		      [%   END %]
+		      &nbsp;&nbsp;[% entry.value.attrs.reqStart.0 %]
+		      [% ELSE %]
+		      [% entry.key %]
+		      [% END %]
 		    </b>
 		  </div>
 	    </div> <!-- searchby_menu_dropdown.tt btn-group div -->
@@ -348,7 +359,7 @@
 		      [%     IF loop.last || v.match('form') %][% # if last element or button %]
 		      [%     v.trim %]
 		      [%     ELSE %][% # not last element of array %]
-		      [%     v.trim %]<br>
+		    <div>[%     v.trim %]</div>
 		      [%     END %]
 		      [%   END %]
 		      [% END %]
