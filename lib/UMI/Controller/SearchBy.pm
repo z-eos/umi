@@ -350,7 +350,8 @@ sub index :Path :Args(0) {
       use Text::Diff;
       $tmp = diff \$diff->{reqOld}, \$diff->{reqMod}, { STYLE => 'Text::Diff::HTML' }
       	if defined $diff->{reqMod} &&  defined $diff->{reqMod};
-      $ttentries->{$dn}->{attrs}->{reqOldModDiff} = '<pre>' . $tmp . '</pre>';
+      $ttentries->{$dn}->{attrs}->{reqOldModDiff} = '<pre>' . $tmp . '</pre>'
+      	if defined $diff->{reqMod} &&  defined $diff->{reqMod};
       undef $diff;
       
       push @ttentries_keys, $_->dn if $sort_order eq 'reverse'; # for not history searches
@@ -420,7 +421,7 @@ sub proc :Path(proc) :Args(0) {
     $ldap_crud = $c->model('LDAP_CRUD');
 
     #=====================================================================
-    # Modify (all fields form)
+    # Modify (all fields form), here we pass data to a sub modify() bellow
     #=====================================================================
     if (defined $params->{'ldap_modify'} && $params->{'ldap_modify'} ne '') {
 
@@ -451,9 +452,12 @@ sub proc :Path(proc) :Args(0) {
 	  map { utf8::decode($_),$_ } @{$entry->{$attr}};
 	}
       }
-      
+
       $c->stats->profile('all fields are ready');
 
+      # here we building the list ($names)of all attributes of each objectClass
+      # of the $entry, for each element we investigate, whether the attribute
+      # single-value or not
       my ($is_single, $names);
       foreach my $objectClass (sort @{$entry->{objectClass}}) {
 	foreach $attr (sort (keys %{$c->session->{ldap}->{obj_schema}->{$objectClass}->{must}} )) {
@@ -469,10 +473,7 @@ sub proc :Path(proc) :Args(0) {
 	  $names->{$attr} = 0;
 	}
       }
-      
-# to remove after check of the next row code #       foreach $attr ( $entry_tmp->attributes ) {
-# to remove after check of the next row code # 	delete $names->{$attr};
-# to remove after check of the next row code #       }
+      # here we remove all attributes already present in the $entry
       delete $names->{$_} foreach ( $entry_tmp->attributes );
 
       $c->stats->profile('schema is ready');
@@ -1425,20 +1426,26 @@ sub modify :Path(modify) :Args(0) {
 	 $attr eq 'userCertificate' ) {
       $params->{$attr} = $c->req->upload($attr);
     }
-    
-    $val  = $params->{$attr};
-    $orig = $entry->get_value($attr);
-    
-    # SMARTMATCH: recurse on paired elements of ARRAY1 and ARRAY2
-    # if identical then next
-    next if ref($val) eq "ARRAY" && $val ~~ $orig;
-    next if defined $entry->get_value($attr) && $val eq $entry->get_value($attr);
+
+    # skip equal data processing
+    if ( ref($params->{$attr} ) eq 'ARRAY' ) {
+      $val  = $params->{$attr};
+      $orig = $entry->get_value($attr, asref => 1);
+      @{$val}  = sort( @{$val} );
+      @{$orig} = sort( @{$orig} );
+      next if $val ~~ $orig;
+    } else {
+      $val  = $params->{$attr};
+      $orig = $entry->get_value($attr);
+      next if defined $orig && $val eq $orig;
+    }
 
     # removing all empty array elements if any
     if ( ref($val) eq "ARRAY" ) {
       @{$val} = reverse map { $self->is_ascii($_) &&
 			$attr ne 'givenName' && $attr ne 'sn' && $attr ne 'description'	?
-			$self->utf2lat($_) : $_ } grep { $_ ne '' } @{$val};
+			$self->utf2lat($_) : $_ }
+	grep { $_ ne '' } @{$val};
     } elsif ( $val ne '' && defined $entry->get_value($attr) && $val ne $entry->get_value($attr) ) {
       $val = $self->utf2lat($val) if $self->is_ascii($val) &&
 	$attr ne 'givenName' && $attr ne 'sn' && $attr ne 'description';
@@ -1485,15 +1492,14 @@ sub modify :Path(modify) :Args(0) {
   }
 
   my $modx;
-  if ( defined $delete && $#{$delete} > -1 ) {
-    push @{$modx}, delete => $delete;
-  }
-  if ( defined $add && $#{$add} > -1 ) {
-    push @{$modx}, add => $add;
-  }
-  if ( defined $replace && $#{$replace} > -1 ) {
-    push @{$modx}, replace => $replace;
-  }
+  push @{$modx}, delete => $delete
+    if defined $delete && $#{$delete} > -1;
+
+  push @{$modx}, add => $add
+    if defined $add && $#{$add} > -1;
+
+  push @{$modx}, replace => $replace
+    if defined $replace && $#{$replace} > -1;
 
   if ( defined $modx && $#{$modx} > -1 ) {
     # p $modx;

@@ -181,7 +181,7 @@
 		    onClick="document.getElementById('ldap_base_case').value=this.value"
 		    value="[% helper_cfg('cfg_ldap_crud','base', 'gitacl') %]"
 		    tabindex="25">
-	      <i class="[% icon_class %] fa-gavel"></i> GitACL
+	      <i class="[% icon_class %] fa-git"></i> GitACL
 	    </button>
 	  </div>
 	  <a href="/searchadvanced"

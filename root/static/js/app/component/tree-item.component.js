@@ -21,6 +21,9 @@ Vue.component('tree-item', {
                 this.toggle();
             } else {
                 Service.api.getTreeData( this.tree.dn, function (data) {
+		    if ( !data.tree.subtree ) { 
+			return;
+		    }
                     data.tree.subtree.forEach(function (tree) {
 			if ( tree.subtree ) {
                             tree.subtree = tree.subtree.sort(function (prev, next) {

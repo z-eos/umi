@@ -16,7 +16,7 @@ requires 'Catalyst::Action::RenderView';
 requires 'Moose';
 requires 'namespace::autoclean';
 requires 'Config::General'; # This should reflect the config file format you've chosen
-# See Catalyst::Plugin::ConfigLoader for supported formats
+                            # See Catalyst::Plugin::ConfigLoader for supported formats
 
 requires 'Catalyst::View::TT';
 requires 'Catalyst::View::JSON';
@@ -30,7 +30,7 @@ requires 'Cache::FastMmap';
 requires 'Compress::LZ4';
 requires 'Crypt::GeneratePassword'; # it is required but looks not available with `pkg install'
 requires 'Crypt::RSA';
-requires 'Digest::SHA1';
+requires 'Digest::SHA';
 requires 'GD::Barcode::QRcode';
 requires 'Lingua::Translit';
 requires 'MIME::Base64';
@@ -39,6 +39,7 @@ requires 'Net::LDAP';
 requires 'Net::Netmask';
 requires 'Net::SSH::Perl';
 requires 'Text::Unidecode';
+requires 'Text::Diff::HTML';
 
 test_requires 'Test::More' => '1.001014';
 catalyst;

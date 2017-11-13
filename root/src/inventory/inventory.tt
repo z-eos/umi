@@ -30,28 +30,26 @@
   <br class="clear">
   [% END %]
 
-  <nav role="navigation" class="well well-sm" title="menu of the actions to perform upon the object">
-    <ul class="nav nav-pills nav-justified" id="inventoryTabs">
-      <li class="addsvcacc [% IF ! form.add_inventory %]active [% END %]text-left" role="presentation">
-	<a aria-controls="common" data-toggle="tab" role="tab"
-	   id="common-tab" href="#common" title="Common Data"
-	   [% IF ! form.add_inventory %]aria-expanded="true"[% ELSE %]aria-expanded="false"[% END %]>
-	  <span class="fa fa-fw fa-user fa-lg"></span>
-	  <span class="visible-lg-inline">Common</span>
-	</a>
-      </li>
+  <ul class="nav nav-pills nav-justified" id="inventoryTabs" title="menu of the actions to perform upon the object">
+    <li class="nav-item addsvcacc [% IF ! form.add_inventory %]active [% END %]text-left" role="presentation">
+      <a aria-controls="common" data-toggle="tab" role="tab"
+	 id="common-tab" href="#common" title="Common Data"
+	 [% IF ! form.add_inventory %]aria-expanded="true"[% ELSE %]aria-expanded="false"[% END %]>
+	<span class="fa fa-fw fa-keyboard-o fa-lg"></span>
+	<span class="visible-lg-inline">Common</span>
+      </a>
+    </li>
 
-      <li class="complex text-left[% IF form.add_inventory %] active[% END %]"" role="presentation">
-	<a aria-controls="compart" data-toggle="tab" role="tab"
-	   id="compart-tab" href="#compart" title="Comparts"
-	   [% IF ! form.add_inventory %]aria-expanded="false"[% ELSE %]aria-expanded="true"[% END %]>
-	  <span class="fa fa-fw fa-puzzle-piece fa-lg"></span>
-	  <span class="visible-lg-inline">Compart</span>
-	</a>
-      </li>
+    <li class="nav-item complex text-left[% IF form.add_inventory %] active[% END %]" role="presentation">
+      <a aria-controls="compart" data-toggle="tab" role="tab"
+	 id="compart-tab" href="#compart" title="Comparts"
+	 [% IF ! form.add_inventory %]aria-expanded="false"[% ELSE %]aria-expanded="true"[% END %]>
+	<span class="fa fa-fw fa-microchip fa-lg"></span>
+	<span class="visible-lg-inline">Compart</span>
+      </a>
+    </li>
 
-    </ul>
-  </nav>
+  </ul>
 
   [% IF ! form.add_inventory %][% form.block('common').render %][% END %]
   [% form.block('compart').render %]

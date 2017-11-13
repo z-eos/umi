@@ -1,9 +1,9 @@
 [% META title = 'Org root' %]
 
 [% IF form.init_object.aux_dn_form_to_modify %]
-<h2>Update Org Form <small><em>[% form.init_object.aux_dn_form_to_modify %]</em></small></h2>
+<h2>Form to Update Org <small><em>[% form.init_object.aux_dn_form_to_modify %]</em></small></h2>
 [% ELSE %]
-<h2>Creation Org Form <small><em>all stuff</em></small></h2>
+<h2>Form to Create Org <small><em>all stuff</em></small></h2>
 [% END %]
 
 [% INCLUDE ldap_err.tt %]

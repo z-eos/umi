@@ -134,7 +134,7 @@ sub _build_cfg {
 			    default =>       'fa fa-star',
 			    People =>        'fa fa-user-circle-o',
 			    DHCP =>          'fa fa-sitemap',
-			    GitACL =>        'fa fa-gavel',
+			    GitACL =>        'fa fa-git',
 			    group =>         'fa fa-group',
 			    history =>       'fa fa-history',
 			    inventory =>     'fa fa-tag',

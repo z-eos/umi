@@ -1,8 +1,23 @@
 /*! 
- * AJAX to render any change 
- */    
-var handleResponce = function(html) {
+ * NProgress indicator
+ */
+
+$(document).bind("ajaxSend", function(){
+
     NProgress.start();
+
+}).bind("ajaxComplete", function(){
+
+    NProgress.done();
+
+});
+
+
+/*! 
+ * AJAX to render any change 
+ */
+
+var handleResponce = function(html) {
 
     console.log('RESPONCE: handleResponce');
 
@@ -35,7 +50,7 @@ var handleResponce = function(html) {
 	
 	// $.post($(this).attr('action'), postData, handleResponce);
     });
-    NProgress.done();
+
 };
 
 

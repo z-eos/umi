@@ -185,36 +185,39 @@
 		    <i class="[% blocked _ ' ' _ entry_icon_size %] fa [% site.icons.root_obj %]">&nbsp;&nbsp;</i>
 		  </button>
 		</form>
-		<div class="btn btn-link umi-search">
+		<div class="btn umi-search">
 		  <!-- p class="visible-lg-block visible-md-block"></p>&nbsp; -->
 
-		  [% # --- DISABLED ANYTHING DETECTION TO COLOR ICON AND TEXT --- %]
-		  [% # if certificate and is not enabled then color to danger %]
 		  [% icon_color = '' %]
+		  [% # --- DISABLED "ANYTHING" DETECTION, TO COLOR ICON AND TEXT --- %]
+		  [% #     if certificate and it is not enabled then color to danger %]
 		  [% IF entry.value.attrs.exists('umiOvpnAddStatus') && entry.value.attrs.umiOvpnAddStatus.0 != 'enabled' %]
 		  [% icon_color = 'text-danger' %]
 		  [% END %]
 
 
+		  [% # --- ICON, WHICH IS AFTER CLICK-TO-OPEN-ROOT-OBJECT BUTTON --- %]
 		  [% IF entry.value.mgmnt.is_root && entry.key.match('People') %]
 		  <i title="Root Account" class="[% base_icon.People _ ' ' _ entry_icon_size %]"></i>
 		  [% ELSIF entry.value.mgmnt.is_root && entry.key.match('Inventory') %]
 		  <i title="Inventory Root Object" class="[% base_icon.inventory _ ' ' _ entry_icon_size %]"></i>
 		  [% ELSIF entry.value.mgmnt.is_root && entry.key.match('Sendmail') %]
 		  <i title="MTA Root Object" class="[% base_icon.mta _ ' ' _ entry_icon_size %]"></i>
+		  [% ELSIF entry.value.mgmnt.is_root && entry.key.match('GitACL') %]
+		  <i title="GitACL Root Object" class="[% base_icon.GitACL _ ' ' _ entry_icon_size %]"></i>
 		  [% ELSIF entry.value.mgmnt.is_root && entry.key.match('reqStart') %]
 		  [%   IF entry.value.attrs.reqType.0 == 'add' %]
-		  <i class="[% entry_icon_size %] fa fa-lg fa-plus-square" title="History Object Request type: Add"></i>
+		  <i title="History Object Request type: Add" class="[% entry_icon_size %] fa fa-lg fa-plus-square"></i>
 		  [%   ELSIF entry.value.attrs.reqType.0 == 'delete' %]
-		  <i class="[% entry_icon_size %] fa fa-lg fa-minus-square" title="History Object Request type: Delete"></i>
+		  <i title="History Object Request type: Delete" class="[% entry_icon_size %] fa fa-lg fa-minus-square"></i>
 		  [%   ELSIF entry.value.attrs.reqType.0 == 'modify' %]
-		  <i class="[% entry_icon_size %] fa fa-lg fa-pencil-square" title="History Object Request type: Modify"></i>
+		  <i title="History Object Request type: Modify" class="[% entry_icon_size %] fa fa-lg fa-pencil-square"></i>
 		  [%   END %]
 		  [% ELSIF entry.value.mgmnt.is_root && ! entry.key.match('People') %]
 		  <i title="Root Objectt" class="[% base_icon.default _ ' ' _ entry_icon_size %]"></i>
-		  [% ELSIF entry.key.match('^author') %]
 
-		  [% # --- SERVICES START -------------------------------------------------------------------- %]
+		  [% # --- SERVICE ICON START --------------------------------------------------------------- %]
+		  [% ELSIF entry.key.match('^author') %]
 		  [% cur_svc = dn.authorizedService.split('@').0 %]
 		  [%   IF services.$cur_svc.icon %]
 		  <i title="[% services.$cur_svc.descr %] Service Account Branch" class="[% services.$cur_svc.icon _ ' ' _ entry_icon_size %] [% branch_class %]"></i>
@@ -229,8 +232,10 @@
 		  [%   ELSE %]
 		  <i title="Service Account" class="fa fa-leaf [% leaf_class _ ' ' _ entry_icon_size %]"></i>
 		  [%   END %]
-		  [% # --- SERVICES STOP  -------------------------------------------------------------------- %]
+		  [% # --- SERVICES ICON STOP  -------------------------------------------------------------- %]
 
+		  [% ELSIF entry.key.match('GitACL') %]
+		  <i title="Subject to GitACL" class="[% base_icon.GitACL _ ' ' _ branch_class _ ' ' _ entry_icon_size %]"></i>
 		  [% ELSIF entry.key.match('^cn=.*,ou=Inventory') %]
 		  <i title="Subject to Inventory" class="fa fa-tag [% branch_class _ ' ' _ entry_icon_size %]"></i>
 		  [% ELSIF entry.key.match(',ou=Sendmail') %]
@@ -242,7 +247,7 @@
 		  [% END %]
 		</div>
 		[% # dn of the select result object %]
-		<div class="btn btn-link umi-search" title="[% blocked_title %]">&nbsp;
+		<div class="btn umi-search" title="[% blocked_title %]">&nbsp;
 		  <b class="[% icon_color  # _ ' ' _ entry_text_size %]">
 		    [% IF entry.key.match('People') %]
 		    [% entry.key.replace('uid=','').replace('authorizedService=','').split(',').slice(0,-3).join('&nbsp;&nbsp;<i class="fa fa-ellipsis-h"></i>&nbsp;&nbsp;') %]
@@ -253,20 +258,63 @@
 		  </b>
 		</div>
 	      </div> <!-- searchby_menu_dropdown.tt btn-group div -->
+
+
+	      
 	      <div class="col-2 pull-right">
+		<!-- <table class="table-condensed">
+     <tr>
+     <td>
+     <span title="created, GMT" class="visible-lg-block visible-md-block">
+     <small>
+     <i class="fa fa-play-circle"></i>&nbsp;
+     [% entry.value.root.ts.createTimestamp _ ' by <b> ' _ entry.value.root.ts.creatorsName _ '</b>' %]
+     </small>
+     </span>
+     </td>
+     </tr>
+     <tr>
+     <td>
+     <span  title="modified, GMT" class="visible-lg-block visible-md-block">
+     <small>
+     <i class="fa fa-stop-circle"></i>&nbsp;
+     [%  entry.value.root.ts.modifyTimestamp _ ' by <b>' _ entry.value.root.ts.modifiersName _ '</b>' %]
+     </small>
+     </span>
+     </td>
+     </tr>
+     </table>&nbsp; -->
+
 		<small>
 		  <ul class="fa-ul umi-zerro-margin">
-		    <li title="created, GMT"><i class="fa-li fa fa-play-circle"></i>
-		      [% entry.value.root.ts.createTimestamp %] by <b>[% entry.value.root.ts.creatorsName %]</b>&nbsp;
+		    
+		    <li title="created, GMT" class="visible-lg-block visible-md-block">
+		      <i class="fa-li fa fa-play-circle"></i>
+		      [% entry.value.root.ts.createTimestamp _ ' by <b> ' _ entry.value.root.ts.creatorsName _ '</b>&nbsp' %]
 		    </li>
+		    [% crtd = entry.value.root.ts.createTimestamp _ ' by ' _ entry.value.root.ts.creatorsName _ '&nbsp' %]
+		    <li title="created, GMT: [% crtd %]" class="visible-xs-block visible-sm-block">
+		      <i class="fa-li fa fa-play-circle"></i>
+		    </li>
+		    
 		    [% IF entry.value.attrs.createTimestamp.0 != entry.value.attrs.modifyTimestamp.0 %]
-		    <li title="modified, GMT"><i class="fa-li fa fa-stop-circle"></i>
-		      [%  entry.value.root.ts.modifyTimestamp %] by <b>[% entry.value.root.ts.modifiersName %]</b>&nbsp;
+		    <li title="modified, GMT" class="visible-lg-block visible-md-block">
+		      <i class="fa-li fa fa-stop-circle"></i>
+		      [%  entry.value.root.ts.modifyTimestamp _ ' by <b>' _ entry.value.root.ts.modifiersName _ '</b>&nbsp' %]
+		    </li>
+		    [%  mdfd = entry.value.root.ts.modifyTimestamp _ ' by ' _ entry.value.root.ts.modifiersName _ '&nbsp' %]
+		    <li title="created, GMT: [% mdfd %]" class="visible-xs-block visible-sm-block">
+		      <i class="fa-li fa fa-stop-circle"></i>
 		    </li>
 		    [% END %]
+		    
 		  </ul>
 		</small>
+
 	      </div>
+
+
+	      
 	    </div> <!-- searchby_menu_dropdown.tt row div -->
 	  </div>
 </div>

@@ -63,8 +63,8 @@
     <div class="tree-point">
       <!-- <div class="tree-item-status" v-if="tree.subtree" @click="checkBranches"> -->
       <div class="tree-item-status" @click="checkBranches">
-	<i class="text-muted fa [% site.icons.toggle_right %]" v-if="!opened"></i>
-	<i class="text-muted fa [% site.icons.toggle_down %]" v-if="opened"></i>
+	<i class="text-muted fa fa-lg [% site.icons.toggle_right %]" v-if="!opened"></i>
+	<i class="text-muted fa fa-lg [% site.icons.toggle_down %]" v-if="opened"></i>
       </div>
       <a class="tree-item-link" @click="showItem">{{ tree.id }}</a>
       <i class="fa [% site.icons.searchby_subtree %] text-muted" @click="showItemBranch"></i>
