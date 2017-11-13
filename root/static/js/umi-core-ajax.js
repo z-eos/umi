@@ -51,6 +51,7 @@ var handleResponce = function(html) {
 	// $.post($(this).attr('action'), postData, handleResponce);
     });
 
+    $('.app-body, body, html').scrollTop(0);
 };
 
 

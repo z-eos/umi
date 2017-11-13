@@ -1512,7 +1512,7 @@ sub modify :Path(modify) :Args(0) {
 	if ( $mesg ne "0" ) {
 	  push @{$return->{error}}, $mesg->{html};
 	} else {
-	  push @{$return->{success}}, 'RDN changed<br><br>';
+	  push @{$return->{success}}, 'RDN changed as well<br><br>';
 	}
       }
       push @{$return->{success}}, 'Modification/s made:<pre>' .
@@ -1526,7 +1526,6 @@ sub modify :Path(modify) :Args(0) {
 	     params => $params,
 	     final_message => $return,
 	   );
-
 }
 
 
