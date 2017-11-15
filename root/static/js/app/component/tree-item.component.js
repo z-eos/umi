@@ -21,16 +21,9 @@ Vue.component('tree-item', {
                 this.toggle();
             } else {
                 Service.api.getTreeData( this.tree.dn, function (data) {
-		    if ( !data.tree.subtree ) { 
+		    if ( !data.tree.dn ) { 
 			return;
 		    }
-                    data.tree.subtree.forEach(function (tree) {
-			if ( tree.subtree ) {
-                            tree.subtree = tree.subtree.sort(function (prev, next) {
-				return prev.id > next.id ? 1 : -1
-                            })
-			}
-                    });
 		    
                     _this.$set(_this.tree, 'subtree', data.tree.subtree);
                     _this.opened = true;

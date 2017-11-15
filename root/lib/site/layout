@@ -34,7 +34,6 @@
 </div> <!-- APP BODY -->
 
 [% PROCESS site/footer %]
-[% END %]
 
 <script src="/static/js/vue.js"></script>
 <script src="/static/js/nprogress.js"></script>   
@@ -91,3 +90,5 @@
 <script src="/static/js/app/component/tree-item.component.js"></script>
 <script src="/static/js/app/component/tree.component.js"></script>
 <script src="/static/js/app/app.js"></script>
+
+[% END %]

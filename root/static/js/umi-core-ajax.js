@@ -4,11 +4,13 @@
 
 $(document).bind("ajaxSend", function(){
 
+    console.log('UMI CORE AJAX: START');    
     NProgress.start();
 
 }).bind("ajaxComplete", function(){
 
     NProgress.done();
+    console.log('UMI CORE AJAX: FINISH ');    
 
 });
 
@@ -19,7 +21,7 @@ $(document).bind("ajaxSend", function(){
 
 var handleResponce = function(html) {
 
-    console.log('RESPONCE: handleResponce');
+    console.log('UMI CORE AJAX: RESPONCE handleResponce');
 
     $('#workingfield').html(html);
     
@@ -37,7 +39,7 @@ var handleResponce = function(html) {
 	    postData = $(this).serialize();
 	}
 
-	console.log('VERY AJAX: ' + $(this).attr('action') + ' ? ' + postData);
+	console.log('UMI CORE AJAX: ACTION ' + $(this).attr('action') + ' ? ' + postData);
 	$.ajax({
 	    url: $(this).attr('action'),
 	    data: postData,
@@ -64,7 +66,7 @@ $('#sidebar,#workingfield,#header').on('click', 'a:not([href^="#"],[href="/"])',
     var a = this;
     var href = a.getAttribute('href');
 
-    console.log('ONCLICK: ' + href);
+    console.log('UMI CORE AJAX: ONCLICK ' + href);
     
     $.get(href, handleResponce );
 });
@@ -78,12 +80,12 @@ $('form.formajaxer').on('submit', function(e) {
 
     var d = this;
     
-    console.log('ONSUBMIT: attributes: ' + d.getAttributes);
+    console.log('UMI CORE AJAX: ONSUBMIT attributes: ' + d.getAttributes);
 
     var base = $('#ldap_base_case').val().indexOf('=') > 0
 	? '&ldapsearch_base=' + $('#ldap_base_case').val()
 	: '&' + $('#ldap_base_case').val() + '=1';
 
-    console.log('ONSUBMIT: base: ' + base);
+    console.log('UMI CORE AJAX: ONSUBMIT base: ' + base);
     $.post($(this).attr('action'), $(this).serialize() + base, handleResponce);
 });

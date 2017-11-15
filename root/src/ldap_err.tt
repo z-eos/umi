@@ -3,7 +3,7 @@
 <div class="panel-group umi-zerro-margin" id="accordion">
   <div class="panel panel-danger">
     <div class="panel-heading clearfix umi-zerro-padding" role="tab" id="headErr">
-      <a class="chevron_toggleable btn btn-danger pull-left"
+      <a class="chevron_toggleable btn btn-danger pull-left borderless"
 	 href="#" title="Collapse In/Out This Panel" data-target="#collapseErr"
 	 data-toggle="collapse" data-parent="#accordion">
 	<i class="fa [% site.icons.toggle_up %]"></i>
@@ -36,7 +36,7 @@
 [% IF final_message.warning %]
 <div class="panel panel-warning">
   <div class="panel-heading clearfix umi-zerro-padding">
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close"
+    <button type="button" class="close borderless" data-dismiss="alert" aria-label="Close"
 	    onclick="$(this).closest('.panel').hide(200)"
 	    title="Dismiss this panel.">
       <span aria-hidden="true" class="fa fa-times-circle"></span>&nbsp;

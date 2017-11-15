@@ -17,6 +17,7 @@ UMI::Controller::LDAP_Tree - Catalyst Controller
 
 LDAP tree crawler
 
+
 =head1 METHODS
 
 =cut
@@ -32,22 +33,17 @@ sub index :Path :Args(0) {
   my ( $self, $c ) = @_;
 
   my $return;
-  my ( $root, $dn, $branch, $level1, $level2, $root_dn, $root_l, $root_r, $branch_dn, $branch_l, $branch_r );
+  my ( $e, $l, $r, $tree );
 
   my $ldap_crud = $c->model('LDAP_CRUD');
+
+  $c->stash->{current_view} = 'WebJSON';
 
   my $params = $c->req->params;
   my $arg = { base => $params->{base} || $ldap_crud->{cfg}->{base}->{db},
 	      filter => $params->{filter} || '(objectClass=*)', };
 
-  # # first we crawl 
-  # my $mesg = $ldap_crud->search({ base => $arg->{base},
-  # 				  scope => 'sub',
-  # 				  sizelimit => 0,
-  # 				  attrs => [ 'fakeAttr' ],
-  # 				  filter => $arg->{filter}, });
-  # p $root = $mesg->as_struct;
-
+  # initial, one level crawl
   my $mesg = $ldap_crud->search({ base => $arg->{base},
 				  scope => 'one',
 				  sizelimit => 0,
@@ -56,17 +52,14 @@ sub index :Path :Args(0) {
     push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
     $c->stash( template => 'tree/tree.tt',
 	       final_message => $return, );
-  } else {
-    $c->stash->{current_view} = 'WebJSON';
-    $c->stash->{tree}->{dn} = $arg->{base};
-    $c->stash->{tree}->{id} = '';
-    $root = $mesg->as_struct;
-    my $branch_tree;
-    foreach $root_dn (keys ( %{$root} ) ) {
-      ( $root_l, $root_r ) = split(/,/, $root_dn);
-      $branch_tree->{id} = $root_l;
-      $branch_tree->{dn} = $root_dn;
-      $mesg = $ldap_crud->search({ base => $root_dn,
+  } elsif ( $mesg->count ) {
+    # each element fetched check whether it is branch or leaf
+    my @root = $mesg->sorted;
+    foreach $e ( @root ) {
+      ( $l, $r ) = split(/,/, $e->dn);
+      $tree->{id} = $l;
+      $tree->{dn} = $e->dn;
+      $mesg = $ldap_crud->search({ base => $e->dn,
 				   scope => 'one',
 				   sizelimit => 0,
 				   filter => '(objectClass=*)', });
@@ -75,17 +68,17 @@ sub index :Path :Args(0) {
 	$c->stash( template => 'tree/tree.tt',
 		   final_message => $return, );
       } else {
-	$branch = $mesg->as_struct;
-	foreach $branch_dn (keys ( %{$branch} ) ) {
-	  ( $branch_l, $branch_r ) = split(/,/, $branch_dn);
-	  push @{$branch_tree->{subtree}}, {id => $branch_l, dn => $branch_dn };
-	}
+	$tree->{br} = $mesg->count > 0 ? 1 : 0;
       }
-      push @{$c->stash->{tree}->{subtree}}, $branch_tree;
-      undef $branch_tree;
+      push @{$c->stash->{tree}}, $tree;
+      undef $tree;
     }
-    #p $c->stash->{tree};
-    # $c->stash( template => 'tree/tree.tt', );
+  } else {
+    ( $l, $r ) = split(/,/, $arg->{base});
+    $tree->{id} = $l;
+    $tree->{dn} = $arg->{base};
+    $tree->{br} = 0;
+    push @{$c->stash->{tree}}, $tree;
   }
 }
 

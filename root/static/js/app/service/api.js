@@ -25,6 +25,8 @@ window.Service.api = (function () {
             $.ajax({
                 type: "GET",
                 url: url,
+		// to avoid NProgress.start from umi-core-ajax.js
+		global: false,
                 success: function (data) {
                     if (typeof data === 'string') {
                         JSON.parse(data);
@@ -33,18 +35,6 @@ window.Service.api = (function () {
                     } else {
                         console.warn("Data has unusable format - ", typeof data);
                         return;
-                    }
-
-                    if (data && data.tree && data.tree.subtreez) {
-                        data.tree.subtree = data.tree.subtree.sort(function (prev, next) {
-                            return prev.id > next.id ? 1 : -1
-                        })
-
-                        data.tree.subtree.forEach(function (tree) {
-                            tree.subtree = tree.subtree.sort(function (prev, next) {
-                                return prev.id > next.id ? 1 : -1
-                            })
-                        });
                     }
 
                     if (typeof callBack === 'function') {
