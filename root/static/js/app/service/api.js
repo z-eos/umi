@@ -14,19 +14,21 @@ window.Service.api = (function () {
         constructor: Api,
 
         getTreeData: function (id, callBack) {
+            var url;
+
             if (typeof id !== 'string') {
                 console.log('Id should be a string - ', id);
             }
-
-            var url = id ?
-                this.config.treeUrl + '?base=' + id :
-                this.config.treeUrl;
+            
+            if ( id ) {
+                url = '/ldap_tree?base=' + id;
+            } else {
+                url = '/ldap_tree';
+            }
 
             $.ajax({
                 type: "GET",
                 url: url,
-		// to avoid NProgress.start from umi-core-ajax.js
-		global: false,
                 success: function (data) {
                     if (typeof data === 'string') {
                         JSON.parse(data);
@@ -38,7 +40,12 @@ window.Service.api = (function () {
                     }
 
                     if (typeof callBack === 'function') {
-                        callBack(data);
+                        callBack(data.sort(function (prev, next) {
+                            prevId = prev.id.toLowerCase().split('=')[1].replace(/\W/ig, '');
+                            nextId = next.id.toLowerCase().split('=')[1].replace(/\W/ig, '');
+        
+                            return nextId < prevId ? 1 : -1;
+                        }));
                     }
                 },
                 error: function (error) {
@@ -52,12 +59,14 @@ window.Service.api = (function () {
 
             var url = isBranch ?
                 '/searchby?ldapsearch_scope=sub&ldapsearch_base=' + id :
-                '/searchby?ldapsearch_scope=base&ldapsearch_base=' + id
+                '/searchby?ldapsearch_scope=base&ldapsearch_base=' + id;
 
             $.ajax({
                 url: url,
-		// function handleResponce is defined in umi-core-ajax.js
-                success: handleResponce
+                success: function (html) {
+                    _this.config.treeViewElement.html(html);
+		    handleResponce();
+                }
             });
         }
     }

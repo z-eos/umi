@@ -304,7 +304,7 @@ sub index :Path :Args(0) {
 	 # userPassword => $_->exists('userPassword') ? 1 : 0,
 	 userPassword    => $is_userPassword,
 	 userDhcp        => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ &&
-	 scalar split(',', $dn) <= 3 ? 1 : 0,
+	 scalar split(',', $dn) <= $dn_depth ? 1 : 0,
 	};
 
       my $diff = undef;
@@ -1801,7 +1801,7 @@ sub block :Path(block) :Args(0) {
 
 =head1 dhcp_add
 
-DHCP object to user binding
+DHCP-to-user binding object
 
 =cut
 

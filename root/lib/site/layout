@@ -60,31 +60,51 @@
 <script type="text/x-template" id="template-tree-item">
   <li class="tree-item" :class="{opened: opened, closed: !opened}">
     <div class="tree-point">
-      <!-- <div class="tree-item-status" v-if="tree.subtree" @click="checkBranches"> -->
-      <div class="tree-item-status" @click="checkBranches">
-	<i class="text-muted fa fa-lg [% site.icons.toggle_right %]" v-if="!opened"></i>
-	<i class="text-muted fa fa-lg [% site.icons.toggle_down %]" v-if="opened"></i>
+      <div class="tree-item-status" 
+	   v-if="item.branch > 0 && !loading"
+	   @click="toggleBranches">
+
+	<i class="text-muted fa fa-caret-right" aria-hidden="true" v-if="!opened"></i>
+	<i class="text-muted fa fa-caret-down" aria-hidden="true" v-if="opened"></i>
       </div>
-      <a class="tree-item-link" @click="showItem">{{ tree.id }}</a>
-      <i class="fa [% site.icons.searchby_subtree %] text-muted" @click="showItemBranch"></i>
+
+      <div class="tree-subitem-loader" v-if="loading"><!-- v-if="loading" -->
+	<i class="text-muted fa fa-spinner fa-pulse fa-fw margin-bottom"></i>
+      </div>
+
+      <a class="tree-item-link" @click="showItem()">{{ item.id }}</a>
+
+      <span class="tree-item-link-list" 
+	    @click="showItemBranches()"
+	    v-if="item.branch > 0" 
+	    title="Show all sub items">
+	
+	<i class="text-muted fa fa-list" aria-hidden="true"></i>
+      </span>
     </div>
-    
-    <ul v-if="tree.subtree" class="tree" :class="{opened: opened, closed: !opened}">
-      <tree-item
-	:tree="subtree" 
-	v-for="(subtree, index) in tree.subtree" 
-	key="subtree.index"></tree-item>
-    </ul>
+
+    <div class="tree-subitem">
+      <ul v-if="branches.length" class="tree" :class="{opened: opened, closed: !opened}">
+	<tree-item
+	  :item="item" 
+	  v-for="(item, index) in branches" 
+	  key="subtree.index">
+	</tree-item>
+      </ul>
+    </div>
   </li>
+
 </script> 
 
 <script type="text/x-template" id="template-tree">
-  <ul class="tree-root tree h6">
+  <ul class="tree-root tree">
     <tree-item
-      :tree="subtree" 
-      v-for="(subtree, index) in tree.subtree" 
-      key="subtree.index"></tree-item>
+      v-for="(item, index) in tree" 
+      :item="item" 
+      :key="item.dn">a</tree-item>
   </ul>
+
+
 </script>
 <script src="/static/js/app/service/api.js"></script>
 <script src="/static/js/app/component/tree-item.component.js"></script>

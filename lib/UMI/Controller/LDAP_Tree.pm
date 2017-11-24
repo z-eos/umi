@@ -33,11 +33,11 @@ sub index :Path :Args(0) {
   my ( $self, $c ) = @_;
 
   my $return;
-  my ( $e, $l, $r, $tree );
+  my ( $e, $l, $r, $tree, @to_stash );
 
   my $ldap_crud = $c->model('LDAP_CRUD');
 
-  $c->stash->{current_view} = 'WebJSON';
+  $c->stash->{current_view} = 'WebJSON_LDAP_Tree';
 
   my $params = $c->req->params;
   my $arg = { base => $params->{base} || $ldap_crud->{cfg}->{base}->{db},
@@ -68,18 +68,20 @@ sub index :Path :Args(0) {
 	$c->stash( template => 'tree/tree.tt',
 		   final_message => $return, );
       } else {
-	$tree->{br} = $mesg->count > 0 ? 1 : 0;
+	$tree->{branch} = $mesg->count > 0 ? 1 : 0;
       }
-      push @{$c->stash->{tree}}, $tree;
+      push @to_stash, $tree;
       undef $tree;
     }
   } else {
     ( $l, $r ) = split(/,/, $arg->{base});
     $tree->{id} = $l;
     $tree->{dn} = $arg->{base};
-    $tree->{br} = 0;
-    push @{$c->stash->{tree}}, $tree;
+    $tree->{branch} = 0;
+    push @to_stash, $tree;
   }
+
+  $c->stash->{tree} = \@to_stash;
 }
 
 

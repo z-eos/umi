@@ -1,11 +1,15 @@
+
 Vue.component('tree-item', {
     template: '#template-tree-item',
 
-    props: ['tree'],
+    props: ['item'],
 
     data: function () {
         return {
-            opened: false
+            opened: false,
+            loading: false,
+            hasSubItems: false,
+            branches: []
         }
     },
 
@@ -14,31 +18,51 @@ Vue.component('tree-item', {
             this.opened = !this.opened;
         },
 
-        checkBranches: function () {
+        loadBranches: function (callBack) {
             var _this = this;
 
-            if ( this.tree.subtree ) {
-                this.toggle();
-            } else {
-                Service.api.getTreeData( this.tree.dn, function (data) {
-		    if ( !data.tree.dn ) { 
-			return;
-		    }
-		    
-                    _this.$set(_this.tree, 'subtree', data.tree.subtree);
-                    _this.opened = true;
-                });
+            if ( this.loading ) {
+                return;
+            }
+
+            this.loading = true;
+
+            Service.api.getTreeData(this.item.dn, function (branches) {
+                _this.branches = branches;
+                _this.loading = false;
+            });
+        },
+
+        openBranches: function () {
+            if( this.item.branch < 1 ) {
+                return;
+            }
+
+            this.opened = true;
+
+            if ( this.branches.length === 0 ) {
+                this.loadBranches();
             }
         },
 
-	showItem: function () {
-            Service.api.updateViewTree(this.tree.dn);
+        closeBranches: function () {
+            if( this.item.branch < 1 ) {
+                return;
+            }
+            
+            this.opened = false;
         },
 
-	showItemBranch: function () {
-            Service.api.updateViewTree(this.tree.dn, true);
-        }
+        toggleBranches: function () {
+            (this.opened ? this.closeBranches : this.openBranches)();
+        },
 
-	
+        showItem: function () {
+            Service.api.updateViewTree(this.item.dn);
+        },
+
+        showItemBranches: function () {
+            Service.api.updateViewTree(this.item.dn, true);
+        }
     }
 });
