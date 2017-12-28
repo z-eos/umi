@@ -7,6 +7,7 @@ use Moose;
 use namespace::autoclean;
 
 use Data::Printer  colored => 1;
+use Time::Piece;
 
 BEGIN { with 'Tools'; }
 
@@ -16,6 +17,7 @@ use Net::LDAP::LDIF;
 use Net::LDAP::Control;
 use Net::LDAP::Control::Sort;
 use Net::LDAP::Control::SortResult;
+use Net::LDAP::Extension::Refresh;
 use Net::LDAP::Constant qw(LDAP_CONTROL_SORTRESULT);
 use Net::LDAP::Util qw(
 			ldap_error_text
@@ -168,8 +170,8 @@ sub _build_cfg {
 	  #=====================================================================
 
 	  stub => {
-		   homeDirectory => '/nonexistent',
-		   loginShell => '/sbin/nologin',
+		   homeDirectory => '/dev/null1',
+		   loginShell => '/usr/bin/false',
 		   gidNumber => UMI->config->{default}->{gidNumber},
 		   group => UMI->config->{default}->{group},
 		   noavatar_mgmnt => UMI->path_to('root', 'static', 'images', '/avatar-mgmnt.png'),
@@ -877,6 +879,32 @@ sub moddn {
     }
   } else {
     $return = $msg->ldif;
+  }
+  return $return;
+}
+
+
+=head2 refresh
+
+Net::LDAP::Extension::Refresh wrapper
+
+=cut
+
+sub refresh {
+  my ($self, $entryName, $requestTtl) = @_;
+  p $entryName; p $requestTtl;
+  my $callername = (caller(1))[3];
+  $callername = 'main' if ! defined $callername;
+  my ($return, $msg);
+
+  $msg = $self->ldap->refresh ( entryName => $entryName, requestTtl => $requestTtl );
+  # p my $ttl = "refresh TTL: " . $msg->get_ttl();
+  # p $ttl .= $msg->error if $msg->code;
+  if ($msg->code) {
+    $return->{error} = $msg->error;
+    $return->{caller} = 'call to LDAP_CRUD->refresh from ' . $callername . ': ';
+  } else {
+    $return->{success} = "TTL changed to " . $msg->get_ttl;
   }
   return $return;
 }
@@ -2765,8 +2793,14 @@ sub create_account_branch {
 	      ->{$args->{associateddomain}} ?
 	      $self->cfg->{authorizedService}->{$args->{authorizedservice}}->{associateddomain_prefix}
 	      ->{$args->{associateddomain}} : '',
-	      $args->{associateddomain}), };
+	      $args->{associateddomain}),
+      objectclass => $args->{objectclass},
+    };
 
+  my $t = localtime;
+  $arg->{requestttl} = defined $args->{requestttl} &&
+    $args->{requestttl} ? Time::Piece->strptime( $args->{requestttl}, "%Y.%m.%d %H:%M")->epoch - $t->epoch : 0;
+  
   $arg->{dn} =
     sprintf("authorizedService=%s@%s,%s=%s,%s",
 	    $arg->{authorizedservice},
@@ -2774,11 +2808,11 @@ sub create_account_branch {
 	    $self->cfg->{rdn}->{acc_root},
 	    $args->{$self->cfg->{rdn}->{acc_root}},
 	    $self->cfg->{base}->{acc_root});
-
+  # p $arg;
   my ( $return, $if_exist);
   $arg->{add_attrs} =
     [ uid => sprintf('%s@%s', $arg->{$self->cfg->{rdn}->{acc_root}}, $arg->{authorizedservice}),
-      objectClass => $self->cfg->{objectClass}->{acc_svc_branch},
+      objectClass => [ @{$self->cfg->{objectClass}->{acc_svc_branch}}, @{$arg->{objectclass}} ],
       authorizedService =>
       sprintf('%s@%s%s', $arg->{authorizedservice},
 	      defined $self->cfg->{authorizedService}->{$args->{authorizedservice}}
@@ -2786,7 +2820,7 @@ sub create_account_branch {
 	      $self->cfg->{authorizedService}->{$args->{authorizedservice}}
 	      ->{associateddomain_prefix}->{$args->{associateddomain}} : '',
 	      $arg->{associateddomain}), ];
-
+  # p $arg->{add_attrs};
   $if_exist =
     $self->search( { base => $arg->{dn}, scope => 'base', attrs => [ 'authorizedService' ], } );
   if ( $if_exist->count ) {
@@ -2800,6 +2834,15 @@ sub create_account_branch {
 	sprintf('Error during %s branch (dn: %s) creation occured: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s',
 		uc($arg->{authorizedservice}), $arg->{dn}, $mesg->{html}, $mesg->{srv}, $mesg->{text});
     } else {
+      if ( $arg->{requestttl} ) {
+	my $t = localtime;
+	my $refresh = $self->refresh( $arg->{dn}, $arg->{requestttl} );
+	if ( defined $refresh->{success} ) {
+	  $return->{success}, $refresh->{success};
+	} elsif ( defined $refresh->{error} ) {
+	  $return->{error}, $refresh->{error};
+	}
+      }
       $return->{dn} = $arg->{dn};
       $return->{associateddomain_prefix} = $arg->{'associateddomain_prefix'};
     }
@@ -2879,7 +2922,14 @@ sub create_account_branch_leaf {
       umiOvpnAddDevOSVer => $args->{umiOvpnAddDevOSVer} || 'NA',
 	     
       radiusgroupname => $args->{radiusgroupname} || '',
-      radiusprofiledn => $args->{radiusprofiledn} || '', };
+      radiusprofiledn => $args->{radiusprofiledn} || '',
+
+      objectclass => $args->{objectclass}, };
+
+  my $t = localtime;
+  $arg->{requestttl} = defined $args->{requestttl} &&
+    $args->{requestttl} ? Time::Piece->strptime( $args->{requestttl}, "%Y.%m.%d %H:%M")->epoch - $t->epoch : 0;
+
   my ( $return, $if_exist );
 
   $arg->{prefixed_uid} =
@@ -2906,7 +2956,7 @@ sub create_account_branch_leaf {
     $authorizedService = [ description => $arg->{description}, ]; # ??? looks like it is not needed ... except web may be ...
   } else {
     $authorizedService = [
-			  objectClass => $self->cfg->{objectClass}->{acc_svc_common},
+			  objectClass => [ @{$self->cfg->{objectClass}->{acc_svc_common}}, @{$arg->{objectclass}} ],
 			  authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
 			  associatedDomain => $arg->{associatedDomain},
 			  uid => $arg->{uid},
@@ -2955,13 +3005,13 @@ sub create_account_branch_leaf {
 			   $self->macnorm({ mac => $arg->{login} }),
 			   $arg->{basedn}); # DN for MAC AUTH differs
       push @{$authorizedService},
-	objectClass => $self->cfg->{objectClass}->{acc_svc_802_1x},
+	objectClass => [ @{$self->cfg->{objectClass}->{acc_svc_802_1x}}, @{$arg->{objectclass}} ],
 	uid => $self->macnorm({ mac => $arg->{login} }),
 	cn =>  $self->macnorm({ mac => $arg->{login} });
     } else {
       $arg->{dn} = sprintf('uid=%s,%s', $arg->{prefixed_uid}, $arg->{basedn}); # DN for EAP-TLS differs
       push @{$authorizedService},
-	objectClass => $self->cfg->{objectClass}->{acc_svc_802_1x_eaptls},
+	objectClass => [ @{$self->cfg->{objectClass}->{acc_svc_802_1x_eaptls}}, @{$arg->{objectclass}} ],
 	uid => $arg->{prefixed_uid},
 	cn => $arg->{prefixed_uid};
     }
@@ -2998,7 +3048,7 @@ sub create_account_branch_leaf {
       if defined $arg->{sshpublickey} && $arg->{sshpublickey} ne '';
 
     $authorizedService = [
-			  objectClass => $self->cfg->{objectClass}->{ssh},
+			  objectClass => [ @{$self->cfg->{objectClass}->{ssh}}, @{$arg->{objectclass}} ],
 			  sshPublicKey => [ @$sshPublicKey ],
 			  uid => $arg->{uid},
 			 ];
@@ -3024,7 +3074,7 @@ sub create_account_branch_leaf {
 			  cn => substr($arg->{userCertificate}->{filename},0,-4),
 			  associatedDomain => $arg->{associatedDomain},
 			  authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
-			  objectClass => $self->cfg->{objectClass}->{ovpn},
+			  objectClass => [ @{$self->cfg->{objectClass}->{ovpn}}, @{$arg->{objectclass}} ],
 			  umiOvpnCfgIfconfigPush => $arg->{umiOvpnCfgIfconfigPush},
 			  umiOvpnAddStatus => $arg->{umiOvpnAddStatus},
 			  umiUserCertificateSn => '' . $arg->{cert_info}->{'S/N'},
@@ -3044,7 +3094,7 @@ sub create_account_branch_leaf {
   #=== SERVICE: web ==================================================
   } elsif ( $arg->{service} eq 'web' ) {
     $authorizedService = [
-			  objectClass => $self->cfg->{objectClass}->{acc_svc_web},
+			  objectClass => [ @{$self->cfg->{objectClass}->{acc_svc_web}}, @{$arg->{objectclass}} ],
 			  authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
 			  associatedDomain => $arg->{associatedDomain},
 			  uid => $arg->{uid},
@@ -3078,6 +3128,14 @@ sub create_account_branch_leaf {
 	sprintf('Error during %s account creation occured: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s',
 		uc($arg->{service}), $mesg->{html}, $mesg->{srv}, $mesg->{text});
     } else {
+      if ( $arg->{requestttl} ) {
+	my $refresh = $self->refresh( $arg->{dn}, $arg->{requestttl});
+	if ( defined $refresh->{success} ) {
+	  push @{$return->{success}}, $refresh->{success};
+	} elsif ( defined $refresh->{error} ) {
+	  push @{$return->{error}}, $refresh->{error};
+	}
+      }
       push @{$return->{success}},
 	sprintf('<i class="%s fa-fw"></i>&nbsp;<em>%s account login:</em> <strong class="text-success">%s</strong> <em>password:</em> <strong class="text-success mono">%s</strong>',
 		$self->cfg->{authorizedService}->{$arg->{service}}->{icon},

@@ -30,7 +30,8 @@
    btn_blocked = ' btn-link'
    blocked_title = ''
    branch_class = ' fa-lg umi-1-margin-left'
-   leaf_class = ' umi-2-margin-left' %]
+   leaf_class = ' umi-2-margin-left'
+   dynamic_object = '<i class="fa fa-hourglass-end fa-lg" title="dynamic object"></i>' %]
 
 [% IF entries.size == 1 %]
 [% in = 'in'
@@ -187,7 +188,10 @@
 		</form>
 		<div class="btn umi-search">
 		  <!-- p class="visible-lg-block visible-md-block"></p>&nbsp; -->
-
+		  [% IF entry.value.mgmnt.dynamicObject %]
+		  [% dynamic_object %]
+		  [% END %]
+		  
 		  [% icon_color = '' %]
 		  [% # --- DISABLED "ANYTHING" DETECTION, TO COLOR ICON AND TEXT --- %]
 		  [% #     if certificate and it is not enabled then color to danger %]
@@ -262,52 +266,37 @@
 
 	      
 	      <div class="col-2 pull-right">
-		<!-- <table class="table-condensed">
-     <tr>
-     <td>
-     <span title="created, GMT" class="visible-lg-block visible-md-block">
-     <small>
-     <i class="fa fa-play-circle"></i>&nbsp;
-     [% entry.value.root.ts.createTimestamp _ ' by <b> ' _ entry.value.root.ts.creatorsName _ '</b>' %]
-     </small>
-     </span>
-     </td>
-     </tr>
-     <tr>
-     <td>
-     <span  title="modified, GMT" class="visible-lg-block visible-md-block">
-     <small>
-     <i class="fa fa-stop-circle"></i>&nbsp;
-     [%  entry.value.root.ts.modifyTimestamp _ ' by <b>' _ entry.value.root.ts.modifiersName _ '</b>' %]
-     </small>
-     </span>
-     </td>
-     </tr>
-     </table>&nbsp; -->
 
 		<small>
 		  <ul class="fa-ul umi-zerro-margin">
 		    
 		    <li title="created, GMT" class="visible-lg-block visible-md-block">
-		      <i class="fa-li fa fa-play-circle"></i>
+		      <i class="fa-li fa fa-hourglass-start"></i>
 		      [% entry.value.root.ts.createTimestamp _ ' by <b> ' _ entry.value.root.ts.creatorsName _ '</b>&nbsp' %]
 		    </li>
 		    [% crtd = entry.value.root.ts.createTimestamp _ ' by ' _ entry.value.root.ts.creatorsName _ '&nbsp' %]
 		    <li title="created, GMT: [% crtd %]" class="visible-xs-block visible-sm-block">
-		      <i class="fa-li fa fa-play-circle"></i>
+		      <i class="fa-li fa fa-hourglass-start"></i>
 		    </li>
 		    
 		    [% IF entry.value.attrs.createTimestamp.0 != entry.value.attrs.modifyTimestamp.0 %]
 		    <li title="modified, GMT" class="visible-lg-block visible-md-block">
-		      <i class="fa-li fa fa-stop-circle"></i>
+		      <i class="fa-li fa fa-hourglass-half"></i>
 		      [%  entry.value.root.ts.modifyTimestamp _ ' by <b>' _ entry.value.root.ts.modifiersName _ '</b>&nbsp' %]
 		    </li>
 		    [%  mdfd = entry.value.root.ts.modifyTimestamp _ ' by ' _ entry.value.root.ts.modifiersName _ '&nbsp' %]
 		    <li title="created, GMT: [% mdfd %]" class="visible-xs-block visible-sm-block">
-		      <i class="fa-li fa fa-stop-circle"></i>
+		      <i class="fa-li fa fa-hourglass-half"></i>
 		    </li>
 		    [% END %]
-		    
+
+		    [% IF entry.value.mgmnt.dynamicObject %]
+		    <li title="expire, GMT" class="visible-lg-block visible-md-block">
+		      <i class="fa-li fa fa-hourglass-end"></i>
+		      [%  entry.value.root.ts.entryExpireTimestamp _ '&nbsp' %]
+		    </li>
+		    [% END %]
+
 		  </ul>
 		</small>
 

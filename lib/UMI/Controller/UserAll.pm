@@ -5,6 +5,7 @@ package UMI::Controller::UserAll;
 use Moose;
 use namespace::autoclean;
 use Data::Printer;
+use Time::Piece;
 
 BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 
@@ -104,6 +105,7 @@ sub index :Path :Args(0) {
 		 ldap_crud => $c->model('LDAP_CRUD'), );
 
     $self->form->add_svc_acc( defined $params->{add_svc_acc} && $params->{add_svc_acc} ne '' ? $params->{add_svc_acc} : '' );
+    $self->form->dynamic_object( $params->{dynamic_object} );
     $params->{action_searchby} = $c->uri_for_action('searchby/index');
     $c->stash( final_message => $self->create_account( $c->model('LDAP_CRUD'), $params ), );
   }
@@ -116,12 +118,14 @@ sub index :Path :Args(0) {
 sub create_account {
   my  ( $self, $ldap_crud, $args ) = @_;
   my ( @form_fields,
+       $attr_hash,
        $uid,
        $uidNumber,
        $descr,
        $pwd,
        $file,
        $jpeg,
+       $objectClass,
        $final_message,
        $success_message,
        $warning_message,
@@ -175,14 +179,19 @@ sub create_account {
 
     my $root_add_dn = sprintf('%s=%s,%s',
 			      $ldap_crud->cfg->{rdn}->{acc_root},
-			      $ldap_crud->cfg->{rdn}->{acc_root} eq 'uid' ? $uid : sprintf('%s %s',
-											   $args->{person_givenname},
-											   $args->{person_sn}),
+			      $ldap_crud->cfg->{rdn}->{acc_root} eq 'uid' ?
+			      $uid : sprintf('%s %s',
+					     $args->{person_givenname},
+					     $args->{person_sn}),
 			      $ldap_crud->cfg->{base}->{acc_root});
 
     # my $schema = $ldap_crud->schema;
     # p my $schemattr = $schema->attribute('gecos');
 
+    $objectClass = $ldap_crud->cfg->{objectClass}->{acc_root};
+    push @{$objectClass}, 'dynamicObject'
+      if $args->{person_exp} ne '';
+    
     my $root_add_options =
       [
        uid  => $uid, # $ldap_crud->cfg->{rdn}->{acc_root} => $uid,
@@ -207,7 +216,7 @@ sub create_account {
 
        title => lc($args->{'person_title'}),
 
-       objectClass => $ldap_crud->cfg->{objectClass}->{acc_root},
+       objectClass => $objectClass,
       ];
 
     my $ldif = $ldap_crud->add( $root_add_dn, $root_add_options );
@@ -218,6 +227,17 @@ sub create_account {
 		$ldif->{srv},
 		$ldif->{text});
     } else {
+      if ( $args->{person_exp} ne '' ) {
+	my $t = localtime;
+	my $refresh = $ldap_crud->refresh( $root_add_dn,
+					 Time::Piece->strptime( $args->{person_exp}, "%Y.%m.%d %H:%M")->epoch - $t->epoch );
+	if ( defined $refresh->{success} ) {
+	  push @{$final_message->{success}}, $refresh->{success};
+	} elsif ( defined $refresh->{error} ) {
+	  push @{$final_message->{error}}, $refresh->{error};
+	}
+      }
+      
       push @{$final_message->{success}},
 	sprintf('<i class="fa fa-user fa-lg fa-fw"></i>&nbsp;<em>root account login:</em> <strong class="text-success">%s</strong> <em>password:</em> <strong class="text-success mono">%s</strong>%s',
 		$uid,
@@ -227,7 +247,7 @@ sub create_account {
 						      css_btn => 'btn-success',
 						      css_frm => 'pull-right' }) ) ;
     }
-p $final_message->{success};
+    # p $final_message->{success};
   } else {
     #####################################################################################
     # ADDITIONAL service account (no root account creation, but using the existent one)
@@ -265,13 +285,14 @@ p $final_message->{success};
     #---------------------------------------------------------------------
     # Simplified Account mail branch of ROOT Object Creation
     #---------------------------------------------------------------------
+    $attr_hash = { uid => $uid,
+		   authorizedservice => 'mail',
+		   associateddomain => $args->{person_associateddomain},
+		   objectclass => $args->{dynamic_object} || $args->{person_exp} ne '' ? [ 'dynamicObject' ] : [],
+		   requestttl => defined $args->{person_exp} && $args->{person_exp} ne '' ? $args->{person_exp} : '', };
     $branch =
       $ldap_crud
-      ->create_account_branch ({
-				uid => $uid,
-				authorizedservice => 'mail',
-				associateddomain => $args->{person_associateddomain},
-			       },);
+      ->create_account_branch ( $attr_hash );
 
     push @{$final_message->{success}}, $branch->{success} if defined $branch->{success};
     push @{$final_message->{warning}}, $branch->{warning} if defined $branch->{warning};
@@ -291,6 +312,8 @@ p $final_message->{success};
        telephoneNumber => $args->{person_telephonenumber},
        login => defined $args->{person_login} &&
        $args->{person_login} ne '' ? $args->{person_login} : $uid,
+       objectclass => $args->{dynamic_object} || $args->{person_exp} ne '' ? [ 'dynamicObject' ] : [],
+       requestttl => defined $args->{person_exp} && $args->{person_exp} ne '' ? $args->{person_exp} : '',
       };
 
     if ( ! $args->{person_password1} &&
@@ -311,14 +334,12 @@ p $final_message->{success};
     #---------------------------------------------------------------------
     # Simplified Account xmpp branch of ROOT Object Creation
     #---------------------------------------------------------------------
-    $branch =
-      $ldap_crud
-      ->create_account_branch ({
-				uid => $uid,
-				authorizedservice => 'xmpp',
-				associateddomain => $args->{person_associateddomain},
-			       },
-			      );
+    $attr_hash = { uid => $uid,
+		   authorizedservice => 'xmpp',
+		   associateddomain => $args->{person_associateddomain},
+		   objectclass => $args->{dynamic_object} || $args->{person_exp} ne '' ? [ 'dynamicObject' ] : [],
+		   requestttl => defined $args->{person_exp} && $args->{person_exp} ne '' ? $args->{person_exp} : '', };
+    $branch = $ldap_crud->create_account_branch ( $attr_hash );
 
     push @{$final_message->{success}}, $branch->{success} if defined $branch->{success};
     push @{$final_message->{warning}}, $branch->{warning} if defined $branch->{warning};
@@ -329,9 +350,11 @@ p $final_message->{success};
     #---------------------------------------------------------------------
     $x->{basedn} = $branch->{dn};
     $x->{authorizedservice} = 'xmpp';
+    $x->{objectclass} = $args->{dynamic_object} || $args->{person_exp} ne '' ? [ 'dynamicObject' ] : [];
+    $x->{requestttl} = defined $args->{person_exp} && $args->{person_exp} ne '' ? $args->{person_exp} : '';
 
-    $leaf =
-      $ldap_crud->create_account_branch_leaf ( $x );
+    $leaf = $ldap_crud->create_account_branch_leaf ( $x );
+    
     push @{$final_message->{success}}, @{$leaf->{success}} if defined $leaf->{success};
     push @{$final_message->{warning}}, @{$leaf->{warning}} if defined $leaf->{warning};
     push @{$final_message->{error}}, @{$leaf->{error}} if defined $leaf->{error};
@@ -353,6 +376,8 @@ we skip empty (criteria is a concatenation of each field value) repeatable eleme
 =cut
 
 	foreach ( $element->fields ) {
+	  # p $_->name;
+	  # p $_->value;
 	  next if $_->name =~ /aux_/ || $_->name eq 'remove';
 	  $is_svc_empty .= $_->value if defined $_->value;
 	}
@@ -361,16 +386,17 @@ we skip empty (criteria is a concatenation of each field value) repeatable eleme
 	#---------------------------------------------------------------------
 	# Account branch of ROOT Object
 	#---------------------------------------------------------------------
-	$branch =
-	  $ldap_crud
-	  ->create_account_branch ({
-				    $ldap_crud->cfg->{rdn}->{acc_root} => $uid,
-				    authorizedservice => $form_field ne 'account' ?
-				    substr($form_field, 10) :
-				    $element->field('authorizedservice')->value,
-				    associateddomain => $element->field('associateddomain')->value,
-				   },
-				  );
+	$attr_hash = {
+		      $ldap_crud->cfg->{rdn}->{acc_root} => $uid,
+		      authorizedservice => $form_field ne 'account'
+		      ? substr($form_field, 10) : $element->field('authorizedservice')->value,
+		      associateddomain => $element->field('associateddomain')->value,
+		      objectclass => ( defined $args->{dynamic_object} && $args->{dynamic_object} eq '1')
+		      || ( defined $args->{person_exp} && $args->{person_exp} ne '' ) ? [ 'dynamicObject' ] : [],
+		      requestttl => defined $args->{person_exp} && $args->{person_exp} ne '' ? $args->{person_exp} : '',
+		     };
+
+	$branch = $ldap_crud->create_account_branch ( $attr_hash );
 
 	push @{$final_message->{success}}, $branch->{success} if defined $branch->{success};
 	push @{$final_message->{warning}}, $branch->{warning} if defined $branch->{warning};
@@ -379,7 +405,7 @@ we skip empty (criteria is a concatenation of each field value) repeatable eleme
 	#---------------------------------------------------------------------
 	# LEAF of the account BRANCH of ROOT Object
 	#---------------------------------------------------------------------
-	my $x = 
+	my $x =
 	  {
 	   basedn => $branch->{dn},
 	   authorizedservice => $form_field ne 'account' ?
@@ -406,10 +432,14 @@ we skip empty (criteria is a concatenation of each field value) repeatable eleme
 	   sn => $args->{person_sn},
 	   telephoneNumber => $args->{person_telephonenumber},
 	   # jpegPhoto => $jpeg,
+	   requestttl => defined $args->{person_exp} && $args->{person_exp} ne '' ? $args->{person_exp} : '',
 	  };
 
 	$x->{description} =
 	  defined $element->field('description') ? $element->field('description')->value : '';
+
+	$x->{objectclass} = ( defined $args->{dynamic_object} && $args->{dynamic_object} eq '1')
+	  || ( defined $args->{person_exp} && $args->{person_exp} ne '' ) ? [ 'dynamicObject' ] : [];
 
 	if ( $form_field eq 'account' ) {
 	  if ( $element->field('authorizedservice')->value =~ /^802.1x-.*/ ) {

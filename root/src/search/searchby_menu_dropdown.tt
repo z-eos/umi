@@ -42,6 +42,7 @@
 	<form role="form" method="POST" class="formajaxer"
 	      action="/userall">
 	  <input type="hidden" name="add_svc_acc" value="[% entry.key %]">
+	  <input type="hidden" name="dynamic_object" value="[% entry.value.mgmnt.dynamicObject %]">
 	  <button type="submit" title="add new service account" class="btn btn-link"
 		  data-order="[% site.searchby.menu.order.add_svc_acc %]">
 	  <span class="fa fa-fw fa-plus text-success"></span>

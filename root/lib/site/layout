@@ -52,6 +52,7 @@
 <script src="/static/js/umi-header.js"></script>
 <script src="/static/js/umi-searchby-modals.js"></script>
 
+<script src="/static/js/jquery.datetimepicker.js"></script>
 <script src="/static/js/jquery.multi-select.js"></script>
 <script src="/static/js/jquery.quicksearch.js"></script>
 <!-- <script src="/static/js/umi-multiselect.js"></script> -->

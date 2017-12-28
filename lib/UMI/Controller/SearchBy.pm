@@ -188,7 +188,10 @@ sub index :Path :Args(0) {
 					      'createTimestamp',
 					      'creatorsName',
 					      'modifiersName',
-					      'modifyTimestamp', ],
+					      'modifyTimestamp',
+					      'entryTtl',
+					      'entryExpireTimestamp',
+					    ],
 				  });
     my @entries = defined $params->{order_by} &&
       $params->{order_by} ne '' ? $mesg->sorted(split(/,/,$params->{order_by})) : $mesg->sorted('dn');
@@ -212,7 +215,8 @@ sub index :Path :Args(0) {
 
     my ( $ttentries, @ttentries_keys, $attr, $tmp, $dn, $dn_depth, $dn_depthes, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry, @root_groups, $root_gr, $obj_item, $c_name, $m_name );
     my $blocked = 0;
-    my $is_userPassword = 0;
+    my $is_userPassword  = 0;
+    my $is_dynamicObject = 0;
 
     foreach (@entries) {
       $dn = $_->dn;
@@ -231,6 +235,11 @@ sub index :Path :Args(0) {
 	  $is_userPassword = 1
 	    if exists $c->session->{ldap}->{obj_schema}->{$tmp}->{may}->{userPassword} ||
 	    exists $c->session->{ldap}->{obj_schema}->{$tmp}->{must}->{userPassword};
+	  if ( $tmp eq 'dynamicObject' ) {
+	    $is_dynamicObject = 1;
+	    $ttentries->{$dn}->{root}->{ts}->{entryExpireTimestamp} =
+	      $self->generalizedtime_fr({ ts => $_->get_value('entryExpireTimestamp') });
+	  }
 	}
 	
 	# is this user blocked?
@@ -296,12 +305,13 @@ sub index :Path :Args(0) {
 	 is_log          => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{db_log}/ ? $_->get_value( 'reqType' ) : 'no',
 	 is_root         => scalar split(',', $dn) <= $dn_depth ? 1 : 0,
 	 is_account      => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
+	 dynamicObject   => $is_dynamicObject,
 	 is_group        => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{group}/ ? 1 : 0,
 	 is_inventory    => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ? 1 : 0,
 	 root_obj_groups => defined $root_gr ? $root_gr : undef,
 	 jpegPhoto       => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
 	 gitAclProject   => $_->exists('gitAclProject') ? 1 : 0,
-	 # userPassword => $_->exists('userPassword') ? 1 : 0,
+	 # userPassword  => $_->exists('userPassword') ? 1 : 0,
 	 userPassword    => $is_userPassword,
 	 userDhcp        => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ &&
 	 scalar split(',', $dn) <= $dn_depth ? 1 : 0,
@@ -794,16 +804,18 @@ sub proc :Path(proc) :Args(0) {
       my ( $arr, $login, $uid, $pwd, $return );
       my @id = split(',', $params->{'add_svc_acc'});
       $params->{'add_svc_acc_uid'} = substr($id[0], 4); # $params->{'login'} =
-
+      my $dynamic_object = defined $params->{'dynamic_object'} && $params->{'dynamic_object'} ne '' ? 1 : 0;
+      
       $c->stash(
 		template => 'user/user_add_svc.tt',
 		form => $self->form_add_svc_acc,
 		add_svc_acc => $params->{'add_svc_acc'},
+		dynamic_object => $dynamic_object,
 		add_svc_acc_uid => $params->{'add_svc_acc_uid'},
 	       );
 
       $params->{usercertificate} = $c->req->upload('usercertificate') if defined $params->{usercertificate};
-      p $params->{usercertificate};
+      # p $params->{usercertificate};
 
       return unless $self->form_add_svc_acc->process(
 						     posted => ($c->req->method eq 'POST'),
@@ -870,6 +882,8 @@ sub proc :Path(proc) :Args(0) {
 				       service_pwd => $pwd->{$_}->{clear},
 				      };
 
+	  p my $ttl = Time::Piece->strptime( $params->{person_exp}, "%Y.%m.%d %H:%M");
+
 	  $create_account_branch_return =
 	    $c->controller('User')
 	      ->create_account_branch ( $ldap_crud,
@@ -877,6 +891,8 @@ sub proc :Path(proc) :Args(0) {
 					 base_uid => substr($id[0], 4),
 					 service => $_,
 					 associatedDomain => $params->{'associateddomain_prefix'} . $params->{associateddomain},
+					 objectclass => defined $params->{dynamic_object} && $params->{dynamic_object} ne '' ? 'dynamicObject' : '',
+					 requestttl => defined $params->{person_exp} && $params->{person_exp} ne '' ? $params->{person_exp} : '',
 					},
 				      );
 
@@ -916,6 +932,8 @@ sub proc :Path(proc) :Args(0) {
 	       userCertificate => $params->{usercertificate},
 	       radiusgroupname => $params->{radiusgroupname},
 	       radiustunnelprivategroupid => $params->{radiustunnelprivategroupid},
+	       objectclass => defined $params->{dynamic_object} && $params->{dynamic_object} ne '' ? 'dynamicObject' : '',
+	       requestttl => defined $params->{person_exp} && $params->{person_exp} ne '' ? $params->{person_exp} : '',
 	      };
 
 	  if ( defined $params->{to_sshkeygen} ) {

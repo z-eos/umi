@@ -26,7 +26,8 @@
    <script src="/static/js/jquery.min.js"></script>
    <script src="/static/js/bootstrap.min.js"></script>
 
-   
+   <link href="/static/css/jquery.datetimepicker.css" media="screen" rel="stylesheet" type="text/css">
+      
  </head>
  [% IF c.user_exists %]
  [% body_class = 'app header-fixed navbar-fixed sidebar-fixed sidebar-minimized fixed-nav aside-menu-hidden' %]

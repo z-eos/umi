@@ -17,6 +17,7 @@ has '+action' => ( default => '/userall');
 has 'namesake' => ( is => 'rw', );
 has 'autologin' => ( is => 'rw', );
 has 'add_svc_acc' => ( is => 'rw', ); # set if we add service account rather than new user
+has 'dynamic_object' => ( is => 'rw', );
 
 sub build_form_element_class { [ qw(form-horizontal tab-content formajaxer) ] }
 
@@ -36,6 +37,7 @@ sub html_attributes {
 }
 
 has_field 'add_svc_acc' => ( type => 'Hidden', );
+has_field 'dynamic_object' => ( type => 'Hidden', );
 
 ######################################################################
 #== PERSONAL DATA ====================================================
@@ -57,6 +59,15 @@ has_field 'person_sn'
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'Doe' },
        required => 1 );
+
+has_field 'person_exp'
+  => ( type => 'Text',
+       label => 'Exp.',
+       label_class => [ 'col-xs-1', 'col-sm-1', 'col-md-1', 'col-lg-1',  ],
+       element_wrapper_class => [ 'col-xs-2', 'col-sm-2', 'col-md-2', 'col-lg-2', ],
+       element_class => [ 'input-sm', ],
+       element_attr => { placeholder => 'Expiration on', },
+       required => 0 );
 
 has_field 'person_namesake'
   => ( type => 'Checkbox',
@@ -866,19 +877,20 @@ sub validate {
 			   filter => '(uid=' . $self->autologin . '*)',
 			   base => $ldap_crud->cfg->{base}->{acc_root},
 			   attrs => [ 'uid' ], });
+    my $uid_namesake;
     if ( $mesg->count == 1 &&
 	 defined $self->field('person_namesake')->value &&
 	 $self->field('person_namesake')->value == 1 ) {
-      $self->namesake(1);
+      $self->namesake( 1+substr( $mesg->entry(0)->get_value('uid'), length($self->autologin)) );
     } elsif ( $mesg->count &&
 	      defined $self->field('person_namesake')->value &&
 	      $self->field('person_namesake')->value eq '1' ) {
       my @uids_namesake_suffixes;
-      foreach my $uid_namesake ( $mesg->entries ) {
+      foreach $uid_namesake ( $mesg->entries ) {
 	push @uids_namesake_suffixes, 0+substr( $uid_namesake->get_value('uid'), length($self->autologin));
       }
       my @uids_namesake_suffixes_desc = sort {$b <=> $a} @uids_namesake_suffixes;
-      # @uids_namesake_suffixes_desc;
+      # p @uids_namesake_suffixes_desc;
       $self->namesake(++$uids_namesake_suffixes_desc[0]);
     } elsif ( $mesg->count ) {
       $entry = $mesg->entry(0);
@@ -1219,7 +1231,7 @@ sub validate {
     $i = 0;
     foreach $element ( $self->field('loginless_ovpn')->fields ) {
       foreach my $tmpname ($element->field('userCertificate')) {
-	p $tmpname; # field('userCertificate');
+	# p $tmpname; # field('userCertificate');
       }
       if ((( defined $element->field('associateddomain')->value &&
 	     defined $element->field('userCertificate')->value &&
