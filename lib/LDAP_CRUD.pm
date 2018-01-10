@@ -226,6 +226,9 @@ sub _build_cfg {
 						  authorizedServiceObject
 						  domainRelatedObject
 					       ) ],
+			  acc_svc_email => [ qw(
+						 mailutilsAccount
+					      ) ],
 			  acc_svc_web => [ qw(
 					       account
 					       simpleSecurityObject
@@ -775,7 +778,7 @@ sub unbind {
 sub schema {
   my $self = shift;
   my $schema = $self->ldap->schema ( );
-  
+
   return $schema;
 }
 
@@ -902,7 +905,7 @@ sub refresh {
     $return->{error} = $msg->error;
     $return->{caller} = 'call to LDAP_CRUD->refresh from ' . $callername . ': ';
   } else {
-    $return->{success} = sprintf("TTL for DN: %s was set to %d seconds", $entryName, $msg->get_ttl);
+    $return->{success} = sprintf("TTL for DN: <b class=\"text-success\">%s</b> was set to %d seconds", $entryName, $msg->get_ttl);
   }
   return $return;
 }
@@ -2977,7 +2980,7 @@ sub create_account_branch_leaf {
       'mu-mailBox' => 'maildir:/var/mail/' . $arg->{associatedDomain} . '/' . $arg->{uid},
       gidNumber => $self->cfg->{authorizedService}->{$arg->{service}}->{gidNumber},
       userPassword => $arg->{password}->{$arg->{service}}->{'ssha'},
-      objectClass => [ 'mailutilsAccount' ];
+      objectClass => [ @{$self->cfg->{objectClass}->{acc_svc_email}} ];
   #=== SERVICE: xmpp =================================================
   } elsif ( $arg->{service} eq 'xmpp') {
     if ( defined $arg->{jpegPhoto} ) {

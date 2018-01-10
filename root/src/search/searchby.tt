@@ -31,7 +31,7 @@
    blocked_title = ''
    branch_class = ' fa-lg umi-1-margin-left'
    leaf_class = ' umi-2-margin-left'
-   dynamic_object = '<i class="fa fa-hourglass-end fa-lg" title="dynamic object"></i>' %]
+   dynamic_object = '<i class="fa fa-hourglass-half fa-lg" title="dynamic object"></i>' %]
 
 [% IF entries.size == 1 %]
 [% in = 'in'

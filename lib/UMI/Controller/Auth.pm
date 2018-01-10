@@ -71,7 +71,7 @@ sub signin :Path Global {
       }
     }
     my $schema = $ldap_crud->schema; # ( dn => $ldap_crud->{base}->{db} );
-    foreach $key ( sort ( keys %{$meta_schema} )) {
+    foreach $key ( sort ( keys %{$meta_schema} )) {p $key;
       next if $key eq 'top';
       foreach $must ( $schema->must ( $key ) ) {
 	$syntmp = $schema->attribute_syntax($must->{'name'});
