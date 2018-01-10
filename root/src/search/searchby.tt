@@ -216,6 +216,8 @@
 		  <i title="History Object Request type: Delete" class="[% entry_icon_size %] fa fa-lg fa-minus-square"></i>
 		  [%   ELSIF entry.value.attrs.reqType.0 == 'modify' %]
 		  <i title="History Object Request type: Modify" class="[% entry_icon_size %] fa fa-lg fa-pencil-square"></i>
+		  [%   ELSIF entry.value.attrs.reqType.0 == 'modrdn' %]
+		  <i title="History Object Request type: ModRDN" class="[% entry_icon_size %] fa fa-lg fa-share-alt-square"></i>
 		  [%   END %]
 		  [% ELSIF entry.value.mgmnt.is_root && ! entry.key.match('People') %]
 		  <i title="Root Objectt" class="[% base_icon.default _ ' ' _ entry_icon_size %]"></i>

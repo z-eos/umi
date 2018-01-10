@@ -122,7 +122,9 @@ sub proc :Path(proc) :Args(0) {
 	'createTimestamp',
 	'creatorsName',
 	'modifiersName',
-	'modifyTimestamp';
+	'modifyTimestamp',
+	'entryTtl',
+	'entryExpireTimestamp';
       
       $ldap_crud = $c->model('LDAP_CRUD');
       my $mesg = $ldap_crud->search({
@@ -142,6 +144,9 @@ sub proc :Path(proc) :Args(0) {
 
       my ( $ttentries, @ttentries_keys, $attr, $dn_depth,  $dn_depthes, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry, @root_groups, $obj_item, $tmp, $c_name, $m_name );
       my $blocked = 0;
+    my $is_userPassword  = 0;
+      my $is_dynamicObject = 0;
+
       foreach (@entries) {
 	$c_name = ldap_explode_dn( $_->get_value('creatorsName'), casefold => 'none' );
 	$m_name = ldap_explode_dn( $_->get_value('modifiersName'), casefold => 'none' );
@@ -153,6 +158,19 @@ sub proc :Path(proc) :Args(0) {
 
 	if ( $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
 	  $dn_depth = scalar split(/,/, $ldap_crud->{cfg}->{base}->{acc_root}) + 1;
+	  
+	  foreach $tmp ( @{$_->get_value('objectClass', asref => 1)} ) {
+	    $is_userPassword = 1
+	      if exists $c->session->{ldap}->{obj_schema}->{$tmp}->{may}->{userPassword} ||
+	      exists $c->session->{ldap}->{obj_schema}->{$tmp}->{must}->{userPassword};
+	    if ( $tmp eq 'dynamicObject' ) {
+	      $is_dynamicObject = 1;
+	      $ttentries->{$_->dn}->{root}->{ts}->{entryExpireTimestamp} =
+		$self->generalizedtime_fr({ ts => $_->get_value('entryExpireTimestamp') });
+	    }
+	  }
+	  
+	  # is this user blocked?
 	  $mesg = $ldap_crud->search({
 				      base => $ldap_crud->cfg->{base}->{group},
 				      filter => sprintf('(&(cn=%s)(memberUid=%s))',
@@ -230,11 +248,12 @@ sub proc :Path(proc) :Args(0) {
 	   is_log => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{db_log}/ ? $_->get_value( 'reqType' ) : 'no',
 	   is_root => scalar split(',', $_->dn) <= $dn_depth ? 1 : 0,
 	   is_account => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
+	   dynamicObject   => $is_dynamicObject,
 	   is_group => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{group}/ ? 1 : 0,
 	   is_inventory => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ? 1 : 0,
 	   jpegPhoto => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
 	   gitAclProject => $_->exists('gitAclProject') ? 1 : 0,
-	   userPassword => $_->exists('userPassword') ? 1 : 0,
+	   userPassword    => $is_userPassword,
 	   userDhcp => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ &&
 	   scalar split(',', $_->dn) <= 3 ? 1 : 0,
 	  };

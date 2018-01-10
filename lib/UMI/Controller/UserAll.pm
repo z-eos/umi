@@ -131,6 +131,8 @@ sub create_account {
        $warning_message,
        $error_message );
 
+  my $is_person_exp = defined $args->{person_exp} && $args->{person_exp} ne '' && $args->{person_exp} ne '____.__.__ __:__' ? 1 : 0;
+  
   ###################################################################################
   # NEW ACCOUNT, not additional service one
   ###################################################################################
@@ -189,8 +191,7 @@ sub create_account {
     # p my $schemattr = $schema->attribute('gecos');
 
     $objectClass = $ldap_crud->cfg->{objectClass}->{acc_root};
-    push @{$objectClass}, 'dynamicObject'
-      if $args->{person_exp} ne '';
+    push @{$objectClass}, 'dynamicObject' if $is_person_exp;
     
     my $root_add_options =
       [
@@ -227,10 +228,10 @@ sub create_account {
 		$ldif->{srv},
 		$ldif->{text});
     } else {
-      if ( $args->{person_exp} ne '' ) {
+      if ( $is_person_exp ) {
 	my $t = localtime;
 	my $refresh = $ldap_crud->refresh( $root_add_dn,
-					 Time::Piece->strptime( $args->{person_exp}, "%Y.%m.%d %H:%M")->epoch - $t->epoch );
+					   Time::Piece->strptime( $args->{person_exp}, "%Y.%m.%d %H:%M")->epoch - $t->epoch );
 	if ( defined $refresh->{success} ) {
 	  push @{$final_message->{success}}, $refresh->{success};
 	} elsif ( defined $refresh->{error} ) {
@@ -288,8 +289,8 @@ sub create_account {
     $attr_hash = { uid => $uid,
 		   authorizedservice => 'mail',
 		   associateddomain => $args->{person_associateddomain},
-		   objectclass => $args->{dynamic_object} || $args->{person_exp} ne '' ? [ 'dynamicObject' ] : [],
-		   requestttl => defined $args->{person_exp} && $args->{person_exp} ne '' ? $args->{person_exp} : '', };
+		   objectclass => $args->{dynamic_object} || $is_person_exp ? [ 'dynamicObject' ] : [],
+		   requestttl => $is_person_exp ? $args->{person_exp} : '', };
     $branch =
       $ldap_crud
       ->create_account_branch ( $attr_hash );
@@ -312,8 +313,8 @@ sub create_account {
        telephoneNumber => $args->{person_telephonenumber},
        login => defined $args->{person_login} &&
        $args->{person_login} ne '' ? $args->{person_login} : $uid,
-       objectclass => $args->{dynamic_object} || $args->{person_exp} ne '' ? [ 'dynamicObject' ] : [],
-       requestttl => defined $args->{person_exp} && $args->{person_exp} ne '' ? $args->{person_exp} : '',
+       objectclass => $args->{dynamic_object} || $is_person_exp ? [ 'dynamicObject' ] : [],
+       requestttl => $is_person_exp ? $args->{person_exp} : '',
       };
 
     if ( ! $args->{person_password1} &&
@@ -337,8 +338,8 @@ sub create_account {
     $attr_hash = { uid => $uid,
 		   authorizedservice => 'xmpp',
 		   associateddomain => $args->{person_associateddomain},
-		   objectclass => $args->{dynamic_object} || $args->{person_exp} ne '' ? [ 'dynamicObject' ] : [],
-		   requestttl => defined $args->{person_exp} && $args->{person_exp} ne '' ? $args->{person_exp} : '', };
+		   objectclass => $args->{dynamic_object} || $is_person_exp ? [ 'dynamicObject' ] : [],
+		   requestttl => $is_person_exp ? $args->{person_exp} : '', };
     $branch = $ldap_crud->create_account_branch ( $attr_hash );
 
     push @{$final_message->{success}}, $branch->{success} if defined $branch->{success};
@@ -350,8 +351,8 @@ sub create_account {
     #---------------------------------------------------------------------
     $x->{basedn} = $branch->{dn};
     $x->{authorizedservice} = 'xmpp';
-    $x->{objectclass} = $args->{dynamic_object} || $args->{person_exp} ne '' ? [ 'dynamicObject' ] : [];
-    $x->{requestttl} = defined $args->{person_exp} && $args->{person_exp} ne '' ? $args->{person_exp} : '';
+    $x->{objectclass} = $args->{dynamic_object} || $is_person_exp ? [ 'dynamicObject' ] : [];
+    $x->{requestttl} = $is_person_exp ? $args->{person_exp} : '';
 
     $leaf = $ldap_crud->create_account_branch_leaf ( $x );
     

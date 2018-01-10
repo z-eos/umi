@@ -892,19 +892,17 @@ Net::LDAP::Extension::Refresh wrapper
 
 sub refresh {
   my ($self, $entryName, $requestTtl) = @_;
-  p $entryName; p $requestTtl;
+  # p $entryName; p $requestTtl;
   my $callername = (caller(1))[3];
   $callername = 'main' if ! defined $callername;
   my ($return, $msg);
 
   $msg = $self->ldap->refresh ( entryName => $entryName, requestTtl => $requestTtl );
-  # p my $ttl = "refresh TTL: " . $msg->get_ttl();
-  # p $ttl .= $msg->error if $msg->code;
   if ($msg->code) {
     $return->{error} = $msg->error;
     $return->{caller} = 'call to LDAP_CRUD->refresh from ' . $callername . ': ';
   } else {
-    $return->{success} = "TTL changed to " . $msg->get_ttl;
+    $return->{success} = sprintf("TTL for DN: %s was set to %d seconds", $entryName, $msg->get_ttl);
   }
   return $return;
 }
