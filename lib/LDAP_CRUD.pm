@@ -165,7 +165,7 @@ sub _build_cfg {
 	  #=====================================================================
 	  ##
 	  ### CONFIGURATION STARTS HERE (something you could want to change.
-	  ### *all other stuff can be changed ONLY if you understand what for*
+	  ### *all other stuff can be changed ONLY if you understand all consequences*
 	  ##
 	  #=====================================================================
 

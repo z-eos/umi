@@ -4,105 +4,148 @@
    %]
 
 <div class="page-header">
-  <h2>Modify All Fields <small><em>of DN: [% params.dn %]</em></small></h2>
+  <h2>Modify Fields of DN:<small><em>[% modify %]</em></small></h2>
 </div>
 
 [% INCLUDE ldap_err.tt %]
 
-[% # USE dumper %]
-<!-- <pre> -->
-  [% # dumper.dump(params) %]
-<!-- </pre> -->
+[% multival = {
+   title = 1
+   description = 1
+   objectClass = 1
+   sshPubKey = 1
+   }
+   %]
+
+[% # USE dumper %]<!-- <pre>[% # dumper.dump(params) %]</pre> -->
 
 [% IF ! final_message.exists('success') || final_message.success.empty %]
 <form method="POST"
+      id="modify-tt-form"
       enctype="multipart/form-data"
       class="form-horizontal formajaxer"
       action="/searchby/modify">
   <input type="hidden" name="dn" id="dn" value="[% modify %]">
 
-  <div class="form-group">
-    <label class="col-sm-2 control-label">
-      Attributes Available
-    </label>
-    <div class="col-sm-10">
-      <select class="form-control" name="aux_attrs_rest" id="aux_attrs_rest">
-	<option value=""> --- Choose An Attribute ---</option>
-	[% FOREACH attr_rest IN attrs_rest %]
-	<option value="[% attr_rest.key %]">[% attr_rest.key %]</option>
-	[% END %]
-      </select>
+  <div class="well">
+    <div class="form-group">
+      <label class="col-sm-3 text-right h5">
+	<b>Attributes Available:</b>
+      </label>
+      <div class="col-sm-9">
+	<select class="form-control" name="aux_attrs_rest" id="aux_attrs_rest">
+	  <option value=""> --- Choose An Attribute ---</option>
+	  [% FOREACH attr_rest IN attrs_rest %]
+	  <option value="[% attr_rest.key %]">[% attr_rest.key %]</option>
+	  [% END %]
+	</select>
+      </div>
     </div>
-  </div>
-  [% FOREACH attr_rest IN attrs_rest %]
-  <div id="[% attr_rest.key %]" class="form-group hidden attrs-rest">
-    <label class="col-sm-2 control-label">
-      [% # IF schema.item(attr_rest.key) != 1 && %]
-      [% IF c.session.ldap.obj_schema.item(attr_rest.key) != 1 && 
-         attr_rest.key != rdn &&
-         attr_rest.key != 'userPassword' &&
-         ! attr_rest.key.match('userCertificate') &&
-         attr_rest.key != 'jpegPhoto' %]
-      [% attr_rest.key %]&nbsp;<a class="element-add" href="#" title="add value">
-      <i class="fa [% site.icons.field_add %] text-success"></i>
-      </a>
-      [% ELSE %]
-      [% attr_rest.key %]
-      [% END %]
-    </label>
-    <div class="col-sm-10">
-      [% IF attr_rest.key == 'jpegPhoto' %]
-      <input type="file" class="btn btn-default" name="[% attr_rest.key %]" accept="image/jpeg, image/png"></input>      
-      [% ELSE %]
-      <input type=text value="" name="[% attr_rest.key %]" class="form-control" placeholder="new attribute value to be added">
-      [% END %]
+    [% FOREACH attr_rest IN attrs_rest %]
+    [% id = attr_rest.key _ '_' _ loop.index %]
+    <div id="[% attr_rest.key %]" class="form-group hidden attrs-rest row">
+      <label class="col-sm-3 text-right h5">
+	<b>[% attr_rest.key %]</b>
+      </label>
+      <div class="col-sm-9">
+	<div class="input-group form-group">
+	  [%   IF multival.${attr.key} == 1 && ( attr.value.size == 1 || attr.value.first == val ) %]
+	  <span class="input-group-btn">
+            <button class="btn btn-secondary btn-default btn-add element-add"
+		    id="[% id %]"
+		    type="button" title="click to add another [% attr.key %] field">
+	      <i class="fa fa-copy text-success"></i>
+	    </button>
+	  </span>
+	  [%   ELSE %]
+	  <span class="input-group-btn">
+	    <button class="btn btn-secondary btn-default btn-erase" type="button" title="erase field value"
+		    id="[% id %]">
+	      <i class="fa fa-eraser text-danger"></i>
+	    </button>
+	  </span>
+	  [%   END %]
+
+	  [% IF attr_rest.key == 'jpegPhoto' %]
+	  <input type="file" class="btn btn-default" id="[% id %]" name="[% attr_rest.key %]" accept="image/jpeg, image/png">      
+	  [% ELSIF attr_rest.key == 'mu-sieveOnReceive' %]
+	  <textarea name="[% attr_rest.key %]" class="form-control" rows=2 placeholder="sieve script to be put here"></textarea>
+	  [% ELSE %]
+	  <input type=text value="" id="[% id %]" name="[% attr_rest.key %]" class="form-control"
+		 placeholder="input attribute [% attr_rest.key %] value here">
+	  [% END %]
+	</div>
+      </div>
     </div>
+    [% END %]
   </div>
-  [% END %]
-  <hr>
-  
+  [% # -------------------------------------------------------------------------------------------- %]
   [% FOREACH attr IN entries %]
+  [% attrId = attr.key _ '_' _ loop.index %]
   <div class="form-group">
-    <label class="col-sm-2 control-label">
-      [% # IF schema.item(attr.key) != 1 && %]
-      [% IF c.session.ldap.obj_schema.item(attr.key) != 1 && 
-         attr.key != rdn &&
-         attr.key != 'userPassword' &&
-         ! attr.key.match('userCertificate') &&
-         attr.key != 'jpegPhoto' %]
-      [% attr.key %]&nbsp;<a class="element-add" href="#" title="add value"><i class="fa fa-plus-circle text-success"></i></a>
-      [% ELSE %]
-      [% attr.key %]
-      [% END %]
+    <label class="col-sm-3 text-right h5">
+      <b>[% attr.key %]:</b>
     </label>
-    <div class="col-sm-10">
+    <div class="col-sm-9 controls">
+      <div class="input-group">
       [% IF attr.key == 'jpegPhoto' %]
       <img alt="jpegPhoto of [% modify %]" src="[% attr.value %]" class="img-thumbnail pull-left" title="[% modify %]">
-      <input type="file" class="btn btn-default" name="[% attr.key %]" accept="image/jpeg, image/png"></input>
+      <input type="file" class="btn btn-default" name="[% attr.key %]" accept="image/jpeg, image/png">
 
       [% ELSIF attr.key == 'userCertificate;binary' ||
 	 attr.key == 'cACertificate;binary' ||
 	 attr.key == 'certificateRevocationList;binary' %]
-      <input type="file" class="btn btn-default" name="[% attr.key %]" accept=".der"></input>
+      <input type="file" class="btn btn-default" name="[% attr.key %]" accept=".der">
 
       [% ELSIF attr.key == 'userPassword' %]
       <input type="password" name="[% attr.key %]0" class="form-control" placeholder="password is here">
       <input type="password" name="[% attr.key %]1" class="form-control" placeholder="confirm password">
+      
       [% ELSE %]
-      [% FOREACH val IN attr.value %]
-      [% IF attr.key == rdn %]
-      <input type=text value="[% val %]" name="[% attr.key %]" disabled="" class="form-control" title="this field is RDN">
-      [% ELSIF attr.key.match('umiUserCertificate') %]
-      <input type=text value="[% val %]" name="[% attr.key %]" disabled="" class="form-control" title="auto changed by new, .der format certificate (see the field &laquo;userCertificate&raquo;) upload">
-      [% ELSIF attr.key == 'sshPublicKey' %]
-      <p><textarea name="[% attr.key %]" class="form-control" rows=2>[% val %]</textarea></p>
-      [% ELSIF attr.key == 'grayPublicKey' %]
-      <p><textarea name="[% attr.key %]" class="form-control" rows=2>[% val %]</textarea></p>
-      [% ELSE %]
-      <p><input type=text value="[% val %]" name="[% attr.key %]" class="form-control"></p>
+      [%   FOREACH val IN attr.value %]
+      [%   id = attr.key _ '_' _ loop.index %]
+      <div class="input-group form-group entry">
+	[%   IF multival.${attr.key} == 1 && ( attr.value.size == 1 || attr.value.last == val ) %]
+	<span class="input-group-btn">
+          <button class="btn btn-secondary btn-default btn-add element-add"
+		  id="[% id %]"
+		  type="button" title="click to add another [% attr.key %] field">
+	    <i class="fa fa-copy text-success"></i>
+	  </button>
+	</span>
+	[%   ELSE %]
+	<span class="input-group-btn">
+	  <button class="btn btn-secondary btn-default btn-erase" type="button" title="erase field value"
+		  id="[% id %]">
+	    <i class="fa fa-eraser text-danger"></i>
+	  </button>
+	</span>
+	[%   END %]
+	
+	[%   IF attr.key == rdn %]
+	<input type=text value="[% val %]" name="[% attr.key %]" id="[% 'val_' _ id %]" disabled="" class="form-control" title="this field is RDN">
+	
+	[%   ELSIF attr.key.match('umiUserCertificate') %]
+	<input type=text value="[% val %]" name="[% attr.key %]" id="[% 'val_' _ id %]" disabled="" class="form-control"
+	       title="auto changed by new, .der format certificate (see the field &laquo;userCertificate&raquo;) upload">
+	
+	[%   ELSIF attr.key == 'sshPublicKey' %]
+	<textarea name="[% attr.key %]" id="[% 'val_' _ id %]" class="form-control" rows=2>[% val %]</textarea>
+	
+	[%   ELSIF attr.key == 'grayPublicKey' %]
+	<textarea name="[% attr.key %]" id="[% 'val_' _ id %]" class="form-control" rows=2>[% val %]</textarea>
+	
+	[%   ELSIF attr.key == 'mu-sieveOnReceive' %]
+	<textarea name="[% attr.key %]" id="[% 'val_' _ id %]" class="form-control" rows=2>[% val %]</textarea>
+
+	[%   ELSE %]
+	<input type=text value="[% val %]" id="[% 'val_' _ id %]" name="[% attr.key %]" class="form-control">
+		
+	[%   END %]
+      </div>
+      [%   END %]
       [% END %]
-      [% END %]
-      [% END %]
+      </div>
     </div>
   </div>
   [% END %]
@@ -117,10 +160,43 @@
 </form>
 
 <script>
- $(function() {
-   var duplicateElement = function(event, undef) {
-     var $origin = $(this).parents("label").next().find("p:first");
 
+ // IDEA: https://bootsnipp.com/snippets/featured/dynamic-form-fields-add-amp-remove-bs3
+ 
+ $(function()
+   {
+     $('#modify-tt-form').on('click', '.btn-add', function(e)
+       {
+         e.preventDefault();
+	 console.log('btn-add was clicked');
+	 
+         var controlForm = $(this).closest('.controls'),
+             currentEntry = controlForm.find(".entry").last(),
+             newEntry = $(currentEntry.clone()).appendTo(controlForm);
+	 //debugger;
+
+         newEntry.find('.form-control').val('');
+         controlForm.find('.entry:not(:last) .btn-add')
+		    .removeClass('btn-add').addClass('btn-erase')
+		    .removeClass('btn-success').addClass('text-danger')
+		    .html('<span class="fa fa-eraser"></span>');
+	 return false;
+       }).on('click', '.btn-erase', function(e)
+       {
+	 e.preventDefault();
+	 console.log('btn-erase was clicked');
+
+     	 $(this).closest('.input-group').find('.form-control').val('');
+	 return false;
+       });
+   });
+ 
+
+ $(function() {
+/*
+   var duplicateElement = function(event, undef) {
+     var $origin = $(this).parents("div");
+     
      if (!$origin.length) return !1;
 
      var $clone = $($origin[0].outerHTML),
@@ -136,29 +212,31 @@
      return false;
 
    };
-   
-   $(".element-add").on("click", duplicateElement);
 
+   // $(".btn-add").on("click", duplicateElement);
+*/
    $("#aux_attrs_rest").on("change", function(e) {
      var $this = $(this),
 	 value = $this.val();
-
+     
      if (!value || !value.length) return;
      var $form = $this.parents("form");
-     $form.find("div.attrs-rest").addClass("hidden").each(function(index, item) {
-       $(item).find("input:text, input:password, input:file, select, textarea, input:radio, input:checkbox").each(function(id, element) {
-	 $(element).val('')
-		   .removeAttr('checked')
-		   .removeAttr('selected')
-		   .children("option")
-		   .first()
-		   .prop("selected",true);
-       });
-     });
+     $form.find("div.attrs-rest")
+	  .addClass("hidden")
+	  .each(function(index, item) {
+	    $(item).find("input:text, input:password, input:file, select, textarea, input:radio, input:checkbox")
+		   .each(function(id, element) {
+		     $(element).removeAttr('checked')
+			       .removeAttr('selected')
+			       .children("option")
+			       .first()
+			       .prop("selected",true);
+		   }).val('');
+	  });
      $form.find("div#"+value).removeClass("hidden");     
    });
-
+   
  });
- 
+
 </script> 
 [% END %]

@@ -1,5 +1,5 @@
 
-new Vue({
+window.App = new Vue({
     el: '#App',
     
     data: function () {
