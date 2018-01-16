@@ -163,8 +163,7 @@
 
  // IDEA: https://bootsnipp.com/snippets/featured/dynamic-form-fields-add-amp-remove-bs3
  
- $(function()
-   {
+ $(function() {
      $('#modify-tt-form').on('click', '.btn-add', function(e)
        {
          e.preventDefault();
@@ -189,32 +188,7 @@
      	 $(this).closest('.input-group').find('.form-control').val('');
 	 return false;
        });
-   });
- 
 
- $(function() {
-/*
-   var duplicateElement = function(event, undef) {
-     var $origin = $(this).parents("div");
-     
-     if (!$origin.length) return !1;
-
-     var $clone = $($origin[0].outerHTML),
-	 types = ["INPUT", "TEXTAREA"];
-
-     if (types.indexOf($clone.children()[0].nodeName) != -1) {
-       $clone.children().val("");
-     }
-
-     $origin.parent().prepend($clone);
-     $clone.children().focus();
-
-     return false;
-
-   };
-
-   // $(".btn-add").on("click", duplicateElement);
-*/
    $("#aux_attrs_rest").on("change", function(e) {
      var $this = $(this),
 	 value = $this.val();
@@ -235,7 +209,6 @@
 	  });
      $form.find("div#"+value).removeClass("hidden");     
    });
-   
  });
 
 </script> 
