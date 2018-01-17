@@ -12,8 +12,10 @@ $(document).bind("ajaxSend", function(){
     NProgress.done();
     console.log('UMI CORE AJAX: FINISH ');    
 
-});
+    $("#stat-to").html('');
+    $("#stat-from").appendTo("#stat-to");
 
+});
 
 /*! 
  * AJAX to render any change 
@@ -53,9 +55,8 @@ var handleResponce = function(html) {
 	// $.post($(this).attr('action'), postData, handleResponce);
     });
 
-    $('.app-body, body, html').scrollTop(0);
+    $(".app-body, body, html").scrollTop(0);
 };
-
 
 /*! 
  * AJAX to load on click-s (not submits)

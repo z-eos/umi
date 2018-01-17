@@ -1,55 +1,71 @@
 [% IF c.user_exists && c.session.auth_uid && stats.debug %]
 
-<table class="table table-hover table-condensed">
-<thead>
-    <tr class="text-primary">
-      <th colspan="2">
-	<i class="fa fa-pie-chart"></i>
-	Page Statistics <small><em>(debug level [% stats.debug %])</em></small>
-      </th>
-    </tr>
-    <tr class="text-primary">
-      <th colspan="2" class="text-right">
-	<small>
-	  <em>session [% c.sessionid %] expires: [% USE date %][% date.format(time = c.session_expires, format = '%F %T') %]</em>
-	</small>	
-      </th>
-    </tr>
-  </thead>
-  <tbody>
-    [% elapsed_bg = '' %]
-    [% IF stats.debug == 1 %]
-    [%    IF stats.elapsed < 0.1 %]
-    [%    elapsed_bg = 'success' %]
-    [%    ELSIF stats.elapsed > 0.7 %]
-    [%    elapsed_bg = 'danger' %]
-    [%    ELSE %]
-    [%    elapsed_bg = 'warning' %]
-    [%    END %]
-    <tr class="[% elapsed_bg %]">
-      <td colspan="2">
-	Request took [% stats.elapsed %]s
-      </td>
-    </tr>
-    [% ELSIF stats.debug == 2 %]
-    [% FOREACH i IN stats.report %]
-    [%    IF i.2 < 0.1 %]
-    [%    tr_class = 'success' %]
-    [%    ELSIF i.2 > 0.7 %]
-    [%    tr_class= 'danger' %]
-    [%    ELSE %]
-    [%    tr_class = 'warning' %]
-    [%    END %]
-    <tr class="[% tr_class %]">
-      <td>[% i.1 %]</td>
-      <td class="text-right">took [% i.2 %] s</td>
-    </tr>
-    [% END %]
-    <tr class="info">
-      <td class="text-right">Whole request</td>
-      <td class="text-left">took [% stats.elapsed %] s</td>
-    </tr>
-    [% END %]
-  </tbody>
-</table>
+[% default = '' %]
+
+<div class="hidden">
+  <div id="stat-from">
+
+    <table class="table table-condensed">
+      <thead>
+	<tr>
+	  <th colspan="2">
+	    <i class="fa fa-pie-chart"></i>
+	    Page Statistics <small><em>(debug level [% stats.debug %])</em></small>
+	  </th>
+	</tr>
+	<tr>
+	  <th colspan="2" class="text-right">
+	    <small>
+	      <em>session: [% c.sessionid %]<br>
+	      expires: [% USE date %][% date.format(time = c.session_expires, format = '%F %T') %]</em>
+	    </small>	
+	  </th>
+	</tr>
+      </thead>
+      <tbody>
+	[% elapsed_bg = '' %]
+	[% IF stats.elapsed < 0.1 %]
+	[% elapsed_bg = 'success' %]
+	[% ELSIF stats.elapsed > 0.7 %]
+	[% elapsed_bg = 'danger' %]
+	[% ELSE %]
+	[% elapsed_bg = 'warning' %]
+	[% END %]
+	<tr>
+	  <th class="text-[% elapsed_bg %] text-right"><b>Whole request took</b></th>
+	  <th class="text-[% elapsed_bg %] text-left"><b>[% stats.elapsed %]s</b></th>
+	</tr>
+	[% IF stats.debug == 1 %]
+	[%    IF stats.elapsed < 0.1 %]
+	[%    elapsed_bg = 'success' %]
+	[%    ELSIF stats.elapsed > 0.7 %]
+	[%    elapsed_bg = 'danger' %]
+	[%    ELSE %]
+	[%    elapsed_bg = 'warning' %]
+	[%    END %]
+	<tr class="text-[% elapsed_bg %][% default %]">
+	  <td colspan="2">
+	    Request took [% stats.elapsed %]s
+	  </td>
+	</tr>
+	[% ELSIF stats.debug == 2 %]
+	[% FOREACH i IN stats.report %]
+	[%    IF i.2 < 0.1 %]
+	[%    tr_class = 'success' %]
+	[%    ELSIF i.2 > 0.7 %]
+	[%    tr_class= 'danger' %]
+	[%    ELSE %]
+	[%    tr_class = 'warning' %]
+	[%    END %]
+	<tr>
+	  <td class="text-[% tr_class %][% default %]">[% i.1.replace(',', ', ') %]</td>
+	  <td class="text-[% tr_class %] text-right">[% i.2 %]s</td>
+	</tr>
+	[% END %]
+	[% END %]
+      </tbody>
+    </table>
+
+  </div>
+</div>
 [% END %]

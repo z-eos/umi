@@ -181,7 +181,7 @@ sub proc :Path(proc) :Args(0) {
 	  $return->{error} .= $ldap_crud->err( $mesg )->{html}
 	    if $mesg->is_error();
 
-	  $c->stats->profile('is-blocked search for <i class="text-muted">' . $_->dn . '</i>');
+	  $c->stats->profile('is-blocked search for <i class="text-light">' . $_->dn . '</i>');
 	
 	  @root_arr = split(',', $_->dn);
 	  $root_i = $#root_arr;

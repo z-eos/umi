@@ -244,7 +244,9 @@
       [% END %]
     </ul>
     <!-- <button class="navbar-toggler aside-menu-toggler" type="button"><i class="fa fa-bars"></i></button> -->
-    <a class="navbar-toggler aside-menu-toggler btn btn-link borderless" href="#" title="currently have no idea how to use it but it is a cool feature"><i class="fa fa-bars"></i></a>
+    <a class="navbar-toggler aside-menu-toggler btn btn-link borderless" href="#" title="additional stuff">
+      <i class="fa fa-bars"></i>
+    </a>
   </div>
 </header>
 

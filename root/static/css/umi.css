@@ -141,8 +141,12 @@ html,body {
 
 
 .mono {
-  font-family: monospace;
+  font-family: "Courier New", Courier, monospace;
   word-break: break-all;
+}
+
+.mono-only {
+  font-family: "Andale Mono", monospace;
 }
 
 .umi-search, .umi-search:active {

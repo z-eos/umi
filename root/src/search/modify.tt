@@ -14,6 +14,7 @@
    description = 1
    objectClass = 1
    sshPubKey = 1
+   telephoneNumber = 1
    }
    %]
 

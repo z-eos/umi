@@ -1,10 +1,10 @@
-
+[% # -*- mode: web; -*- %]
 [% IF c.user %]  
 [% PROCESS site/header %]
 
 <div class="app-body"> <!-- APP BODY -->
 
-[% PROCESS site/sidebar %]
+  [% PROCESS site/sidebar %]
 
   <main class="main">
     <noscript>
@@ -19,17 +19,16 @@
       </div>
     </noscript>
     <div class="container-fluid" id="workingfield">
-      
-[% END %]
+      [% END %]
       
       [% content %]
       
-[% IF c.user %]  
+      [% IF c.user %]  
 
     </div>
   </main>
 
-[% PROCESS site/aside %]
+  [% PROCESS site/aside %]
   
 </div> <!-- APP BODY -->
 

@@ -1,11 +1,19 @@
+[% # -*- mode: web; -*- %]
+
 [% IF template.name.match('\.(css|js|txt)');
-     debug("Passing page through as text: $template.name");
-     content;
-   ELSIF is_ajax == 1;
-     debug("AJAX request. Passing page through as text: $template.name");
-     content;
-   ELSE;
-     debug("Applying HTML page layout wrappers to $template.name\n");
-     content WRAPPER site/html + site/layout;
-   END;
+debug("Passing page through as text: $template.name");
+content;
+
+ELSIF is_ajax == 1;
+debug("AJAX request. Passing page through as text: $template.name");
+
+content;
+
+INCLUDE stat.tt;
+
+ELSE;
+debug("Applying HTML page layout wrappers to $template.name\n");
+content WRAPPER site/html + site/layout;
+
+END;
 -%]

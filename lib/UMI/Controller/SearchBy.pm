@@ -243,7 +243,7 @@ sub index :Path :Args(0) {
 	}
 	
 	# is this user blocked?
-	$c->stats->profile('is-blocked search for <i class="text-muted">' . $_->dn . '</i>');
+	$c->stats->profile('is-blocked search for <i class="text-light">' . $_->dn . '</i>');
 	$mesg = $ldap_crud->search({ base => $ldap_crud->cfg->{base}->{group},
 				     filter => sprintf('(&(cn=%s)(memberUid=%s))',
 						       $ldap_crud->cfg->{stub}->{group_blocked},
@@ -441,7 +441,7 @@ sub proc :Path(proc) :Args(0) {
       $return->{error} = $ldap_crud->err( $mesg )->{html} if ! $mesg->count;
       $entry_tmp = $mesg->entry(0);
 
-      $c->stats->profile('search for <i class="text-muted">' . $params->{ldap_modify} . '</i>');
+      $c->stats->profile('search for <i class="text-light">' . $params->{ldap_modify} . '</i>');
 
       foreach $attr ( $entry_tmp->attributes ) {
 	if ( $attr =~ /;binary/ or

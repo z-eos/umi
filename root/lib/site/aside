@@ -2,8 +2,11 @@
 
 <aside class="aside-menu bg-dark" id="App" data-url-tree="/ldap_tree">
   <ul class="nav nav-pills nav-fill" role="tablist">
-    <li class="nav-item">
+    <li class="nav-item" title="LDAP tree">
       <a class="nav-link" data-toggle="tab" href="#tree" role="tab"><i class="fa fa-tree"></i></a>
+    </li>
+    <li class="nav-item" title="statistics">
+      <a class="nav-link" data-toggle="tab" href="#statistics" role="tab"><i class="fa fa-bar-chart"></i></a>
     </li>
     <li class="nav-item">
       <a class="nav-link" data-toggle="tab" href="#messages" role="tab"><i class="fa fa-globe"></i></a>
@@ -29,17 +32,14 @@
     </div>
 
 
-    <!-- === MESSAGES ===  -->
-    <div class="tab-pane p-3" id="messages" role="tabpanel">
-      <div class="message">
-        <div>
-          <small class="text-muted">Lukasz Holeczek</small>
-          <small class="text-muted float-right mt-1">1:52 PM</small>
-        </div>
-        <div class="text-truncate font-weight-bold">Lorem ipsum dolor sit amet</div>
-        <small class="text-muted">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt...</small>
+    <!-- === STATISTICS ===  -->
+    <div class="tab-pane p-3" id="statistics" role="tabpanel">
+      <div id="stat-to" class="message">
       </div>
-      <hr>
+    </div>
+    
+      <!-- === MESSAGES ===  -->
+    <div class="tab-pane p-3" id="messages" role="tabpanel">
       <div class="message">
         <div>
           <small class="text-muted">Lukasz Holeczek</small>
