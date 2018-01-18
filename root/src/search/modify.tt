@@ -4,7 +4,13 @@
    %]
 
 <div class="page-header">
-  <h2>Modify Fields of DN:<small><em>[% modify %]</em></small></h2>
+  <h2>Modify Fields of DN:<small><em>
+    [% IF modify %]
+    [% modify %]
+    [% ELSE %]
+    [% params.dn %]
+    [% END %]
+  </em></small></h2>
 </div>
 
 [% INCLUDE ldap_err.tt %]

@@ -47,7 +47,7 @@ sub about :Path(about) :Args(0) {
     $c->stash( template => 'about.tt',);
 }
 
-sub motto :Path(motto) :Args(0) {
+sub motto : Local {
     my ( $self, $c ) = @_;
     $c->stash( template => 'motto.tt', );
 }
@@ -82,7 +82,7 @@ sub accinfo :Path(accinfo) :Args(0) {
     $c->stash( template => 'acc_info.tt', );
 }
 
-sub sysinfo :Path(sysinfo) :Args(0) {
+sub sysinfo : Local {
   my ( $self, $c ) = @_;
 
   use Data::Printer colored => 0;
@@ -133,7 +133,7 @@ no way to shorten the list to some specific service, yet
 
 =cut
 
-sub stat_acc :Path(stat_acc) :Args(0) {
+sub stat_acc : Local {
   my ( $self, $c ) = @_;
 
   if ( $c->user_exists() ) {
@@ -241,7 +241,7 @@ for now it is used in sysinfo()
 
 =cut
 
-sub stat_monitor :Path(stat_monitor) :Args(0) {
+sub stat_monitor : Local {
   my ( $self, $c ) = @_;
   if ( $c->user_exists() ) {
     my $return;
@@ -316,7 +316,7 @@ account of whether we wish it ...
 
 =cut
 
-sub download_from_ldap :Path(download_from_ldap) :Args(0) {
+sub download_from_ldap : Local {
   my ( $self, $c ) = @_;
   # application/x-x509-ca-cert
   # application/x-x509-user-cert
@@ -647,7 +647,7 @@ page to test code snipets
 
 =cut
 
-sub test :Path(test) :Args(0) {
+sub test : Local {
   my ( $self, $c ) = @_;
   my $ldap_crud = $c->model('LDAP_CRUD');
 
