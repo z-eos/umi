@@ -11,9 +11,10 @@ use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printabl
 
 # has '+error_message' => ( default => 'There were errors in your form.' );has '+item_class' => ( default =>'Inventory' );
 has '+enctype' => ( default => 'multipart/form-data');
+has '+action' => ( default => '/inventory');
 has 'add_inventory' => ( is => 'rw', ); # set if we add inventory rather than create a new one
 
-sub build_form_element_class { [ 'form-horizontal', 'tab-content' ] }
+sub build_form_element_class { [ qw(form-horizontal tab-content formajaxer) ] }
 
 sub build_update_subfields {
   by_flag => { repeatable => { do_wrapper => 1, do_label => 1 } }

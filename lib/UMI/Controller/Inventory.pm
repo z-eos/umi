@@ -4,14 +4,15 @@
 package UMI::Controller::Inventory;
 use Moose;
 use namespace::autoclean;
-use Data::Printer;
+
+use Data::Printer { use_prototypes => 0, caller_info => 1 };
 
 BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 
 use UMI::Form::Inventory;
 has 'form' => ( isa => 'UMI::Form::Inventory', is => 'rw',
 		lazy => 1, default => sub { UMI::Form::Inventory->new },
-		documentation => q{Complex Form to add new, nonexistent user account/s},
+		documentation => q{Complex Form to add new, inventory data},
 	      );
 
 
@@ -33,10 +34,12 @@ Catalyst Controller.
 =cut
 
 sub index :Path :Args(0) {
-    my ( $self, $c, $ldapadduser_id ) = @_;
+    my ( $self, $c ) = @_;
+    my $ldap_crud = $c->model('LDAP_CRUD');
     my $params = $c->req->parameters;
 
-    $self->form->add_inventory( defined $params->{add_inventory} ? $params->{add_inventory} : '' );
+    $self->form->add_inventory( defined $params->{add_inventory} &&
+				$params->{add_inventory} ne '' ? $params->{add_inventory} : '' );
     my $final_message;
 
     # here we initialize repeatable fields to be rendered when the form is called from
@@ -49,24 +52,25 @@ sub index :Path :Args(0) {
 
     $params->{'common_FileDMI'} = $c->req->upload('common_FileDMI') if $params->{'common_FileDMI'};
     $params->{'common_FileSMART'} = $c->req->upload('common_FileSMART') if $params->{'common_FileSMART'};
-
+    p $params;
     $c->stash( template => 'inventory/inventory.tt',
 	       form => $self->form,
 	       final_message => $final_message, );
+    p $final_message;
     return unless $self->form->process(
 				       posted => ($c->req->method eq 'POST'),
 				       params => $params,
-				       ldap_crud => $c->model('LDAP_CRUD'),
+				       ldap_crud => $ldap_crud,
 				      );
-
+    p $params;
     while ( my ($k, $v) = each %{$params} ) {
       delete $params->{$k} if $v eq '';
     }
 
-    my $dmi = $self->create_inventory( $c->model('LDAP_CRUD'), $params );
+    p my $inventory = $self->create_inventory( $ldap_crud, $params );
     #$final_message->{success} = sprintf('<pre>%s</pre>', np($dmi->{success}, caller_info => 1, colored => 0)) if $dmi->{success};
-    $final_message->{success} = $dmi->{success} if $dmi->{success};
-    $final_message->{error} = $dmi->{error} if $dmi->{error};
+    $final_message->{success} = $inventory->{success} if $inventory->{success};
+    $final_message->{error} = $inventory->{error} if $inventory->{error};
 
     $c->stash( final_message => $final_message );
 
@@ -84,7 +88,7 @@ sub create_inventory {
   $args->{common_inventoryNumber} = 'NA'
     if ( defined $args->{common_inventoryNumber} && $args->{common_inventoryNumber} eq '' ) ||
     ! defined $args->{common_inventoryNumber};
-  
+p $args; p $ldap_crud;
   my ( $file_is, $return, $hw, $tmp, $k, $key, $v, $val, $i, $j, $l, $r, $compart, $add, $hwAssignedTo, $common_compart );
 
 

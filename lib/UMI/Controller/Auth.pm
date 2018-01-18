@@ -45,7 +45,7 @@ former, dynamic method, variant is at LDAP_CRUD->attr_equality
 
 sub signin :Path Global {
   my ( $self, $c ) = @_;
-  
+
   $c->session->{auth_uid} = $c->req->param('auth_uid');
   $c->session->{auth_pwd} = $c->req->param('auth_pwd');
 
@@ -71,7 +71,7 @@ sub signin :Path Global {
       }
     }
     my $schema = $ldap_crud->schema; # ( dn => $ldap_crud->{base}->{db} );
-    foreach $key ( sort ( keys %{$meta_schema} )) {p $key;
+    foreach $key ( sort ( keys %{$meta_schema} )) {
       next if $key eq 'top';
       foreach $must ( $schema->must ( $key ) ) {
 	$syntmp = $schema->attribute_syntax($must->{'name'});

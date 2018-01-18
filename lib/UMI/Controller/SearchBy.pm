@@ -11,7 +11,7 @@ use namespace::autoclean;
 
 use Data::Printer { use_prototypes => 0, caller_info => 1 };
 
-use Try::Tiny;
+# use Try::Tiny;
 
 BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 

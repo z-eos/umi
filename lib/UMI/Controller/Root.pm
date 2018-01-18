@@ -632,6 +632,11 @@ sub auto : Private {
 			})) {
     $c->stash( template => 'welcome.tt', );
   } else {
+    # p $c->error;
+    $c->logout();
+    $c->delete_session('Forcing SignOut due to some error ... (for forms, one of the reasons is lack of class formajaxer or action set)');
+    # $c->response->redirect($c->uri_for('/'));
+
     $c->stash( template => 'signin.tt', );
   }
 }

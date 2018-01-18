@@ -69,7 +69,7 @@
 		name="user_block"
 		data-order="[% site.searchby.menu.order.user_block %]"
 		data-toggle="modal"
-		data-target="#modal_block[% id_sufix %]">
+		data-target="#modal_block[% id_suffix %]">
 	  <span class="fa fa-fw fa-ban text-danger"></span>
 	  block
 	</button>
@@ -84,7 +84,7 @@
 		name="ldap_delete"
 		data-order="[% site.searchby.menu.order.ldap_delete %]"
 		data-toggle="modal"
-		data-target="#modal_delete[% id_sufix %]">
+		data-target="#modal_delete[% id_suffix %]">
 	  <span class="fa fa-fw fa-trash text-danger"></span>
 	  delete
 	</button>
@@ -98,7 +98,7 @@
 		  name="chg_acc"
 		  data-order="[% site.searchby.menu.order.chg_acc %]"
 		  data-toggle="modal"
-		  data-target="#modal_reassign[% id_sufix %]">
+		  data-target="#modal_reassign[% id_suffix %]">
 	    <span class="fa fa-fw fa-recycle text-danger"></span>
 	    reassign
 	  </button>
@@ -115,7 +115,7 @@
 		data-order="[% site.searchby.menu.order.vcard %]"
 		name="vcard"
 		data-toggle="modal"
-		data-target="#modal_vcard[% id_sufix %]">
+		data-target="#modal_vcard[% id_suffix %]">
 	  <span class="fa fa-fw fa-upload text-info"></span>
 	  export vCard
 	</button>
@@ -130,7 +130,7 @@
 		data-order="[% site.searchby.menu.order.ldap_ldif %]"
 		name="ldap_ldif"
 		data-toggle="modal"
-		data-target="#modal_ldif[% id_sufix %]">
+		data-target="#modal_ldif[% id_suffix %]">
 	  <span class="fa fa-fw fa-upload text-info"></span>
 	  export LDIF
 	</button>
@@ -182,7 +182,7 @@
 		disabled="disabled"
 		data-order="[% site.searchby.menu.order.ldap_rollback %]"
 		data-toggle="modal"
-		data-target="#modal_rollback[% id_sufix %]">
+		data-target="#modal_rollback[% id_suffix %]">
 	  <span class="fa fa-fw fa-undo text-danger"></span>
 	  rollback
 	</button>

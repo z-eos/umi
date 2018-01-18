@@ -1,13 +1,13 @@
 [% IF admin_owned && ! is_log_obj %]
 <!-- #### Modal: Delete start -->
-<div class="modal modal-danger" id="modal_delete[% id_sufix %]"
-     tabindex="-1" role="dialog" aria-labelledby="modal_delete[% id_sufix %]_label"
+<div class="modal modal-danger" id="modal_delete[% id_suffix %]"
+     tabindex="-1" role="dialog" aria-labelledby="modal_delete[% id_suffix %]_label"
      aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <form role="form" method="POST" action="/searchby/delete">
 	<div class="modal-header">
-	  <h4 class="modal-title" id="modal_delete[% id_sufix %]_label">
+	  <h4 class="modal-title" id="modal_delete[% id_suffix %]_label">
 	    <span class="fa fa-exclamation-circle"></span>
 	    You are about to perform deletion of DN:<br><b>[% entry.key.replace(',', ', ') %]</b>
 	  </h4>
@@ -33,14 +33,14 @@
 
 [% IF to_rollback %]
 <!-- #### Modal: RollBack start -->
-<div class="modal modal-danger" id="modal_rollback[% id_sufix %]"
-     tabindex="-1" role="dialog" aria-labelledby="modal_rollback[% id_sufix %]_label"
+<div class="modal modal-danger" id="modal_rollback[% id_suffix %]"
+     tabindex="-1" role="dialog" aria-labelledby="modal_rollback[% id_suffix %]_label"
      aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <form role="form" method="POST" action="/searchby/delete"><!-- === TO FINISH === -->
 	<div class="modal-header">
-	  <h4 class="modal-title" id="modal_rollback[% id_sufix %]_label">
+	  <h4 class="modal-title" id="modal_rollback[% id_suffix %]_label">
 	    <span class="fa fa-times-circle"></span>
 	    You are about to perform last change rollback of DN:<br><b>[% entry.key.replace(',', ', ') %]</b>
 	  </h4>
@@ -62,14 +62,14 @@
 [% END %]
 
 <!-- #### Modal: Block start -->
-<div class="modal modal-danger" id="modal_block[% id_sufix %]"
-     tabindex="-1" role="dialog" aria-labelledby="modal_block[% id_sufix %]_label"
+<div class="modal modal-danger" id="modal_block[% id_suffix %]"
+     tabindex="-1" role="dialog" aria-labelledby="modal_block[% id_suffix %]_label"
      aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <form role="form" method="POST" class="formajaxer" action="/searchby/block">
 	<div class="modal-header">
-	  <h4 class="h4 modal-title" id="modal_block[% id_sufix %]_label">
+	  <h4 class="h4 modal-title" id="modal_block[% id_suffix %]_label">
 	    <span class="fa fa-ban"></span>
 	    You are about to block user with DN:<br><b>[% entry.key.replace(',', ', ') %]</b>
 	  </h4>
@@ -80,7 +80,7 @@
 	    <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
 	    <button type="submit" class="btn bg-danger umi-btn-event umi-btn-ajax"
 		    name="user_block" value="[% entry.key %]"
-		    onClick="$(modal_block[% id_sufix %]).modal('hide')"
+		    onClick="$(modal_block[% id_suffix %]).modal('hide')"
 		    data-action="block">
 	      Yes, I really want to block this user all accounts, and yes, I understand all consequences!
 	    </button>
@@ -92,14 +92,14 @@
 </div><!-- #### Modal: Block end -->
 
 <!-- #### Modal: Reassign Root Account start -->
-<div class="modal modal-danger" id="modal_reassign[% id_sufix %]"
-     tabindex="-1" role="dialog" aria-labelledby="modal_reassign[% id_sufix %]_label"
+<div class="modal modal-danger" id="modal_reassign[% id_suffix %]"
+     tabindex="-1" role="dialog" aria-labelledby="modal_reassign[% id_suffix %]_label"
      aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <form role="form" method="POST" action="/searchby/reassign" class="formajaxer">
 	<div class="modal-header">
-	  <h4 class="modal-title" id="modal_reassign[% id_sufix %]_label">
+	  <h4 class="modal-title" id="modal_reassign[% id_suffix %]_label">
 	    <span class="fa fa-recycle"></span>
 	    You are about to change root DN for:<br><b>[% entry.key.replace(',', ', ') %]</b>
 	  </h4>
@@ -134,7 +134,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	  <div>
 	    <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
 	    <button type="submit" class="btn bg-danger umi-btn-event umi-btn-ajax"
-		    onClick="$(modal_reassign[% id_sufix %]).modal('hide')"
+		    onClick="$(modal_reassign[% id_suffix %]).modal('hide')"
 		    name="src_dn"
 		    value="[% entry.key %]" data-action="reassign" >
 	      Yes, I really want to change it and yes, I understand all consequences!
@@ -147,14 +147,14 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 </div><!-- #### Modal: Reassign Root Account end -->
 
 <!-- #### Modal: LDIF start -->
-<div class="modal modal-info" id="modal_ldif[% id_sufix %]"
-     tabindex="-1" role="dialog" aria-labelledby="modal_ldif[% id_sufix %]_label"
+<div class="modal modal-info" id="modal_ldif[% id_suffix %]"
+     tabindex="-1" role="dialog" aria-labelledby="modal_ldif[% id_suffix %]_label"
      aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <form role="form" method="POST" class="formajaxer">
 	<div class="modal-header">
-	  <h4 class="modal-title" id="modal_ldif[% id_sufix %]_label">
+	  <h4 class="modal-title" id="modal_ldif[% id_suffix %]_label">
 	    <span class="fa fa-info-circle"></span>
 	    LDIF of DN:<br><b>[% entry.key.replace(',', ', ') %]</b>
 	  </h4>
@@ -178,7 +178,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	<div class="modal-footer">
 	  <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
 	  <button type="submit"
-		  onClick="$(modal_ldif[% id_sufix %]).modal('hide')"
+		  onClick="$(modal_ldif[% id_suffix %]).modal('hide')"
 		  class="btn bg-info umi-btn-event umi-btn-logic"
 		  data-umiact="/searchby/ldif_gen"
 		  name="ldap_ldif"
@@ -192,14 +192,14 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 </div><!-- #### Modal: LDIF end -->
 
 <!-- #### Modal: vCard start -->
-<div class="modal modal-info" id="modal_vcard[% id_sufix %]"
-     tabindex="-1" role="dialog" aria-labelledby="modal_vcard[% id_sufix %]_label"
+<div class="modal modal-info" id="modal_vcard[% id_suffix %]"
+     tabindex="-1" role="dialog" aria-labelledby="modal_vcard[% id_suffix %]_label"
      aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <form role="form" method="POST" class="formajaxer">
 	<div class="modal-header">
-	  <h4 class="modal-title" id="modal_vcard[% id_sufix %]_label">
+	  <h4 class="modal-title" id="modal_vcard[% id_suffix %]_label">
 	    <span class="fa fa-files-o fa-lg"></span>
 	    vCard of DN:<br><b>[% entry.key.replace(',', ', ') %]</b>
 	  </h4>
@@ -231,7 +231,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	<div class="modal-footer">
 	  <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
 	  <button type="submit"
-		  onClick="$(modal_vcard[% id_sufix %]).modal('hide')"
+		  onClick="$(modal_vcard[% id_suffix %]).modal('hide')"
 		  class="btn bg-info umi-btn-event umi-btn-logic"
 		  data-umiact="/searchby/vcard_gen"
 		  name="vcard_dn"

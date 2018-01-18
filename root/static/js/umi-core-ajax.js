@@ -19,6 +19,9 @@ $(document).bind("ajaxSend", function(){
 
 /*! 
  * AJAX to render any change 
+ * IMPORTANT: https://api.jquery.com/serialize/
+ *            Only "successful controls" are serialized to the string.
+ *            No submit button value is serialized since the form was not submitted using a button.
  */
 
 var handleResponce = function(html) {

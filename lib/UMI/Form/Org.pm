@@ -4,14 +4,19 @@
 package UMI::Form::Org;
 
 use HTML::FormHandler::Moose;
-extends 'UMI::Form::LDAP';
+BEGIN { extends 'UMI::Form::LDAP';
+	with 'Tools'; }
 
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable' );
 
-sub build_form_element_class { [ 'form-horizontal', ] }
+use Data::Printer;
+
+has '+action' => ( default => '/org');
+
+sub build_form_element_class { [ qw(form-horizontal formajaxer), ] }
 
 sub html_attributes {
-  my ( $self, $field, $type, $attr ) = @_; use Data::Printer;
+  my ( $self, $field, $type, $attr ) = @_;
   push @{$attr->{'class'}}, 'required'
     if $type eq 'label' && $field->required;
 }

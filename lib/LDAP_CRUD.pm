@@ -560,7 +560,7 @@ around 'ldap' =>
 			   # 			    checkcrl => 0,
 			   # 			  },
 			  );
-    
+
     if ( $mesg->is_error ) {
       warn '#' x 60 . "\nUMI WARNING: Net::LDAP->bind related problem occured!" .
     	"\nerror_name: " . $mesg->error_name .
@@ -2839,9 +2839,9 @@ sub create_account_branch {
 	my $t = localtime;
 	my $refresh = $self->refresh( $arg->{dn}, $arg->{requestttl} );
 	if ( defined $refresh->{success} ) {
-	  $return->{success}, $refresh->{success};
+	  $return->{success} = $refresh->{success};
 	} elsif ( defined $refresh->{error} ) {
-	  $return->{error}, $refresh->{error};
+	  $return->{error} = $refresh->{error};
 	}
       }
       $return->{dn} = $arg->{dn};

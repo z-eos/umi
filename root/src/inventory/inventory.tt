@@ -15,8 +15,9 @@
 
 [% INCLUDE ldap_err.tt %]
 
-<form id="[% form.name %]" class="form-horizontal tab-content" method="post" enctype="multipart/form-data">
-<!-- <form class="form-horizontal tab-content" method="post" enctype="multipart/form-data"> -->
+<form id="[% form.name %]" action="[% form.action %]"
+      class="[% form.form_element_class.join(' ') %]"
+      method="post" enctype="[% form.enctype %]">
 
   [% form.field('add_inventory').render %]
   [% IF ! form.add_inventory %]

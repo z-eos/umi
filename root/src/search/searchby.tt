@@ -41,6 +41,20 @@
    chevron_toggle = 'down' %]
 [% END %]
 
+[% MACRO buttonizer  BLOCK %]
+<form id="buttonizer_form[% buttonizer_id %]"
+      method="POST"
+      action="/searchby"
+      class="form-inline formajaxer">
+  <input type="hidden" name="ldap_subtree" value="[% buttonizer_dn %]">
+  <button type="submit" class="btn btn-link btn-xs"
+	  title="click to open this object"
+	  id="buttonizer_button[% buttonizer_id %]">
+    [% buttonizer_dn %]
+  </button>
+</form>
+[% END %]
+
 
 <div class="table-responsive umi-overflow-x-vis">
   <table class="table table-condensed">
@@ -87,7 +101,7 @@
          entry.value = entries.$entrykey
          dn = entry.key.split(',|=').hash    # here we preparing hash of each dn
 	 # here we preparing uniqe suffix to be added to objects id (like modals e.t.c.)
-         id_sufix = '_' _ entry.key.split(',').0.split('=').1.replace('[-@:\. ]', '_') _ '_' _ loop.index %]
+         id_suffix = '_' _ entry.key.split(',').0.split('=').1.replace('[-@:\. ]', '_') _ '_' _ loop.index %]
 
       [%   IF entry.value.mgmnt.is_blocked %]
       [%   blocked = ' text-danger'
@@ -386,24 +400,28 @@
 	[%     IF h_attr.key == 'sshPublicKey' %]
 	<div class="panel panel-default"><div class="panel-body"><small class="mono">[% i %]</small></div></div>
 	[%     ELSE %]
-	[%     IF schema.${h_attr.key} == 'distinguishedNameMatch' || schema.${h_attr.key} == 'distinguishedName' %]
-	[%     v = '<form role="form" method="POST" action="/searchby" class="formajaxer">' _
-	   '<button type="submit" class="btn btn-link btn-xs"' _
-	   'title="click to open this object" name="ldap_subtree" value="' _
-	   i _ '">' _ i _ '</button></form>' %]
-	[%     ELSE %]
-	[%     v = i %]
-	[%     END %]
+	
+	[%       IF schema.${h_attr.key} == 'distinguishedNameMatch' ||
+	            schema.${h_attr.key} == 'distinguishedName' ||
+	            i.match('^.*ou=.*,dc=.*') %]
+	         [% v = buttonizer( buttonizer_id=id_suffix, buttonizer_dn=i) %]
+	[%       ELSE %]
+	[%       v = i %]
+	[%       END %]
 
-	[%     IF loop.last || v.match('form') %][% # if last element or button %]
-	[%     v.trim %]
-	[%     ELSE %][% # not last element of array %]
-	<div>[%     v.trim %]</div>
+	[%       IF loop.last || v.match('form') %][% # if last element or button %]
+	[%       v.trim %]
+	[%       ELSE %][% # not last element of array %]
+	<div>[%  v.trim %]</div>
+	[%       END %]
 	[%     END %]
 	[%   END %]
-	[% END %]
 	[% ELSE %]
-	[% h_attr.value.trim %]
+	[%   IF ${h_attr.value}.match('^.*,dc=.*') %]
+	[%   buttonizer( buttonizer_id=id_suffix, buttonizer_dn=h_attr.value) %]
+	[%   ELSE %]
+	[%   h_attr.value.trim %]
+	[%   END %]
 	[% END %]
       </dd>
       [% END %] [% # FOREACH h_attr IN entry.value.attrs %]
