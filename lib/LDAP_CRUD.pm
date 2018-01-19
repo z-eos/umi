@@ -941,9 +941,11 @@ sub ldif_read {
 	push @{$arg->{final_message}->{error}}, $self->err($mesg)->{html};
       } else {
 	push @{$arg->{final_message}->{success}},
-	  '<form role="form" method="POST" action="' . UMI->uri_for_action("searchby/index") . '">' .
-	  '<button type="submit" class="btn btn-link btn-xs" title="click to open this object" name="ldap_subtree" value="' .
-	  $entry->dn . '">successfully added: ' . $entry->dn . '</button></form>';
+	  $self->search_result_item_as_button( { uri => UMI->uri_for_action('searchby/index'),
+						 dn => $entry->dn,
+						 btn_txt => $entry->dn,
+						 css_btn => 'btn-link',
+						 prefix => 'successfully added: '} );
       }
     }
   }

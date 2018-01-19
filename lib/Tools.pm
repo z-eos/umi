@@ -7,9 +7,15 @@ use Moose::Role;
 use utf8;
 use Data::Printer;
 use Try::Tiny;
-use Net::CIDR::Set;
-use Net::LDAP::Util qw(	generalizedTime_to_time ldap_explode_dn );
 use POSIX qw(strftime);
+
+use Scalar::Util;
+use List::Util;
+use List::MoreUtils;
+
+use Net::CIDR::Set;
+
+use Net::LDAP::Util qw(	generalizedTime_to_time ldap_explode_dn );
 
 # ??? # use Scalar::Util;
 # ??? # use List::Util;
@@ -1294,18 +1300,33 @@ wrapper to place a form into a button for the data to be displayed
 sub search_result_item_as_button {
   my ($self, $args) = @_;
 
-  my $arg = { uri => $args->{uri},
-	      dn => $args->{dn},
+  my $arg = { uri     => $args->{uri},
+	      dn      => $args->{dn},
+	      pfx     => $args->{prefix} || '',
+	      sfx     => $args->{suffix} || '',
+	      btn_txt => $args->{btn_txt} || '',
+	      btn_tit => $args->{btn_tit} || '',
 	      css_frm => $args->{css_frm} || '',
 	      css_btn => $args->{css_btn} || '', };
   
-  return sprintf('<form role="form" method="POST" action="%s" class="%s"><button type="submit" class="btn %s umi-search" title="account with the same addresses" name="ldap_subtree" value="%s">%s</button></form>',
+  return sprintf("%s <form method=\"POST\" 
+      action=\"%s\" 
+      class=\"form-inline formajaxer %s\">
+  <input type=\"hidden\" name=\"ldap_subtree\" value=\"%s\">
+  <button type=\"submit\" 
+          class=\"btn %s\" 
+          title=\"%s\">
+    %s
+  </button>
+</form>%s",
+		 $arg->{pfx},
 		 $arg->{uri}, # $c->uri_for_action('searchby/index'),
 		 $arg->{css_frm},
-		 $arg->{css_btn},
 		 $arg->{dn},
-		 $arg->{dn});
-
+		 $arg->{css_btn},
+		 $arg->{btn_tit},
+		 $arg->{btn_txt},
+		 $arg->{sfx} );
 }
 
 

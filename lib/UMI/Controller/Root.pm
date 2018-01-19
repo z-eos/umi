@@ -484,7 +484,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
       splice @x, 0, 1;
       $mesg = $ldap_crud->search( { base => join(',', @x),
 				    scope => 'base',
-				    attrs => [ 'dhcpOption' ],} );
+				    attrs => [ 'dhcpOption' ], } );
       if ( $mesg->code ) { $return->{error} .= sprintf('<li>DHCP domain-name/s %s</li>',
 						       $ldap_crud->err($mesg)->{html}); }
       foreach ( @{[$mesg->entry(0)->get_value('dhcpOption')]} ) {
