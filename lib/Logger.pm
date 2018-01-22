@@ -9,6 +9,7 @@ use Try::Tiny;
 use POSIX qw(strftime);
 
 use base 'Log::Contextual';
+# use Log::Contextual;
 use Log::Log4perl qw(:levels :easy);
 
 my $appender_file =

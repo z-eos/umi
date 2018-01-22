@@ -32,6 +32,7 @@ use Net::LDAP::Util qw(
 
 use Try::Tiny;
 
+use Logger;
 
 =head1 NAME
 
@@ -523,6 +524,8 @@ sub _build_ldap {
 	  warn "Net::LDAP->new problem, error: $_";    # not $@
 	};
 
+	log_debug 'LDAP_CRUD: test debug.';
+	
 	# START TLS if defined
 	if ( defined UMI->config->{ldap_crud_cafile} &&
 	     UMI->config->{ldap_crud_cafile} ne '' ) {
