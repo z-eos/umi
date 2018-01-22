@@ -18,6 +18,7 @@
 [% multival = {
    title = 1
    description = 1
+   memberUid = 1
    objectClass = 1
    sshPubKey = 1
    telephoneNumber = 1

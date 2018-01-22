@@ -32,7 +32,7 @@
   
 </div> <!-- APP BODY -->
 
-[% PROCESS site/footer %]
+[% # PROCESS site/footer %]
 
 <script src="/static/js/vue.js"></script>
 <script src="/static/js/nprogress.js"></script>   

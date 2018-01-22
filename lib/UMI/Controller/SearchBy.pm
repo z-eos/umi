@@ -18,44 +18,37 @@ BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 use UMI::Form::Dhcp;
 has 'form_add_dhcp' => ( isa => 'UMI::Form::Dhcp', is => 'rw',
 			lazy => 1, default => sub { UMI::Form::Dhcp->new },
-			documentation => q{Form to add userDhcp},
-		      );
+			documentation => q{Form to add userDhcp}, );
 
 use UMI::Form::ModPwd;
 has 'form_mod_pwd' => ( isa => 'UMI::Form::ModPwd', is => 'rw',
 			lazy => 1, default => sub { UMI::Form::ModPwd->new },
-			documentation => q{Form to modify userPassword},
-		      );
+			documentation => q{Form to modify userPassword}, );
 
 use UMI::Form::ModJpegPhoto;
 has 'form_jpegphoto' => ( isa => 'UMI::Form::ModJpegPhoto', is => 'rw',
 			  lazy => 1, default => sub { UMI::Form::ModJpegPhoto->new },
-			  documentation => q{Form to add/modify jpegPhoto},
-			);
+			  documentation => q{Form to add/modify jpegPhoto}, );
 
 use UMI::Form::ModUserGroup;
 has 'form_mod_groups' => ( isa => 'UMI::Form::ModUserGroup', is => 'rw',
 			   lazy => 1, default => sub { UMI::Form::ModUserGroup->new },
-			   documentation => q{Form to add/modify group/s of the user.},
-			 );
+			   documentation => q{Form to add/modify group/s of the user.}, );
 
 use UMI::Form::ModRadGroup;
 has 'form_mod_rad_groups' => ( isa => 'UMI::Form::ModRadGroup', is => 'rw',
 			   lazy => 1, default => sub { UMI::Form::ModRadGroup->new },
-			   documentation => q{Form to add/modify RADIUS group/s of the object.},
-			 );
+			   documentation => q{Form to add/modify RADIUS group/s of the object.}, );
 
 use UMI::Form::ModGroupMemberUid;
 has 'form_mod_memberUid' => ( isa => 'UMI::Form::ModGroupMemberUid', is => 'rw',
 			      lazy => 1, default => sub { UMI::Form::ModGroupMemberUid->new },
-			      documentation => q{Form to add/modify memberUid/s of the group.},
-			    );
+			      documentation => q{Form to add/modify memberUid/s of the group.}, );
 
 use UMI::Form::AddServiceAccount;
 has 'form_add_svc_acc' => ( isa => 'UMI::Form::AddServiceAccount', is => 'rw',
 			    lazy => 1, default => sub { UMI::Form::AddServiceAccount->new },
-			    documentation => q{Form to add service account},
-			  );
+			    documentation => q{Form to add service account}, );
 
 =head1 NAME
 
@@ -213,7 +206,7 @@ sub index :Path :Args(0) {
       }
     }
 
-    my ( $ttentries, @ttentries_keys, $attr, $tmp, $dn, $dn_depth, $dn_depthes, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry, @root_groups, $root_gr, $obj_item, $c_name, $m_name );
+    my ( $ttentries, @ttentries_keys, $attr, $tmp, $dn, $dn_depth, $dn_depthes, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry, $primary_group_name, @root_groups, $root_gr, $gr_entry, $obj_item, $c_name, $m_name );
     my $blocked = 0;
     my $is_userPassword  = 0;
     my $is_dynamicObject = 0;
@@ -292,6 +285,22 @@ sub index :Path :Args(0) {
 	    $root_gr->{ $_->get_value('cn') } = 1;
 	  }
 	}
+
+	# getting name of the primary group
+	if ( $_->exists('gidNumber') ) {
+	  $mesg = $ldap_crud->search({ base => sprintf('ou=group,%s', $ldap_crud->cfg->{base}->{db}),
+				       filter => sprintf('(gidNumber=%s)',
+							 $_->get_value('gidNumber')), });
+
+	  if ( $mesg->is_error() ) {
+	    $return->{error} .= $ldap_crud->err( $mesg )->{html};
+	  } elsif ( $mesg->count ) {
+	    $gr_entry = $mesg->entry(0);
+	    p $ttentries->{$dn}->{root}->{PrimaryGroupNameDn} = $gr_entry->dn;
+	    p $ttentries->{$dn}->{root}->{PrimaryGroupName} = $gr_entry->get_value('cn');
+	  }
+	}
+
       } elsif ( $dn =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ) {
 	$dn_depth = scalar split(/,/, $ldap_crud->{cfg}->{base}->{inventory}) + 1;
       } else {

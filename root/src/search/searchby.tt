@@ -50,7 +50,7 @@
   <button type="submit" class="btn btn-link btn-xs"
 	  title="click to open this object"
 	  id="buttonizer_button[% buttonizer_id %]">
-    [% buttonizer_dn %]
+    [% buttonizer_text %]
   </button>
 </form>
 [% END %]
@@ -389,6 +389,10 @@
 	    </dl>
 	  </em>
 	</small>
+	[% ELSIF h_attr.key == 'gidNumber'%]
+	[%   buttonizer( buttonizer_id=entry.value.root.PrimaryGroupName,
+	       buttonizer_dn=entry.value.root.PrimaryGroupNameDn,
+	       buttonizer_text= h_attr.value.0 _ ' (' _ entry.value.root.PrimaryGroupName _ ')' )%]	
 	[% ELSIF h_attr.key == 'userPKCS12' %]
 	<kbd class="fa fa-file-o">&nbsp;Binary Data</kbd>
 	[% ELSIF h_attr.key == 'jpegPhoto' %]
@@ -404,7 +408,7 @@
 	[%       IF schema.${h_attr.key} == 'distinguishedNameMatch' ||
 	            schema.${h_attr.key} == 'distinguishedName' ||
 	            i.match('^.*ou=.*,dc=.*') %]
-	         [% v = buttonizer( buttonizer_id=id_suffix, buttonizer_dn=i) %]
+	         [% v = buttonizer( buttonizer_id=id_suffix, buttonizer_dn=i, buttonizer_text=i ) %]
 	[%       ELSE %]
 	[%       v = i %]
 	[%       END %]
@@ -418,7 +422,9 @@
 	[%   END %]
 	[% ELSE %]
 	[%   IF ${h_attr.value}.match('^.*,dc=.*') %]
-	[%   buttonizer( buttonizer_id=id_suffix, buttonizer_dn=h_attr.value) %]
+	[%   buttonizer( buttonizer_id=id_suffix,
+	       buttonizer_dn=h_attr.value,
+	       buttonizer_text=h_attr.value.trim ) %]
 	[%   ELSE %]
 	[%   h_attr.value.trim %]
 	[%   END %]
