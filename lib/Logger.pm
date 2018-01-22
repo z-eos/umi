@@ -8,11 +8,20 @@ use Data::Printer;
 use Try::Tiny;
 use POSIX qw(strftime);
 
-# use base 'Log::Contextual';
-use Log::Log4perl qw(:easy);
-Log::Log4perl->easy_init($DEBUG);
-my $logger  = Log::Log4perl->get_logger;
-set_logger $logger;
+use Log::Contextual::SimpleLogger;
+use Log::Contextual qw( :log ),
+  -logger => Log::Contextual::SimpleLogger->new({ levels => [qw( debug )]});
+
+
+
+
+# use base 'Log::Contextual qw( :log :dlog set_logger with_logger )';
+# use Log::Log4perl qw(:easy);
+# Log::Log4perl->easy_init($DEBUG);
+
+# my $logger  = Log::Log4perl->get_logger;
+
+# set_logger $logger;
 
 
 
