@@ -823,7 +823,7 @@ sub search {
 			      attrs => $arg->{attrs},
 			      sizelimit => $arg->{sizelimit},
 			    );
-  # log_warn { np($arg) };
+  log_debug { np($arg) };
   return $mesg;
 }
 

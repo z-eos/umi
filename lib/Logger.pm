@@ -8,22 +8,30 @@ use Data::Printer;
 use Try::Tiny;
 use POSIX qw(strftime);
 
-use base 'Log::Contextual';
-
 use Log::Log4perl qw(:levels :easy);
+use base qw(Log::Dispatch::Output);
+use base 'Log::Contextual';
 
 #  log4perl.appender.LogFileDebug.layout.ConversionPattern = %d{yyyy.MM.DD HH:mm:ss} %p: %F{2}:%L %M:%n%m%n
 
 my $appender_file = q(
-  log4perl.logger                           = TRACE, LogFileDebug
-  log4perl.appender.LogFileDebug            = Log::Log4perl::Appender::File
-  log4perl.appender.LogFileDebug.layout     = PatternLayout
-  log4perl.appender.LogFileDebug.layout.ConversionPattern = %d{yyyy.MM.DD HH:mm:ss} [%p]: %F{2}:%L %m%n
-  log4perl.appender.LogFileDebug.recreate   = 1
-  log4perl.appender.LogFileDebug.mkpath     = 1
-  log4perl.appender.LogFileDebug.filename   = /tmp/umi/umi.log
-  log4perl.appender.LogFileDebug.mode       = append
-  log4perl.appender.LogFileDebug.utf8       = 1
+  log4perl.logger                       = INFO, appndr_s
+  log4perl.logger.transcript            = TRACE, appndr_f
+
+  log4perl.appender.appndr_f            = Log::Log4perl::Appender::File
+  log4perl.appender.appndr_f.layout     = PatternLayout
+  log4perl.appender.appndr_f.layout.ConversionPattern = %d{yyyy.MM.DD HH:mm:ss} [%p]: %F{2}:%L %m%n
+  log4perl.appender.appndr_f.recreate   = 1
+  log4perl.appender.appndr_f.mkpath     = 1
+  log4perl.appender.appndr_f.filename   = /tmp/umi/umi.log
+  log4perl.appender.appndr_f.mode       = append
+  log4perl.appender.appndr_f.utf8       = 1
+
+  log4perl.appender.appndr_s            = Log::Dispatch::Syslog
+  log4perl.appender.appndr_s.ident      = UMI
+  log4perl.appender.appndr_s.facility   = local2
+  log4perl.appender.appndr_s.layout     = PatternLayout
+  log4perl.appender.appndr_s.layout.ConversionPattern = %p: %F{2} @ %L: %m
 );
 
 # my $appender_file = q(
