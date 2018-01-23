@@ -10,32 +10,32 @@ use POSIX qw(strftime);
 
 use base 'Log::Contextual';
 
-#use Log::Log4perl ':easy';
-#Log::Log4perl->easy_init($DEBUG);
-
 use Log::Log4perl qw(:levels :easy);
 
+#  log4perl.appender.LogFileDebug.layout.ConversionPattern = %d{yyyy.MM.DD HH:mm:ss} %p: %F{2}:%L %M:%n%m%n
+
 my $appender_file = q(
-  log4perl.logger                       = DEBUG, LogFileDebug
+  log4perl.logger                           = TRACE, LogFileDebug
   log4perl.appender.LogFileDebug            = Log::Log4perl::Appender::File
   log4perl.appender.LogFileDebug.layout     = PatternLayout
-  log4perl.appender.LogFileDebug.layout.ConversionPattern = %d{yyyy.MM.DD HH:mm:ss} %p: %F{2}:%L %M:%n%m%n
+  log4perl.appender.LogFileDebug.layout.ConversionPattern = %d{yyyy.MM.DD HH:mm:ss} [%p]: %F{2}:%L %m%n
   log4perl.appender.LogFileDebug.recreate   = 1
   log4perl.appender.LogFileDebug.mkpath     = 1
   log4perl.appender.LogFileDebug.filename   = /tmp/umi/umi.log
   log4perl.appender.LogFileDebug.mode       = append
   log4perl.appender.LogFileDebug.utf8       = 1
-
-  log4perl.logger                       = DEBUG, LogFileInfo
-  log4perl.appender.LogFileInfo            = Log::Log4perl::Appender::File
-  log4perl.appender.LogFileInfo.layout     = PatternLayout
-  log4perl.appender.LogFileInfo.layout.ConversionPattern = %d{yyyy.MM.DD HH:mm:ss} %p: %F{2}:%L %M:%n%m%n
-  log4perl.appender.LogFileInfo.recreate   = 1
-  log4perl.appender.LogFileInfo.mkpath     = 1
-  log4perl.appender.LogFileInfo.filename   = /tmp/umi/umi.log
-  log4perl.appender.LogFileInfo.mode       = append
-  log4perl.appender.LogFileInfo.utf8       = 1
 );
+
+# my $appender_file = q(
+#   log4perl.logger                           = TRACE, LogFileDebug
+#   log4perl.appender.LogFileDebug            = Log::Log4perl::Appender::File
+#   log4perl.appender.LogFileDebug.layout     = SimpleLayout
+#   log4perl.appender.LogFileDebug.recreate   = 1
+#   log4perl.appender.LogFileDebug.mkpath     = 1
+#   log4perl.appender.LogFileDebug.filename   = /tmp/umi/umi.log
+#   log4perl.appender.LogFileDebug.mode       = append
+#   log4perl.appender.LogFileDebug.utf8       = 1
+# );
 
 Log::Log4perl::init( \$appender_file );
 
@@ -55,8 +55,34 @@ sub arg_package_logger { $_[1] }
 sub arg_logger { $_[1] }
 
 
+sub TIEHANDLE {
+  my $class = shift;
+  bless [], $class;
+}
 
+sub PRINT {
+  my $self = shift;
+  $Log::Log4perl::caller_depth++;
+  TRACE @_;
+  # @_;
+  $Log::Log4perl::caller_depth--;
+}
 
+sub PRINTF {
+  my $self = shift;
+  $Log::Log4perl::caller_depth++;
+  TRACE @_;
+  # @_;
+  $Log::Log4perl::caller_depth--;
+}
+
+sub BINMODE {
+  my $self = shift;
+  $Log::Log4perl::caller_depth++;
+  TRACE @_;
+  # @_;
+  $Log::Log4perl::caller_depth--;
+}
 
 
 

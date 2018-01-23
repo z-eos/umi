@@ -8,6 +8,8 @@ use namespace::autoclean;
 use Data::Printer  colored => 1;
 use Data::Dumper;
 
+use Logger;
+
 use Catalyst::Runtime 5.8;
 
 use Catalyst qw/
@@ -164,8 +166,6 @@ __PACKAGE__->allow_access("/tooltranslit");
 
 
 __PACKAGE__->acl_allow_root_internals;
-
-
 
 
 

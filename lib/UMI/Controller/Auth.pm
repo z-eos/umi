@@ -5,6 +5,7 @@ package UMI::Controller::Auth;
 use Moose;
 use namespace::autoclean;
 use Data::Printer;
+use Logger;
 
 BEGIN { extends 'Catalyst::Controller'; }
 
@@ -113,6 +114,8 @@ sub signin :Path Global {
       }
     }
 
+    log_info { 'user ' . $c->session->{auth_uid} . ' successfully logged in' };
+    
     $c->stash( template => 'welcome.tt', );
   } else {
     $c->stash( template => 'signin.tt', );
@@ -122,6 +125,7 @@ sub signin :Path Global {
 sub signout :Path Global {
   my ( $self, $c ) = @_;
   $c->logout();
+  log_info { 'user ' . $c->session->{auth_uid} . ' successfully logged out' };
   $c->delete_session('SignOut');
   $c->response->redirect($c->uri_for('/'));
 }

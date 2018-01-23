@@ -11,6 +11,10 @@ use Time::Piece;
 
 BEGIN { with 'Tools'; }
 
+use Logger;
+
+# tie *STDERR, "Logger";
+
 use utf8;
 use Net::LDAP;
 use Net::LDAP::LDIF;
@@ -31,8 +35,6 @@ use Net::LDAP::Util qw(
 		     );
 
 use Try::Tiny;
-
-use Logger;
 
 =head1 NAME
 
@@ -518,8 +520,10 @@ sub _build_ldap {
 	my $self = shift;
 	my ( $ldap, $mesg );
 
+	# log_debug { UMI->config->{debug}->{level} };
+	
 	$ldap = try {
-	  Net::LDAP->new( $self->host, async => 1, debug => 0 );
+	  Net::LDAP->new( $self->host, async => 1, debug => UMI->config->{debug}->{level} || 0 );
 	} catch {
 	  warn "Net::LDAP->new problem, error: $_";    # not $@
 	};
@@ -717,17 +721,6 @@ returns hash with formatted details
 
 sub err {
   my ($self, $mesg, $debug) = @_;
-  # p $mesg;
-# to finish #   use Log::Contextual qw( :log :dlog set_logger with_logger );
-# to finish #   use Log::Contextual::SimpleLogger;
-# to finish # 
-# to finish #   my $logger = Log::Contextual::SimpleLogger->new({
-# to finish # 						   levels => [qw( trace debug )]
-# to finish # 						  });
-# to finish # 
-# to finish #   set_logger $logger;
-# to finish # 
-# to finish #   log_debug { Dumper($self) . "\n" . $self->err( $mesg ) };
 
   my $caller = (caller(1))[3];
   my $err = {
@@ -767,7 +760,8 @@ sub err {
 			   $mesg->server_error
 			 );
 
-  p $err if defined $debug && $debug > 0;
+  log_debug { np($err) };
+  # p $err if defined $debug && $debug > 0;
   return $err; # if $mesg->code;
 }
 
@@ -822,17 +816,15 @@ sub search {
   	     sizelimit => defined $args->{sizelimit} ? $args->{sizelimit} : 20,
   	    };
 
-
-  log_debug {np($arg)};
-
-
-  return $self->ldap->search( base => $arg->{base},
+  my $mesg = $self->ldap->search( base => $arg->{base},
 			      scope => $arg->{scope},
 			      filter => $arg->{filter},
 			      deref => $arg->{deref},
 			      attrs => $arg->{attrs},
 			      sizelimit => $arg->{sizelimit},
 			    );
+  # log_warn { np($arg) };
+  return $mesg;
 }
 
 
