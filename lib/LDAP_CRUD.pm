@@ -6,7 +6,7 @@ package LDAP_CRUD;
 use Moose;
 use namespace::autoclean;
 
-use Data::Printer  colored => 1;
+use Data::Printer  colored => 0, caller_info => 0;
 use Time::Piece;
 
 BEGIN { with 'Tools'; }
@@ -822,7 +822,8 @@ sub search {
   	     sizelimit => defined $args->{sizelimit} ? $args->{sizelimit} : 20,
   	    };
 
-  log_debug {'---===############### LDAP_CRUD: test debug. #############################'};
+
+  log_debug {np($arg)};
 
 
   return $self->ldap->search( base => $arg->{base},
