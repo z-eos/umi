@@ -8,20 +8,54 @@ use Data::Printer;
 use Try::Tiny;
 use POSIX qw(strftime);
 
-use Log::Contextual::SimpleLogger;
-use Log::Contextual qw( :log ),
-  -logger => Log::Contextual::SimpleLogger->new({ levels => [qw( debug )]});
+use base 'Log::Contextual';
+
+#use Log::Log4perl ':easy';
+#Log::Log4perl->easy_init($DEBUG);
+
+use Log::Log4perl qw(:easy);
+use Log::Log4perl::Appender::File;
+
+my $appender_file =
+  Log::Log4perl::Appender->new(
+			       "Log::Log4perl::Appender::File",
+			       recreate   => 1,
+			       mkpath     => 1,
+			       filename   => '/tmp/umi/umi.log',
+			       mode       => 'append',
+			       utf8       => 1,
+			      );
+
+Log::Log4perl::init( $appender_file );
 
 
 
 
-# use base 'Log::Contextual qw( :log :dlog set_logger with_logger )';
-# use Log::Log4perl qw(:easy);
-# Log::Log4perl->easy_init($DEBUG);
+sub arg_default_logger { $_[1] || Log::Log4perl->get_logger }
+sub arg_levels { [qw(debug trace warn info error fatal custom_level)] }
+sub default_import { ':log' }
 
-# my $logger  = Log::Log4perl->get_logger;
+# or maybe instead of default_logger
+sub arg_package_logger { $_[1] }
 
-# set_logger $logger;
+# and almost definitely not this, which is only here for completeness
+sub arg_logger { $_[1] }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -523,8 +523,6 @@ sub _build_ldap {
 	} catch {
 	  warn "Net::LDAP->new problem, error: $_";    # not $@
 	};
-
-	log_debug {'LDAP_CRUD: test debug.'};
 	
 	# START TLS if defined
 	if ( defined UMI->config->{ldap_crud_cafile} &&
@@ -823,6 +821,9 @@ sub search {
   	     attrs  => $args->{attrs} || [ '*' ],
   	     sizelimit => defined $args->{sizelimit} ? $args->{sizelimit} : 20,
   	    };
+
+  log_debug {'---===############### LDAP_CRUD: test debug. #############################'};
+
 
   return $self->ldap->search( base => $arg->{base},
 			      scope => $arg->{scope},
