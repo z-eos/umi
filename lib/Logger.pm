@@ -13,26 +13,26 @@ use base 'Log::Contextual';
 #use Log::Log4perl ':easy';
 #Log::Log4perl->easy_init($DEBUG);
 
-use Log::Log4perl qw(:easy);
-use Log::Log4perl::Appender::File;
+use Log::Log4perl qw(:levels :easy);
 
-my $appender_file =
-  Log::Log4perl::Appender->new(
-			       "Log::Log4perl::Appender::File",
-			       recreate   => 1,
-			       mkpath     => 1,
-			       filename   => '/tmp/umi/umi.log',
-			       mode       => 'append',
-			       utf8       => 1,
-			      );
+my $appender_file = q(
+  log4perl.appender.Logfile            = Log::Log4perl::Appender::File
+  log4perl.appender.Logfile.recreate   = 1
+  log4perl.appender.Logfile.mkpath     = 1
+  log4perl.appender.Logfile.filename   = /tmp/umi/umi.log
+  log4perl.appender.Logfile.mode       = append
+  log4perl.appender.Logfile.utf8       = 1
+);
 
-Log::Log4perl::init( $appender_file );
+Log::Log4perl::init( \$appender_file );
 
 
 
 
 sub arg_default_logger { $_[1] || Log::Log4perl->get_logger }
-sub arg_levels { [qw(debug trace warn info error fatal custom_level)] }
+
+sub arg_levels { [qw(debug trace warn info error fatal)] }
+
 sub default_import { ':log' }
 
 # or maybe instead of default_logger
