@@ -12,8 +12,11 @@ use Time::Piece;
 BEGIN { with 'Tools'; }
 
 use Logger;
-use Trapper;
-tie *STDERR, "Trapper";
+
+if ( UMI->config->{authentication}->{realms}->{ldap}->{store}->{ldap_server_options}->{debug} ) {
+  use Trapper;
+  tie *STDERR, "Trapper";
+}
 
 use utf8;
 use Net::LDAP;
