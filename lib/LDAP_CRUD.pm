@@ -12,8 +12,8 @@ use Time::Piece;
 BEGIN { with 'Tools'; }
 
 use Logger;
-#use Trapper;
-#tie *STDERR, "Trapper";
+use Trapper;
+tie *STDERR, "Trapper";
 
 use utf8;
 use Net::LDAP;
@@ -521,10 +521,10 @@ sub _build_ldap {
 	my ( $ldap, $mesg );
 
 
-	log_info { UMI->config->{debug}->{level} };
+#	log_error { UMI->config->{debug}->{level} };
 	
 	$ldap = try {
-	  Net::LDAP->new( $self->host, async => 0, debug => UMI->config->{debug}->{ldap} || 0 );
+	  Net::LDAP->new( $self->host );
 	} catch {
 	  warn "Net::LDAP->new problem, error: $_";    # not $@
 	};
