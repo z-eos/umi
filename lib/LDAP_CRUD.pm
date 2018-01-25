@@ -505,7 +505,8 @@ sub _build_cfg {
 	 };
 }
 
-has 'host' => ( is => 'ro', isa => 'Str', required => 1, default => UMI->config->{ldap_crud_host});
+has 'host' => ( is => 'ro', isa => 'Str', required => 1,
+		default => UMI->config->{authentication}->{realms}->{ldap}->{store}->{ldap_server});
 has 'uid' => ( is => 'ro', isa => 'Str', required => 1 );
 has 'pwd' => ( is => 'ro', isa => 'Str', required => 1 );
 has 'dry_run' => ( is => 'ro', isa => 'Bool', default => 0 );
