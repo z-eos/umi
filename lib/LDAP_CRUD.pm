@@ -12,8 +12,8 @@ use Time::Piece;
 BEGIN { with 'Tools'; }
 
 use Logger;
-
-# tie *STDERR, "Logger";
+#use Trapper;
+#tie *STDERR, "Trapper";
 
 use utf8;
 use Net::LDAP;
@@ -520,10 +520,11 @@ sub _build_ldap {
 	my $self = shift;
 	my ( $ldap, $mesg );
 
-	# log_debug { UMI->config->{debug}->{level} };
+
+	log_info { UMI->config->{debug}->{level} };
 	
 	$ldap = try {
-	  Net::LDAP->new( $self->host, async => 1, debug => UMI->config->{debug}->{level} || 0 );
+	  Net::LDAP->new( $self->host, async => 0, debug => UMI->config->{debug}->{ldap} || 0 );
 	} catch {
 	  warn "Net::LDAP->new problem, error: $_";    # not $@
 	};
@@ -567,11 +568,11 @@ around 'ldap' =>
 			  );
 
     if ( $mesg->is_error ) {
-      warn '#' x 60 . "\nUMI WARNING: Net::LDAP->bind related problem occured!" .
-    	"\nerror_name: " . $mesg->error_name .
-    	"\nerror_desc: " . $mesg->error_desc .
-    	"\nerror_text: " . $mesg->error_text .
-    	"\nserver_error: " . $mesg->server_error;
+      log_fatal { '#' x 60 . "\nUMI WARNING: Net::LDAP->bind related problem occured!" };
+      log_fatal { "\nerror_name: " . $mesg->error_name };
+      log_fatal { "\nerror_desc: " . $mesg->error_desc };
+      log_fatal { "\nerror_text: " . $mesg->error_text };
+      log_fatal { "\nserver_error: " . $mesg->server_error };
     }
     return $ldap;
   };
@@ -760,7 +761,7 @@ sub err {
 			   $mesg->server_error
 			 );
 
-  log_debug { np($err) };
+  log_error { np($err) } if defined $debug && $debug > 0;
   # p $err if defined $debug && $debug > 0;
   return $err; # if $mesg->code;
 }
@@ -823,7 +824,9 @@ sub search {
 			      attrs => $arg->{attrs},
 			      sizelimit => $arg->{sizelimit},
 			    );
+
   log_debug { np($arg) };
+
   return $mesg;
 }
 

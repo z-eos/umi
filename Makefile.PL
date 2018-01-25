@@ -25,6 +25,10 @@ requires 'Catalyst::Plugin::Authentication';
 requires 'Catalyst::Plugin::Session::Store::FastMmap';
 requires 'Catalyst::Authentication::Store::LDAP';
 
+requires 'Log::Log4perl'
+requires 'Log::Contextual'
+requires 'Log::Dispatch'
+    
 requires 'BSD::Resource';
 requires 'Cache::FastMmap';
 requires 'Compress::LZ4';

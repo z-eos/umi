@@ -3,138 +3,93 @@
 
 package Logger;
 
-use utf8;
 use Data::Printer;
-use Try::Tiny;
-use POSIX qw(strftime);
 
 use Log::Log4perl qw(:levels :easy);
+use Log::Log4perl::Layout;
+use Log::Log4perl::Level;
+use Log::Log4perl::Filter;
+use Log::Log4perl::Filter::LevelRange;
+use Log::Log4perl::Filter::LevelMatch;
+
 use base qw(Log::Dispatch::Output);
 use base 'Log::Contextual';
 
-#  log4perl.appender.LogFileDebug.layout.ConversionPattern = %d{yyyy.MM.DD HH:mm:ss} %p: %F{2}:%L %M:%n%m%n
+### DEBUG, INFO, WARN, ERROR, FATAL
 
-my $appender_file = q(
-  log4perl.logger                       = INFO, appndr_s
-  log4perl.logger.transcript            = TRACE, appndr_f
+###=== APPENDER FILE ==================================================
+my $apn_file =
+  Log::Log4perl::Appender->new(
+			       "Log::Log4perl::Appender::File",
+			       name       => 'appndr_f',
+			       filename   => '/tmp/umi/umi-transcript.log',
+			       mode       => 'append',
+			       additivity => 0,
+			       utf8       => 1,
+			       #	syswrite   => 1,
+			       recreate   => 1,
+			       mkpath     => 1
+			      );
 
-  log4perl.appender.appndr_f            = Log::Log4perl::Appender::File
-  log4perl.appender.appndr_f.layout     = PatternLayout
-  log4perl.appender.appndr_f.layout.ConversionPattern = %d{yyyy.MM.DD HH:mm:ss} [%p]: %F{2}:%L %m%n
-  log4perl.appender.appndr_f.recreate   = 1
-  log4perl.appender.appndr_f.mkpath     = 1
-  log4perl.appender.appndr_f.filename   = /tmp/umi/umi.log
-  log4perl.appender.appndr_f.mode       = append
-  log4perl.appender.appndr_f.utf8       = 1
+my $flt_file =
+  Log::Log4perl::Filter::LevelRange->new(
+					 LevelMin      => 'INFO',
+					 LevelMax      => 'FATAL',
+					 AcceptOnMatch => true
+					);
+$apn_file->filter($flt_file);
 
-  log4perl.appender.appndr_s            = Log::Dispatch::Syslog
-  log4perl.appender.appndr_s.ident      = UMI
-  log4perl.appender.appndr_s.facility   = local2
-  log4perl.appender.appndr_s.layout     = PatternLayout
-  log4perl.appender.appndr_s.layout.ConversionPattern = %p: %F{2} @ %L: %m
-);
+my $layout_file =
+  Log::Log4perl::Layout::PatternLayout->new( "%d{yyyy.MM.DD HH:mm:ss} [%p]: L%05L @ %F{2}: %m{chomp}%n%n" );
 
-# my $appender_file = q(
-#   log4perl.logger                           = TRACE, LogFileDebug
-#   log4perl.appender.LogFileDebug            = Log::Log4perl::Appender::File
-#   log4perl.appender.LogFileDebug.layout     = SimpleLayout
-#   log4perl.appender.LogFileDebug.recreate   = 1
-#   log4perl.appender.LogFileDebug.mkpath     = 1
-#   log4perl.appender.LogFileDebug.filename   = /tmp/umi/umi.log
-#   log4perl.appender.LogFileDebug.mode       = append
-#   log4perl.appender.LogFileDebug.utf8       = 1
-# );
-
-Log::Log4perl::init( \$appender_file );
+$apn_file->layout($layout_file);
 
 
+### === APPENDER SYSLOG ================================================
+my $apn_sysl =
+  Log::Log4perl::Appender->new(
+			       "Log::Dispatch::Syslog",
+			       ident      => 'UMI',
+			       facility   => 'local2'
+			      );
 
+my $flt_sysl =
+  Log::Log4perl::Filter::LevelMatch->new(
+					 LevelToMatch  => 'DEBUG',
+					 AcceptOnMatch => true
+					);
+$apn_sysl->filter($flt_sysl);
+
+my $layout_sysl =
+  Log::Log4perl::Layout::PatternLayout->new( "[%p]: L%05L @ %F{2}: %m{chomp}" );
+
+$apn_sysl->layout($layout_sysl);
+
+### === APPENDER SCREEN ================================================
+my $apn_scrn =
+  Log::Log4perl::Appender->new(
+			       "Log::Log4perl::Appender::ScreenColoredLevels"
+			      );
+
+$apn_scrn->filter($flt_sysl);
+
+my $layout_scrn =
+  Log::Log4perl::Layout::PatternLayout->new( "%d{yyyy.MM.DD HH:mm:ss} [%p]: L%05L @ %F{2}: %m{chomp}%n%n" );
+
+$apn_scrn->layout($layout_scrn);
+
+
+
+
+get_logger->add_appender($apn_file);
+get_logger->add_appender($apn_sysl);
+get_logger->add_appender($apn_scrn);
+
+get_logger->level($TRACE);
 
 sub arg_default_logger { $_[1] || Log::Log4perl->get_logger }
-
-sub arg_levels { [qw(debug trace warn info error fatal)] }
-
+sub arg_levels { [qw(off fatal error warn info debug trace all)] }
 sub default_import { ':log' }
-
-# or maybe instead of default_logger
-sub arg_package_logger { $_[1] }
-
-# and almost definitely not this, which is only here for completeness
-sub arg_logger { $_[1] }
-
-
-sub TIEHANDLE {
-  my $class = shift;
-  bless [], $class;
-}
-
-sub PRINT {
-  my $self = shift;
-  $Log::Log4perl::caller_depth++;
-  TRACE @_;
-  # @_;
-  $Log::Log4perl::caller_depth--;
-}
-
-sub PRINTF {
-  my $self = shift;
-  $Log::Log4perl::caller_depth++;
-  TRACE @_;
-  # @_;
-  $Log::Log4perl::caller_depth--;
-}
-
-sub BINMODE {
-  my $self = shift;
-  $Log::Log4perl::caller_depth++;
-  TRACE @_;
-  # @_;
-  $Log::Log4perl::caller_depth--;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# use base 'Log::Contextual';
-# # use Log::Contextual;
-# use Log::Log4perl qw(:levels :easy);
-
-# my $appender_file =
-#   Log::Log4perl::Appender->new(
-# 			       "Log::Log4perl::Appender::File",
-# 			       name       => "umi_log",
-# 			       filename   => '/tmp/umi/umi.log',
-# 			       mode       => 'append',
-# 			       additivity => 0,
-# 			       utf8       => 1,
-# 			      );
-
-# Log::Log4perl::init( \$appender_file );
-
-
-# sub arg_default_logger { $_[1] || Log::Log4perl->get_logger }
-
-# sub arg_levels { [qw(debug trace warn info error fatal custom_level)] }
-
-# sub default_import { ':log' }
-
-# # or maybe instead of default_logger
-# sub arg_package_logger { $_[1] }
-
-# # and almost definitely not this, which is only here for completeness
-# sub arg_logger { $_[1] }
 
 
 =head1 AUTHOR
