@@ -5,6 +5,7 @@ package UMI::Controller::Auth;
 use Moose;
 use namespace::autoclean;
 use Data::Printer;
+use Try::Tiny;
 use Logger;
 
 BEGIN { extends 'Catalyst::Controller'; }
@@ -50,13 +51,19 @@ sub signin :Path Global {
   $c->session->{auth_uid} = $c->req->param('auth_uid');
   $c->session->{auth_pwd} = $c->req->param('auth_pwd');
 
-  if ( $c->authenticate({
-			 id       => $c->session->{auth_uid},
-			 password => $c->session->{auth_pwd},
-			})) {
+  my $auth = '';
+  $auth = try {
+    $c->authenticate({ id       => $c->session->{auth_uid},
+		       password => $c->session->{auth_pwd}, });
+  } catch {
+    log_fatal { sprintf(" user %s was not authenticated; %s", $c->session->{auth_uid}, $_) };
+    $auth = '';
+  };
+
+  if ( $auth ne '' ) {
     ## moving to Session->__user # $c->session->{auth_obj} = $c->user->attributes('ashash');
     ## moving to Session->__user # delete $c->session->{auth_obj}->{jpegphoto};
-    # dending of what RDN type is used for auth e.g.uid, cn
+    # depending of what RDN type is used for auth e.g.uid, cn
     $c->session->{auth_uid} = eval '$c->user->' . UMI->config->{authentication}->{realms}->{ldap}->{store}->{user_field};
     ## moving to Session->__user # delete $c->session->{auth_roles};
     ## moving to Session->__user # push @{$c->session->{auth_roles}}, $c->user->roles;
@@ -67,9 +74,7 @@ sub signin :Path Global {
     my $ldap_crud = $c->model('LDAP_CRUD');
     my ( $meta_schema, $key, $value, $must_meta, $may_meta, $must, $may, $syntmp);
     while ( ($key, $value) = each %{$ldap_crud->{cfg}->{objectClass}}) {
-      foreach ( @{$value} ) {
-	$meta_schema->{$_} += 1;
-      }
+      foreach ( @{$value} ) { $meta_schema->{$_} += 1; }
     }
     my $schema = $ldap_crud->schema; # ( dn => $ldap_crud->{base}->{db} );
     foreach $key ( sort ( keys %{$meta_schema} )) {
@@ -118,7 +123,13 @@ sub signin :Path Global {
     
     $c->stash( template => 'welcome.tt', );
   } else {
-    $c->stash( template => 'signin.tt', );
+    my $final_message;
+    $final_message->{error} = 'Server internal error, please inform sysadmin!';
+    $c->logout();
+    $c->delete_session('SignOut');
+    # $c->response->redirect($c->uri_for('/'));
+    $c->stash( template => 'signin.tt',
+	     final_message => $final_message, );
   }
 }
 

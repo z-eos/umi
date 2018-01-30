@@ -5,11 +5,12 @@
 
 <div class="container umi-bg">
   <form class="form-signin" role="form" method="POST" action="signin">
+  [% INCLUDE ldap_err.tt %]
     <div class="form-group has-feedback">
 	<img src="/static/images/umi-logo-black-diagonal.png"
 	     alt="Unified Management Interface"
 	     class="img-responsive mx-auto">
-      <h2 class="form-signin-heading text-center">please sign in</h2>
+      <h2 class="form-signin-heading text-center text-light text-uppercase">please sign in</h2>
 
       <div class="input-group">
 	<span class="input-group-addon fa fa-user-circle-o" id="basic-login"></span>
@@ -19,9 +20,9 @@
 	<span class="input-group-addon fa fa-lock" id="basic-password"></span>
 	<input type="password" class="form-control" placeholder="password" aria-describedby="basic-password" name="auth_pwd" required>
       </div>
-      <div class="checkbox">
+      <div class="checkbox text-light">
 	<label>
-          <input name="auth_mem" type="checkbox" value="remember-me"> Remember me
+          <input name="auth_mem" type="checkbox" value="remember-me"> remember me
 	</label>
       </div>
 

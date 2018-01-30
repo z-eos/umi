@@ -63,6 +63,7 @@ sub PRINTF {
 
 sub BINMODE {
   my $self = shift;
+
   $Log::Log4perl::caller_depth++;
   DEBUG @_;
   $Log::Log4perl::caller_depth--;

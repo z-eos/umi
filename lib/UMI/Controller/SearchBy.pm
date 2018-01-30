@@ -161,9 +161,12 @@ sub index :Path :Args(0) {
 	 ! $self->may_i({ base_dn => $base,
 			  filter => $filter,
 			  user => $c->user, }) ) {
+      log_error { sprintf('User roles or Tools->may_i() check does not allow search by base dn: %s and/or filter: %s',
+			  $base,
+			  $filter ) };
       $c->stash( template => 'ldap_err.tt',
 		 final_message => { error
-				    => sprintf('Your roles does not allow search by base dn:<h5>&laquo;<b><em>%s</em></b>&raquo;</h5> and/or filter:<h5>&laquo;<b><em>%s</em></b>&raquo;</h5>ask UMI admin for explanation/s and provide above info.',
+				    => sprintf('Your roles or Tools->may_i() check does not allow search by base dn:<h5>&laquo;<b><em>%s</em></b>&raquo;</h5> and/or filter:<h5>&laquo;<b><em>%s</em></b>&raquo;</h5>ask UMI admin for explanation/s and provide above info.',
 					       $base,
 					       $filter ), }, );
       return 0;

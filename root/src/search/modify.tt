@@ -16,12 +16,15 @@
 [% INCLUDE ldap_err.tt %]
 
 [% multival = {
-   title = 1
+   associatedDomain = 1
+   businessCategory = 1
    description = 1
+   dhcpStatements = 1
    memberUid = 1
    objectClass = 1
    sshPubKey = 1
    telephoneNumber = 1
+   title = 1
    }
    %]
 
@@ -147,8 +150,7 @@
 	<textarea name="[% attr.key %]" id="[% 'val_' _ id %]" class="form-control" rows=2>[% val %]</textarea>
 
 	[%   ELSE %]
-	<input type=text value="[% val %]" id="[% 'val_' _ id %]" name="[% attr.key %]" class="form-control">
-		
+	<input type="text" value='[% val %]' id="[% 'val_' _ id %]" name="[% attr.key %]" class="form-control">
 	[%   END %]
       </div>
       [%   END %]

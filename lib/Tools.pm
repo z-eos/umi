@@ -1170,20 +1170,18 @@ sub file_smart {
 
 =head2 may_i
 
-replies question: "may I do this?"
+replies a question: "may I do this?"
 
-check the match of the base DN and search filter provided against user
+it checks the match of the search base DN and filter provided against user
 roles and user dn
 
 user role name is expected to be constructed as `acl-<r/w>-KEYWORD>
-where KEYWORD is the pattern to match against the given DN and filter
+where KEYWORD is the pattern to match against the given search DN and filter
 
-in other words
+- if KEYWORD for any of user roles matches the search filter or base DN,
+the check is cosidered successfull
 
-- if KEYWORD for any of user roles matches the filter or
-base DN, the check is successfull
-
-- if user dn matches base DN, the check is suc1cessfull
+- if user dn matches search base DN, the check is considered successfull
 
 return 1 if search is allowed (match) and 0 if not
 
@@ -1459,12 +1457,12 @@ sub tree_buid {
   use List::Util qw( pairs );
 
   my $explodn = ldap_explode_dn( $arg->{dn}, casefold => 'none', reverse => 1 );
-  
+
   foreach ( pairs @{$explodn} ) {
     push @{$tree}, { dn => $_->key . '=' . $_->value };
   }
 
-  
+
 }
 
 

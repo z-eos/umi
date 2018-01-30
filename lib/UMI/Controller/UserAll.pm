@@ -245,6 +245,7 @@ sub create_account {
 		$pwd->{root}->{'clear'},
 		$self->search_result_item_as_button({ uri => $args->{action_searchby},
 						      dn => $root_add_dn,
+						      btn_txt => $root_add_dn,
 						      css_btn => 'btn-success',
 						      css_frm => 'pull-right' }) ) ;
     }

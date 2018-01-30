@@ -557,27 +557,24 @@ around 'ldap' =>
 
     my $ldap = $self->$orig(@_);
 
-    my $mesg = $ldap->bind(
-			   sprintf( "%s=%s,%s",
-				    $self->cfg->{rdn}->{acc_root},
-				    $self->uid,
-				    $self->cfg->{base}->{acc_root} ),
-			   password => $self->pwd,
-			   version  => 3,
-			   # start_tls => 1,
-			   # start_tls_options   => { verify => 'none',
-			   # 			    cafile => '/usr/local/etc/openldap/norse.digital.pem',
-			   # 			    checkcrl => 0,
-			   # 			  },
-			  );
+    my $dn = sprintf( "%s=%s,%s",
+		      $self->cfg->{rdn}->{acc_root},
+		      $self->uid,
+		      $self->cfg->{base}->{acc_root} );
 
-    if ( $mesg->is_error ) {
-      log_fatal { '#' x 60 . "\nUMI WARNING: Net::LDAP->bind related problem occured!" };
-      log_fatal { "\nerror_name: " . $mesg->error_name };
-      log_fatal { "\nerror_desc: " . $mesg->error_desc };
-      log_fatal { "\nerror_text: " . $mesg->error_text };
-      log_fatal { "\nserver_error: " . $mesg->server_error };
-    }
+    my $mesg;
+    $mesg = $ldap->bind( $dn,
+			 password => $self->pwd,
+			 version  => 3, );
+
+    log_fatal { sprintf( "%s\nUMI WARNING: Net::LDAP->bind related problem occured!\nerror_name: %s \nerror_desc: %s \nerror_text: %s \nserver_error: %s",
+			 '#' x 60,
+			 $mesg->error_name,
+			 $mesg->error_desc,
+			 $mesg->error_text,
+			 $mesg->server_error ) }
+      if $mesg->is_error;
+    
     return $ldap;
   };
 
@@ -854,6 +851,7 @@ sub add {
       $return = $self->err( $msg );
       $return->{caller} = 'call to LDAP_CRUD->add from ' . $callername . ': ';
     } else {
+      log_info { 'DN: ' . $dn . ' was successfully added.' };
       $return = 0;
     }
   } else {
@@ -882,6 +880,7 @@ sub moddn {
       $return = $self->err( $msg );
       $return->{caller} = 'call to LDAP_CRUD->moddn from ' . $callername . ': ';
     } else {
+      log_info { 'DN: ' . $dn . ' was successfully modified.' };
       $return = 0;
     }
   } else {
@@ -909,11 +908,18 @@ sub refresh {
     $return->{error} = $msg->error;
     $return->{caller} = 'call to LDAP_CRUD->refresh from ' . $callername . ': ';
   } else {
-    $return->{success} = sprintf("TTL for DN: <b class=\"text-success\">%s</b> was set to %d seconds", $entryName, $msg->get_ttl);
+    log_info { sprintf("TTL for DN: %s was set to %d seconds from now", $entryName, $msg->get_ttl) };
+    $return->{success} = sprintf("TTL for DN: <b class=\"text-success\">%s</b> was set to %d seconds from now", $entryName, $msg->get_ttl);
   }
   return $return;
 }
 
+
+=head2 ldif_read
+
+LDIF processing from input file or ldif code
+
+=cut
 
 sub ldif_read {
   my ($self, $args) = @_;
@@ -926,6 +932,7 @@ sub ldif_read {
     try {
       open( $file, "<", \$arg->{ldif});
     } catch {
+      log_error { "Cannot open data from variable: $arg->{ldif} for reading: $_" };
       return $arg->{final_message} = { error => [ "Cannot open data from variable: $arg->{ldif} for reading: $_", ] };
     };
   } else {
@@ -942,8 +949,10 @@ sub ldif_read {
     } else {
       $mesg = $entry->update($self->ldap);
       if ( $mesg->code ) {
+	log_error { $self->err($mesg)->{desc} . ' while processing DN: ' . $entry->dn };
 	push @{$arg->{final_message}->{error}}, $self->err($mesg)->{html};
       } else {
+	log_info { 'DN: ' . $entry->dn . ' was successfully processed.' };
 	push @{$arg->{final_message}->{success}},
 	  $self->search_result_item_as_button( { uri => UMI->uri_for_action('searchby/index'),
 						 dn => $entry->dn,
@@ -1170,11 +1179,7 @@ sub reassign {
 
 =head2 del
 
-TODO
-
-to backup entry deleted
-
-https://metacpan.org/pod/Net::LDAP::Control::PreRead
+non recursive deletion
 
 =cut
 
@@ -1196,9 +1201,11 @@ sub del {
       if ( $msg && $msg->error_name eq 'LDAP_NO_SUCH_OBJECT' ) {
 	push @{$return->{warning}}, $self->err( $msg ) if $msg;
       } else {
+	log_error { $self->err($msg)->{desc} . ' while deleting DN: ' . $dn };
 	push @{$return->{error}}, $self->err( $msg ) if $msg;
       }
     } else {
+      log_info { 'DN: ' . $dn . ' was successfully deleted.' };
       $return = 0;
     }
   } else {
@@ -1258,14 +1265,14 @@ sub delr {
 	if ( $msg && $msg->error_name eq 'LDAP_NO_SUCH_OBJECT' ) {
 	  push @{$return->{warning}}, $self->err( $msg ) if $msg;
 	} else {
+	  log_error { $self->err($msg)->{desc} . ' while deleting DN: ' . $dn2del };
 	  push @{$return->{error}}, $self->err( $msg ) if $msg;
 	}
       } else {
+	log_info { 'DN: ' . $dn2del . ' was successfully deleted.' };
 	$return = 0;
       }
     }
-    # $self->ldap->update;
-    # $self->ldap->unbind;
   } else {
     $return = 0;
   }
@@ -1509,7 +1516,10 @@ sub modify {
     $msg = $self->ldap->modify ( $dn, changes => $changes, );
     if ($msg->is_error()) {
       $return = $self->err( $msg );
-    } else { $return = 0; }
+    } else {
+      log_info { 'DN: ' . $dn . ' was successfully modified.' };
+      $return = 0;
+    }
   } else { $return = $msg->ldif; }
   # p [ $dn, $changes, $return];
   return $return;

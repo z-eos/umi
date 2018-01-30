@@ -29,7 +29,7 @@ has_field 'file'
        label_class => [ 'col-xs-2' ],
        element_class => [ 'btn', 'btn-default', ],
        element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-       max_size => '50000',
+       max_size => '100000',
        # required => 1,
      );
 

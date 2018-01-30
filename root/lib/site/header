@@ -229,12 +229,12 @@
       	<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-user-circle"></i> [% c.user() %]</a>
 	<div class="dropdown-menu">
 	    <a class="dropdown-item" href="/user_prefs"><i class="fa fa-cogs"></i> Profie</a>
-	    <a class="dropdown-item" href="/auth/signout" title="Sign Out"><i class="fa fa-sign-out"></i> Sign Out</a>
+	    <a class="dropdown-item ajaxless" href="/auth/signout" title="Sign Out"><i class="fa fa-sign-out"></i> Sign Out</a>
 	</div>
       </li>
       [% ELSE %]
       <li class="nav-item">
-	<a href="/auth/signin" title="Sign In"><i class="fa fa-sign-in"></i></a>
+	<a href="/auth/signin" class="ajaxless" title="Sign In"><i class="fa fa-sign-in"></i></a>
       </li>
       [% END %]
       [% IF c.user %]
