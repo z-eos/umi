@@ -1,3 +1,4 @@
+[% # -*- mode: web; -*- %]
 <div id="sidebar" class="sidebar">
   <nav class="sidebar-nav">
     <ul class="nav">
@@ -8,7 +9,7 @@
           <li class="nav-item">
 	    <a class="nav-link" href="/stat_acc"
 	       title="All accounts info in one single,huge,big,fat and heavy table">
-	      <i class="fa fa-fw fa-id-card-o"></i>
+	      <i class="fa fa-fw fa-id-card"></i>
 	      Accounts
 	    </a>
 	  </li>
@@ -80,19 +81,19 @@
 	  [% IF c.check_user_roles('admin') %]
           <li class="nav-item">
 	    <a class="nav-link" href="/group" tabindex="3">
-              <i class="fa fa-fw fa-group"> </i>
+              <i class="fa fa-fw fa-users"> </i>
               Group
 	    </a>
 	  </li>
           <li class="nav-item">
 	    <a class="nav-link" href="/nisnetgroup" tabindex="3">
-              <i class="fa fa-fw fa-group"> </i>
+              <i class="fa fa-fw fa-users"> </i>
               NIS NetGroup
 	    </a>
 	  </li>
           <li class="nav-item">
 	    <a class="nav-link" href="/gitacl" tabindex="5">
-              <i class="fa fa-fw fa-git"></i>
+              <i class="fab fa-fw fa-git"></i>
               GitACL
 	    </a>
 	  </li>
@@ -137,13 +138,13 @@
 	<a class="nav-link nav-dropdown-toggle" href="#"><i class="fa fa-info-circle"></i> Info</a>
 	<ul class="nav-dropdown-items">
 	  <li class="nav-item">
-	    <a class="nav-link" href="/motto"><i class="fa fa-hand-spock-o"></i> user's motto</a>
+	    <a class="nav-link" href="/motto"><i class="fa fa-hand-spock"></i> user's motto</a>
 	  </li>
 	  <li class="nav-item">
 	    <a class="nav-link" href="/about"><i class="fa fa-question-circle"></i> help</a>
 	  </li>
 	  <li class="nav-item">
-	    <a class="nav-link" href="https://github.com/z-eos/umi/wiki"><i class="fa fa-fw fa-wikipedia-w"></i> UMI wiki</a>
+	    <a class="nav-link" href="https://github.com/z-eos/umi/wiki"><i class="fab fa-fw fa-wikipedia-w"></i> UMI wiki</a>
 	  </li>
 	  <li class="nav-item">
 	    <a class="nav-link" href="[% helper_cfg('cfg_local','header','help', 'item2', 'url') %]">
@@ -151,10 +152,10 @@
 	    [% helper_cfg('cfg_local','header','help', 'item2', 'txt') %]</a>
 	  </li>
 	  <li class="nav-item">
-	    <a class="nav-link" href="#"><i class="fa fa-fw fa-comments-o"></i> chat</a>
+	    <a class="nav-link" href="#"><i class="fa fa-fw fa-comments"></i> chat</a>
 	  </li>
 	  <li class="nav-item">
-	    <a class="nav-link" href="#"><i class="fa fa-fw fa-envelope-o"></i> email</a>
+	    <a class="nav-link" href="#"><i class="fa fa-fw fa-envelope"></i> email</a>
 	  </li>
 	  <li class="nav-item">
 	    <a class="nav-link" href="#"><i class="fa fa-fw fa-mobile"></i> telephone</a>

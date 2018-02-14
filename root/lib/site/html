@@ -12,7 +12,7 @@
    <link rel="icon" type="image/x-icon" href="/static/images/favicon.png">
    
    <!-- Icons -->
-   <link href="/static/css/font-awesome.min.css" rel="stylesheet">
+   <link href="/static/fontawesome/css/fontawesome-all.min.css" rel="stylesheet">
 
    <!-- CoreUI Main styles for this application -->
    <link href="/static/css/style.css" rel="stylesheet">

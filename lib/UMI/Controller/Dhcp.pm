@@ -9,7 +9,15 @@ BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 
 use UMI::Form::Dhcp;
 
-use Data::Printer;
+use Data::Printer { use_prototypes => 0, caller_info => 1 };
+
+use Logger;
+
+if ( UMI->config->{authentication}->{realms}->{ldap}->{store}->{ldap_server_options}->{debug} ) {
+  log_info { "LDAP debug option is set, I activate STDERR redirect." };
+  use Trapper;
+  tie *STDERR, "Trapper";
+}
 
 =head1 NAME
 
@@ -40,16 +48,28 @@ new object creation
 
 sub index :Path :Args(0) {
   my ( $self, $c ) = @_;
+  my $params = $c->req->parameters;
 
-    $c->stash( template => 'dhcp/dhcp_wrap.tt',
-	       form => $self->form );
+  $c->stash( template => 'dhcp/dhcp_wrap.tt',
+	     form => $self->form );
 
-    return unless
-      $self->form->process(
-			   posted => ($c->req->method eq 'POST'),
-			   params => $c->req->parameters,
-			   ldap_crud => $c->model('LDAP_CRUD'),
-			  );
+  return unless
+    $self->form->process(
+			 posted => ($c->req->method eq 'POST'),
+			 params => $c->req->parameters,
+			 ldap_crud => $c->model('LDAP_CRUD'),
+			);
+  $c->stash(
+	    final_message => $self->create_dhcp_host ( $c->model('LDAP_CRUD'),
+						       {
+							dhcpHWAddress => $params->{dhcpHWAddress},
+							uid => substr((split(',',$params->{ldap_add_dhcp}))[0],4),
+							dhcpStatements => $params->{dhcpStatements},
+							net => $params->{net},
+							cn => $params->{cn},
+							dhcpComments => $params->{dhcpComments},
+						       }
+						     ));
 }
 
 
@@ -67,7 +87,7 @@ creates dhcp host configuration object (static dhcp lease)
     objectclass: uidObject
     uid: U1408443894C9001-kathryn.janeway
 
-we are taking net from the form and resolving it's not used ip addresses 
+we are taking net from the form and resolving it's not used ip addresses
 
 =cut
 
@@ -77,66 +97,79 @@ sub create_dhcp_host {
   my  ( $self, $ldap_crud, $args ) = @_;
   my $return;
   my $dhcpStatements;
-
-  # p $args;
+  my $nets;
+  my @net = split('/', $args->{net});
+  
+  # p ( $args, caller_info => 1, colored => 1);
   # p $_->name foreach(@{$self->form->fields});
-
 
   # my $dhcpStatements = $ldap_crud->dhcp_lease({ net => $args->{net} });
   # $return->{error} = sprintf('<li>%s</li>', $dhcpStatements->{error}) if ref($dhcpStatements) eq 'HASH';
 
   my $iu = $ldap_crud->ipam_used({ svc => 'dhcp',
-				   fqdn => $args->{net},
-				   base => $ldap_crud->{cfg}->{base}->{dhcp},
-				   filter => sprintf('(&(objectClass=dhcpSubnet)(dhcpOption=domain-name "%s"))', $args->{net}),
+				   netdn => $args->{net},
+				   base => $args->{net},
+				   filter => '(objectClass=*)',
 				   attrs => [ 'cn', 'dhcpNetMask', 'dhcpRange' ], });
-
+  # log_debug { np( $iu ) };
   if ( defined $iu->{error} ) {
     $return->{warning} = $iu->{error};
   } else {
-    $dhcpStatements = $self->ipam_first_free({ ipspace => $iu->{ipspace},
-					       ip_used => $iu->{ip_used}, });
-
-    my $arg = {
-	       dhcpHWAddress => $args->{dhcpHWAddress},
-	       uid => $args->{uid},
-	       net => $args->{net}, # FQDN for net new oject have to belong to
-	       dhcpStatements => $args->{dhcpStatements} || $dhcpStatements,
-	       cn => $args->{cn} || $args->{uid} . '-' . $args->{dhcpHWAddress} =~ tr/://dr,
-	       dhcpComments => join(' ', $args->{dhcpComments}) || undef,
-	      };
-
-    $arg->{ldapadd_arg} = [
-			   dhcpHWAddress => sprintf('ethernet %s', $arg->{dhcpHWAddress}),
-			   uid => $arg->{uid},
-			   dhcpStatements => [ sprintf('fixed-address %s', $arg->{dhcpStatements}),
-					       sprintf('ddns-hostname "%s"', $arg->{cn}) ],
-			   cn => $arg->{cn},
-			   objectClass => $ldap_crud->cfg->{objectClass}->{dhcp},
-			  ];
-
-    push @{$arg->{ldapadd_arg}}, dhcpComments => $arg->{dhcpComments} if defined $arg->{dhcpComments};
-
-    my $nets = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{dhcp},
-				     filter => 'dhcpOption=domain-name "' . $arg->{net} . '"', } );
-
-    if ( $nets->count > 1 ) {
-      $return->{warning} = '<li>network <b>&laquo;' . $arg->{net} .'&raquo;</b> used more than one time in DHCP config!</li>';
-    }
-
-    my $net = $nets->entry(0);
-    $arg->{dn} = sprintf('cn=%s,%s', $arg->{cn}, $net->dn);
-
-    $nets = $ldap_crud->add( $arg->{dn}, $arg->{ldapadd_arg} );
-    if ( $nets ) {
-      $return->{error} .= sprintf('<li>error during <b>&laquo;%s&raquo;</b> configuration: %s</li>', $arg->{net}, $nets);
+    my $first_free = $self->ipam_first_free({ ipspace => $iu->{ipspace}, ip_used => $iu->{ip_used} });
+    if ( ! $first_free ) {
+      $return->{warning} = $self->
+	search_result_item_as_button({ pfx     => 'No free address available for the network choosen.',
+				       dn      => $args->{net},
+				       btn_txt => $args->{net},
+				       css_btn => 'btn-warning',
+				       sfx     => 'try to narrow dhcpRange/dhcpPool for the network if any.', });
     } else {
-      $return->{success} =
-	sprintf('user <em><b>%s,%s</b></em> MAC: <em><b>%s</b></em> now bound to IP: <em><b>%s,%s</b></em>',
-		$arg->{uid},
-		$ldap_crud->cfg->{base}->{acc_root},
-		$arg->{dhcpHWAddress},
-		$arg->{dhcpStatements});
+      my $arg = {
+		 dhcpHWAddress => $args->{dhcpHWAddress},
+		 uid => $args->{uid},
+		 netdn => $args->{net},
+		 net => $args->{net}, # FQDN for net new oject have to belong to
+		 dhcpStatements => $args->{dhcpStatements} || $first_free,
+		 cn => $args->{cn} || $args->{uid} . '-' . $args->{dhcpHWAddress} =~ tr/://dr,
+		 dhcpComments => join(' ', $args->{dhcpComments}) || undef,
+		};
+
+      $arg->{ldapadd_arg} = [
+			     cn => $arg->{cn},
+			     uid => $arg->{uid},
+			     objectClass => $ldap_crud->cfg->{objectClass}->{dhcp},
+			     dhcpHWAddress => sprintf('ethernet %s', $arg->{dhcpHWAddress}),
+			     dhcpStatements => [ sprintf('fixed-address %s', $arg->{dhcpStatements}),
+						 sprintf('ddns-hostname "%s"', $arg->{cn}) ],
+			    ];
+
+      push @{$arg->{ldapadd_arg}}, dhcpComments => $arg->{dhcpComments} if defined $arg->{dhcpComments};
+      # log_debug { np($arg) };
+
+      # $nets = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{dhcp},
+      # 				     filter => 'dhcpOption=domain-name "' . $arg->{net} . '"', } );
+
+      # if ( $nets->count > 1 ) {
+      #   $return->{warning} = '<li>network <b>&laquo;' . $arg->{net} .'&raquo;</b> used more than one time in DHCP config!</li>';
+      # }
+      # my $net = $nets->entry(0);
+
+      $arg->{dn} = sprintf('cn=%s,%s', $arg->{cn}, $arg->{netdn});
+
+      $nets = $ldap_crud->add( $arg->{dn}, $arg->{ldapadd_arg} );
+      log_debug { np($nets) };
+      if ( $nets ) {
+	$return->{error} .= sprintf('<li>error during <b>&laquo;%s&raquo;</b> configuration: %s</li>',
+				    $arg->{net},
+				    $nets->{html});
+      } else {
+	$return->{success} =
+	  sprintf('user <em><b>%s,%s</b></em> MAC: <em><b>%s</b></em> now bound to IP: <em><b>%s,%s</b></em>',
+		  $arg->{uid},
+		  $ldap_crud->cfg->{base}->{acc_root},
+		  $arg->{dhcpHWAddress},
+		  $arg->{dhcpStatements});
+      }
     }
   }
   return $return;

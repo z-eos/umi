@@ -47,7 +47,9 @@ __PACKAGE__
 	   disable_component_resolution_regex_fallback => 1,
 	   enable_catalyst_header => 1, # Send X-Catalyst header
 	   default_view => "Web",
-	   session => { cookie_name => "umi_cookie",
+	   session => { # cookie_name => "umi_cookie",
+			cookie_expires => 0,
+			cookie_secure => 0,
 		        storage => "/tmp/umi/umi-session-t$^T-p$>",
 			## Cache::FastMmap section PAGE SIZE AND KEY/VALUE LIMITS
 			# cache_size => '10m',
@@ -56,7 +58,7 @@ __PACKAGE__
 			compressor => 'lz4',
 			flash_to_stash => 1,
 			# expire_time => '1d',
-			expires => 28800, # 8 hours
+			expires => 86400, # 24 hours
 			verify_address => 1,
 			unlink_on_exit => 1,
 			## init_file => 1, # causes need for re-login if PSGI reloaded during the form filling

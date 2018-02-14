@@ -110,12 +110,12 @@ sub sysinfo : Local {
 
   $sysinfo = {
 	      session => { title => 'Session',
-			   data => np(%x, colored => 0), },
+			   data  => np(%x, colored => 0), },
 	      LDAP_CRUD_cfg => { title => 'LDAP_CRUD configuration ( $c->model(LDAP_CRUD)->cfg )',
-				 data => np($c->model('LDAP_CRUD')->cfg, colored => 0), },
+				 data  => np($c->model('LDAP_CRUD')->cfg, colored => 0), },
 	      # look stat_monitor()
 	      monitor => { title => 'OpenLDAP daemon monitor',
-			   data => np($monitor, colored => 0), },
+			   data  => np($monitor, colored => 0), },
 	      # UMI_c => { title => 'UMI c',
 	      # 		      data => p($c, colored => 0), },
 	     };
@@ -750,7 +750,7 @@ sub end : ActionClass('RenderView') {
     find(sub { $size += -s if -f $_ }, $b);
     push @{$navbar_note}, { note => sprintf("session storage %.1f Mb", $size / 1024 / 1024),
 			    color => $size > UMI->config->{session_storage_size} ? 'danger' : 'info',
-			    icon => 'fa-trash-o' };
+			    icon => 'fa-trash' };
   }
   
   my @rep = $c->stats->report;

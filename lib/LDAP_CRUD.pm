@@ -14,6 +14,7 @@ BEGIN { with 'Tools'; }
 use Logger;
 
 if ( UMI->config->{authentication}->{realms}->{ldap}->{store}->{ldap_server_options}->{debug} ) {
+  log_info { "LDAP debug option is set, I activate STDERR redirect." };
   use Trapper;
   tie *STDERR, "Trapper";
 }
@@ -139,18 +140,18 @@ sub _build_cfg {
 					   monitor
 					) ],
 		   icon => {
-			    default =>       'fa fa-star',
-			    People =>        'fa fa-user-circle-o',
-			    DHCP =>          'fa fa-sitemap',
-			    GitACL =>        'fa fa-git',
-			    group =>         'fa fa-group',
-			    history =>       'fa fa-history',
-			    inventory =>     'fa fa-tag',
-			    mta =>           'fa fa-envelope',
-			    Organizations => 'fa fa-industry',
-			    OpenVPN =>       'fa fa-sitemap',
-			    rad_groups =>    'fa fa-group',
-			    rad_profiles =>  'fa fa-cogs',
+			    default =>       'fas fa-star',
+			    People =>        'fas fa-user',
+			    DHCP =>          'fas fa-sitemap',
+			    GitACL =>        'fas fa-git',
+			    group =>         'fas fa-users',
+			    history =>       'fas fa-history',
+			    inventory =>     'fas fa-tag',
+			    mta =>           'fas fa-envelope',
+			    Organizations => 'fas fa-industry',
+			    OpenVPN =>       'fas fa-sitemap',
+			    rad_groups =>    'fas fa-users',
+			    rad_profiles =>  'fas fa-cogs',
 			   },
 		  },
 	  exclude_prefix => 'aux_',
@@ -304,7 +305,7 @@ sub _build_cfg {
 		      disabled => 0,
 		      gidNumber => 10106,
 		      jpegPhoto_noavatar => UMI->path_to('root', 'static', 'images', '/avatar-xmpp.png'),
-		      icon => 'fa fa-lightbulb-o',
+		      icon => 'fa fa-lightbulb',
 		      data_fields => 'login,logindescr,password1,password2',
 		      data_relation => 'passw',
 		      associateddomain_prefix =>
@@ -840,7 +841,8 @@ Net::LDAP->add wrapper
 
 sub add {
   my ($self, $dn, $attrs) = @_;
-
+  log_debug { $dn };
+  log_debug { np($attrs) };
   my $callername = (caller(1))[3];
   $callername = 'main' if ! defined $callername;
   my $return;
@@ -954,11 +956,11 @@ sub ldif_read {
       } else {
 	log_info { 'DN: ' . $entry->dn . ' was successfully processed.' };
 	push @{$arg->{final_message}->{success}},
-	  $self->search_result_item_as_button( { uri => UMI->uri_for_action('searchby/index'),
-						 dn => $entry->dn,
+	  $self->search_result_item_as_button( { uri     => UMI->uri_for_action('searchby/index'),
+						 dn      => $entry->dn,
 						 btn_txt => $entry->dn,
 						 css_btn => 'btn-link',
-						 prefix => 'successfully added: '} );
+						 pfx     => 'successfully added: '} );
       }
     }
   }
@@ -2103,6 +2105,8 @@ sub params2attrs {
 
 =head2 dhcp_lease
 
+!!! TO BE REPLACED WITH ipam_used
+
 method to stat used static DHCP leases (isc-dhcpd layout)
 
 info gathered:
@@ -2115,16 +2119,20 @@ script `dhcpd-conf-to-ldap'
 
     cn=172.16.0.0,cn=XXX01 DHCP Config,ou=XXX01,...,ou=ZZZ,ou=DHCP,dc=umidb
 
-each net contains own uniq domain-name
+each net expected to contain own uniq domain-name, if not specified
+then net DN is expected to be set
 
 logic for lease assignment is:
 
 user -> org of user -> domain/s of org of user -> DHCP net for the domain
+     |                                         ^
+     +-----------------------------------------|
 
 arguments method expects
 
-    fqdn => fqdn of the network
-    what => keyword, one of: used, ip, mac, hostname, all (the type of data to return)
+    fqdn  => fqdn of the network
+    netdn => DN of the network to pick the lease up from
+    what  => keyword, one of: used, ip, mac, hostname, all (the type of data to return)
 
 method returns such a hash:
 
@@ -2186,58 +2194,49 @@ where key
 
 sub dhcp_lease {
   my ( $self, $args ) = @_;
-  my $return;
+  my ($return, $mesg);
   my $arg = {
-	     fqdn => $args->{net},
-	     what => $args->{what} || 'stub', # used, ip, mac, hostname, all
+	     net_addr => $args->{net_addr} || '',
+	     net_mask => $args->{net_mask} || '',
+	     net_rnge => $args->{net_rnge} || '',
+	     netdn    => $args->{netdn} || '',
+	     net      => $args->{net} || '',
+	     fqdn     => $args->{fqdn} || '',
+	     what     => $args->{what} || 'stub', # used, ip, mac, hostname, all
 	    };
 
-  my $mesg =
-    $self->search({ base => $self->cfg->{base}->{dhcp},
-		    filter => sprintf('dhcpOption=domain-name "%s"', $arg->{fqdn}),
-		    attrs => [ 'cn', 'dhcpNetMask', 'dhcpRange' ], });
+  my ( $i, $net_addr, $addr_num, $rnge, @leases, $lease, $ip, $mac, $hostname );
+  $return->{net_dn} = $arg->{netdn};
+  $net_addr = $self->ipam_ip2dec( $arg->{net_addr} );
+  $addr_num = 2 ** ( 32 - $arg->{mask});
+  ( $rnge->{l}, $rnge->{r} ) = split(" ", $arg->{range});
+  $rnge->{l} = $self->ipam_ip2dec( $rnge->{l} );
+  $rnge->{r} = $self->ipam_ip2dec( $rnge->{r} );
 
-  if (! $mesg->count) {
-    $return->{error} = 'DHCP configuration for net choosen, looks absent.';
-    return $return;
-  } else {
-    my ( $i, $net_addr, $addr_num, $range_left, $range_right, @leases, $lease, $ip, $mac, $hostname );
-    my @net = $mesg->entries;
-    foreach (@net) {
-      $return->{net_dn} = $_->dn;
-      $net_addr = unpack('N', pack ('C4', split('\.', $_->get_value('cn')))); # IPv4 to decimal
-      $addr_num = 2 ** ( 32 - $_->get_value('dhcpNetMask'));
-      ( $range_left, $range_right ) = split(" ", $_->get_value('dhcpRange'));
-      $range_left = unpack('N', pack ('C4', split('\.', $range_left)));
-      $range_right = unpack('N', pack ('C4', split('\.', $range_right)));
+  $mesg = $self->search({ base => $arg->{netdn},
+			  scope => 'children',
+			  attrs => [ 'cn', 'dhcpStatements', 'dhcpHWAddress' ],
+			  sizelimit => 0, });
 
-      $mesg =
-	$self->search({ base => $_->dn,
-			scope => 'children',
-			attrs => [ 'cn', 'dhcpStatements', 'dhcpHWAddress' ],
-			sizelimit => 256, });
+  @leases = $mesg->sorted('dhcpStatements');
+  foreach ( @leases ) {
+    $ip = $self->ipam_ip2dec( (split(/\s+/, $_->get_value('dhcpStatements')))[1] );
+    $mac = (split(/\s+/, $_->get_value('dhcpHWAddress')))[1];
+    $hostname = $_->get_value('cn');
 
-      @leases = $mesg->sorted('dhcpStatements');
-      foreach ( @leases ) {
-	$ip = unpack('N', pack ('C4', split('\.', (split(/\s+/, $_->get_value('dhcpStatements')))[1])));
-	$mac = (split(/\s+/, $_->get_value('dhcpHWAddress')))[1];
-	$hostname = $_->get_value('cn');
-
-	$return->{used}->{ip}->{$ip}->{mac} = $mac;
-	$return->{used}->{ip}->{$ip}->{hostname} = $hostname;
-	$return->{used}->{mac}->{$mac}->{ip} = $ip;
-	$return->{used}->{mac}->{$mac}->{hostname} = $hostname;
-	$return->{used}->{hostname}->{$hostname}->{ip} = $ip;
-	$return->{used}->{hostname}->{$hostname}->{mac} = $mac;
-      }
-      ## ip counting starts from the *second* assignable (not the net
-      ## address and not broadcast) the first address is reserved for
-      ## the very DHCP server needs
-      for ($i = $net_addr + 1 + 1; $i < ($net_addr + $addr_num - 1); $i++) {
-	next if $return->{used}->{ip}->{$i} || ( $i >= $range_left && $i <= $range_right );
-	push @{$return->{available}}, $i;
-      }
-    }
+    $return->{used}->{ip}->{$ip}->{mac} = $mac;
+    $return->{used}->{ip}->{$ip}->{hostname} = $hostname;
+    $return->{used}->{mac}->{$mac}->{ip} = $ip;
+    $return->{used}->{mac}->{$mac}->{hostname} = $hostname;
+    $return->{used}->{hostname}->{$hostname}->{ip} = $ip;
+    $return->{used}->{hostname}->{$hostname}->{mac} = $mac;
+  }
+  ## ip counting starts from the *second* assignable (not the net
+  ## address and not broadcast) the first address is reserved for
+  ## the very DHCP server needs
+  for ($i = $net_addr + 1 + 1; $i < ($net_addr + $addr_num - 1); $i++) {
+    next if $return->{used}->{ip}->{$i} || ( $i >= $rnge->{l} && $i <= $rnge->{r} );
+    push @{$return->{available}}, $i;
   }
 
   if ( defined $arg->{what} && $arg->{what} eq 'ip' ) {
@@ -2251,13 +2250,15 @@ sub dhcp_lease {
   } elsif ( defined $arg->{what} && $arg->{what} eq 'used' ) {
     return $return->{used};
   } else {
-    return [ map join(".",unpack("C4", pack("N",$_))), sort(@{$return->{available}}) ]; # decimal to IPv4
+    return [ map $self->ipam_dec2ip( $_ ), sort(@{$return->{available}}) ]; # decimal to IPv4
   }
 }
 
 =head2 ipam_used
 
-IP Addresses Used
+!!! TO BE FIXED
+
+method to find all IP Addresses Used for a network requested
 
 info gathered:
 
@@ -2269,10 +2270,12 @@ arguments (returned with results as well) expected:
      svc: type STRING
           service identificator
 
+   netdn: DN of the network to process
+
     fqdn: fqdn of the network provided by `svc' service
 
     base: type STRING
-          base to do search against, in general it is LDAP_CRUD::cfg->{base}->{}
+          base to do search against, in general it is LDAP_CRUD::cfg->{base}->{...}
 
   filter: type STRING
           filter to do search with
@@ -2284,7 +2287,7 @@ arguments (returned with results as well) expected:
    attrs: type ARRAYREF
           attributes to return
 
-method returns such a hash:
+the method returns hash like this:
 
     {
       arg       {
@@ -2312,47 +2315,89 @@ method returns such a hash:
 sub ipam_used {
   my ( $self, $args ) = @_;
   my $arg = { svc    => $args->{svc} || 'ovpn',
-	      fqdn   => $args->{fqdn},
+	      netdn  => $args->{netdn},
+	      fqdn   => $args->{fqdn} || '',
 	      base   => $args->{base},
 	      filter => $args->{filter},
 	      attrs  => $args->{attrs},
 	    };
+  # log_debug { np($arg) };
   my $return;
   $return->{arg} = $arg;
 
   my ( $key, $val, $k, $v, $l, $r, $tmp, $entry_svc, $entry_dhcp, $entry_ovpn, $ipspace, $ip_used );
-  
+
   if ( $arg->{svc} ne 'dhcp' && $arg->{svc} ne 'ovpn' ) {
     $return->{error} = 'ipam_used(): incorrect value of option: svc.';
     return $return;
   }
-  
+
   my $mesg_svc = $self->search({ base   => $arg->{base},
 				 filter => $arg->{filter},
+				 scope => 'base',
 				 attrs  => $arg->{attrs}, });
-  if (! $mesg_svc->count) {
-    $return->{error} = sprintf("ipam_used(): No %s configuration for %s found .", uc( $arg->{svc} ), $arg->{fqdn});
+  if ( $mesg_svc->code ) {
+    #    $return->{error} = sprintf("ipam_used(): No %s configuration for %s found .", uc( $arg->{svc} ), $arg->{netdn});
+    push @{$return->{error}}, $self->err($mesg_svc)->{html};
+    log_error { sprintf("%s : %s : %s", $self->err($mesg_svc)->{name},
+			$self->err($mesg_svc)->{desc},
+			$self->err($mesg_svc)->{text}) };
     return $return;
   } else {
+    # !!! TODO case when no host configured yet
     foreach $entry_svc (@{[ $mesg_svc->as_struct ]}) {
+      # log_debug { np($entry_svc) };
       while ( ($key, $val) = each %{$entry_svc} ) {
-	# SERVICE: DHCP -----------------------------------------------
+
+	#--- SERVICE: DHCP ----------------------------------------------------------------------------------------------
 	if ( $arg->{svc} eq 'dhcp' ) {
-	  push @{$return->{ipspace}}, $val->{cn}->[0] . '/' . $val->{dhcpnetmask}->[0];
+	  push @{$return->{ipspace}}, $val->{cn}->[0] . '/'. $val->{dhcpnetmask}->[0];
+
+	  # declare each dhcpRange as used space
+	  my $mesg_rnge = $self->search({ base   => $arg->{base},
+					  filter => '(dhcpRange=*)',
+					  attrs  => [ qw( cn dhcpRange ) ], });
+	  if ( $mesg_rnge->code ) {
+	    push @{$return->{error}}, $self->err($mesg_rnge)->{html};
+	    log_error { sprintf("%s : %s : %s", $self->err($mesg_rnge)->{name},
+				$self->err($mesg_rnge)->{desc},
+				$self->err($mesg_rnge)->{text}) };
+	    return $return;
+	  } else {
+	    foreach ( @{[ $mesg_rnge->entries ]} ) {
+	      ($l, $r) = split(/ /, $_->get_value('dhcpRange'));
+	      $return->{iprange}->{l} = $l;
+	      $return->{iprange}->{r} = $r;
+	      for ( my $i = $self->ipam_ip2dec( $l ); $i < $self->ipam_ip2dec( $r ) + 1; $i++ ) {
+		push @{$return->{ip_used}}, $self->ipam_dec2ip( $i ) . '/32';
+	      }
+	    }
+	  }
+
+	  # declare each existent lease as used ip
 	  my $mesg_dhcp = $self->search({ base   => $key,
 					  filter => 'dhcpStatements=fixed-address*',
 					  attrs  => [ 'dhcpStatements', 'dhcpHWAddress' ], });
-	  if (! $mesg_dhcp->count) {
-	    $return->{error} = sprintf("ipam_used(): Some %s dn: %s configuration missed or incorrect.", uc( $arg->{svc} ), $key);
+	  if ( $mesg_dhcp->code ) {
+	    push @{$return->{error}}, sprintf("ipam_used(): problems with DN: %s; error: %s", $key, $self->err($mesg_dhcp)->{html});
+	    log_error { sprintf("%s : %s : %s", $self->err($mesg_dhcp)->{name},
+				$self->err($mesg_dhcp)->{desc},
+				$self->err($mesg_dhcp)->{text}) };
 	    return $return;
 	  } else {
-	    foreach $entry_dhcp (@{[ $mesg_dhcp->as_struct ]}) {
-	      push @{$return->{ip_used}}, (split(/ /, $v->{dhcpstatements}->[0]))[1] . '/32'
-		while ( ($k, $v) = each %{$entry_dhcp} );
+	    foreach $entry_dhcp ( @{[ $mesg_dhcp->as_struct ]} ) {
+	      while ( ($k, $v) = each %{$entry_dhcp} ) {
+		foreach ( @{$v->{dhcpstatements}} ) {
+		  next if $_ !~ /fixed-address/;
+		  log_debug { $_ };
+		  push @{$return->{ip_used}}, (split(/ /, $_))[1] . '/32';
+		}
+	      }
 	    }
 	  }
 	}
-	# SERVICE: OpenVPN --------------------------------------------
+
+	# SERVICE: OpenVPN -------------------------------------------------------------------------------------------
 	elsif ( $arg->{svc} eq 'ovpn' ) {
 	  ($l, $r) = split(/ /, $val->{umiovpncfgserver}->[0]);
 
@@ -2388,6 +2433,7 @@ sub ipam_used {
 	    }
 	  }
 	}
+	#log_debug { np($return) };
       } # while end
     } # foreach end
   }
@@ -2538,6 +2584,57 @@ sub _build_select_associateddomains {
   return \@domains;
 }
 
+=head2 select_dhcp_nets
+
+Method, options builder for select element of networks served by dhcp
+
+=cut
+
+has 'select_dhcp_nets' => ( traits => ['Array'],
+	       is => 'ro', isa => 'ArrayRef', required => 0, lazy => 1,
+	       builder => '_build_select_dhcp_nets',
+	     );
+
+sub _build_select_dhcp_nets {
+  my $self = shift;
+  my (@domains, @dhcp_cfg_arr, $dhcp_cfg, @net_arr, $net);
+  my $err_message = '';
+
+  my $mesg = $self->search( { base => $self->cfg->{base}->{dhcp},
+			      filter => '(&(objectClass=dhcpService)(cn=*))',
+			      sizelimit => 0,
+			      attrs => [ qw( cn ) ],
+			    } );
+  if ( ! $mesg->count ) {
+    $err_message =
+      $self->msg2html({ type => 'panel', data => $self->err($mesg)->{html} });
+  } else {
+    @dhcp_cfg_arr = $mesg->sorted('cn');
+    foreach $dhcp_cfg ( @dhcp_cfg_arr ) {
+      $mesg = $self->search( { base => $dhcp_cfg->dn,
+			      filter => '(&(objectClass=dhcpSubnet)(cn=*))',
+			      sizelimit => 0,
+			      attrs => [ qw(cn dhcpOption dhcpNetMask) ],
+			    } );
+      if ( ! $mesg->count ) {
+	$err_message =
+	  $self->msg2html({ type => 'panel', data => $self->err($mesg)->{html} });
+      } else {
+	@net_arr = $mesg->sorted('cn');
+	push @domains, { value => '--- select network assigned domain ---', label => '--- select network assigned domain ---'};
+	foreach $net ( @net_arr ) {
+	  push @domains, { value => $net->dn,
+			   label => sprintf("[%s]: %s/%s",
+					    $dhcp_cfg->get_value('cn'),
+					    $net->get_value('cn'),
+					    $net->get_value('dhcpNetMask'))};
+	}
+      }
+    }
+  }
+  return \@domains;
+}
+
 =head2 select_dhcp_associateddomains
 
 Method, options builder for select element of dhcp domain names
@@ -2554,28 +2651,28 @@ has 'select_dhcp_associateddomains' => ( traits => ['Array'],
 
 sub _build_select_dhcp_associateddomains {
   my $self = shift;
-
+  my ($net, $mask);
+  
   my @domains;
   my $mesg = $self->search( { base => $self->cfg->{base}->{dhcp},
 			      filter => '(&(objectClass=dhcpSubnet)(dhcpOption=domain-name *))',
 			      sizelimit => 0,
-			      attrs => [ 'dhcpOption' ],
+			      attrs => [ qw(cn dhcpOption dhcpNetMask) ],
 			    } );
   my $err_message = '';
 
-  $err_message = '<div class="alert alert-danger">' .
-    '<i class="' . $self->{cfg}->{stub}->{icon_error} . '"></i><ul>' .
-    $self->err($mesg) . '</ul></div>'
+  $err_message = $self->msg2html({ type => 'panel',
+				   data => $self->err($mesg)->{html} })
     if ! $mesg->count;
 
-  my @entries = $mesg->sorted('dhcpOption');
+  my @entries = $mesg->sorted('cn');
   my (@i, @j);
   foreach my $entry ( @entries ) {
     @i = $entry->get_value('dhcpOption');
-    foreach (@i) {
+    foreach (@i) { log_info { $_ };
       # to skip underlying objects dhcpOption values different from `domain-name'
       push @j, substr((split(/ /, $_))[1], 1, -1)
-  	if $_ =~ /domain-name ".*"/;
+    	if $_ =~ /domain-name ".*"/;
     }
   }
   unshift @j, '--- select network assigned domain ---';

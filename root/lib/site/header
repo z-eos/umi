@@ -59,7 +59,7 @@
 	    <i class="sr-only">Toggle Dropdown</i>
 	  </div>
 
-	  [% icon_class = "fa fa-fw" %]
+	  [% icon_class = "fas fa-fw text-light" %]
 	  [% menu_item = "dropdown-item btn btn-secondary " %]
 	  [% color = "bg-success" %]
 
@@ -81,13 +81,13 @@
 		    onClick="document.getElementById('ldap_base_case').value=this.value"
 		    value="ldapsearch_by_jid"
 		    title="filter pattern in mail">
-	      <i class="[% icon_class %] fa-lightbulb-o"></i> by JID
+	      <i class="[% icon_class %] fa-lightbulb"></i> by JID
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
 		    onClick="document.getElementById('ldap_base_case').value=this.value"
 		    value="ldapsearch_by_ip"
 		    title="filter pattern in ip address">
-	      <i class="[% icon_class %] fa-code-fork"></i> by IP
+	      <i class="[% icon_class %] fa-home"></i> by IP
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
 		    onClick="document.getElementById('ldap_base_case').value=this.value"
@@ -114,13 +114,13 @@
 		    onClick="document.getElementById('ldap_base_case').value=this.value"
 		    value="[% helper_cfg('cfg_ldap_crud','base', 'group') %]"
 		    title="filter pattern with base Groups">
-	      <i class="[% icon_class %] fa-group"></i> group
+	      <i class="[% icon_class %] fa-users"></i> group
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
 		    onClick="document.getElementById('ldap_base_case').value=this.value"
 		    value="[% helper_cfg('cfg_ldap_crud','base', 'netgroup') %]"
 		    title="filter pattern with base NisNetgroups">
-	      <i class="[% icon_class %] fa-group"></i> netgroup
+	      <i class="[% icon_class %] fa-users"></i> netgroup
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
 		    onClick="document.getElementById('ldap_base_case').value=this.value"
@@ -147,7 +147,7 @@
 		    onClick="document.getElementById('ldap_base_case').value=this.value"
 		    tabindex="22"
 		    title="filter pattern with base Aliases">
-	      <i class="[% icon_class %] fa-files-o"></i> alias
+	      <i class="[% icon_class %] fa-file-alt"></i> alias
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
 		    onClick="document.getElementById('ldap_base_case').value=this.value"
@@ -181,7 +181,7 @@
 		    onClick="document.getElementById('ldap_base_case').value=this.value"
 		    value="[% helper_cfg('cfg_ldap_crud','base', 'gitacl') %]"
 		    tabindex="25">
-	      <i class="[% icon_class %] fa-git"></i> GitACL
+	      <i class="fab fa-fw fa-git text-light"></i> GitACL
 	    </button>
 	  </div>
 	  <a href="/searchadvanced"
@@ -219,7 +219,7 @@
       [% ELSE %]
       <li class="nav-item">
 	<div class="nav-link">
-	  <i class="fa fa-bell-o"></i>
+	  <i class="fa fa-bell"></i>
 	</div>
       </li>
       [% END %]
@@ -229,12 +229,12 @@
       	<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-user-circle"></i> [% c.user() %]</a>
 	<div class="dropdown-menu">
 	    <a class="dropdown-item" href="/user_prefs"><i class="fa fa-cogs"></i> Profie</a>
-	    <a class="dropdown-item ajaxless" href="/auth/signout" title="Sign Out"><i class="fa fa-sign-out"></i> Sign Out</a>
+	    <a class="dropdown-item ajaxless" href="/auth/signout" title="Sign Out"><i class="fa fa-sign-out-alt"></i> Sign Out</a>
 	</div>
       </li>
       [% ELSE %]
       <li class="nav-item">
-	<a href="/auth/signin" class="ajaxless" title="Sign In"><i class="fa fa-sign-in"></i></a>
+	<a href="/auth/signin" class="ajaxless" title="Sign In"><i class="fa fa-sign-in-alt"></i></a>
       </li>
       [% END %]
       [% IF c.user %]

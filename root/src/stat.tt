@@ -58,7 +58,7 @@
 	[%    tr_class = 'warning' %]
 	[%    END %]
 	<tr>
-	  <td class="text-[% tr_class %][% default %]">[% i.1.replace(',', ', ') %]</td>
+	  <td class="text-[% tr_class %][% default %]"><span style="font-size:xx-small">[% i.1.replace(',', ', ') %]</span></td>
 	  <td class="text-[% tr_class %] text-right">[% i.2 %]s</td>
 	</tr>
 	[% END %]

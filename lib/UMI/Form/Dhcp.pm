@@ -28,7 +28,7 @@ has_field 'net' => ( type => 'Select',
 		     wrapper_class => [ 'col-xs-8' ],
 		     element_wrapper_class => [ 'col-xs-10', 'col-lg-10', ],
 		     label_attr => { title => 'net (of the offices) the user assign to' },
-		     options_method => \&dhcp_associateddomains,
+		     options_method => \&dhcp_nets,
 		   );
 
 # sub options_net {
@@ -96,7 +96,7 @@ has_field 'dhcpStatements' => (
 			       apply => [ IPAddress ],
 			       label => 'IP',
 			       label_class => [ 'col-xs-2' ],
-			       label_attr => { title => 'IP address' },
+			       label_attr => { title => 'IP address, if not set, then first free available is picked up' },
 			       element_wrapper_class => [ 'col-xs-10', 'col-lg-10', ],
 			       wrapper_class => 'col-xs-8',
 			       element_attr => { placeholder => '192.168.0.1' },
@@ -213,10 +213,10 @@ sub validate {
 
 ######################################################################
 
-sub dhcp_associateddomains {
+sub dhcp_nets {
   my $self = shift;
   return unless $self->form->ldap_crud;
-  return $self->form->ldap_crud->select_dhcp_associateddomains;
+  return $self->form->ldap_crud->select_dhcp_nets;
 }
 
 ######################################################################

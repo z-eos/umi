@@ -56,7 +56,7 @@
 	  <input type="hidden" name="ldap_modify_group" value="[% entry.key %]">
 	  <button type="submit" title="modify group/s user belongs to" class="btn btn-link"
 		  data-order="[% site.searchby.menu.order.ldap_modify_group %]">
-	  <span class="fa fa-fw fa-group text-warning"></span>
+	  <span class="fa fa-fw fa-users text-warning"></span>
 	  group
 	  </button>
 	</form>
@@ -85,7 +85,7 @@
 		data-order="[% site.searchby.menu.order.ldap_delete %]"
 		data-toggle="modal"
 		data-target="#modal_delete[% id_suffix %]">
-	  <span class="fa fa-fw fa-trash text-danger"></span>
+	  <span class="fa fa-fw fa-trash-alt text-danger"></span>
 	  delete
 	</button>
       </li>
@@ -156,7 +156,7 @@
 	  <input type="hidden" name="ldap_modify" value="[% entry.key %]">
 	  <button type="submit" title="edit all fields" class="btn btn-link"
 		  data-order="[% site.searchby.menu.order.ldap_modify %]">
-	  <span class="fa fa-fw fa-pencil text-warning"></span>
+	  <span class="fa fa-fw fa-pencil-alt text-warning"></span>
 	  edit (all)
 	  </button>
 	</form>
@@ -249,7 +249,7 @@
 	  <input type="hidden" name="ldap_modify_jpegphoto" value="[% entry.key %]">
 	  <button type="submit" title="change jpegPhoto (like avatar e.t.c.)" class="btn btn-link"
 		  data-order="[% site.searchby.menu.order.ldap_modify_jpegphoto %]">
-	  <span class="fa fa-fw fa-file-image-o text-warning"></span>
+	  <span class="fa fa-fw fa-file-image text-warning"></span>
 	  image
 	  </button>
 	</form>

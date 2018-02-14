@@ -17,6 +17,8 @@ use Net::CIDR::Set;
 
 use Net::LDAP::Util qw(	generalizedTime_to_time ldap_explode_dn );
 
+use Logger;
+
 # ??? # use Scalar::Util;
 # ??? # use List::Util;
 
@@ -96,14 +98,14 @@ input data is hash
 
     tgt_net: type STRING 
              subnet (of I<ipspace>) address in CIDR notation, the free
-             address found to be from if not set, then the very I<ipspace>
+             address found, to be from. If not set, then the very I<ipspace>
              assumed
 
     req_msk: type INT
-             netmask, in CIDR notation, of the requested ip space (default is 32)
+             netmask , in CIDR notation, of the requested ip space (default is 32)
 
 First, we calculate I<free> addresses set, it is new set containing all the
-addresses that are present in I<pool> set but not I<used> set.
+addresses that are present in a I<pool> set but not I<used> yet.
 
 Second, we calculate I<nsec> (from intersection) addresses set, it is
 new set that is the intersection of a I<trgt> and I<free> sets. This is
@@ -126,6 +128,7 @@ sub ipam_first_free {
 	      ip_used => $args->{ip_used},
 	      tgt_net => $args->{tgt_net} || $args->{ipspace}->[0],
 	      req_msk => $args->{req_msk} || 32, };
+  # log_debug { np($arg) };
   my $pool = Net::CIDR::Set->new;
   $pool->add( $_ )
     foreach (@{ $arg->{ipspace} });
@@ -141,8 +144,11 @@ sub ipam_first_free {
 
   my $nsec = $trgt->intersection( $free );
 
+  log_debug { np( @{[ $nsec->as_array( $nsec->iterate_addresses ) ]} ) };
   foreach ( $nsec->as_array( $nsec->iterate_addresses ) ) {
+    # skip network and broadcast addresses
     next if $arg->{req_msk} == 32 && $_ =~ /^.*\.[0,255]$/;
+    # skip until first address belonging to the target network
     next if ! $free->contains( $_ . '/' . $arg->{req_msk} );
     return $_;
   }
@@ -286,7 +292,7 @@ sub utf2qp {
 
 =head2 msg2html
 
-format message to HTML code
+wrapper to format message to HTML code (to wrap some text (html) with panel/alert)
 
 =cut
 
@@ -1288,20 +1294,28 @@ sub vld_ifconfigpush {
 
 =head2 search_result_item_as_button
 
-wrapper to place a form into a button for the data to be displayed
+wrapper to place data to be displayed into a form button
 
-    uri holds form action
-    dn is object DN to be passed to the action
+    $self->search_result_item_as_button( { uri => ..., dn => ... } )
+
+        pfx: prefix text to put before the form 
+        uri: holds form action, default is `searchby/index'
+    css_frm: form CSS
+         dn: is object DN to be passed to the action
+    css_btn: button CSS
+    btn_tit: button title
+    btn_txt: button text
+        sfx: suffix text to put after the form
 
 =cut
 
 sub search_result_item_as_button {
   my ($self, $args) = @_;
 
-  my $arg = { uri     => $args->{uri},
+  my $arg = { uri     => $args->{uri} || UMI->uri_for_action('searchby/index'),
 	      dn      => $args->{dn},
-	      pfx     => $args->{prefix} || '',
-	      sfx     => $args->{suffix} || '',
+	      pfx     => $args->{pfx} || '',
+	      sfx     => $args->{sfx} || '',
 	      btn_txt => $args->{btn_txt} || '',
 	      btn_tit => $args->{btn_tit} || '',
 	      css_frm => $args->{css_frm} || '',

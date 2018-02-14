@@ -759,12 +759,12 @@ sub proc :Path(proc) :Args(0) {
       		final_message => $c->controller('Dhcp')
 		->create_dhcp_host ( $c->model('LDAP_CRUD'),
 				     {
-				      dhcpHWAddress => $params->{dhcpHWAddress},
-				      uid => substr((split(',',$params->{ldap_add_dhcp}))[0],4),
-				      dhcpStatements => $params->{dhcpStatements},
-				      net => $params->{net},
 				      cn => $params->{cn},
+				      net => $params->{net},
+				      uid => substr((split(',',$params->{ldap_add_dhcp}))[0],4),
 				      dhcpComments => $params->{dhcpComments},
+				      dhcpHWAddress => $params->{dhcpHWAddress},
+				      dhcpStatements => $params->{dhcpStatements},
 				     }
 				   ),
       	       ) if $self->form_add_dhcp->validated;
@@ -1843,28 +1843,37 @@ sub dhcp_add :Path(dhcp_add) :Args(0) {
   $c->stash(
 	    template => 'dhcp/dhcp_wrap.tt',
 	    form => $self->form_add_dhcp,
-	    ldap_add_dhcp => $params->{'ldap_add_dhcp'},
+#	    ldap_add_dhcp => $params->{'ldap_add_dhcp'},
 	   );
 
-  return unless $self->form_add_dhcp->process(
-					      posted => ($c->req->method eq 'POST'),
-					      params => $params,
-					      ldap_crud => $c->model('LDAP_CRUD'),
-					     );
+  if ( keys %{$params} == 1 ) {
+  # if ( defined $params->{add_svc_acc} && $params->{add_svc_acc} ne '' ) {
+    my $init_obj = { ldap_add_dhcp => $params->{'ldap_add_dhcp'} };
+    return unless $self->form_add_dhcp
+      ->process( init_object => $init_obj,
+		 ldap_crud => $c->model('LDAP_CRUD'), );
+  } else {
+    return unless $self->form_add_dhcp->process(
+						posted => ($c->req->method eq 'POST'),
+						params => $params,
+						ldap_crud => $c->model('LDAP_CRUD'),
+					       );
 
-  $c->stash(
-	    final_message => $c->controller('Dhcp')
-	    ->create_dhcp_host ( $c->model('LDAP_CRUD'),
-				 {
-				  dhcpHWAddress => $params->{dhcpHWAddress},
-				  uid => substr((split(',',$params->{ldap_add_dhcp}))[0],4),
-				  dhcpStatements => $params->{dhcpStatements},
-				  net => $params->{net},
-				  cn => $params->{cn},
-				  dhcpComments => $params->{dhcpComments},
-				 }
-			       ),
-	   ) if $self->form_add_dhcp->validated;
+    # p( $params, caller_info => 1, colored => 1);
+    $c->stash(
+	      final_message => $c->controller('Dhcp')
+	      ->create_dhcp_host ( $c->model('LDAP_CRUD'),
+				   {
+				    dhcpHWAddress => $params->{dhcpHWAddress},
+				    uid => substr((split(',',$params->{ldap_add_dhcp}))[0],4),
+				    dhcpStatements => $params->{dhcpStatements},
+				    net => $params->{net},
+				    cn => $params->{cn},
+				    dhcpComments => $params->{dhcpComments},
+				   }
+				 ),
+	     ); # if $self->form_add_dhcp->validated;
+  }
 }
 
 

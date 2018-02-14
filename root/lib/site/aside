@@ -6,7 +6,7 @@
       <a class="nav-link" data-toggle="tab" href="#tree" role="tab"><i class="fa fa-tree"></i></a>
     </li>
     <li class="nav-item" title="statistics">
-      <a class="nav-link" data-toggle="tab" href="#statistics" role="tab"><i class="fa fa-bar-chart"></i></a>
+      <a class="nav-link" data-toggle="tab" href="#statistics" role="tab"><i class="fa fa-chart-pie"></i></a>
     </li>
     <li class="nav-item">
       <a class="nav-link" data-toggle="tab" href="#messages" role="tab"><i class="fa fa-globe"></i></a>
