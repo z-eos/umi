@@ -122,12 +122,13 @@ sub proc :Path(proc) :Args(0) {
       my @attrs = ( '*' );
       @attrs = split(/,/, $params->{'show_attrs'}) if $params->{'show_attrs'} ne '';
       push @attrs,
-	'createTimestamp',
-	'creatorsName',
-	'modifiersName',
-	'modifyTimestamp',
-	'entryTtl',
-	'entryExpireTimestamp';
+      	'createTimestamp',
+      	'creatorsName',
+      	'modifiersName',
+      	'modifyTimestamp',
+#      	'pwdHistory',
+      	'entryTtl',
+      	'entryExpireTimestamp';
       
       $ldap_crud = $c->model('LDAP_CRUD');
       my $mesg = $ldap_crud->search({

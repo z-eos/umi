@@ -189,6 +189,7 @@ sub index :Path :Args(0) {
 					      'entryExpireTimestamp',
 					    ],
 				  });
+    # log_debug { np($mesg->as_struct) };
     my @entries = defined $params->{order_by} &&
       $params->{order_by} ne '' ? $mesg->sorted(split(/,/,$params->{order_by})) : $mesg->sorted('dn');
 

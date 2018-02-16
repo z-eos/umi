@@ -126,7 +126,7 @@ sub create_dhcp_host {
     } else {
       my $arg = {
 		 dhcpHWAddress => $args->{dhcpHWAddress},
-		 uid => $args->{uid},
+		 uid => $args->{uid} || 'unknown',
 		 netdn => $args->{net},
 		 net => $args->{net}, # FQDN for net new oject have to belong to
 		 dhcpStatements => $args->{dhcpStatements} || $first_free,

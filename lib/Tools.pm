@@ -415,11 +415,12 @@ sub pwdgen {
   my $sha = Digest::SHA->new(1);
   $sha->add( $pwdgen->{'pwd'}, $pwdgen->{'salt'} );
 
-  return {
-	  clear => $pwdgen->{'pwd'},
-	  ssha => '{SSHA}' . $self->pad_base64( encode_base64( $sha->digest . $pwdgen->{'salt'}, '' ) )
-	 };
-
+  $pwdgen->{return} = {
+		       clear => $pwdgen->{'pwd'},
+		       ssha => '{SSHA}' . $self->pad_base64( encode_base64( $sha->digest . $pwdgen->{'salt'}, '' ) )
+		      };
+  # log_debug { np($pwdgen->{return}) };
+  return $pwdgen->{return};
 }
 
 sub pad_base64 {

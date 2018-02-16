@@ -156,6 +156,13 @@ sub _build_cfg {
 		  },
 	  exclude_prefix => 'aux_',
 	  sizelimit => 50,
+	  defaults => { ldap => {
+				 scope  => 'sub',
+				 filter => '(objectClass=*)',
+				 deref  => 'never',
+				 attrs  => [ '*' ],
+				 sizelimit => 50,
+				}, },
 	  translit => "ALA-LC RUS",
 	  translit_no => {
 			  description => 1,
@@ -812,11 +819,11 @@ sub search {
 
   my $arg = {
   	     base   => $args->{base},
-  	     scope  => $args->{scope} || 'sub',
-  	     filter => $args->{filter} || '(objectClass=*)',
-  	     deref  => $args->{deref} || 'never',
-  	     attrs  => $args->{attrs} || [ '*' ],
-  	     sizelimit => defined $args->{sizelimit} ? $args->{sizelimit} : 20,
+  	     scope  => $args->{scope}  || $self->{cfg}->{defaults}->{ldap}->{scope},
+  	     filter => $args->{filter} || $self->{cfg}->{defaults}->{ldap}->{filter},
+  	     deref  => $args->{deref}  || $self->{cfg}->{defaults}->{ldap}->{deref},
+  	     attrs  => $args->{attrs}  || $self->{cfg}->{defaults}->{ldap}->{attrs},
+  	     sizelimit => defined $args->{sizelimit} ? $args->{sizelimit} : $self->{cfg}->{defaults}->{ldap}->{sizelimit},
   	    };
 
   my $mesg = $self->ldap->search( base => $arg->{base},
@@ -1523,7 +1530,9 @@ sub modify {
       $return = 0;
     }
   } else { $return = $msg->ldif; }
-  # p [ $dn, $changes, $return];
+  # log_debug { np($dn ) };
+  # log_debug { np($changes ) };
+  # log_debug { np($return ) };
   return $return;
 }
 
@@ -2377,6 +2386,7 @@ sub ipam_used {
 	  # declare each existent lease as used ip
 	  my $mesg_dhcp = $self->search({ base   => $key,
 					  filter => 'dhcpStatements=fixed-address*',
+					  sizelimit => 0,
 					  attrs  => [ 'dhcpStatements', 'dhcpHWAddress' ], });
 	  if ( $mesg_dhcp->code ) {
 	    push @{$return->{error}}, sprintf("ipam_used(): problems with DN: %s; error: %s", $key, $self->err($mesg_dhcp)->{html});
