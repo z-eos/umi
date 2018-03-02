@@ -23,7 +23,7 @@ my $apn_file =
   Log::Log4perl::Appender->new(
 			       "Log::Log4perl::Appender::File",
 			       name       => 'appndr_f',
-			       filename   => '/var/log/umi/umi-transcript.log',
+			       filename   => '/var/log/umi/umi-apnd-file.log', # UMI->config->{log}->{file},
 			       mode       => 'append',
 			       additivity => 0,
 			       utf8       => 1,

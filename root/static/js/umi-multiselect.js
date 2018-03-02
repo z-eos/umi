@@ -1,9 +1,9 @@
 $(function(){
-    $('#groups').multiSelect({
+    $('#ms-groups').multiSelect({
 	keepOrder: true,
 
-	selectableHeader: "<button type='button' class='btn btn-block btn-info btn-sm'><span class='fa fa-group'>&nbsp;</span><b>Groups Available</b></button><input type='text' class='form-control search-input input-sm' autocomplete='off' placeholder='type to search or clear all for default'>",
-	selectionHeader: "<button type='button' class='btn btn-block btn-success btn-sm'><span class='fa fa-group'>&nbsp;</span><b>Groups Selected</b></button><input type='text' class='form-control search-input input-sm' autocomplete='off' placeholder='type to search or clear all for default'>",
+	selectableHeader: "<button type='button' class='btn btn-block btn-info btn-sm'><span class='fa fa-users'>&nbsp;</span><b>Groups Available</b></button><input type='text' class='form-control search-input input-sm' autocomplete='off' placeholder='type to search or clear all for default'>",
+	selectionHeader: "<button type='button' class='btn btn-block btn-success btn-sm'><span class='fa fa-users'>&nbsp;</span><b>Groups Selected</b></button><input type='text' class='form-control search-input input-sm' autocomplete='off' placeholder='type to search or clear all for default'>",
 
 	afterInit: function(ms){
 	    var that = this,
@@ -41,6 +41,7 @@ $(function(){
 	   element.classList.add("tab-pane"); */
 	
     });
+    // $('#ms-groups').addClass('tab-panel');
 });
 
 // here we put multiselect related things into tab

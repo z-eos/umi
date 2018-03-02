@@ -16,7 +16,7 @@ my $apn_file =
   Log::Log4perl::Appender->new(
 			       "Log::Log4perl::Appender::File",
 			       name       => 'appndr_f',
-			       filename   => '/var/log/umi/umi-stderr-redirect.log',
+			       filename   => UMI->config->{debug}->{file},
 			       mode       => 'append',
 			       additivity => 0,
 			       utf8       => 1,

@@ -7,6 +7,8 @@ use Moose;
 use namespace::autoclean;
 use Data::Printer colored => 0;
 
+use Logger;
+
 BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 
 #
@@ -160,6 +162,7 @@ sub stat_acc : Local {
 	$utf_sn = $account->get_value('sn');
 	utf8::decode($utf_givenName);
 	utf8::decode($utf_sn);
+	# log_debug { $account->dn };
 	$accounts->{$account->dn} = { uid => $account->get_value('uid'),
 				      givenName => $utf_givenName,
 				      sn => $utf_sn,

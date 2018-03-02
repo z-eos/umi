@@ -834,7 +834,7 @@ sub search {
 			      sizelimit => $arg->{sizelimit},
 			    );
 
-  log_debug { np($arg) };
+  # log_debug { np($arg) };
 
   return $mesg;
 }
@@ -1432,6 +1432,8 @@ sub block {
   my @keys;
   my ( $msg, $msg_usr, $msg_add, $msg_chg, $ent_svc, $ent_chg, @blockgr );
 
+  log_debug { np( $args ) };
+
   $msg_usr = $self->search ( { base => $args->{dn},
 			       sizelimit => 0, } );
   if ( $msg_usr->is_error() ) {
@@ -1505,7 +1507,8 @@ sub block {
     }
   }
 
-  # p $return;
+  log_debug { np( $return ) };
+
   return $return;
 }
 

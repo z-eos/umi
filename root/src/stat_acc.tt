@@ -2,6 +2,13 @@
    link = '<link href="/static/css/dt-dataTables.bootstrap.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-buttons.jqueryui.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-buttons.dataTables.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-buttons.bootstrap.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-select.dataTables.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-select.bootstrap.min.css" rel="stylesheet" type="text/css">'
    %] 
 
+<link href="/static/css/dt-dataTables.bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/static/css/dt-buttons.jqueryui.min.css" rel="stylesheet" type="text/css">
+<link href="/static/css/dt-buttons.dataTables.min.css" rel="stylesheet" type="text/css">
+<link href="/static/css/dt-buttons.bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/static/css/dt-select.dataTables.min.css" rel="stylesheet" type="text/css">
+<link href="/static/css/dt-select.bootstrap.min.css" rel="stylesheet" type="text/css">
+
 <div class="page-header">
   <h2>
     Users Accounts Statistics

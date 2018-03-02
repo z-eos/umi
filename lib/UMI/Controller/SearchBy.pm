@@ -5,6 +5,8 @@ package UMI::Controller::SearchBy;
 
 use Net::LDAP::Util qw(	ldap_explode_dn );
 
+use Logger;
+
 #use utf8;
 use Moose;
 use namespace::autoclean;
@@ -526,29 +528,22 @@ sub proc :Path(proc) :Args(0) {
 #=====================================================================
     } elsif ( defined $params->{'ldap_modify_group'} &&
 	      $params->{'ldap_modify_group'} ne '' ) {
-
+      # log_debug { np( $params ) };
       my $groups;
       if ( defined $params->{groups} ) {
-	if ( ref($params->{groups}) eq 'ARRAY' ) {
-	  $groups = $params->{groups};
-	} else {
-	  $groups = [ $params->{groups} ];
-	}
+	$groups = ref($params->{groups}) eq 'ARRAY' ? $params->{groups} : [ $params->{groups} ];
       } else {
 	$groups = '';
       }
 
       my $ldap_crud = $c->model('LDAP_CRUD');
-
       my $id;
-      # if ( $ldap_crud->{cfg}->{rdn}->{acc_root} ne 'uid' ) {
-	my $mesg = $ldap_crud->search( { base => $params->{'ldap_modify_group'},
-					 scope => 'base',
-					 attrs => [ 'uid' ], });
-	push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
-	  if $mesg->code != 0;
-	$id = $mesg->entry(0)->get_value( 'uid' );
-      # }
+      my $mesg = $ldap_crud->search( { base => $params->{'ldap_modify_group'},
+				       scope => 'base',
+				       attrs => [ 'uid' ], });
+      push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
+	if $mesg->code != 0;
+      $id = $mesg->entry(0)->get_value( $ldap_crud->{cfg}->{rdn}->{acc_root} );
 
       if ( ! defined $params->{groups} && ! defined $params->{aux_submit} ) {
 	my ( $return, $base, $filter, $dn );
@@ -560,13 +555,13 @@ sub proc :Path(proc) :Args(0) {
 	  if $mesg->code != 0;
 
 	my @groups_usr = $mesg->sorted('cn');
-	foreach ( @groups_usr ) { push @{$params->{groups}}, $_->dn; } #  substr( (split /,/, $_->dn)[0], 3); }
-	# $params->{groups} = undef;
+	push @{$params->{groups}}, $_->dn foreach ( $mesg->sorted('cn') );
       }
-      # p $params;
+      # log_debug { np( $params ) };
+
       $c->stash( template => 'user/user_mod_group.tt',
 		 form => $self->form_mod_groups,
-		 ldap_modify_group => $params->{'ldap_modify_group'}, );
+		 ldap_modify_group => $params->{ldap_modify_group}, );
 
       return unless $self->form_mod_groups
       	->process( posted => ($c->req->method eq 'POST'),
@@ -574,11 +569,11 @@ sub proc :Path(proc) :Args(0) {
 		   ldap_crud => $ldap_crud );
 
       $c->stash( final_message => $self
-		 ->mod_groups( $ldap_crud,
-			       { mod_groups_dn => $params->{ldap_modify_group},
-				 base => $ldap_crud->cfg->{base}->{group},
-				 groups => $groups,
-				 type => 'posixGroup', } ), );
+      		 ->mod_groups( $ldap_crud,
+      			       { mod_groups_dn => $params->{ldap_modify_group},
+      				 base => $ldap_crud->cfg->{base}->{group},
+      				 groups => $groups,
+      				 type => 'posixGroup', } ), );
 
 #=====================================================================
 # Modify RADIUS Groups
@@ -1175,34 +1170,31 @@ sub mod_groups {
 	      groups => $args->{groups},
 	      base => defined $args->{base} ? $args->{base} : $ldap_crud->cfg->{base}->{group},
 	      type => defined $args->{type} ? $args->{type} : 'posixGroup', };
-
+  log_debug { np( $args ) };
+  log_debug { np( $arg ) };
   my ( $mesg, $return);
-  # if ( $ldap_crud->{cfg}->{rdn}->{acc_root} ne 'uid' ) {
-    $mesg = $ldap_crud->search( { base => $arg->{obj_dn},
-				  scope => 'base',
-				  attrs => [ 'uid' ], });
-    push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
-      if $mesg->code != 0;
-    $arg->{uid} = $mesg->entry(0)->get_value( 'uid' );
-  # } else {
-  #   $arg->{uid} = substr( (split /,/, $args->{mod_groups_dn})[0], 4 );
-  # }
+  $mesg = $ldap_crud->search( { base => $arg->{obj_dn},
+				scope => 'base',
+				attrs => [ 'uid' ], });
+  push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
+    if $mesg->code != 0;
+  $arg->{uid} = $mesg->entry(0)->get_value( 'uid' );
 
   # hash with all selected for add/delete group/s
   if ( ref($arg->{groups}) eq 'ARRAY' ) {
     foreach (@{$arg->{groups}}) { $arg->{groups_sel}->{$_} = 1; }
   }
   # $return;
-  $mesg = $ldap_crud->search( { base => $arg->{base},
-				filter => $arg->{type} eq 'posixGroup' ?
-				'memberUid=' . $arg->{uid} :
-				'member=' . $arg->{obj_dn},
-				sizelimit => 0,
-				attrs => ['cn'], } );
+  $mesg =
+    $ldap_crud->search( { base => $arg->{base},
+			  filter => $arg->{type} eq 'posixGroup' ? 'memberUid=' . $arg->{uid} : 'member=' . $arg->{obj_dn},
+			  sizelimit => 0,
+			  attrs => ['cn'], } );
   push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
     if $mesg->code ne '0';
 
   my $g = $mesg->as_struct;
+  # log_debug { np( $g ) };
 
   $mesg = $ldap_crud->search( { base => $arg->{base},
 				scope => 'one',
@@ -1213,60 +1205,49 @@ sub mod_groups {
 
   my @groups_all = $mesg->sorted('cn');
   foreach ( @groups_all ) {
-    # if ( $arg->{type} eq 'posixGroup' ) {
-    #   $arg->{groups_all}->{$_->get_value('cn')} = 0;
-    #   $arg->{groups_sel}->{$_->get_value('cn')} = 0
-    # 	if ! defined $arg->{groups_sel}->{$_->get_value('cn')};
-    #   $arg->{groups_old}->{$_->get_value('cn')} =
-    # 	# defined $g->{sprintf('cn=%s,%s',$_->get_value('cn'),$ldap_crud->cfg->{base}->{group})} ?
-    # 	defined $g->{$_->dn} ? 1 : 0;
-    # } else {
       $arg->{groups_all}->{$_->dn} = 0;
       $arg->{groups_sel}->{$_->dn} = 0
 	if ! defined $arg->{groups_sel}->{$_->dn};
       $arg->{groups_old}->{$_->dn} =
 	defined $g->{$_->dn} ? 1 : 0;
-    # }
   }
 
   # after submit
-  if ( ref($arg->{groups}) eq 'ARRAY' ) {
-    my @groups_chg;
-    foreach (keys %{$arg->{groups_all}}) {
-      # submited data equals to the data from DB - nothing to do
-      next if $arg->{groups_old}->{$_} && $arg->{groups_sel}->{$_};
-      if (( $arg->{groups_old}->{$_} && ! $arg->{groups_sel}->{$_} ) ||
-	  ( $arg->{groups_old}->{$_} && ref($arg->{groups}) ne 'ARRAY' )) {
-	# all submited data absent or lacks of DB data - delete
-	push @groups_chg, 'delete' => $arg->{type} eq 'posixGroup' ?
-	  [ 'memberUid' => $arg->{uid} ] : [ 'member' => $arg->{obj_dn} ];
-      } elsif ( ! $arg->{groups_old}->{$_} && $arg->{groups_sel}->{$_} ) {
-	# DB data lacks of submited data - add
-	push @groups_chg, 'add' => $arg->{type} eq 'posixGroup' ?
-	  [ 'memberUid' => $arg->{uid} ] : [ 'member' => $arg->{obj_dn} ];
-      }
-      # p [sprintf('cn=%s,%s', $_, $arg->{base}), @groups_chg] if $#groups_chg > 0;
-      # p \@groups_chg;
-      if ( $#groups_chg > 0) {
-	# p [sprintf('cn=%s,%s', $_, $arg->{base}), @groups_chg]
-	# $mesg = $ldap_crud
-	#   ->modify( $arg->{type} eq 'posixGroup' ? sprintf('cn=%s,%s', $_, $arg->{base}) : $_,
-	# 	    \@groups_chg ); p $mesg;
-	$mesg = $ldap_crud
-	  ->modify( $_, \@groups_chg );
-	if ( $mesg ) {
-	  push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
-	} else {
-	  push @{$return->{success}},
-	    sprintf('<span class="%s">%s</span>',
-		    $groups_chg[0] eq 'add' ? 'text-success" title="added to' : 'text-danger" title="deleted from',
-		    $groups_chg[0] eq 'add' ? $_ : '<s>' . $_ . '</s>');
-	}
-	# p [ $return, $arg ];
-      }
-      $#groups_chg = -1;
+  my @groups_chg;
+  foreach (keys %{$arg->{groups_all}}) {
+    # submited data equals to the data from DB - nothing to do
+    next if $arg->{groups_old}->{$_} && $arg->{groups_sel}->{$_};
+    if (( $arg->{groups_old}->{$_} && ! $arg->{groups_sel}->{$_} ) ||
+	( $arg->{groups_old}->{$_} && ref($arg->{groups}) ne 'ARRAY' )) {
+      # some group or even all unselected (present in old and absent in selected)
+      push @groups_chg, 'delete' => $arg->{type} eq 'posixGroup' ?
+	[ 'memberUid' => $arg->{uid} ] : [ 'member' => $arg->{obj_dn} ];
+    } elsif ( ! $arg->{groups_old}->{$_} && $arg->{groups_sel}->{$_} ) {
+      # old (DB) data lacks of submited (selected) data - add
+      push @groups_chg, 'add' => $arg->{type} eq 'posixGroup' ?
+	[ 'memberUid' => $arg->{uid} ] : [ 'member' => $arg->{obj_dn} ];
     }
+    # log_debug { np(@groups_chg) ];
+    if ( $#groups_chg > 0) {
+      # p [sprintf('cn=%s,%s', $_, $arg->{base}), @groups_chg]
+      # $mesg = $ldap_crud
+      #   ->modify( $arg->{type} eq 'posixGroup' ? sprintf('cn=%s,%s', $_, $arg->{base}) : $_,
+      # 	    \@groups_chg ); p $mesg;
+      $mesg = $ldap_crud
+	->modify( $_, \@groups_chg );
+      if ( $mesg ) {
+	push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
+      } else {
+	push @{$return->{success}},
+	  sprintf('<span class="%s">%s</span>',
+		  $groups_chg[0] eq 'add' ? 'text-success" title="added to' : 'text-danger" title="deleted from',
+		  $groups_chg[0] eq 'add' ? $_ : '<s>' . $_ . '</s>');
+      }
+    }
+    $#groups_chg = -1;
   }
+  log_debug { np( $return ) };
+  # log_debug { np( $arg ) };
   return $return;
 }
 

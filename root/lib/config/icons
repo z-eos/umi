@@ -1,6 +1,7 @@
 [%
    site.icons = {
       field_add        = 'fa-plus-circle'
+      group	       = 'fa-users'
       toggle           = 'fa-caret-'
       toggle_up        = 'fa-caret-up'
       toggle_down      = 'fa-caret-down'

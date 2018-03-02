@@ -89,8 +89,9 @@ html,body {
 
 .required:after {
   content: "\f06a";
-  font-family: "FontAwesome";
+  font-family: "Font Awesome 5 Free";
   font-size: 70%;
+  font-weight: 900;
   color: #E74C3C;
   vertical-align: top;
   margin: 0px 0px 0px 3px;
@@ -99,7 +100,7 @@ html,body {
 
 .atleastone:after {
   content: "\f071";
-  font-family: "FontAwesome";
+  font-family: "Font Awesome 5 Free";
   font-size: 70%;
   color: #E99002;
   vertical-align: top;
@@ -109,7 +110,7 @@ html,body {
 
 .content-plus-circle:after {
   content: "\f055";
-  font-family: "FontAwesome";
+  font-family: "Font Awesome 5 Free";
   font-size: 70%;
   //    color: #fff;
   vertical-align: 60%;
@@ -119,7 +120,7 @@ html,body {
 
 .content-ellipsis-v:after {
   content: "\f142";
-  font-family: "FontAwesome";
+  font-family: "Font Awesome 5 Free";
   font-size: 70%;
   //    color: #fff;
   vertical-align: 60%;
@@ -129,7 +130,7 @@ html,body {
 
 .blocked:after {
   content: "\f05e";
-  font-family: "FontAwesome";
+  font-family: "Font Awesome 5 Free";
   font-size: 70%;
   color: #E74C3C;
   vertical-align: top;
@@ -139,7 +140,7 @@ html,body {
 
 .iconright:after {
   content: "\f06b";
-  font-family: "FontAwesome";
+  font-family: "Font Awesome 5 Free";
   font-size: 100%;
   color: #3c9a5f;
   vertical-align: top;
@@ -149,7 +150,7 @@ html,body {
 
 .umi-dnstring:after {
   content: "\f1ab";
-  font-family: "FontAwesome";
+  font-family: "Font Awesome 5 Free";
   font-size: 100%;
   color: #3c9a5f;
   vertical-align: top;
@@ -329,7 +330,7 @@ select.form-control:not([size]):not([multiple]) {
 
 .sidebar .nav .nav-item .nav-link.nav-dropdown-toggle::before, .sidebar .nav .nav-item .navbar .nav-dropdown-toggle.dropdown-toggle::before, .navbar .sidebar .nav .nav-item .nav-dropdown-toggle.dropdown-toggle::before {
   content: "\f0d9";
-  font-family: "FontAwesome";
+  font-family: "Font Awesome 5 Free";
 }
 
 /* -------------------------------
@@ -367,14 +368,22 @@ select.form-control:not([size]):not([multiple]) {
 
 
 table.dataTable thead .sorting::after {
-  content: "\f0dc";
+  font-weight: 900 !important;
+  content: "\f0dc" !important;
+  font-family: "Font Awesome 5 Free" !important;
 }
 table.dataTable thead .sorting_asc::after {
-  content: "\f0de";
+  font-weight: 900 !important;
+  content: "\f0de" !important;
+  font-family: "Font Awesome 5 Free" !important;
 }
 table.dataTable thead .sorting_desc::after {
-  content: "\f0dd";
+  font-weight: 900 !important;
+  content: "\f0dd" !important;
+  font-family: "Font Awesome 5 Free" !important;
 }
 table.dataTable thead .sorting::after, table.dataTable thead .sorting_asc::after, table.dataTable thead .sorting_desc::after, table.dataTable thead .sorting_asc_disabled::after, table.dataTable thead .sorting_desc_disabled::after {
-  font-family: "Fontawesome";
+  font-weight: 900 !important;
+  font-family: "Font Awesome 5 Free" !important;
 }
+

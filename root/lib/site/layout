@@ -39,8 +39,8 @@
 <script src="/static/js/umi-core-ajax.js"></script>   
 
 
-<script src="/static/js/dt-jquery.dataTables.min.js"></script>
-<script src="/static/js/dt-dataTables.bootstrap.min.js"></script>
+<!-- <script src="/static/js/dt-jquery.dataTables.min.js"></script>
+	<script src="/static/js/dt-dataTables.bootstrap.min.js"></script> -->
 
 <!-- GenesisUI main scripts -->
 <script src="/static/js/app.js"></script>
@@ -52,8 +52,9 @@
 <script src="/static/js/umi-searchby-modals.js"></script>
 
 <script src="/static/js/jquery.datetimepicker.js"></script>
-<script src="/static/js/jquery.multi-select.js"></script>
+
 <script src="/static/js/jquery.quicksearch.js"></script>
+<script src="/static/js/jquery.multi-select.js"></script>
 <!-- <script src="/static/js/umi-multiselect.js"></script> -->
 
 <!-- LDAP tree related (Vue based) -->

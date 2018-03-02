@@ -48,33 +48,24 @@ former, dynamic method, variant is at LDAP_CRUD->attr_equality
 sub signin :Path Global {
   my ( $self, $c ) = @_;
 
+  log_debug { np( $c->req->params ) };
+
   $c->session->{auth_uid} = $c->req->param('auth_uid');
   $c->session->{auth_pwd} = $c->req->param('auth_pwd');
 
-  my $auth = '';
-  $auth = try {
+  try {
     $c->authenticate({ id       => $c->session->{auth_uid},
 		       password => $c->session->{auth_pwd}, });
-  } catch {
-    log_fatal { sprintf(" user %s was not authenticated; %s", $c->session->{auth_uid}, $_) };
-    $auth = '';
-  };
 
-  if ( $auth ne '' ) {
-    ## moving to Session->__user # $c->session->{auth_obj} = $c->user->attributes('ashash');
-    ## moving to Session->__user # delete $c->session->{auth_obj}->{jpegphoto};
     # depending of what RDN type is used for auth e.g.uid, cn
     $c->session->{auth_uid} = eval '$c->user->' . UMI->config->{authentication}->{realms}->{ldap}->{store}->{user_field};
-    ## moving to Session->__user # delete $c->session->{auth_roles};
-    ## moving to Session->__user # push @{$c->session->{auth_roles}}, $c->user->roles;
-    ## moving to Session->__user # $c->cache->set( 'auth_obj', $c->session->{auth_obj} );
-    # p $c->session;
-    # p $c->cache->get( 'auth_obj' );
-
+    # log_debug { np($c->session) };
     my $ldap_crud = $c->model('LDAP_CRUD');
     my ( $meta_schema, $key, $value, $must_meta, $may_meta, $must, $may, $syntmp);
     while ( ($key, $value) = each %{$ldap_crud->{cfg}->{objectClass}}) {
-      foreach ( @{$value} ) { $meta_schema->{$_} += 1; }
+      foreach ( @{$value} ) {
+	$meta_schema->{$_} += 1;
+      }
     }
     my $schema = $ldap_crud->schema; # ( dn => $ldap_crud->{base}->{db} );
     foreach $key ( sort ( keys %{$meta_schema} )) {
@@ -120,17 +111,23 @@ sub signin :Path Global {
     }
 
     log_info { 'user ' . $c->session->{auth_uid} . ' successfully logged in' };
-    
+
     $c->stash( template => 'welcome.tt', );
-  } else {
+  } catch {
+    log_fatal { sprintf(" user %s was not authenticated;\n\n %s \n\n %s\n %s \n ",
+			$c->session->{auth_uid},
+			'=' x 70,
+			$_,
+			'=' x 70) };
+    log_debug { np( @_ ) };
     my $final_message;
     $final_message->{error} = 'Server internal error, please inform sysadmin!';
     $c->logout();
     $c->delete_session('SignOut');
     # $c->response->redirect($c->uri_for('/'));
     $c->stash( template => 'signin.tt',
-	     final_message => $final_message, );
-  }
+	       final_message => $final_message, );
+  };
 }
 
 sub signout :Path Global {
