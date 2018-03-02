@@ -1,9 +1,9 @@
 [% META title = 'GitACL' %]
 
 [% IF form.init_object.aux_dn_form_to_modify %]
-<h2>Update GitACL Form <small><em>[% form.init_object.aux_dn_form_to_modify %]</em></small></h2>
+<[% site.pageheading %]>Update GitACL Form <small><em>[% form.init_object.aux_dn_form_to_modify %]</em></small></[% site.pageheading %]>
 [% ELSE %]
-<h2>Creation GitACL Form <small><em>all stuff</em></small></h2>
+<[% site.pageheading %]>Creation GitACL Form <small><em>all stuff</em></small></[% site.pageheading %]>
 [% END %]
 
 [% INCLUDE ldap_err.tt %]

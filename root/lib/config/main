@@ -13,7 +13,8 @@
    # define a data structure to hold sitewide data
    site = {
      title     => 'UMI',
-     copyright => '2015 Zeus Panchenko',
+     copyright => '20XX Zeus Panchenko',
+     pageheading => 'h3',
    };
 
    # load up any other configuration items

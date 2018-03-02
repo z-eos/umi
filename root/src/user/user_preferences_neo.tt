@@ -5,9 +5,9 @@
 
 
 <div class="page-header">
-  <h2>
+  <[% site.pageheading %]>
     <b>[% auth_obj.givenname %]&nbsp;[% auth_obj.sn %]</b> <small class="mono">(<i>UID: &laquo;[% auth_obj.uid %]&raquo; preferences)</i></small>
-  </h2>
+  </[% site.pageheading %]>
 </div>
 
 <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">

@@ -2,7 +2,7 @@
 
 <div class="row">
   <div class="col-md-10">
-    <h2 class="page-header">Org <small>manipulations</small></h2>
+    <[% site.pageheading %] class="page-header">Org <small>manipulations</small></[% site.pageheading %]>
     <dl>
       <li>
 	<h4>Organization (office) DNs are hierarchycal</h4>

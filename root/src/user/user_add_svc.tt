@@ -1,7 +1,7 @@
 [% META title = 'Add Service Account' %]
 
     <div class="page-header">
-      <h2>Service Account Add Form <small><em class="mono">for user: [% add_svc_acc %]</em></small></h2>
+      <[% site.pageheading %]>Service Account Add Form <small><em class="mono">for user: [% add_svc_acc %]</em></small></[% site.pageheading %]>
     </div>
 
     [% IF final_message.error %]

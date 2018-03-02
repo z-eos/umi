@@ -331,6 +331,8 @@ select.form-control:not([size]):not([multiple]) {
 .sidebar .nav .nav-item .nav-link.nav-dropdown-toggle::before, .sidebar .nav .nav-item .navbar .nav-dropdown-toggle.dropdown-toggle::before, .navbar .sidebar .nav .nav-item .nav-dropdown-toggle.dropdown-toggle::before {
   content: "\f0d9";
   font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  font-size: 100%;
 }
 
 /* -------------------------------

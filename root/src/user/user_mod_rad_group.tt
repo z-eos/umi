@@ -6,7 +6,7 @@
 [% INCLUDE ldap_err.tt %]
 
 <div class="page-header">
-  <h2>RADIUS Groups Modification Form <small><em class="mono">for user: [% ldap_modify_rad_group %]</em></small></h2>
+  <[% site.pageheading %]>RADIUS Groups Modification Form <small><em class="mono">for user: [% ldap_modify_rad_group %]</em></small></[% site.pageheading %]>
 </div>
 
 [% form.render %]

@@ -4,14 +4,14 @@
 
 <div class="row">
   <div class="col-xs-6 col-sm-6 col-md-3 col-lg-3">
-    <h1>
-      Search Results
+    <[% site.pageheading %]>
+    Search Results
       <sup>
 	<abbr  title="not all objects could be found via predefined search items, to search for all objects use advanced search menu item!" class="initialism">
 	  <i class="fa fa-info-circle text-info"></i>
 	</abbr>
       </sup>
-    </h1>
+    </[% site.pageheading %]>
   </div>
   <div class="col-xs-6 col-sm-6 col-md-9 col-lg-9"><br>
     <dl class="dl-horizontal mono text-info">

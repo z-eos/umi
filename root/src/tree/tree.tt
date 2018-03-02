@@ -1,6 +1,6 @@
 [% META title = 'To QR Code' %]
 
-<h2><i class="fa fa-tree fa-lg"></i> LDAP Tree <small><em>all stuff</em></small></h2>
+<[% site.pageheading %]><i class="fa fa-tree fa-lg"></i> LDAP Tree <small><em>all stuff</em></small></[% site.pageheading %]>
 
 [% INCLUDE ldap_err.tt %]
 

@@ -1,6 +1,6 @@
 [% META title = 'To Translit' %]
 
-<h2><i class="fa fa-text-width fa-lg"></i> Text to translit <small><em>all stuff</em></small></h2>
+<[% site.pageheading %]><i class="fa fa-text-width fa-lg"></i> Text to translit <small><em>all stuff</em></small></[% site.pageheading %]>
 
 [% INCLUDE ldap_err.tt %]
 

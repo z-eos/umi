@@ -1,7 +1,7 @@
 [% META title = 'Password Modify' %]
 
 <div class="page-header">
-  <h2>Password Check or Modification Form <small><em class="mono">for user: [% ldap_modify_password %]</em></small></h2>
+  <[% site.pageheading %]>Password Check or Modification Form <small><em class="mono">for user: [% ldap_modify_password %]</em></small></[% site.pageheading %]>
 </div>
 
 [% INCLUDE ldap_err.tt %]

@@ -10,12 +10,12 @@
 <link href="/static/css/dt-select.bootstrap.min.css" rel="stylesheet" type="text/css">
 
 <div class="page-header">
-  <h2>
+  <[% site.pageheading %]>
     Users Accounts Statistics
     <small><em>
       you can sort by multiple columns at the same time (<b>Shift-click</b> on a column adds it as a secondary, tertiary etc ordering column)
     </em></small>
-  </h2>
+  </[% site.pageheading %]>
 </div>
 
 [% INCLUDE ldap_err.tt %]

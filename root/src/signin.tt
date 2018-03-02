@@ -10,7 +10,7 @@
 	<img src="/static/images/umi-logo-black-diagonal.png"
 	     alt="Unified Management Interface"
 	     class="img-responsive mx-auto">
-      <h2 class="form-signin-heading text-center text-light text-uppercase">please sign in</h2>
+      <[% site.pageheading %] class="form-signin-heading text-center text-light text-uppercase">please sign in</[% site.pageheading %]>
 
       <div class="input-group">
 	<span class="input-group-addon" id="basic-login"><i class="fa fa-user-circle"></i></span>

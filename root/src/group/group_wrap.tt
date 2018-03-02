@@ -7,7 +7,7 @@
 
 [% INCLUDE ldap_err.tt %]
 
-<h2>New Group Creation Form <small><em>all stuff</em></small></h2>
+<[% site.pageheading %]>New Group Creation Form <small><em>all stuff</em></small></[% site.pageheading %]>
 
 [% form.render %]
 

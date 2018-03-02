@@ -4,7 +4,7 @@
 %]
 
 <div class="page-header">
-  <h2>Group Member/s Modification Form <small><em class="mono">for group: [% groupdn %]</em></small></h2>
+  <[% site.pageheading %]>Group Member/s Modification Form <small><em class="mono">for group: [% groupdn %]</em></small></[% site.pageheading %]>
 </div>
 
 [% INCLUDE ldap_err.tt %]

@@ -1,7 +1,7 @@
 [% META title = 'JpegPhoto Modify' %]
 
 <div class="page-header">
-  <h2>jpegPhoto Modification Form <small><em class="mono">for user: [% ldap_modify_jpegphoto %]</em></small></h2>
+  <[% site.pageheading %]>jpegPhoto Modification Form <small><em class="mono">for user: [% ldap_modify_jpegphoto %]</em></small></[% site.pageheading %]>
 </div>
 
 [% INCLUDE ldap_err.tt %]

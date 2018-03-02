@@ -1,6 +1,6 @@
 [% META title = 'Search Simple Results' %]
 
-<h2>Deletion Result <small><em>base: [% params.ldapsearch_base %]; &nbsp;&nbsp; filter: [% params.ldapsearch_filter %]</em></small></h2>
+<[% site.pageheading %]>Deletion Result <small><em>base: [% params.ldapsearch_base %]; &nbsp;&nbsp; filter: [% params.ldapsearch_filter %]</em></small></[% site.pageheading %]>
 
 [% IF err != '0' %]
 [% err %]

@@ -1,6 +1,6 @@
 [% META title = 'Search Simple Results' %]
 
-<h2>Search Simple Results <small><em>base: [% final_message.dn %]; &nbsp;&nbsp; filter: (objectClass=*)</em></small></h2>
+<[% site.pageheading %]>Search Simple Results <small><em>base: [% final_message.dn %]; &nbsp;&nbsp; filter: (objectClass=*)</em></small></[% site.pageheading %]>
 
 [% INCLUDE ldap_err.tt %]
 

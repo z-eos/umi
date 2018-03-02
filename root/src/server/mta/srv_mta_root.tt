@@ -2,14 +2,14 @@
    link = '<link href="/static/css/dt-dataTables.bootstrap.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-buttons.jqueryui.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-buttons.dataTables.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-buttons.bootstrap.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-select.dataTables.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-select.bootstrap.min.css" rel="stylesheet" type="text/css">'
    %]
 
-<h2 class="page-header">MTA
+<[% site.pageheading %] class="page-header">MTA
       <sup>
 	<abbr  title="[% mta.default.description %]">
 	  <i class="fa fa-info-circle text-info"></i>
 	</abbr>
       </sup>
       related <small>manipulations</small>
-</h2>
+</[% site.pageheading %]>
 
 [% INCLUDE ldap_err.tt %]
 

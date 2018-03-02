@@ -2,7 +2,7 @@
 
 <div class="row">
   <div class="col-md-10">
-    <h2 class="page-header">USERs <small>manipulations</small></h2>
+    <[% site.pageheading %] class="page-header">USERs <small>manipulations</small></[% site.pageheading %]>
 
     <dl>
       <li>

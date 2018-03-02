@@ -5,9 +5,9 @@
 
 <div class="page-header">
 [% IF form.init_object.aux_dn_form_to_modify %]
-<h2>Update Nis Group 2 Form <small><em>[% form.init_object.aux_dn_form_to_modify %]</em></small></h2>
+<[% site.pageheading %]>Update Nis Group 2 Form <small><em>[% form.init_object.aux_dn_form_to_modify %]</em></small></[% site.pageheading %]>
 [% ELSE %]
-<h2>Nis Group 2 Creation Form <small><em>all stuff</em></small></h2>
+<[% site.pageheading %]>Nis Group 2 Creation Form <small><em>all stuff</em></small></[% site.pageheading %]>
 [% END %]
 </div>
 

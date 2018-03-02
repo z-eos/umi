@@ -1,6 +1,6 @@
 [% META title = 'To Import' %]
 
-<h2><i class="fa fa-download fa-lg"></i> LDIF to import <small><em>( either LDIF file or LDIF data )</em></small></h2>
+<[% site.pageheading %]><i class="fa fa-download fa-lg"></i> LDIF to import <small><em>( either LDIF file or LDIF data )</em></small></[% site.pageheading %]>
 
 [% INCLUDE ldap_err.tt %]
 
