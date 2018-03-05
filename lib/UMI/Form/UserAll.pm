@@ -755,7 +755,7 @@ has_field 'groups'
   => ( type => 'Multiple',
        label => '',
        element_wrapper_class => [ 'col-xs-12', ],
-       element_class => [ 'multiselect', 'input-sm', ],
+       element_class => [ 'multiselect', 'input-sm', 'umi-multiselect', ],
        # required => 1,
      );
 

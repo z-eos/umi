@@ -1,6 +1,6 @@
 .ms-container{
-  background: transparent url('../images/switch.png') no-repeat 50% 50%;
-  width: 100%;
+  background: transparent url('../img/switch.png') no-repeat 50% 50%;
+  width: 370px;
 }
 
 .ms-container:after{
@@ -23,9 +23,7 @@
 .ms-container .ms-selection{
   float: right;
 }
-.ms-selectable{
-  text-align: right;
-}
+
 .ms-container .ms-list{
   -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
   -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);

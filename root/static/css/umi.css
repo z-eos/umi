@@ -270,6 +270,22 @@ html,body {
 
 /* -------------------------------
 
+   KLUDGE patches to multi-select
+
+   ------------------------------- */
+
+.ms-container {
+  background: transparent url('../images/switch.png') no-repeat 50% 50% !important;
+  width: 100% !important;
+}
+
+.ms-selectable {
+  text-align: right;
+}
+
+
+/* -------------------------------
+
    KLUDGE fixes of CoreUI theme
 
    ------------------------------- */

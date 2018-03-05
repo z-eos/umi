@@ -21,6 +21,7 @@ has_field 'ldap_modify_group' => ( type => 'Hidden', );
 
 has_field 'groups' => ( type => 'Multiple',
 			label => '',
+			element_class => [ 'umi-multiselect', ],
 			options_method => \&group, );
 
 has_field 'aux_reset' => ( type => 'Reset',

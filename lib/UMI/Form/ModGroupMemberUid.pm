@@ -17,7 +17,7 @@ has_field 'ldap_modify_memberUid' => ( type => 'Hidden', );
 
 has_field 'memberUid' => ( type => 'Multiple',
 			   label => '',
-			   # element_class => [ 'multiselect' ],
+			   # element_class => [ 'umi-multiselect' ],
 			   # required => 1,
 			 );
 

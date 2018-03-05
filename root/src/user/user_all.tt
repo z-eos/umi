@@ -165,63 +165,72 @@
 
 <!-- <script src="/static/js/jquery.multi-select.js"></script> -->
 <!-- <script src="/static/js/jquery.quicksearch.js"></script> -->
-<!-- script src="/static/js/umi-multiselect.js"></script -->
+<script src="/static/js/umi-multiselect.js"></script>
 
 <script type="text/javascript">
-
- $(function(){
-    $('#groups').multiSelect({
-	keepOrder: true,
-
-	selectableHeader: "<button type='button' class='btn btn-block btn-info btn-sm'><span class='fa fa-users'>&nbsp;</span><b>Groups Available</b></button><input type='text' class='form-control search-input input-sm' autocomplete='off' placeholder='type to search or clear all for default'>",
-	selectionHeader: "<button type='button' class='btn btn-block btn-success btn-sm'><span class='fa fa-users'>&nbsp;</span><b>Groups Selected</b></button><input type='text' class='form-control search-input input-sm' autocomplete='off' placeholder='type to search or clear all for default'>",
-
-	afterInit: function(ms){
-	    var that = this,
-		$selectableSearch = that.$selectableUl.prev(),
-		$selectionSearch = that.$selectionUl.prev(),
-		selectableSearchString = '#'+that.$container.attr('id')+' .ms-elem-selectable:not(.ms-selected)',
-		selectionSearchString = '#'+that.$container.attr('id')+' .ms-elem-selection.ms-selected';
-
-	    that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
-		.on('keydown', function(e){
-		    if (e.which === 40){
-			that.$selectableUl.focus();
-			return false;
-		    }
-		});
-
-	    that.qs2 = $selectionSearch.quicksearch(selectionSearchString)
-		.on('keydown', function(e){
-		    if (e.which == 40){
-			that.$selectionUl.focus();
-			return false;
-		    }
-		});
-	},
-	afterSelect: function(){
-	    this.qs1.cache();
-	    this.qs2.cache();
-	},
-	afterDeselect: function(){
-	    this.qs1.cache();
-	    this.qs2.cache();
-	}
-
-	/* var element = document.getElementById("ms-groups");
-	   element.classList.add("tab-pane"); */
-	
-    });
-    // $('#ms-groups').addClass('tab-panel');
-});
-
-// here we put multiselect related things into tab
-$(function(){
-    var element = document.getElementById("groups");
-    element.classList.add("tab-pane");
-});
-
-
+// // http://loudev.com/
+// $(function(){
+//    $('.umi-multiselect').multiSelect({
+//	keepOrder: true,
+//
+//	selectableHeader: "<div class='input-group'><span class='input-group-addon bg-info' id='basic-addon1' title='Available groups search'><i class='fas fa-users text-light'></i></span><input type='text' autocomplete='off' aria-describedby='basic-addon1' class='form-control search-input input-sm' placeholder='Available groups search'></div>",
+//
+//	//<button type='button' class='btn btn-block btn-info btn-sm'><span class='fa fa-users'>&nbsp;</span><b>Groups Available</b></button><input type='text' class='form-control search-input input-sm' autocomplete='off' placeholder='type to search or clear all for default'>",
+//	
+////	selectionHeader: "<div class='input-group'><span class='input-group-addon bg-success' id='basic-addon2' title='Selected groups search'><i class='fas fa-users text-light'></i></span><input type='text' autocomplete='off' aria-describedby='basic-addon2' class='form-control search-input input-sm' placeholder='Selected groups search'></div>",
+//
+////	selectionHeader: "<button type='button' class='btn btn-block btn-success btn-sm'><span class='fa fa-users'>&nbsp;</span><b>Groups Selected</b></button><input type='text' class='form-control search-input input-sm' autocomplete='off' placeholder='type to search or clear all for default'>",
+//
+//	selectionHeader: "<input type='text' class='form-control search-input input-sm' autocomplete='off' placeholder='selected group/s search' title='selected group/s search'>",
+//
+//	afterInit: function(ms){
+//	    var that = this,
+//		$selectableSearch = that.$selectableUl.prev().find('input'),
+//		$selectionSearch  = that.$selectionUl.prev(),
+//		selectableSearchString = '#'+that.$container.attr('id')+' .ms-elem-selectable:not(.ms-selected)',
+//		selectionSearchString  = '#'+that.$container.attr('id')+' .ms-elem-selection.ms-selected';
+//
+//	  console.log(this);
+//	  
+//	    that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
+//		.on('keydown', function(e){
+//		    if (e.which === 40){
+//			that.$selectableUl.focus();
+//			return false;
+//		    }
+//		});
+//
+//	    that.qs2 = $selectionSearch.quicksearch(selectionSearchString)
+//		.on('keydown', function(e){
+//		    if (e.which == 40){
+//			that.$selectionUl.focus();
+//			return false;
+//		    }
+//		});
+//	},
+//	afterSelect: function(){
+//	    this.qs1.cache();
+//	    this.qs2.cache();
+//	},
+//	afterDeselect: function(){
+//	    this.qs1.cache();
+//	    this.qs2.cache();
+//	}
+//
+//      /* var element = document.getElementById("groups");
+//	 element.classList.add("tab-pane"); */
+//	
+//    });
+//    // $('#ms-groups').addClass('tab-pane');
+//});
+//
+//// here we put multiselect related things into tab
+//$(function(){
+//    var element = document.getElementById("groups");
+//    element.classList.add("tab-pane");
+//});
+//
+//
 </script>
 
 [% USE date(time = date.now, format = '%Y.%m.%d', locale = 'en_US') %]

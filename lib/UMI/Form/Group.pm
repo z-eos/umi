@@ -21,7 +21,7 @@ has_field 'cn' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
 
 has_field 'memberUid' => ( type => 'Multiple',
 			   label => 'Group Members',
-			   # element_class => [ 'multiselect' ],
+			   element_class => [ 'umi-multiselect' ],
 			   # required => 1,
 			 );
 

@@ -203,7 +203,7 @@
       <li class="nav-item dropdown">
 	<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">
 	  <i class="fa fa-bell icon-bell"></i>
-	  <span class="badge badge-pill badge-danger bg-danger"><small>[% navbar_note.size %]</small></span>
+	  <small><span class="badge badge-pill badge-danger bg-danger">[% navbar_note.size %]</span></small>
 	</a>
 	<div class="dropdown-menu dropdown-menu-right">
 	  <div class="dropdown-header text-center text-dark">

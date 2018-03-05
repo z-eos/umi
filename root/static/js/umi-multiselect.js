@@ -1,16 +1,16 @@
 $(function(){
-    $('#ms-groups').multiSelect({
+    $('.umi-multiselect').multiSelect({
 	keepOrder: true,
 
-	selectableHeader: "<button type='button' class='btn btn-block btn-info btn-sm'><span class='fa fa-users'>&nbsp;</span><b>Groups Available</b></button><input type='text' class='form-control search-input input-sm' autocomplete='off' placeholder='type to search or clear all for default'>",
-	selectionHeader: "<button type='button' class='btn btn-block btn-success btn-sm'><span class='fa fa-users'>&nbsp;</span><b>Groups Selected</b></button><input type='text' class='form-control search-input input-sm' autocomplete='off' placeholder='type to search or clear all for default'>",
+	selectableHeader: "<div class='input-group has-warning'><span class='input-group-addon bg-warning' id='basic-addon1' title='Available groups search'><i class='fas fa-users text-light'></i></span><input type='text' autocomplete='off' aria-describedby='basic-addon1' class='form-control search-input input-sm' placeholder='Search for available' title='Search for available'></div>",
+	selectionHeader: "<div class='input-group has-success'><span class='input-group-addon bg-success' id='basic-addon2' title='Available groups search'><i class='fas fa-users text-light'></i></span><input type='text' autocomplete='off' aria-describedby='basic-addon2' class='form-control search-input input-sm' placeholder='Search for selected' title='Search for selected'></div>",
 
 	afterInit: function(ms){
 	    var that = this,
-		$selectableSearch = that.$selectableUl.prev(),
-		$selectionSearch = that.$selectionUl.prev(),
+		$selectableSearch = that.$selectableUl.prev().find('input'),
+		$selectionSearch  = that.$selectionUl.prev().find('input'),
 		selectableSearchString = '#'+that.$container.attr('id')+' .ms-elem-selectable:not(.ms-selected)',
-		selectionSearchString = '#'+that.$container.attr('id')+' .ms-elem-selection.ms-selected';
+		selectionSearchString  = '#'+that.$container.attr('id')+' .ms-elem-selection.ms-selected';
 
 	    that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
 		.on('keydown', function(e){
