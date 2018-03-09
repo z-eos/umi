@@ -102,6 +102,7 @@ html,body {
   content: "\f071";
   font-family: "Font Awesome 5 Free";
   font-size: 70%;
+  font-weight: 900;
   color: #E99002;
   vertical-align: top;
   margin: 0px 0px 0px 3px;
@@ -112,6 +113,7 @@ html,body {
   content: "\f055";
   font-family: "Font Awesome 5 Free";
   font-size: 70%;
+  font-weight: 900;
   //    color: #fff;
   vertical-align: 60%;
   margin: 0 0 0 -4px;
@@ -122,6 +124,7 @@ html,body {
   content: "\f142";
   font-family: "Font Awesome 5 Free";
   font-size: 70%;
+  font-weight: 900;
   //    color: #fff;
   vertical-align: 60%;
   margin: 0 0 0 0;
@@ -132,6 +135,7 @@ html,body {
   content: "\f05e";
   font-family: "Font Awesome 5 Free";
   font-size: 70%;
+  font-weight: 900;
   color: #E74C3C;
   vertical-align: top;
   margin: -10px 0px 0px -20px;
@@ -142,6 +146,7 @@ html,body {
   content: "\f06b";
   font-family: "Font Awesome 5 Free";
   font-size: 100%;
+  font-weight: 900;
   color: #3c9a5f;
   vertical-align: top;
   margin: 0px 0px 5px 0px;
@@ -152,6 +157,7 @@ html,body {
   content: "\f1ab";
   font-family: "Font Awesome 5 Free";
   font-size: 100%;
+  font-weight: 900;
   color: #3c9a5f;
   vertical-align: top;
   margin: 0px 0px 5px 0px;

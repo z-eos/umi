@@ -223,12 +223,14 @@ sub _build_cfg {
 						  account
 						  simpleSecurityObject
 						  authorizedServiceObject
+						  domainRelatedObject
 						  radiusprofile
 					       ) ],
 			  acc_svc_802_1x_eaptls => [ qw(
 							 account
 							 simpleSecurityObject
 							 authorizedServiceObject
+							 domainRelatedObject
 							 radiusprofile
 							 pkiUser
 							 umiUserCertificate
@@ -3146,6 +3148,7 @@ sub create_account_branch_leaf {
 
     push @{$authorizedService},
       authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
+      associatedDomain => $arg->{associatedDomain},
       userPassword => $arg->{password}->{$arg->{service}}->{clear},
       description => $arg->{description} ne '' ? $arg->{description} : sprints('%s: %s', uc($arg->{service}), $arg->{'login'});
 

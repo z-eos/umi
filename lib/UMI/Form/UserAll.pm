@@ -878,7 +878,7 @@ sub validate {
       $ldap_crud->search({ scope => 'base',
 			   base => $self->add_svc_acc,
 			   attrs => [ 'givenName', 'sn' ], });
-    my $autologin_entry = $autologin_mesg->entry(0);
+    my $autologin_entry = $autologin_mesg->entry(0); p $autologin_mesg->as_struct;
     $self->autologin( lc($autologin_entry->get_value('givenName') . '.' .
 			 $autologin_entry->get_value('sn') ));
   }
