@@ -154,14 +154,15 @@
 	  <li class="nav-item">
 	    <a class="nav-link" href="#chat" ><i class="fa fa-fw fa-comments"></i> chat</a>
 	    
-	    <!-- CONVERSEJS https://conversejs.org -->
-	    <link rel="stylesheet" type="text/css" media="screen" href="/static/converse.js/css/converse.css">
-	    <script src="/static/converse.js/converse.js"></script>
-
 	    <script>
+	     /* CONVERSEJS https://conversejs.org */
+	     
 	     var is_chat = false;
 	     
 	     $('[href="#chat"]').on('click', function(e){
+	       $('head').append('<link rel="stylesheet" type="text/css" media="screen" href="/static/converse.js/css/converse.css">');
+	       $('<script src="/static/converse.js/converse.js"></' + 'script>').appendTo(document.body);
+	    
 	       e.preventDefault();
 
 	       if (!is_chat) {
