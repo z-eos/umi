@@ -152,8 +152,44 @@
 	    [% helper_cfg('cfg_local','header','help', 'item2', 'txt') %]</a>
 	  </li>
 	  <li class="nav-item">
-	    <a class="nav-link" href="#"><i class="fa fa-fw fa-comments"></i> chat</a>
-	  </li>
+	    <a class="nav-link" href="#chat" ><i class="fa fa-fw fa-comments"></i> chat</a>
+	    
+	    <!-- CONVERSEJS https://conversejs.org -->
+	    <link rel="stylesheet" type="text/css" media="screen" href="/static/converse.js/css/converse.css">
+	    <script src="/static/converse.js/converse.js"></script>
+
+	    <script>
+	     var is_chat = false;
+	     
+	     $('[href="#chat"]').on('click', function(e){
+	       e.preventDefault();
+
+	       if (!is_chat) {
+		 converse.initialize({
+		   allow_chat_pending_contacts: true,
+		   allow_registration: false,
+		   /* auto_join_rooms: [
+		      'tech_support@conference.im.ibs.dn.ua',
+		      ], */
+		   bosh_service_url: 'https://im.ibs.dn.ua:5281/bosh',
+		   i18n: 'en',
+		   keepalive: true,
+		   message_carbons: true,
+		   roster_groups: true,
+		   show_controlbox_by_default: true,
+		   show_send_button: true,
+		   strict_plugin_dependencies: false,
+		   //   view_mode: 'fullscreen',
+		   //   debug: true,
+		   xhr_user_search: false
+		 });
+	       }
+	       
+	       is_chat = true;
+	     });
+	    </script>
+	    
+	    </li>
 	  <li class="nav-item">
 	    <a class="nav-link" href="#"><i class="fa fa-fw fa-envelope"></i> email</a>
 	  </li>

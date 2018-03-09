@@ -52,7 +52,7 @@ var handleResponce = function(html) {
 	    contentType: contentType,
 	    type: 'POST',
 	    success: handleResponce,
-	    error: handleResponce
+	    error: function(xhr) { console.log('ERROR',arguments); handleResponce(xhr.responseText) }
 	});
 	
 	// $.post($(this).attr('action'), postData, handleResponce);

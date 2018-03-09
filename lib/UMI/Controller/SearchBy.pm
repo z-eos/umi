@@ -380,7 +380,7 @@ sub index :Path :Args(0) {
       undef $diff;
       
       push @ttentries_keys, $_->dn if $sort_order eq 'reverse'; # for not history searches
-      $blocked = 0;
+      $blocked = $is_dynamicObject = 0;
     }
 
     # suffix array of dn preparation to respect LDAP objects "inheritance"

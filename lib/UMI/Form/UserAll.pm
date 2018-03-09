@@ -9,7 +9,7 @@ BEGIN { extends 'UMI::Form::LDAP';
 
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable', 'StrongPassword', 'IPAddress' );
 
-use Data::Printer;
+use Data::Printer caller_info => 1, colored => 1;
 
 # has '+error_message' => ( default => 'There were errors in your form.' );has '+item_class' => ( default =>'UserAll' );
 has '+enctype' => ( default => 'multipart/form-data');
@@ -657,6 +657,18 @@ has_field 'loginless_ovpn.ifconfigpush'
        wrapper_class => [ qw{col-xs-12}, ],
      );
 
+has_field 'loginless_ovpn.config'
+  => ( apply => [ Printable, ],
+       label => 'Config',
+       label_class => [ 'col-xs-2', ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
+       element_class => [ 'input-sm', ],
+       element_attr => { placeholder => 'path/to/some/additional/configfile.conf',
+			 'data-name' => 'config',
+			 'data-group' => 'loginless_ovpn', },
+       wrapper_class => [ qw{col-xs-12}, ],
+     );
+
 has_field 'loginless_ovpn.devtype'
   => ( apply => [ NoSpaces, Printable ],
        label => 'Device Type',
@@ -1230,9 +1242,8 @@ sub validate {
     my $ovpn_tmp;
     $i = 0;
     foreach $element ( $self->field('loginless_ovpn')->fields ) {
-      foreach my $tmpname ($element->field('userCertificate')) {
-	# p $tmpname; # field('userCertificate');
-      }
+      # p $_->value foreach ($element->field('userCertificate'));
+
       if ((( defined $element->field('associateddomain')->value &&
 	     defined $element->field('userCertificate')->value &&
 	     defined $element->field('ifconfigpush')->value &&
@@ -1280,14 +1291,15 @@ sub validate {
 				'<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
 				'<b> <i class="fa fa-arrow-right"></i> OpenVPN:</b> Problems with certificate file<br>' . $is_x509->{error})
 	    if defined $is_x509->{error};
-	} elsif ( defined $element->field('userCertificate')->value &&
-		  ! defined $element->field('userCertificate')->value->{tempname} ) {
-	  $element->field('userCertificate')->add_error('userCertificate file was not uploaded');
-	  $self->add_form_error('<span class="fa-stack fa-fw">' .
-				'<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
-				'<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
-				'<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
-				'<b> <i class="fa fa-arrow-right"></i> OpenVPN:</b> userCertificate file was not uploaded<br>');
+# due to ajax upload # 	} elsif ( defined $element->field('userCertificate')->value &&
+# due to ajax upload # 		  ref($element->field('userCertificate')->value) ne 'HASH' ) {
+# due to ajax upload # #		  ! defined $element->field('userCertificate')->value->{tempname} ) {
+# due to ajax upload # 	  $element->field('userCertificate')->add_error('userCertificate file was not uploaded');
+# due to ajax upload # 	  $self->add_form_error('<span class="fa-stack fa-fw">' .
+# due to ajax upload # 				'<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
+# due to ajax upload # 				'<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
+# due to ajax upload # 				'<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
+# due to ajax upload # 				'<b> <i class="fa fa-arrow-right"></i> OpenVPN:</b> userCertificate file was not uploaded<br>');
 	} elsif ( ! defined $element->field('userCertificate')->value ) {
 	  $element->field('userCertificate')->add_error('userCertificate is mandatory!');
 	  $self->add_form_error('<span class="fa-stack fa-fw">' .

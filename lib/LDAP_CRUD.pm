@@ -3041,6 +3041,7 @@ sub create_account_branch_leaf {
       # !!! here we much need check for cert existance !!!
       userCertificate => $args->{userCertificate} || '',
       umiOvpnCfgIfconfigPush => $args->{umiOvpnCfgIfconfigPush} || 'NA',
+      umiOvpnCfgConfig => $args->{umiOvpnCfgConfig} || '',
       umiOvpnAddStatus => $args->{umiOvpnAddStatus} || 'blocked',
       umiOvpnAddDevType => $args->{umiOvpnAddDevType} || 'NA',
       umiOvpnAddDevMake => $args->{umiOvpnAddDevMake} || 'NA',
@@ -3203,6 +3204,7 @@ sub create_account_branch_leaf {
 			  authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
 			  objectClass => [ @{$self->cfg->{objectClass}->{ovpn}}, @{$arg->{objectclass}} ],
 			  umiOvpnCfgIfconfigPush => $arg->{umiOvpnCfgIfconfigPush},
+			  umiOvpnCfgConfig => $arg->{umiOvpnCfgConfig},
 			  umiOvpnAddStatus => $arg->{umiOvpnAddStatus},
 			  umiUserCertificateSn => '' . $arg->{cert_info}->{'S/N'},
 			  umiUserCertificateNotBefore => '' . $arg->{cert_info}->{'Not Before'},

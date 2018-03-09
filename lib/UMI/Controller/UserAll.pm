@@ -395,7 +395,7 @@ we skip empty (criteria is a concatenation of each field value) repeatable eleme
 		      associateddomain => $element->field('associateddomain')->value,
 		      objectclass => ( defined $args->{dynamic_object} && $args->{dynamic_object} eq '1')
 		      || ( defined $args->{person_exp} && $args->{person_exp} ne '' ) ? [ 'dynamicObject' ] : [],
-		      requestttl => defined $args->{person_exp} && $args->{person_exp} ne '' ? $args->{person_exp} : '',
+		      requestttl => $is_person_exp ? $args->{person_exp} : '',
 		     };
 
 	$branch = $ldap_crud->create_account_branch ( $attr_hash );
@@ -434,7 +434,7 @@ we skip empty (criteria is a concatenation of each field value) repeatable eleme
 	   sn => $args->{person_sn},
 	   telephoneNumber => $args->{person_telephonenumber},
 	   # jpegPhoto => $jpeg,
-	   requestttl => defined $args->{person_exp} && $args->{person_exp} ne '' ? $args->{person_exp} : '',
+	   requestttl => $is_person_exp ? $args->{person_exp} : '',
 	  };
 
 	$x->{description} =
@@ -495,6 +495,7 @@ we skip empty (criteria is a concatenation of each field value) repeatable eleme
 			     { clear => '<del>NOPASSWORD</del>' } };
 	  $x->{associateddomain} = $element->field('associateddomain')->value;
 	  $x->{umiOvpnCfgIfconfigPush} = $element->field('ifconfigpush')->value || 'NA';
+	  $x->{umiOvpnCfgConfig} = $element->field('config')->value || 'NA';
 	  $x->{umiOvpnAddStatus} = $element->field('status')->value || 'blocked';
 	  $x->{umiOvpnAddDevType} = $element->field('devtype')->value || 'NA';
 	  $x->{umiOvpnAddDevMake} = $element->field('devmake')->value || 'NA';

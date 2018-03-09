@@ -26,6 +26,8 @@
    sshPubKey = 1
    telephoneNumber = 1
    title = 1
+   umiOvpnCfgPush = 1
+   umiOvpnCfgPush = 1
    }
    %]
 
