@@ -107,7 +107,7 @@
 	  [% IF c.check_any_user_role ('admin', 'coadmin', 'acl-w-organizations') %]
           <li class="nav-item">
 	    <a class="nav-link" href="/org" tabindex="4">
-              <i class="fa fa-fw fa-industry"></i>
+              <i class="fa fa-fw fa-building"></i>
               Org
 	    </a>
 	  </li>

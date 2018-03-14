@@ -87,7 +87,7 @@
 		    onClick="document.getElementById('ldap_base_case').value=this.value"
 		    value="ldapsearch_by_ip"
 		    title="filter pattern in ip address">
-	      <i class="[% icon_class %] fa-home"></i> by IP
+	      <i class="[% icon_class %] fa-laptop"></i> by IP
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
 		    onClick="document.getElementById('ldap_base_case').value=this.value"
@@ -99,7 +99,7 @@
 		    onClick="document.getElementById('ldap_base_case').value=this.value"
 		    value="ldapsearch_by_sn"
 		    title="filter pattern in Serial Number address">
-	      <i class="[% icon_class %] fa-barcode"></i> by S/N
+	      <i class="[% icon_class %] fa-qrcode"></i> by S/N
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
 		    onClick="document.getElementById('ldap_base_case').value=this.value"
@@ -134,7 +134,7 @@
 		    value="[% helper_cfg('cfg_ldap_crud','base', 'org') %]"
 		    tabindex="20"
 		    title="filter pattern with base Organizations">
-	      <i class="[% icon_class %] fa-industry"></i> organization
+	      <i class="[% icon_class %] fa-building"></i> organization
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
 		    onClick="document.getElementById('ldap_base_case').value=this.value"
