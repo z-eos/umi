@@ -21,6 +21,7 @@
    description = 1
    dhcpStatements = 1
    grayPublicKey = 1
+   member = 1
    memberUid = 1
    objectClass = 1
    sshPubKey = 1

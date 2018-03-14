@@ -533,7 +533,7 @@ sub proc :Path(proc) :Args(0) {
       if ( defined $params->{groups} ) {
 	$groups = ref($params->{groups}) eq 'ARRAY' ? $params->{groups} : [ $params->{groups} ];
       } else {
-	$groups = '';
+	$groups = undef;
       }
 
       my $ldap_crud = $c->model('LDAP_CRUD');
@@ -545,7 +545,7 @@ sub proc :Path(proc) :Args(0) {
 	if $mesg->code != 0;
       $id = $mesg->entry(0)->get_value( $ldap_crud->{cfg}->{rdn}->{acc_root} );
 
-      if ( ! defined $params->{groups} && ! defined $params->{aux_submit} ) {
+      if ( ! defined $params->{groups} && ! defined $params->{aux_runflag} ) {
 	my ( $return, $base, $filter, $dn );
 	$mesg = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{group},
 				      filter => sprintf('memberUid=%s', $id),
@@ -563,17 +563,19 @@ sub proc :Path(proc) :Args(0) {
 		 form => $self->form_mod_groups,
 		 ldap_modify_group => $params->{ldap_modify_group}, );
 
+      log_debug { np( $self->form_mod_groups->value ) };
       return unless $self->form_mod_groups
-      	->process( posted => ($c->req->method eq 'POST'),
+      	->process( posted => ($c->req->method eq 'POST' ),
 		   params => $params,
 		   ldap_crud => $ldap_crud );
+      log_debug { np( $self->form_mod_groups->value ) };
 
       $c->stash( final_message => $self
       		 ->mod_groups( $ldap_crud,
       			       { mod_groups_dn => $params->{ldap_modify_group},
       				 base => $ldap_crud->cfg->{base}->{group},
       				 groups => $groups,
-      				 type => 'posixGroup', } ), );
+      				 type => 'posixGroup', } ), ) if defined $params->{aux_runflag}; # !!! otherwise all groups are deleted on the initial run
 
 #=====================================================================
 # Modify RADIUS Groups
@@ -1166,10 +1168,11 @@ on input it expects hash with:
 
 sub mod_groups {
   my ( $self, $ldap_crud, $args ) = @_;
-  my $arg = { obj_dn => $args->{mod_groups_dn},
-	      groups => $args->{groups},
-	      base => defined $args->{base} ? $args->{base} : $ldap_crud->cfg->{base}->{group},
-	      type => defined $args->{type} ? $args->{type} : 'posixGroup', };
+  my $arg = { obj_dn   => $args->{mod_groups_dn},
+	      firstrun => $args->{firstrun},
+	      groups   => $args->{groups},
+	      base     => defined $args->{base} ? $args->{base} : $ldap_crud->cfg->{base}->{group},
+	      type     => defined $args->{type} ? $args->{type} : 'posixGroup', };
   log_debug { np( $args ) };
   log_debug { np( $arg ) };
   my ( $mesg, $return);

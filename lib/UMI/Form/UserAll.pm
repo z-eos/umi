@@ -338,7 +338,7 @@ has_field 'account.login'
        element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'john.doe',
-			 title => 'login will be added with @domain in the end',
+			 title => 'login to be added with @domain in the end; root uid is used if not provided.',
 			 'autocomplete' => 'off',
 			 'data-name' => 'login',
 			 'data-group' => 'account', },

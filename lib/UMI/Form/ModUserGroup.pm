@@ -18,6 +18,7 @@ sub html_attributes {
 }
 
 has_field 'ldap_modify_group' => ( type => 'Hidden', );
+has_field 'aux_runflag' => ( type => 'Hidden', value => '0' );
 
 has_field 'groups' => ( type => 'Multiple',
 			label => '',
