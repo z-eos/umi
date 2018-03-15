@@ -19,6 +19,7 @@
    associatedDomain = 1
    businessCategory = 1
    description = 1
+   dhcpOption = 1
    dhcpStatements = 1
    grayPublicKey = 1
    member = 1

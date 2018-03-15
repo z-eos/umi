@@ -149,6 +149,7 @@ sub stat_acc : Local {
     my $params = $c->req->params;
     
     my $ldap_crud = $c->model('LDAP_CRUD');
+    #-- collect all root accounts
     my $mesg = $ldap_crud->search({ base => $ldap_crud->{cfg}->{base}->{acc_root},
 				    scope => 'one',
 				    sizelimit => 0,
@@ -160,8 +161,8 @@ sub stat_acc : Local {
       foreach $account ( @{[$mesg->entries]} ) {
 	$utf_givenName = $account->get_value('givenName');
 	$utf_sn = $account->get_value('sn');
-	utf8::decode($utf_givenName);
-	utf8::decode($utf_sn);
+	utf8::decode($utf_givenName) if defined $utf_givenName;
+	utf8::decode($utf_sn) if defined $utf_sn;
 	# log_debug { $account->dn };
 	$accounts->{$account->dn} = { uid => $account->get_value('uid'),
 				      givenName => $utf_givenName,
@@ -169,6 +170,7 @@ sub stat_acc : Local {
 				      authorizedService => {},
 				      blocked => 0, };
 
+	#-- is current account blocked?
 	$mesg_blk = $ldap_crud->search({ base => $ldap_crud->{cfg}->{base}->{group},
 					 scope => 'one',
 					 sizelimit => 0,
@@ -182,6 +184,7 @@ sub stat_acc : Local {
 	  $accounts->{$account->dn}->{blocked} = 1 if $mesg_blk->count;
 	}
 
+	#-- collect all services (service branch objects) of the current account
 	$mesg_svc = $ldap_crud->search({ base => $account->dn,
 					 scope => 'one',
 					 sizelimit => 0,
@@ -195,13 +198,15 @@ sub stat_acc : Local {
 	    $svc->{ (split('@', $_->get_value('authorizedService')))[0] } = 1;
 	  }
 	  @services = sort keys %{$svc};
+	  undef $svc;
+	  # log_debug { np( @services ) };
 
 	  $#mesg_svc_entries = -1;
 	  foreach $service ( @services ) {
 	    $mesg_svc = $ldap_crud->search({ base => $account->dn,
 					     scope => 'sub',
 					     sizelimit => 0,
-					     filter => sprintf('authorizedService=%s@*', $service),
+					     filter => sprintf('(&(|(objectClass=domainRelatedObject)(objectClass=uidObject)(objectClass=strongAuthenticationUser)(objectClass=simpleSecurityObject))(authorizedService=%s@*))', $service),
 					     attrs => [ 'associatedDomain',
 							'authorizedService',
 							'cn',
@@ -212,10 +217,11 @@ sub stat_acc : Local {
 	      @mesg_svc_entries = $mesg_svc->entries;
 	      if ($mesg_svc->count) {
 		foreach ( @mesg_svc_entries ) {
-		  next if ! $_->exists('associatedDomain');
+		  #-- !! ATTENTION !! no associatedDomain - no records in return
+		  # next if ! $_->exists('associatedDomain');
 
 		  push @{$accounts->{$account->dn}->{authorizedService}->{$service}
-			   ->{$_->get_value('associatedDomain')}},
+			   ->{ $_->exists('associatedDomain') ? $_->get_value('associatedDomain') : 'NA' }},
 			   { uid => $_->exists('uid') ? $_->get_value('uid') : 'NA',
 			     cn  => $_->exists('cn')  ? $_->get_value('cn')  : 'NA', };
 		}
@@ -223,9 +229,10 @@ sub stat_acc : Local {
 	    }
 	  }
 	}
+	# log_debug { np( $accounts->{$account->dn} ) };
       }
     }
-
+    # log_debug { np($accounts) };
     $c->stash( template => 'stat_acc.tt',
 	       accounts => $accounts,
 	       final_message => $return,);
