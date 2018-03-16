@@ -328,6 +328,11 @@ html,body {
   color: rgba(200, 200, 200, 0.75);
 }
 
+#searchby {
+  flex: 1;
+  margin-left: 15px;
+}
+
 #searchby .form-control {
   height: 35px;
 }
@@ -355,6 +360,7 @@ select.form-control:not([size]):not([multiple]) {
   font-family: "Font Awesome 5 Free";
   font-weight: 900;
   font-size: 100%;
+  color: #536c79;
 }
 
 /* -------------------------------
