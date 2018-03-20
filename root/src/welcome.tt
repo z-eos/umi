@@ -1,8 +1,23 @@
 [% META title = 'welcome' %] 
 
+[% USE date;
+   SWITCH date.format(format = '%s').substr(-1, 1);
+   CASE [1,3];
+   bg='bg-info';
+   CASE [2,4];
+   bg='bg-danger';
+   CASE [5,7];
+   bg='bg-warning';
+   CASE [6,8];
+   bg='bg-primary';
+   CASE;
+   bg='bg-success';
+   END;
+   -%]
+
 <br>
 
-<div class="card text-white bg-warning mb-3" style="max-width: 40rem;">
+<div class="card text-white [% bg %] mb-3" style="max-width: 40rem;">
   <div class="card-header">Do chant</div>
   <div class="card-body">
     <h3 class="card-title"><b>Do chant user's <a href="/motto">motto</a>!</b></h3>

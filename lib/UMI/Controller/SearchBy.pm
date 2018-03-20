@@ -83,10 +83,13 @@ sub index :Path :Args(0) {
     $params = $c->req->params;
     $ldap_crud = $c->model('LDAP_CRUD');
 
-    if ( defined $params->{'ldapsearch_by_name'} ||
-	 defined $params->{'ldapsearch_by_email'} ||
-	 defined $params->{'ldapsearch_by_jid'} ||
-	 defined $params->{'ldapsearch_by_telephone'} ) {
+    if ( defined $params->{'ldapsearch_global'} ) {
+      $base = $ldap_crud->cfg->{base}->{db};
+      $params->{'ldapsearch_base'} = $base;
+    } elsif ( defined $params->{'ldapsearch_by_name'} ||
+	      defined $params->{'ldapsearch_by_email'} ||
+	      defined $params->{'ldapsearch_by_jid'} ||
+	      defined $params->{'ldapsearch_by_telephone'} ) {
       $base = $ldap_crud->cfg->{base}->{acc_root};
     } elsif ( defined $params->{'ldap_subtree'} && $params->{'ldap_subtree'} ne '' ) {
       $base = $params->{'ldap_subtree'};

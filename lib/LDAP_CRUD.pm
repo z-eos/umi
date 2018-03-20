@@ -503,7 +503,7 @@ sub _build_cfg {
 			},
 	  },
 	  err => {
-		  0 => '<i class="fa fa-search-minus fa-lg text-warning "></i>&nbsp;Looks like your request returned no result. Try to change query parameter/s.',
+		  0 => '<div class="alert list-group-item-success" role="alert"><i class="fa fa-info-circle fa-lg"></i>&nbsp;<b>Your request returned no result. Try to change query parameter/s.</b></div>',
 		  50 => 'Do not panic! This situation needs your security officer and system administrator attention, please contact them to solve the issue.',
 		 },
 

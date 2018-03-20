@@ -22,7 +22,7 @@
       [% IF c.check_user_roles('admin') %]
       <div class="callout m-0 py-2 text-muted text-center text-uppercase">
 	<!-- <a class="nav-link" href="/ldap_tree"> -->
-          <small><b>LDAP tree crawler</b></small>
+          <small><b>LDAP tree</b></small>
 	  <!-- </a> -->
       </div>
 

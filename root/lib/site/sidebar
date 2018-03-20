@@ -152,7 +152,7 @@
 	    [% helper_cfg('cfg_local','header','help', 'item2', 'txt') %]</a>
 	  </li>
 	  <li class="nav-item">
-	    <a class="nav-link" href="#chat" ><i class="fa fa-fw fa-comments"></i> chat</a>
+	    <a class="nav-link" href="#chat" ><i class="fa fa-fw fa-comment-alt"></i> chat</a>
 	    
 	    <script>
 	     /* CONVERSEJS https://conversejs.org */
@@ -191,12 +191,6 @@
 	    </script>
 	    
 	    </li>
-	  <li class="nav-item">
-	    <a class="nav-link" href="#"><i class="fa fa-fw fa-envelope"></i> email</a>
-	  </li>
-	  <li class="nav-item">
-	    <a class="nav-link" href="#"><i class="fa fa-fw fa-mobile"></i> telephone</a>
-	  </li>
 	  <li class="nav-item">
 	    <a class="nav-link" href="#"><i class="fa fa-fw fa-bug text-danger"></i> bug</a>
 	  </li>

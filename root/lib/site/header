@@ -20,7 +20,7 @@
 	     id="ldapsearch_filter"
 	     name="ldapsearch_filter"
 	     title="LDAP search filter input field"
-	     placeholder='*Vasya*Pupkin*'
+	     placeholder='attributeName=*value*'
 	     data-animation="false"
 	     data-trigger="hover"
 	     data-placement="bottom"
@@ -106,6 +106,12 @@
 		    value="ldapsearch_by_telephone"
 		    title="filter pattern in telephone number">
 	      <i class="[% icon_class %] fa-phone"></i> by phone num
+	    </button>
+	    <button type="submit" class="[% menu_item %] bg-primary"
+		    onClick="document.getElementById('ldap_base_case').value=this.value"
+		    value="ldapsearch_global"
+		    title="global search through all DB, by attrName=*value*">
+	      <i class="[% icon_class %] fa-database"></i> GLOBAL
 	    </button>
 	    	    
 	    [% color = "bg-info" %]
