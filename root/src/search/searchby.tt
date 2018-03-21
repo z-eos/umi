@@ -95,7 +95,7 @@
     </thead>
     <tbody>
 
-      [% root_of_rec = '<span class="fa fa-th-large fa-2x"></span>' %]
+      [% root_of_rec = '<span class="fa fa-sticky-note fa-2x"></span>' %]
       [% FOREACH entrykey IN entrieskeys %]
       [%   entry.key = entrykey    # dn of the current entry
          entry.value = entries.$entrykey
