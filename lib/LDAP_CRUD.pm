@@ -2518,6 +2518,7 @@ sub _build_select_organizations {
   my $self = shift;
   my (@branches, @office, $to_utfy);
 
+  # all head offices
   my $mesg = $self->search({
 			    base => $self->{'cfg'}->{'base'}->{'org'},
 			    scope => 'one',
@@ -2525,6 +2526,7 @@ sub _build_select_organizations {
 			    sizelimit => 0
 			   });
   my @headOffices = $mesg->sorted('physicaldeliveryofficename');
+  # branch offices
   foreach my $headOffice (@headOffices) {
     $mesg = $self->search({
 			   base => $headOffice->dn,
@@ -2807,8 +2809,9 @@ has 'select_offices' => ( traits => ['Array'],
 sub _build_select_offices {
   my $self = shift;
   return $self->bld_select({ base => $self->cfg->{base}->{org},
-			     attr => [ 'destinationIndicator', ]});
-  # 'physicalDeliveryOfficeName' ]});
+			     scope => 'sub',
+#			     attr => [ 'destinationIndicator', ]});
+			     attr => [ 'destinationIndicator', 'physicalDeliveryOfficeName' ]});
 }
 
 

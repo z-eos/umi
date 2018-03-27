@@ -39,8 +39,9 @@ has_field 'physicalDeliveryOfficeName'
       apply => [ NotAllDigits, Printable, ],
       label => 'physicalDeliveryOfficeName',
       label_class => [ 'col-xs-2', ],
-      label_attr => { title => 'official office name as it is known to the world' },
-      element_attr => { placeholder => 'Horns & Hooves LLC' },
+      label_attr => { title => 'official office name as it is known to the world', },
+      element_attr => { placeholder => 'Horns & Hooves LLC',
+			title => 'official office name as it is known to the world', },
       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
       required => 1,
      );
@@ -50,8 +51,9 @@ has_field 'destinationIndicator'
       apply => [ NotAllDigits, Printable, ],
       label => 'destinationIndicator',
       label_class => [ 'col-xs-2', ],
-      label_attr => { title => 'code name of the office, organization occupies' },
-      element_attr => { placeholder => 'example: abc, yz04, kl-01' },
+      label_attr => { title => 'unique code of the office organization occupies, to be used for references to it (like physicalDeliveryOfficeName of the person preferences)' },
+      element_attr => { placeholder => 'example: abc, yz04, kl-01',
+			title => 'unique code of the office organization occupies, to be used for references to it (like physicalDeliveryOfficeName of the person preferences)', },
       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
       required => 1,
      );
@@ -63,9 +65,9 @@ has_field 'associatedDomain'
 		   message => 'Must be valid FQDN' }, ],
       label => 'associatedDomain',
       label_class => [ 'col-xs-2', ],
-      label_attr => { title => 'FQDN' },
+      label_attr => { title => 'FQDN assigned to this org, at least an internal one, something like oXXX.local', },
       element_attr => { placeholder => 'orgXXX.foo.bar',
-			title => 'FQDN, at least an internal one, something like oXXX.local', },
+			title => 'FQDN assigned to this org, at least an internal one, something like oXXX.local', },
       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
       required => 1,
      );
@@ -75,9 +77,10 @@ has_field 'ou'
       apply => [ NoSpaces, NotAllDigits, Printable, ],
       label => 'Org Unit',
       label_class => [ 'col-xs-2', ],
-      label_attr => { title => 'short name as it is used in object DN' },
+      label_attr => { title => 'short name as it is used in object DN', },
       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-      element_attr => { placeholder => 'hrns-n-hvs' },
+      element_attr => { placeholder => 'hrns-n-hvs',
+			title => 'short name as it is used in object DN', },
       required => 1,
      );
 
@@ -133,7 +136,8 @@ has_field 'l'
       label_class => [ 'col-xs-2', ],
       label_attr => { title => 'location, commonly the city the office situated at' },
       element_wrapper_class => [ 'col-xs-5', 'col-lg-2', ],
-      element_attr => { placeholder => 'Kyiv' },
+      element_attr => { placeholder => 'Fort Baker',
+			title => 'location, commonly the city the office situated at', },
       required => 1,
      );
 
@@ -142,7 +146,7 @@ has_field 'st'
        label_class => [ 'col-xs-2', ],
        label_attr => { title => 'state, commonly short form of the city' },
        element_wrapper_class => [ 'col-xs-5', 'col-lg-1', ],
-       element_attr => { placeholder => 'KV' },
+       element_attr => { placeholder => 'CA' },
      );
 
 has_field 'postalAddress'

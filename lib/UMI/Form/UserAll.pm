@@ -63,10 +63,12 @@ has_field 'person_sn'
 has_field 'person_exp'
   => ( type => 'Text',
        label => 'Exp.',
-       label_class => [ 'col-xs-1', 'col-sm-1', 'col-md-1', 'col-lg-1',  ],
+       label_attr => { title => 'Object Expiration', },
+       label_class => [ 'col-xs-1', 'col-sm-1', 'col-md-1', 'col-lg-1', 'atleastone', ],
        element_wrapper_class => [ 'col-xs-2', 'col-sm-2', 'col-md-2', 'col-lg-2', ],
        element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'Expiration on', },
+       element_attr => { placeholder => 'Expiration on',
+			 title => 'Object Expiration', },
        required => 0 );
 
 has_field 'person_namesake'

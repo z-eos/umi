@@ -3,7 +3,7 @@
    link = '<link href="/static/css/signin.css" rel="stylesheet">'
 %] 
 
-<div class="container umi-bg">
+<div class="container umi-bg ajaxless">
   <form class="form-signin" role="form" method="POST" action="signin">
   [% INCLUDE ldap_err.tt %]
     <div class="form-group has-feedback">

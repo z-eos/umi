@@ -95,7 +95,7 @@
     </thead>
     <tbody>
 
-      [% root_of_rec = '<span class="fa fa-sticky-note fa-2x"></span>' %]
+      [% root_of_rec = '<span class="far fa-dot-circle fa-2x"></span>' %]
       [% FOREACH entrykey IN entrieskeys %]
       [%   entry.key = entrykey    # dn of the current entry
          entry.value = entries.$entrykey
@@ -223,6 +223,8 @@
 		  <i title="MTA Root Object" class="[% base_icon.mta _ ' ' _ entry_icon_size %]"></i>
 		  [% ELSIF entry.value.mgmnt.is_root && entry.key.match('GitACL') %]
 		  <i title="GitACL Root Object" class="[% base_icon.GitACL _ ' ' _ entry_icon_size %]"></i>
+		  [% ELSIF entry.value.mgmnt.is_root && entry.key.match('DHCP') %]
+		  <i title="DHCP Root Object" class="[% base_icon.DHCP _ ' ' _ entry_icon_size %]"></i>
 		  [% ELSIF entry.value.mgmnt.is_root && entry.key.match('reqStart') %]
 		  [%   IF entry.value.attrs.reqType.0 == 'add' %]
 		  <i title="History Object Request type: Add" class="[% entry_icon_size %] fa fa-lg fa-plus-square"></i>
@@ -256,6 +258,8 @@
 
 		  [% ELSIF entry.key.match('GitACL') %]
 		  <i title="Subject to GitACL" class="[% base_icon.GitACL _ ' ' _ branch_class _ ' ' _ entry_icon_size %]"></i>
+		  [% ELSIF entry.key.match('DHCP') %]
+		  <i title="DHCP Object" class="[% base_icon.DHCP _ ' ' _ branch_class _ ' ' _ entry_icon_size %]"></i>
 		  [% ELSIF entry.key.match('^cn=.*,ou=Inventory') %]
 		  <i title="Subject to Inventory" class="fa fa-tag [% branch_class _ ' ' _ entry_icon_size %]"></i>
 		  [% ELSIF entry.key.match(',ou=Sendmail') %]

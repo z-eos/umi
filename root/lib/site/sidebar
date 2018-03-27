@@ -148,7 +148,7 @@
 	  </li>
 	  <li class="nav-item">
 	    <a class="nav-link" href="[% helper_cfg('cfg_local','header','help', 'item2', 'url') %]">
-	      <i class="fa fa-fw [% helper_cfg('cfg_local','header','help', 'item2', 'ico') %]"></i>
+	      <i class="fab fa-fw [% helper_cfg('cfg_local','header','help', 'item2', 'ico') %]"></i>
 	    [% helper_cfg('cfg_local','header','help', 'item2', 'txt') %]</a>
 	  </li>
 	  <li class="nav-item">

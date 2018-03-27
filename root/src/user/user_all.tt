@@ -25,8 +25,8 @@
   [% form.field('dynamic_object').render %]
   
   [% IF ! form.field('add_svc_acc').value %]
-  [%     form.field('person_givenname').render %]
-  [%     form.field('person_sn').render %]
+  [%      form.field('person_givenname').render %]
+  [%      form.field('person_sn').render %]
   <div class="col-xs-offset-1 col-xs-5 col-lg-5 row">
     <div class="col-xs-6">
       [% form.field('person_namesake').render %]
@@ -48,7 +48,9 @@
 	<a aria-controls="person" data-toggle="tab" role="button"
 	   id="person-tab" href="#person" title="Personal Data"
 	   [% IF ! form.field('add_svc_acc').value %]aria-expanded="true"[% ELSE %]aria-expanded="false"[% END %]>
-	  <span class="fa fa-fw fa-user fa-lg"></span>
+	  <span class="fa-stack">
+	    <span class="fa fa-fw fa-user fa-lg"></span>
+	  </span>
 	  <span class="visible-lg-inline visible-md-inline">Person</span>
 	</a>
       </li>
@@ -59,9 +61,9 @@
 	   [% IF ! form.field('add_svc_acc').value %]aria-expanded="false"[% ELSE %]aria-expanded="true"[% END %]>
 	  <!-- <span class="fa fa-user-plus fa-lg"></span>
 	      <span class="visible-lg-inline">Login</span> -->
-	  <span class="fa-stack fa-fw">
+	  <span class="fa-stack">
 	    <i class="fa fa-cog fa-stack-2x text-muted umi-opacity02"></i>
-	    <i class="fa fa-lock pull-right fa-stack-1x"></i>
+	    <i class="fa fa-key pull-right fa-stack-1x"></i>
 	  </span>
 	  <span class="visible-lg-inline visible-md-inline">&nbsp;&nbsp;</span>
 	  <span class="visible-lg-inline visible-md-inline">&nbsp;Pass</span>
@@ -72,13 +74,9 @@
 	<a aria-controls="sec-contents" data-toggle="dropdown"
 	   class="dropdown-toggle" role="button" id="umiSec" href="#"
 	   title="Services Without Login/Password" aria-expanded="false">
-	  <!-- <span class="fa-stack fa-lg">
-	      <i class="fa fa-square-o fa-stack-2x"></i>
-	      <i class="fa fa-user-times fa-stack-1x"></i>
-	      </span> -->
-	  <span class="fa-stack fa-fw">
-	    <i class="fa fa-cog fa-stack-2x text-muted umi-opacity02"></i>
-	    <i class="fa fa-unlock pull-right fa-stack-1x"></i>
+	  <span class="fa-stack">
+	      <i class="fa fa-cog fa-stack-2x text-muted umi-opacity02"></i>
+	      <i class="fa fa-lock-open pull-right fa-stack-1x"></i>
 	  </span>
 	  <!-- <span class="fa fa-user-times fa-lg"></span> -->
 	  <!-- <span class="caret"></span> -->
@@ -109,7 +107,9 @@
 	<a aria-controls="groups" data-toggle="tab" id="groups-tab"
 	   role="button" href="#groups" title="Group/s User Belongs to"
 	   aria-expanded="false">
-	  <span class="fa fa-fw fa-group fa-lg"></span>
+	  <span class="fa-stack">
+	    <span class="fa fa-fw fa-users fa-lg"></span>
+	  </span>
 	  <span class="visible-lg-inline visible-md-inline">Group</span>
 	</a>
       </li>
