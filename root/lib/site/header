@@ -107,11 +107,11 @@
 		    title="filter pattern in telephone number">
 	      <i class="[% icon_class %] fa-phone"></i> by phone num
 	    </button>
-	    <button type="submit" class="[% menu_item %] bg-primary"
+	    <button type="submit" class="[% menu_item %] bg-primary text-dark"
 		    onClick="document.getElementById('ldap_base_case').value=this.value"
 		    value="ldapsearch_global"
 		    title="global search through all DB, by attrName=*value*">
-	      <i class="[% icon_class %] fa-database"></i> GLOBAL
+	      <i class="fas fa-fw fa-database text-dark"></i> GLOBAL
 	    </button>
 	    	    
 	    [% color = "bg-info" %]

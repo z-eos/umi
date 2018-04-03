@@ -389,17 +389,21 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 				    $ldap_crud->err($mesg)->{html});
       } else {
 	$entry = $mesg->as_struct;
+	# log_debug { np($entry) };
+	my $ttmmpp = eval '$entry->{$user_dn}->' . $ldap_crud->{cfg}->{rdn}->{acc_root};
+	log_debug { np( $ttmmpp ) };
+	# log_debug { np($c->user->$ldap_crud->{cfg}->{rdn}->{acc_root}) };
 	$arg = {
 		uid => $entry->{$user_dn}->{uid}->[0],
 		givenname => $entry->{$user_dn}->{givenname}->[0],
+		mail => defined $entry->{$user_dn}->{mail} ? $entry->{$user_dn}->{mail} : [],
 		sn => $entry->{$user_dn}->{sn}->[0],
 		title => defined $entry->{$user_dn}->{title} ? $entry->{$user_dn}->{title} : ['N/A'],
 		o => $entry->{$user_dn}->{o},
 		physicaldeliveryofficename => $entry->{$user_dn}->{physicaldeliveryofficename},
 		telephonenumber => defined $entry->{$user_dn}->{telephonenumber} ?
 		$entry->{$user_dn}->{telephonenumber} : ['N/A'],
-		mail => defined $entry->{$user_dn}->{mail} ? $entry->{$user_dn}->{mail} : ['N/A'],
-		roles => $entry->{$user_dn}->{$user_rdn[0]} eq $c->user ? \@{[$c->user->roles]} : 'a mere mortal',
+		roles => $entry->{$user_dn}->{$ldap_crud->{cfg}->{rdn}->{acc_root}}->[0] eq eval '$c->user->' . $ldap_crud->{cfg}->{rdn}->{acc_root} ? [ $c->user->roles ] : 'a mere mortal',
 	       };
       }
     } else {
@@ -410,13 +414,13 @@ sub user_preferences :Path(user_prefs) :Args(0) {
       $telephonenumber = $c->user->has_attribute('telephonenumber') ?
 	$c->user->telephonenumber : 'N/A';
       $title = $c->user->has_attribute('title') ? $c->user->title : 'N/A';
-      $mail = $c->user->has_attribute('mail') ? $c->user->mail : 'N/A';
+
       $arg = {
 	      uid => $c->user->uid,
 	      givenname => $c->user->givenname || 'N/A',
 	      sn => $c->user->sn || 'N/A',
 	      title => $title,
-	      mail => $mail,
+	      mail => $c->user->has_attribute('mail') ? $c->user->mail : [ 'N/A' ],
 	      o => [ $o ],
 	      physicaldeliveryofficename => $physicaldeliveryofficename,
 	      telephonenumber => $telephonenumber,
@@ -502,11 +506,14 @@ sub user_preferences :Path(user_prefs) :Args(0) {
       }
 
       push @{$dhcp}, {
-		      dn => $_,
-		      cn => $entries->{$_}->{cn}->[0],
+		      dn =>   $_,
+		      cn =>   $entries->{$_}->{cn}->[0],
 		      fqdn => $domain_name,
-		      ip => substr($entries->{$_}->{dhcpstatements}->[0], 14),
-		      mac => substr($entries->{$_}->{dhcphwaddress}->[0], 9),
+#		      ip =>   substr($entries->{$_}->{dhcpstatements}->[0], 14),
+#		      mac =>  substr($entries->{$_}->{dhcphwaddress}->[0], 9),
+		      ip =>   (split(' ', $entries->{$_}->{dhcpstatements}->[0]))[1],
+		      mac =>  (split(' ', $entries->{$_}->{dhcphwaddress}->[0]))[1],
+		      desc => $entries->{$_}->{dhcpcomments}->[0],
 		     };
     }
 
@@ -548,6 +555,8 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	if ( (split('@', $service_details->{authorizedService}))[0] eq 'ovpn' ) {
 	  $service_details->{cert}->{$_->dn} =
 	    $self->cert_info({ cert => $_->get_value('userCertificate;binary') });
+	} elsif ( (split('@', $service_details->{authorizedService}))[0] eq 'mail' ) {
+	  push @{$arg->{mail}}, $_->get_value('uid');
 	} elsif ( (split('@', $service_details->{authorizedService}))[0] eq 'ssh' ) {
 	  @{$service_details->{sshkey}->{$_->dn}} = $_->get_value('sshPublicKey');
 	}
@@ -555,6 +564,8 @@ sub user_preferences :Path(user_prefs) :Args(0) {
       push @{$service}, $service_details;
       undef $service_details;
     }
+
+    log_debug { np($arg) };
 
     #=================================================================
     # Inventory assigned to user

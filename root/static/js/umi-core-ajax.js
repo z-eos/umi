@@ -27,7 +27,14 @@ $(document).bind("ajaxSend", function(){
 var handleResponce = function(html) {
 
     console.log('UMI CORE AJAX: RESPONCE handleResponce');
-
+    
+    console.log('UMI CORE AJAX: is signin? '+$(html).find("#form-signin").length);
+    if( $(html).find("#form-signin").length ) {
+	console.log('UMI CORE AJAX: is singin? ');
+	location.href="/signin";
+	return;
+    }
+    
     $('#workingfield').html(html);
     
     $('#workingfield form.formajaxer').on('submit', function(e) {

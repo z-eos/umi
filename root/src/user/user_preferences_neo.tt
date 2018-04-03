@@ -25,11 +25,11 @@
     <div id="collapse_personal_data" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_personal_data">
       <div class="panel-body">
 	<div class="media">
-	  <div class="media-left"><img class="media-object img-thumbnail bg-info" [% jpegPhoto %]</div>
+	  <div class="media-left"><img width="200" class="media-object img-responsive img-rounded bg-info" [% jpegPhoto %]</div>
 	  <div class="media-body">
 	    <dl class="dl-horizontal fa-ul">
 	      <li class="media-heading">
-		<i><span class="fa fa-li fa-user" title="first, last names"></span>
+		<i><span class="fa fa-li fa-lg fa-user-circle" title="first, last names"></span>
 		  <em><b>[% auth_obj.givenname %] [% auth_obj.sn %]</b></em></i>
 	      </li>
 	      <li><i>
@@ -37,23 +37,23 @@
 		[% auth_obj.uid %]
 	      </i></li>
 	      <li><i>
-		<span class="fa fa-li fa-black-tie" title="title/position"></span>
+		<span class="fab fa-li fa-black-tie" title="title/position"></span>
 		[% IF auth_obj.title.size %][% FOREACH i IN auth_obj.title %][% i %]<br>[% END %]
 		[% ELSE %]
 		[% auth_obj.title %]
 		[% END %]
 	      </i></li>
 	      <li><i>
-		<span class="fa fa-li fa-group" title="group/s user belongs to"></span>
+		<span class="fa fa-li fa-users" title="group/s user belongs to"></span>
 		[% FOREACH role IN auth_obj.roles.sort %][% role %]<br>[% END %]
 	      </i></li>
 	      <li><i>
-		<span class="fa fa-li fa-phone-square" title="phone number/s"></span>
+		<span class="fa fa-li fa-phone" title="phone number/s"></span>
 		[% IF auth_obj.telephonenumber.size %][% FOREACH i IN auth_obj.telephonenumber %][% i %]<br>[% END %]
 		[% ELSE %][% auth_obj.telephonenumber %][% END %]
 	      </i></li>
 	      <li><i>
-		<span class="fa fa-li fa-envelope-square" title="email address/es"></span>
+		<span class="fa fa-li fa-envelope" title="email address/es"></span>
 		[% IF auth_obj.mail.size %][% FOREACH i IN auth_obj.mail %][% i %]<br>[% END %]
 		[% ELSE %][% auth_obj.mail %][% END %]
 	      </i></li>
@@ -77,20 +77,9 @@
 	<span class="fa fa-industry col-xs-offset-1">&nbsp;</span>Organization/s
       </h3>
     </div>
-    <div id="collapse_org" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_org">
+    <div id="collapse_org" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_org">
       <div class="panel-body">
 	[% FOREACH org IN orgs %]
-	<div class="card">
-	  <div class="card-block p-1 clearfix">
-            <i class="fa fa-industry bg-info p-1 font-2xl mr-1 float-left"></i>
-            <div class="h5 text-info mb-0 mt-h">[% org.key %]</div>
-            <div class="text-muted text-uppercase font-weight-bold font-xs">main office</div>
-	  </div>
-	  <div class="card-footer p-x-1 py-h">
-            <a class="font-weight-bold font-xs btn-block text-muted" href="#">View More <i class="fa fa-angle-right float-right font-lg"></i></a>
-	  </div>
-	</div>
-
 	<div class="panel panel-info">
 	  <div class="panel-heading" id="heading_org_[% org.key.replace('[\. ]', '') %]">
 	    <h3 class="panel-title">
@@ -145,7 +134,7 @@
 	      action="/searchby/proc">
 	  [% END %]
 	  <table class="table table-striped table-condensed table-hover">
-	    <thead><tr class="active"><th>Hostname</th><th>FQDN</th><th>IP</th><th>MAC</th></tr></thead>
+	    <thead><tr class="active"><th>Hostname</th><th>FQDN</th><th>IP</th><th>MAC</th><th>Description</th></tr></thead>
 	    <tbody>
 	      [% FOREACH x IN dhcp %]
 	      <tr class="mono">
@@ -255,7 +244,7 @@
 		  [% END %]
 		  [% x.cn %]
 		</td>
-		<td>[% x.fqdn %]</td><td>[% x.ip %]</td><td>[% x.mac %]</td>
+		<td>[% x.fqdn %]</td><td>[% x.ip %]</td><td>[% x.mac %]</td><td>[% x.desc %]</td>
 	      </tr>
 	      [% END %]
 	    </tbody>
@@ -433,19 +422,19 @@
 		  </ul>
 		</div>
 		[% z.value %]
-		[% IF y.cert.${z.key} %]
+		[%   IF y.cert.${z.key} %]
 		<br><small class="pull-left"><em><dl class="dl-horizontal">
-		  [% FOREACH cert IN y.cert.${z.key} %]
-		  [% NEXT IF cert.key == "cert" %]
-		  [% NEXT IF cert.key == "error" && cert.value == "" %]
+		  [%   FOREACH cert IN y.cert.${z.key} %]
+		  [%     NEXT IF cert.key == "cert" %]
+		  [%     NEXT IF cert.key == "error" && cert.value == "" %]
 		  <dt>[% cert.key %]</dt><dd class="mono">[% cert.value %]</dd>
-		  [% END %]
+		  [%   END %]
 		</dl></em></small>
-		[% ELSIF y.sshkey.${z.key} %]
-		[% FOREACH cert IN y.sshkey.${z.key} %]
+		[%   ELSIF y.sshkey.${z.key} %]
+		[%     FOREACH cert IN y.sshkey.${z.key} %]
 		<h6 class="pull-left mono"><em>[% cert %]</em></h6>
-		[% END %]
-		[% END %]
+		[%     END %]
+		[%   END %]
 		[% END %]
 	      </td>
 	    </tr>

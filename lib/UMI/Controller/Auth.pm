@@ -114,19 +114,20 @@ sub signin :Path Global {
 
     $c->stash( template => 'welcome.tt', );
   } catch {
-    log_fatal { sprintf(" user %s was not authenticated;\n\n %s \n\n %s\n %s \n ",
+    log_fatal { sprintf(" user %s session was not found (expired session or server restarted);\n\n %s \n\n %s\n %s \n ",
 			$c->session->{auth_uid},
 			'=' x 70,
 			$_,
 			'=' x 70) };
     log_debug { np( @_ ) };
     my $final_message;
-    $final_message->{error} = 'Server internal error, please inform sysadmin!';
+    #$final_message->{error} = 'Server internal error, please inform sysadmin!';
     $c->logout();
     $c->delete_session('SignOut');
+    $c->response->status(401);
     # $c->response->redirect($c->uri_for('/'));
-    $c->stash( template => 'signin.tt',
-	       final_message => $final_message, );
+    $c->stash( template => 'signin.tt', );
+#	       final_message => $final_message, );
   };
 }
 
