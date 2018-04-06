@@ -31,16 +31,16 @@
       
  </head>
  [% IF c.user_exists %]
- [% sidebar = c.session.Session.settings.ui.sidebar ? ' sidebar-minimized' : '' %]
- [% aside = c.session.Session.settings.ui.aside ? ' aside-menu-hidden' : '' %]
+ [% sidebar = c.session.settings.ui.sidebar == 0 ? ' sidebar-minimized' : '' %]
+ [% aside = c.session.settings.ui.aside == 0 ? ' aside-menu-hidden' : '' %]
  [% body_class = 'app header-fixed navbar-fixed sidebar-fixed fixed-nav' _ sidebar _ aside %]
  [% ELSE %]
  [% body_class = '' %]
  [% END %]
  <body class="[% body_class %]">
-   
+
    [% content %]
- 
+
    <script type="text/javascript">
     /*! 
      * searchby result/s un/fold-er

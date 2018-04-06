@@ -638,16 +638,40 @@ sub settings_save :Path(settings_save) :Args(0) POST {
   my ( $self, $c ) = @_;
 
   my $params = $c->req->parameters;
-
   log_debug { np($params) };
-  log_debug { np($c->session->{settings}) };
+
+  my $ldap_crud = $c->model('LDAP_CRUD');
+  my $replace;
+
+  log_debug { np($c->session->{settings}->{ui}) };
+  if ( ! defined $c->session->{settings}->{ui} ) {
+    $c->session->{settings}->{ui} = $ldap_crud->{cfg}->{ui};
+    push @{$replace}, add => [ objectClass => 'umiSettings' ];
+  }
+  log_debug { np($c->session->{settings}->{ui}) };
+
   foreach (keys ( %{$c->session->{settings}->{ui}} )) {
-    $c->session->{settings}->{ui}->{$_} = 0
-      if ! defined $params->{$_};
+    $c->session->{settings}->{ui}->{$_} = defined $params->{$_} ? 1 : 0;
   }
   log_debug { np($c->session->{settings}) };
 
-  # WRITE IT TO LDAP
+  use JSON;
+  my $json = JSON->new->allow_nonref;
+  my $json_text   = $json->encode( $c->session->{settings} );
+  log_debug { np($json_text) };
+  log_debug { np($c->user->dn) };
+    
+  push @{$replace},  replace => [ umiSettingsJson => $json_text, ];
+
+  my $return;
+  my $mesg = $ldap_crud->modify( $c->user->dn, $replace );
+  if ( $mesg ) {
+    $return->{error} .= $mesg->{html};
+    log_debug { np($mesg) };
+    $c->response->status(401);
+  } else {
+    $c->response->status(200);
+  }
 }
 
 

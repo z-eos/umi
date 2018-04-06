@@ -65,9 +65,10 @@ sub signin :Path Global {
       use JSON;
       my $json = JSON->new->allow_nonref;
       $c->session->{settings} = $json->decode( $c->user->umisettingsjson );
+      # log_debug { np($c->session->{settings}) };
     }
     
-    log_debug { np( $c->user->ldap_entry->ldif ) };
+    # log_debug { np( $c->user->ldap_entry->ldif ) };
     my $ldap_crud = $c->model('LDAP_CRUD');
     my ( $meta_schema, $key, $value, $must_meta, $may_meta, $must, $may, $syntmp);
     while ( ($key, $value) = each %{$ldap_crud->{cfg}->{objectClass}}) {

@@ -152,8 +152,7 @@ sub _build_cfg {
 			    OpenVPN =>       'fas fa-sitemap',
 			    rad_groups =>    'fas fa-users',
 			    rad_profiles =>  'fas fa-cogs',
-			   },
-		  },
+			   }, },
 	  exclude_prefix => 'aux_',
 	  sizelimit => 50,
 	  defaults => { ldap => {
@@ -163,6 +162,10 @@ sub _build_cfg {
 				 attrs  => [ '*' ],
 				 sizelimit => 50,
 				}, },
+	  ui => { debug   => 0,
+		  aside   => 0,
+		  sidebar => 0,
+		},
 	  translit => "ALA-LC RUS",
 	  translit_no => {
 			  description => 1,

@@ -11,7 +11,8 @@
 	    data-target="#collapseSession[% i %]"
 	    aria-expanded="true"
 	    aria-controls="collapseSession[% i %]">
-      <span id="chevron_switcher" class="fa fa-toggle-up text-primary"></span>
+      <span id="chevron_switcher" class="fa [% site.icons.toggle_down %]"></span>
+      <!-- span id="chevron_switcher" class="fa fa-toggle-up text-primary"></span -->
     </button>
     [% sysinfo.$key.title %]
   </div>
@@ -24,9 +25,21 @@
 [% i = i + 1 %]
 [% END %]
 
+<!--
 <script>
  $('.chevron_toggleable').on('click', function() {
-   $(this).find('.fa').toggleClass('fa-toggle-down').toggleClass('fa-toggle-up')
+   $(this).find('.fa').toggleClass('[% site.icons.toggle_down %]').toggleClass('[% site.icons.toggle_up %]')
+ });
+</script>
+-->
+
+<script>
+ /*!
+  * searchby result/s un/collaps-er
+  */ 
+ $('.collapse_in_out').on('click', function() {
+   $("[id^=collapse]").toggleClass('panel-collapse collapse in').toggleClass('panel-collapse collapse');
+   $("[id^=chevron_switcher]").toggleClass('[% site.icons.toggle_down %]').toggleClass('[% site.icons.toggle_up %]');
  });
 </script>
 
