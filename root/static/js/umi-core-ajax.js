@@ -27,10 +27,9 @@ $(document).bind("ajaxSend", function(){
 var handleResponce = function(html) {
 
     console.log('UMI CORE AJAX: RESPONCE handleResponce');
-    
-    console.log('UMI CORE AJAX: is signin? '+$(html).find("#form-signin").length);
+
     if( $(html).find("#form-signin").length ) {
-	console.log('UMI CORE AJAX: is singin? ');
+	console.log('UMI CORE AJAX: is signin? '+$(html).find("#form-signin").length);
 	location.href="/signin";
 	return;
     }
@@ -99,4 +98,16 @@ $('form.formajaxer').on('submit', function(e) {
 
     console.log('UMI CORE AJAX: ONSUBMIT base: ' + base);
     $.post($(this).attr('action'), $(this).serialize() + base, handleResponce);
+});
+
+console.log('UMI CORE AJAX: ', $('form.settings-save'));
+/*! 
+ * AJAX to process settings saving form
+ */    
+$('#settings-save').on('submit', function(e) {
+    e.preventDefault();
+    console.log('UMI CORE AJAX: ONSUBMIT settings');
+    $.post($(this).attr('action'), $(this).serialize(), function() {
+	// Done is here
+    });
 });

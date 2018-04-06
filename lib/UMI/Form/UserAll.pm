@@ -76,7 +76,8 @@ has_field 'person_namesake'
        label => 'namesake',
        label_class => [ 'col-xs-1', ],
        element_attr => { title => 'This new user has the same name/s as of some existent one. Check it if sure this new user does not exist and is not that existent one' },
-       # element_wrapper_class => [ 'col-xs-offset-1', 'col-xs-11', 'col-lg-5', 'text-muted', ],
+       # element_class => [ 'custom-control-input', ],
+       # element_wrapper_class => [ 'custom-control', 'custom-checkbox', ],
      );
 
 has_field 'person_simplified'

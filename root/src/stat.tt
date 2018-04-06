@@ -1,4 +1,4 @@
-[% IF c.user_exists && c.session.auth_uid && stats.debug %]
+[% IF c.user_exists && c.session.auth_uid && c.session.settings.debug %] [% # stats.debug %]
 
 [% default = '' %]
 

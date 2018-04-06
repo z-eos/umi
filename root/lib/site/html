@@ -1,3 +1,4 @@
+[% # -*- mode: web -*- %]
 <!DOCTYPE html>
 <html lang="en">
  <head>
@@ -30,7 +31,9 @@
       
  </head>
  [% IF c.user_exists %]
- [% body_class = 'app header-fixed navbar-fixed sidebar-fixed sidebar-minimized fixed-nav aside-menu-hidden' %]
+ [% sidebar = c.session.Session.settings.ui.sidebar ? ' sidebar-minimized' : '' %]
+ [% aside = c.session.Session.settings.ui.aside ? ' aside-menu-hidden' : '' %]
+ [% body_class = 'app header-fixed navbar-fixed sidebar-fixed fixed-nav' _ sidebar _ aside %]
  [% ELSE %]
  [% body_class = '' %]
  [% END %]

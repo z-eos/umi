@@ -39,6 +39,7 @@ sub index :Path :Args(0) {
     # $c->response->body( $c->welcome_message );
     if ( $c->user_exists() ) {
       $c->stash( template => 'welcome.tt', );
+      # log_debug { np($c->user->attributes('ashash')) };
     } else {
       $c->stash( template => 'signin.tt', );
     }
@@ -626,6 +627,30 @@ sub access_denied : Private {
     $c->stash( template => 'signin.tt', );
   }
 }
+
+=head2 settings
+
+save settings
+
+=cut
+
+sub settings_save :Path(settings_save) :Args(0) POST {
+  my ( $self, $c ) = @_;
+
+  my $params = $c->req->parameters;
+
+  log_debug { np($params) };
+  log_debug { np($c->session->{settings}) };
+  foreach (keys ( %{$c->session->{settings}->{ui}} )) {
+    $c->session->{settings}->{ui}->{$_} = 0
+      if ! defined $params->{$_};
+  }
+  log_debug { np($c->session->{settings}) };
+
+  # WRITE IT TO LDAP
+}
+
+
 
 
 =head2 default

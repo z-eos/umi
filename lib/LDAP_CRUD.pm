@@ -213,6 +213,7 @@ sub _build_cfg {
 					    organizationalPerson
 					    person
 					    inetLocalMailRecipient
+					    umiSettings
 					    grayAccount
 					 ) ],
 			  acc_svc_branch => [ qw(

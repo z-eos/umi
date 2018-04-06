@@ -43,6 +43,7 @@ requires 'Net::CIDR::Set'
 requires 'Net::LDAP';
 requires 'Net::Netmask';
 requires 'Net::SSH::Perl';
+requires 'Template::Plugin::JSON';
 requires 'Text::Unidecode';
 requires 'Text::Diff::HTML';
 requires 'Time::Piece';

@@ -60,6 +60,14 @@ sub signin :Path Global {
     # depending of what RDN type is used for auth e.g.uid, cn
     $c->session->{auth_uid} = eval '$c->user->' . UMI->config->{authentication}->{realms}->{ldap}->{store}->{user_field};
     # log_debug { np($c->session) };
+
+    if ( $c->user->umisettingsjson ) {
+      use JSON;
+      my $json = JSON->new->allow_nonref;
+      $c->session->{settings} = $json->decode( $c->user->umisettingsjson );
+    }
+    
+    log_debug { np( $c->user->ldap_entry->ldif ) };
     my $ldap_crud = $c->model('LDAP_CRUD');
     my ( $meta_schema, $key, $value, $must_meta, $may_meta, $must, $may, $syntmp);
     while ( ($key, $value) = each %{$ldap_crud->{cfg}->{objectClass}}) {
@@ -70,7 +78,9 @@ sub signin :Path Global {
     my $schema = $ldap_crud->schema; # ( dn => $ldap_crud->{base}->{db} );
     foreach $key ( sort ( keys %{$meta_schema} )) {
       next if $key eq 'top';
+      # log_debug { np(@{[$schema->must ( $key )]}) } if $key eq 'umiSettings';
       foreach $must ( $schema->must ( $key ) ) {
+	next if $must->{name} eq 'objectClass';
 	$syntmp = $schema->attribute_syntax($must->{'name'});
 	$must_meta =
 	  {
@@ -85,7 +95,9 @@ sub signin :Path Global {
 	  ->{ $must->{'name'} } = $must_meta;
 	$must_meta = -1;
       }
+      # log_debug { np(@{[$schema->may ( $key )]}) } if $key eq 'umiSettings';
       foreach $may ( $schema->may ( $key ) ) {
+	next if $may->{name} eq 'objectClass';
 	$syntmp = $schema->attribute_syntax($may->{'name'});
 	$may_meta =
 	  {
