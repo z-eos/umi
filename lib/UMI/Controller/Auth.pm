@@ -1,4 +1,4 @@
-# -*- cperl -*-
+# -*- mode: cperl; mode: follow; -*-
 #
 
 package UMI::Controller::Auth;
@@ -61,10 +61,11 @@ sub signin :Path Global {
     $c->session->{auth_uid} = eval '$c->user->' . UMI->config->{authentication}->{realms}->{ldap}->{store}->{user_field};
     # log_debug { np($c->session) };
 
-    if ( $c->user->umisettingsjson ) {
+    my $umiSettingsJson = $c->user->has_attribute('umisettingsjson');
+    if ( defined $umiSettingsJson ) {
       use JSON;
       my $json = JSON->new->allow_nonref;
-      $c->session->{settings} = $json->decode( $c->user->umisettingsjson );
+      $c->session->{settings} = $json->decode( $umiSettingsJson );
       # log_debug { np($c->session->{settings}) };
     }
     
