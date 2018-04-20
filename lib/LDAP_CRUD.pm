@@ -187,7 +187,7 @@ sub _build_cfg {
 	  #=====================================================================
 
 	  stub => {
-		   homeDirectory => '/dev/null1',
+		   homeDirectory => '/usr/local/home',
 		   loginShell => '/usr/bin/false',
 		   gidNumber => UMI->config->{default}->{gidNumber},
 		   group => UMI->config->{default}->{group},

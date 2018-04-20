@@ -211,7 +211,7 @@ sub create_account {
        gecos => $self->utf2lat( sprintf('%s %s',
 					$args->{person_givenname},
 					$args->{person_sn}) ),
-       homeDirectory => $ldap_crud->cfg->{stub}->{homeDirectory},
+       homeDirectory => $ldap_crud->cfg->{stub}->{homeDirectory} . '/' . $uid,
        jpegPhoto => [ $jpeg ],
        loginShell => $ldap_crud->cfg->{stub}->{loginShell},
 
