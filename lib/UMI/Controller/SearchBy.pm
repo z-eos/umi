@@ -1239,10 +1239,9 @@ sub mod_groups {
       # $mesg = $ldap_crud
       #   ->modify( $arg->{type} eq 'posixGroup' ? sprintf('cn=%s,%s', $_, $arg->{base}) : $_,
       # 	    \@groups_chg ); p $mesg;
-      $mesg = $ldap_crud
-	->modify( $_, \@groups_chg );
+      $mesg = $ldap_crud->modify( $_, \@groups_chg );
       if ( $mesg ) {
-	push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
+	push @{$return->{error}}, $mesg->{html};
       } else {
 	push @{$return->{success}},
 	  sprintf('<span class="%s">%s</span>',

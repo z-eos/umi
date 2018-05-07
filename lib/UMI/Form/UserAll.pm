@@ -630,7 +630,8 @@ has_field 'loginless_ovpn.associateddomain'
        element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        options_method => \&associateddomains,
-       element_attr => { 'data-name' => 'associateddomain',
+       element_attr => { title => 'FQDN of the VPN server, client is configured for',
+			 'data-name' => 'associateddomain',
 			 'data-group' => 'loginless_ovpn', },
        wrapper_class => [ qw{col-xs-12}, ],
      );
@@ -655,19 +656,8 @@ has_field 'loginless_ovpn.ifconfigpush'
        element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => '&laquo;10.0.97.2 10.0.97.1&raquo; or &laquo;10.13.83.192 10.0.97.1&raquo;',
+			 title => 'openvpn(8) option &#96;--ifconfig l rn&#39; (Set TUN/TAP adapter parameters.  l is the IP address of the local VPN endpoint. rn is the IP address of the remote VPN endpoint.)',
 			 'data-name' => 'ifconfigpush',
-			 'data-group' => 'loginless_ovpn', },
-       wrapper_class => [ qw{col-xs-12}, ],
-     );
-
-has_field 'loginless_ovpn.config'
-  => ( apply => [ Printable, ],
-       label => 'Config',
-       label_class => [ 'col-xs-2', ],
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'path/to/some/additional/configfile.conf',
-			 'data-name' => 'config',
 			 'data-group' => 'loginless_ovpn', },
        wrapper_class => [ qw{col-xs-12}, ],
      );
@@ -679,7 +669,33 @@ has_field 'loginless_ovpn.devtype'
        element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'notebook, netbook, smartphone',
+			 title => 'OS type (defines which address to assign: /30 for Win like and /32 for XNIX like)',
 			 'data-name' => 'dev',
+			 'data-group' => 'loginless_ovpn', },
+       wrapper_class => [ qw{col-xs-12}, ],
+     );
+
+has_field 'loginless_ovpn.devos'
+  => ( apply => [ Printable ],
+       label => 'OS',
+       label_class => [ 'col-xs-2', ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
+       element_class => [ 'input-sm', ],
+       element_attr => { placeholder => 'xNIX, MacOS, Android, Windows',
+			 'data-name' => 'devos',
+			 'data-group' => 'loginless_ovpn', },
+       wrapper_class => [ qw{col-xs-12}, ],
+     );
+
+has_field 'loginless_ovpn.config'
+  => ( apply => [ Printable, ],
+       label => 'Config',
+       label_class => [ 'col-xs-2', ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
+       element_class => [ 'input-sm', ],
+       element_attr => { placeholder => 'path/to/some/additional/configfile.conf',
+			 title => 'openvpn(8) option &#96;--config&#39; (Load additional config options from file where each line corresponds to one command line option, but with the leading &#39;--&#39; removed.)',
+			 'data-name' => 'config',
 			 'data-group' => 'loginless_ovpn', },
        wrapper_class => [ qw{col-xs-12}, ],
      );
@@ -704,18 +720,6 @@ has_field 'loginless_ovpn.devmodel'
        element_class => [ 'input-sm', ],
        element_attr => { placeholder => 'Pavilion dm1',
 			 'data-name' => 'devmodel',
-			 'data-group' => 'loginless_ovpn', },
-       wrapper_class => [ qw{col-xs-12}, ],
-     );
-
-has_field 'loginless_ovpn.devos'
-  => ( apply => [ Printable ],
-       label => 'OS',
-       label_class => [ 'col-xs-2', ],
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'xNIX, MacOS, Android, Windows',
-			 'data-name' => 'devos',
 			 'data-group' => 'loginless_ovpn', },
        wrapper_class => [ qw{col-xs-12}, ],
      );

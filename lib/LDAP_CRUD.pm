@@ -161,7 +161,8 @@ sub _build_cfg {
 				 deref  => 'never',
 				 attrs  => [ '*' ],
 				 sizelimit => 50,
-				}, },
+				},
+			notAvailable => 'NA', },
 	  ui => { debug   => 0,
 		  aside   => 0,
 		  sidebar => 0,
@@ -216,9 +217,8 @@ sub _build_cfg {
 					    organizationalPerson
 					    person
 					    inetLocalMailRecipient
-					    umiSettings
 					    grayAccount
-					 ) ],
+					 ) ],  # umiSettings
 			  acc_svc_branch => [ qw(
 						  account
 						  authorizedServiceObject

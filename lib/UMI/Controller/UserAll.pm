@@ -393,8 +393,7 @@ we skip empty (criteria is a concatenation of each field value) repeatable eleme
 		      authorizedservice => $form_field ne 'account'
 		      ? substr($form_field, 10) : $element->field('authorizedservice')->value,
 		      associateddomain => $element->field('associateddomain')->value,
-		      objectclass => ( defined $args->{dynamic_object} && $args->{dynamic_object} eq '1')
-		      || ( defined $args->{person_exp} && $args->{person_exp} ne '' ) ? [ 'dynamicObject' ] : [],
+		      objectclass => $is_person_exp ? [ 'dynamicObject' ] : [],
 		      requestttl => $is_person_exp ? $args->{person_exp} : '',
 		     };
 
@@ -440,8 +439,7 @@ we skip empty (criteria is a concatenation of each field value) repeatable eleme
 	$x->{description} =
 	  defined $element->field('description') ? $element->field('description')->value : '';
 
-	$x->{objectclass} = ( defined $args->{dynamic_object} && $args->{dynamic_object} eq '1')
-	  || ( defined $args->{person_exp} && $args->{person_exp} ne '' ) ? [ 'dynamicObject' ] : [];
+	$x->{objectclass} = $is_person_exp ? [ 'dynamicObject' ] : [];
 
 	if ( $form_field eq 'account' ) {
 	  if ( $element->field('authorizedservice')->value =~ /^802.1x-.*/ ) {

@@ -1,4 +1,4 @@
-# -*- mode: cperl -*-
+# -*- mode: cperl; mode: follow; -*-
 #
 
 package Tools;

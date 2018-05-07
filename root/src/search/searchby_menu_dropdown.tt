@@ -32,8 +32,8 @@
 	  <button type="submit" class="btn btn-link"
 		  title="look user object subtree data"
 		  data-order="[% site.searchby.menu.order.user_preferences %]">
-	    <span class="fa fa-fw fa-list-alt text-info"></span>
-	    user prefs
+	    <span class="fas fa-fw fa-user-tag text-info"></span>
+	    user details
 	  </button>
 	</form>
       </li>
@@ -45,7 +45,7 @@
 	  <input type="hidden" name="dynamic_object" value="[% entry.value.mgmnt.dynamicObject %]">
 	  <button type="submit" title="add new service account" class="btn btn-link"
 		  data-order="[% site.searchby.menu.order.add_svc_acc %]">
-	  <span class="fa fa-fw fa-plus-square text-success"></span>
+	  <span class="fa fa-fw fa-user-cog text-success"></span>
 	  new service
 	  </button>
 	</form>
@@ -70,7 +70,7 @@
 		data-order="[% site.searchby.menu.order.user_block %]"
 		data-toggle="modal"
 		data-target="#modal_block[% id_suffix %]">
-	  <span class="fa fa-fw fa-ban text-danger"></span>
+	  <span class="fa fa-fw fa-user-slash text-danger"></span>
 	  block
 	</button>
       </li>
@@ -85,7 +85,7 @@
 		data-order="[% site.searchby.menu.order.ldap_delete %]"
 		data-toggle="modal"
 		data-target="#modal_delete[% id_suffix %]">
-	  <span class="fa fa-fw fa-trash-alt text-danger"></span>
+	  <span class="fa fa-fw fa-trash text-danger"></span>
 	  delete
 	</button>
       </li>
@@ -136,7 +136,7 @@
 	</button>
       </li>
       [%   IF ! is_log_obj %]
-      <li>
+<!--      <li>
 	<form role="form" method="POST" 
 	      action="/searchby/modform">
 	  <button type="submit" class="btn btn-link"
@@ -149,7 +149,7 @@
 	    edit form
 	  </button>
 	</form>
-      </li>
+      </li> -->
       <li>
 	<form role="form" method="POST" class="formajaxer"
 	      action="/searchby/proc">
@@ -223,7 +223,7 @@
 	  <input type="hidden" name="ldap_modify_password" value="[% entry.key %]">
 	  <button type="submit" title="password change / check" class="btn btn-link"
 		  data-order="[% site.searchby.menu.order.ldap_modify_password %]">
-	  <span class="fa fa-fw fa-unlock-alt text-danger"></span>
+	  <span class="fa fa-fw fa-user-lock text-danger"></span>
 	  password
 	  </button>
 	</form>
@@ -249,7 +249,7 @@
 	  <input type="hidden" name="ldap_modify_jpegphoto" value="[% entry.key %]">
 	  <button type="submit" title="change jpegPhoto (like avatar e.t.c.)" class="btn btn-link"
 		  data-order="[% site.searchby.menu.order.ldap_modify_jpegphoto %]">
-	  <span class="fa fa-fw fa-file-image text-warning"></span>
+	  <span class="fa fa-fw fa-image text-warning"></span>
 	  image
 	  </button>
 	</form>
