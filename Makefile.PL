@@ -29,7 +29,6 @@ requires 'Log::Log4perl'
 requires 'Log::Contextual'
 requires 'Log::Dispatch'
     
-requires 'BSD::Resource';
 requires 'Cache::FastMmap';
 requires 'Compress::LZ4';
 requires 'Crypt::GeneratePassword';

@@ -167,8 +167,10 @@
 	      <div class="panel-heading [% # panel_color %] clearfix umi-zerro-padding">
 		[% INCLUDE search/searchby_menu_dropdown.tt %]
 
+		[% user_name = '' %]
 		[% IF entry.key.match('People') %]
 		[% root_of_rec = entry.value.root.sn _ ' ' _ entry.value.root.givenName %]
+		[% user_name = root_of_rec %]
 		[% # !!! HARDCODED customization, depends of DN structure !!! %]
 		[% ELSIF entry.value.mgmnt.is_root && entry.value.mgmnt.is_inventory %]
 		[% root_of_rec = entry.key.split(',').slice(-1 * ( 3 + num_of_dc), -1 ).0.split('=').1 %]
@@ -190,7 +192,7 @@
 		<form class="formajaxer" role="form" method="POST" action="/searchby">
 		  <input type="hidden"  name="ldap_subtree" value="[% root_obj_dn %]">
 		  <button class="[% root_of_rec_btn %] btn [% btn_blocked %] umi-search visible-lg-block visible-md-block"
-			  title="[% root_of_rec %] (click to open root object) [% blocked_title %]"
+			  title="[% user_name %] (click to open root object) [% blocked_title %]"
 			  type="submit">
 		    <span class="to-root-object [% entry_text_size %] [%# blocked %]"><b>[% root_of_rec %]</b></span>
 		  </button>
