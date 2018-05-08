@@ -265,7 +265,11 @@ html,body {
   height: 350px;
 }
 
-
+.to-root-object {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .app-header.navbar .navbar-brand {
   width: 70px;

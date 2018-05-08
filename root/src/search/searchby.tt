@@ -190,9 +190,9 @@
 		<form class="formajaxer" role="form" method="POST" action="/searchby">
 		  <input type="hidden"  name="ldap_subtree" value="[% root_obj_dn %]">
 		  <button class="[% root_of_rec_btn %] btn [% btn_blocked %] umi-search visible-lg-block visible-md-block"
-			  title="Click to open root object. [% blocked_title %]"
+			  title="[% root_of_rec %] (click to open root object) [% blocked_title %]"
 			  type="submit">
-		    <span class="[% entry_text_size %] [%# blocked %]"><b>[% root_of_rec %]</b></span>
+		    <span class="to-root-object [% entry_text_size %] [%# blocked %]"><b>[% root_of_rec %]</b></span>
 		  </button>
 		  <button class="btn btn-link umi-search visible-xs-block visible-sm-block"
 			  title="Click to open root object of this account. [% blocked_title %]"

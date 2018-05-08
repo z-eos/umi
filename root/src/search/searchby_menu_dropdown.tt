@@ -56,7 +56,7 @@
 	  <input type="hidden" name="ldap_modify_group" value="[% entry.key %]">
 	  <button type="submit" title="modify group/s user belongs to" class="btn btn-link"
 		  data-order="[% site.searchby.menu.order.ldap_modify_group %]">
-	  <span class="fa fa-fw fa-users text-warning"></span>
+	  <span class="fa fa-fw fa-users-cog text-warning"></span>
 	  group
 	  </button>
 	</form>
