@@ -655,9 +655,35 @@ has_field 'loginless_ovpn.ifconfigpush'
        label_class => [ 'col-xs-2', 'required', ],
        element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
-       element_attr => { placeholder => '&laquo;10.0.97.2 10.0.97.1&raquo; or &laquo;10.13.83.192 10.0.97.1&raquo;',
+       element_attr => { placeholder => '10.0.91.1 10.0.91.2 or 10.0.97.135 10.0.97.1 or 10.13.83.192 10.0.97.1',
 			 title => 'openvpn(8) option &#96;--ifconfig l rn&#39; (Set TUN/TAP adapter parameters.  l is the IP address of the local VPN endpoint. rn is the IP address of the remote VPN endpoint.)',
 			 'data-name' => 'ifconfigpush',
+			 'data-group' => 'loginless_ovpn', },
+       wrapper_class => [ qw{col-xs-12}, ],
+     );
+
+has_field 'loginless_ovpn.iroute'
+  => ( apply => [ Printable, ],
+       label => 'Iroute',
+       label_class => [ 'col-xs-2', ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
+       element_class => [ 'input-sm', ],
+       element_attr => { placeholder => '10.0.99.2 255.255.255.0',
+			 title => 'openvpn(8) option &#96;--iroute network [netmask]&#39; (Generate an internal route to a specific client. The netmask parameter, if omitted, defaults to 255.255.255.255.)',
+			 'data-name' => 'iroute',
+			 'data-group' => 'loginless_ovpn', },
+       wrapper_class => [ qw{col-xs-12}, ],
+     );
+
+has_field 'loginless_ovpn.push'
+  => ( apply => [ Printable, ],
+       label => 'Push',
+       label_class => [ 'col-xs-2', ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
+       element_class => [ 'input-sm', ],
+       element_attr => { placeholder => 'route 192.168.222.144 255.255.255.128',
+			 title => 'openvpn(8) option &#96;--push option&#39; (Push a config file option back to the client for remote execution.)',
+			 'data-name' => 'push',
 			 'data-group' => 'loginless_ovpn', },
        wrapper_class => [ qw{col-xs-12}, ],
      );

@@ -1,4 +1,4 @@
-# -*- mode: cperl -*-
+# -*- mode: cperl; mode: follow; -*-
 #
 
 package UMI::Controller::UserAll;
@@ -493,6 +493,8 @@ we skip empty (criteria is a concatenation of each field value) repeatable eleme
 			     { clear => '<del>NOPASSWORD</del>' } };
 	  $x->{associateddomain} = $element->field('associateddomain')->value;
 	  $x->{umiOvpnCfgIfconfigPush} = $element->field('ifconfigpush')->value || 'NA';
+	  $x->{umiOvpnCfgIroute} = $element->field('iroute')->value || 'NA';
+	  $x->{umiOvpnCfgPush} = $element->field('push')->value || 'NA';
 	  $x->{umiOvpnCfgConfig} = $element->field('config')->value || 'NA';
 	  $x->{umiOvpnAddStatus} = $element->field('status')->value || 'blocked';
 	  $x->{umiOvpnAddDevType} = $element->field('devtype')->value || 'NA';
