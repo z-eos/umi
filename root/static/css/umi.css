@@ -269,6 +269,7 @@ html,body {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin: 0;
 }
 
 .app-header.navbar .navbar-brand {
