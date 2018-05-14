@@ -3211,7 +3211,7 @@ sub create_account_branch_leaf {
       $self->cert_info({ cert => $self->file2var($arg->{userCertificate}->{'tempname'}, $return),
 			 ts => "%Y%m%d%H%M%S", });
     $authorizedService = [
-			  cn => substr($arg->{userCertificate}->{filename},0,-4),
+			  cn => '' . $arg->{cert_info}->{CN},
 			  associatedDomain => $arg->{associatedDomain},
 			  authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
 			  objectClass => [ @{$self->cfg->{objectClass}->{ovpn}}, @{$arg->{objectclass}} ],
@@ -3232,6 +3232,7 @@ sub create_account_branch_leaf {
 			  umiOvpnAddDevOSVer => $arg->{umiOvpnAddDevOSVer},
 			  'userCertificate;binary' => $arg->{cert_info}->{cert},
 			 ];
+    push @{$authorizedService}, description => $arg->{description} if $arg->{description} ne '';
     push @{$return->{error}}, $arg->{cert_info}->{error} if defined $arg->{cert_info}->{error};
     
   #=== SERVICE: web ==================================================
