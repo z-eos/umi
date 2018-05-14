@@ -45,16 +45,5 @@
 
    [% content %]
 
-   <script type="text/javascript">
-    /*! 
-     * searchby result/s un/fold-er
-     */    
-    /* $('.chevron_toggleable').on('click', function() {
-       //$('#chevron_switcher').on('click', function() {
-       console.log('toggggggggle');
-       $(this).find('.fa').toggleClass('[% site.icons.toggle_down %]').toggleClass('[% site.icons.toggle_up %]')
-       }); */
-   </script>
-
  </body>
 </html>

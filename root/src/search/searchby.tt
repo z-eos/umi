@@ -35,10 +35,10 @@
 
 [% IF entries.size == 1 %]
 [% in = 'in'
-   chevron_toggle = 'up' %]
+   chevron_toggle = 'down' %]
 [% ELSE %]
 [% in = ''
-   chevron_toggle = 'down' %]
+   chevron_toggle = 'right' %]
 [% END %]
 
 [% MACRO buttonizer  BLOCK %]
@@ -274,14 +274,14 @@
 		</div>
 		[% # dn of the select result object %]
 		<div class="btn umi-search" title="[% blocked_title %]">&nbsp;
-		  <b class="[% icon_color  # _ ' ' _ entry_text_size %]">
+		  <span class="[% icon_color  # _ ' ' _ entry_text_size %]">
 		    [% IF entry.key.match('People') %]
 		    [% entry.key.replace('uid=','').replace('authorizedService=','').split(',').slice(0,-3).join('&nbsp;&nbsp;<i class="fa fa-ellipsis-h"></i>&nbsp;&nbsp;') %]
 		    [% entry.value.attrs.reqStart.0 %]
 		    [% ELSE %]
 		    [% entry.key %]
 		    [% END %]
-		  </b>
+		  </span>
 		</div>
 	      </div> <!-- searchby_menu_dropdown.tt btn-group div -->
 
@@ -451,11 +451,12 @@
 
 <script>
  /*!
-  * searchby result/s un/collaps-er
+  * searchby result/s un/collaps-er (@ searchby.tt)
   */ 
  $('.collapse_in_out').on('click', function() {
+   console.log('toggle from searchby.tt');
    $("[id^=collapse]").toggleClass('panel-collapse collapse in').toggleClass('panel-collapse collapse');
-   $("[id^=chevron_switcher]").toggleClass('[% site.icons.toggle_down %]').toggleClass('[% site.icons.toggle_up %]');
+   $("[id^=chevron_switcher]").toggleClass('[% site.icons.toggle_right %]').toggleClass('[% site.icons.toggle_down %]');
  });
 </script>
 

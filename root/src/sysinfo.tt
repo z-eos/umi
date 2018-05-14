@@ -35,7 +35,7 @@
 
 <script>
  /*!
-  * searchby result/s un/collaps-er
+  * searchby result/s un/collaps-er (@ sysinfo.tt)
   */ 
  $('.collapse_in_out').on('click', function() {
    $("[id^=collapse]").toggleClass('panel-collapse collapse in').toggleClass('panel-collapse collapse');

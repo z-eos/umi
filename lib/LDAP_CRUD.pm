@@ -141,7 +141,7 @@ sub _build_cfg {
 					) ],
 		   icon => {
 			    default =>       'fas fa-star',
-			    People =>        'fas fa-user',
+			    People =>        'fas fa-user-circle',
 			    DHCP =>          'fas fa-sitemap',
 			    GitACL =>        'fas fa-git',
 			    group =>         'fas fa-users',

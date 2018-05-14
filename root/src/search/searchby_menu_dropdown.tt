@@ -15,7 +15,7 @@
 	    type="button" id="dropdownMenuActions"
 	    data-toggle="dropdown"
 	    title="Possible Actions Upon the Object">
-      <span class="fa fa-cogs"></span>
+      <span class="fa fa-sliders-h"></span>
     </button>
     
     <ul class="dropdown-menu dropdown-menu-left"
@@ -32,7 +32,7 @@
 	  <button type="submit" class="btn btn-link"
 		  title="look user object subtree data"
 		  data-order="[% site.searchby.menu.order.user_preferences %]">
-	    <span class="fas fa-fw fa-user-tag text-info"></span>
+	    <span class="fas fa-fw fa-id-card-alt text-info"></span>
 	    user details
 	  </button>
 	</form>
