@@ -106,6 +106,23 @@
       </li>
       [%   END %]
       [% END %][% # admin_owned stop %]
+
+      [% IF entry.value.mgmnt.dynamicObject %]
+      <li>
+	<form role="form" method="POST" 
+	      action="/searchby/proc">
+	  <button type="button" title="refresh object (RFC2589)"
+		  class="btn btn-link" value="[% entry.key %]"
+		  name="chg_acc"
+		  data-order="[% site.searchby.menu.order.chg_acc %]"
+		  data-toggle="modal"
+		  data-target="#modal_refresh[% id_suffix %]">
+	    <span class="fa fa-fw fa-clock text-info"></span>
+	    refresh
+	  </button>
+	</form>
+      </li>
+      [% END %]
       
       [% IF entry.key.match('mail') || entry.key.match('xmpp') || (entry.value.mgmnt.is_root && entry.value.mgmnt.is_account) %]
       <li>

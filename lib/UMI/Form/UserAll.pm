@@ -366,7 +366,7 @@ has_field 'account.password1'
        minlength => 7, maxlength => 128,
        label => 'Password',
        label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
-       wrapper_class => [  qw{hidden passw 8021xeaptls relation col-xs-12}, ],
+       wrapper_class => [  qw{hidden passw sshacc 8021xeaptls relation col-xs-12}, ],
        element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        ne_username => 'login',
@@ -382,7 +382,7 @@ has_field 'account.password2'
        minlength => 7, maxlength => 128,
        label => '',
        label_class => [ qw{col-xs-12 col-sm-2}, ],
-       wrapper_class => [  qw{hidden passw 8021xeaptls relation col-xs-12}, ],
+       wrapper_class => [  qw{hidden passw sshacc 8021xeaptls relation col-xs-12}, ],
        element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        ne_username => 'login',
@@ -447,6 +447,39 @@ has_field 'account.userCertificate'
 			'data-name' => 'userCertificate'
 		       },
      );
+
+has_field 'account.sshkey'
+  => ( type => 'TextArea',
+       label => 'SSH Pub Key',
+       label_class => [ 'col-xs-2', 'required', ],
+       wrapper_class => [  qw{hidden sshacc relation col-xs-12}, ],
+       do_id => 'no',
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
+       element_class => [ 'input-sm', 'mono', ],
+       element_attr => { title => 'Paste SSH key (read sshd(8) section AUTHORIZED_KEYS FILE FORMAT for reference)',
+			 placeholder => q{command=&quot;...&quot;, environment=&quot;NAME=value&quot;,...,from=&quot;...&quot; no-agent-forwarding,no-port-forwarding,no-pty,no-user-rc,no-x11-forwarding,permitopen=&quot;host:port&quot;,tunnel=&quot;n&quot; ssh-rsa AAA...bZN Lorem ipsum dolor sit amet potenti},
+			 'data-name' => 'sshkey',
+			 'data-group' => 'account', },
+       cols => 30, rows => 4,
+     );
+
+
+has_field 'account.sshkeyfile'
+  => ( type => 'Upload',
+       label => 'SSH Pub Key/s File',
+       label_class => [ 'col-xs-2', 'required', ],
+#       wrapper_attr => { id => 'sshkeyfile', },
+       wrapper_class => [  qw{hidden sshacc relation col-xs-12}, ],
+       do_id => 'no',
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
+       element_class => [ 'btn', 'btn-default', 'btn-sm',],
+       element_attr => {title => 'SSH key file (read sshd(8) section AUTHORIZED_KEYS FILE FORMAT for reference)',
+			'data-name' => 'sshkeyfile',
+			'data-group' => 'account',
+			# 'onchange' => 'global.triggerTextarea(this)',
+		       },
+     );
+
 
 has_field 'account.remove'
   => ( type => 'RmElement',

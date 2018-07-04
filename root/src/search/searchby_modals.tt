@@ -106,12 +106,12 @@
 	</div>
 	<div class="modal-body clearfix form-group text-primary">
 	  <label for="dn_to_reassign_to" class="col-xs-2 text-right control-label">
-	    <abbr title="&#xf071; DN or just UID
+	    <abbr title="DN or just UID
 
-&#xf085; SERVICES:
+SERVICES:
 user root account DN user ID (here UID is &laquo;abc&raquo; while user root account DN is &laquo;uid=abc,ou=bla,dc=foo&raquo;) this object will be reassigned to
 
-&#xf02c; INVENTORY:
+INVENTORY:
 above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inventory,dc=umidb&raquo;
 ">
 	      object ID, to reassign to:
@@ -243,4 +243,62 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
     </div>
   </div>
 </div><!-- #### Modal: vCard end -->
+
+<!-- #### Modal: Refresh start -->
+<div class="modal modal-info" id="modal_refresh[% id_suffix %]"
+     tabindex="-1" role="dialog" aria-labelledby="modal_refresh[% id_suffix %]_label"
+     aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form role="form" method="POST" action="/searchby/refresh" class="formajaxer">
+	<div class="modal-header">
+	  <h4 class="modal-title" id="modal_refresh[% id_suffix %]_label">
+	    <span class="fa fa-clock"></span>
+	    You are about to refresh TTL for:<br><b>[% entry.key.replace(',', ', ') %]</b>
+	  </h4>
+	</div>
+	<div class="modal-body clearfix form-group text-primary text-center">
+	  <input type="text" class="input-sm form-control"
+		 id="modal_refresh_dtp[% id_suffix %]"
+		 title="Refresh TTL of this object (extended LDAPv3 operation as described in RFC2589)"
+		 name="requestTtl">
+	</div>
+	<div class="modal-footer">
+	  <div>
+	    <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
+	    <button type="submit" class="btn bg-info umi-btn-event umi-btn-ajax"
+		    onClick="$(modal_refresh[% id_suffix %]).modal('hide')"
+		    name="dn_to_refresh"
+		    value="[% entry.key %]" data-action="refresh" >
+	      Yes, I really want to set it and yes, I understand all consequences!
+	    </button>
+	  </div>
+	</div>
+      </form>
+    </div>
+  </div>
+</div><!-- #### Modal: Refresh end -->
+<script>
+ $('#modal_refresh_dtp[% id_suffix %]').datetimepicker({
+   lang:'en',
+   mask:true,
+   format: 'Y.m.d H:i',
+   formatTime:'H:i',
+   formatDate:'Y.m.d',
+   step:20,
+   inline:true,
+   timepicker:true,
+   weeks:true,
+   closeOnDateSelect:true,
+   todayButton:true,
+   datepicker:true,
+   dayOfWeekStart:1,
+   yearStart:[% date.format(format = '%Y') %],
+   yearEnd:[% date.format(format = '%Y') + dds_max_ttl_years %],
+   startDate:'[% date.format %]',
+   startTime:'[% date.format(format = 'H:i') %]',
+   minDate:'[% date.format %]',
+   maxDate:[% date.format(format = '%Y') + dds_max_ttl_years %]+'.01.01'
+ });
+</script>
 

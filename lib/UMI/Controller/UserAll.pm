@@ -9,10 +9,12 @@ use Time::Piece;
 
 BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 
+use Logger;
+
 use UMI::Form::UserAll;
 has 'form' => ( isa => 'UMI::Form::UserAll', is => 'rw',
 		lazy => 1, default => sub { UMI::Form::UserAll->new },
-		documentation => q{Complex Form to add new, nonexistent user account/s},
+		documentation => q{Complex Form to add new user account and services},
 	      );
 
 
@@ -68,9 +70,12 @@ sub index :Path :Args(0) {
       $c->req->upload('account.' . $i . '.userCertificate')
       if defined $params->{'account.' . $i . '.userCertificate'} &&
       $params->{'account.' . $i . '.userCertificate'} ne '';
+    $params->{'account.' . $i . '.sshkeyfile'} =
+      $c->req->upload('account.' . $i . '.sshkeyfile')
+      if defined $params->{'account.' . $i . '.sshkeyfile'} &&
+      $params->{'account.' . $i . '.sshkeyfile'} ne '';
     $i++;
   }
-  $i = 0;
   foreach ( $self->form->field('loginless_ssh')->fields ) {
     $params->{'loginless_ssh.' . $i . '.keyfile'} =
       $c->req->upload('loginless_ssh.' . $i . '.keyfile')
@@ -98,7 +103,7 @@ sub index :Path :Args(0) {
       ->process( init_object => $init_obj,
 		 ldap_crud => $c->model('LDAP_CRUD'), );
   } else {
-    # p $params;
+    # log_debug { np( $params ) };
     return unless $self->form
       ->process( posted => ($c->req->method eq 'POST'),
 		 params => $params,
@@ -373,7 +378,7 @@ sub create_account {
 
 =pod
 
-we skip empty (criteria is a concatenation of each field value) repeatable elements
+we skip empty (criteria of emptiness is a concatenation of each field value) repeatable elements
 
 =cut
 
@@ -404,7 +409,7 @@ we skip empty (criteria is a concatenation of each field value) repeatable eleme
 	push @{$final_message->{error}}, $branch->{error} if defined $branch->{error};
 
 	#---------------------------------------------------------------------
-	# LEAF of the account BRANCH of ROOT Object
+	# LEAF of the account BRANCH
 	#---------------------------------------------------------------------
 	my $x =
 	  {
@@ -465,6 +470,16 @@ we skip empty (criteria is a concatenation of each field value) repeatable eleme
 	      if defined $element->field('radiusgroupname')->value;
 	    $x->{radiusprofiledn} = $element->field('radiusprofiledn')->value
 	      if defined $element->field('radiusprofiledn')->value;
+
+	  } elsif ( $element->field('authorizedservice')->value eq 'ssh-acc' ) {
+
+	    push @{$x->{objectclass}}, @{$ldap_crud->cfg->{objectClass}->{acc_svc_ssh}};
+	    $x->{sshkey} = $element->field('sshkey')->value;
+	    $x->{sshkeyfile} = $element->field('sshkeyfile')->value;
+	    $x->{password}->{$element->field('authorizedservice')->value} =
+	      ! $element->field('password2')->value ?
+	      $self->pwdgen : $self->pwdgen({ pwd => $element->field('password2')->value });
+
 	  } elsif ( ! $element->field('password1')->value &&
 		    ! $element->field('password2')->value) {
 	    $x->{password} = { $element->field('authorizedservice')->value => $self->pwdgen };
@@ -504,6 +519,7 @@ we skip empty (criteria is a concatenation of each field value) repeatable eleme
 	  $x->{umiOvpnAddDevOSVer} = $element->field('devosver')->value || 'NA';
 	}
 
+	# log_debug { np($x) };
 	$leaf =
 	  $ldap_crud->create_account_branch_leaf ( $x );
 	push @{$final_message->{success}}, @{$leaf->{success}} if defined $leaf->{success};
@@ -517,7 +533,7 @@ we skip empty (criteria is a concatenation of each field value) repeatable eleme
   # SERVICE ACCOUNTS PROCESSING STOP
   ######################################################################
 
-  # p $final_message;
+  # log_debug { np($final_message) };
   return $final_message;
 }
 

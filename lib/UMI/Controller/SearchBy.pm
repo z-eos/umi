@@ -12,6 +12,7 @@ use Moose;
 use namespace::autoclean;
 
 use Data::Printer { use_prototypes => 0, caller_info => 1 };
+use Time::Piece;
 
 # use Try::Tiny;
 
@@ -1775,6 +1776,44 @@ sub reassign :Path(reassign) :Args(0) {
     $c->stash( template => 'stub.tt',
 	       params => $params,
 	       err => $err, );
+  }
+}
+
+=head1 refresh
+
+object TTL refresh ( wrapper of Net::LDAP::Extension::Refresh )
+
+=cut
+
+
+sub refresh :Path(refresh) :Args(0) {
+  my ( $self, $c ) = @_;
+  my $params = $c->req->parameters;
+
+  log_debug { np($params) };
+  
+  # my $err = 0;
+
+  my $t = localtime;
+  my $refresh = $c->model('LDAP_CRUD')
+    ->refresh( $params->{dn_to_refresh},
+	       Time::Piece->strptime( $params->{requestTtl}, "%Y.%m.%d %H:%M")->epoch - $t->epoch );
+
+  if ( $params->{type} eq 'json' ) {
+    $c->stash->{current_view} = 'WebJSON';
+
+    if ( defined $refresh->{success} ) {
+      $c->stash->{success} = 1;
+      $c->stash->{message} = 'OK';
+    } else {
+      $c->stash->{success} = 0;
+      $c->stash->{message} = $self->msg2html({ type => 'panel',
+					       data => $refresh->{error}->{html} });
+    }
+  } else {
+    $c->stash( template => 'stub.tt',
+	       params => $params,
+	       err => $refresh->{error}->{html}, );
   }
 }
 

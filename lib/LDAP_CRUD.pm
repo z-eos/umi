@@ -256,6 +256,9 @@ sub _build_cfg {
 					       authorizedServiceObject
 					       domainRelatedObject
 					    ) ],
+			  acc_svc_ssh => [ qw(
+					       ldapPublicKey
+					    ) ],
 			  gitacl => [ qw(
 				    	  top
 				    	  gitACL
@@ -374,11 +377,13 @@ sub _build_cfg {
 			 },
 	   'ssh-acc' => {
 			 auth => 1,
+			 homeDirectory_prefix => '/home/',
 			 descr => 'SSH',
 			 disabled => 0,
+			 gidNumber => 10022,
 			 icon => 'fa fa-key',
-			 data_fields => 'login,logindescr,password1,password2',
-			 data_relation => 'passw',
+			 data_fields => 'login,logindescr,password1,password2,sshkey,sshkeyfile',
+			 data_relation => 'sshacc',
 			},
 	   'ssh' => {
 		     auth => 0,
@@ -3023,6 +3028,7 @@ returns reference to hash of arrays
 
 sub create_account_branch_leaf {
   my  ( $self, $args ) = @_;
+  # log_debug { np( $args )};
   my $arg =
     { basedn => $args->{basedn},
       service => $args->{authorizedservice},
@@ -3033,33 +3039,34 @@ sub create_account_branch_leaf {
 	      $self->cfg->{authorizedService}->{$args->{authorizedservice}}
 	      ->{associateddomain_prefix}->{$args->{associateddomain}} : '',
 	      $args->{associateddomain}),
-      uidNumber => $args->{uidNumber},
-      givenName => $args->{givenName},
-      sn => $args->{sn},
-      login => $args->{login},
-      password => $args->{password},
-      description => $args->{description} || 'no description yet',
-      gecos => $self->utf2lat( sprintf('%s %s', $args->{givenName}, $args->{sn}) ),
-      telephoneNumber => $args->{telephoneNumber} || '666',
-      jpegPhoto => $args->{jpegPhoto} || undef,
-	     
-      to_sshkeygen => $args->{to_sshkeygen} || undef,
-      sshpublickey => $args->{sshpublickey} || undef,
+      uidNumber        => $args->{uidNumber},
+      givenName        => $args->{givenName},
+      sn               => $args->{sn},
+      login            => $args->{login},
+      password         => $args->{password},
+      gecos            => $self->utf2lat( sprintf('%s %s', $args->{givenName}, $args->{sn}) ),
+      telephoneNumber  => $args->{telephoneNumber} || '666',
+      jpegPhoto        => $args->{jpegPhoto} || undef,
+
+      to_sshkeygen     => $args->{to_sshkeygen} || undef,
+      sshpublickey     => $args->{sshpublickey} || undef,
       sshpublickeyfile => $args->{sshpublickeyfile} || undef,
-      sshkeydescr => $args->{sshkeydescr} || undef,
+      sshkeydescr      => $args->{sshkeydescr} || undef,
+      sshkey           => $args->{sshkey} || undef,
+      sshkeyfile       => $args->{sshkeyfile} || undef,
       # !!! here we much need check for cert existance !!!
-      userCertificate => $args->{userCertificate} || '',
+      userCertificate        => $args->{userCertificate} || '',
       umiOvpnCfgIfconfigPush => $args->{umiOvpnCfgIfconfigPush} || 'NA',
-      umiOvpnCfgIroute => $args->{umiOvpnCfgIroute} || 'NA',
-      umiOvpnCfgPush => $args->{umiOvpnCfgPush} || 'NA',
-      umiOvpnCfgConfig => $args->{umiOvpnCfgConfig} || '',
-      umiOvpnAddStatus => $args->{umiOvpnAddStatus} || 'blocked',
-      umiOvpnAddDevType => $args->{umiOvpnAddDevType} || 'NA',
-      umiOvpnAddDevMake => $args->{umiOvpnAddDevMake} || 'NA',
-      umiOvpnAddDevModel => $args->{umiOvpnAddDevModel} || 'NA',
-      umiOvpnAddDevOS => $args->{umiOvpnAddDevOS} || 'NA',
-      umiOvpnAddDevOSVer => $args->{umiOvpnAddDevOSVer} || 'NA',
-	     
+      umiOvpnCfgIroute       => $args->{umiOvpnCfgIroute} || 'NA',
+      umiOvpnCfgPush         => $args->{umiOvpnCfgPush} || 'NA',
+      umiOvpnCfgConfig       => $args->{umiOvpnCfgConfig} || '',
+      umiOvpnAddStatus       => $args->{umiOvpnAddStatus} || 'blocked',
+      umiOvpnAddDevType      => $args->{umiOvpnAddDevType} || 'NA',
+      umiOvpnAddDevMake      => $args->{umiOvpnAddDevMake} || 'NA',
+      umiOvpnAddDevModel     => $args->{umiOvpnAddDevModel} || 'NA',
+      umiOvpnAddDevOS        => $args->{umiOvpnAddDevOS} || 'NA',
+      umiOvpnAddDevOSVer     => $args->{umiOvpnAddDevOSVer} || 'NA',
+
       radiusgroupname => $args->{radiusgroupname} || '',
       radiusprofiledn => $args->{radiusprofiledn} || '',
 
@@ -3084,7 +3091,9 @@ sub create_account_branch_leaf {
 		       $arg->{uid},
 		       $arg->{basedn});
 
-  my ($authorizedService, $sshkey, $authorizedService_add, $jpegPhoto_file, $sshPublicKey );
+  # log_debug { np($arg) };
+  
+  my ($authorizedService, $sshkey, $authorizedService_add, $jpegPhoto_file, $sshPublicKey, $description );
 
   if ( $arg->{service} eq 'ovpn' ||
        $arg->{service} eq 'ssh' ||
@@ -3092,7 +3101,6 @@ sub create_account_branch_leaf {
 	 $arg->{service} eq '802.1x-eap-tls' ) ||
        $arg->{service} eq 'web' ) {
     $authorizedService = [];
-    $authorizedService = [ description => $arg->{description}, ]; # ??? looks like it is not needed ... except web may be ...
   } else {
     $authorizedService = [
 			  objectClass => [ @{$self->cfg->{objectClass}->{acc_svc_common}}, @{$arg->{objectclass}} ],
@@ -3105,10 +3113,11 @@ sub create_account_branch_leaf {
 			  uidNumber => $arg->{uidNumber},
 			  loginShell => $self->cfg->{stub}->{loginShell},
 			  gecos => $self->utf2lat( sprintf('%s %s', $args->{givenName}, $args->{sn}) ),
-			  description => $arg->{description} ne '' ? $arg->{description} :
-			  sprintf('%s: %s @ %s', uc($arg->{service}), $arg->{'login'}, $arg->{associatedDomain}),
 			 ];
   }
+  
+  $description = $args->{description} ne '' ? $args->{description} :
+    sprintf('%s: %s @ %s', uc($arg->{service}), $arg->{'login'}, $arg->{associatedDomain});
 
   #=== SERVICE: mail =================================================
   if ( $arg->{service} eq 'mail') {
@@ -3119,6 +3128,7 @@ sub create_account_branch_leaf {
       gidNumber => $self->cfg->{authorizedService}->{$arg->{service}}->{gidNumber},
       userPassword => $arg->{password}->{$arg->{service}}->{'ssha'},
       objectClass => [ @{$self->cfg->{objectClass}->{acc_svc_email}} ];
+    
   #=== SERVICE: xmpp =================================================
   } elsif ( $arg->{service} eq 'xmpp') {
     if ( defined $arg->{jpegPhoto} ) {
@@ -3158,8 +3168,7 @@ sub create_account_branch_leaf {
     push @{$authorizedService},
       authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
       associatedDomain => $arg->{associatedDomain},
-      userPassword => $arg->{password}->{$arg->{service}}->{clear},
-      description => $arg->{description} ne '' ? $arg->{description} : sprints('%s: %s', uc($arg->{service}), $arg->{'login'});
+      userPassword => $arg->{password}->{$arg->{service}}->{clear};
 
     push @{$authorizedService},
       radiusprofiledn => $arg->{radiusprofiledn}
@@ -3180,6 +3189,25 @@ sub create_account_branch_leaf {
 	'userCertificate;binary' => $arg->{cert_info}->{cert};
     }
 
+  #=== SERVICE: ssh-acc ==============================================
+  } elsif ( $arg->{service} eq 'ssh-acc' ) {
+    if ( defined $arg->{sshkeyfile} ) {
+      $sshPublicKey = $self->file2var( $arg->{sshkeyfile}->{tempname}, $return, 1);
+      # log_debug { np($arg->{sshkeyfile}) };
+      # log_debug { np($sshPublicKey) };
+      # log_debug { np($return) };
+      $description = $self->utf2lat( sprintf("%s ;\nkey file: %s ( %s bytes)",
+					     $description,
+					     $arg->{sshkeyfile}->{filename},
+					     $arg->{sshkeyfile}->{size}) );
+    }
+    push @{$sshPublicKey}, $arg->{sshkey}
+      if defined $arg->{sshkey} && $arg->{sshkey} ne '';
+    push @{$authorizedService}, sshPublicKey => [ @$sshPublicKey ],
+      gidNumber => $self->cfg->{authorizedService}->{$arg->{service}}->{gidNumber},
+      userPassword => $arg->{password}->{$arg->{service}}->{'ssha'},
+      homeDirectory => $self->cfg->{authorizedService}->{$arg->{service}}->{homeDirectory_prefix} . '/' . $arg->{uid};
+
   #=== SERVICE: ssh ==================================================
   } elsif ( $arg->{service} eq 'ssh' ) {
     $sshPublicKey = $self->file2var( $arg->{sshpublickeyfile}->{tempname}, $return, 1)
@@ -3192,17 +3220,10 @@ sub create_account_branch_leaf {
 			  sshPublicKey => [ @$sshPublicKey ],
 			  uid => $arg->{uid},
 			 ];
-
-    push @{$authorizedService},
-      description => $arg->{description} ne 'no description yet' ?
-      $self->utf2lat( sprintf("%s\nNote: %s bytes file \"%s\" was uploaded",
-			      $arg->{description},
-			      $arg->{sshpublickeyfile}->{size},
-			      $arg->{sshpublickeyfile}->{filename}) ) :
-      $self->utf2lat( sprintf("Note: %s bytes file %s was uploaded",
-			      $arg->{sshpublickeyfile}->{size},
-			      $arg->{sshpublickeyfile}->{filename}) )
-		      if defined $arg->{sshpublickeyfile};
+    $description = $self->utf2lat( sprintf("%s\nNote: %s bytes file \"%s\" was uploaded",
+					   $description,
+					   $arg->{sshkeyfile}->{size},
+					   $arg->{sshkeyfile}->{filename}) );
 
   #=== SERVICE: ovpn =================================================
   } elsif ( $arg->{service} eq 'ovpn' ) {
@@ -3232,7 +3253,7 @@ sub create_account_branch_leaf {
 			  umiOvpnAddDevOSVer => $arg->{umiOvpnAddDevOSVer},
 			  'userCertificate;binary' => $arg->{cert_info}->{cert},
 			 ];
-    push @{$authorizedService}, description => $arg->{description} if $arg->{description} ne '';
+
     push @{$return->{error}}, $arg->{cert_info}->{error} if defined $arg->{cert_info}->{error};
     
   #=== SERVICE: web ==================================================
@@ -3246,6 +3267,8 @@ sub create_account_branch_leaf {
 			 ];
   }
 
+  push @{$authorizedService}, description => $description;
+  
   # p $arg->{dn};
   # p $authorizedService;
   # p $sshPublicKey;

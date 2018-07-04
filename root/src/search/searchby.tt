@@ -2,6 +2,9 @@
 [% META title = 'Search Simple Results' %]
 [% # stash.name %]
 
+[% USE date(time = date.now, format = '%Y.%m.%d', locale = 'en_US') %]
+[% dds_max_ttl_years = 10 %]
+
 <div class="row">
   <div class="col-xs-6 col-sm-6 col-md-3 col-lg-3">
     <[% site.pageheading %]>
@@ -31,7 +34,7 @@
    blocked_title = ''
    branch_class = ' fa-lg umi-1-margin-left'
    leaf_class = ' umi-2-margin-left'
-   dynamic_object = '<i class="fa fa-hourglass-half fa-lg" title="dynamic object"></i>' %]
+   dynamic_object = '<i class="fa fa-clock fa-lg" title="dynamic object"></i>' %]
 
 [% IF entries.size == 1 %]
 [% in = 'in'
@@ -233,7 +236,7 @@
 		  [%   ELSIF entry.value.attrs.reqType.0 == 'delete' %]
 		  <i title="History Object Request type: Delete" class="[% entry_icon_size %] fa fa-lg fa-minus-square"></i>
 		  [%   ELSIF entry.value.attrs.reqType.0 == 'modify' %]
-		  <i title="History Object Request type: Modify" class="[% entry_icon_size %] fa fa-lg fa-pencil-square"></i>
+		  <i title="History Object Request type: Modify" class="[% entry_icon_size %] fa fa-lg fa-pen-square"></i>
 		  [%   ELSIF entry.value.attrs.reqType.0 == 'modrdn' %]
 		  <i title="History Object Request type: ModRDN" class="[% entry_icon_size %] fa fa-lg fa-share-alt-square"></i>
 		  [%   END %]

@@ -38,12 +38,12 @@
   <br class="clear">
   [% END %]
 
-  [% IF ! form.field('add_svc_acc').value || (form.field('add_svc_acc').value && form.field('dynamic_object').value)%]
+  [% # IF ! form.field('add_svc_acc').value || (form.field('add_svc_acc').value && form.field('dynamic_object').value)%]
   [% form.field('person_exp').render %]
-  [% END %]
+  [% # END %]
   
   <!-- <nav role="navigation" class="well well-sm" title="menu of the actions to perform upon the object"> -->
-    <ul class="nav nav-pills nav-justified" id="myTab">
+    <ul class="nav nav-pills nav-justified well well-sm" id="myTab">
       <li role="presentation" class="nav-item addsvcacc [% IF ! form.field('add_svc_acc').value %]active [% END %]text-left">
 	<a aria-controls="person" data-toggle="tab" role="button"
 	   id="person-tab" href="#person" title="Personal Data"
