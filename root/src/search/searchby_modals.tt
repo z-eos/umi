@@ -258,6 +258,13 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	  </h4>
 	</div>
 	<div class="modal-body clearfix form-group text-primary text-center">
+	  <blockquote>
+	    <p>
+	      ... the lifetime of dynamic objects with subordinates is
+	      prolonged <b>until all the dynamic subordinates expire</b>.
+	    </p>
+	    <footer>slapo-dds(5)</footer>
+	  </blockquote>
 	  <input type="text" class="input-sm form-control"
 		 id="modal_refresh_dtp[% id_suffix %]"
 		 title="Refresh TTL of this object (extended LDAPv3 operation as described in RFC2589)"

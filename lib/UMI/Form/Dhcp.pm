@@ -22,6 +22,16 @@ sub html_attributes {
 
 has_field 'ldap_add_dhcp' => ( type => 'Hidden', );
 
+has_field 'exp' => ( type => 'Text',
+		     label => 'Expiration',
+		     label_attr => { title => 'Object Expiration', },
+		     label_class => [ 'col-xs-2', 'col-sm-2', 'col-md-2', 'col-lg-2', 'atleastone', ],
+		     wrapper_class => [ 'col-xs-8' ],
+		     element_wrapper_class => [ 'col-xs-10', 'col-sm-10', 'col-md-10', 'col-lg-10', ],
+		     element_class => [ 'input-sm', ],
+		     element_attr => { title => 'Object Expiration', },
+		     required => 0 );
+
 has_field 'net' => ( type => 'Select',
 		     label => 'Network',
 		     label_class => [ 'col-xs-2' ],
@@ -138,6 +148,7 @@ has_block 'submitit' => ( tag => 'div',
 			);
 
 sub build_render_list {[ 'ldap_add_dhcp',
+			 'exp',
 			 'net',
 			 'cn',
 			 'dhcpHWAddress',
