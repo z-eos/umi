@@ -112,6 +112,7 @@ sub _build_cfg {
 		   dhcp =>           'ou=DHCP,'               . UMI->config->{ldap_crud_db},
 		   gitacl =>         'ou=GitACL,'             . UMI->config->{ldap_crud_db},
 		   group =>          'ou=group,'              . UMI->config->{ldap_crud_db},
+		   system =>         'ou=group,ou=system,'    . UMI->config->{ldap_crud_db},
 		   inventory =>      'ou=hw,ou=Inventory,'    . UMI->config->{ldap_crud_db},
 		   machines =>       'ou=machines,'           . UMI->config->{ldap_crud_db},
 		   mta =>            'ou=Sendmail,'           . UMI->config->{ldap_crud_db},

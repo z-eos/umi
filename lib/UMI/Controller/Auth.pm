@@ -71,7 +71,8 @@ sub signin :Path Global {
     
     # log_debug { np( $c->user->ldap_entry->ldif ) };
     my $ldap_crud = $c->model('LDAP_CRUD');
-    my ( $meta_schema, $key, $value, $must_meta, $may_meta, $must, $may, $syntmp);
+    my ( $meta_schema, $key, $value, $must_meta, $may_meta, $must, $may, $syntmp );
+    
     while ( ($key, $value) = each %{$ldap_crud->{cfg}->{objectClass}}) {
       foreach ( @{$value} ) {
 	$meta_schema->{$_} += 1;

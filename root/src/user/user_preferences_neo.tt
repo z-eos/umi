@@ -1,8 +1,6 @@
-
 [% META title = 'User Account Info' %]
 
 [% INCLUDE ldap_err.tt %]
-
 
 <div class="page-header">
   <[% site.pageheading %]>
@@ -25,7 +23,7 @@
     <div id="collapse_personal_data" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_personal_data">
       <div class="panel-body">
 	<div class="media">
-	  <div class="media-left"><img width="200" class="media-object img-responsive img-rounded bg-info" [% jpegPhoto %]</div>
+	  <div class="media-left"><img width="200" class="media-object img-thumbnail bg-info" [% jpegPhoto %]</div>
 	  <div class="media-body">
 	    <dl class="dl-horizontal fa-ul">
 	      <li class="media-heading">
@@ -37,25 +35,28 @@
 		[% auth_obj.uid %]
 	      </i></li>
 	      <li><i>
-		<span class="fab fa-li fa-black-tie" title="title/position"></span>
+		<span class="fas fa-li fa-graduation-cap" title="title/position"></span>
 		[% IF auth_obj.title.size %][% FOREACH i IN auth_obj.title %][% i %]<br>[% END %]
 		[% ELSE %]
 		[% auth_obj.title %]
 		[% END %]
 	      </i></li>
+	      [% IF c.check_any_user_role ('admin', 'coadmin') %]
 	      <li><i>
-		<span class="fa fa-li fa-users" title="group/s user belongs to"></span>
-		[% FOREACH role IN auth_obj.roles.sort %][% role %]<br>[% END %]
-	      </i></li>
+		<span class="fa fa-li fa-users" title="UMI system group/s user belongs to"></span>
+		[%   FOREACH role IN auth_obj.roles.sort %][% role %]<br>[% END %]
+	      </i>
+	      </li>
+	      [% END %]
 	      <li><i>
 		<span class="fa fa-li fa-phone" title="phone number/s"></span>
 		[% IF auth_obj.telephonenumber.size %][% FOREACH i IN auth_obj.telephonenumber %][% i %]<br>[% END %]
-		[% ELSE %][% auth_obj.telephonenumber %][% END %]
+		[% ELSE %]<span class="text-danger">N/A</span>[% END %]
 	      </i></li>
 	      <li><i>
 		<span class="fa fa-li fa-envelope" title="email address/es"></span>
 		[% IF auth_obj.mail.size %][% FOREACH i IN auth_obj.mail %][% i %]<br>[% END %]
-		[% ELSE %][% auth_obj.mail %][% END %]
+		[% ELSE %]<span class="text-danger">N/A</span>[% END %]
 	      </i></li>
 	    </dl>
 	  </div>

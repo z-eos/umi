@@ -366,7 +366,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
     my @user_rdn = split('=', $user_dn);
     my $ldap_crud = $c->model('LDAP_CRUD');
 
-    my ( $arg, $mesg, $return, $entry, $entries, $orgs, $domains, $fqdn, $o,
+    my ( $arg, $mesg, $uid, $return, $entry, $entries, $orgs, $domains, $fqdn, $o,
 	 $physicaldeliveryofficename, $telephonenumber, $title, $mail, );
 
     #=================================================================
@@ -397,14 +397,13 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	$arg = {
 		uid => $entry->{$user_dn}->{uid}->[0],
 		givenname => $entry->{$user_dn}->{givenname}->[0],
-		mail => defined $entry->{$user_dn}->{mail} ? $entry->{$user_dn}->{mail} : [],
+		mail => $entry->{$user_dn}->{mail} // [],
 		sn => $entry->{$user_dn}->{sn}->[0],
-		title => defined $entry->{$user_dn}->{title} ? $entry->{$user_dn}->{title} : ['N/A'],
+		title => $entry->{$user_dn}->{title} // ['N/A'],
 		o => $entry->{$user_dn}->{o},
 		physicaldeliveryofficename => $entry->{$user_dn}->{physicaldeliveryofficename},
-		telephonenumber => defined $entry->{$user_dn}->{telephonenumber} ?
-		$entry->{$user_dn}->{telephonenumber} : ['N/A'],
-		roles => $entry->{$user_dn}->{$ldap_crud->{cfg}->{rdn}->{acc_root}}->[0] eq eval '$c->user->' . $ldap_crud->{cfg}->{rdn}->{acc_root} ? [ $c->user->roles ] : 'a mere mortal',
+		telephonenumber => $entry->{$user_dn}->{telephonenumber} // ['N/A'],
+		# roles => [ $c->user->roles ],
 	       };
       }
     } else {
@@ -421,14 +420,33 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	      givenname => $c->user->givenname || 'N/A',
 	      sn => $c->user->sn || 'N/A',
 	      title => $title,
-	      mail => $c->user->has_attribute('mail') ? $c->user->mail : [ 'N/A' ],
+	      mail => $c->user->has_attribute('mail') ? [ $c->user->mail ] : [ 'N/A' ],
 	      o => [ $o ],
 	      physicaldeliveryofficename => $physicaldeliveryofficename,
-	      telephonenumber => $telephonenumber,
-	      roles => \@{[$c->user->roles]} || 'N/A',
+	      telephonenumber => [ $telephonenumber ],
+	      # roles => \@{[$c->user->roles]} || 'N/A',
 	     };
       undef $o;
     }
+
+    $mesg = $ldap_crud->search({ base => $ldap_crud->cfg->{base}->{system},
+				 filter => '(memberUid=' . $arg->{uid} . ')',
+				 attrs => [ 'cn' ], });
+    if ( $mesg->code ) {
+      $return->{error} .= sprintf('<li>personal info %s</li>',
+ 				  $ldap_crud->err($mesg)->{html});
+    } else {
+      if ( $mesg->count > 0 ) {
+	push @{$arg->{roles}}, $_->get_value('cn')
+	  foreach ( @{[$mesg->entries]});
+      }
+      else {
+	$arg->{roles} = [ 'N/A' ];
+      }
+    }
+
+    # log_debug { np(@{[$c->user->roles]}) };
+    log_debug { np($arg) };
     utf8::decode($arg->{givenname});
     utf8::decode($arg->{sn});
     # p $arg;
@@ -456,9 +474,9 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	  $orgs->{$entries->{$_}->{physicaldeliveryofficename}->[0]} =
 	    sprintf('%s, %s, %s, %s',
 		    $entries->{$_}->{postofficebox}->[0],
+		    $entries->{$_}->{street}->[0],
 		    $entries->{$_}->{postaladdress}->[0],
-		    $entries->{$_}->{l}->[0],
-		    $entries->{$_}->{st}->[0]
+		    $entries->{$_}->{l}->[0]
 		   );
 	  $fqdn->{$entries->{$_}->{physicaldeliveryofficename}->[0]} = defined $entries->{$_}->{associateddomain} ?
 	    [ sort @{$entries->{$_}->{associateddomain}} ] : [];
@@ -521,7 +539,9 @@ sub user_preferences :Path(user_prefs) :Args(0) {
     #=================================================================
     # user services
     #
-    my ( $service, $service_details );
+    log_debug { np($arg) };
+
+    my ( $svc_entry, $service, $service_details );
     $mesg = $ldap_crud->search( { base => 'uid=' . $arg->{uid} . ',' .
 				  $ldap_crud->cfg->{base}->{acc_root},
 				  scope => 'one',
@@ -532,31 +552,33 @@ sub user_preferences :Path(user_prefs) :Args(0) {
       $return->{error} .= sprintf('<li>services list %s</li>',
 				  $ldap_crud->err($mesg)->{html});
     }
-    foreach ($mesg->sorted( 'authorizedService' )) {
-      $mesg = $ldap_crud->search( { base => $_->dn, scope => 'children', });
+    foreach $svc_entry (@{[$mesg->sorted( 'authorizedService' )]}) {
+      $mesg = $ldap_crud->search( { base => $svc_entry->dn,
+				    scope => 'children', });
       if ( $mesg->code ) {
 	$return->{error} .= sprintf('<li>each service children %s</li>',
 				    $ldap_crud->err($mesg)->{html});
       }
       next if ! $mesg->count;
       $service_details = {
-			  branch_dn => $_->dn,
-			  authorizedService => $_->get_value('authorizedService'),
+			  branch_dn => $svc_entry->dn,
+			  authorizedService => $svc_entry->get_value('authorizedService'),
 			  auth => $ldap_crud->cfg->{authorizedService}
-			  ->{(split('@', $_->get_value('authorizedService')))[0]}->{auth},
+			  ->{(split('@', $svc_entry->get_value('authorizedService')))[0]}->{auth},
 			  icon => $ldap_crud->cfg->{authorizedService}
-			  ->{(split('@', $_->get_value('authorizedService')))[0]}->{icon},
+			  ->{(split('@', $svc_entry->get_value('authorizedService')))[0]}->{icon},
 			  descr => $ldap_crud->cfg->{authorizedService}
-			  ->{(split('@', $_->get_value('authorizedService')))[0]}->{descr},
+			  ->{(split('@', $svc_entry->get_value('authorizedService')))[0]}->{descr},
 			 };
 
       foreach (@{[$mesg->sorted( 'authorizedService' )]}) {
-	$service_details->{leaf}->{$_->dn} = defined $_->get_value('uid') ? $_->get_value('uid') : $_->get_value('cn');
+	$service_details->{leaf}->{$_->dn} = $_->get_value('uid') // $_->get_value('cn');
 
 	if ( (split('@', $service_details->{authorizedService}))[0] eq 'ovpn' ) {
 	  $service_details->{cert}->{$_->dn} =
 	    $self->cert_info({ cert => $_->get_value('userCertificate;binary') });
-	} elsif ( (split('@', $service_details->{authorizedService}))[0] eq 'mail' ) {
+	  $service_details->{cert}->{$_->dn}->{'ifconfig-push'} = $_->get_value('umiOvpnCfgIfconfigPush');
+	} elsif ( $service_details->{authorizedService} =~ /^mail\@/ ) {
 	  push @{$arg->{mail}}, $_->get_value('uid');
 	} elsif ( (split('@', $service_details->{authorizedService}))[0] eq 'ssh' ) {
 	  @{$service_details->{sshkey}->{$_->dn}} = $_->get_value('sshPublicKey');
@@ -565,8 +587,6 @@ sub user_preferences :Path(user_prefs) :Args(0) {
       push @{$service}, $service_details;
       undef $service_details;
     }
-
-    log_debug { np($arg) };
 
     #=================================================================
     # Inventory assigned to user

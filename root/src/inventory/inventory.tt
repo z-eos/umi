@@ -45,7 +45,7 @@
       <a aria-controls="compart" data-toggle="tab" role="tab"
 	 id="compart-tab" href="#compart" title="Comparts"
 	 [% IF ! form.add_inventory %]aria-expanded="false"[% ELSE %]aria-expanded="true"[% END %]>
-	<span class="fa fa-fw fa-microchip fa-lg"></span>
+	<span class="fas fa-memory fa-lg"></span>
 	<span class="visible-lg-inline">Compart</span>
       </a>
     </li>

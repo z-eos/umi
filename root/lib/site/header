@@ -126,7 +126,7 @@
 		    onClick="document.getElementById('ldap_base_case').value=this.value"
 		    value="[% helper_cfg('cfg_ldap_crud','base', 'netgroup') %]"
 		    title="filter pattern with base NisNetgroups">
-	      <i class="[% icon_class %] fa-users"></i> netgroup
+	      <i class="[% icon_class %] fa-user-friends"></i> netgroup
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
 		    onClick="document.getElementById('ldap_base_case').value=this.value"
@@ -174,7 +174,7 @@
 		    value="[% helper_cfg('cfg_ldap_crud','base', 'inventory') %]"
 		    tabindex="24"
 		    title="filter pattern with base Inventory">
-	      <i class="[% icon_class %] fa-tags"></i> inventory
+	      <i class="[% icon_class %] fa-pen-nib"></i> inventory
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
 		    onClick="document.getElementById('ldap_base_case').value=this.value"
