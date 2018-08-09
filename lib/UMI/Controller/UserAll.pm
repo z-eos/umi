@@ -456,13 +456,9 @@ we skip empty (criteria of emptiness is a concatenation of each field value) rep
 	      $x->{password} = { $element->field('authorizedservice')->value =>
 				 { clear =>
 				   sprintf('%s%s',
-					   defined $ldap_crud->cfg->{authorizedService}
-					   ->{$element->field('authorizedservice')->value}
-					   ->{login_prefix} ?
 					   $ldap_crud->cfg->{authorizedService}->{$element->field('authorizedservice')->value}
-					   ->{login_prefix} : '',
-					   defined $element->field('login')->value ?
-					   $element->field('login')->value : $uid ) }
+					   ->{login_prefix} // '',
+					   $element->field('login')->value // $uid ) }
 			       };
 	    }
 
@@ -474,8 +470,11 @@ we skip empty (criteria of emptiness is a concatenation of each field value) rep
 	  } elsif ( $element->field('authorizedservice')->value eq 'ssh-acc' ) {
 
 	    push @{$x->{objectclass}}, @{$ldap_crud->cfg->{objectClass}->{acc_svc_ssh}};
-	    $x->{sshkey} = $element->field('sshkey')->value;
+	    $x->{sshkey}     = $element->field('sshkey')->value;
 	    $x->{sshkeyfile} = $element->field('sshkeyfile')->value;
+	    $x->{sshgid}     = $element->field('sshgid')->value;
+	    $x->{sshhome}    = $element->field('sshhome')->value;
+	    $x->{sshshell}   = $element->field('sshshell')->value;
 	    $x->{password}->{$element->field('authorizedservice')->value} =
 	      ! $element->field('password2')->value ?
 	      $self->pwdgen : $self->pwdgen({ pwd => $element->field('password2')->value });
@@ -488,35 +487,35 @@ we skip empty (criteria of emptiness is a concatenation of each field value) rep
 			       $self->pwdgen( { pwd => $element->field('password2')->value } ) };
 	  }
 
-	  $x->{login} = defined $element->field('login')->value ? $element->field('login')->value : $uid;
+	  $x->{login} = $element->field('login')->value // $uid;
 
 	  $x->{userCertificate} = $element->field('userCertificate')->value
 	    if defined $element->field('userCertificate')->value &&
 	    $element->field('userCertificate')->value ne '';
 	  
 	} elsif ( $x->{authorizedservice} eq 'ssh' ) {
-	  $x->{sshpublickey} = $element->field('key')->value;
+	  $x->{sshpublickey}     = $element->field('key')->value;
 	  $x->{sshpublickeyfile} = $element->field('keyfile')->value;
-	  $x->{login} = $uid;
-	  $x->{password} = { $x->{authorizedservice} =>
-			     { clear => '<del>NOPASSWORD</del>' }
+	  $x->{login}            = $uid;
+	  $x->{password}         = { $x->{authorizedservice} =>
+				     { clear => '<del>NOPASSWORD</del>' }
 			   };
 	} elsif ( $x->{authorizedservice} eq 'ovpn' ) {
 	  $x->{userCertificate} = $element->field('userCertificate')->value
 	    if defined $element->field('userCertificate')->value;
-	  $x->{password} = { $x->{authorizedservice} =>
-			     { clear => '<del>NOPASSWORD</del>' } };
-	  $x->{associateddomain} = $element->field('associateddomain')->value;
+	  $x->{password}               = { $x->{authorizedservice} =>
+					   { clear => '<del>NOPASSWORD</del>' } };
+	  $x->{associateddomain}       = $element->field('associateddomain')->value;
 	  $x->{umiOvpnCfgIfconfigPush} = $element->field('ifconfigpush')->value || 'NA';
-	  $x->{umiOvpnCfgIroute} = $element->field('iroute')->value || 'NA';
-	  $x->{umiOvpnCfgPush} = $element->field('push')->value || 'NA';
-	  $x->{umiOvpnCfgConfig} = $element->field('config')->value || 'NA';
-	  $x->{umiOvpnAddStatus} = $element->field('status')->value || 'blocked';
-	  $x->{umiOvpnAddDevType} = $element->field('devtype')->value || 'NA';
-	  $x->{umiOvpnAddDevMake} = $element->field('devmake')->value || 'NA';
-	  $x->{umiOvpnAddDevModel} = $element->field('devmodel')->value || 'NA';
-	  $x->{umiOvpnAddDevOS} = $element->field('devos')->value || 'NA';
-	  $x->{umiOvpnAddDevOSVer} = $element->field('devosver')->value || 'NA';
+	  $x->{umiOvpnCfgIroute}       = $element->field('iroute')->value || 'NA';
+	  $x->{umiOvpnCfgPush}         = $element->field('push')->value || 'NA';
+	  $x->{umiOvpnCfgConfig}       = $element->field('config')->value || 'NA';
+	  $x->{umiOvpnAddStatus}       = $element->field('status')->value || 'blocked';
+	  $x->{umiOvpnAddDevType}      = $element->field('devtype')->value || 'NA';
+	  $x->{umiOvpnAddDevMake}      = $element->field('devmake')->value || 'NA';
+	  $x->{umiOvpnAddDevModel}     = $element->field('devmodel')->value || 'NA';
+	  $x->{umiOvpnAddDevOS}        = $element->field('devos')->value || 'NA';
+	  $x->{umiOvpnAddDevOSVer}     = $element->field('devosver')->value || 'NA';
 	}
 
 	# log_debug { np($x) };

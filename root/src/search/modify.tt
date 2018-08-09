@@ -25,7 +25,7 @@
    member = 1
    memberUid = 1
    objectClass = 1
-   sshPubKey = 1
+   sshPublicKey = 1
    telephoneNumber = 1
    title = 1
    umiOvpnCfgPush = 1

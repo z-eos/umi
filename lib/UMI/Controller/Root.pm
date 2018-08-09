@@ -740,7 +740,8 @@ page to test code snipets
 sub test : Local {
   my ( $self, $c ) = @_;
   my $ldap_crud = $c->model('LDAP_CRUD');
-
+  my $return = '';
+  
 # DHCP STUFF #     my $svc;
 # DHCP STUFF #     my $fqdn;
 # DHCP STUFF # 
@@ -785,24 +786,52 @@ sub test : Local {
 # DHCP STUFF # 
 # DHCP STUFF # 	     );
 
-  use Net::LDAP::Util qw(	ldap_explode_dn canonical_dn );
-  
-  my $params = $c->req->params;
-  my $arg = { base => $params->{base} || $ldap_crud->{cfg}->{base}->{db},
-	      filter => $params->{filter} || '(objectClass=*)', };
+# tree build #   use Net::LDAP::Util qw(	ldap_explode_dn canonical_dn );
+# tree build #   
+# tree build #   my $params = $c->req->params;
+# tree build #   my $arg = { base => $params->{base} || $ldap_crud->{cfg}->{base}->{db},
+# tree build # 	      filter => $params->{filter} || '(objectClass=*)', };
+# tree build # 
+# tree build #   my $mesg = $ldap_crud->search({ base => $arg->{base},
+# tree build # 				  scope => 'sub',
+# tree build # 				  sizelimit => 0,
+# tree build # 				  attrs => [ 'fakeAttr' ],
+# tree build # 				  filter => $arg->{filter}, });
+# tree build #   my $tree;
+# tree build #   foreach my $entry ( @{[$mesg->entries]} ) {
+# tree build #     $tree = $self->tree_build({ dn => $entry->dn, });
+# tree build #   }
+# tree build #   $return = $tree;
 
-  my $mesg = $ldap_crud->search({ base => $arg->{base},
-				  scope => 'sub',
+  my $req = $ldap_crud->control_sync_req;
+  log_debug { np( $req ) };
+  my $mesg = $ldap_crud->search({ base      => $ldap_crud->{cfg}->{base}->{acc_root},
+				  filter    => "(objectClass=*)",
+				  control   => [ $req ],
+				  callback  => sub { # log_debug {np(@_)};
+				    my $msg  = shift;;
+				    my $obj  = shift;
+				    my @controls = $msg->control;
+				    # log_debug { np( $msg ) };
+				    if ( defined $obj && $obj->isa('Net::LDAP::Entry') ) {
+				      # log_debug { $obj->dn . ' ; ' . np(@controls)};
+				      my $syncstate = undef;
+				      for my $control (@controls) {
+					if ( $control->isa('Net::LDAP::Control::SyncState') ) {
+					  $syncstate = $control;
+				  			   log_debug {np($syncstate)};
+					  last;
+					}
+				      }
+				    }
+				  },
 				  sizelimit => 0,
-				  attrs => [ 'fakeAttr' ],
-				  filter => $arg->{filter}, });
-  my $tree;
-  foreach my $entry ( @{[$mesg->entries]} ) {
-    $tree = $self->tree_build({ dn => $entry->dn, });
-  }
-
+				  attrs     => [ '*' ] });
+  log_debug { np( $mesg ) };
+  $return = $mesg->count;
+  
   $c->stash( template => 'test.tt',
-	     final_message => $tree,
+	     final_message => $return,
 	   );
 }
 

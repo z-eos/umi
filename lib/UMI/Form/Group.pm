@@ -8,10 +8,15 @@ BEGIN { extends 'UMI::Form::LDAP'; with 'Tools'; }
 
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable' );
 
-has '+action' => ( default => '/searchby/proc' );
+has '+action' => ( default => '/group' );
 
 sub build_form_element_class { [ qw(formajaxer) ] }
 
+sub html_attributes {
+  my ( $self, $field, $type, $attr ) = @_;
+  push @{$attr->{class}}, 'required'
+    if ( $type eq 'label' && $field->required );
+}
 has '+item_class' => ( default =>'Group' );
 
 has_field 'cn' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
@@ -60,30 +65,26 @@ has_field 'descr' => ( type => 'TextArea',
 		       element_attr => { placeholder => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed dapibus nulla. Mauris vehicula vehicula ligula ac dapibus. Fusce vehicula a turpis sed. ' },
 		       cols => 30, rows => 2);
 
-has_field 'reset' => ( type => 'Reset',
-		       wrapper_class => [ 'col-xs-1' ],
-		       element_class => [ 'btn', 'btn-danger', 'btn-block' ],
-		       element_wrapper_class => [ 'col-xs-12', ],
-		       value => 'Reset' );
+has_field 'aux_reset' => ( type => 'Reset',
+			   wrapper_class => [ 'col-xs-4' ],
+			   element_class => [ 'btn', 'btn-danger', 'btn-block' ],
+			   element_wrapper_class => [ 'col-xs-12', ],
+			   # value => 'Reset'
+			 );
 
-has_field 'submit' => ( type => 'Submit',
-			wrapper_class => [ 'col-xs-11' ],
-			element_class => [ 'btn', 'btn-success', 'col-xs-12' ],
-			value => 'Submit' );
+has_field 'aux_submit' => ( type => 'Submit',
+			    wrapper_class => [ 'col-xs-8' ],
+			    element_class => [ 'btn', 'btn-success', 'btn-block' ],
+			    value => 'Submit' );
 
-has_block 'submitit' => ( tag => 'fieldset',
-			render_list => [ 'reset', 'submit'],
-			label => '&nbsp;',
-			class => [ 'row' ]
-		      );
+# has_block 'submitit' => ( tag => 'fieldset',
+# 			render_list => [ 'reset', 'submit'],
+# 			label => '&nbsp;',
+# 			class => [ 'row' ]
+# 		      );
 
-sub build_render_list {[ 'cn', 'memberUid', 'descr', 'submitit' ]}
+# sub build_render_list {[ 'cn', 'memberUid', 'descr', 'submitit' ]}
 
-sub html_attributes {
-  my ( $self, $field, $type, $attr ) = @_;
-  push @{$attr->{class}}, 'required'
-    if ( $type eq 'label' && $field->required );
-}
 
 sub validate {
   my $self = shift;

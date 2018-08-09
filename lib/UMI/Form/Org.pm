@@ -4,8 +4,7 @@
 package UMI::Form::Org;
 
 use HTML::FormHandler::Moose;
-BEGIN { extends 'UMI::Form::LDAP';
-	with 'Tools'; }
+BEGIN { extends 'UMI::Form::LDAP'; with 'Tools'; }
 
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable' );
 

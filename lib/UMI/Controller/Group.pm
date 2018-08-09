@@ -9,6 +9,8 @@ BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 
 use Data::Printer;
 
+use Logger;
+
 use UMI::Form::Group;
 
 has 'form' => ( isa => 'UMI::Form::Group', is => 'rw',
@@ -34,28 +36,28 @@ Catalyst Controller.
 =cut
 
 sub index :Path :Args(0) {
-    my ( $self, $c, $ldapadduser_id ) = @_;
+    my ( $self, $c ) = @_;
+    my $params = $c->req->parameters;
     # if ( $c->check_user_roles('wheel')) {
       # use Data::Dumper;
 
-      $c->stash( template => 'group/group_wrap.tt',
-		 form => $self->form );
+    $c->stash( template => 'group/group_wrap.tt',
+	       form => $self->form );
 
-      my $params = $c->req->parameters;
+    log_debug { np( $params ) };
 
-      return unless $self->form->process( item_id => $ldapadduser_id,
-					  posted => ($c->req->method eq 'POST'),
-					  params => $params,
-					  ldap_crud => $c->model('LDAP_CRUD'),
-					);
+    return unless $self->form->process( posted => ($c->req->method eq 'POST'),
+					params => $params,
+					ldap_crud => $c->model('LDAP_CRUD'),
+				      );
 
-      $c->stash( final_message => $self->create_group($c->model('LDAP_CRUD'),
-						      {
-						       cn => $params->{cn},
-						       descr => $params->{descr},
-						       memberUid => $params->{memberUid},
-						      }),
-	       );
+    $c->stash( final_message => $self->create_group($c->model('LDAP_CRUD'),
+						    {
+						     cn => $params->{cn},
+						     descr => $params->{descr},
+						     memberUid => $params->{memberUid},
+						    }),
+	     );
 
     # } elsif ( defined $c->session->{"auth_uid"} ) {
     #   if (defined $c->session->{'unauthorized'}->{ $c->action } ) {
@@ -83,7 +85,7 @@ sub create_group {
 	       memberUid => $args->{memberUid} || undef,
 	      };
 
-    # p $args;
+    log_debug { np( $args ) };
 
     my $memberUid;
     if ( ref($arg->{memberUid}) eq 'ARRAY' ) {

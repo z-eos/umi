@@ -448,6 +448,51 @@ has_field 'account.userCertificate'
 		       },
      );
 
+has_field 'account.sshgid'
+  => ( apply => [ NoSpaces, NotAllDigits, Printable ],
+       label => 'gidNumber',
+       wrapper_class => [  qw{hidden sshacc relation col-xs-12}, ],
+       do_id => 'no',
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
+       element_class => [ 'input-sm', 'mono' ],
+       element_attr => { placeholder => 'default is 11102 (ssh-ci)',
+			 title => 'Group ID of the user.',
+			 'autocomplete' => 'off',
+			 'data-name' => 'sshgid',
+			 'data-group' => 'account', },
+     );
+
+has_field 'account.sshhome'
+  => ( apply => [ NoSpaces, NotAllDigits, Printable ],
+       label => 'homeDir',
+       wrapper_class => [  qw{hidden sshacc relation col-xs-12}, ],
+       do_id => 'no',
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
+       element_class => [ 'input-sm', 'mono' ],
+       element_attr => { placeholder => '/nonexistent',
+			 title => 'Home directory of the user.',
+			 'autocomplete' => 'off',
+			 'data-name' => 'sshhome',
+			 'data-group' => 'account', },
+     );
+
+has_field 'account.sshshell'
+  => ( apply => [ NoSpaces, NotAllDigits, Printable ],
+       label => 'loginShell',
+       wrapper_class => [  qw{hidden sshacc relation col-xs-12}, ],
+       do_id => 'no',
+       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
+       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
+       element_class => [ 'input-sm', 'mono' ],
+       element_attr => { placeholder => '/bin/bash',
+			 title => 'Shell of the user.',
+			 'autocomplete' => 'off',
+			 'data-name' => 'sshshell',
+			 'data-group' => 'account', },
+     );
+
 has_field 'account.sshkey'
   => ( type => 'TextArea',
        label => 'SSH Pub Key',
@@ -1157,9 +1202,13 @@ sub validate {
 	   defined $element->field('associateddomain')->value && $element->field('associateddomain')->value ne '' ) {
 	$mesg =
 	  $ldap_crud->search({
-			      filter => '(&(authorizedService=' .
-			      $element->field('authorizedservice')->value . '@' . $element->field('associateddomain')->value .
-			      ')' . $passwd_acc_filter .')',
+			      filter => sprintf("(&(authorizedService=%s%s%s)%s)",
+						$element->field('authorizedservice')->value,
+						$ldap_crud->cfg->{authorizedService}->{
+										       $element->field('authorizedservice')->value
+										      }->{login_delim} // '@',
+						$element->field('associateddomain')->value,
+						$passwd_acc_filter),
 			      base => $ldap_crud->cfg->{base}->{acc_root},
 			      attrs => [ 'uid' ],
 			     });

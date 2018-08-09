@@ -6,7 +6,7 @@ package LDAP_CRUD;
 use Moose;
 use namespace::autoclean;
 
-use Data::Printer  colored => 0, caller_info => 0;
+use Data::Printer colored => 0, caller_info => 0;
 use Time::Piece;
 
 BEGIN { with 'Tools'; }
@@ -26,7 +26,7 @@ use Net::LDAP::Control;
 use Net::LDAP::Control::Sort;
 use Net::LDAP::Control::SortResult;
 use Net::LDAP::Extension::Refresh;
-use Net::LDAP::Constant qw(LDAP_CONTROL_SORTRESULT);
+use Net::LDAP::Constant qw( LDAP_CONTROL_SORTRESULT );
 use Net::LDAP::Util qw(
 			ldap_error_text
 			ldap_error_name
@@ -157,11 +157,14 @@ sub _build_cfg {
 	  exclude_prefix => 'aux_',
 	  sizelimit => 50,
 	  defaults => { ldap => {
-				 scope  => 'sub',
-				 filter => '(objectClass=*)',
-				 deref  => 'never',
-				 attrs  => [ '*' ],
-				 sizelimit => 150,
+				 scope               => 'sub',
+				 filter              => '(objectClass=*)',
+				 deref               => 'never',
+				 attrs               => [ '*' ],
+				 sizelimit           => 150,
+				 gidNumber_start     => 10000,
+				 uidNumber_start     => 10000,
+				 uidNumber_ssh_start => 20100,
 				},
 			notAvailable => 'NA', },
 	  ui => { debug   => 0,
@@ -377,14 +380,17 @@ sub _build_cfg {
 			  data_relation => 'passw',
 			 },
 	   'ssh-acc' => {
-			 auth => 1,
-			 homeDirectory_prefix => '/home/',
-			 descr => 'SSH',
-			 disabled => 0,
-			 gidNumber => 10022,
-			 icon => 'fa fa-key',
-			 data_fields => 'login,logindescr,password1,password2,sshkey,sshkeyfile',
-			 data_relation => 'sshacc',
+			 auth                 => 1,
+			 login_delim          => '_',
+			 homeDirectory_prefix => '/usr/local/home',
+			 loginShell           => '/usr/bin/false',
+			 descr                => 'SSH',
+			 disabled             => 0,
+			 gidNumber            => 11102,
+			 uidNumberShift       => 10000,
+			 icon                 => 'fa fa-key',
+			 data_fields          => 'login,logindescr,password1,password2,sshkey,sshkeyfile,sshhome,sshshell,sshgid',
+			 data_relation        => 'sshacc',
 			},
 	   'ssh' => {
 		     auth => 0,
@@ -603,19 +609,37 @@ around 'ldap' =>
 
 Method to get last uidNumber for base ou=People,dc=umidb
 
-it uses sub last_seq_val()
-
 =cut
 
 has 'last_uidNumber' => ( is       => 'ro',
-			  isa      => 'Str',
+			  isa      => 'Num',
 			  required => 0, lazy => 1,
 			  builder  => 'build_last_uidNumber', );
 
 sub build_last_uidNumber {
   my $self = shift;
-  return $self->last_seq_val({ base => $self->cfg->{base}->{acc_root},
-			       attr => 'uidNumber', });
+  return $self->last_seq_val({ base  => $self->cfg->{base}->{acc_root},
+			       attr  => 'uidNumber', })
+    // $self->cfg->{defaults}->{ldap}->{uidNumber_start};
+}
+
+=head2 last_uidNumber_ssh
+
+Method to get last uidNumber for SSH accounts
+
+=cut
+
+has 'last_uidNumber_ssh' => ( is       => 'ro',
+			      isa      => 'Num',
+			      required => 0, lazy => 1,
+			      builder  => 'build_last_uidNumber_ssh', );
+
+sub build_last_uidNumber_ssh {
+  my $self = shift;
+  return $self->last_seq_val({ base   => $self->cfg->{base}->{acc_root},
+			       filter => '(&(authorizedService=ssh-acc@*)(uidNumber=*))',
+			       attr   => 'uidNumber', })
+    // $self->cfg->{defaults}->{ldap}->{uidNumber_ssh_start};
 }
 
 =head2 last_gidNumber
@@ -627,14 +651,15 @@ it uses sub last_seq_val()
 =cut
 
 has 'last_gidNumber' => ( is       => 'ro',
-			  isa      => 'Str',
+			  isa      => 'Num',
 			  required => 0, lazy => 1,
 			  builder  => 'build_last_gidNumber', );
 
 sub build_last_gidNumber {
   my $self = shift;
-  return $self->last_seq_val({ base => $self->cfg->{base}->{acc_root},
-			       attr => 'gidNumber', });
+  return $self->last_seq_val({ base  => $self->cfg->{base}->{acc_root},
+			       attr  => 'gidNumber', })
+    // $self->cfg->{defaults}->{ldap}->{gidNumber_start};
 }
 
 
@@ -646,10 +671,11 @@ like for uidNumber or gidNumber
 
 on input it expects hash
 
-    base => base to search in (mandatory)
-    attr => attribute name to search for the latest seq number for (mandatory)
-    scope => scope (optional, default is `one')
-    deref => deref (optional, default is `never')
+    base   => base to search in (mandatory)
+    attr   => attribute name to search for the latest seq number for (mandatory)
+    filter => filter (optional, default is `(ATTRIBUTE=*)')
+    scope  => scope (optional, default is `one')
+    deref  => deref (optional, default is `never')
 
 return value in success is the last number in sequence of the attribute values
 
@@ -659,28 +685,33 @@ return value in error is message from method err()
 
 sub last_seq_val {
   my ($self, $args) = @_;
-  my $arg = { base  => $args->{base},
-	      attr  => $args->{attr},
-	      scope => $args->{scope} || 'one',
-	      deref => $args->{deref} || 'never', };
+  my $arg = { base   => $args->{base},
+	      attrs  => $args->{attr},
+	      filter => $args->{filter} || sprintf("(%s=*)", $args->{attr}),
+	      scope  => $args->{scope}  || 'one',
+	      deref  => $args->{deref}  || 'never', };
 
   my $callername = (caller(1))[3];
   $callername = 'main' if ! defined $callername;
-  my $return = 'call to LDAP_CRUD->last_gidNumber from ' . $callername . ': ';
+  my $return = 'call to LDAP_CRUD->last_seq_val from ' . $callername . ': ';
 
   $self->reset_ldap;
   my $mesg =
     $self->ldap->search( base   => $arg->{base},
 			 scope  => $arg->{scope},
-			 filter => '(' . $arg->{attr} . '=*)',
+			 filter => $arg->{filter},
 			 attrs  => [ $arg->{attr} ],
 			 deref => $arg->{deref}, );
 
   if ( $mesg->code ) {
     $return .= $self->err( $mesg );
   } else {
-    my @arr = $mesg->sorted ( $arg->{attr} );
-    $return = $arr[$#arr]->get_value( $arg->{attr} );
+    if ( $mesg->count ) {
+      my @arr = $mesg->sorted ( $arg->{attr} );
+      $return = $arr[$#arr]->get_value( $arg->{attr} );
+    } else {
+      return undef;
+    }
   }
   return $return;
 }
@@ -799,6 +830,7 @@ sub schema {
   return $schema;
 }
 
+
 =head2 search
 
 Net::LDAP->search wrapper which expects hash on input
@@ -821,8 +853,9 @@ should be processed with $self->err()
 sub search {
   my ($self, $args) = @_;
 
-  if ( defined $args->{dn} &&
-       $args->{dn} ne '' ) {
+  # log_debug { np($args) };
+
+  if ( defined $args->{dn} && $args->{dn} ne '' ) {
     my @args_arr = split(/,/, $args->{dn});
     $args->{filter} = shift @args_arr;
     $args->{base} = join(',', @args_arr);
@@ -830,21 +863,18 @@ sub search {
   }
 
   my $arg = {
-  	     base   => $args->{base},
-  	     scope  => $args->{scope}  || $self->{cfg}->{defaults}->{ldap}->{scope},
-  	     filter => $args->{filter} || $self->{cfg}->{defaults}->{ldap}->{filter},
-  	     deref  => $args->{deref}  || $self->{cfg}->{defaults}->{ldap}->{deref},
-  	     attrs  => $args->{attrs}  || $self->{cfg}->{defaults}->{ldap}->{attrs},
-  	     sizelimit => defined $args->{sizelimit} ? $args->{sizelimit} : $self->{cfg}->{defaults}->{ldap}->{sizelimit},
+  	     base      => $args->{base},
+  	     scope     => $args->{scope}     // $self->{cfg}->{defaults}->{ldap}->{scope},
+  	     filter    => $args->{filter}    // $self->{cfg}->{defaults}->{ldap}->{filter},
+  	     deref     => $args->{deref}     // $self->{cfg}->{defaults}->{ldap}->{deref},
+  	     attrs     => $args->{attrs}     // $self->{cfg}->{defaults}->{ldap}->{attrs},
+  	     sizelimit => $args->{sizelimit} // $self->{cfg}->{defaults}->{ldap}->{sizelimit},
   	    };
 
-  my $mesg = $self->ldap->search( base => $arg->{base},
-			      scope => $arg->{scope},
-			      filter => $arg->{filter},
-			      deref => $arg->{deref},
-			      attrs => $arg->{attrs},
-			      sizelimit => $arg->{sizelimit},
-			    );
+  $arg->{callback} = $args->{callback} if exists $args->{callback};
+  $arg->{control}  = [ $self->control_sync_req ]  if exists $args->{control};
+
+  my $mesg = $self->ldap->search( %{$arg} );
 
   # log_debug { np($arg) };
 
@@ -3029,49 +3059,53 @@ returns reference to hash of arrays
 
 sub create_account_branch_leaf {
   my  ( $self, $args ) = @_;
-  # log_debug { np( $args )};
+  log_debug { np( $args )};
   my $arg =
-    { basedn => $args->{basedn},
-      service => $args->{authorizedservice},
-      associatedDomain =>
-      sprintf('%s%s',
-	      defined $self->cfg->{authorizedService}->{$args->{authorizedservice}}
-	      ->{associateddomain_prefix}->{$args->{associateddomain}} ?
-	      $self->cfg->{authorizedService}->{$args->{authorizedservice}}
-	      ->{associateddomain_prefix}->{$args->{associateddomain}} : '',
-	      $args->{associateddomain}),
-      uidNumber        => $args->{uidNumber},
-      givenName        => $args->{givenName},
-      sn               => $args->{sn},
-      login            => $args->{login},
-      password         => $args->{password},
-      gecos            => $self->utf2lat( sprintf('%s %s', $args->{givenName}, $args->{sn}) ),
-      telephoneNumber  => $args->{telephoneNumber} || '666',
-      jpegPhoto        => $args->{jpegPhoto} || undef,
+    {
+      basedn                 => $args->{basedn},
+      service                => $args->{authorizedservice},
+      associatedDomain       => sprintf('%s%s',
+					$self->cfg->{authorizedService}->{$args->{authorizedservice}}
+					->{associateddomain_prefix}->{$args->{associateddomain}} // '',
+					$args->{associateddomain}),
+      uidNumber              => $args->{uidNumber},
+      givenName              => $args->{givenName},
+      sn                     => $args->{sn},
+      login                  => $args->{login},
+      password               => $args->{password},
+      gecos                  => $self->utf2lat( sprintf('%s %s', $args->{givenName}, $args->{sn}) ),
 
-      to_sshkeygen     => $args->{to_sshkeygen} || undef,
-      sshpublickey     => $args->{sshpublickey} || undef,
-      sshpublickeyfile => $args->{sshpublickeyfile} || undef,
-      sshkeydescr      => $args->{sshkeydescr} || undef,
-      sshkey           => $args->{sshkey} || undef,
-      sshkeyfile       => $args->{sshkeyfile} || undef,
+      telephoneNumber        => $args->{telephoneNumber}        || '666',
+      jpegPhoto              => $args->{jpegPhoto}              || undef,
+
+      to_sshkeygen           => $args->{to_sshkeygen}           || undef,
+      sshpublickey           => $args->{sshpublickey}           || undef,
+      sshpublickeyfile       => $args->{sshpublickeyfile}       || undef,
+      sshkeydescr            => $args->{sshkeydescr}            || undef,
+      sshkey                 => $args->{sshkey}                 || undef,
+      sshkeyfile             => $args->{sshkeyfile}             || undef,
+      sshgid                 => $args->{sshgid}                 || undef,
+      sshhome                => $args->{sshhome}                || undef,
+      sshshell               => $args->{sshshell}               || undef,
+
       # !!! here we much need check for cert existance !!!
-      userCertificate        => $args->{userCertificate} || '',
+      userCertificate        => $args->{userCertificate}        || '',
       umiOvpnCfgIfconfigPush => $args->{umiOvpnCfgIfconfigPush} || 'NA',
-      umiOvpnCfgIroute       => $args->{umiOvpnCfgIroute} || 'NA',
-      umiOvpnCfgPush         => $args->{umiOvpnCfgPush} || 'NA',
-      umiOvpnCfgConfig       => $args->{umiOvpnCfgConfig} || '',
-      umiOvpnAddStatus       => $args->{umiOvpnAddStatus} || 'blocked',
-      umiOvpnAddDevType      => $args->{umiOvpnAddDevType} || 'NA',
-      umiOvpnAddDevMake      => $args->{umiOvpnAddDevMake} || 'NA',
-      umiOvpnAddDevModel     => $args->{umiOvpnAddDevModel} || 'NA',
-      umiOvpnAddDevOS        => $args->{umiOvpnAddDevOS} || 'NA',
-      umiOvpnAddDevOSVer     => $args->{umiOvpnAddDevOSVer} || 'NA',
+      umiOvpnCfgIroute       => $args->{umiOvpnCfgIroute}       || 'NA',
+      umiOvpnCfgPush         => $args->{umiOvpnCfgPush}         || 'NA',
+      umiOvpnCfgConfig       => $args->{umiOvpnCfgConfig}       || '',
+      umiOvpnAddStatus       => $args->{umiOvpnAddStatus}       || 'blocked',
+      umiOvpnAddDevType      => $args->{umiOvpnAddDevType}      || 'NA',
+      umiOvpnAddDevMake      => $args->{umiOvpnAddDevMake}      || 'NA',
+      umiOvpnAddDevModel     => $args->{umiOvpnAddDevModel}     || 'NA',
+      umiOvpnAddDevOS        => $args->{umiOvpnAddDevOS}        || 'NA',
+      umiOvpnAddDevOSVer     => $args->{umiOvpnAddDevOSVer}     || 'NA',
 
-      radiusgroupname => $args->{radiusgroupname} || '',
-      radiusprofiledn => $args->{radiusprofiledn} || '',
+      radiusgroupname        => $args->{radiusgroupname}        || '',
+      radiusprofiledn        => $args->{radiusprofiledn}        || '',
 
-      objectclass => $args->{objectclass}, };
+      objectclass            => $args->{objectclass},
+    };
 
   my $t = localtime;
   $arg->{requestttl} = defined $args->{requestttl} &&
@@ -3081,16 +3115,11 @@ sub create_account_branch_leaf {
 
   $arg->{prefixed_uid} =
     sprintf('%s%s',
-	    defined $self->cfg->{authorizedService}->{$arg->{service}}->{login_prefix} ?
-	    $self->cfg->{authorizedService}->{$arg->{service}}->{login_prefix} : '',
+	    $self->cfg->{authorizedService}->{$arg->{service}}->{login_prefix} // '',
 	    $arg->{login});
   
-  $arg->{uid} = sprintf('%s@%s',
-			$arg->{prefixed_uid},
-			$arg->{associatedDomain});
-  $arg->{dn} = sprintf('uid=%s,%s',
-		       $arg->{uid},
-		       $arg->{basedn});
+  $arg->{uid} = sprintf('%s_%s', $arg->{prefixed_uid}, $arg->{associatedDomain});
+  $arg->{dn} = sprintf('uid=%s,%s', $arg->{uid}, $arg->{basedn});
 
   # log_debug { np($arg) };
   
@@ -3111,8 +3140,8 @@ sub create_account_branch_leaf {
 			  cn => $arg->{uid},
 			  givenName => $arg->{givenName},
 			  sn => $arg->{sn},
-			  uidNumber => $arg->{uidNumber},
-			  loginShell => $self->cfg->{stub}->{loginShell},
+# moved to each svc	  uidNumber => $arg->{uidNumber},
+# moved to ssh-acc        loginShell => $self->cfg->{stub}->{loginShell},
 			  gecos => $self->utf2lat( sprintf('%s %s', $args->{givenName}, $args->{sn}) ),
 			 ];
   }
@@ -3127,6 +3156,7 @@ sub create_account_branch_leaf {
       $arg->{associatedDomain} . '/' . $arg->{uid},
       'mu-mailBox' => 'maildir:/var/mail/' . $arg->{associatedDomain} . '/' . $arg->{uid},
       gidNumber => $self->cfg->{authorizedService}->{$arg->{service}}->{gidNumber},
+      uidNumber => $arg->{uidNumber},
       userPassword => $arg->{password}->{$arg->{service}}->{'ssha'},
       objectClass => [ @{$self->cfg->{objectClass}->{acc_svc_email}} ];
     
@@ -3141,6 +3171,7 @@ sub create_account_branch_leaf {
     push @{$authorizedService},
       homeDirectory => $self->cfg->{stub}->{homeDirectory},
       gidNumber => $self->cfg->{authorizedService}->{$arg->{service}}->{gidNumber},
+      uidNumber => $arg->{uidNumber},
       userPassword => $arg->{password}->{$arg->{service}}->{'ssha'},
       telephonenumber => $arg->{telephoneNumber},
       jpegPhoto => [ $self->file2var( $jpegPhoto_file, $return) ];
@@ -3205,10 +3236,17 @@ sub create_account_branch_leaf {
     push @{$sshPublicKey}, $arg->{sshkey}
       if defined $arg->{sshkey} && $arg->{sshkey} ne '';
     push @{$authorizedService}, sshPublicKey => [ @$sshPublicKey ],
-      gidNumber => $self->cfg->{authorizedService}->{$arg->{service}}->{gidNumber},
-      userPassword => $arg->{password}->{$arg->{service}}->{'ssha'},
-      homeDirectory => $self->cfg->{authorizedService}->{$arg->{service}}->{homeDirectory_prefix} . '/' . $arg->{uid};
-
+      gidNumber     => $arg->{sshgid}   // $self->cfg->{authorizedService}->{$arg->{service}}->{gidNumber},
+#      uidNumber => $arg->{uidNumber} + $self->cfg->{authorizedService}->{$arg->{service}}->{uidNumberShift},
+      uidNumber => $self->last_uidNumber_ssh,
+      userPassword  => $arg->{password}->{$arg->{service}}->{'ssha'},
+      loginShell    => $arg->{sshshell} // $self->cfg->{authorizedService}->{$arg->{service}}->{loginShell},
+      homeDirectory => $arg->{sshhome}  // sprintf("%s/%s",
+						   $self->cfg->{authorizedService}->{$arg->{service}}->{homeDirectory_prefix},
+						   $arg->{uid});
+    # ,
+    #   homeDirectory => $self->cfg->{authorizedService}->{$arg->{service}}->{homeDirectory_prefix} . '/' . $arg->{uid};
+    # log_debug { np( $arg ) };
   #=== SERVICE: ssh ==================================================
   } elsif ( $arg->{service} eq 'ssh' ) {
     $sshPublicKey = $self->file2var( $arg->{sshpublickeyfile}->{tempname}, $return, 1)

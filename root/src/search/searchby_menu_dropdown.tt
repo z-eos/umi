@@ -89,7 +89,7 @@
 	  delete
 	</button>
       </li>
-      [%   IF ! entry.value.mgmnt.is_root %]
+      [%   IF ! entry.value.mgmnt.is_root && entry.key.match(',authorizedService=') %]
       <li>
 	<form role="form" method="POST" 
 	      action="/searchby/proc">
@@ -99,7 +99,7 @@
 		  data-order="[% site.searchby.menu.order.chg_acc %]"
 		  data-toggle="modal"
 		  data-target="#modal_reassign[% id_suffix %]">
-	    <span class="fa fa-fw fa-recycle text-danger"></span>
+	    <span class="fa fa-fw fa-retweet text-danger"></span>
 	    reassign
 	  </button>
 	</form>
@@ -213,7 +213,7 @@
 		  value="[% entry.key %]"
 		  data-order="[% site.searchby.menu.order.ldap_modify_memberUid %]"
 		  name="ldap_modify_memberUid">
-	    <span class="fa fa-fw fa-group text-info"></span>
+	    <span class="fa fa-fw fa-users text-info"></span>
 	    members
 	  </button>
 	</form>
