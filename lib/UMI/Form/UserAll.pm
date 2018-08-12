@@ -549,111 +549,6 @@ has_block 'auth'
 #== SERVICES WITHOUT LOGIN ===========================================
 ######################################################################
 
-#=== SSH =============================================================
-
-has_field 'aux_add_loginless_ssh'
-  => ( type => 'AddElement',
-       repeatable => 'loginless_ssh',
-       value => 'Add new SSH Key',
-       element_class => [ 'btn-success', ],
-       wrapper_class => [ qw{col-lg-4 col-md-4}, ],
-     );
-
-has_field 'loginless_ssh'
-  => ( type => 'Repeatable',
-       setup_for_js => 1,
-       do_wrapper => 1,
-       element_class => [ 'btn-success', ],
-       element_wrapper_class => [ 'controls', ],
-       wrapper_attr => { class => 'no-has-error' },
-       # wrap_repeatable_element_method => \&wrap_loginless_ssh_elements,
-       #tags => { controls_div => 1 },
-       # init_contains => { wrapper_attr => { class => ['hfh', 'repinst'] } },
-     );
-
-# sub wrap_loginless_ssh_elements {
-#   my ( $self, $input, $subfield ) = @_;
-#   my $output = sprintf('%s%s%s', ! $subfield ? qq{\n<div class="duplicate">} : qq{\n<div class="duplicated">},
-# 		       $input,
-# 		       qq{</div>});
-# }
-
-has_field 'loginless_ssh.associateddomain'
-  => ( type => 'Select',
-       label => 'Domain Name',
-       label_class => [ 'col-xs-2', 'required', ],
-       empty_select => '--- Choose Domain ---',
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', ],
-       options_method => \&associateddomains,
-       element_attr => {
-			'data-name' => 'associateddomain',
-			'data-group' => 'loginless_ssh',
-		       },
-       wrapper_class => [ qw{col-xs-12}, ],
-     );
-
-has_field 'loginless_ssh.key'
-  => ( type => 'TextArea',
-       label => 'SSH Pub Key',
-       label_class => [ 'col-xs-2', 'required', ],
-       wrapper_attr => { id => 'sshpubkey', },
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', 'mono', ],
-       element_attr => { placeholder => 'Paste SSH key',
-			 'data-name' => 'key',
-			 'data-group' => 'loginless_ssh', },
-       cols => 30, rows => 4,
-       wrapper_class => [ qw{col-xs-12}, ],
-     );
-
-
-has_field 'loginless_ssh.keyfile'
-  => ( type => 'Upload',
-       label => 'SSH Pub Key/s File',
-       label_class => [ 'col-xs-2', 'required', ],
-       wrapper_attr => { id => 'sshpubkeyfile', },
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'btn', 'btn-default', 'btn-sm',],
-       element_attr => {
-			'data-name' => 'key',
-			'data-group' => 'loginless_ssh',
-			# 'onchange' => 'global.triggerTextarea(this)',
-		       },
-       wrapper_class => [ qw{col-xs-12}, ],
-     );
-
-# has_field 'loginless_ssh.description'
-#   => ( type => 'TextArea',
-#        label => 'Description',
-#        label_class => [ 'col-xs-2', ],
-#        element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-#        element_class => [ 'input-sm', ],
-#        element_attr => { placeholder => 'Any description.',
-# 			 'autocomplete' => 'off',
-# 			 'data-group' => 'ssh', },
-#        cols => 30, rows => 1,
-#        wrapper_class => [ qw{col-xs-12}, ],
-#      );
-
-has_field 'loginless_ssh.remove'
-  => ( type => 'RmElement',
-       value => 'Remove this (above fields) account',
-       element_class => [ qw{btn-danger}, ],
-       element_wrapper_class => [ qw{col-xs-offset-2 col-xs-10 col-lg-5 col-md-5}, ],
-       wrapper_class => [ qw{well}, ],
-     );
-
-has_block 'ssh'
-  => ( tag => 'fieldset',
-       label => 'SSH Key&nbsp;<small class="text-muted"><em>( both, key and keyfile are added if provided )</em></small>',
-       render_list => [ 'aux_add_loginless_ssh', 'loginless_ssh', ],
-       class => [ 'tab-pane', 'fade', ],
-       attr => { id => 'ssh',
-		 'aria-labelledby' => "ssh-tab",
-		 role => "tabpanel", },
-     );
-
 #=== OpenVPN =========================================================
 
 has_field 'aux_add_loginless_ovpn'
@@ -1246,113 +1141,110 @@ sub validate {
       $i++;
     }
   
+# to rewrite due to loginless_ssh removal #     #---[ ssh + ]------------------------------------------------
+# to rewrite due to loginless_ssh removal #     my $sshpubkeyuniq;
+# to rewrite due to loginless_ssh removal #     $i = 0;
+# to rewrite due to loginless_ssh removal #     foreach $element ( $self->field('loginless_ssh')->fields ) {
+# to rewrite due to loginless_ssh removal #       if ( defined $element->field('associateddomain')->value &&
+# to rewrite due to loginless_ssh removal # 	   ! defined $element->field('key')->value &&
+# to rewrite due to loginless_ssh removal # 	   ! defined $element->field('keyfile')->value ) { # fqdn but no key
+# to rewrite due to loginless_ssh removal # 	$element->field('key')->add_error('Either Key, KeyFile or both field/s have to be defined!');
+# to rewrite due to loginless_ssh removal # 	$element->field('keyfile')->add_error('Either KeyFile, Key or both field/s have to be defined!');
+# to rewrite due to loginless_ssh removal #       } elsif ( ( defined $element->field('key')->value ||
+# to rewrite due to loginless_ssh removal # 		  defined $element->field('keyfile')->value ) &&
+# to rewrite due to loginless_ssh removal # 		! defined $element->field('associateddomain')->value ) { # key but no fqdn
+# to rewrite due to loginless_ssh removal # 	$element->field('associateddomain')->add_error('Domain field have to be defined!');
+# to rewrite due to loginless_ssh removal #       } elsif ( ! defined $element->field('key')->value &&
+# to rewrite due to loginless_ssh removal # 		! defined $element->field('keyfile')->value &&
+# to rewrite due to loginless_ssh removal # 		! defined $element->field('associateddomain')->value &&
+# to rewrite due to loginless_ssh removal # 		$i > 0 ) {	# empty duplicatee
+# to rewrite due to loginless_ssh removal # 	$self->add_form_error('<span class="fa-stack fa-fw">' .
+# to rewrite due to loginless_ssh removal # 			      '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
+# to rewrite due to loginless_ssh removal # 			      '<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
+# to rewrite due to loginless_ssh removal # 			      '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
+# to rewrite due to loginless_ssh removal # 			      '<b> <i class="fa fa-arrow-right"></i> SSH:</b> Empty duplicatee! Fill it or remove, please');
+# to rewrite due to loginless_ssh removal #       }
+# to rewrite due to loginless_ssh removal # 
+# to rewrite due to loginless_ssh removal #       # prepare to know if fqdn+key+keyfile is uniq?
+# to rewrite due to loginless_ssh removal #       $sshpubkeyuniq->{associateddomain} = $element->field('associateddomain')->value // '';
+# to rewrite due to loginless_ssh removal #       $sshpubkeyuniq->{key} =              $element->field('key')->value // '';
+# to rewrite due to loginless_ssh removal #       $sshpubkeyuniq->{keyfile} =          $element->field('keyfile')->value->{filename} // '';
+# to rewrite due to loginless_ssh removal #       $sshpubkeyuniq->{hash} = sprintf('%s%s%s',
+# to rewrite due to loginless_ssh removal # 				       $sshpubkeyuniq->{associateddomain},
+# to rewrite due to loginless_ssh removal # 				       $sshpubkeyuniq->{key},,
+# to rewrite due to loginless_ssh removal # 				       $sshpubkeyuniq->{keyfile});
+# to rewrite due to loginless_ssh removal #       $elementcmp->{$sshpubkeyuniq->{hash}} = ! $i ? 1 : $elementcmp->{$sshpubkeyuniq->{hash}}++;
+# to rewrite due to loginless_ssh removal # 
+# to rewrite due to loginless_ssh removal #       # validate keyfile if provided
+# to rewrite due to loginless_ssh removal #       my $sshpubkey_hash = {};
+# to rewrite due to loginless_ssh removal #       my ( $sshpubkey, $key_file, $key_file_msg );
+# to rewrite due to loginless_ssh removal #       if ( defined $element->field('keyfile')->value &&
+# to rewrite due to loginless_ssh removal # 	   ref($element->field('keyfile')->value) eq 'Catalyst::Request::Upload' ) {
+# to rewrite due to loginless_ssh removal # 	$key_file = $self->file2var( $element->field('keyfile')->value->{tempname}, $key_file_msg, 1);
+# to rewrite due to loginless_ssh removal # 	$element->field('keyfile')->add_error($key_file_msg->{error})
+# to rewrite due to loginless_ssh removal # 	  if defined $key_file_msg->{error};
+# to rewrite due to loginless_ssh removal # 	foreach (@{$key_file}) {
+# to rewrite due to loginless_ssh removal # 	  my $abc = $_;
+# to rewrite due to loginless_ssh removal # 	  if ( ! $self->sshpubkey_parse(\$abc, $sshpubkey_hash) ) {
+# to rewrite due to loginless_ssh removal # 	    $self->add_form_error('<span class="fa-stack fa-fw">' .
+# to rewrite due to loginless_ssh removal # 				  '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
+# to rewrite due to loginless_ssh removal # 				  '<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
+# to rewrite due to loginless_ssh removal # 				  '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
+# to rewrite due to loginless_ssh removal # 				  '<b> <i class="fa fa-arrow-right"></i> SSH:</b> ' . $sshpubkey_hash->{error});
+# to rewrite due to loginless_ssh removal # 	  }
+# to rewrite due to loginless_ssh removal # 	  $sshpubkey_hash = {};
+# to rewrite due to loginless_ssh removal # 	}
+# to rewrite due to loginless_ssh removal #       }
+# to rewrite due to loginless_ssh removal #       
+# to rewrite due to loginless_ssh removal #       $sshpubkey = defined $element->field('key')->value ? $element->field('key')->value : undef;
+# to rewrite due to loginless_ssh removal #       if( defined $sshpubkey && ! $self->sshpubkey_parse(\$sshpubkey, $sshpubkey_hash) ) {
+# to rewrite due to loginless_ssh removal # 	$self->add_form_error('<span class="fa-stack fa-fw">' .
+# to rewrite due to loginless_ssh removal # 			      '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
+# to rewrite due to loginless_ssh removal # 			      '<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
+# to rewrite due to loginless_ssh removal # 			      '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
+# to rewrite due to loginless_ssh removal # 			      '<b> <i class="fa fa-arrow-right"></i> SSH:</b> ' . $sshpubkey_hash->{error});
+# to rewrite due to loginless_ssh removal #       }
+# to rewrite due to loginless_ssh removal #       $i++;
+# to rewrite due to loginless_ssh removal #     }
+# to rewrite due to loginless_ssh removal # 
+# to rewrite due to loginless_ssh removal #     foreach $element ( $self->field('loginless_ssh')->fields ) {
+# to rewrite due to loginless_ssh removal #       $sshpubkeyuniq->{associateddomain} = defined $element->field('associateddomain')->value ?
+# to rewrite due to loginless_ssh removal # 	$element->field('associateddomain')->value : '';
+# to rewrite due to loginless_ssh removal #       $sshpubkeyuniq->{key} = defined $element->field('key')->value ?
+# to rewrite due to loginless_ssh removal # 	$element->field('key')->value : '';
+# to rewrite due to loginless_ssh removal #       $sshpubkeyuniq->{keyfile} = defined $element->field('keyfile')->value ?
+# to rewrite due to loginless_ssh removal # 	$element->field('keyfile')->value->{filename} : '';
+# to rewrite due to loginless_ssh removal #       $sshpubkeyuniq->{hash} = sprintf('%s%s%s',
+# to rewrite due to loginless_ssh removal # 				       $sshpubkeyuniq->{associateddomain},
+# to rewrite due to loginless_ssh removal # 				       $sshpubkeyuniq->{key},,
+# to rewrite due to loginless_ssh removal # 				       $sshpubkeyuniq->{keyfile});
+# to rewrite due to loginless_ssh removal #       $element->field('key')->add_error('The same key is defined more than once for the same FQDN')
+# to rewrite due to loginless_ssh removal # 	if $elementcmp->{$sshpubkeyuniq->{hash}} > 1 &&
+# to rewrite due to loginless_ssh removal # 	$sshpubkeyuniq->{keyfile} eq '' &&
+# to rewrite due to loginless_ssh removal # 	$sshpubkeyuniq->{key} ne '';
+# to rewrite due to loginless_ssh removal #       $element->field('keyfile')->add_error('The same keyfile is defined more than once for the same FQDN')
+# to rewrite due to loginless_ssh removal # 	if $elementcmp->{$sshpubkeyuniq->{hash}} > 1 &&
+# to rewrite due to loginless_ssh removal # 	$sshpubkeyuniq->{key} eq '' &&
+# to rewrite due to loginless_ssh removal # 	$sshpubkeyuniq->{keyfile} ne '';
+# to rewrite due to loginless_ssh removal #       $element->field('key')->add_error('The same key and keyfile are defined more than once for the same FQDN')
+# to rewrite due to loginless_ssh removal # 	if $elementcmp->{$sshpubkeyuniq->{hash}} > 1 &&
+# to rewrite due to loginless_ssh removal # 	$sshpubkeyuniq->{keyfile} ne '' &&
+# to rewrite due to loginless_ssh removal # 	$sshpubkeyuniq->{key} ne '';
+# to rewrite due to loginless_ssh removal #     }
+# to rewrite due to loginless_ssh removal # 
+# to rewrite due to loginless_ssh removal #     $self->add_form_error('<span class="fa-stack fa-fw">' .
+# to rewrite due to loginless_ssh removal # 			  '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
+# to rewrite due to loginless_ssh removal # 			  '<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
+# to rewrite due to loginless_ssh removal # 			  '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
+# to rewrite due to loginless_ssh removal # 			  '<b> <i class="fa fa-arrow-right"></i> SSH:</b> Has error/s! Correct or remove, please')
+# to rewrite due to loginless_ssh removal #       if $self->field('loginless_ssh')->has_error_fields;
+# to rewrite due to loginless_ssh removal #   
+# to rewrite due to loginless_ssh removal #     #---[ ssh - ]------------------------------------------------
+
     #----------------------------------------------------------
     #== VALIDATION password less ------------------------------
     #----------------------------------------------------------
   
-    #---[ ssh + ]------------------------------------------------
-    my $sshpubkeyuniq;
-    $i = 0;
-    foreach $element ( $self->field('loginless_ssh')->fields ) {
-      if ( defined $element->field('associateddomain')->value &&
-	   ! defined $element->field('key')->value &&
-	   ! defined $element->field('keyfile')->value ) { # fqdn but no key
-	$element->field('key')->add_error('Either Key, KeyFile or both field/s have to be defined!');
-	$element->field('keyfile')->add_error('Either KeyFile, Key or both field/s have to be defined!');
-      } elsif ( ( defined $element->field('key')->value ||
-		  defined $element->field('keyfile')->value ) &&
-		! defined $element->field('associateddomain')->value ) { # key but no fqdn
-	$element->field('associateddomain')->add_error('Domain field have to be defined!');
-      } elsif ( ! defined $element->field('key')->value &&
-		! defined $element->field('keyfile')->value &&
-		! defined $element->field('associateddomain')->value &&
-		$i > 0 ) {	# empty duplicatee
-	$self->add_form_error('<span class="fa-stack fa-fw">' .
-			      '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
-			      '<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
-			      '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
-			      '<b> <i class="fa fa-arrow-right"></i> SSH:</b> Empty duplicatee! Fill it or remove, please');
-      }
-
-      # prepare to know if fqdn+key+keyfile is uniq?
-      $sshpubkeyuniq->{associateddomain} = defined $element->field('associateddomain')->value ?
-	$element->field('associateddomain')->value : '';
-      $sshpubkeyuniq->{key} = defined $element->field('key')->value ?
-	$element->field('key')->value : '';
-      $sshpubkeyuniq->{keyfile} = defined $element->field('keyfile')->value ?
-	$element->field('keyfile')->value->{filename} : '';
-      $sshpubkeyuniq->{hash} = sprintf('%s%s%s',
-				       $sshpubkeyuniq->{associateddomain},
-				       $sshpubkeyuniq->{key},,
-				       $sshpubkeyuniq->{keyfile});
-      $elementcmp->{$sshpubkeyuniq->{hash}} = ! $i ? 1 : $elementcmp->{$sshpubkeyuniq->{hash}}++;
-
-      # validate keyfile if provided
-      my $sshpubkey_hash = {};
-      my ( $sshpubkey, $key_file, $key_file_msg );
-      if ( defined $element->field('keyfile')->value &&
-	   ref($element->field('keyfile')->value) eq 'Catalyst::Request::Upload' ) {
-	$key_file = $self->file2var( $element->field('keyfile')->value->{tempname}, $key_file_msg, 1);
-	$element->field('keyfile')->add_error($key_file_msg->{error})
-	  if defined $key_file_msg->{error};
-	foreach (@{$key_file}) {
-	  my $abc = $_;
-	  if ( ! $self->sshpubkey_parse(\$abc, $sshpubkey_hash) ) {
-	    $self->add_form_error('<span class="fa-stack fa-fw">' .
-				  '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
-				  '<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
-				  '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
-				  '<b> <i class="fa fa-arrow-right"></i> SSH:</b> ' . $sshpubkey_hash->{error});
-	  }
-	  $sshpubkey_hash = {};
-	}
-      }
-      
-      $sshpubkey = defined $element->field('key')->value ? $element->field('key')->value : undef;
-      if( defined $sshpubkey && ! $self->sshpubkey_parse(\$sshpubkey, $sshpubkey_hash) ) {
-	$self->add_form_error('<span class="fa-stack fa-fw">' .
-			      '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
-			      '<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
-			      '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
-			      '<b> <i class="fa fa-arrow-right"></i> SSH:</b> ' . $sshpubkey_hash->{error});
-      }
-      $i++;
-    }
-
-    foreach $element ( $self->field('loginless_ssh')->fields ) {
-      $sshpubkeyuniq->{associateddomain} = defined $element->field('associateddomain')->value ?
-	$element->field('associateddomain')->value : '';
-      $sshpubkeyuniq->{key} = defined $element->field('key')->value ?
-	$element->field('key')->value : '';
-      $sshpubkeyuniq->{keyfile} = defined $element->field('keyfile')->value ?
-	$element->field('keyfile')->value->{filename} : '';
-      $sshpubkeyuniq->{hash} = sprintf('%s%s%s',
-				       $sshpubkeyuniq->{associateddomain},
-				       $sshpubkeyuniq->{key},,
-				       $sshpubkeyuniq->{keyfile});
-      $element->field('key')->add_error('The same key is defined more than once for the same FQDN')
-	if $elementcmp->{$sshpubkeyuniq->{hash}} > 1 &&
-	$sshpubkeyuniq->{keyfile} eq '' &&
-	$sshpubkeyuniq->{key} ne '';
-      $element->field('keyfile')->add_error('The same keyfile is defined more than once for the same FQDN')
-	if $elementcmp->{$sshpubkeyuniq->{hash}} > 1 &&
-	$sshpubkeyuniq->{key} eq '' &&
-	$sshpubkeyuniq->{keyfile} ne '';
-      $element->field('key')->add_error('The same key and keyfile are defined more than once for the same FQDN')
-	if $elementcmp->{$sshpubkeyuniq->{hash}} > 1 &&
-	$sshpubkeyuniq->{keyfile} ne '' &&
-	$sshpubkeyuniq->{key} ne '';
-    }
-
-    $self->add_form_error('<span class="fa-stack fa-fw">' .
-			  '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
-			  '<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
-			  '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
-			  '<b> <i class="fa fa-arrow-right"></i> SSH:</b> Has error/s! Correct or remove, please')
-      if $self->field('loginless_ssh')->has_error_fields;
-  
-    #---[ ssh - ]------------------------------------------------
-
     #---[ OpenVPN + ]--------------------------------------------
     my $ovpn_tmp;
     $i = 0;
@@ -1406,15 +1298,6 @@ sub validate {
 				'<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
 				'<b> <i class="fa fa-arrow-right"></i> OpenVPN:</b> Problems with certificate file<br>' . $is_x509->{error})
 	    if defined $is_x509->{error};
-# due to ajax upload # 	} elsif ( defined $element->field('userCertificate')->value &&
-# due to ajax upload # 		  ref($element->field('userCertificate')->value) ne 'HASH' ) {
-# due to ajax upload # #		  ! defined $element->field('userCertificate')->value->{tempname} ) {
-# due to ajax upload # 	  $element->field('userCertificate')->add_error('userCertificate file was not uploaded');
-# due to ajax upload # 	  $self->add_form_error('<span class="fa-stack fa-fw">' .
-# due to ajax upload # 				'<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
-# due to ajax upload # 				'<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
-# due to ajax upload # 				'<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
-# due to ajax upload # 				'<b> <i class="fa fa-arrow-right"></i> OpenVPN:</b> userCertificate file was not uploaded<br>');
 	} elsif ( ! defined $element->field('userCertificate')->value ) {
 	  $element->field('userCertificate')->add_error('userCertificate is mandatory!');
 	  $self->add_form_error('<span class="fa-stack fa-fw">' .

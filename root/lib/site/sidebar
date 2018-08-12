@@ -4,12 +4,12 @@
     <ul class="nav">
 
       <li class="nav-item nav-dropdown">
-	<a class="nav-link nav-dropdown-toggle" href="#"><i class="fa fa-toolbox"></i> Analyze</a>
+	<a class="nav-link nav-dropdown-toggle" href="#"><i class="fas fa-tasks"></i> Analyze</a>
 	<ul class="nav-dropdown-items">
           <li class="nav-item">
 	    <a class="nav-link" href="/stat_acc"
 	       title="All accounts info in one single,huge,big,fat and heavy table">
-	      <i class="fa fa-fw fa-id-card"></i>
+	      <i class="fas fa-fw fa-id-card-alt"></i>
 	      Accounts
 	    </a>
 	  </li>
@@ -17,7 +17,7 @@
 	    <a class="nav-link" href="/servermta"
 	       tabindex="2"
 	       title="All MTAs info in one single table">
-	      <i class="fa fa-fw fa-server"></i>
+	      <i class="fas fa-fw fa-at"></i>
 	      MTA
 	    </a>
 	  </li>
@@ -25,7 +25,7 @@
       </li>
 
       <li class="nav-item nav-dropdown">
-	<a class="nav-link nav-dropdown-toggle" href="#"><i class="fa fa-wrench"></i> Tools</a>
+	<a class="nav-link nav-dropdown-toggle" href="#"><i class="fas fa-toolbox"></i> Tools</a>
 	<ul class="nav-dropdown-items">
           <li class="nav-item">
 	    <a class="nav-link" href="/tooltranslit">
@@ -66,7 +66,7 @@
       </li>
 
       <li class="nav-item nav-dropdown">
-	<a class="nav-link nav-dropdown-toggle" href="#"><i class="fa fa-th"></i> Objects</a>
+	<a class="nav-link nav-dropdown-toggle" href="#"><i class="fas fa-shapes"></i> Objects</a>
 	<ul class="nav-dropdown-items">
           <li class="nav-item">
 	  </li>

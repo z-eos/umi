@@ -91,14 +91,6 @@
 	      OpenVPN
 	    </a>
 	  </li>
-	  <li role="presentation">
-	    <a aria-controls="ssh" data-toggle="tab"
-	       id="ssh-tab" role="button" tabindex="-1"
-	       href="#ssh" aria-expanded="false">
-	      <span class="fa fa-key"></span>
-	      SSH
-	    </a>
-	  </li>
 	</ul>
       </li>
 
@@ -122,7 +114,6 @@
   [% form.render_repeatable_js %]
   [% IF ! form.field('add_svc_acc').value %][% form.block('person').render %][% END %]
   [% form.block('auth').render %]
-  [% form.block('ssh').render %]
   [% form.block('ovpn').render %]
   [% form.block('groupsselect').render %]
 

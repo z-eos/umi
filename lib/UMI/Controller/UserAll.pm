@@ -54,12 +54,6 @@ sub index :Path :Args(0) {
        ! defined $params->{'loginless_ovpn.0.associateddomain'} ) {
     $params->{'loginless_ovpn.0.associateddomain'} = '' if ! $params->{'loginless_ovpn.0.associateddomain'};
   }
-  if ( defined $self->form->add_svc_acc &&
-       $self->form->add_svc_acc ne '' &&
-       ! defined $params->{'loginless_ssh.0.associateddomain'} ) {
-    $params->{'loginless_ssh.0.associateddomain'} = '' if ! $params->{'loginless_ssh.0.associateddomain'};
-    # 	$params->{'loginless_ssh.0.key'} = '' if ! $params->{'loginless_ssh.0.key'};
-  }
 
   $params->{'person_avatar'} = $c->req->upload('person_avatar') if $params->{'person_avatar'};
 
@@ -74,13 +68,6 @@ sub index :Path :Args(0) {
       $c->req->upload('account.' . $i . '.sshkeyfile')
       if defined $params->{'account.' . $i . '.sshkeyfile'} &&
       $params->{'account.' . $i . '.sshkeyfile'} ne '';
-    $i++;
-  }
-  foreach ( $self->form->field('loginless_ssh')->fields ) {
-    $params->{'loginless_ssh.' . $i . '.keyfile'} =
-      $c->req->upload('loginless_ssh.' . $i . '.keyfile')
-      if defined $params->{'loginless_ssh.' . $i . '.keyfile'} &&
-      $params->{'loginless_ssh.' . $i . '.keyfile'} ne '';
     $i++;
   }
   $i = 0;
@@ -144,7 +131,7 @@ sub create_account {
   # NEW/ADDITIONAL acoount start
   if ( defined $self->form->add_svc_acc && $self->form->add_svc_acc eq '' ) {
     @form_fields = defined $args->{person_simplified} &&
-      $args->{person_simplified} eq "1" ? qw{ account } : qw{ account loginless_ovpn loginless_ssh groups };
+      $args->{person_simplified} eq "1" ? qw{ account } : qw{ account loginless_ovpn groups };
     $uidNumber = $ldap_crud->last_uidNumber + 1;
 
     $args->{'uid_suffix'} = $self->form->namesake ? $self->form->namesake : '';
@@ -371,7 +358,7 @@ sub create_account {
     # person_simplified checkbox is *not* checked, we continue with GENERAL form
     #===========================================================================
   } else {
-    @form_fields = qw{ account loginless_ovpn loginless_ssh groups };
+    @form_fields = qw{ account loginless_ovpn groups };
     foreach my $form_field ( @form_fields ) {
       next if $form_field eq 'groups'; # groups we are skiping for now
       foreach $element ( $self->form->field($form_field)->fields ) {
@@ -493,13 +480,6 @@ we skip empty (criteria of emptiness is a concatenation of each field value) rep
 	    if defined $element->field('userCertificate')->value &&
 	    $element->field('userCertificate')->value ne '';
 	  
-	} elsif ( $x->{authorizedservice} eq 'ssh' ) {
-	  $x->{sshpublickey}     = $element->field('key')->value;
-	  $x->{sshpublickeyfile} = $element->field('keyfile')->value;
-	  $x->{login}            = $uid;
-	  $x->{password}         = { $x->{authorizedservice} =>
-				     { clear => '<del>NOPASSWORD</del>' }
-			   };
 	} elsif ( $x->{authorizedservice} eq 'ovpn' ) {
 	  $x->{userCertificate} = $element->field('userCertificate')->value
 	    if defined $element->field('userCertificate')->value;

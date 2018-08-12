@@ -24,6 +24,7 @@
    grayPublicKey = 1
    member = 1
    memberUid = 1
+   nisNetgroupTriple = 1
    objectClass = 1
    sshPublicKey = 1
    telephoneNumber = 1

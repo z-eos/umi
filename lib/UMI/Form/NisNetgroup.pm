@@ -9,6 +9,10 @@ BEGIN { extends 'UMI::Form::LDAP';
 
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable' );
 
+has '+action' => ( default => '/nisnetgroup' );
+
+sub build_form_element_class { [ qw(formajaxer) ] }
+
 has '+enctype' => ( default => 'multipart/form-data');
 
 #sub build_form_element_class { [ 'form-horizontal', ] }
@@ -135,7 +139,7 @@ has_field 'aux_delim_memberNisNetgroup'
 
 has_field 'memberNisNetgroup' => ( type => 'Multiple',
 			   label => 'NisNetgroup Subgroups',
-			   # element_class => [ 'multiselect' ],
+			   element_class => [ 'umi-multiselect' ],
 			   # required => 1,
 			 );
 

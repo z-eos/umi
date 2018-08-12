@@ -383,6 +383,7 @@ sub _build_cfg {
 			 auth                 => 1,
 			 login_delim          => '_',
 			 homeDirectory_prefix => '/usr/local/home',
+			 icon                 => 'fa fa-key',
 			 loginShell           => '/usr/bin/false',
 			 descr                => 'SSH',
 			 disabled             => 0,
@@ -392,14 +393,6 @@ sub _build_cfg {
 			 data_fields          => 'login,logindescr,password1,password2,sshkey,sshkeyfile,sshhome,sshshell,sshgid',
 			 data_relation        => 'sshacc',
 			},
-	   'ssh' => {
-		     auth => 0,
-		     descr => 'SSH key',
-		     disabled => 0,
-		     icon => 'fa fa-key',
-		     # data_fields => 'key,keyfile,associateddomain',
-		     # data_relation => 'sshpubkey',
-		    },
 	   'gpg' => {
 		     auth => 0,
 		     descr => 'GPG key',
@@ -3238,7 +3231,7 @@ sub create_account_branch_leaf {
     push @{$authorizedService}, sshPublicKey => [ @$sshPublicKey ],
       gidNumber     => $arg->{sshgid}   // $self->cfg->{authorizedService}->{$arg->{service}}->{gidNumber},
 #      uidNumber => $arg->{uidNumber} + $self->cfg->{authorizedService}->{$arg->{service}}->{uidNumberShift},
-      uidNumber => $self->last_uidNumber_ssh,
+      uidNumber => $self->last_uidNumber_ssh + 1,
       userPassword  => $arg->{password}->{$arg->{service}}->{'ssha'},
       loginShell    => $arg->{sshshell} // $self->cfg->{authorizedService}->{$arg->{service}}->{loginShell},
       homeDirectory => $arg->{sshhome}  // sprintf("%s/%s",
@@ -3247,22 +3240,6 @@ sub create_account_branch_leaf {
     # ,
     #   homeDirectory => $self->cfg->{authorizedService}->{$arg->{service}}->{homeDirectory_prefix} . '/' . $arg->{uid};
     # log_debug { np( $arg ) };
-  #=== SERVICE: ssh ==================================================
-  } elsif ( $arg->{service} eq 'ssh' ) {
-    $sshPublicKey = $self->file2var( $arg->{sshpublickeyfile}->{tempname}, $return, 1)
-      if defined $arg->{sshpublickeyfile};
-    push @{$sshPublicKey}, $arg->{sshpublickey}
-      if defined $arg->{sshpublickey} && $arg->{sshpublickey} ne '';
-
-    $authorizedService = [
-			  objectClass => [ @{$self->cfg->{objectClass}->{ssh}}, @{$arg->{objectclass}} ],
-			  sshPublicKey => [ @$sshPublicKey ],
-			  uid => $arg->{uid},
-			 ];
-    $description = $self->utf2lat( sprintf("%s\nNote: %s bytes file \"%s\" was uploaded",
-					   $description,
-					   $arg->{sshkeyfile}->{size},
-					   $arg->{sshkeyfile}->{filename}) );
 
   #=== SERVICE: ovpn =================================================
   } elsif ( $arg->{service} eq 'ovpn' ) {
