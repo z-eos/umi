@@ -313,6 +313,7 @@ sub _build_cfg {
 		      auth => 1,
 		      descr => 'Email',
 		      disabled => 0,
+		      login_delim          => '@',
 		      homeDirectory_prefix => '/mail/fast/imap/',
 		      gidNumber => 26,
 		      icon => 'fa fa-envelope',
@@ -323,6 +324,7 @@ sub _build_cfg {
 		      auth => 1,
 		      descr => 'XMPP (Jabber)',
 		      disabled => 0,
+		      login_delim          => '@',
 		      gidNumber => 10106,
 		      jpegPhoto_noavatar => UMI->path_to('root', 'static', 'images', '/avatar-xmpp.png'),
 		      icon => 'fa fa-lightbulb',
@@ -3111,7 +3113,10 @@ sub create_account_branch_leaf {
 	    $self->cfg->{authorizedService}->{$arg->{service}}->{login_prefix} // '',
 	    $arg->{login});
   
-  $arg->{uid} = sprintf('%s_%s', $arg->{prefixed_uid}, $arg->{associatedDomain});
+  $arg->{uid} = sprintf('%s%s%s',
+			$arg->{prefixed_uid},
+			$self->cfg->{authorizedService}->{$arg->{service}}->{login_delim} // '@',
+			$arg->{associatedDomain});
   $arg->{dn} = sprintf('uid=%s,%s', $arg->{uid}, $arg->{basedn});
 
   # log_debug { np($arg) };
