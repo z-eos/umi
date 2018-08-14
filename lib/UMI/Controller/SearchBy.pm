@@ -1456,7 +1456,7 @@ sub modify :Path(modify) :Args(0) {
     } else {
       $val  = $params->{$attr};
       $orig = $entry->get_value($attr);
-      next if defined $orig && $val eq $orig;
+      next if defined $orig && $val eq $orig && $val ne '';
     }
 
     # removing all empty array elements if any
@@ -1545,6 +1545,27 @@ sub modify :Path(modify) :Args(0) {
 	     params => $params,
 	     final_message => $return,
 	   );
+
+# --- #   $c->stash( template => 'search/modify.tt',
+# --- # 	     final_message => $return, );
+# --- # 
+# --- #   if ( keys %{$params} == 1 ) {
+# --- #     my $init_obj = { add_svc_acc => $params->{add_svc_acc} };
+# --- #     return unless $self->form
+# --- #       ->process( init_object => $init_obj,
+# --- # 		 ldap_crud => $c->model('LDAP_CRUD'), );
+# --- #   } else {
+# --- #     # log_debug { np( $params ) };
+# --- #     return unless $self->form
+# --- #       ->process( posted => ($c->req->method eq 'POST'),
+# --- # 		 params => $params,
+# --- # 		 ldap_crud => $c->model('LDAP_CRUD'), );
+# --- # 
+# --- #     $self->form->ldap_modify( defined $params->{ldap_modify} && $params->{ldap_modify} ne '' ? $params->{ldap_modify} : '' );
+# --- #     $params->{action_searchby} = $c->uri_for_action('searchby/modify');
+# --- # 
+# --- #   }
+
 }
 
 

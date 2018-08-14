@@ -37,23 +37,47 @@ Catalyst Controller.
 
 sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
-    if ( defined $c->session->{"auth_uid"} ) {
+# --- #     if ( defined $c->session->{"auth_uid"} ) {
       my $params = $c->req->params;
 
-      $c->stash( template => 'search/search_advanced.tt',
-      		 form => $self->form, );
+# --- #       $c->stash( template => 'search/search_advanced.tt',
+# --- #       		 form => $self->form, );
+# --- # 
+# --- #       return unless
+# --- # 	$self->form->process(
+# --- # 			     posted => ($c->req->method eq 'POST'),
+# --- # 			     params => $params,
+# --- # 			     ldap_crud => $c->model('LDAP_CRUD'),
+# --- # 			    );
+# --- # 
+# --- #       # $c->stash( final_message => '' );
+# --- #     } else {
+# --- #       $c->stash( template => 'signin.tt', );
+      # --- #     }
 
-      return unless
-	$self->form->process(
-			     posted => ($c->req->method eq 'POST'),
-			     params => $params,
-			     ldap_crud => $c->model('LDAP_CRUD'),
-			    );
+    $c->stash( template => 'search/search_advanced.tt',
+	       form => $self->form,
+	       final_message => '', );
 
-      # $c->stash( final_message => '' );
+    if ( keys %{$params} > 0 ) {
+      my $init_obj = { base_dn       => $params->{base_dn},
+		       search_filter => $params->{search_filter},
+		       search_scope => $params->{search_scope}, };
+      return unless $self->form
+	->process( init_object => $init_obj,
+		   ldap_crud => $c->model('LDAP_CRUD'), );
     } else {
-      $c->stash( template => 'signin.tt', );
+      # log_debug { np( $params ) };
+      return unless $self->form
+	->process( posted => ($c->req->method eq 'POST'),
+		   params => $params,
+		   ldap_crud => $c->model('LDAP_CRUD'), );
+      
+      $self->form->base_dn( $params->{base_dn} );
+      $self->form->search_filter( $params->{search_filter} );
+      # $params->{action_searchby} = $c->uri_for_action('searchby/index');
     }
+
   }
 
 sub proc :Path(proc) :Args(0) {
@@ -310,6 +334,7 @@ sub proc :Path(proc) :Args(0) {
 		base_icon => $ldap_crud->cfg->{base}->{icon},
 		final_message => $return,
 		form => $self->form,
+		from_searchadvanced => 1,
 	       );
     } else {
       $c->stash( template => 'signin.tt', );

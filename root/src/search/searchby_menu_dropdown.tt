@@ -89,8 +89,8 @@
 	  delete
 	</button>
       </li>
-      [%   IF ! entry.value.mgmnt.is_root && entry.key.match(',authorizedService=') %]
-      <li>
+      [% #  IF ! entry.value.mgmnt.is_root && entry.key.match(',authorizedService=') %]
+      <!-- <li>
 	<form role="form" method="POST" 
 	      action="/searchby/proc">
 	  <button type="button" title="reassign to other root account (move this object to another root account)"
@@ -103,8 +103,8 @@
 	    reassign
 	  </button>
 	</form>
-      </li>
-      [%   END %]
+      </li> -->
+      [% #  END %]
       [% END %][% # admin_owned stop %]
 
       [% IF entry.value.mgmnt.dynamicObject %]
@@ -153,20 +153,6 @@
 	</button>
       </li>
       [%   IF ! is_log_obj %]
-<!--      <li>
-	<form role="form" method="POST" 
-	      action="/searchby/modform">
-	  <button type="submit" class="btn btn-link"
-		  title="edit form (the one used for object creation)"
-		  value="[% entry.key %]"
-		  disabled="disabled"
-		  data-order="[% site.searchby.menu.order.ldap_modify %]"
-		  name="aux_dn_form_to_modify">
-	    <span class="fa fa-fw fa-edit text-warning"></span>
-	    edit form
-	  </button>
-	</form>
-      </li> -->
       <li>
 	<form role="form" method="POST" class="formajaxer"
 	      action="/searchby/proc">
@@ -178,6 +164,21 @@
 	  </button>
 	</form>
       </li>
+      [%     IF entry.key.match('Netgroups') %]
+      <li>
+	<form role="form" method="POST" 
+	      action="/searchby/modform">
+	  <button type="submit" class="btn btn-link"
+		  title="edit form (the one used for object creation)"
+		  value="[% entry.key %]"
+		  data-order="[% site.searchby.menu.order.ldap_modify %]"
+		  name="aux_dn_form_to_modify">
+	    <span class="fa fa-fw fa-pen-alt text-muted"></span>
+	    edit form
+	  </button>
+	</form>
+      </li>
+      [%     END %]
       <li>
 	<form role="form" method="POST" class="formajaxer"
 	      action="/searchby">

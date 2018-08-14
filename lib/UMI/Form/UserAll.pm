@@ -995,7 +995,12 @@ sub validate {
 	$login_error_pfx = 'Login';
       }
 
-      $passwd_acc_filter = '(uid=' . $logintmp . '@' . $element->field('associateddomain')->value . ')'
+      $passwd_acc_filter = sprintf("(uid=%s%s%s)",
+				   $logintmp,
+				   $ldap_crud->cfg->{authorizedService}->{
+									  $element->field('authorizedservice')->value
+									 }->{login_delim} // '@',
+				   $element->field('associateddomain')->value)
 	if defined $element->field('associateddomain')->value && $element->field('associateddomain')->value ne '';
       #---[ login preparation for check ]------------------------------------------------
 

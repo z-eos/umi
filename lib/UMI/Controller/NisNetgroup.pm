@@ -63,18 +63,20 @@ sub create_nisnetgroup {
 	       memberNisNetgroup => $args->{memberNisNetgroup} || undef,
 	      };
 
-    my $memberNisNetgroup;
-    if ( ref($arg->{memberNisNetgroup}) eq 'ARRAY' ) {
-      $memberNisNetgroup = $arg->{memberNisNetgroup};
-    } else {
-      push @{$memberNisNetgroup}, $arg->{memberNisNetgroup};
-    }
-
     my $netgroup_attrs = [
 			  'objectClass' => $ldap_crud->cfg->{objectClass}->{netgroup},
 			  'description' => $arg->{description},
-			  'memberNisNetgroup' => $memberNisNetgroup,
 			 ];
+
+    if ( defined $arg->{memberNisNetgroup} && $arg->{memberNisNetgroup} ne '' ) {
+      my $memberNisNetgroup;
+      if ( ref($arg->{memberNisNetgroup}) eq 'ARRAY' ) {
+	$memberNisNetgroup = $arg->{memberNisNetgroup};
+      } else {
+	push @{$memberNisNetgroup}, $arg->{memberNisNetgroup};
+      }
+      push @{$netgroup_attrs}, 'memberNisNetgroup' => $memberNisNetgroup;
+    }
 
     my $netgroup_triple;
     my $a = undef;

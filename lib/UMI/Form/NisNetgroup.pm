@@ -88,6 +88,7 @@ has_field 'triple.host'
        do_label => 0,
        label => 'Host',
        element_attr => { placeholder => 'host01',
+			 title => 'host',
 			 'data-name' => 'host',
 			 'data-group' => 'triple', },
        wrapper_class => [ 'col-xs-11', 'col-lg-3', ],
@@ -98,6 +99,7 @@ has_field 'triple.user'
        do_label => 0,
        label => 'User',
        element_attr => { placeholder => 'user06',
+			 title => 'user',
 			 'data-name' => 'user',
 			 'data-group' => 'triple', },
        wrapper_class => [ 'col-xs-11', 'col-lg-3', ],
@@ -108,6 +110,7 @@ has_field 'triple.domain'
        do_label => 0,
        label => 'Domain',
        element_attr => { placeholder => 'foo.bar',
+			 title => 'domain',
 			 'data-name' => 'domain',
 			 'data-group' => 'triple', },
        wrapper_class => [ 'col-xs-11', 'col-lg-3', ],
@@ -134,7 +137,7 @@ has_block 'nistriple'
 
 has_field 'aux_delim_memberNisNetgroup'
   => ( type => 'Display',
-       html => '<br><br><br><br><br><br><h4>NIS Sub Ggoups</h4>',
+       html => '<br><br><br><br><br><br><h4>NIS Sub Groups</h4>',
      );
 
 has_field 'memberNisNetgroup' => ( type => 'Multiple',
