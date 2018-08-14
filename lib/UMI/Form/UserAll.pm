@@ -7,7 +7,8 @@ use HTML::FormHandler::Moose;
 BEGIN { extends 'UMI::Form::LDAP';
 	with 'Tools', 'HTML::FormHandler::Render::RepeatableJs'; }
 
-use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable', 'StrongPassword', 'IPAddress' );
+# use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable', 'StrongPassword', 'IPAddress' );
+use HTML::FormHandler::Types (':all');
 
 use Data::Printer caller_info => 1, colored => 1;
 
@@ -334,7 +335,7 @@ has_field 'account.authorizedservice'
      );
 
 has_field 'account.login'
-  => ( apply => [ NoSpaces, NotAllDigits, Printable ],
+  => ( apply => [ NoSpaces, NotAllDigits, Printable, NonEmptyStr ],
        label => 'Login',
        do_id => 'no',
        label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
@@ -965,6 +966,10 @@ sub validate {
       }
 
       #---[ login preparation for check ]------------------------------------------------
+
+      $element->field('login')->add_error('Underscore character is not allowed in login field ...')
+	if defined $element->field('login')->value && index($element->field('login')->value, '_') > -1;
+
       if ( ! defined $element->field('login')->value ||
 	   $element->field('login')->value eq '' ) {
 	$logintmp = sprintf('%s%s%s',
@@ -1118,7 +1123,7 @@ sub validate {
 
       $self->add_form_error('<span class="fa-stack fa-fw">' .
 			    '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
-			    '<i class="fa fa-user pull-right fa-stack-1x"></i></span>' .
+			    '<i class="fa fa-key pull-right fa-stack-1x"></i></span>' .
 			    '<b class="visible-lg-inline">&nbsp;Pass&nbsp;</b>' .
 			    'Has error/s! Correct or remove, please')
 	if $self->field('account')->has_error_fields;
@@ -1350,7 +1355,7 @@ sub validate {
 
   $self->add_form_error('<span class="fa-stack fa-fw">' .
 			'<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
-			'<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
+			'<i class="fa fa-lock-open pull-right fa-stack-1x"></i></span>' .
 			'<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
 			'<b> <i class="fa fa-arrow-right"></i> OpenVPN:</b> Has error/s! Correct or remove, please')
     if $self->field('loginless_ovpn')->has_error_fields;

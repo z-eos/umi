@@ -256,6 +256,10 @@ html,body {
   margin: 0pt 0pt 0pt 30pt;
 }
 
+.umi-1-margin-top {
+  margin: 15pt 0pt 0pt 0pt;
+}
+
 .umi-margings-fixer.form-horizontal .form-group {
   margin-left: 0;
   margin-right: 0;

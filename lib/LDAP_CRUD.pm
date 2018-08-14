@@ -913,23 +913,32 @@ Net::LDAP->moddn wrapper
 =cut
 
 sub moddn {
-  my ($self, $dn, $opts) = @_;
-
+  my ($self, $args) = @_;
+  my $arg = { dn           => $args->{src_dn},
+	      newrdn       => $args->{newrdn},
+	      deleteoldrdn => $args->{deleteoldrdn} || '1',
+	      newsuperior  => $args->{newsuperior}  || undef };
+  
   my $callername = (caller(1))[3];
   $callername = 'main' if ! defined $callername;
   my $return;
   my $msg;
-  if ( ! $self->dry_run ) {
-    $msg = $self->ldap->moddn ( $dn, newrdn => $opts, deleteoldrdn => 1, );
-    if ($msg->is_error()) {
-      $return = $self->err( $msg );
-      $return->{caller} = 'call to LDAP_CRUD->moddn from ' . $callername . ': ';
-    } else {
-      log_info { 'DN: ' . $dn . ' was successfully modified.' };
-      $return = 0;
-    }
+
+  $msg = defined $arg->{newsuperior} ?
+    $self->ldap->moddn ( $arg->{dn},
+			 newrdn       => $arg->{newrdn},
+			 deleteoldrdn => $arg->{deleteoldrdn},
+			 newsuperior  => $arg->{newsuperior} ) :
+    $self->ldap->moddn ( $arg->{dn},
+			 newrdn       => $arg->{newrdn},
+			 deleteoldrdn => $arg->{deleteoldrdn} );
+  
+  if ($msg->is_error()) {
+    $return = $self->err( $msg );
+    $return->{caller} = 'call to LDAP_CRUD->moddn from ' . $callername . ': ';
   } else {
-    $return = $msg->ldif;
+    log_info { 'DN: ' . $arg->{dn} . ' was successfully modified.' };
+    $return = 0;
   }
   return $return;
 }

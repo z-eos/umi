@@ -1527,7 +1527,7 @@ sub modify :Path(modify) :Args(0) {
       push @{$return->{error}}, $mesg->{html};
     } else {
       if ( defined $moddn && $moddn ne '' ) {
-	$mesg = $ldap_crud->moddn( $params->{dn}, $moddn, );
+	$mesg = $ldap_crud->moddn({ dn => $params->{dn}, newrdn => $moddn, });
 	if ( $mesg ne "0" ) {
 	  push @{$return->{error}}, $mesg->{html};
 	} else {
@@ -1798,6 +1798,36 @@ sub reassign :Path(reassign) :Args(0) {
     $c->stash( template => 'stub.tt',
 	       params => $params,
 	       err => $err, );
+  }
+}
+
+=head1 moddn
+
+moddn
+
+=cut
+
+sub moddn :Path(moddn) :Args(0) {
+  my ( $self, $c ) = @_;
+  my $params = $c->req->parameters;
+  log_debug { np( $params ) };
+  my $err = $c->model('LDAP_CRUD')->moddn($params);
+  log_debug { np ( $err ) };
+  if ( $params->{type} eq 'json' ) {
+    $c->stash->{current_view} = 'WebJSON';
+    $c->stash->{success} = ref($err) ne 'HASH' && ref($err) ne 'ARRAY' ? 1 : 0;
+
+    if ( ref($err) ne 'HASH' && ref($err) ne 'ARRAY' ) {
+      $c->stash->{message} = 'OK';
+    } elsif ( (ref($err) eq 'HASH' || ref($err) eq 'ARRAY' ) && $#{$err->{error}} > -1 ) {
+      $c->stash->{success} = 0;
+      $c->stash->{message} = $self->msg2html({ type => 'panel',
+  					       data => $err->{error}->[0]->{html} });
+    }
+  } else {
+    $c->stash( template => 'stub.tt',
+  	       params => $params,
+  	       err => $err, );
   }
 }
 

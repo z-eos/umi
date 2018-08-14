@@ -89,8 +89,19 @@
 	  delete
 	</button>
       </li>
-      [% #  IF ! entry.value.mgmnt.is_root && entry.key.match(',authorizedService=') %]
-      <!-- <li>
+      <li>
+	<button type="button" title="rename object (change RDN)" class="btn btn-link"
+		value="[% entry.key %]"
+		name="ldap_delete"
+		data-order="[% site.searchby.menu.order.ldap_delete %]"
+		data-toggle="modal"
+		data-target="#modal_moddn[% id_suffix %]">
+	  <span class="fa fa-fw fa-highlighter text-danger"></span>
+	  moddn
+	</button>
+      </li>
+      [%   IF ! entry.value.mgmnt.is_root && entry.key.match(',authorizedService=') %]
+      <li>
 	<form role="form" method="POST" 
 	      action="/searchby/proc">
 	  <button type="button" title="reassign to other root account (move this object to another root account)"
@@ -103,8 +114,8 @@
 	    reassign
 	  </button>
 	</form>
-      </li> -->
-      [% #  END %]
+      </li>
+      [%   END %]
       [% END %][% # admin_owned stop %]
 
       [% IF entry.value.mgmnt.dynamicObject %]
@@ -164,8 +175,8 @@
 	  </button>
 	</form>
       </li>
-      [%     IF entry.key.match('Netgroups') %]
-      <li>
+      [% #    IF entry.key.match('Netgroups') %]
+      <!-- <li>
 	<form role="form" method="POST" 
 	      action="/searchby/modform">
 	  <button type="submit" class="btn btn-link"
@@ -177,8 +188,8 @@
 	    edit form
 	  </button>
 	</form>
-      </li>
-      [%     END %]
+      </li> -->
+      [% #    END %]
       <li>
 	<form role="form" method="POST" class="formajaxer"
 	      action="/searchby">
