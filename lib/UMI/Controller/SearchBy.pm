@@ -450,9 +450,18 @@ sub proc :Path(proc) :Args(0) {
     my ($ldap_crud, $mesg, $return, $attr, $entry_tmp, $entry);
     $ldap_crud = $c->model('LDAP_CRUD');
 
-    #=====================================================================
-    # Modify (all fields form), here we pass data to a sub modify() bellow
-    #=====================================================================
+    # log_debug { np($params) };
+    # log_debug { np($c->stash) };
+    foreach my $ldap_xxx (keys (%{$c->stash})) {
+      next if $ldap_xxx !~ /ldap_/;
+      $params->{$ldap_xxx} = $c->stash->{$ldap_xxx}
+	if ! exists $params->{$ldap_xxx};
+      log_info { 'parameter ' . $ldap_xxx . ' is present in stash but was not passed with params => some method (not form) set it' };
+    }
+
+#=====================================================================
+# Modify (all fields form), here we pass data to a sub modify() bellow
+#=====================================================================
     if (defined $params->{'ldap_modify'} && $params->{'ldap_modify'} ne '') {
 
       $c->stats->profile( begin => "searchby_modify" );
@@ -492,14 +501,13 @@ sub proc :Path(proc) :Args(0) {
       foreach my $objectClass (sort @{$entry->{objectClass}}) {
 	foreach $attr (sort (keys %{$c->session->{ldap}->{obj_schema}->{$objectClass}->{must}} )) {
 	  next if $attr eq "objectClass";
-	  $is_single->{$attr} =
-	    $c->session->{ldap}->{obj_schema}->{$objectClass}->{must}->{$attr}->{'single-value'};
+	  log_debug { np($c->session->{ldap}->{obj_schema}->{$objectClass}->{must}->{$attr}->{'single-value'}) };
+	  $is_single->{$attr} = $c->session->{ldap}->{obj_schema}->{$objectClass}->{must}->{$attr}->{'single-value'};
 	  $names->{$attr} = 0;
 	}
 	foreach $attr (sort (keys %{$c->session->{ldap}->{obj_schema}->{$objectClass}->{may}} )) {
 	  next if $attr eq "objectClass";
-	  $is_single->{$attr} =
-	    $c->session->{ldap}->{obj_schema}->{$objectClass}->{may}->{$attr}->{'single-value'};
+	  $is_single->{$attr} = $c->session->{ldap}->{obj_schema}->{$objectClass}->{may}->{$attr}->{'single-value'};
 	  $names->{$attr} = 0;
 	}
       }
@@ -508,14 +516,12 @@ sub proc :Path(proc) :Args(0) {
 
       $c->stats->profile('schema is ready');
 
-      ## here we work with the only one, single entry!!
-      # p $is_single;
-      # p $names;
-      # p $entry;
-      # $c->session->{modify_entries} = $mesg->entry(0);
-      # $c->session->{modify_dn} = $params->{ldap_modify};
-      # $c->session->{modify_schema} = $is_single;
-
+      # push into $return all things which could be in $c->stash->{final_message}
+      if ( exists $c->stash->{final_message} ) {
+	push @{$return->{$_}}, @{$c->stash->{final_message}->{$_}}
+	  foreach (keys (%{$c->stash->{final_message}}));
+      }
+      # log_debug { np($is_single) };
       $c->stash(
 		template => 'search/modify.tt', # !!! look modify() bellow
 		modify => $params->{'ldap_modify'},
@@ -1423,14 +1429,15 @@ sub modify :Path(modify) :Args(0) {
   my ( $self, $c ) = @_;
 
   my $params = $c->req->parameters;
+  my $dn = $params->{dn};
   my $ldap_crud = $c->model('LDAP_CRUD');
-  my $mesg = $ldap_crud->search( { base => $params->{dn}, scope => 'base' } );
+  my $mesg = $ldap_crud->search( { base => $dn, scope => 'base' } );
   my $return;
   $return->{error} = $ldap_crud->err($mesg)->{html} if $mesg->code;
 
   my $entry = $mesg->entry(0);
 
-  my ($jpeg, $binary, $attr, $val, $orig, $cert_info);
+  my ($jpeg, $binary, $attr, $val_params, $val_entry, $cert_info);
   my $add = undef;
   my $moddn = undef;
   my $delete = undef;
@@ -1446,67 +1453,67 @@ sub modify :Path(modify) :Args(0) {
       $params->{$attr} = $c->req->upload($attr);
     }
 
-    # skip equal data processing
+    # skip equal and undefined data
+    $val_params  = $params->{$attr};
+    next if ! defined $val_params;
     if ( ref($params->{$attr} ) eq 'ARRAY' ) {
-      $val  = $params->{$attr};
-      $orig = $entry->get_value($attr, asref => 1);
-      @{$val}  = sort( @{$val} );
-      @{$orig} = sort( @{$orig} );
-      next if $val ~~ $orig;
+      $val_entry      = $entry->get_value($attr, asref => 1);
+      @{$val_params}  = sort( @{$val_params} );
+      @{$val_entry}   = sort( @{$val_entry} );
+      next if $val_params ~~ $val_entry;
     } else {
-      $val  = $params->{$attr};
-      $orig = $entry->get_value($attr);
-      next if defined $orig && $val eq $orig && $val ne '';
+      $val_entry = $entry->get_value($attr);
+      next if defined $val_entry && $val_params eq $val_entry; # !!! looks like it is not needed && $val_params ne '';
     }
 
     # removing all empty array elements if any
-    if ( ref($val) eq "ARRAY" ) {
-      @{$val} = reverse map { $self->is_ascii($_) &&
+    if ( ref($val_params) eq "ARRAY" ) {
+      @{$val_params} = reverse map { $self->is_ascii($_) &&
 			$attr ne 'givenName' && $attr ne 'sn' && $attr ne 'description'	?
 			$self->utf2lat($_) : $_ }
-	grep { $_ ne '' } @{$val};
-    } elsif ( $val ne '' && defined $entry->get_value($attr) && $val ne $entry->get_value($attr) ) {
-      $val = $self->utf2lat($val) if $self->is_ascii($val) &&
+	grep { $_ ne '' } @{$val_params};
+    } elsif ( $val_params ne '' && defined $entry->get_value($attr) && $val_params ne $entry->get_value($attr) ) {
+      $val_params = $self->utf2lat($val_params) if $self->is_ascii($val_params) &&
 	$attr ne 'givenName' && $attr ne 'sn' && $attr ne 'description';
     }
 
     # what to do or to not to do?
-    if ( $attr eq 'jpegPhoto' && $val ne '' ) {
-      $jpeg = $self->file2var( $val->{'tempname'}, $return );
+    if ( $attr eq 'jpegPhoto' && $val_params ne '' ) {
+      $jpeg = $self->file2var( $val_params->{'tempname'}, $return );
       return $jpeg if ref($jpeg) eq 'HASH' && defined $jpeg->{error};
       push @{$replace}, $attr => [ $jpeg ];
 
-    } elsif ( $attr eq 'userCertificate' && $val ne '' ) {
-      $binary = $self->file2var( $val->{'tempname'}, $return );
+    } elsif ( $attr eq 'userCertificate' && $val_params ne '' ) {
+      $binary = $self->file2var( $val_params->{'tempname'}, $return );
       return $binary if ref($binary) eq 'HASH' && defined $binary->{error};
       push @{$replace}, $attr . ';binary' => [ $binary ];
       $cert_info =
 	$self->cert_info({ cert => $binary, ts => "%Y%m%d%H%M%S", });
-      push @{$replace}, 'umiUserCertificateSn' => '' . $cert_info->{'S/N'};
+      push @{$replace}, 'umiUserCertificateSn'        => '' . $cert_info->{'S/N'};
       push @{$replace}, 'umiUserCertificateNotBefore' => '' . $cert_info->{'Not Before'};
-      push @{$replace}, 'umiUserCertificateNotAfter' => '' . $cert_info->{'Not  After'};
-      push @{$replace}, 'umiUserCertificateSubject' => '' . $cert_info->{'Subject'};
-      push @{$replace}, 'umiUserCertificateIssuer' => '' . $cert_info->{'Issuer'};
+      push @{$replace}, 'umiUserCertificateNotAfter'  => '' . $cert_info->{'Not  After'};
+      push @{$replace}, 'umiUserCertificateSubject'   => '' . $cert_info->{'Subject'};
+      push @{$replace}, 'umiUserCertificateIssuer'    => '' . $cert_info->{'Issuer'};
       $moddn = 'cn=' . $cert_info->{'CN'};
     } elsif ( ( $attr eq 'cACertificate' ||
-		$attr eq 'certificateRevocationList' ) && $val ne '' ) {
-      $binary = $self->file2var( $val->{'tempname'}, $return );
+		$attr eq 'certificateRevocationList' ) && $val_params ne '' ) {
+      $binary = $self->file2var( $val_params->{'tempname'}, $return );
       return $binary if ref($binary) eq 'HASH' && defined $binary->{error};
       push @{$replace}, $attr . ';binary' => [ $binary ];
-    } elsif ( $val eq '' && defined $entry->get_value($attr) ) {
+    } elsif ( $val_params eq '' && defined $entry->get_value($attr) ) {
       push @{$delete}, $attr => [];
-    } elsif ( $val ne '' && ! defined $entry->get_value($attr) ) {
+    } elsif ( $val_params ne '' && ! defined $entry->get_value($attr) ) {
       # !!! ??? is it necessary here? can we leave it instead of replacing by itself
       if ( $attr eq 'jpegPhoto' ) {
-	$jpeg = $self->file2var( $val->{'tempname'}, $return );
+	$jpeg = $self->file2var( $val_params->{'tempname'}, $return );
 	return $jpeg if ref($jpeg) eq 'HASH' && defined $jpeg->{error};
-	$val = [ $jpeg ];
+	$val_params = [ $jpeg ];
       }
-      push @{$add}, $attr => $val;
-    } elsif ( ref($val) eq "ARRAY" && $#{$val} > -1 ) {
-      push @{$replace}, $attr => $val;
-    } elsif ( ref($val) ne "ARRAY" && $val ne "" ) { # && $val ne $orig ) {
-      push @{$replace}, $attr => $val;
+      push @{$add}, $attr => $val_params;
+    } elsif ( ref($val_params) eq "ARRAY" && $#{$val_params} > -1 ) {
+      push @{$replace}, $attr => $val_params;
+    } elsif ( ref($val_params) ne "ARRAY" && $val_params ne "" ) { # && $val_params ne $val_entry ) {
+      push @{$replace}, $attr => $val_params;
     }
   }
 
@@ -1541,11 +1548,17 @@ sub modify :Path(modify) :Args(0) {
     push @{$return->{warning}}, 'No change was performed!';
   }
 
-  $c->stash( template => 'search/modify.tt', # stub.tt',
-	     params => $params,
-	     final_message => $return,
-	   );
+  # $c->stash( template      => 'search/modify.tt', # stub.tt',
+  # 	     params        => $params,
+  # 	     final_message => $return,
+  # 	   );
 
+  log_info { 'here we detach to /searchby/proc with ldap_modify = ' . $dn . ' with return: ' . np($return) };
+  $c->stash->{ldap_modify}   = $dn;
+  $c->stash->{final_message} = $return;
+  $c->forward('/searchby/proc');
+
+  
 # --- #   $c->stash( template => 'search/modify.tt',
 # --- # 	     final_message => $return, );
 # --- # 

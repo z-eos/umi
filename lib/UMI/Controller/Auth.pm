@@ -83,7 +83,7 @@ sub signin :Path Global {
       next if $key eq 'top';
       # log_debug { np(@{[$schema->must ( $key )]}) } if $key eq 'umiSettings';
       foreach $must ( $schema->must ( $key ) ) {
-	next if $must->{name} eq 'objectClass';
+	next if $ldap_crud->{cfg}->{defaults}->{ldap}->{is_single}->{$must->{name}};
 	$syntmp = $schema->attribute_syntax($must->{'name'});
 	$must_meta =
 	  {
@@ -100,7 +100,7 @@ sub signin :Path Global {
       }
       # log_debug { np(@{[$schema->may ( $key )]}) } if $key eq 'umiSettings';
       foreach $may ( $schema->may ( $key ) ) {
-	next if $may->{name} eq 'objectClass';
+	next if $ldap_crud->{cfg}->{defaults}->{ldap}->{is_single}->{$may->{name}};
 	$syntmp = $schema->attribute_syntax($may->{'name'});
 	$may_meta =
 	  {

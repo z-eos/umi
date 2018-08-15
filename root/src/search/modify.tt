@@ -15,28 +15,16 @@
 
 [% INCLUDE ldap_err.tt %]
 
-[% multival = {
-   associatedDomain = 1
-   businessCategory = 1
-   description = 1
-   dhcpOption = 1
-   dhcpStatements = 1
-   grayPublicKey = 1
-   member = 1
-   memberUid = 1
-   nisNetgroupTriple = 1
-   objectClass = 1
-   sshPublicKey = 1
-   telephoneNumber = 1
-   title = 1
-   umiOvpnCfgPush = 1
-   umiOvpnCfgPush = 1
-   }
-   %]
+[% FOREACH pair IN schema.pairs %]
+[%   IF ! pair.value.defined %]
+[%     multival.${pair.key} = 1 %]
+[%   END %]
+[% END %]
+[% multival.associatedDomain = 0 IF modify.match('authorized') %]
 
 [% # USE dumper %]<!-- <pre>[% # dumper.dump(params) %]</pre> -->
 
-[% IF ! final_message.exists('success') || final_message.success.empty %]
+[% # IF ! final_message.exists('success') || final_message.success.empty %]
 <form method="POST"
       id="modify-tt-form"
       enctype="multipart/form-data"
@@ -228,4 +216,4 @@
  });
 
 </script> 
-[% END %]
+[% # END %]
