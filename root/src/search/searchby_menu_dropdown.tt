@@ -175,8 +175,8 @@
 	  </button>
 	</form>
       </li>
-      [% #    IF entry.key.match('Netgroups') %]
-      <!-- <li>
+      [%     IF entry.key.match('Netgroups') %]
+      <li>
 	<form role="form" method="POST" 
 	      action="/searchby/modform">
 	  <button type="submit" class="btn btn-link"
@@ -188,8 +188,8 @@
 	    edit form
 	  </button>
 	</form>
-      </li> -->
-      [% #    END %]
+      </li>
+      [%     END %]
       <li>
 	<form role="form" method="POST" class="formajaxer"
 	      action="/searchby">

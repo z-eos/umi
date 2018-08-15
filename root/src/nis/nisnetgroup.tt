@@ -17,6 +17,10 @@
 
 [% INCLUDE ldap_err.tt %]
 
+### !!! here we need to distinguish create and modify cases
+### !!! here we need to distinguish create and modify cases
+### !!! here we need to distinguish create and modify cases
+
 [% form.render_repeatable_js %]
 
 [% form.render %]

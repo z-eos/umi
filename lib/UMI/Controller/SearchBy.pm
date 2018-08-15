@@ -500,13 +500,12 @@ sub proc :Path(proc) :Args(0) {
       my ($is_single, $names);
       foreach my $objectClass (sort @{$entry->{objectClass}}) {
 	foreach $attr (sort (keys %{$c->session->{ldap}->{obj_schema}->{$objectClass}->{must}} )) {
-	  next if $attr eq "objectClass";
-	  log_debug { np($c->session->{ldap}->{obj_schema}->{$objectClass}->{must}->{$attr}->{'single-value'}) };
+	  #next if $attr eq "objectClass";
 	  $is_single->{$attr} = $c->session->{ldap}->{obj_schema}->{$objectClass}->{must}->{$attr}->{'single-value'};
 	  $names->{$attr} = 0;
 	}
 	foreach $attr (sort (keys %{$c->session->{ldap}->{obj_schema}->{$objectClass}->{may}} )) {
-	  next if $attr eq "objectClass";
+	  #next if $attr eq "objectClass";
 	  $is_single->{$attr} = $c->session->{ldap}->{obj_schema}->{$objectClass}->{may}->{$attr}->{'single-value'};
 	  $names->{$attr} = 0;
 	}
