@@ -471,7 +471,8 @@ sub proc :Path(proc) :Args(0) {
       $entry_tmp = $mesg->entry(0);
 
       $c->stats->profile('search for <i class="text-light">' . $params->{ldap_modify} . '</i>');
-
+      #log_debug { np($entry_tmp) };
+      #log_debug { np($return) };
       foreach $attr ( $entry_tmp->attributes ) {
 	if ( $attr =~ /;binary/ or
 	   $attr eq "userPKCS12" ) { ## !!! temporary stub !!! 	  next;
@@ -1488,11 +1489,11 @@ sub modify :Path(modify) :Args(0) {
       push @{$replace}, $attr . ';binary' => [ $binary ];
       $cert_info =
 	$self->cert_info({ cert => $binary, ts => "%Y%m%d%H%M%S", });
-      push @{$replace}, 'umiUserCertificateSn'        => '' . $cert_info->{'S/N'};
-      push @{$replace}, 'umiUserCertificateNotBefore' => '' . $cert_info->{'Not Before'};
-      push @{$replace}, 'umiUserCertificateNotAfter'  => '' . $cert_info->{'Not  After'};
-      push @{$replace}, 'umiUserCertificateSubject'   => '' . $cert_info->{'Subject'};
-      push @{$replace}, 'umiUserCertificateIssuer'    => '' . $cert_info->{'Issuer'};
+      push @{$replace}, 'umiUserCertificateSn' => '' . $cert_info->{'S/N'},
+	'umiUserCertificateNotBefore' => '' . $cert_info->{'Not Before'},
+	'umiUserCertificateNotAfter'  => '' . $cert_info->{'Not  After'},
+	'umiUserCertificateSubject'   => '' . $cert_info->{'Subject'},
+	'umiUserCertificateIssuer'    => '' . $cert_info->{'Issuer'};
       $moddn = 'cn=' . $cert_info->{'CN'};
     } elsif ( ( $attr eq 'cACertificate' ||
 		$attr eq 'certificateRevocationList' ) && $val_params ne '' ) {
@@ -1533,10 +1534,13 @@ sub modify :Path(modify) :Args(0) {
       push @{$return->{error}}, $mesg->{html};
     } else {
       if ( defined $moddn && $moddn ne '' ) {
-	$mesg = $ldap_crud->moddn({ dn => $params->{dn}, newrdn => $moddn, });
+	$mesg = $ldap_crud->moddn({ src_dn => $params->{dn}, newrdn => $moddn, });
 	if ( $mesg ne "0" ) {
 	  push @{$return->{error}}, $mesg->{html};
 	} else {
+	  my @dn_arr = split(/,/, $params->{dn});
+	  shift @dn_arr;
+	  $dn = sprintf("%s,%s", $moddn, join(',', @dn_arr));
 	  push @{$return->{success}}, 'RDN changed as well<br><br>';
 	}
       }
@@ -1547,37 +1551,10 @@ sub modify :Path(modify) :Args(0) {
     push @{$return->{warning}}, 'No change was performed!';
   }
 
-  # $c->stash( template      => 'search/modify.tt', # stub.tt',
-  # 	     params        => $params,
-  # 	     final_message => $return,
-  # 	   );
-
   log_info { 'here we detach to /searchby/proc with ldap_modify = ' . $dn . ' with return: ' . np($return) };
   $c->stash->{ldap_modify}   = $dn;
   $c->stash->{final_message} = $return;
-  $c->forward('/searchby/proc');
-
-  
-# --- #   $c->stash( template => 'search/modify.tt',
-# --- # 	     final_message => $return, );
-# --- # 
-# --- #   if ( keys %{$params} == 1 ) {
-# --- #     my $init_obj = { add_svc_acc => $params->{add_svc_acc} };
-# --- #     return unless $self->form
-# --- #       ->process( init_object => $init_obj,
-# --- # 		 ldap_crud => $c->model('LDAP_CRUD'), );
-# --- #   } else {
-# --- #     # log_debug { np( $params ) };
-# --- #     return unless $self->form
-# --- #       ->process( posted => ($c->req->method eq 'POST'),
-# --- # 		 params => $params,
-# --- # 		 ldap_crud => $c->model('LDAP_CRUD'), );
-# --- # 
-# --- #     $self->form->ldap_modify( defined $params->{ldap_modify} && $params->{ldap_modify} ne '' ? $params->{ldap_modify} : '' );
-# --- #     $params->{action_searchby} = $c->uri_for_action('searchby/modify');
-# --- # 
-# --- #   }
-
+  $c->detach('/searchby/proc');
 }
 
 

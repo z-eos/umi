@@ -175,17 +175,16 @@
 	  </button>
 	</form>
       </li>
-      [%     IF entry.key.match('Netgroups') %]
+      [%     IF entry.key.match('Netgroups') || entry.key.match('Org') %]
       <li>
-	<form role="form" method="POST" 
+	<form role="form" method="POST" class="formajaxer"
 	      action="/searchby/modform">
+	  <input type="hidden" name="aux_dn_form_to_modify" value="[% entry.key %]">
 	  <button type="submit" class="btn btn-link"
-		  title="edit form (the one used for object creation)"
-		  value="[% entry.key %]"
-		  data-order="[% site.searchby.menu.order.ldap_modify %]"
-		  name="aux_dn_form_to_modify">
+		  title="EXPERIMENTAL: edit form (the one used for object creation)"
+		  data-order="[% site.searchby.menu.order.ldap_modify %]">
 	    <span class="fa fa-fw fa-pen-alt text-muted"></span>
-	    edit form
+	    edit form <sup><span class="fas fa-exclamation-triangle text-muted"></span></sup>
 	  </button>
 	</form>
       </li>
