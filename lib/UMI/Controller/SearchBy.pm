@@ -6,6 +6,7 @@ package UMI::Controller::SearchBy;
 use Net::LDAP::Util qw(	ldap_explode_dn );
 
 use Logger;
+use MIME::Base64;
 
 #use utf8;
 use Moose;
@@ -345,7 +346,6 @@ sub index :Path :Args(0) {
 	$ttentries->{$dn}->{attrs}->{$attr} = $to_utf_decode;
 
 	if ( $attr eq 'jpegPhoto' ) {
-	  use MIME::Base64;
 	  $ttentries->{$dn}->{attrs}->{$attr} =
 	    sprintf('img-thumbnail" alt="jpegPhoto of %s" src="data:image/jpg;base64,%s" title="%s" />',
 		    $dn,
@@ -478,13 +478,10 @@ sub proc :Path(proc) :Args(0) {
 	   $attr eq "userPKCS12" ) { ## !!! temporary stub !!! 	  next;
 	  $entry->{$attr} = "BINARY DATA";
 	} elsif ( $attr eq 'jpegPhoto' ) {
-### !!! to refactory to something like  $jpeg = $self->file2var( $file, $final_message );
-	  use MIME::Base64;
-	  $entry->{$attr} = sprintf('data:image/jpg;base64,%s',
-				    encode_base64(join('',
-						       @{$entry_tmp->get_value($attr, asref => 1)})
-						 )
-				   );
+	  $entry->{$attr} =
+	    sprintf("data:image/jpg;base64,%s",
+		    encode_base64(join('', @{$entry_tmp->get_value($attr, asref => 1)}))
+		   );
 	} elsif ( $attr eq 'userPassword' ) {
 	  next;	#   $entry->{$attr} = '*' x 8;
 	} else {
@@ -1538,10 +1535,17 @@ sub modify :Path(modify) :Args(0) {
 	if ( $mesg ne "0" ) {
 	  push @{$return->{error}}, $mesg->{html};
 	} else {
-	  my @dn_arr = split(/,/, $params->{dn});
-	  shift @dn_arr;
-	  $dn = sprintf("%s,%s", $moddn, join(',', @dn_arr));
-	  push @{$return->{success}}, 'RDN changed as well<br><br>';
+	  $dn =~ s/^(.+?),/$moddn,/;
+	  push @{$return->{success}},
+	    sprintf("<div class='panel panel-info'>
+  <div class='panel-heading'>RDN changed as well</div>
+  <div class='panel-body'>
+    <dl class='dl-horizontal'>
+      <dt>old DN</dt><dd class='mono'>%s</dd>
+      <dt>new DN</dt><dd class='mono'>%s</dd>
+    </dl>
+  </div>
+</div>", $params->{dn}, $dn);
 	}
       }
       push @{$return->{success}}, 'Modification/s made:<pre>' .

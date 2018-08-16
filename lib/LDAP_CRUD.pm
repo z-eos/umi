@@ -940,7 +940,7 @@ sub moddn {
     $self->ldap->moddn ( $arg->{dn},
 			 newrdn       => $arg->{newrdn},
 			 deleteoldrdn => $arg->{deleteoldrdn} );
-  log_debug { np($msg) };
+
   if ($msg->is_error()) {
     $return = $self->err( $msg );
     $return->{caller} = 'call to LDAP_CRUD->moddn from ' . $callername . ': ';

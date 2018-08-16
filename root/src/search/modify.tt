@@ -4,7 +4,7 @@
    %]
 
 <div class="page-header">
-  <[% site.pageheading %]>Modify Fields of DN:<small><em>
+  <[% site.pageheading %]>Modify Fields of DN: <small><em>
     [% IF modify %]
     [% modify %]
     [% ELSE %]
@@ -33,7 +33,7 @@
   <input type="hidden" name="dn" id="dn" value="[% modify %]">
 
   <div class="well">
-    <div class="form-group">
+    <div class="input-group">
       <label class="col-sm-3 text-right h5">
 	<b>Attributes Available:</b>
       </label>
@@ -46,44 +46,44 @@
 	</select>
       </div>
     </div>
-    [% FOREACH attr_rest IN attrs_rest %]
-    [% id = attr_rest.key _ '_' _ loop.index %]
-    <div id="[% attr_rest.key %]" class="form-group hidden attrs-rest row">
-      <label class="col-sm-3 text-right h5">
-	<b>[% attr_rest.key %]</b>
-      </label>
-      <div class="col-sm-9">
-	<div class="input-group input-group-sm">
-	  [%   IF multival.${attr.key} == 1 && ( attr.value.size == 1 || attr.value.first == val ) %]
-	  <span class="input-group-btn">
-            <button class="btn btn-secondary btn-default btn-add element-add"
-		    id="[% id %]"
-		    type="button" title="click to add another [% attr.key %] field">
-	      <i class="fa fa-copy text-success"></i>
-	    </button>
-	  </span>
-	  [%   ELSE %]
-	  <span class="input-group-btn">
-	    <button class="btn btn-secondary btn-default btn-erase" type="button" title="erase field value"
-		    id="[% id %]">
-	      <i class="fa fa-eraser text-danger"></i>
-	    </button>
-	  </span>
-	  [%   END %]
+  </div>
+  [% FOREACH attr_rest IN attrs_rest %]
+  [% id = attr_rest.key _ '_' _ loop.index %]
+  <div id="[% attr_rest.key %]" class="form-group hidden attrs-rest row">
+    <label class="col-sm-3 text-right h5">
+      <b>[% attr_rest.key %]</b>
+    </label>
+    <div class="col-sm-9">
+      <div class="input-group input-group-sm">
+	[%   IF multival.${attr.key} == 1 && ( attr.value.size == 1 || attr.value.first == val ) %]
+	<span class="input-group-btn">
+          <button class="btn btn-secondary btn-default btn-add element-add"
+		  id="[% id %]"
+		  type="button" title="click to add another [% attr.key %] field">
+	    <i class="fa fa-copy text-success"></i>
+	  </button>
+	</span>
+	[%   ELSE %]
+	<span class="input-group-btn">
+	  <button class="btn btn-secondary btn-default btn-erase" type="button" title="erase field value"
+		  id="[% id %]">
+	    <i class="fa fa-eraser text-danger"></i>
+	  </button>
+	</span>
+	[%   END %]
 
-	  [% IF attr_rest.key == 'jpegPhoto' %]
-	  <input type="file" class="btn btn-default" id="[% id %]" name="[% attr_rest.key %]" accept="image/jpeg, image/png">      
-	  [% ELSIF attr_rest.key == 'mu-sieveOnReceive' %]
-	  <textarea name="[% attr_rest.key %]" class="form-control" rows=2 placeholder="sieve script to be put here"></textarea>
-	  [% ELSE %]
-	  <input type=text value="" id="[% id %]" name="[% attr_rest.key %]" class="form-control"
-		 placeholder="input attribute [% attr_rest.key %] value here">
-	  [% END %]
-	</div>
+	[% IF attr_rest.key == 'jpegPhoto' %]
+	<input type="file" class="btn btn-default" id="[% id %]" name="[% attr_rest.key %]" accept="image/jpeg, image/png">      
+	[% ELSIF attr_rest.key == 'mu-sieveOnReceive' %]
+	<textarea name="[% attr_rest.key %]" class="form-control" rows=2 placeholder="sieve script to be put here"></textarea>
+	[% ELSE %]
+	<input type=text value="" id="[% id %]" name="[% attr_rest.key %]" class="form-control"
+	       placeholder="input attribute [% attr_rest.key %] value here">
+	[% END %]
       </div>
     </div>
-    [% END %]
   </div>
+  [% END %]
   [% # -------------------------------------------------------------------------------------------- %]
   [% FOREACH attr IN entries %]
   [% attrId = attr.key _ '_' _ loop.index %]
@@ -95,12 +95,12 @@
       <div class="input-group input-group-sm">
       [% IF attr.key == 'jpegPhoto' %]
       <img alt="jpegPhoto of [% modify %]" src="[% attr.value %]" class="img-thumbnail pull-left" title="[% modify %]">
-      <input type="file" class="btn btn-default" name="[% attr.key %]" accept="image/jpeg, image/png">
+      <input type="file" class="btn btn-default btn-sm" name="[% attr.key %]" accept="image/jpeg, image/png">
 
       [% ELSIF attr.key == 'userCertificate;binary' ||
 	 attr.key == 'cACertificate;binary' ||
 	 attr.key == 'certificateRevocationList;binary' %]
-      <input type="file" class="btn btn-default" name="[% attr.key %]" accept=".der">
+      <input type="file" class="btn btn-default btn-sm" name="[% attr.key %]" accept=".der">
 
       [% ELSIF attr.key == 'userPassword' %]
       <input type="password" name="[% attr.key %]0" class="form-control" placeholder="password is here">
