@@ -94,8 +94,16 @@
     <div class="col-sm-9 controls">
       <div class="input-group input-group-sm">
       [% IF attr.key == 'jpegPhoto' %]
-      <img alt="jpegPhoto of [% modify %]" src="[% attr.value %]" class="img-thumbnail pull-left" title="[% modify %]">
-      <input type="file" class="btn btn-default btn-sm" name="[% attr.key %]" accept="image/jpeg, image/png">
+	<div class="media">
+	  <div class="media-left">
+	    <img alt="jpegPhoto of [% modify %]" src="[% attr.value %]" class="img-thumbnail pull-left" title="[% modify %]">
+	  </div>
+	  <div class="media-body">
+	    <p class="text-muted">to modify image, please use menu &rarr; image</p>
+	  </div>
+	</div>
+
+	<!-- input type="file" class="btn btn-default btn-sm" name="[% attr.key %]" accept="image/jpeg, image/png"> -->
 
       [% ELSIF attr.key == 'userCertificate;binary' ||
 	 attr.key == 'cACertificate;binary' ||

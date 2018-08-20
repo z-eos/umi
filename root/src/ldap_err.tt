@@ -1,4 +1,4 @@
-<br>
+<div class="container-fluid">
 [% IF form.errors || ( final_message.error && final_message.error != '') %]
 <div class="panel-group umi-zerro-margin" id="accordion">
   <div class="panel panel-danger">
@@ -65,5 +65,5 @@
     </ul>
   </div>
 </div>
-<br>
+</div>
 [% END %]

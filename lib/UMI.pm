@@ -40,14 +40,15 @@ extends 'Catalyst';
 our $VERSION = '0.91';
 
 __PACKAGE__
-  ->config(
-	   'Plugin::Cache' => { backend => { class => "Cache::Memory", }, },
-	   name => 'UMI',
-	   # Disable deprecated behavior needed by old applications
-	   disable_component_resolution_regex_fallback => 1,
-	   enable_catalyst_header => 1, # Send X-Catalyst header
-	   default_view => "Web",
-	   session => { # cookie_name => "umi_cookie",
+  ->config({
+	    'Plugin::Cache' => { backend => { class => "Cache::Memory", }, },
+	    name => 'UMI',
+	    # Disable deprecated behavior needed by old applications
+	    disable_component_resolution_regex_fallback => 1,
+	    enable_catalyst_header => 1, # Send X-Catalyst header
+	    default_view => "Web",
+	   
+	    session => {	# cookie_name => "umi_cookie",
 			cookie_expires => 0,
 			cookie_secure => 0,
 		        storage => "/tmp/umi/umi-session-t$^T-p$>",
@@ -62,59 +63,67 @@ __PACKAGE__
 			verify_address => 1,
 			unlink_on_exit => 1,
 			## init_file => 1, # causes need for re-login if PSGI reloaded during the form filling
-		      },
-	   authentication =>
-	   {
-	    default_realm => "ldap",
-	    realms => { ldap =>
-			{ credential => { class => "Password",
-					  password_field => "password",
-					  password_type => "self_check", },
-			  store => { binddn              => 'uid=binddn,ou=system,dc=foo,dc=bar',
-				     bindpw              => 'secret password',
-				     class               => 'LDAP',
-				     ldap_server         => 'ldap.host.org',
-				     ldap_server_options => { timeout => 30 },
-				     use_roles           => 1,
-				     role_basedn         => "ou=group,ou=system,dc=foo,dc=bar",
-				     role_field          => "cn",
-				     role_filter         => "(memberUid=%s)",
-				     role_scope          => "sub",
-				     # role_search_options => { deref => "always" },
-				     role_value          => "uid",
-				     # role_search_as_user => 0,
-				     start_tls           => 0,
-				     start_tls_options   => { verify => "none" },
-				     # entry_class         => "MyApp::LDAP::Entry",
-				     user_basedn         => 'ou=People,dc=foo,dc=bar',
-				     user_field          => "uid",
-				     user_filter         => "(uid=%s)",
-				     user_scope          => "one", # or "sub" for Active Directory
-				     # user_search_options => { deref => "never" },
-				     user_results_filter => sub { return shift->pop_entry },
-				   },
-			},
-		      },
-	   },
-	   'View::Web' => { INCLUDE_PATH => [
-					     UMI->path_to( 'root', 'src' ),
-					     UMI->path_to( 'root', 'lib' )
-					    ],
-			    # DEBUG          => 'parser, provider, dirs, caller',
-			    # DEBUG_FORMAT   => "\n" . '<!-- TT DEBUG - file: $file; L$line; text: [% $text %] -->' . "\n",
-			    PRE_PROCESS    => 'config/main',
-			    PRE_CHOMP      => 1,
-			    POST_CHOMP     => 1,
-			    TRIM           => 1,
-			    WRAPPER        => 'site/wrapper',
-			    ERROR          => 'error.tt2',
-			    TIMER          => 0,
-			    EVAL_PERL      => 1,
-			    ENCODING       => 'utf8',
-			    expose_methods => [ qw{ helper_cfg } ], # provided in lib/UMI/View/Web.pm
-			    render_die     => 1,
-			  },
-	  );
+		       },
+	   
+	    authentication =>
+	    {
+	     default_realm => "ldap",
+	     realms => { ldap =>
+			 { credential => { class => "Password",
+					   password_field => "password",
+					   password_type => "self_check", },
+			   store => { binddn              => 'uid=binddn,ou=system,dc=foo,dc=bar',
+				      bindpw              => 'secret password',
+				      class               => 'LDAP',
+				      ldap_server         => 'ldap.host.org',
+				      ldap_server_options => { timeout => 30 },
+				      use_roles           => 1,
+				      role_basedn         => "ou=group,ou=system,dc=foo,dc=bar",
+				      role_field          => "cn",
+				      role_filter         => "(memberUid=%s)",
+				      role_scope          => "sub",
+				      # role_search_options => { deref => "always" },
+				      role_value          => "uid",
+				      # role_search_as_user => 0,
+				      start_tls           => 0,
+				      start_tls_options   => { verify => "none" },
+				      # entry_class         => "MyApp::LDAP::Entry",
+				      user_basedn         => 'ou=People,dc=foo,dc=bar',
+				      user_field          => "uid",
+				      user_filter         => "(uid=%s)",
+				      user_scope          => "one", # or "sub" for Active Directory
+				      # user_search_options => { deref => "never" },
+				      user_results_filter => sub { return shift->pop_entry },
+				    },
+			 },
+		       },
+	    },
+	   
+	    'View::Web' => { INCLUDE_PATH => [
+					      UMI->path_to( 'root', 'src' ),
+					      UMI->path_to( 'root', 'lib' )
+					     ],
+			     # DEBUG          => 'parser, provider, dirs, caller',
+			     # DEBUG_FORMAT   => "\n" . '<!-- TT DEBUG - file: $file; L$line; text: [% $text %] -->' . "\n",
+			     PRE_PROCESS    => 'config/main',
+			     PRE_CHOMP      => 1,
+			     POST_CHOMP     => 1,
+			     TRIM           => 1,
+			     WRAPPER        => 'site/wrapper',
+			     ERROR          => 'error.tt2',
+			     TIMER          => 0,
+			     EVAL_PERL      => 1,
+			     ENCODING       => 'utf8',
+			     expose_methods => [ qw{ helper_cfg } ], # provided in lib/UMI/View/Web.pm
+			     render_die     => 1,
+			   },
+	   
+	    # 'View::Download' => { # default      => 'text/plain',
+	    # 			  content_type =>
+	    # 			  { 'text/plain' => { outfile_ext => 'ldif',
+	    # 					      module      => '+Download::Plain', },},
+	    # 			},
+	   });
 
 
 # Start the application

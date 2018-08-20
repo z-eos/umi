@@ -16,6 +16,12 @@ has '+action' => ( default => '/searchby/proc' );
 
 has_field 'ldap_modify_jpegphoto' => ( type => 'Hidden', );
 
+has_field 'remove' => ( type => 'Checkbox',
+       label => 'Remove Avatar',
+       wrapper_class => [ 'checkbox', ],
+       element_wrapper_class => [ 'col-xs-offset-2', 'col-10' ],
+       element_attr => { title => 'When checked, this checkbox causes avatar removal.',}, );
+
 has_field 'avatar' => ( type => 'Upload',
 			label => 'Photo User ID',
 			label_class => [ 'col-xs-2' ],
@@ -46,7 +52,7 @@ has_block 'aux_submitit' => ( tag => 'fieldset',
 			      class => [ 'container-fluid' ]
 			    );
 
-sub build_render_list {[ 'ldap_modify_jpegphoto', 'avatar', 'aux_submitit' ]}
+sub build_render_list {[ 'ldap_modify_jpegphoto', 'remove', 'avatar', 'aux_submitit' ]}
 
 sub html_attributes {
   my ( $self, $field, $type, $attr ) = @_;

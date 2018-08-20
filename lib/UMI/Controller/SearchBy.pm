@@ -792,21 +792,20 @@ sub proc :Path(proc) :Args(0) {
       return unless $self->form_jpegphoto->process(
 						   posted => ($c->req->method eq 'POST'),
 						   params => $params,
-						  ) && defined $params->{avatar} && $params->{avatar} ne '';
-
+						  ) && (defined $params->{avatar} && $params->{avatar} ne '' ) ||
+						    ( defined $params->{remove} && $params->{remove} eq '1' );
 
       my $ldap_crud = $c->model('LDAP_CRUD');
 
       $c->stash( final_message => $self
 		 ->mod_jpegPhoto(
-				 $ldap_crud,
+				 $c->model('LDAP_CRUD'),
 				 {
 				  mod_jpegPhoto_dn => $params->{ldap_modify_jpegphoto},
-				  jpegPhoto => $params->{avatar},
-				  jpegPhoto_stub => $c
-				  ->path_to('root',
-					    'static',
-					    'images',
+				  jpegPhoto        => $params->{avatar},
+				  remove           => $params->{remove},
+				  jpegPhoto_stub   => $c
+				  ->path_to('root', 'static', 'images',
 					    $ldap_crud->cfg->{jpegPhoto}->{stub}),
 				 }
 				),
@@ -1005,22 +1004,17 @@ sub mod_jpegPhoto {
 
   my $arg = {
 	     mod_jpegPhoto_dn => $args->{mod_jpegPhoto_dn},
-	     jpegPhoto => $args->{jpegPhoto},
-	     jpegPhoto_stub => $args->{jpegPhoto_stub},
+	     remove           => $args->{remove} || 0,
+	     jpegPhoto        => $args->{jpegPhoto},
+	     jpegPhoto_stub   => $args->{jpegPhoto_stub},
 	    };
 
   my ( $fh, $final_message, $file, $jpeg);
   if (defined $arg->{jpegPhoto}) {
-    $file = $arg->{jpegPhoto}->{'tempname'};
-  } else {
-    $file = $arg->{jpegPhoto_stub};
-  }
-  
-  $jpeg = $self->file2var( $file, $final_message );
+    $jpeg = $self->file2var( $arg->{jpegPhoto}->{'tempname'}, $final_message );
 
-  return $jpeg if ref($jpeg) eq 'HASH' && defined $jpeg->{error};
+    return $jpeg if ref($jpeg) eq 'HASH' && defined $jpeg->{error};
 
-  if ( defined $arg->{jpegPhoto} ) {
     my $mesg = $ldap_crud->modify( $arg->{mod_jpegPhoto_dn},
 				   [ replace => [ jpegPhoto => [ $jpeg ], ], ], );
 
@@ -1032,6 +1026,15 @@ sub mod_jpegPhoto {
 	'<dt>type:</dt><dd>' . $arg->{jpegPhoto}->{'type'} . '</dd>' .
 	'<dt>size:</dt><dd>' . $arg->{jpegPhoto}->{'size'} . ' bytes size.</dd></dl>';
     }
+  } elsif ( $arg->{remove} ) {
+    my $mesg = $ldap_crud->modify( $arg->{mod_jpegPhoto_dn}, [ delete => [ jpegPhoto => [], ], ], );
+    if ( $mesg ne '0' ) {
+      $final_message->{error} = 'Error during jpegPhoto deletion occured: ' . $mesg->{html};
+    } else {
+      $final_message->{success} = 'jpegPhoto attribute was successfully deleted';
+    }
+  } else {
+    $final_message->{success} = 'nothing to do ... neither removal was asked, nor new avatar choosen ...';
   }
 
   return $final_message;
@@ -1328,11 +1331,11 @@ sub ldif_gen :Path(ldif_gen) :Args(0) {
   my ( $self, $c ) = @_;
   my $params = $c->req->parameters;
   my $ldif = $c->model('LDAP_CRUD')->
-    ldif(
-	 $params->{ldap_ldif},
-	 $params->{ldap_ldif_recursive},
-	 $params->{ldap_ldif_sysinfo}
-	);
+    ldif({
+	   dn        => $params->{ldap_ldif},
+	   recursive => $params->{ldap_ldif_recursive},
+	   sysinfo   => $params->{ldap_ldif_sysinfo}
+	 });
         # looks like they are defined always
 	#  defined $params->{ldap_ldif_recursive} && $params->{ldap_ldif_recursive} ne '' ? 1 : 0,
 	#  defined $params->{ldap_ldif_sysinfo} && $params->{ldap_ldif_sysinfo} ne '' ? 1 : 0
@@ -1353,24 +1356,20 @@ sub ldif_gen2f :Path(ldif_gen2f) :Args(0) {
   my ( $self, $c ) = @_;
   my $params = $c->req->parameters;
   my $ldif = $c->model('LDAP_CRUD')->
-    ldif(
-	 $params->{ldap_ldif},
-	 $params->{ldap_ldif_recursive},
-	 $params->{ldap_ldif_sysinfo}
-	);
-        # looks like they are defined always
-	#  defined $params->{ldap_ldif_recursive} && $params->{ldap_ldif_recursive} ne '' ? 1 : 0,
-	#  defined $params->{ldap_ldif_sysinfo} && $params->{ldap_ldif_sysinfo} ne '' ? 1 : 0
-	# );
+    ldif({ dn        => $params->{ldap_ldif},
+	   base      => $params->{ldap_ldif_base},
+	   filter    => $params->{ldap_ldif_filter},
+	   recursive => $params->{ldap_ldif_recursive},
+	   sysinfo   => $params->{ldap_ldif_sysinfo} });
+log_debug { np($ldif) };
+  $c->stash(
+	    current_view => 'Download',
+#	    download => 'text/plain',
+	    plain => $ldif->{ldif},
+	    outfile_name => $ldif->{outfile_name},
+	   );
 
-    $c->stash(
-	      current_view => 'Download',
-	      download => 'text/plain',
-	      plain => $ldif->{ldif},
-	      outfile_name => $ldif->{outfile_name} . '.LDIF',
-	      outfile_ext => 'ldif',
-	     );
-    $c->forward('UMI::View::Download');
+  $c->forward('UMI::View::Download');
 }
 
 
@@ -1515,14 +1514,9 @@ sub modify :Path(modify) :Args(0) {
   }
 
   my $modx;
-  push @{$modx}, delete => $delete
-    if defined $delete && $#{$delete} > -1;
-
-  push @{$modx}, add => $add
-    if defined $add && $#{$add} > -1;
-
-  push @{$modx}, replace => $replace
-    if defined $replace && $#{$replace} > -1;
+  push @{$modx}, delete => $delete   if defined $delete && $#{$delete} > -1;
+  push @{$modx}, add => $add         if defined $add && $#{$add} > -1;
+  push @{$modx}, replace => $replace if defined $replace && $#{$replace} > -1;
 
   if ( defined $modx && $#{$modx} > -1 ) {
     # p $modx;
@@ -1548,8 +1542,14 @@ sub modify :Path(modify) :Args(0) {
 </div>", $params->{dn}, $dn);
 	}
       }
-      push @{$return->{success}}, 'Modification/s made:<pre>' .
-	np($modx, caller_info => 0, colored => 0, index => 0) . '</pre>';
+      push @{$return->{success}}, 'Modification/s made:<pre class="mono">' .
+	np($modx,
+	   caller_info    => 0,
+	   colored        => 0,
+	   hash_separator => ': ',
+	   indent         => 2,
+	   multiline      => 0,
+	   index          => 0) . '</pre>';
     }
   } else {
     push @{$return->{warning}}, 'No change was performed!';

@@ -100,24 +100,30 @@
 	       tabindex="0">
 	      <span id="chevron_switcher" class="fa [% site.icons.toggle %][% chevron_toggle %]"></span>
 	    </a>
-	    <a href="#"
-	       class="btn" role="button"
-	       title="ColorLegend"
-	       id="btnLegend"
-	       data-animation="false"
-	       data-trigger="click"
-	       data-placement="right"
-	       data-html="true"
-	       data-toggle="popover"
-	       data-original-title="ColorLegend"
-	       data-content="<ul class='list-unstyled list-group'>
-	       <li class='list-group-item list-group-item-info'>root object</li>
-	       <li class='list-group-item list-group-item-warning'>service branch</li>
-	       <li class='list-group-item list-group-item-success'>service account</li>
-	       </ul>"
-	       tabindex="0">
-	      <i class="fa fa-info-circle"></i>
-	    </a>
+
+	    [% IF c.check_user_roles('admin') %]
+	    <!-- ###### Search Results LDIF start -->
+	    <div class="pull-right">
+	    <form method="POST" role="form" action="/searchby/ldif_gen2f" id="f_ldif_gen2f">
+	      <input type="hidden"  name="ldap_ldif_base" value="[% base_dn %]">
+	      <input type="hidden"  name="ldap_ldif_filter" value="[% filter %]">
+	      <input type="hidden"  name="ldap_ldif_recursive" value="1">
+	      <a href="#" class="btn btn-link umi-btn-event umi-btn-logic"
+		      value="[% base_dn %]"
+		      name="ldap_ldif"
+		      data-umiact="/searchby/ldif_gen2f"
+		      title='save LDIF bellow as file: [% final_message.outfile_name %]_LDIF.txt'
+		      type="submit">
+		<span class="fa fa-download fa-lg"></span>
+	      </a>
+	    </form>
+	    <!-- ###### Search Results LDIF end -->
+	    </div>
+	    [% END %]
+	    
+	  </div>
+	  <div class="pull-right text-primary">
+	    found [% entrieskeys.size %] objects
 	  </div>
 	</td>
       </tr>

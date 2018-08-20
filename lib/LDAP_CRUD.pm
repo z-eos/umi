@@ -8,6 +8,9 @@ use namespace::autoclean;
 
 use Data::Printer colored => 0, caller_info => 0;
 use Time::Piece;
+use POSIX qw(strftime);
+use MIME::Base64;
+use MIME::QuotedPrint;
 
 BEGIN { with 'Tools'; }
 
@@ -1599,49 +1602,63 @@ LDIF export
 =cut
 
 sub ldif {
-  my ($self, $dn, $recursive, $sysinfo) = @_;
-  use POSIX qw(strftime);
+  my ($self, $args) = @_;
+  my $arg = {
+	     dn     => $args->{dn}        || undef,
+	     base   => $args->{base}      || undef,
+	     filter => $args->{filter}    || 'objectClass=*',
+	     scope  => $args->{recursive} ? 'sub' : 'base',
+	     attrs  => $args->{sysinfo}   ? [ '*',
+					      'createTimestamp',
+					      'creatorsName',
+					      'entryCSN',
+					      'entryDN',
+					      'entryUUID',
+					      'hasSubordinates',
+					      'modifiersName',
+					      'modifyTimestamp',
+					      'structuralobjectclass',
+					      'subschemaSubentry',
+					    ] : [ '*' ],
+	    };
   my $ts = strftime "%Y-%m-%d %H:%M:%S", localtime;
   my $return->{ldif} = sprintf("
 ## LDIF export DN: \"%s\"
-##   Search Scope: \"base\"
-##  Search Filter: \"(objectClass=*)\"
+##   Search Scope: \"%s\"
+##  Search Filter: \"%s\"
 ##
-## LDIF generated on %s, by UMI user %s\n##\n", $dn, $ts, $self->uid);
+## LDIF generated on %s, by UMI user %s\n##\n",
+			       $arg->{dn} // '',
+			       $arg->{scope},
+			       $arg->{filter},
+			       $ts,
+			       $self->uid);
 
-    my $msg = $self->ldap->search ( base => $dn,
-				    scope => $recursive ? 'sub' : 'base',
-				    filter => 'objectClass=*',
-				    attrs => $sysinfo ? [ '*',
-							  'createTimestamp',
-							  'creatorsName',
-							  'entryCSN',
-							  'entryDN',
-							  'entryUUID',
-							  'hasSubordinates',
-							  'modifiersName',
-							  'modifyTimestamp',
-							  'structuralobjectclass',
-							  'subschemaSubentry',
-							] : [ '*' ], );
+    my $msg = $self->search ({ base   => $arg->{base} // $arg->{dn},
+			       scope  => $arg->{scope},
+			       filter => '(' . $arg->{filter} . ')',
+			       attrs  => $arg->{attrs}, });
   if ($msg->is_error()) {
     $return->{error} .= $self->err( $msg );
   } else {
-    my @entries = $msg->sorted;
+    my @entries = $msg->entries;
     foreach my $entry ( @entries ) {
       $return->{ldif} .= $entry->ldif;
     }
     $return->{success} .= sprintf('LDIF for object with DN:<blockquote class="mono">%s</blockquote> generated including%s recursion and including%s system data.',
-				  $dn,
-				  ! $recursive ? ' no' : '',
-				  ! $sysinfo ? ' no' : '' );
+				  $arg->{dn},
+				  ! $args->{recursive} ? ' no' : '',
+				  ! $args->{sysinfo} ? ' no' : '' );
   }
-  $return->{outfile_name} = join('_', split(/,/,canonical_dn($dn, casefold => 'none', reverse => 1, )));
-  $return->{dn} = $dn;
-  $return->{recursive} = $recursive;
-  $return->{sysinfo} = $sysinfo;
+  $return->{outfile_name} = defined $arg->{dn} ?
+    join('_', split(/,/,canonical_dn( $arg->{dn},casefold => 'none', reverse => 1, ))) :
+    sprintf("search-result-by-%s-on-%s", $self->uid, strftime("%Y%m%d%H%M%S", localtime));
+  $return->{dn}        = $arg->{dn};
+  $return->{recursive} = $arg->{recursive};
+  $return->{sysinfo}   = $arg->{sysinfo};
   return $return;
 }
+
 
 =head2 vcard
 
@@ -1657,8 +1674,6 @@ on input we expect
 
 sub vcard {
   my ($self, $args) = @_;
-  use POSIX qw(strftime);
-  use MIME::Base64;
 
   my $ts = strftime "%Y%m%d%H%M%S", localtime;
   my $arg = { dn => $args->{vcard_dn},
@@ -1679,7 +1694,6 @@ sub vcard {
     push @vcard, sprintf('N%s:%s;%s;;;',
 			 $arg->{sn}->{type} eq 'qp' ? ';CHARSET=UTF-8;ENCODING=QUOTED-PRINTABLE' : '',
 			 $arg->{givenName}->{str}, $arg->{sn}->{str} );
-  use MIME::QuotedPrint;
 
     $tmp = $arg->{sn}->{type} eq 'qp' || $arg->{givenNme}->{type} eq 'qp' ?
       encode_qp( sprintf('%s %s', $entry->{$arg->{dn}}->{givenname}->[0], $entry->{$arg->{dn}}->{sn}->[0]), '' ) :

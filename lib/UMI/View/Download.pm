@@ -1,8 +1,15 @@
+#-*- cperl -*-
+#
+
 package UMI::View::Download;
 use Moose;
 use namespace::autoclean;
 
 extends 'Catalyst::View::Download';
+
+__PACKAGE__->config({
+		     content_type => { 'text/plain' => { outfile_ext => 'ldif', },},
+		    });
 
 =head1 NAME
 
@@ -10,7 +17,7 @@ UMI::View::Download - Download View for UMI
 
 =head1 DESCRIPTION
 
-Download View for UMI.
+Download View as file.
 
 =head1 SEE ALSO
 
