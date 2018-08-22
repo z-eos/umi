@@ -1,0 +1,8 @@
+[% META title = 'SSH keygen' %]
+
+<[% site.pageheading %]><i class="fa fa-key fa-lg"></i> SSH key generator <small><em>all stuff</em></small></[% site.pageheading %]>
+
+[% INCLUDE ldap_err.tt %]
+
+[% form.render %]
+
