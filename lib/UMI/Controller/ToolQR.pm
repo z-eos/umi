@@ -41,7 +41,7 @@ sub index :Path :Args(0) {
     my $params = $c->req->parameters;
     
     $c->stash( template => 'tool/toolqr.tt',
-	       form => $self->form );
+	       form     => $self->form );
 
     return unless
       $self->form->process(

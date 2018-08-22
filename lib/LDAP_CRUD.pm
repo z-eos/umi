@@ -895,8 +895,8 @@ Net::LDAP->add wrapper
 
 sub add {
   my ($self, $dn, $attrs) = @_;
-  log_debug { $dn };
-  log_debug { np($attrs) };
+  # log_debug { $dn };
+  # log_debug { np($attrs) };
   my $callername = (caller(1))[3];
   $callername = 'main' if ! defined $callername;
   my $return;

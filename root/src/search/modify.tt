@@ -5,22 +5,19 @@
 
 <div class="page-header">
   <[% site.pageheading %]>Modify Fields of DN: <small><em>
-    [% IF modify %]
-    [% modify %]
-    [% ELSE %]
-    [% params.dn %]
-    [% END %]
+  [% IF modify %]
+  [% modify %]
+  [% ELSE %]
+  [% params.dn %]
+  [% END %]
   </em></small></[% site.pageheading %]>
 </div>
 
-[% INCLUDE ldap_err.tt %]
+[% # IF modify.search('authorizedService') || params.dn.search('authorizedService') %]
+[% # schema.associatedDomain = 1 %]
+[% # END %]
 
-[% FOREACH pair IN schema.pairs %]
-[%   IF ! pair.value.defined %]
-[%     multival.${pair.key} = 1 %]
-[%   END %]
-[% END %]
-[% multival.associatedDomain = 0 IF modify.match('authorized') %]
+[% INCLUDE ldap_err.tt %]
 
 [% # USE dumper %]<!-- <pre>[% # dumper.dump(params) %]</pre> -->
 
@@ -55,7 +52,7 @@
     </label>
     <div class="col-sm-9">
       <div class="input-group input-group-sm">
-	[%   IF multival.${attr.key} == 1 && ( attr.value.size == 1 || attr.value.first == val ) %]
+	[%   IF schema.${attr.key} == 0 && ( attr.value.size == 1 || attr.value.first == val ) %]
 	<span class="input-group-btn">
           <button class="btn btn-secondary btn-default btn-add element-add"
 		  id="[% id %]"
@@ -118,7 +115,7 @@
       [%   FOREACH val IN attr.value %]
       [%   id = attr.key _ '_' _ loop.index %]
       <div class="input-group input-group-sm entry">
-	[%   IF multival.${attr.key} == 1 && ( attr.value.size == 1 || attr.value.last == val ) %]
+	[%   IF schema.${attr.key} == 0 && ! modify.search('authorizedService') && ! params.dn.search('authorizedService') && ( attr.value.size == 1 || attr.value.last == val ) %]
 	<span class="input-group-btn">
           <button class="btn btn-secondary btn-default btn-add element-add"
 		  id="[% id %]"

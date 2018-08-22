@@ -40,6 +40,12 @@
 	    </a>
 	  </li>
           <li class="nav-item">
+	    <a class="nav-link" href="/toolsshkeygen">
+	      <i class="fa fa-fw fa-key"></i>
+	      SSH keygen
+	    </a>
+	  </li>
+          <li class="nav-item">
 	    <a class="nav-link" href="/toolqr">
 	      <i class="fa fa-fw fa-qrcode"></i>
 	      QR

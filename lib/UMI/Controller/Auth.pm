@@ -123,6 +123,12 @@ sub signin :Path Global {
       } elsif ( defined $_->{sup}) {
 	$c->session->{ldap}->{obj_schema_attr_equality}->{$_->{name}} = $_->{sup}->[0];
       }
+
+      if ( exists $ldap_crud->{cfg}->{defaults}->{ldap}->{is_single}->{$_->{name}} ) {
+	$c->session->{ldap}->{obj_schema_attr_single}->{$_->{name}} = $ldap_crud->{cfg}->{defaults}->{ldap}->{is_single}->{$_->{name}};
+      } else {
+	$c->session->{ldap}->{obj_schema_attr_single}->{$_->{name}} = defined $_->{'single-value'} ? 1 : 0;
+      }
     }
 
     log_info { 'user ' . $c->session->{auth_uid} . ' successfully logged in' };

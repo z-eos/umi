@@ -14,6 +14,10 @@ use List::Util;
 use List::MoreUtils;
 
 use Net::CIDR::Set;
+use Net::SSH::Perl::Key;
+
+use Crypt::X509;
+use Crypt::X509::CRL;
 
 use Net::LDAP::Util qw(	generalizedTime_to_time ldap_explode_dn );
 
@@ -155,36 +159,6 @@ sub ipam_first_free {
   return 0;
 }
 
-
-## todo? # =head2 ldap_date
-## todo? # 
-## todo? # to and fro LDAP timestamp parser
-## todo? # 
-## todo? # stolen from https://metacpan.org/pod/Catalyst::Model::LDAP::Entry
-## todo? # 
-## todo? # =cut
-## todo? # 
-## todo? # sub ldap_date {
-## todo? #   my ($self, $args) = @_;
-## todo? #   my $arg = { ts        => $args->{ts},
-## todo? # 	      patternp   => $args->{patternp} || '%Y%m%d%H%M%S%Z',
-## todo? # 	      patternf   => $args->{patternf} || '%F %T %Z',
-## todo? # 	      locale    => $args->{locale} || 'en_US',
-## todo? # 	      tz        => $args->{tz} || 'local',
-## todo? # 	      on_error  => $args->{on_error} || 'undef',
-## todo? # 	    };
-## todo? #   use DateTime::Format::Strptime qw(strftime);
-## todo? #   my $strp =
-## todo? #     DateTime::Format::Strptime->new( pattern   => $arg->{patternp},
-## todo? # 				     locale    => $arg->{locale},
-## todo? # 				     time_zone => $arg->{tz},
-## todo? # 				     on_error  => $arg->{on_error},
-## todo? # 				   );
-## todo? #   $arg->{ts_parsed} = $strp->strftime($arg->{patternf}, $strp->parse_datetime($arg->{ts}));
-## todo? #   p $strp->errmsg if $strp->{on_error} eq 'undef';
-## todo? #   p $arg->{ts_parsed};
-## todo? #   return $arg->{ts_parsed};
-## todo? # }
 
 =head2 regex
 
@@ -431,15 +405,30 @@ sub pad_base64 {
   return $to_pad;
 }
 
-=head2 file2var
+=head2 ssh_keygen
 
-read input file into the returned variable and set final message on
-results of the assignment
+ssh key generator
 
-if $return_as_arr defined and is set to 1, then return array of
-strings, rather than scalar variable
+default key_type is RSA, default bits 2048
+
+wrapper for Net::SSH::Perl::Key
 
 =cut
+
+sub ssh_keygen {
+  my ( $self, $args ) = @_;
+  my $arg = { key_type => $args->{key_type} || 'RSA',
+	      bits     => $args->{bits}     || 2048, };
+
+  my $key;
+  try {
+    $key = Net::SSH::Perl::Key->keygen($arg->{key_type}, $arg->{bits});
+    return { private => $key->{rsa_priv}->export_key_pem('private'),
+	     public  => $key->dump_public };
+  } catch {
+    return { error => qq($_) };
+  }
+}
 
 
 sub file2var {
@@ -491,10 +480,6 @@ sub cert_info {
 	     cert => $args->{cert},
 	     ts => defined $args->{ts} && $args->{ts} ? $args->{ts} : "%a %b %e %H:%M:%S %Y",
 	    };
-
-  use POSIX qw(strftime);
-  use Crypt::X509;
-  use Crypt::X509::CRL;
 
   my ( $cert, $key, $hex, $return );
   if ( $arg->{attr} eq 'userCertificate;binary' ||
@@ -1360,11 +1345,29 @@ sub generalizedtime_fr {
   my ($self, $args) = @_;
 
   my $arg = { format => $args->{format} || "%Y-%m-%d %H:%M:%S",
-	      ts => $args->{ts},
-	      gmt => $args->{gmt} || '1', };
+	      ts     => $args->{ts},
+	      gmt    => $args->{gmt} || '1', };
 
   return $arg->{gmt} ? strftime( $arg->{format}, gmtime( generalizedTime_to_time( $arg->{ts} ))) :
     strftime( $arg->{format}, localtime( generalizedTime_to_time( $arg->{ts} )));
+}
+
+sub ts {
+  my ($self, $args) = @_;
+
+  my $arg = { format => $args->{format} || "%Y%m%d%H%M%S",
+	      now    => $args->{now}    || 1,
+	      gmt    => $args->{gmt}    || 1,
+	      ts     => $args->{ts},
+	    };
+
+  if ( $arg->{now} ) {
+    return $arg->{gmt} ? strftime( $arg->{format}, gmtime ) :
+      strftime( $arg->{format}, localtime );
+  } else {
+    return $arg->{gmt} ? strftime( $arg->{format}, gmtime( $arg->{ts} )) :
+      strftime( $arg->{format}, localtime( $arg->{ts} ));
+  }
 }
 
 =head2 dns_rcode

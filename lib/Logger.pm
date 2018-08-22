@@ -40,7 +40,7 @@ my $flt_file =
 $apn_file->filter($flt_file);
 
 my $layout_file =
-  Log::Log4perl::Layout::PatternLayout->new( "%d{yyyy.MM.DD HH:mm:ss} [%p]: L%05L @ %F{2}: %m{chomp}%n%n" );
+  Log::Log4perl::Layout::PatternLayout->new( "%d{yyyy.MM.dd HH:mm:ss} [%p]: L%05L @ %F{2}: %m{chomp}%n%n" );
 
 $apn_file->layout($layout_file);
 
@@ -75,7 +75,7 @@ my $apn_scrn =
 $apn_scrn->filter($flt_sysl);
 
 my $layout_scrn =
-  Log::Log4perl::Layout::PatternLayout->new( "%d{yyyy.MM.DD HH:mm:ss} [%p]: L%05L @ %F{2}: %m{chomp}%n%n" );
+  Log::Log4perl::Layout::PatternLayout->new( "%d{yyyy.MM.dd HH:mm:ss} [%p]: L%05L @ %F{2}: %m{chomp}%n%n" );
 
 $apn_scrn->layout($layout_scrn);
 

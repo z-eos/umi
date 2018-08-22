@@ -5,21 +5,27 @@
 
 <link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">
 
-[% INCLUDE ldap_err.tt %]
-
 <div class="page-header">
 [% IF form.init_object.aux_dn_form_to_modify %]
-<[% site.pageheading %]>Update Nis Group 2 Form <small><em>[% form.init_object.aux_dn_form_to_modify %]</em></small></[% site.pageheading %]>
+  <[% site.pageheading %]>
+  Nis NetGroup Update Form <small><em>[% form.init_object.aux_dn_form_to_modify %]</em></small>
+  </[% site.pageheading %]>
 [% ELSE %]
-<[% site.pageheading %]>Nis Group 2 Creation Form <small><em>all stuff</em></small></[% site.pageheading %]>
+  <[% site.pageheading %]>
+  Nis NetGroup Creation Form <small><em>all stuff</em></small>
+  </[% site.pageheading %]>
 [% END %]
 </div>
 
 [% INCLUDE ldap_err.tt %]
 
-### !!! here we need to distinguish create and modify cases
-### !!! here we need to distinguish create and modify cases
-### !!! here we need to distinguish create and modify cases
+[% ### !!! here we need to distinguish create and modify cases %]
+[% ### !!! here we need to distinguish create and modify cases %]
+[% ### !!! here we need to distinguish create and modify cases %]
+
+[% # IF form.field('aux_dn_form_to_modify').value %]
+[% # form.action = '/searchby/modify' %]
+[% # END %]
 
 [% form.render_repeatable_js %]
 

@@ -454,9 +454,10 @@ sub proc :Path(proc) :Args(0) {
     # log_debug { np($c->stash) };
     foreach my $ldap_xxx (keys (%{$c->stash})) {
       next if $ldap_xxx !~ /ldap_/;
-      $params->{$ldap_xxx} = $c->stash->{$ldap_xxx}
-	if ! exists $params->{$ldap_xxx};
-      log_info { 'parameter ' . $ldap_xxx . ' is present in stash but was not passed with params => some method (not form) set it' };
+      if ( ! exists $params->{$ldap_xxx} ) {
+	$params->{$ldap_xxx} = $c->stash->{$ldap_xxx};
+	log_info { 'parameter ' . $ldap_xxx . ' is present in stash but was not passed with params => some method (not form) set it' };
+      }
     }
 
 #=====================================================================
@@ -499,12 +500,10 @@ sub proc :Path(proc) :Args(0) {
       foreach my $objectClass (sort @{$entry->{objectClass}}) {
 	foreach $attr (sort (keys %{$c->session->{ldap}->{obj_schema}->{$objectClass}->{must}} )) {
 	  #next if $attr eq "objectClass";
-	  $is_single->{$attr} = $c->session->{ldap}->{obj_schema}->{$objectClass}->{must}->{$attr}->{'single-value'};
 	  $names->{$attr} = 0;
 	}
 	foreach $attr (sort (keys %{$c->session->{ldap}->{obj_schema}->{$objectClass}->{may}} )) {
 	  #next if $attr eq "objectClass";
-	  $is_single->{$attr} = $c->session->{ldap}->{obj_schema}->{$objectClass}->{may}->{$attr}->{'single-value'};
 	  $names->{$attr} = 0;
 	}
       }
@@ -524,7 +523,7 @@ sub proc :Path(proc) :Args(0) {
 		modify => $params->{'ldap_modify'},
 		entries => $entry,
 		attrs_rest => $names,
-		schema => $is_single,
+		schema => $c->session->{ldap}->{obj_schema_attr_single},
 		final_message => $return,
 		rdn => (split('=', (split(',', $params->{ldap_modify}))[0]))[0],
 	       );
@@ -1422,9 +1421,20 @@ modify whole form (all present fields except RDN)
 
 
 sub modify :Path(modify) :Args(0) {
-  my ( $self, $c ) = @_;
+  my ( $self, $c, $params ) = @_;
+  
+  # log_debug { np($params) };
 
-  my $params = $c->req->parameters;
+  # whether we edit object as is or via creation form
+  $params = $c->req->parameters if ! defined $params;
+  my $action_detach_to = '/searchby/proc';
+  if ( defined $params->{aux_dn_form_to_modify} && $params->{aux_dn_form_to_modify} ne '' ) {
+    $params->{dn} = $params->{aux_dn_form_to_modify};
+    $action_detach_to = '/searchby/modform';
+  }
+
+  # log_debug { np($params) };
+
   my $dn = $params->{dn};
   my $ldap_crud = $c->model('LDAP_CRUD');
   my $mesg = $ldap_crud->search( { base => $dn, scope => 'base' } );
@@ -1432,11 +1442,12 @@ sub modify :Path(modify) :Args(0) {
   $return->{error} = $ldap_crud->err($mesg)->{html} if $mesg->code;
 
   my $entry = $mesg->entry(0);
+  # log_debug { np($mesg) };
 
   my ($jpeg, $binary, $attr, $val_params, $val_entry, $cert_info);
-  my $add = undef;
-  my $moddn = undef;
-  my $delete = undef;
+  my $add     = undef;
+  my $moddn   = undef;
+  my $delete  = undef;
   my $replace = undef;
   foreach $attr ( sort ( keys %{$params} )) {
     next if $attr =~ /$ldap_crud->{cfg}->{exclude_prefix}/ ||
@@ -1519,7 +1530,7 @@ sub modify :Path(modify) :Args(0) {
   push @{$modx}, replace => $replace if defined $replace && $#{$replace} > -1;
 
   if ( defined $modx && $#{$modx} > -1 ) {
-    # p $modx;
+    # log_debug { np( $modx ) };
     $mesg = $ldap_crud->modify( $params->{dn}, $modx, );
     if ( $mesg ne "0" ) {
       push @{$return->{error}}, $mesg->{html};
@@ -1556,9 +1567,10 @@ sub modify :Path(modify) :Args(0) {
   }
 
   log_info { 'here we detach to /searchby/proc with ldap_modify = ' . $dn . ' with return: ' . np($return) };
-  $c->stash->{ldap_modify}   = $dn;
-  $c->stash->{final_message} = $return;
-  $c->detach('/searchby/proc');
+  $c->stash->{ldap_modify}           = $dn;
+  $c->stash->{aux_dn_form_to_modify} = $params->{aux_dn_form_to_modify};
+  $c->stash->{final_message}         = $return;
+  $c->detach($action_detach_to);
 }
 
 
@@ -1626,7 +1638,7 @@ sub modform :Path(modform) :Args(0) {
     }
 
     foreach $triple ( @{$init_obj->{nisNetgroupTriple_arr}} ) {
-      # according the order of LDAP attr nisNetgroupTriple value
+      # according to the order used in LDAP attr "nisNetgroupTriple" value
       ( $host, $user, $domain ) = split(/,/, $triple);
       push @{$init_obj->{triple}},
 	{ host => substr($host, 1),
@@ -1641,7 +1653,7 @@ sub modform :Path(modform) :Args(0) {
     $c->stash( template => 'nis/nisnetgroup.tt', );
     
   } elsif ( $params->{aux_dn_form_to_modify} =~ /$ldap_crud->{cfg}->{base}->{org}/ ) { ## ORGANIZATIONs
-    use UMI::Form::Org; p $init_obj;
+    use UMI::Form::Org;
     $form = UMI::Form::Org->new( init_object => $init_obj, );
     $c->stash( template => 'org/org_wrap.tt', );
   } else { ## REST
@@ -1650,7 +1662,7 @@ sub modform :Path(modform) :Args(0) {
 	       final_message => $return, );
     $c->detach();
   }
-  # p $init_obj;		# p $form; # ->{index};
+
   $c->stash( form => $form, );
   
   # first run (coming from searchby)
@@ -1659,48 +1671,49 @@ sub modform :Path(modform) :Args(0) {
       ->process( ldap_crud => $c->model('LDAP_CRUD'), );
   } else {
     return unless $form
-      ->process( posted => ($c->req->method eq 'POST'),
-		 params => $params,
+      ->process( posted    => ($c->req->method eq 'POST'),
+		 params    => $params,
 		 ldap_crud => $c->model('LDAP_CRUD'), );
   }
 
-  $arg->{rpl} = [];
-  foreach my $ff ( $form->fields ) {
-    next if ! defined $ff->value ||
-      $ff->name =~ /aux_/ ||
-      defined $init_obj->{$ff->name} && $ff->value eq $init_obj->{$ff->name};
+  # $arg->{replace} = [];
+  # foreach my $ff ( $form->fields ) {
+  #   next if ! defined $ff->value ||
+  #     $ff->name =~ /aux_/ ||
+  #     defined $init_obj->{$ff->name} && $ff->value eq $init_obj->{$ff->name};
 
-    # the object to modify is NisNetgroup object and current field is tripple and it is not empty
-    if ( $form->field('aux_dn_form_to_modify')->value =~ /$ldap_crud->{cfg}->{base}->{netgroup}/ &&
-	 $ff->name eq 'triple' && $ff->value ) {
-      my $triple;
-      foreach ( @{$ff->value} ) {
-	push @{$triple}, sprintf('(%s,%s,%s)', $_->{host}, $_->{user}, $_->{domain});
-      }
-      push @{$arg->{rpl}}, nisNetgroupTriple => $triple;
-    } else {
-      push @{$arg->{rpl}}, $ff->name => $ff->value if $ff->value ne 'na' && $ff->value ne '';
-    }
+  #   # the object to modify is NisNetgroup object and current field is tripple and it is not empty
+  #   if ( $form->field('aux_dn_form_to_modify')->value =~ /$ldap_crud->{cfg}->{base}->{netgroup}/ &&
+  # 	 $ff->name eq 'triple' && $ff->value ) {
+  #     my $triple;
+  #     foreach ( @{$ff->value} ) {
+  # 	push @{$triple}, sprintf('(%s,%s,%s)', $_->{host}, $_->{user}, $_->{domain});
+  #     }
+  #     push @{$arg->{replace}}, nisNetgroupTriple => $triple;
+  #   } else {
+  #     push @{$arg->{replace}}, $ff->name => $ff->value if $ff->value ne 'na' && $ff->value ne '';
+  #   }
     
-    push @{$arg->{rpl}}, $ff->name => [] if $ff->value eq ''
-      && defined $init_obj->{$ff->name}
-      && $init_obj->{$ff->name} ne '';
+  #   push @{$arg->{replace}}, $ff->name => []
+  #     if $ff->value eq ''
+  #     && defined $init_obj->{$ff->name}
+  #     && $init_obj->{$ff->name} ne '';
     
-  }
-  push @{$arg->{changes}}, replace => $arg->{rpl};
+  # }
+  # push @{$arg->{changes}}, replace => $arg->{replace};
   
-  # p $arg;
+  # # p $arg;
   
-  if ( $#{$arg->{rpl}} > 0 ) {
-    my $chg = $ldap_crud->modify( $arg->{dn}, $arg->{changes} );
-    if ( $chg eq '0' ) {
-      $return->{success} = "$arg->{dn} was changed";
-    } else {
-      $return->{error} = $chg->{html};
-    }
-  }
+  # if ( $#{$arg->{replace}} > 0 ) {
+  #   my $chg = $ldap_crud->modify( $arg->{dn}, $arg->{changes} );
+  #   if ( $chg eq '0' ) {
+  #     push @{$return->{success}}, "$arg->{dn} was changed";
+  #   } else {
+  #     $return->{error} = $chg->{html};
+  #   }
+  # }
 
-  $c->stash( final_message => $return, );
+  # $c->stash( final_message => $return, );
 
 }
 

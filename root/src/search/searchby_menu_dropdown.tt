@@ -183,7 +183,7 @@
 	  <button type="submit" class="btn btn-link"
 		  title="EXPERIMENTAL: edit form (the one used for object creation)"
 		  data-order="[% site.searchby.menu.order.ldap_modify %]">
-	    <span class="fa fa-fw fa-pen-alt text-muted"></span>
+	    <span class="fa fa-fw fa-magic text-muted"></span>
 	    edit form <sup><span class="fas fa-exclamation-triangle text-muted"></span></sup>
 	  </button>
 	</form>
@@ -238,7 +238,7 @@
 		  value="[% entry.key %]"
 		  data-order="[% site.searchby.menu.order.ldap_modify_rad_group %]"
 		  name="ldap_modify_rad_group">
-	    <span class="fa fa-fw fa-group text-info"></span>
+	    <span class="fa fa-fw fa-arrows-alt text-info"></span>
 	    RADIUS group
 	  </button>
 	</form>

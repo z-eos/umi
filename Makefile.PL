@@ -18,12 +18,13 @@ requires 'namespace::autoclean';
 requires 'Config::General'; # This should reflect the config file format you've chosen
                             # See Catalyst::Plugin::ConfigLoader for supported formats
 
-requires 'Catalyst::View::TT';
-requires 'Catalyst::View::JSON';
-requires 'Catalyst::Plugin::Unicode';
+requires 'Catalyst::Authentication::Store::LDAP';
 requires 'Catalyst::Plugin::Authentication';
 requires 'Catalyst::Plugin::Session::Store::FastMmap';
-requires 'Catalyst::Authentication::Store::LDAP';
+requires 'Catalyst::Plugin::Unicode';
+requires 'Catalyst::View::Download';
+requires 'Catalyst::View::JSON';
+requires 'Catalyst::View::TT';
 
 requires 'Log::Log4perl'
 requires 'Log::Contextual'
