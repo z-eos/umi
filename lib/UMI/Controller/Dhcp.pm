@@ -8,16 +8,10 @@ use namespace::autoclean;
 BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 
 use UMI::Form::Dhcp;
+use Time::Piece;
 
 use Data::Printer { use_prototypes => 0, caller_info => 1 };
-
 use Logger;
-
-if ( UMI->config->{authentication}->{realms}->{ldap}->{store}->{ldap_server_options}->{debug} ) {
-  log_info { "LDAP debug option is set, I activate STDERR redirect." };
-  use Trapper;
-  tie *STDERR, "Trapper";
-}
 
 =head1 NAME
 
@@ -62,12 +56,13 @@ sub index :Path :Args(0) {
   $c->stash(
 	    final_message => $self->create_dhcp_host ( $c->model('LDAP_CRUD'),
 						       {
-							dhcpHWAddress => $params->{dhcpHWAddress},
-							uid => substr((split(',',$params->{ldap_add_dhcp}))[0],4),
+							dhcpHWAddress  => $params->{dhcpHWAddress},
+							uid            => substr((split(',',$params->{ldap_add_dhcp}))[0],4),
 							dhcpStatements => $params->{dhcpStatements},
-							net => $params->{net},
-							cn => $params->{cn},
-							dhcpComments => $params->{dhcpComments},
+							net            => $params->{net},
+							cn             => $params->{cn},
+							requestttl     => $params->{requestttl},
+							dhcpComments   => $params->{dhcpComments},
 						       }
 						     ));
 }
@@ -100,51 +95,57 @@ sub create_dhcp_host {
   my $nets;
   my @net = split('/', $args->{net});
   
-  # p ( $args, caller_info => 1, colored => 1);
-  # p $_->name foreach(@{$self->form->fields});
+  log_debug { np( $args ) };
 
   # my $dhcpStatements = $ldap_crud->dhcp_lease({ net => $args->{net} });
   # $return->{error} = sprintf('<li>%s</li>', $dhcpStatements->{error}) if ref($dhcpStatements) eq 'HASH';
 
-  my $iu = $ldap_crud->ipam_used({ svc => 'dhcp',
-				   netdn => $args->{net},
-				   base => $args->{net},
+  my $iu = $ldap_crud->ipam_used({ svc    => 'dhcp',
+				   netdn  => $args->{net},
+				   base   => $args->{net},
 				   filter => '(objectClass=*)',
-				   attrs => [ 'cn', 'dhcpNetMask', 'dhcpRange' ], });
+				   attrs  => [ 'cn', 'dhcpNetMask', 'dhcpRange' ], });
   # log_debug { np( $iu ) };
   if ( defined $iu->{error} ) {
-    $return->{warning} = $iu->{error};
+    push @{$return->{warning}}, $iu->{error};
   } else {
     my $first_free = $self->ipam_first_free({ ipspace => $iu->{ipspace}, ip_used => $iu->{ip_used} });
     if ( ! $first_free ) {
-      $return->{warning} = $self->
+      push @{$return->{warning}}, $self->
 	search_result_item_as_button({ pfx     => 'No free address available for the network choosen.',
 				       dn      => $args->{net},
 				       btn_txt => $args->{net},
 				       css_btn => 'btn-warning',
 				       sfx     => 'try to narrow dhcpRange/dhcpPool for the network if any.', });
     } else {
+      my $t = localtime;
       my $arg = {
-		 dhcpHWAddress => $args->{dhcpHWAddress},
-		 uid => $args->{uid} || 'unknown',
-		 netdn => $args->{net},
-		 net => $args->{net}, # FQDN for net new oject have to belong to
+		 dhcpHWAddress  => $args->{dhcpHWAddress},
+		 uid            => $args->{uid} || 'unknown',
+		 netdn          => $args->{net},
+		 net            => $args->{net}, # FQDN for net new oject have to belong to
 		 dhcpStatements => $args->{dhcpStatements} || $first_free,
-		 cn => $args->{cn} || $args->{uid} . '-' . $args->{dhcpHWAddress} =~ tr/://dr,
-		 dhcpComments => join(' ', $args->{dhcpComments}) || undef,
+		 cn             => $args->{cn} || $args->{uid} . '-' . $args->{dhcpHWAddress} =~ tr/://dr,
+		 dhcpComments   => join(' ', $args->{dhcpComments}) || undef,
 		};
+      my $exp = defined $args->{requestttl} && $args->{requestttl} ne '' && $args->{requestttl} ne '____.__.__ __:__' ? 1 : 0;
+      $arg->{requestttl} = $exp ? Time::Piece->strptime( $args->{requestttl}, "%Y.%m.%d %H:%M")->epoch - $t->epoch : 0;
+      log_debug { np($exp) };
+
+      my $objectClass = $ldap_crud->cfg->{objectClass}->{dhcp};
+      push @{$objectClass}, 'dynamicObject' if $exp;
 
       $arg->{ldapadd_arg} = [
 			     cn => $arg->{cn},
 			     uid => $arg->{uid},
-			     objectClass => $ldap_crud->cfg->{objectClass}->{dhcp},
+			     objectClass => $objectClass,
 			     dhcpHWAddress => sprintf('ethernet %s', $arg->{dhcpHWAddress}),
 			     dhcpStatements => [ sprintf('fixed-address %s', $arg->{dhcpStatements}),
 						 sprintf('ddns-hostname "%s"', $arg->{cn}) ],
 			    ];
 
       push @{$arg->{ldapadd_arg}}, dhcpComments => $arg->{dhcpComments} if defined $arg->{dhcpComments};
-      # log_debug { np($arg) };
+      log_debug { np($arg) };
 
       # $nets = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{dhcp},
       # 				     filter => 'dhcpOption=domain-name "' . $arg->{net} . '"', } );
@@ -159,11 +160,20 @@ sub create_dhcp_host {
       $nets = $ldap_crud->add( $arg->{dn}, $arg->{ldapadd_arg} );
       log_debug { np($nets) };
       if ( $nets ) {
-	$return->{error} .= sprintf('<li>error during <b>&laquo;%s&raquo;</b> configuration: %s</li>',
-				    $arg->{net},
-				    $nets->{html});
+	push @{$return->{error}}, sprintf('<li>error during <b>&laquo;%s&raquo;</b> configuration: %s</li>',
+					  $arg->{net},
+					  $nets->{html});
       } else {
-	$return->{success} =
+	if ( $arg->{requestttl} ) {
+	  my $refresh = $ldap_crud->refresh( $arg->{dn}, $arg->{requestttl} );
+	  if ( defined $refresh->{success} ) {
+	    push @{$return->{success}}, $refresh->{success};
+	  } elsif ( defined $refresh->{error} ) {
+	    push @{$return->{error}}, $refresh->{error};
+	  }
+      }
+
+	push @{$return->{success}},
 	  sprintf('user <em><b>%s,%s</b></em> MAC: <em><b>%s</b></em> now bound to IP: <em><b>%s,%s</b></em>',
 		  $arg->{uid},
 		  $ldap_crud->cfg->{base}->{acc_root},

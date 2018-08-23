@@ -14,8 +14,8 @@
     <button class="btn btn-link umi-search"
 	    type="button" id="dropdownMenuActions"
 	    data-toggle="dropdown"
-	    title="Possible Actions Upon the Object">
-      <span class="fa fa-sliders-h"></span>
+	    title="Action Menu">
+      <span class="fas fa-ellipsis-h"></span>
     </button>
     
     <ul class="dropdown-menu dropdown-menu-left"

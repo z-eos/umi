@@ -1328,46 +1328,42 @@ sub search_result_item_as_button {
 }
 
 
-=head2 generalizedtime_fr
+=head2 ts
 
-wrapper to Net::LDAP::Util generalizedTime_to_time function
+timestamp string generation method
 
-on input it expects
+input
 
-    format => string of strftime(3) conversion specifications
-    ts     => generalizedTime string, in general it match the template 
+    format => output format, default "%Y%m%d%H%M%S"
+    gmt    => generate UTC timestamp of now
+    ts     => desired date to generate timestamp for
+              if not set, then generate localtime 
+              timestamp of now
+    gnrlzd => input is generalizedTime string, in general it match the template 
               "YYYYmmddHH[MM[SS]][(./,)d...](Z|(+/-)HH[MM])"
-    gmt    => returned value is localized or not, default 1 (yes)
+              if defined, then Net::LDAP::Util generalizedTime_to_time will be used
 
 =cut
-
-sub generalizedtime_fr {
-  my ($self, $args) = @_;
-
-  my $arg = { format => $args->{format} || "%Y-%m-%d %H:%M:%S",
-	      ts     => $args->{ts},
-	      gmt    => $args->{gmt} || '1', };
-
-  return $arg->{gmt} ? strftime( $arg->{format}, gmtime( generalizedTime_to_time( $arg->{ts} ))) :
-    strftime( $arg->{format}, localtime( generalizedTime_to_time( $arg->{ts} )));
-}
 
 sub ts {
   my ($self, $args) = @_;
 
-  my $arg = { format => $args->{format} || "%Y%m%d%H%M%S",
-	      now    => $args->{now}    || 1,
-	      gmt    => $args->{gmt}    || 1,
-	      ts     => $args->{ts},
+  my $arg = { format => $args->{format} || "%Y-%m-%d %H:%M:%S",
+	      gnrlzd => $args->{gnrlzd} || 0,
+	      gmt    => $args->{gmt}    || 0,
+	      ts     => $args->{ts}     || undef,
 	    };
 
-  if ( $arg->{now} ) {
-    return $arg->{gmt} ? strftime( $arg->{format}, gmtime ) :
-      strftime( $arg->{format}, localtime );
-  } else {
-    return $arg->{gmt} ? strftime( $arg->{format}, gmtime( $arg->{ts} )) :
-      strftime( $arg->{format}, localtime( $arg->{ts} ));
+  if ( ! defined $arg->{ts} ) {
+    @{$arg->{timeptr}} = $arg->{gmt} ? gmtime : localtime;
+  } elsif ( $arg->{gnrlzd} ) {
+    @{$arg->{timeptr}} =
+      $arg->{gmt} ? gmtime(generalizedTime_to_time( $arg->{ts} )) : localtime(generalizedTime_to_time( $arg->{ts} ));
+  } elsif ( $arg->{ts} ) {
+    @{$arg->{timeptr}} = $arg->{gmt} ? gmtime($arg->{ts}) : localtime($arg->{ts});
   }
+
+  return strftime( $arg->{format}, @{$arg->{timeptr}} );
 }
 
 =head2 dns_rcode

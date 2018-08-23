@@ -973,8 +973,9 @@ sub refresh {
     $return->{error} = $msg->error;
     $return->{caller} = 'call to LDAP_CRUD->refresh from ' . $callername . ': ';
   } else {
-    log_info { sprintf("TTL for DN: %s was set to %d seconds from now", $entryName, $msg->get_ttl) };
-    $return->{success} = sprintf("TTL for DN: <b class=\"text-success\">%s</b> was set to %d seconds from now", $entryName, $msg->get_ttl);
+    # log_info { sprintf("TTL for DN: %s was set to %d hours from now, UTC", $entryName, int($requestTtl/3600 + 0.05) };
+    $return->{success} = sprintf("TTL for DN: <b>%s</b> was set to %d hours from now UTC",
+				 $entryName, int($requestTtl/3600 + 0.005));
   }
   return $return;
 }
@@ -3182,12 +3183,12 @@ sub create_account_branch_leaf {
     push @{$authorizedService},
       homeDirectory => $self->cfg->{authorizedService}->{$arg->{service}}->{homeDirectory_prefix} .
       $arg->{associatedDomain} . '/' . $arg->{uid},
-      'mu-mailBox' => 'maildir:/var/mail/' . $arg->{associatedDomain} . '/' . $arg->{uid},
-      gidNumber => $self->cfg->{authorizedService}->{$arg->{service}}->{gidNumber},
-      loginShell => $self->cfg->{stub}->{loginShell},
-      uidNumber => $arg->{uidNumber},
-      userPassword => $arg->{password}->{$arg->{service}}->{'ssha'},
-      objectClass => [ @{$self->cfg->{objectClass}->{acc_svc_email}} ];
+      'mu-mailBox'  => 'maildir:/var/mail/' . $arg->{associatedDomain} . '/' . $arg->{uid},
+      gidNumber     => $self->cfg->{authorizedService}->{$arg->{service}}->{gidNumber},
+      loginShell    => $self->cfg->{stub}->{loginShell},
+      uidNumber     => $arg->{uidNumber},
+      userPassword  => $arg->{password}->{$arg->{service}}->{'ssha'},
+      objectClass   => [ @{$self->cfg->{objectClass}->{acc_svc_email}} ];
     
   #=== SERVICE: xmpp =================================================
   } elsif ( $arg->{service} eq 'xmpp') {

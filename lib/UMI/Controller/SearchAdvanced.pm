@@ -179,9 +179,9 @@ sub proc :Path(proc) :Args(0) {
 	$c_name = ldap_explode_dn( $_->get_value('creatorsName'), casefold => 'none' );
 	$m_name = ldap_explode_dn( $_->get_value('modifiersName'), casefold => 'none' );
 	$ttentries->{$_->dn}->{root}->{ts} =
-	  { createTimestamp => $self->generalizedtime_fr({ ts => $_->get_value('createTimestamp') }),
+	  { createTimestamp => $self->ts({ ts => $_->get_value('createTimestamp'), gnrlzd => 1, gmt => 1 }),
 	    creatorsName    => defined $c_name->[0]->{uid} ? $c_name->[0]->{uid} : $c_name->[0]->{cn},
-	    modifyTimestamp => $self->generalizedtime_fr({ ts => $_->get_value('modifyTimestamp') }),
+	    modifyTimestamp => $self->ts({ ts => $_->get_value('modifyTimestamp'), gnrlzd => 1, gmt => 1 }),
 	    modifiersName   => defined $m_name->[0]->{uid} ? $m_name->[0]->{uid} : $m_name->[0]->{cn}, };
 
 	if ( $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
@@ -194,7 +194,7 @@ sub proc :Path(proc) :Args(0) {
 	    if ( $tmp eq 'dynamicObject' ) {
 	      $is_dynamicObject = 1;
 	      $ttentries->{$_->dn}->{root}->{ts}->{entryExpireTimestamp} =
-		$self->generalizedtime_fr({ ts => $_->get_value('entryExpireTimestamp') });
+		$self->ts({ ts => $_->get_value('entryExpireTimestamp'), gnrlzd => 1, gmt => 1 });
 	    }
 	  }
 	  

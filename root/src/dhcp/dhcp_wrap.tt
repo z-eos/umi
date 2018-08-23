@@ -10,8 +10,9 @@
 
 [% USE date(time = date.now, format = '%Y.%m.%d', locale = 'en_US') %]
 [% dds_max_ttl_years = 10 %]
+
 <script>
- $('#exp').datetimepicker({
+ $('#requestttl').datetimepicker({
    lang:'en',
    mask:true,
    format: 'Y.m.d H:i',
