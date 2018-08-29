@@ -68,3 +68,9 @@
     cursor: pointer;
     font-size: 14px;
 }
+
+.tree-search {
+    color: #333;
+    margin: 0px 6px 5px;
+    width: calc(100% - 12px);
+}

@@ -69,7 +69,7 @@ sub index :Path :Args(0) {
 	      $key->{private},
 	      $key->{public},
 	      $c->user,
-	      $self->ts
+	      $self->ts({ format => "%Y%m%d%H%M%S" })
 	     );
     }
 

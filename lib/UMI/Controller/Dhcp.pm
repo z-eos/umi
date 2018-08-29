@@ -129,8 +129,8 @@ sub create_dhcp_host {
 		 dhcpComments   => join(' ', $args->{dhcpComments}) || undef,
 		};
       my $exp = defined $args->{requestttl} && $args->{requestttl} ne '' && $args->{requestttl} ne '____.__.__ __:__' ? 1 : 0;
-      $arg->{requestttl} = $exp ? Time::Piece->strptime( $args->{requestttl}, "%Y.%m.%d %H:%M")->epoch - $t->epoch : 0;
-      log_debug { np($exp) };
+      $arg->{requestttl} = $exp ? $self->delta_t({ requestttl => $args->{requestttl}}) : 0;
+      # log_debug { np($exp) };
 
       my $objectClass = $ldap_crud->cfg->{objectClass}->{dhcp};
       push @{$objectClass}, 'dynamicObject' if $exp;
@@ -145,7 +145,7 @@ sub create_dhcp_host {
 			    ];
 
       push @{$arg->{ldapadd_arg}}, dhcpComments => $arg->{dhcpComments} if defined $arg->{dhcpComments};
-      log_debug { np($arg) };
+      # log_debug { np($arg) };
 
       # $nets = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{dhcp},
       # 				     filter => 'dhcpOption=domain-name "' . $arg->{net} . '"', } );

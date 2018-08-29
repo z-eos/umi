@@ -1,46 +1,57 @@
 [% META title = 'System Info' %] 
 
+<link href="/static/css/jquery.json-browse.css" rel="stylesheet" type="text/css">
+
 <h3>System Info <small><em> ... </em></small></h3>
 
-[% i = 0 %]
-[% FOREACH key IN sysinfo.keys.sort %]
-<div class="panel panel-info">
-  <div class="panel-heading umi-zerro-padding">
-    <button class="chevron_toggleable btn btn-link"
-	    type="button" data-toggle="collapse"
-	    data-target="#collapseSession[% i %]"
-	    aria-expanded="true"
-	    aria-controls="collapseSession[% i %]">
-      <span id="chevron_switcher" class="fa [% site.icons.toggle_down %]"></span>
-      <!-- span id="chevron_switcher" class="fa fa-toggle-up text-primary"></span -->
-    </button>
-    [% sysinfo.$key.title %]
+<!-- https://www.npmjs.com/package/json-browse -->
+<script src="/static/js/jquery.json-browse.js"></script>
+
+
+<div class="form-inline json-controls">
+  <div class="form-group json-controls-item">
+    <i class="fas fa-compress text-info"></i>
+    <label class="switch switch-text switch-info switch-sm">
+      <input type="checkbox" class="switch-input" name="collapsed" checked="" id="collapsed">
+      <span class="switch-label" data-on="On" data-off="Off" title="data collapsed"></span>
+      <span class="switch-handle"></span>
+    </label>
   </div>
-  <div class="panel-body collapse"  id="collapseSession[% i %]">
-    <pre>
-      [% sysinfo.$key.data %]
-    </pre>
+
+  <div class="form-group json-controls-item">
+    <i class="fas fa-quote-right text-info"></i>
+    <label class="switch switch-text switch-info switch-sm">
+      <input type="checkbox" class="switch-input" name="with-quotes" id="with-quotes">
+      <span class="switch-label" data-on="On" data-off="Off" title="keys with quotes"></span>
+      <span class="switch-handle"></span>
+    </label>
   </div>
+  
+  <button id="btn-json-browse" title="re-render JSON" class="btn btn-info btn-sm json-controls-item">
+    <i class="fas fa-redo fa-lg"></i>
+  </button>
 </div>
-[% i = i + 1 %]
-[% END %]
 
-<!--
-<script>
- $('.chevron_toggleable').on('click', function() {
-   $(this).find('.fa').toggleClass('[% site.icons.toggle_down %]').toggleClass('[% site.icons.toggle_up %]')
- });
-</script>
--->
+
+<div class="panel panel-default">
+  <div class="panel-heading">system info data ( JSON formated )</div>
+  <div id="json-renderer" class="json-body"></div>
+</div>
+
 
 <script>
- /*!
-  * searchby result/s un/collaps-er (@ sysinfo.tt)
-  */ 
- $('.collapse_in_out').on('click', function() {
-   $("[id^=collapse]").toggleClass('panel-collapse collapse in').toggleClass('panel-collapse collapse');
-   $("[id^=chevron_switcher]").toggleClass('[% site.icons.toggle_down %]').toggleClass('[% site.icons.toggle_up %]');
- });
-</script>
+ $(function() {
+   $('#btn-json-browse').click(function() {
+     var data = [% sysinfo %];
+     var options = {
+       collapsed: $('#collapsed').is(':checked'),
+       withQuotes: $('#with-quotes').is(':checked')
+     };
 
+     $('#json-renderer').jsonBrowse(data, options);
+   });
+
+   $('#btn-json-browse').click();
+  });
+</script>
 

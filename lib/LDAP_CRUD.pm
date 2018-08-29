@@ -124,6 +124,7 @@ sub _build_cfg {
 		   ovpn =>           'ou=OpenVPN,'             . UMI->config->{ldap_crud_db},
 		   rad_groups =>     'ou=groups,ou=RADIUS,'    . UMI->config->{ldap_crud_db},
 		   rad_profiles =>   'ou=profiles,ou=RADIUS,'  . UMI->config->{ldap_crud_db},
+		   sudo =>           'ou=SUDOers,'             . UMI->config->{ldap_crud_db},
 		   workstations =>   'ou=workstations,'        . UMI->config->{ldap_crud_db},
 		   monitor =>        'cn=Monitor',
 		   objects =>        [ qw(
@@ -140,12 +141,13 @@ sub _build_cfg {
 					   ovpn
 					   rad_groups
 					   rad_profiles
+					   sudo
 					   workstations
 					   monitor
 					) ],
 		   icon => {
 			    DHCP =>          'fas fa-sitemap',
-			    GitACL =>        'fas fa-git',
+			    GitACL =>        'fab fa-git',
 			    OpenVPN =>       'fas fa-sitemap',
 			    Organizations => 'fas fa-industry',
 			    People =>        'fas fa-user-circle',
@@ -226,13 +228,13 @@ sub _build_cfg {
 		 },
 	  objectClass => {
 			  acc_root => [ qw(
-					    top
-					    posixAccount
+					    grayAccount
+					    inetLocalMailRecipient
 					    inetOrgPerson
 					    organizationalPerson
 					    person
-					    inetLocalMailRecipient
-					    grayAccount
+					    posixAccount
+					    top
 					 ) ],  # umiSettings
 			  acc_svc_branch => [ qw(
 						  account
@@ -240,51 +242,51 @@ sub _build_cfg {
 					       ) ],
 			  acc_svc_802_1x => [ qw(
 						  account
-						  simpleSecurityObject
 						  authorizedServiceObject
 						  domainRelatedObject
 						  radiusprofile
+						  simpleSecurityObject
 					       ) ],
 			  acc_svc_802_1x_eaptls => [ qw(
 							 account
-							 simpleSecurityObject
 							 authorizedServiceObject
 							 domainRelatedObject
-							 radiusprofile
 							 pkiUser
+							 radiusprofile
+							 simpleSecurityObject
 							 umiUserCertificate
 						      ) ],
 			  acc_svc_common => [ qw(
-						  posixAccount
-						  shadowAccount
-						  inetOrgPerson
 						  authorizedServiceObject
 						  domainRelatedObject
+						  inetOrgPerson
+						  posixAccount
+						  shadowAccount
 					       ) ],
 			  acc_svc_email => [ qw(
 						 mailutilsAccount
 					      ) ],
 			  acc_svc_web => [ qw(
 					       account
-					       simpleSecurityObject
-					       uidObject
 					       authorizedServiceObject
 					       domainRelatedObject
+					       simpleSecurityObject
+					       uidObject
 					    ) ],
 			  acc_svc_ssh => [ qw(
 					       ldapPublicKey
 					    ) ],
 			  gitacl => [ qw(
-				    	  top
 				    	  gitACL
+				    	  top
 				       ) ],
 			  group =>  [ qw(
-				    	  top
 				    	  posixGroup
+				    	  top
 				       ) ],
 			  dhcp => [ qw(
-					top
 					dhcpHost
+					top
 					uidObject
 				     ) ],
 			  netgroup =>  [ qw(
@@ -292,27 +294,31 @@ sub _build_cfg {
 					     nisNetgroup
 					  ) ],
 			  ovpn => [ qw(
-					top
-					organizationalRole
 					authorizedServiceObject
 					domainRelatedObject
+					organizationalRole
 					pkiUser
-					umiUserCertificate
+					top
 					umiOvpnCfg
+					umiUserCertificate
 				     ) ],
 			  org => [ qw(
-				       top
-				       organizationalUnit
 				       domainRelatedObject
+				       organizationalUnit
+				       top
 				    ) ],
 			  ssh => [ qw(
-				       top
 				       account
 				       ldapPublicKey
+				       top
 				    ) ],
+			  sudo =>  [ qw(
+					 top
+				    	 sudoRole
+				      ) ],
 			  inventory => [ qw(
-					     top
 					     hwInventory
+					     top
 					  ) ],
 			 },
 	  jpegPhoto => {
@@ -706,7 +712,7 @@ sub last_seq_val {
 			 scope  => $arg->{scope},
 			 filter => $arg->{filter},
 			 attrs  => [ $arg->{attr} ],
-			 deref => $arg->{deref}, );
+			 deref  => $arg->{deref}, );
 
   if ( $mesg->code ) {
     $return .= $self->err( $mesg );
@@ -715,7 +721,7 @@ sub last_seq_val {
       my @arr = $mesg->sorted ( $arg->{attr} );
       $return = $arr[$#arr]->get_value( $arg->{attr} );
     } else {
-      return undef;
+      return;
     }
   }
   return $return;

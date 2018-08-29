@@ -406,22 +406,37 @@
 	      [%     IF h_attr.key.match('certificateRevocationList;binary') &&
 		 cert.key.match('RevokedCertificates') %]
 	      <dt>[%   cert.key %]</dt><dd class="mono">
-		<table class="table table-condensed table-striped">
-		  <thead>
-		    <tr class="info">
-		      <th>S/N<sub>10</sub></th>
-		      <th>S/N<sub>hex</sub></th>
-		      <th><i class="fa fa-calendar"></i></th>
-		    </tr>
-		  </thead>
-		  [% FOREACH key IN cert.value.keys.sort %]
-		  <tr>
-		    <td>[% key %]</td>
-		    <td>[% cert.value.$key.sn_hex %]</td>
-		    <td>[% cert.value.$key.revocationDate %]</td>
-		  </tr>
-		  [% END %]
-		</table>
+		<div class="panel panel-info">
+		  <div class="panel-heading">
+		    <h3 class="panel-title">
+		      <a class="collapsed chevron_toggleable" data-toggle="collapse"
+			 href="#collapse_personal_data" aria-expanded="true" aria-controls="collapse_personal_data">
+			<i class="fa [% site.icons.toggle_down %] text-default"></i>
+		      </a>
+		      revoked certificates list
+		    </h3>
+		  </div>
+		  <div id="collapse_personal_data" class="panel-collapse collapse" aria-labelledby="heading_personal_data">
+		    <div class="panel-body">
+		      <table class="table table-condensed table-striped">
+			<thead>
+			  <tr class="info">
+			    <th>S/N<sub>10</sub></th>
+			    <th>S/N<sub>hex</sub></th>
+			    <th><i class="fa fa-calendar"></i></th>
+			  </tr>
+			</thead>
+			[% FOREACH key IN cert.value.keys.sort %]
+			<tr>
+			  <td>[% key %]</td>
+			  <td>[% cert.value.$key.sn_hex %]</td>
+			  <td>[% cert.value.$key.revocationDate %]</td>
+			</tr>
+			[% END %]
+		      </table>
+		    </div>
+		  </div>
+		</div>
 	      </dd>
 	      [%     ELSE %]
 	      <dt>[%   cert.key %]</dt><dd class="mono">[% cert.value %]</dd>

@@ -1578,7 +1578,7 @@ sub modify :Path(modify) :Args(0) {
 
 =head1 modform
 
-modify form as it is (reuse of add)
+modify form as it is (reuse of add form)
 
 =cut
 
@@ -1604,6 +1604,7 @@ sub modform :Path(modform) :Args(0) {
     $init_obj->{$attr} = $#{$tmp} > 0 ? $tmp : $tmp->[0];
   }
   $init_obj->{aux_dn_form_to_modify} = $params->{aux_dn_form_to_modify};
+log_debug { np($init_obj) };
 
   ####################################################################
   # TARGETS TO MODIFY
@@ -1651,6 +1652,38 @@ sub modform :Path(modform) :Args(0) {
     use UMI::Form::NisNetgroup;
     $form = UMI::Form::NisNetgroup->new( init_object => $init_obj, );
     $c->stash( template => 'nis/nisnetgroup.tt', );
+
+  } elsif ( $params->{aux_dn_form_to_modify} =~ /$ldap_crud->{cfg}->{base}->{sudo}/ ) { ## SUDO
+
+    if ( ref($init_obj->{sudoCommand}) eq 'ARRAY' ) {
+      $init_obj->{sudoCommand_arr} = $init_obj->{sudoCommand};
+    } else {
+      push @{$init_obj->{sudoCommand_arr}}, $init_obj->{sudoCommand};
+    }
+    
+    push @{$init_obj->{com}}, { sudoCommand => $_ }
+      foreach ( @{$init_obj->{sudoCommand_arr}} );
+
+    delete $init_obj->{sudoCommand_arr};
+    delete $init_obj->{sudoCommand};
+
+    if ( ref($init_obj->{sudoOption}) eq 'ARRAY' ) {
+      $init_obj->{sudoOption_arr} = $init_obj->{sudoOption};
+    } else {
+      push @{$init_obj->{sudoOption_arr}}, $init_obj->{sudoOption};
+    }
+    
+    push @{$init_obj->{opt}}, { sudoOption => $_ }
+      foreach ( @{$init_obj->{sudoOption_arr}} );
+
+    delete $init_obj->{sudoOption_arr};
+    delete $init_obj->{sudoOption};
+
+    
+    
+    use UMI::Form::Sudo;
+    $form = UMI::Form::Sudo->new( init_object => $init_obj, );
+    $c->stash( template => 'sudo/sudo.tt', );
     
   } elsif ( $params->{aux_dn_form_to_modify} =~ /$ldap_crud->{cfg}->{base}->{org}/ ) { ## ORGANIZATIONs
     use UMI::Form::Org;

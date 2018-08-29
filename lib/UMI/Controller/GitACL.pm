@@ -32,40 +32,29 @@ Catalyst Controller.
 =cut
 
 sub index :Path :Args(0) {
-    my ( $self, $c, $gitacl_create_id ) = @_;
-    if ( $c->check_user_roles('wheel')) {
-      # use Data::Dumper;
+  my ( $self, $c, $gitacl_create_id ) = @_;
 
-      $c->stash( template => 'gitacl/gitacl_wrap.tt',
-		 form => $self->form );
+  # use Data::Dumper;
 
-      my $params = $c->req->parameters;
+  $c->stash( template => 'gitacl/gitacl_wrap.tt',
+	     form => $self->form );
 
-      # use Data::Dumper;
-      # $c->log->debug( "\$params:\n" . Dumper($params));
+  my $params = $c->req->parameters;
 
-      # Validate and insert/update database
-      return unless $self->form->process( # item_id => $gitacl_create_id,
-					  posted => ($c->req->method eq 'POST'),
-					  params => $params,
-					  ldap_crud => $c->model('LDAP_CRUD'),
-					);
+  # use Data::Dumper;
+  # $c->log->debug( "\$params:\n" . Dumper($params));
 
-      # $c->log->debug("Moose::Role test:\n" . $self->is_ascii("latin1"));
+  # Validate and insert/update database
+  return unless $self->form->process( # item_id => $gitacl_create_id,
+				     posted => ($c->req->method eq 'POST'),
+				     params => $params,
+				     ldap_crud => $c->model('LDAP_CRUD'),
+				    );
 
-      my $res = $self->create_gitacl( $c );
-      $c->log->debug( "create_account (from umi_add) error: " . $res) if $res;
-    } elsif ( defined $c->session->{"auth_uid"} ) {
-      if (defined $c->session->{'unauthorized'}->{ $c->action } ) {
-	$c->session->{'unauthorized'}->{ $c->action } += 1;
-      } else {
-	$c->session->{'unauthorized'}->{ $c->action } = 1;
-      }
-      $c->stash( 'template' => 'unauthorized.tt',
-		 'unauth_action' => $c->action, );
-    } else {
-      $c->stash( template => 'signin.tt', );
-    }
+  # $c->log->debug("Moose::Role test:\n" . $self->is_ascii("latin1"));
+
+  my $res = $self->create_gitacl( $c );
+  $c->log->debug( "create_account (from umi_add) error: " . $res) if $res;
 }
 
 =head2 create_account

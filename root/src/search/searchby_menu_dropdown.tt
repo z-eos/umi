@@ -175,7 +175,7 @@
 	  </button>
 	</form>
       </li>
-      [%     IF entry.key.match('Netgroups') || entry.key.match('Org') %]
+      [%     IF entry.key.match('Netgroups') || entry.key.match('Org') || entry.key.match('GitACL') || entry.key.match('SUDO') %]
       <li>
 	<form role="form" method="POST" class="formajaxer"
 	      action="/searchby/modform">

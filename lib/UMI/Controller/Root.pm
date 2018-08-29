@@ -89,7 +89,8 @@ sub sysinfo : Local {
   my ( $self, $c ) = @_;
 
   use Data::Printer colored => 0;
-
+  use JSON;
+  
   my $sysinfo;
   my %x = @{$c->dump_these};
   # $x{dump_these} = $c->dump_these;
@@ -111,20 +112,33 @@ sub sysinfo : Local {
   }
   my $monitor = $mesg->as_struct;
 
+  my $json = JSON->new->allow_nonref;
+
+  # $sysinfo = {
+  # 	      session => { title => 'Session',
+  # 			   data  => np(%x, colored => 0), },
+  # 	      LDAP_CRUD_cfg => { title => 'LDAP_CRUD configuration ( $c->model(LDAP_CRUD)->cfg )',
+  # 				 data  => np($c->model('LDAP_CRUD')->cfg, colored => 0), },
+  # 	      # look stat_monitor()
+  # 	      monitor => { title => 'OpenLDAP daemon monitor',
+  # 			   data  => np($monitor, colored => 0), },
+  # 	      # UMI_c => { title => 'UMI c',
+  # 	      # 		      data => p($c, colored => 0), },
+  # 	     };
   $sysinfo = {
-	      session => { title => 'Session',
-			   data  => np(%x, colored => 0), },
-	      LDAP_CRUD_cfg => { title => 'LDAP_CRUD configuration ( $c->model(LDAP_CRUD)->cfg )',
-				 data  => np($c->model('LDAP_CRUD')->cfg, colored => 0), },
-	      # look stat_monitor()
-	      monitor => { title => 'OpenLDAP daemon monitor',
-			   data  => np($monitor, colored => 0), },
-	      # UMI_c => { title => 'UMI c',
-	      # 		      data => p($c, colored => 0), },
+	      'UMI session'
+	      => { title => 'Session',
+		   data  => \%x, },
+	      'LDAP_CRUD->cfg'
+	      => { title => 'LDAP_CRUD configuration ( $c->model(LDAP_CRUD)->cfg )',
+		   data  => $c->model('LDAP_CRUD')->cfg, },
+	      'LDAP monitor'
+	      => { title => 'OpenLDAP daemon monitor',
+		   data  => $monitor, },
 	     };
 
-  $c->stash( template => 'sysinfo.tt',
-	     sysinfo => $sysinfo,
+  $c->stash( template      => 'sysinfo.tt',
+	     sysinfo       => to_json ( $sysinfo, {utf8 => 1, pretty => 1, allow_blessed => 1,} ),
 	     final_message => $return, );
 }
 

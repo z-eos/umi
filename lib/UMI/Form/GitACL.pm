@@ -8,7 +8,9 @@ extends 'UMI::Form::LDAP';
 
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable', 'CIDR', 'PositiveNum' );
 
-sub build_form_element_class { [ 'form-horizontal', ] }
+has '+action' => ( default => '/gitacl' );
+
+sub build_form_element_class { [ 'form-horizontal', 'formajaxer', ] }
 
 sub html_attributes {
   my ( $self, $field, $type, $attr ) = @_;

@@ -32,7 +32,7 @@
    <!-- <script src="/static/bootstrap/js/bootstrap.min.js"></script> -->
 
    <link href="/static/css/jquery.datetimepicker.css" media="screen" rel="stylesheet" type="text/css">
-      
+
  </head>
  [% IF c.user_exists %]
  [% sidebar = c.session.settings.ui.sidebar == 0 ? ' sidebar-minimized' : '' %]

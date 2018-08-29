@@ -1,4 +1,4 @@
-window.Service = window.Module || {};
+window.Service = window.Service || {};
 
 window.Service.api = (function () {
 
@@ -65,7 +65,7 @@ window.Service.api = (function () {
                 url: url,
                 success: function (html) {
                     _this.config.treeViewElement.html(html);
-		    handleResponce();
+        		    handleResponce();
                 }
             });
         }

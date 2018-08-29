@@ -232,7 +232,7 @@ sub create_account {
       }
       
       push @{$final_message->{success}},
-	sprintf('<i class="fa fa-user fa-lg fa-fw"></i>&nbsp;<em>root account login:</em> <strong class="text-success">%s</strong> <em>password:</em> <strong class="text-success mono">%s</strong>%s',
+	sprintf('<i class="fa fa-user-circle fa-lg fa-fw"></i>&nbsp;<em>root account login:</em> <strong class="text-success">%s</strong> <em>password:</em> <strong class="text-success mono">%s</strong>%s',
 		$uid,
 		$pwd->{root}->{'clear'},
 		$self->search_result_item_as_button({ uri => $args->{action_searchby},

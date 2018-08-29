@@ -8,12 +8,18 @@ use utf8;
 use Data::Printer;
 use Try::Tiny;
 use POSIX qw(strftime);
+use Time::Piece;
+use IO::File;
 
 use Scalar::Util;
 use List::Util;
 use List::MoreUtils;
 
 use Net::CIDR::Set;
+
+# # use Crypt::Misc qw( encode_b64 );
+# # use Crypt::PK::RSA;
+
 use Net::SSH::Perl::Key;
 
 use Crypt::X509;
@@ -201,7 +207,7 @@ sub utf2lat {
   use utf8;
   use Lingua::Translit;
   if ( ! defined $allvariants ) {
-    $tr = new Lingua::Translit($table);
+    $tr = Lingua::Translit->new($table);
     $return = $tr->translit( $to_translit );
     # escape important non ascii
     $return =~ s/ĭ/j/g;
@@ -210,15 +216,15 @@ sub utf2lat {
     $return =~ tr/a-zA-Z0-9\,\.\_\-\ \@\#\%\*\(\)\!//cds;
     return $return;
   } else {
-    $tr = new Lingua::Translit('ALA-LC RUS');
+    $tr = Lingua::Translit->new('ALA-LC RUS');
     $return->{'ALA-LC RUS'} = $tr->translit( $to_translit );
-    $tr = new Lingua::Translit('GOST 7.79 RUS');
+    $tr = Lingua::Translit->new('GOST 7.79 RUS');
     $return->{'GOST 7.79 RUS'} = $tr->translit( $to_translit );
-    $tr = new Lingua::Translit('DIN 1460 RUS');
+    $tr = Lingua::Translit->new('DIN 1460 RUS');
     $return->{'DIN 1460 RUS'} = $tr->translit( $to_translit );
-    $tr = new Lingua::Translit('ISO 9');
+    $tr = Lingua::Translit->new('ISO 9');
     $return->{'ISO 9'} = $tr->translit( $to_translit );
-    $tr = new Lingua::Translit($table);
+    $tr = Lingua::Translit->new($table);
     $return->{'UMI use ' . $table . ' with non-alphas removed'} = $tr->translit( $to_translit );
     $return->{'UMI use ' . $table . ' with non-alphas removed'} =~ s/ї/i/g;
     $return->{'UMI use ' . $table . ' with non-alphas removed'} =~ s/є/e/g;
@@ -424,37 +430,53 @@ sub ssh_keygen {
   try {
     $key = Net::SSH::Perl::Key->keygen($arg->{key_type}, $arg->{bits});
     return { private => $key->{rsa_priv}->export_key_pem('private'),
-	     public  => $key->dump_public };
+  	     public  => $key->dump_public };
   } catch {
     return { error => qq($_) };
   }
+
+  # # my $key;
+  # # try {
+  # #   $key = Crypt::PK::RSA->new;
+  # #   $key->generate_key($arg->{bits}/8);
+  # #   my $hash = $key->key2hash;
+  # #   my $e = substr('0',0,length($hash->{e}) % 2) . $hash->{e}; # prepend 0 if hex string is odd length, ie: 10001 (65537 decimal)
+  # #   $b->put_mp_int(pack('H*',$e));
+  # #   $b->put_mp_int(pack('H*',$hash->{N}));
+  # #   $b->bytes;
+  # #   $arg->{return} { private => $key->export_key_jwk('private', 1),
+  # # 		       public  => $key->export_key_jwk('public', 1) };
+  # #   log_debug {np($key->key2hash)};
+  # # } catch {
+  # #   return { error => qq($_) };
+  # # }
 }
 
 
 sub file2var {
-  my  ( $self, $file, $final_message, $return_as_arr ) = @_;
-  my @file_in_arr;
-  my $file_in_str;
-  binmode FILE;
-  
+  my ( $self, $file, $final_message, $return_as_arr ) = @_;
+  my ( @file_in_arr,$file_in_str, $fh );
+
   try {
-    open FILE, $file;
+    $fh = IO::File->new($file, "r");
   } catch {
     push @{$final_message->{error}}, "Can not open $file: $_";
   };
+
+  $fh->binmode;
     
   if ( defined $return_as_arr && $return_as_arr == 1 ) {
-    while (<FILE>) {
+    while (<$fh>) {
       chomp;
       push @file_in_arr, $_;
     }
   } else {
     local $/ = undef;
-    $file_in_str = <FILE>;
+    $file_in_str = <$fh>;
   }
 
   try {
-    close FILE;
+    $fh->close;
   } catch {
     push @{$final_message->{error}}, "$_";
   };
@@ -1243,7 +1265,7 @@ sub vld_ifconfigpush {
 
   my ( $l, $r ) = split(/ /, $arg->{ifconfigpush});
 
-  $arg->{vpn}->{net} = new Net::Netmask ($arg->{vpn_net});
+  $arg->{vpn}->{net} = Net::Netmask->new($arg->{vpn_net});
 
   if ( $arg->{mode} ne 'net30' && $arg->{vpn}->{net}->nth(1) eq $l ) {
     $arg->{return}->{error} = 'Left address can not be the address of VPN server itself.';
@@ -1252,7 +1274,7 @@ sub vld_ifconfigpush {
     $arg->{return} = 0; # $arg->{return}->{error} = 'NONWIN CONFIG';
 
   } else {
-    $arg->{net} = new Net::Netmask ( $l . '/30');
+    $arg->{net} = Net::Netmask->new( $l . '/30');
     if ( ! $arg->{net}->match( $r ) ) {
       $arg->{return}->{error} = 'The second address does not belong to the expected ' . $arg->{net}->desc;
     } elsif ( $l eq $r ) {
@@ -1364,6 +1386,14 @@ sub ts {
   }
 
   return strftime( $arg->{format}, @{$arg->{timeptr}} );
+}
+
+sub delta_t {
+  my ($self, $args) = @_;
+  my $arg = { requestttl => $args->{requestttl},
+	      format     => $args->{format} || "%Y.%m.%d %H:%M" };
+  my $t = localtime;
+  return Time::Piece->strptime( $arg->{requestttl}, $arg->{format})->epoch - $t->epoch;
 }
 
 =head2 dns_rcode
