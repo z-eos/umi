@@ -49,9 +49,16 @@
      };
 
      $('#json-renderer').jsonBrowse(data, options);
+     $(".json-string").addClass("text-success");
+     $(".json-literal").addClass("text-primary");
    });
 
    $('#btn-json-browse').click();
   });
 </script>
 
+<script>
+ $(function(){
+   $(".json-string").addClass("text-success");
+ });
+</script>

@@ -12,13 +12,14 @@ ul.json-dict, ol.json-array {
 }
 /*  font: 13px/18px monospace; */
 
+/* added with $(".json-string").addClass("text-success");
 .json-string {
   color: #0B7500;
 }
 .json-literal {
   color: #1A01CC;
   font-weight: bold;
-}
+} */
 
 /* Toggle button */
 a.json-toggle {

@@ -1330,11 +1330,9 @@ sub ldif_gen :Path(ldif_gen) :Args(0) {
   my ( $self, $c ) = @_;
   my $params = $c->req->parameters;
   my $ldif = $c->model('LDAP_CRUD')->
-    ldif({
-	   dn        => $params->{ldap_ldif},
+    ldif({ dn        => $params->{ldap_ldif},
 	   recursive => $params->{ldap_ldif_recursive},
-	   sysinfo   => $params->{ldap_ldif_sysinfo}
-	 });
+	   sysinfo   => $params->{ldap_ldif_sysinfo}, });
         # looks like they are defined always
 	#  defined $params->{ldap_ldif_recursive} && $params->{ldap_ldif_recursive} ne '' ? 1 : 0,
 	#  defined $params->{ldap_ldif_sysinfo} && $params->{ldap_ldif_sysinfo} ne '' ? 1 : 0
@@ -1354,13 +1352,14 @@ method to download ldif_gen() results as text/plain file
 sub ldif_gen2f :Path(ldif_gen2f) :Args(0) {
   my ( $self, $c ) = @_;
   my $params = $c->req->parameters;
+  log_debug { np($params) };
   my $ldif = $c->model('LDAP_CRUD')->
     ldif({ dn        => $params->{ldap_ldif},
 	   base      => $params->{ldap_ldif_base},
 	   filter    => $params->{ldap_ldif_filter},
 	   recursive => $params->{ldap_ldif_recursive},
 	   sysinfo   => $params->{ldap_ldif_sysinfo} });
-log_debug { np($ldif) };
+  # log_debug { np($ldif) };
   $c->stash(
 	    current_view => 'Download',
 #	    download => 'text/plain',

@@ -1628,6 +1628,7 @@ sub ldif {
 					      'subschemaSubentry',
 					    ] : [ '*' ],
 	    };
+  log_debug{np($arg)};
   my $ts = strftime "%Y-%m-%d %H:%M:%S", localtime;
   my $return->{ldif} = sprintf("
 ## LDIF export DN: \"%s\"
@@ -1641,12 +1642,13 @@ sub ldif {
 			       $ts,
 			       $self->uid);
 
-    my $msg = $self->search ({ base   => $arg->{base} // $arg->{dn},
-			       scope  => $arg->{scope},
-			       filter => '(' . $arg->{filter} . ')',
-			       attrs  => $arg->{attrs}, });
+    my $msg = $self->search ({ base      => $arg->{base} // $arg->{dn},
+			       scope     => $arg->{scope},
+			       filter    => '(' . $arg->{filter} . ')',
+			       sizelimit => 0,
+			       attrs     => $arg->{attrs}, });
   if ($msg->is_error()) {
-    $return->{error} .= $self->err( $msg );
+    $return->{error} .= $self->err( $msg )->{html};
   } else {
     my @entries = $msg->entries;
     foreach my $entry ( @entries ) {
@@ -1661,8 +1663,8 @@ sub ldif {
     join('_', split(/,/,canonical_dn( $arg->{dn},casefold => 'none', reverse => 1, ))) :
     sprintf("search-result-by-%s-on-%s", $self->uid, strftime("%Y%m%d%H%M%S", localtime));
   $return->{dn}        = $arg->{dn};
-  $return->{recursive} = $arg->{recursive};
-  $return->{sysinfo}   = $arg->{sysinfo};
+  $return->{recursive} = $args->{recursive} ? 1 : 0;
+  $return->{sysinfo}   = $args->{sysinfo} ? 1 : 0;
   return $return;
 }
 
