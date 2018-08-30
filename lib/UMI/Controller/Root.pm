@@ -6,6 +6,7 @@ package UMI::Controller::Root;
 use Moose;
 use namespace::autoclean;
 use Data::Printer colored => 0;
+use JSON;
 
 use Logger;
 
@@ -87,19 +88,25 @@ sub accinfo :Path(accinfo) :Args(0) {
 
 sub sysinfo : Local {
   my ( $self, $c ) = @_;
-
-  use Data::Printer colored => 0;
-  use JSON;
   
   my $sysinfo;
-  my %x = @{$c->dump_these};
+  my $x;
+  my $y = $c->dump_these;
+  my %z = %{$y->[1]};
+  $x->{$y->[0]} = \%z;
+  #log_debug {np($x)};
   # $x{dump_these} = $c->dump_these;
-  $x{calculate_initial_session_expires} = localtime($c->calculate_initial_session_expires);
-  $x{get_session_id} = localtime($c->get_session_id);
-  $x{session_expires} = localtime($c->session_expires);
-  $x{auth_pwd} = 'CENSORED';
-  $x{auth_obj}->{userpassword} = 'CENSORED';
+  $x->{calculate_initial_session_expires} = $self->ts({ ts => $c->calculate_initial_session_expires, format => "%Y%m%d%H%M%S" });
+  $x->{get_session_id} =  $self->ts({ ts => $c->get_session_id, format => "%Y%m%d%H%M%S" });
+  $x->{session_expires} = $self->ts({ ts => $c->session_expires, format => "%Y%m%d%H%M%S" });
+  $x->{auth_pwd} =
+    $x->{Session}->{auth_pwd} =
+    $x->{Session}->{auth_obj}->{userpassword} =
+    $x->{Session}->{__user}->{user}->{attributes}->{userpassword} = '*****';
+  
+  delete $x->{__user}->{user}->{ldap_entry};
 
+  log_debug {np($x)};
   my $return;
   my $ldap_crud = $c->model('LDAP_CRUD');
   my $mesg = $ldap_crud->search({ base => $ldap_crud->{cfg}->{base}->{monitor},
@@ -128,7 +135,7 @@ sub sysinfo : Local {
   $sysinfo = {
 	      'UMI session'
 	      => { title => 'Session',
-		   data  => \%x, },
+		   data  => $x, },
 	      'LDAP_CRUD->cfg'
 	      => { title => 'LDAP_CRUD configuration ( $c->model(LDAP_CRUD)->cfg )',
 		   data  => $c->model('LDAP_CRUD')->cfg, },

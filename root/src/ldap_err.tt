@@ -1,69 +1,67 @@
-<div class="col-12">
-  [% IF form.errors || ( final_message.error && final_message.error != '') %]
-  <div class="panel-group umi-zerro-margin" id="accordion">
-    <div class="panel panel-danger">
-      <div class="panel-heading clearfix umi-zerro-padding" role="tab" id="headErr">
-	<a class="chevron_toggleable btn btn-danger pull-left borderless"
-	   href="#" title="Collapse In/Out This Panel" data-target="#collapseErr"
-	   data-toggle="collapse" data-parent="#accordion">
-	  <i class="fa [% site.icons.toggle_up %]"></i>
-	</a>
-	<h4>&nbsp;&nbsp;<span class="fa fa-exclamation-circle">&nbsp;</span>Error!</h4>
-      </div>
-      <div id="collapseErr" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingErr">
-	<div class="panel-body">
-	  [% IF form.errors %]
-	  <b class="text-danger">Form contains error/s! Check for fields constraints met, please!</b>
-	  <ul class="list-unstyled">
-	    [% FOREACH i IN form.errors.reverse %]
-	    [% IF i != '' %]<li>[% i %]</li>[% END %]
-	    [% END %]
-	  </ul>
+[% IF form.errors || ( final_message.error && final_message.error != '') %]
+<div class="panel-group umi-zerro-margin" id="accordion">
+  <div class="panel panel-danger">
+    <div class="panel-heading clearfix umi-zerro-padding" role="tab" id="headErr">
+      <a class="chevron_toggleable btn btn-danger pull-left borderless"
+	 href="#" title="Collapse In/Out This Panel" data-target="#collapseErr"
+	 data-toggle="collapse" data-parent="#accordion">
+	<i class="fa [% site.icons.toggle_up %]"></i>
+      </a>
+      <h4>&nbsp;&nbsp;<span class="fa fa-exclamation-circle">&nbsp;</span>Error!</h4>
+    </div>
+    <div id="collapseErr" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingErr">
+      <div class="panel-body">
+	[% IF form.errors %]
+	<b class="text-danger">Form contains error/s! Check for fields constraints met, please!</b>
+	<ul class="list-unstyled">
+	  [% FOREACH i IN form.errors.reverse %]
+	  [% IF i != '' %]<li>[% i %]</li>[% END %]
 	  [% END %]
-	  [% IF final_message.error %]
-	  <ul class="list-unstyled">
-	    [% FOREACH i IN final_message.error.sort %]
-	    [% IF i != '' %]<li>[% i %]</li>[% END %]
-	    [% END %]
-	  </ul>
+	</ul>
+	[% END %]
+	[% IF final_message.error %]
+	<ul class="list-unstyled">
+	  [% FOREACH i IN final_message.error.sort %]
+	  [% IF i != '' %]<li>[% i %]</li>[% END %]
 	  [% END %]
-	</div>
+	</ul>
+	[% END %]
       </div>
     </div>
   </div>
-  <br>
-  [% END %]
-  [% IF final_message.warning %]
-  <div class="panel panel-warning">
-    <div class="panel-heading clearfix umi-zerro-padding">
-      <button type="button" class="close borderless" data-dismiss="alert" aria-label="Close"
-	      onclick="$(this).closest('.panel').hide(200)"
-	      title="Dismiss this panel.">
-	<span aria-hidden="true" class="fa fa-times-circle"></span>&nbsp;
-      </button>
-      <h4>&nbsp;&nbsp;<span class="fa fa-exclamation-triangle">&nbsp;</span>Warning!<em class="h5">(relax and do not panic! mostly it is just a note to let you know some detail/s)</em></h4>
-    </div>
-    <div class="panel-body">
-      <ul class="list-unstyled">
-	[% FOREACH i IN final_message.warning.sort %]
-	<li>[% i %]</li>
-	[% END %]
-      </ul>
-    </div>
-  </div>
-  [% END %]
-  [% IF final_message.success %]
-  <div class="panel panel-success">
-    <div class="panel-heading clearfix umi-zerro-padding">
-      <h4>&nbsp;&nbsp;<span class="fa fa-check-circle">&nbsp;</span>Success! [% final_message.title %]</h4>
-    </div>
-    <div class="panel-body">
-      <ul class="list-unstyled">
-	[% FOREACH i IN final_message.success.sort %]
-	<li>[% IF i == 1 %]Operation went well![% ELSE %][% i %][% END %]</li>
-	[% END %]
-      </ul>
-    </div>
-  </div>
-  [% END %]
 </div>
+<br>
+[% END %]
+[% IF final_message.warning %]
+<div class="panel panel-warning">
+  <div class="panel-heading clearfix umi-zerro-padding">
+    <button type="button" class="close borderless" data-dismiss="alert" aria-label="Close"
+	    onclick="$(this).closest('.panel').hide(200)"
+	    title="Dismiss this panel.">
+      <span aria-hidden="true" class="fa fa-times-circle"></span>&nbsp;
+    </button>
+    <h4>&nbsp;&nbsp;<span class="fa fa-exclamation-triangle">&nbsp;</span>Warning!<em class="h5">(relax and do not panic! mostly it is just a note to let you know some detail/s)</em></h4>
+  </div>
+  <div class="panel-body">
+    <ul class="list-unstyled">
+      [% FOREACH i IN final_message.warning.sort %]
+      <li>[% i %]</li>
+      [% END %]
+    </ul>
+  </div>
+</div>
+[% END %]
+[% IF final_message.success %]
+<div class="panel panel-success">
+  <div class="panel-heading clearfix umi-zerro-padding">
+    <h4>&nbsp;&nbsp;<span class="fa fa-check-circle">&nbsp;</span>Success! [% final_message.title %]</h4>
+  </div>
+  <div class="panel-body">
+    <ul class="list-unstyled">
+      [% FOREACH i IN final_message.success.sort %]
+      <li>[% IF i == 1 %]Operation went well![% ELSE %][% i %][% END %]</li>
+      [% END %]
+    </ul>
+  </div>
+</div>
+[% END %]

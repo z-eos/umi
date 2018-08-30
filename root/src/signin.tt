@@ -4,7 +4,7 @@
 %] 
 
 <div class="container umi-bg ajaxless">
-  <form id="form-signin" class="form-signin" role="form" method="POST" action="signin">
+  <form id="form-signin" class="form-signin formajaxer" role="form" method="POST" action="signin">
   [% INCLUDE ldap_err.tt %]
     <div class="form-group has-feedback">
 	<img src="/static/images/umi-logo-black-diagonal.png"

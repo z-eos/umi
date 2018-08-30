@@ -47,13 +47,14 @@ former, dynamic method, variant is at LDAP_CRUD->attr_equality
 
 sub signin :Path Global {
   my ( $self, $c ) = @_;
-
+  log_debug { np( @_ ) };
   log_debug { np( $c->req->params ) };
 
   $c->session->{auth_uid} = $c->req->param('auth_uid');
   $c->session->{auth_pwd} = $c->req->param('auth_pwd');
 
   try {
+    # log_debug { np($c->session) };
     $c->authenticate({ id       => $c->session->{auth_uid},
 		       password => $c->session->{auth_pwd}, });
 
@@ -140,7 +141,6 @@ sub signin :Path Global {
 			'=' x 70,
 			$_,
 			'=' x 70) };
-    log_debug { np( @_ ) };
     my $final_message;
     #$final_message->{error} = 'Server internal error, please inform sysadmin!';
     $c->logout();
