@@ -134,115 +134,12 @@
 	<form role="form" method="POST"
 	      action="/searchby/proc">
 	  [% END %]
-	  <table class="table table-striped table-condensed table-hover">
+	  <table id="tbl_dhcp" class="table table-striped table-condensed table-hover">
 	    <thead><tr class="active"><th>Hostname</th><th>FQDN</th><th>IP</th><th>MAC</th><th>Description</th></tr></thead>
 	    <tbody>
 	      [% FOREACH x IN dhcp %]
 	      <tr class="mono">
 		<td>
-		  [% IF c.check_user_roles('admin') || c.check_user_roles('coadmin') %]
-		  <div class="dropdown pull-left">
-		    <button class="btn btn-link btn-sm dropdown-toggle"
-			    type="button" id="dropdownMenuActions"
-			    data-toggle="dropdown"
-			    title="Possible Actions Upon the Object">
-		      <span class="fa fa-cog text-primary"></span><span class="caret text-primary"></span>
-		    </button>
-		    <ul class="dropdown-menu dropdown-menu-left bg-primary"
-			aria-labelledby="dropdownMenuActions"
-			role="menu">
-		      <li>
-			<button type="button" title="delete object" class="btn btn-link"
-				value="[% x.dn %]" name="ldap_delete"
-				data-toggle="modal" data-target="#deleteModal[% loop.index %]">
-			  <span class="fa fa-times-circle text-danger"></span>
-			  delete
-			</button>
-		      </li>
-		      <li>
-			<button type="button" title="export LDIF of the object"
-				class="btn btn-link" value="[% x.dn %]"
-				name="ldap_ldif" data-toggle="modal"
-				data-target="#ldifModal[% loop.index %]">
-			  <span class="fa fa-upload text-info"></span>
-			  LDIF
-			</button>
-		      </li>
-		      <li>
-			<button type="submit" title="edit object" class="btn btn-link"
-				value="[% x.dn %]" name="ldap_modify">
-			  <span class="fa fa-edit text-warning"></span>
-			  edit (all)
-			</button>
-		      </li>
-		    </ul>
-		  </div>
-		  <!-- #### Modal: Delete start -->
-		  <div class="modal" id="deleteModal[% loop.index %]"
-		       tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel[% loop.index %]"
-		       aria-hidden="true">
-		    <div class="modal-dialog modal-lg">
-		      <div class="modal-content">
-			<form role="form" method="POST" action="/searchby/delete">
-			  <div class="modal-header">
-			    <h4 class="modal-title alert alert-danger" id="deleteModalLabel[% loop.index %]">
-			      <span class="fa fa-times-circle"></span>
-			      You are about to perform deletion of DN: <b>[% x.dn.replace(',', ', ') %]</b>
-			    </h4>
-			  </div>
-			  <div class="modal-body text-primary">
-			    <input type="checkbox" name="ldap_delete_recursive">
-			    Recursive deletion of all children of this object as well</input>
-			  </div>
-			  <div class="modal-footer">
-			    <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">
-			      Close
-			    </button>
-			    <button type="submit" class="btn btn-primary umi-btn-event umi-btn-ajax"
-				    name="ldap_delete" value="[% x.dn %]" data-action="delete" >
-			      Yes, I really want to delete it and yes, I understand all consequences!
-			    </button>
-			  </div>
-			</form>
-		      </div>
-		    </div>
-		  </div><!-- #### Modal: Delete end -->
-		  <!-- #### Modal: LDIF start -->
-		  <div class="modal" id="ldifModal[% loop.index %]"
-		       tabindex="-1" role="dialog" aria-labelledby="ldifModalLabel[% loop.index %]"
-		       aria-hidden="true">
-		    <div class="modal-dialog modal-lg">
-		      <div class="modal-content">
-			<div class="modal-header">
-			  <h4 class="modal-title alert alert-info" id="ldifModalLabel[% loop.index %]">
-			    <span class="fa fa-info-sign"></span>
-			    LDIF of DN: <b>[% x.dn %]</b>
-			  </h4>
-			</div>
-			<div class="modal-body text-primary">
-			  <input type="checkbox" name="ldap_ldif_recursive">
-			  Get LDIFs for all children as well</input>
-			</div>
-			<div class="modal-body text-primary">
-			  <input type="checkbox" name="ldap_ldif_sysinfo">
-			  Get system info as well</input>
-			</div>
-			<div class="modal-footer">
-			  <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">
-			    Close
-			  </button>
-			  <button type="submit"
-				  class="btn btn-primary umi-btn-event umi-btn-logic"
-				  data-umiact="/searchby/ldif_gen"
-				  name="ldap_ldif"
-				  value="[% x.dn %]">
-			    Yes, to get LDIF
-			  </button>
-			</div>
-		      </div>
-		    </div>
-		  </div><!-- #### Modal: LDIF end -->
-		  [% END %]
 		  [% x.cn %]
 		</td>
 		<td>[% x.fqdn %]</td><td>[% x.ip %]</td><td>[% x.mac %]</td><td>[% x.desc %]</td>
@@ -288,140 +185,31 @@
 	    <tr>
 	      <td></td>
 	      <td>
+		[% IF y.auth && ( y.authorizedService.search('mail') ||
+		   y.authorizedService.search('xmpp') ||
+		   y.authorizedService.search('web') ) %]
 		<div class="dropdown pull-left">
-		  <button class="btn btn-link btn-sm dropdown-toggle"
+		  <button class="btn btn-link btn-sm"
 			  type="button" id="dropdownMenuActions"
 			  data-toggle="dropdown"
 			  title="Possible Actions Upon the Object">
-		    <span class="fa fa-cog text-primary"></span><span class="caret text-primary"></span>
+		    <span class="fas fa-ellipsis-h text-primary"></span>
 		  </button>
-		  <ul class="dropdown-menu dropdown-menu-left bg-primary"
+		  <ul class="dropdown-menu dropdown-menu-left"
 		      aria-labelledby="dropdownMenuActions"
 		      role="menu">
-		    [% IF c.check_user_roles('admin') || c.check_user_roles('coadmin') %]
-		    <li>
-		      <button type="button" title="delete object" class="btn btn-link"
-			      value="[% z.key %]"
-			      name="ldap_delete"
-			      data-order="50"
-			      data-toggle="modal"
-			      data-target="#modal_del_svc_[% zufix %]">
-			<span class="fa fa-trash text-danger"></span>
-			delete
-		      </button>
-		    </li>
-		    <li>
-		      <button type="button" title="export LDIF of the object"
-			      class="btn btn-link"
-			      value="[% z.key %]"
-			      name="ldap_ldif"
-			      data-order="70"
-			      data-toggle="modal"
-			      data-target="#modal_ldif_[% zufix %]">
-			<span class="fa fa-upload text-info"></span>
-			LDIF
-		      </button>
-		    </li>
-		    <li>
-		      <form role="form" method="POST" action="/searchby/proc">
-			<button type="submit" title="edit object" class="btn btn-link"
-				value="[% z.key %]"
-				data-order="100"
-				name="ldap_modify">
-			  <span class="fa fa-pencil text-primary"></span>
-			  edit (all)
-			</button>
-		      </form>
-		    </li>
-		    <!-- #### Modal: Delete Service start -->
-		    <div class="modal" id="modal_del_svc_[% zufix %]"
-			 tabindex="-1" role="dialog" aria-labelledby="modal_del_svc_[% zufix %]_label"
-			 aria-hidden="true">
-		      <div class="modal-dialog modal-lg">
-			<div class="modal-content">
-			  <form role="form" method="POST" action="/searchby/delete">
-			    <div class="modal-header">
-			      <h4 class="modal-title alert alert-danger" id="modal_del_svc_[% zufix %]_label">
-				<span class="fa fa-times-circle"></span>
-				You are about to perform deletion of DN: <b>[% z.key %]</b>
-			      </h4>
-			    </div>
-			    <div class="modal-body text-primary">
-			      <input type="checkbox" name="ldap_delete_recursive">
-			      Recursive deletion of all children of this object as well</input>
-			    </div>
-			    <div class="modal-footer">
-			      <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">
-				Close
-			      </button>
-			      <button type="submit" class="btn btn-danger umi-btn-event umi-btn-ajax"
-				      name="ldap_delete" value="[% z.key %]" data-action="delete">
-				Yes, I really want to delete it and yes, I understand all consequences!
-			      </button>
-			    </div>
-			  </form>
-			</div>
-		      </div>
-		    </div><!-- #### Modal: Delete Service end -->
-		    <!-- #### Modal: LDIF Service start -->
-		    <div class="modal" id="modal_ldif_[% zufix %]"
-			 tabindex="-1" role="dialog" aria-labelledby="modal_ldif_[% zufix %]_label"
-			 aria-hidden="true">
-		      <div class="modal-dialog modal-lg">
-			<div class="modal-content">
-			  <form role="form" method="POST">
-			    <div class="modal-header">
-			      <h4 class="modal-title alert alert-info" id="modal_ldif_[% zufix %]_label">
-				<span class="fa fa-info-sign"></span>
-				LDIF of DN: <b>[% z.key %]</b>
-			      </h4>
-			    </div>
-			    <div class="modal-body text-primary">
-			      <input type="checkbox" name="ldap_ldif_recursive">
-			      Get LDIFs for all children as well</input>
-			    </div>
-			    <div class="modal-body text-primary">
-			      <input type="checkbox" name="ldap_ldif_sysinfo">
-			      Get system info as well</input>
-			    </div>
-			    <div class="modal-footer">
-			      <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">
-				Close
-			      </button>
-			      <button type="submit" class="btn btn-primary umi-btn-event umi-btn-logic"
-				      data-umiact="/searchby/ldif_gen" name="ldap_ldif" value="[% z.key %]">
-				Yes, to get LDIF
-			      </button>
-			    </div>
-			  </form>
-			</div>
-		      </div>
-		    </div><!-- #### Modal: LDIF Service end -->
-		    [% END %]
-		    [% IF y.auth && ( y.authorizedService.search('mail') ||
-		       y.authorizedService.search('xmpp') ||
-		       y.authorizedService.search('web') ) %]
 		    <li>
 		      <form role="form" method="POST" action="/searchby/modify_userpassword">
 			<button type="submit" title="modify password" class="btn btn-link" data-order="30"
 				value="[% z.key %]" name="ldap_modify_password">
-			  <span class="fa fa-user-secret text-primary"></span>
+			  <span class="fa fa-user-lock text-danger"></span>
 			  password
 			</button>
 		      </form>
 		    </li>
-		    <li>
-		      <form role="form" method="POST" action="/searchby/proc">
-			<button type="submit" title="modify jpegPhoto" class="btn btn-link" data-order="60"
-				value="[% z.key %]" name="ldap_modify_jpegphoto">
-			  <span class="fa fa-image text-primary"></span>
-			  image
-			</button>
-		      </form>
-		    </li>
-		    [% END %]
 		  </ul>
 		</div>
+		[% END %]
 		[% z.value %]
 		[%   IF y.cert.${z.key} %]
 		<br><small class="pull-left"><em><dl class="dl-horizontal">

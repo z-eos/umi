@@ -255,7 +255,17 @@
 
 		  [% # --- ICON, WHICH IS AFTER CLICK-TO-OPEN-ROOT-OBJECT BUTTON --- %]
 		  [% IF entry.value.mgmnt.is_root && entry.key.match('People') %]
-		  <i title="Root Account" class="[% base_icon.People _ ' ' _ entry_icon_size %]"></i>
+		  <form role="form" method="POST" class="formajaxer" action="/searchby/user_preferences">
+		    <input type="hidden" name="user_preferences" value="[% entry.key %]">
+		    <button type="submit"
+			    class="btn btn-link umi-search"
+			    title="look user object subtree data">
+		      <span class="[% base_icon.People _ ' ' _ entry_icon_size %]"></span>
+		    </button>
+		  </form>
+
+		  <!-- i title="Root Account" class="[% # base_icon.People _ ' ' _ entry_icon_size %]"></i -->
+
 		  [% ELSIF entry.value.mgmnt.is_root && entry.key.match('Inventory') %]
 		  <i title="Inventory Root Object" class="[% base_icon.inventory _ ' ' _ entry_icon_size %]"></i>
 		  [% ELSIF entry.value.mgmnt.is_root && entry.key.match('Sendmail') %]

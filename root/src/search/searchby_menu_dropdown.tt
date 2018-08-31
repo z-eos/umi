@@ -32,7 +32,7 @@
 	  <button type="submit" class="btn btn-link"
 		  title="look user object subtree data"
 		  data-order="[% site.searchby.menu.order.user_preferences %]">
-	    <span class="fas fa-fw fa-id-card-alt text-info"></span>
+	    <span class="[% base_icon.People %] fa-fw text-info"></span>
 	    user details
 	  </button>
 	</form>

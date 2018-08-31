@@ -150,7 +150,7 @@ sub _build_cfg {
 			    GitACL =>        'fab fa-git',
 			    OpenVPN =>       'fas fa-sitemap',
 			    Organizations => 'fas fa-industry',
-			    People =>        'fas fa-user-circle',
+			    People =>        'fas fa-user-tag',
 			    default =>       'fas fa-star',
 			    group =>         'fas fa-users',
 			    history =>       'fas fa-history',

@@ -528,7 +528,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 				    attrs => [ 'dhcpOption' ], } );
       if ( $mesg->code ) { $return->{error} .= sprintf('<li>DHCP domain-name/s %s</li>',
 						       $ldap_crud->err($mesg)->{html}); }
-      foreach ( @{[$mesg->entry(0)->get_value('dhcpOption')]} ) {
+      foreach ( @{[$mesg->entry(0)->get_value('dhcpStatements')]} ) {
 	$domain_name = substr($_, 13, -1) if $_ =~ /domain-name /;
       }
 
@@ -586,6 +586,8 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	  $service_details->{cert}->{$_->dn} =
 	    $self->cert_info({ cert => $_->get_value('userCertificate;binary') });
 	  $service_details->{cert}->{$_->dn}->{'ifconfig-push'} = $_->get_value('umiOvpnCfgIfconfigPush');
+	  $service_details->{cert}->{$_->dn}->{'OS'}            = $_->get_value('umiOvpnAddDevOS');
+	  $service_details->{cert}->{$_->dn}->{'device'}        = $_->get_value('umiOvpnAddDevType');
 	} elsif ( $service_details->{authorizedService} =~ /^mail\@/ ) {
 	  push @{$arg->{mail}}, $_->get_value('uid');
 	} elsif ( (split('@', $service_details->{authorizedService}))[0] eq 'ssh' ) {
