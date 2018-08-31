@@ -88,25 +88,30 @@ sub accinfo :Path(accinfo) :Args(0) {
 
 sub sysinfo : Local {
   my ( $self, $c ) = @_;
+  my $json = JSON->new->allow_nonref;
   
   my $sysinfo;
   my $x;
   my $y = $c->dump_these;
   my %z = %{$y->[1]};
   $x->{$y->[0]} = \%z;
-  #log_debug {np($x)};
-  # $x{dump_these} = $c->dump_these;
+
   $x->{calculate_initial_session_expires} = $self->ts({ ts => $c->calculate_initial_session_expires, format => "%Y%m%d%H%M%S" });
   $x->{get_session_id} =  $self->ts({ ts => $c->get_session_id, format => "%Y%m%d%H%M%S" });
   $x->{session_expires} = $self->ts({ ts => $c->session_expires, format => "%Y%m%d%H%M%S" });
-  $x->{auth_pwd} =
-    $x->{Session}->{auth_pwd} =
-    $x->{Session}->{auth_obj}->{userpassword} =
-    $x->{Session}->{__user}->{user}->{attributes}->{userpassword} = '*****';
-  
-  delete $x->{__user}->{user}->{ldap_entry};
 
-  log_debug {np($x)};
+  $x->{Session}->{auth_pwd} = '*****'
+    if exists $x->{Session}->{auth_pwd};
+
+  $x->{Session}->{auth_obj}->{userpassword} = '*****'
+    if exists $x->{Session}->{auth_obj} && exists $x->{Session}->{auth_obj}->{userpassword};
+
+  $x->{Session}->{__user}->{user}->{attributes}->{userpassword} = '*****'
+    if ref($x->{Session}->{__user}) eq 'HASH' && exists $x->{Session}->{__user}->{user}->{attributes}->{userpassword};
+
+  delete $x->{Session}->{__user}->{user}->{ldap_entry}
+    if ref($x->{Session}->{__user}) eq 'HASH' && exists $x->{Session}->{__user}->{user}->{ldap_entry};
+
   my $return;
   my $ldap_crud = $c->model('LDAP_CRUD');
   my $mesg = $ldap_crud->search({ base => $ldap_crud->{cfg}->{base}->{monitor},
@@ -114,34 +119,16 @@ sub sysinfo : Local {
 				  sizelimit => 0,
 				  attrs   => [ '*', '+', ],
 				  filter => '(objectClass=*)', });
-  if ( $mesg->code ) {
-    push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
-  }
+  push @{$return->{error}}, $ldap_crud->err($mesg)->{html}
+    if $mesg->error;
   my $monitor = $mesg->as_struct;
 
-  my $json = JSON->new->allow_nonref;
-
-  # $sysinfo = {
-  # 	      session => { title => 'Session',
-  # 			   data  => np(%x, colored => 0), },
-  # 	      LDAP_CRUD_cfg => { title => 'LDAP_CRUD configuration ( $c->model(LDAP_CRUD)->cfg )',
-  # 				 data  => np($c->model('LDAP_CRUD')->cfg, colored => 0), },
-  # 	      # look stat_monitor()
-  # 	      monitor => { title => 'OpenLDAP daemon monitor',
-  # 			   data  => np($monitor, colored => 0), },
-  # 	      # UMI_c => { title => 'UMI c',
-  # 	      # 		      data => p($c, colored => 0), },
-  # 	     };
-  $sysinfo = {
-	      'UMI session'
-	      => { title => 'Session',
-		   data  => $x, },
-	      'LDAP_CRUD->cfg'
-	      => { title => 'LDAP_CRUD configuration ( $c->model(LDAP_CRUD)->cfg )',
-		   data  => $c->model('LDAP_CRUD')->cfg, },
-	      'LDAP monitor'
-	      => { title => 'OpenLDAP daemon monitor',
-		   data  => $monitor, },
+  $sysinfo = { 'UMI session'    => { title => 'Session',
+				     data  => $x, },
+	       'LDAP_CRUD->cfg' => { title => 'LDAP_CRUD configuration ( internal UMI $c->model(LDAP_CRUD)->cfg )',
+				     data  => $c->model('LDAP_CRUD')->cfg, },
+	      'LDAP monitor'    => { title => 'OpenLDAP daemon monitor',
+				     data  => $monitor, },
 	     };
 
   $c->stash( template      => 'sysinfo.tt',

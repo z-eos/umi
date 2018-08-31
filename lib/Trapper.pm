@@ -34,7 +34,7 @@ $apn_file->filter($flt_file);
 
 my $layout_file =
 #  Log::Log4perl::Layout::PatternLayout->new( "%m" );
-  Log::Log4perl::Layout::PatternLayout->new( "%d{yyyy.MM.dd HH:mm:ss} [%p]: L%05L @ %M: %F{2}: %m{chomp}%n" );
+  Log::Log4perl::Layout::PatternLayout->new( "<<< %d{yyyy.MM.dd HH:mm:ss} [%p]: L%05L @ %M: %F{2}: %m{chomp} L%05L @ %M: %F{2} >>>%n" );
 
 $apn_file->layout($layout_file);
 
