@@ -110,6 +110,10 @@
 	      <input type="hidden"  name="ldap_ldif_base" value="[% base_dn %]">
 	      <input type="hidden"  name="ldap_ldif_filter" value="[% filter %]">
 	      <input type="hidden"  name="ldap_ldif_recursive" value="1">
+	      <input type="hidden"  name="ldap_ldif_scope" value="[% scope %]">
+	      [% FOREACH item IN attrs %]
+	      <input type="hidden"  name="ldap_ldif_attrs" value="[% item %]">
+	      [% END %]
 	      <a href="#" class="btn btn-link umi-btn-event umi-btn-logic"
 		      value="[% base_dn %]"
 		      name="ldap_ldif"
@@ -150,22 +154,22 @@
 	 btn_blocked = ' btn-link' %]
       [%   END %]
 
-      [% # === DEFINITION OF OBJECT CLASSES ACCORDING THE RDN === %]
+      [% # === OBJECT CLASSES ACCORDING THE RDN DEFINITION === %]
       [%   IF entry.value.mgmnt.is_root && entry.key.match('People') %]
       [%   entry_text_size = 'h4'
-	 entry_icon_size = 'fa-lg fa-2x'
+	 entry_icon_size = 'fa-lg'
 	 root_of_rec_btn = 'col-lg-2 col-md-2 col-xs-1' %]
       [%   ELSIF entry.key.match('^author') %]
       [%   entry_text_size = 'h5'
-	 entry_icon_size = 'fa-lg fa-1x'
+	 entry_icon_size = 'fa-sm'
 	 root_of_rec_btn = 'col-lg-2 col-md-2 col-xs-1' %]
       [%   ELSE %]
       [%   entry_text_size = 'h6'
-	 entry_icon_size = 'fa-lg fa-1x'
+	 entry_icon_size = 'fa-xs'
 	 root_of_rec_btn = 'col-lg-2 col-md-2 col-xs-1' %]
       [%   END %]
 
-      [% # === DEFINING OBJECT TYPE PANEL COLOR === %]
+      [% # === OBJECT TYPE PANEL COLOR DEFINING === %]
       [%   IF (entry.value.mgmnt.is_root && entry.value.mgmnt.is_account) || ! entry.value.mgmnt.is_account %]
       [%   panel_color = 'bg-info text-info'
          tr_color = 'info' %]
@@ -239,11 +243,9 @@
 		    <i class="[% blocked _ ' ' _ entry_icon_size %] fa [% site.icons.root_obj %]">&nbsp;&nbsp;</i>
 		  </button>
 		</form>
+		
 		<div class="btn umi-search">
 		  <!-- p class="visible-lg-block visible-md-block"></p>&nbsp; -->
-		  [% IF entry.value.mgmnt.dynamicObject %]
-		  [% dynamic_object %]
-		  [% END %]
 		  
 		  [% icon_color = '' %]
 		  [% # --- DISABLED "ANYTHING" DETECTION, TO COLOR ICON AND TEXT --- %]
@@ -260,6 +262,9 @@
 		    <button type="submit"
 			    class="btn btn-link umi-search"
 			    title="look user object subtree data">
+		      [% IF entry.value.mgmnt.dynamicObject %]
+		      [% dynamic_object %]
+		      [% END %]
 		      <span class="[% base_icon.People _ ' ' _ entry_icon_size %]"></span>
 		    </button>
 		  </form>
@@ -267,61 +272,61 @@
 		  <!-- i title="Root Account" class="[% # base_icon.People _ ' ' _ entry_icon_size %]"></i -->
 
 		  [% ELSIF entry.value.mgmnt.is_root && entry.key.match('Inventory') %]
-		  <i title="Inventory Root Object" class="[% base_icon.inventory _ ' ' _ entry_icon_size %]"></i>
+		  <i title="Inventory Root Object" class="umisearch-padding [% base_icon.inventory _ ' ' _ entry_icon_size %]"></i>
 		  [% ELSIF entry.value.mgmnt.is_root && entry.key.match('Sendmail') %]
-		  <i title="MTA Root Object" class="[% base_icon.mta _ ' ' _ entry_icon_size %]"></i>
+		  <i title="MTA Root Object" class="umisearch-padding [% base_icon.mta _ ' ' _ entry_icon_size %]"></i>
 		  [% ELSIF entry.value.mgmnt.is_root && entry.key.match('GitACL') %]
-		  <i title="GitACL Root Object" class="[% base_icon.GitACL _ ' ' _ entry_icon_size %]"></i>
+		  <i title="GitACL Root Object" class="umisearch-padding [% base_icon.GitACL _ ' ' _ entry_icon_size %]"></i>
 		  [% ELSIF entry.value.mgmnt.is_root && entry.key.match('DHCP') %]
-		  <i title="DHCP Root Object" class="[% base_icon.DHCP _ ' ' _ entry_icon_size %]"></i>
+		  <i title="DHCP Root Object" class="umisearch-padding [% base_icon.DHCP _ ' ' _ entry_icon_size %]"></i>
 		  [% ELSIF entry.value.mgmnt.is_root && entry.key.match('reqStart') %]
 		  [%   IF entry.value.attrs.reqType.0 == 'add' %]
-		  <i title="History Object Request type: Add" class="[% entry_icon_size %] fa fa-lg fa-plus-square"></i>
+		  <i title="History Object Request type: Add" class="umisearch-padding [% entry_icon_size %] fa fa-lg fa-plus-square"></i>
 		  [%   ELSIF entry.value.attrs.reqType.0 == 'delete' %]
-		  <i title="History Object Request type: Delete" class="[% entry_icon_size %] fa fa-lg fa-minus-square"></i>
+		  <i title="History Object Request type: Delete" class="umisearch-padding [% entry_icon_size %] fa fa-lg fa-minus-square"></i>
 		  [%   ELSIF entry.value.attrs.reqType.0 == 'modify' %]
-		  <i title="History Object Request type: Modify" class="[% entry_icon_size %] fa fa-lg fa-pen-square"></i>
+		  <i title="History Object Request type: Modify" class="umisearch-padding [% entry_icon_size %] fa fa-lg fa-pen-square"></i>
 		  [%   ELSIF entry.value.attrs.reqType.0 == 'modrdn' %]
-		  <i title="History Object Request type: ModRDN" class="[% entry_icon_size %] fa fa-lg fa-share-alt-square"></i>
+		  <i title="History Object Request type: ModRDN" class="umisearch-padding [% entry_icon_size %] fa fa-lg fa-share-alt-square"></i>
 		  [%   END %]
 		  [% ELSIF entry.value.mgmnt.is_root && ! entry.key.match('People') %]
-		  <i title="Root Objectt" class="[% base_icon.default _ ' ' _ entry_icon_size %]"></i>
+		  <i title="Root Objectt" class="umisearch-padding [% base_icon.default _ ' ' _ entry_icon_size %]"></i>
 
 		  [% # --- SERVICE ICON START --------------------------------------------------------------- %]
 		  [% ELSIF entry.key.match('^author') %]
 		  [% cur_svc = dn.authorizedService.split('@').0 %]
 		  [%   IF services.$cur_svc.icon %]
-		  <i title="[% services.$cur_svc.descr %] Service Account Branch" class="[% services.$cur_svc.icon _ ' ' _ entry_icon_size %] [% branch_class %]"></i>
+		  <i title="[% services.$cur_svc.descr %] Service Account Branch" class="umisearch-padding [% services.$cur_svc.icon _ ' ' _ entry_icon_size %] [% branch_class %]"></i>
 		  [%   ELSE %]
-		  <i title="Service Account Branch" class="fa fa-code-fork[% branch_class %][% blocked %]"></i>
+		  <i title="Service Account Branch" class="umisearch-padding fa fa-code-fork[% branch_class %][% blocked %]"></i>
 		  [%   END %]
 
 		  [% ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
 		  [% cur_svc = dn.authorizedService.split('@').0 %]
 		  [%   IF services.$cur_svc.icon %]
-		  <i title="[% services.$cur_svc.descr %] Service Account" class="[% services.$cur_svc.icon _ ' ' _ entry_icon_size _ ' ' _ icon_color %] [% leaf_class %]"></i>
+		  <i title="[% services.$cur_svc.descr %] Service Account" class="umisearch-padding [% services.$cur_svc.icon _ ' ' _ entry_icon_size _ ' ' _ icon_color %] [% leaf_class %]"></i>
 		  [%   ELSE %]
-		  <i title="Service Account" class="fa fa-leaf [% leaf_class _ ' ' _ entry_icon_size %]"></i>
+		  <i title="Service Account" class="umisearch-padding fa fa-leaf [% leaf_class _ ' ' _ entry_icon_size %]"></i>
 		  [%   END %]
 		  [% # --- SERVICES ICON STOP  -------------------------------------------------------------- %]
 
 		  [% ELSIF entry.key.match('GitACL') %]
-		  <i title="Subject to GitACL" class="[% base_icon.GitACL _ ' ' _ branch_class _ ' ' _ entry_icon_size %]"></i>
+		  <i title="Subject to GitACL" class="umisearch-padding [% base_icon.GitACL _ ' ' _ branch_class _ ' ' _ entry_icon_size %]"></i>
 		  [% ELSIF entry.key.match('DHCP') %]
-		  <i title="DHCP Object" class="[% base_icon.DHCP _ ' ' _ branch_class _ ' ' _ entry_icon_size %]"></i>
+		  <i title="DHCP Object" class="umisearch-padding [% base_icon.DHCP _ ' ' _ branch_class _ ' ' _ entry_icon_size %]"></i>
 		  [% ELSIF entry.key.match('^cn=.*,ou=Inventory') %]
-		  <i title="Subject to Inventory" class="fa fa-tag [% branch_class _ ' ' _ entry_icon_size %]"></i>
+		  <i title="Subject to Inventory" class="umisearch-padding fa fa-tag [% branch_class _ ' ' _ entry_icon_size %]"></i>
 		  [% ELSIF entry.key.match(',ou=Sendmail') %]
-		  <i title="Subject to Sendmail" class="[% base_icon.mta _ ' ' _ branch_class _ ' ' _ entry_icon_size %]"></i>
+		  <i title="Subject to Sendmail" class="umisearch-padding [% base_icon.mta _ ' ' _ branch_class _ ' ' _ entry_icon_size %]"></i>
 		  [% ELSIF base_ico.${dn.ou} %]
-		  <i title="Service Account Branch" class="[% base_icon.${dn.ou} _ ' ' _ entry_icon_size %]"></i>
+		  <i title="Service Account Branch" class="umisearch-padding [% base_icon.${dn.ou} _ ' ' _ entry_icon_size %]"></i>
 		  [% ELSE %]
-		  <i title="Service Account Branch" class="fa fa-code-fork[% blocked _ ' ' _ entry_icon_size %]"></i>
+		  <i title="Service Account Branch" class="umisearch-padding fa fa-code-fork[% blocked _ ' ' _ entry_icon_size %]"></i>
 		  [% END %]
 		</div>
 		[% # dn of the select result object %]
 		<div class="btn umi-search" title="[% blocked_title %]">&nbsp;
-		  <span class="[% icon_color  # _ ' ' _ entry_text_size %]">
+		  <span class="btn [% icon_color  # _ ' ' _ entry_text_size %]">
 		    [% IF entry.key.match('People') %]
 		    [% entry.key.replace('uid=','').replace('authorizedService=','').split(',').slice(0,-3).join('&nbsp;&nbsp;<i class="fa fa-ellipsis-h"></i>&nbsp;&nbsp;') %]
 		    [% entry.value.attrs.reqStart.0 %]
@@ -336,7 +341,7 @@
 	      
 	      <div class="col-2 pull-right">
 
-		<small>
+		<small class="btn-sm umi-text-smaler">
 		  <ul class="fa-ul umi-zerro-margin">
 		    
 		    <li title="created, GMT" class="visible-lg-block visible-md-block">
@@ -410,52 +415,50 @@
 	   h_attr.key.match('cACertificate;binary')%]
 	<br>
 	<small class="pull-left">
-	  <em>
-	    <dl class="dl-horizontal">
-	      [% FOREACH cert IN h_attr.value %]
-	      [%   NEXT IF cert.key == 'cert' %]
-	      [%   NEXT IF cert.key == 'error' && ! cert.value %]
-	      [%     IF h_attr.key.match('certificateRevocationList;binary') &&
-		 cert.key.match('RevokedCertificates') %]
-	      <dt>[%   cert.key %]</dt><dd class="mono">
-		<div class="panel panel-info">
-		  <div class="panel-heading">
-		    <h3 class="panel-title">
-		      <a class="collapsed chevron_toggleable" data-toggle="collapse"
-			 href="#collapse_personal_data" aria-expanded="true" aria-controls="collapse_personal_data">
-			<i class="fa [% site.icons.toggle_down %] text-default"></i>
-		      </a>
-		      revoked certificates list
-		    </h3>
-		  </div>
-		  <div id="collapse_personal_data" class="panel-collapse collapse" aria-labelledby="heading_personal_data">
-		    <div class="panel-body">
-		      <table class="table table-condensed table-striped">
-			<thead>
-			  <tr class="info">
-			    <th>S/N<sub>10</sub></th>
-			    <th>S/N<sub>hex</sub></th>
-			    <th><i class="fa fa-calendar"></i></th>
-			  </tr>
-			</thead>
-			[% FOREACH key IN cert.value.keys.sort %]
-			<tr>
-			  <td>[% key %]</td>
-			  <td>[% cert.value.$key.sn_hex %]</td>
-			  <td>[% cert.value.$key.revocationDate %]</td>
+	  <dl class="dl-horizontal">
+	    [% FOREACH cert IN h_attr.value %]
+	    [%   NEXT IF cert.key == 'cert' %]
+	    [%   NEXT IF cert.key == 'error' && ! cert.value %]
+	    [%     IF h_attr.key.match('certificateRevocationList;binary') &&
+	       cert.key.match('RevokedCertificates') %]
+	    <dt>[%   cert.key %]</dt><dd class="mono">
+	      <div class="panel panel-info">
+		<div class="panel-heading">
+		  <h3 class="panel-title">
+		    <a class="collapsed chevron_toggleable" data-toggle="collapse"
+		       href="#collapse_personal_data" aria-expanded="true" aria-controls="collapse_personal_data">
+		      <i class="fa [% site.icons.toggle_down %] text-default"></i>
+		    </a>
+		    revoked certificates list
+		  </h3>
+		</div>
+		<div id="collapse_personal_data" class="panel-collapse collapse" aria-labelledby="heading_personal_data">
+		  <div class="panel-body">
+		    <table class="table table-condensed table-striped">
+		      <thead>
+			<tr class="info">
+			  <th>S/N<sub>10</sub></th>
+			  <th>S/N<sub>hex</sub></th>
+			  <th><i class="fa fa-calendar"></i></th>
 			</tr>
-			[% END %]
-		      </table>
-		    </div>
+		      </thead>
+		      [% FOREACH key IN cert.value.keys.sort %]
+		      <tr>
+			<td>[% key %]</td>
+			<td>[% cert.value.$key.sn_hex %]</td>
+			<td>[% cert.value.$key.revocationDate %]</td>
+		      </tr>
+		      [% END %]
+		    </table>
 		  </div>
 		</div>
-	      </dd>
-	      [%     ELSE %]
-	      <dt>[%   cert.key %]</dt><dd class="mono">[% cert.value %]</dd>
-	      [%     END %]
-	      [% END %]
-	    </dl>
-	  </em>
+	      </div>
+	    </dd>
+	    [%     ELSE %]
+	    <dt>[%   cert.key %]</dt><dd class="mono">[% cert.value %]</dd>
+	    [%     END %]
+	    [% END %]
+	  </dl>
 	</small>
 	[% ELSIF h_attr.key == 'gidNumber'%]
 	[%   buttonizer( buttonizer_id=entry.value.root.PrimaryGroupName,

@@ -219,12 +219,12 @@ sub _build_cfg {
 		   core_mta => 'relay.umi',
 		  },
 	  rdn => {
-		  org =>            'ou',
 		  acc_root =>       UMI->config->{authentication}->{realms}->{ldap}->{store}->{user_field},
 		  acc_svc_branch => 'authorizedService',
 		  acc_svc_common => 'uid',
 		  gitacl =>         'cn',
 		  group =>          'cn',
+		  org =>            'ou',
 		 },
 	  objectClass => {
 			  acc_root => [ qw(
@@ -698,9 +698,9 @@ sub last_seq_val {
   my ($self, $args) = @_;
   my $arg = { base   => $args->{base},
 	      attrs  => $args->{attr},
-	      filter => $args->{filter} || sprintf("(%s=*)", $args->{attr}),
-	      scope  => $args->{scope}  || 'one',
-	      deref  => $args->{deref}  || 'never', };
+	      filter => $args->{filter} // sprintf("(%s=*)", $args->{attr}),
+	      scope  => $args->{scope}  // 'one',
+	      deref  => $args->{deref}  // 'never', };
 
   my $callername = (caller(1))[3];
   $callername = 'main' if ! defined $callername;
@@ -711,15 +711,15 @@ sub last_seq_val {
     $self->ldap->search( base   => $arg->{base},
 			 scope  => $arg->{scope},
 			 filter => $arg->{filter},
-			 attrs  => [ $arg->{attr} ],
+			 attrs  => [ $arg->{attrs} ],
 			 deref  => $arg->{deref}, );
 
   if ( $mesg->code ) {
     $return .= $self->err( $mesg );
   } else {
     if ( $mesg->count ) {
-      my @arr = $mesg->sorted ( $arg->{attr} );
-      $return = $arr[$#arr]->get_value( $arg->{attr} );
+      my @arr = $mesg->sorted ( $arg->{attrs} );
+      $return = $arr[$#arr]->get_value( $arg->{attrs} );
     } else {
       return;
     }
@@ -1611,34 +1611,41 @@ LDIF export
 sub ldif {
   my ($self, $args) = @_;
   my $arg = {
-	     dn     => $args->{dn}        || undef,
-	     base   => $args->{base}      || undef,
-	     filter => $args->{filter}    || 'objectClass=*',
-	     scope  => $args->{recursive} ? 'sub' : 'base',
-	     attrs  => $args->{sysinfo}   ? [ '*',
-					      'createTimestamp',
-					      'creatorsName',
-					      'entryCSN',
-					      'entryDN',
-					      'entryUUID',
-					      'hasSubordinates',
-					      'modifiersName',
-					      'modifyTimestamp',
-					      'structuralobjectclass',
-					      'subschemaSubentry',
-					    ] : [ '*' ],
+	     dn     => $args->{dn}     // undef,
+	     base   => $args->{base}   // undef,
+	     filter => $args->{filter} // 'objectClass=*',
+	     attrs  => [ $args->{attrs} ]  // [ '*' ],
+	     scope  => $args->{scope},
+	     # scope  => $args->{recursive}  ? 'sub' : 'base',
 	    };
+
+  if ( defined $args->{sysinfo} && $args->{sysinfo} ne '' ) {
+    push @{$arg->{attrs}}, 'createTimestamp',
+      'creatorsName',
+      'entryCSN',
+      'entryDN',
+      'entryUUID',
+      'hasSubordinates',
+      'modifiersName',
+      'modifyTimestamp',
+      'structuralobjectclass',
+      'subschemaSubentry';
+  }
+  
+  log_debug{np($args)};
   log_debug{np($arg)};
   my $ts = strftime "%Y-%m-%d %H:%M:%S", localtime;
   my $return->{ldif} = sprintf("
 ## LDIF export DN: \"%s\"
 ##   Search Scope: \"%s\"
 ##  Search Filter: \"%s\"
+##   Search Attrs: \"%s\"
 ##
 ## LDIF generated on %s, by UMI user %s\n##\n",
-			       $arg->{dn} // '',
+			       $arg->{base} // $arg->{dn} // '',
 			       $arg->{scope},
 			       $arg->{filter},
+			       join(',', @{$arg->{attrs}}),
 			       $ts,
 			       $self->uid);
 

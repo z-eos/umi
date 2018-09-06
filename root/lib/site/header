@@ -207,10 +207,12 @@
     <ul class="nav navbar-nav ml-auto">
       [% IF navbar_note.size %][% # Root->end %]
       <li class="nav-item dropdown">
+	
 	<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">
 	  <i class="fa fa-bell icon-bell"></i>
 	  <small><span class="badge badge-pill badge-danger bg-danger">[% navbar_note.size %]</span></small>
 	</a>
+	
 	<div class="dropdown-menu dropdown-menu-right">
 	  <div class="dropdown-header text-center text-dark">
 	    <strong>You have [% navbar_note.size %] notification</strong>

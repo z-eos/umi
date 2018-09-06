@@ -19,7 +19,7 @@
 
 [% INCLUDE ldap_err.tt %]
 
-[% # USE dumper %]<!-- <pre>[% # dumper.dump(params) %]</pre> -->
+[% # USE dumper %]<!-- pre>[% # dumper.dump(attrs_rest) %]</pre -->
 
 [% # IF ! final_message.exists('success') || final_message.success.empty %]
 <form method="POST"
@@ -52,11 +52,12 @@
     </label>
     <div class="col-sm-9">
       <div class="input-group input-group-sm">
-	[%   IF schema.${attr.key} == 0 && ( attr.value.size == 1 || attr.value.first == val ) %]
+	[% # !!! TO FINISH in LIKENESS WITH BELLOW ... %]
+	[%   IF schema.${attr_rest.key} == 0 && ( attr_rest.value.size == 1 || attr_rest.value.first == attr_rest.value ) %]
 	<span class="input-group-btn">
           <button class="btn btn-secondary btn-default btn-add element-add"
 		  id="[% id %]"
-		  type="button" title="click to add another [% attr.key %] field">
+		  type="button" title="click to add another [% attr_rest.key %] field">
 	    <i class="fa fa-copy text-success"></i>
 	  </button>
 	</span>
@@ -89,14 +90,11 @@
       <b>[% attr.key %]:</b>
     </label>
     <div class="col-sm-9 controls">
-      <div class="input-group input-group-sm">
+      <div class="input-group input-group-sm" title="to modify image, please use menu &rarr; image">
       [% IF attr.key == 'jpegPhoto' %]
 	<div class="media">
 	  <div class="media-left">
-	    <img alt="jpegPhoto of [% modify %]" src="[% attr.value %]" class="img-thumbnail pull-left" title="[% modify %]">
-	  </div>
-	  <div class="media-body">
-	    <p class="text-muted">to modify image, please use menu &rarr; image</p>
+	    <img alt="jpegPhoto of [% modify %]" src="[% attr.value %]" class="bg-mute img-thumbnail pull-left" title="[% modify %], to modify, use menu &rarr; image">
 	  </div>
 	</div>
 
@@ -114,8 +112,13 @@
       [% ELSE %]
       [%   FOREACH val IN attr.value %]
       [%   id = attr.key _ '_' _ loop.index %]
+
+      <!-- pre>[% # attr.value.last %]<br>[% # val %]</pre -->
+      
       <div class="input-group input-group-sm entry">
-	[%   IF schema.${attr.key} == 0 && ! modify.search('authorizedService') && ! params.dn.search('authorizedService') && ( attr.value.size == 1 || attr.value.last == val ) %]
+	[% # ! modify.search('authorizedService') && ! params.dn.search('authorizedService') && %]
+	[%   IF schema.${attr.key} == 0 &&
+	   ( attr.value.size == 1 || attr.value.last == val ) %]
 	<span class="input-group-btn">
           <button class="btn btn-secondary btn-default btn-add element-add"
 		  id="[% id %]"
@@ -133,7 +136,7 @@
 	[%   END %]
 	
 	[%   IF attr.key == rdn %]
-	<input type=text value="[% val %]" name="[% attr.key %]" id="[% 'val_' _ id %]" disabled="" class="form-control" title="this field is RDN">
+	<input type=text value="[% val %]" name="[% attr.key %]" id="[% 'val_' _ id %]" disabled="" class="form-control" title="this field is RDN, to modify it, use menu &rarr; moddn">
 	
 	[%   ELSIF attr.key.match('umiUserCertificate') %]
 	<input type=text value="[% val %]" name="[% attr.key %]" id="[% 'val_' _ id %]" disabled="" class="form-control"

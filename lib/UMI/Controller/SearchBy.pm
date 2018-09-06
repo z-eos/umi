@@ -409,14 +409,15 @@ sub index :Path :Args(0) {
     # p $c->request->cookies;
 
     $c->stash(
-	      template => 'search/searchby.tt',
-	      base_dn => $base,
-	      filter => $filter,
-	      entrieskeys => \@ttentries_keys,
-	      entries => $ttentries,
-	      schema => $c->session->{ldap}->{obj_schema_attr_equality},
-	      services => $ldap_crud->cfg->{authorizedService},
-	      base_icon => $ldap_crud->cfg->{base}->{icon},
+	      template      => 'search/searchby.tt',
+	      base_dn       => $base,
+	      filter        => $filter,
+	      scope         => $scope,
+	      entrieskeys   => \@ttentries_keys,
+	      entries       => $ttentries,
+	      schema        => $c->session->{ldap}->{obj_schema_attr_equality},
+	      services      => $ldap_crud->cfg->{authorizedService},
+	      base_icon     => $ldap_crud->cfg->{base}->{icon},
 	      final_message => $return,
 	     );
   } else {
@@ -519,13 +520,13 @@ sub proc :Path(proc) :Args(0) {
       }
       # log_debug { np($is_single) };
       $c->stash(
-		template => 'search/modify.tt', # !!! look modify() bellow
-		modify => $params->{'ldap_modify'},
-		entries => $entry,
-		attrs_rest => $names,
-		schema => $c->session->{ldap}->{obj_schema_attr_single},
+		attrs_rest    => $names,
+		entries       => $entry,
 		final_message => $return,
-		rdn => (split('=', (split(',', $params->{ldap_modify}))[0]))[0],
+		modify        => $params->{'ldap_modify'},
+		rdn           => (split('=', (split(',', $params->{ldap_modify}))[0]))[0],
+		schema        => $c->session->{ldap}->{obj_schema_attr_single},
+		template      => 'search/modify.tt', # !!! look modify() bellow
 	       );
 
       $c->stats->profile( end => "searchby_modify" );
@@ -1330,13 +1331,15 @@ sub ldif_gen :Path(ldif_gen) :Args(0) {
   my ( $self, $c ) = @_;
   my $params = $c->req->parameters;
   my $ldif = $c->model('LDAP_CRUD')->
-    ldif({ dn        => $params->{ldap_ldif},
+    ldif({
+	   attrs     => $params->{ldap_ldif_attrs},
+	   base      => $params->{ldap_ldif_base},
+	   dn        => $params->{ldap_ldif},
+	   filter    => $params->{ldap_ldif_filter},
 	   recursive => $params->{ldap_ldif_recursive},
-	   sysinfo   => $params->{ldap_ldif_sysinfo}, });
-        # looks like they are defined always
-	#  defined $params->{ldap_ldif_recursive} && $params->{ldap_ldif_recursive} ne '' ? 1 : 0,
-	#  defined $params->{ldap_ldif_sysinfo} && $params->{ldap_ldif_sysinfo} ne '' ? 1 : 0
-	# );
+	   scope     => $params->{ldap_ldif_scope},
+	   sysinfo   => $params->{ldap_ldif_sysinfo},
+	 });
   $c->stash(
 	    template => 'search/ldif.tt',
 	    final_message => $ldif,
@@ -1354,11 +1357,15 @@ sub ldif_gen2f :Path(ldif_gen2f) :Args(0) {
   my $params = $c->req->parameters;
   log_debug { np($params) };
   my $ldif = $c->model('LDAP_CRUD')->
-    ldif({ dn        => $params->{ldap_ldif},
+    ldif({
+	   attrs     => $params->{ldap_ldif_attrs},
 	   base      => $params->{ldap_ldif_base},
+	   dn        => $params->{ldap_ldif},
 	   filter    => $params->{ldap_ldif_filter},
 	   recursive => $params->{ldap_ldif_recursive},
-	   sysinfo   => $params->{ldap_ldif_sysinfo} });
+	   scope     => $params->{ldap_ldif_scope},
+	   sysinfo   => $params->{ldap_ldif_sysinfo}
+	 });
   # log_debug { np($ldif) };
   $c->stash(
 	    current_view => 'Download',

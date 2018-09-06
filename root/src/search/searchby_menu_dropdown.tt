@@ -1,16 +1,21 @@
 [% # -*- mode: web -*- %]
-<div class="row">
-<div class="btn-group col-10 clearfix">
-  <a href="#"
-     class="chevron_toggleable btn btn-link pull-left"
-     title="Collapse In/Out This Panel"
-     data-target="#collapse[% loop.index %]"
-     data-toggle="collapse"
-     data-parent="#accordion[% loop.index %]">
-    <span id="chevron_switcher" class="fa [% site.icons.toggle %][% chevron_toggle %]"></span>
-  </a>
 
-  <div class="dropdown pull-left">
+[% fa_meta = 'fas fa-fw'%]
+
+<div class="row">
+  <div class="btn-group col-10 clearfix">
+    <div class="btn">
+      <a href="#"
+	 class="chevron_toggleable btn btn-link pull-left"
+	 title="Collapse In/Out This Panel"
+	 data-target="#collapse[% loop.index %]"
+	 data-toggle="collapse"
+	 data-parent="#accordion[% loop.index %]">
+	<span id="chevron_switcher" class="fa [% site.icons.toggle %][% chevron_toggle %]"></span>
+      </a>
+    </div>
+    
+    <div class="btn dropdown pull-left">
     <button class="btn btn-link umi-search"
 	    type="button" id="dropdownMenuActions"
 	    data-toggle="dropdown"
@@ -45,7 +50,7 @@
 	  <input type="hidden" name="dynamic_object" value="[% entry.value.mgmnt.dynamicObject %]">
 	  <button type="submit" title="add new service account" class="btn btn-link"
 		  data-order="[% site.searchby.menu.order.add_svc_acc %]">
-	  <span class="fa fa-fw fa-user-cog text-success"></span>
+	  <span class="[% fa_meta %] fa-user-cog text-success"></span>
 	  new service
 	  </button>
 	</form>
@@ -56,7 +61,7 @@
 	  <input type="hidden" name="ldap_modify_group" value="[% entry.key %]">
 	  <button type="submit" title="modify group/s user belongs to" class="btn btn-link"
 		  data-order="[% site.searchby.menu.order.ldap_modify_group %]">
-	  <span class="fa fa-fw fa-users-cog text-warning"></span>
+	  <span class="[% fa_meta %] fa-users-cog text-warning"></span>
 	  group
 	  </button>
 	</form>
@@ -70,7 +75,7 @@
 		data-order="[% site.searchby.menu.order.user_block %]"
 		data-toggle="modal"
 		data-target="#modal_block[% id_suffix %]">
-	  <span class="fa fa-fw fa-user-slash text-danger"></span>
+	  <span class="[% fa_meta %] fa-user-slash text-danger"></span>
 	  block
 	</button>
       </li>
@@ -85,7 +90,7 @@
 		data-order="[% site.searchby.menu.order.ldap_delete %]"
 		data-toggle="modal"
 		data-target="#modal_delete[% id_suffix %]">
-	  <span class="fa fa-fw fa-trash text-danger"></span>
+	  <span class="[% fa_meta %] fa-trash text-danger"></span>
 	  delete
 	</button>
       </li>
@@ -96,7 +101,7 @@
 		data-order="[% site.searchby.menu.order.ldap_delete %]"
 		data-toggle="modal"
 		data-target="#modal_moddn[% id_suffix %]">
-	  <span class="fa fa-fw fa-highlighter text-danger"></span>
+	  <span class="[% fa_meta %] fa-pen-fancy text-danger"></span>
 	  moddn
 	</button>
       </li>
@@ -110,7 +115,7 @@
 		  data-order="[% site.searchby.menu.order.chg_acc %]"
 		  data-toggle="modal"
 		  data-target="#modal_reassign[% id_suffix %]">
-	    <span class="fa fa-fw fa-retweet text-danger"></span>
+	    <span class="[% fa_meta %] fa-retweet text-danger"></span>
 	    reassign
 	  </button>
 	</form>
@@ -128,7 +133,7 @@
 		  data-order="[% site.searchby.menu.order.chg_acc %]"
 		  data-toggle="modal"
 		  data-target="#modal_refresh[% id_suffix %]">
-	    <span class="fa fa-fw fa-clock text-info"></span>
+	    <span class="[% fa_meta %] fa-clock text-info"></span>
 	    refresh
 	  </button>
 	</form>
@@ -144,7 +149,7 @@
 		name="vcard"
 		data-toggle="modal"
 		data-target="#modal_vcard[% id_suffix %]">
-	  <span class="fa fa-fw fa-upload text-info"></span>
+	  <span class="[% fa_meta %] fa-upload text-info"></span>
 	  export vCard
 	</button>
       </li>
@@ -159,7 +164,7 @@
 		name="ldap_ldif"
 		data-toggle="modal"
 		data-target="#modal_ldif[% id_suffix %]">
-	  <span class="fa fa-fw fa-upload text-info"></span>
+	  <span class="[% fa_meta %] fa-upload text-info"></span>
 	  export LDIF
 	</button>
       </li>
@@ -170,7 +175,7 @@
 	  <input type="hidden" name="ldap_modify" value="[% entry.key %]">
 	  <button type="submit" title="edit all fields" class="btn btn-link"
 		  data-order="[% site.searchby.menu.order.ldap_modify %]">
-	  <span class="fa fa-fw fa-pencil-alt text-warning"></span>
+	  <span class="[% fa_meta %] fa-edit text-warning"></span>
 	  edit (all)
 	  </button>
 	</form>
@@ -183,7 +188,7 @@
 	  <button type="submit" class="btn btn-link"
 		  title="EXPERIMENTAL: edit form (the one used for object creation)"
 		  data-order="[% site.searchby.menu.order.ldap_modify %]">
-	    <span class="fa fa-fw fa-magic text-muted"></span>
+	    <span class="[% fa_meta %] fa-magic text-muted"></span>
 	    edit form <sup><span class="fas fa-exclamation-triangle text-muted"></span></sup>
 	  </button>
 	</form>
@@ -195,7 +200,7 @@
 	  <input type="hidden" name="ldap_history" value="[% entry.key %]">
 	  <button type="submit" title="history of this object" class="btn btn-link"
 		  data-order="[% site.searchby.menu.order.ldap_history %]">
-	  <span class="fa fa-fw fa-history text-info"></span>
+	  <span class="[% fa_meta %] fa-history text-info"></span>
 	  history
 	  </button>
 	</form>
@@ -211,7 +216,7 @@
 		data-order="[% site.searchby.menu.order.ldap_rollback %]"
 		data-toggle="modal"
 		data-target="#modal_rollback[% id_suffix %]">
-	  <span class="fa fa-fw fa-undo text-danger"></span>
+	  <span class="[% fa_meta %] fa-undo text-danger"></span>
 	  rollback
 	</button>
       </li>
@@ -224,7 +229,7 @@
 		  value="[% entry.key %]"
 		  data-order="[% site.searchby.menu.order.ldap_modify_memberUid %]"
 		  name="ldap_modify_memberUid">
-	    <span class="fa fa-fw fa-users text-info"></span>
+	    <span class="[% fa_meta %] fa-users text-info"></span>
 	    members
 	  </button>
 	</form>
@@ -238,7 +243,7 @@
 		  value="[% entry.key %]"
 		  data-order="[% site.searchby.menu.order.ldap_modify_rad_group %]"
 		  name="ldap_modify_rad_group">
-	    <span class="fa fa-fw fa-arrows-alt text-info"></span>
+	    <span class="[% fa_meta %] fa-arrows-alt text-info"></span>
 	    RADIUS group
 	  </button>
 	</form>
@@ -251,7 +256,7 @@
 	  <input type="hidden" name="ldap_modify_password" value="[% entry.key %]">
 	  <button type="submit" title="password change / check" class="btn btn-link"
 		  data-order="[% site.searchby.menu.order.ldap_modify_password %]">
-	  <span class="fa fa-fw fa-user-lock text-danger"></span>
+	  <span class="[% fa_meta %] fa-user-lock text-danger"></span>
 	  password
 	  </button>
 	</form>
@@ -264,7 +269,7 @@
 	  <input type="hidden" name="ldap_add_dhcp" value="[% entry.key %]">
 	  <button type="submit" title="add DHCP (MAC to IP binding)" class="btn btn-link"
 		  data-order="[% site.searchby.menu.order.ldap_add_dhcp %]">
-	  <span class="fa fa-fw fa-sitemap text-warning"></span>
+	  <span class="[% fa_meta %] fa-sitemap text-warning"></span>
 	  DHCP
 	  </button>
 	</form>
@@ -277,7 +282,7 @@
 	  <input type="hidden" name="ldap_modify_jpegphoto" value="[% entry.key %]">
 	  <button type="submit" title="change jpegPhoto (like avatar e.t.c.)" class="btn btn-link"
 		  data-order="[% site.searchby.menu.order.ldap_modify_jpegphoto %]">
-	  <span class="fa fa-fw fa-image text-warning"></span>
+	  <span class="[% fa_meta %] fa-image text-warning"></span>
 	  image
 	  </button>
 	</form>
@@ -292,7 +297,7 @@
 		  value="[% entry.key %]"
 		  data-order="[% site.searchby.menu.order.ldap_gitacl_reorder %]"
 		  name="ldap_gitacl_reorder">
-	    <span class="fa fa-fw fa-sort text-warning"></span>
+	    <span class="[% fa_meta %] fa-sort text-warning"></span>
 	    reorder
 	  </button>
 	</form>

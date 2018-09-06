@@ -813,32 +813,11 @@ sub test : Local {
 # tree build #   }
 # tree build #   $return = $tree;
 
-  my $req = $ldap_crud->control_sync_req;
-  log_debug { np( $req ) };
-  my $mesg = $ldap_crud->search({ base      => $ldap_crud->{cfg}->{base}->{acc_root},
-				  filter    => "(objectClass=*)",
-				  control   => [ $req ],
-				  callback  => sub { # log_debug {np(@_)};
-				    my $msg  = shift;;
-				    my $obj  = shift;
-				    my @controls = $msg->control;
-				    # log_debug { np( $msg ) };
-				    if ( defined $obj && $obj->isa('Net::LDAP::Entry') ) {
-				      # log_debug { $obj->dn . ' ; ' . np(@controls)};
-				      my $syncstate = undef;
-				      for my $control (@controls) {
-					if ( $control->isa('Net::LDAP::Control::SyncState') ) {
-					  $syncstate = $control;
-				  			   log_debug {np($syncstate)};
-					  last;
-					}
-				      }
-				    }
-				  },
-				  sizelimit => 0,
-				  attrs     => [ '*' ] });
-  log_debug { np( $mesg ) };
-  $return = $mesg->count;
+  # log_debug { np( $mesg ) };
+  $return = $ldap_crud->last_seq_val({ base  => $ldap_crud->cfg->{base}->{acc_root},
+				       attr  => 'uidNumber', });
+
+
   
   $c->stash( template => 'test.tt',
 	     final_message => $return,

@@ -215,12 +215,20 @@ html,body {
   text-decoration: none;
 }
 
-.table-vcenter td {
+.umi-search-padding {
+  padding: 8px 12px;
+}
+
+  .table-vcenter td {
   vertical-align: middle!important;
 }
 
 .umi-text-left {
   text-align: left;
+}
+
+.umi-text-smaler {
+  font-size: 75%;
 }
 
 .umi-opacity05 {
@@ -273,7 +281,7 @@ html,body {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin: 0;
+//  margin: 0;
 }
 
 .app-header.navbar .navbar-brand {

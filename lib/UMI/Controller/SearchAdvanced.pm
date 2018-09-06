@@ -172,7 +172,7 @@ sub proc :Path(proc) :Args(0) {
 
       my ( $ttentries, @ttentries_keys, $attr, $dn_depth,  $dn_depthes, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry, @root_groups, $obj_item, $tmp, $c_name, $m_name );
       my $blocked = 0;
-    my $is_userPassword  = 0;
+      my $is_userPassword  = 0;
       my $is_dynamicObject = 0;
 
       foreach (@entries) {
@@ -186,15 +186,17 @@ sub proc :Path(proc) :Args(0) {
 
 	if ( $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
 	  $dn_depth = scalar split(/,/, $ldap_crud->{cfg}->{base}->{acc_root}) + 1;
-	  
-	  foreach $tmp ( @{$_->get_value('objectClass', asref => 1)} ) {
-	    $is_userPassword = 1
-	      if exists $c->session->{ldap}->{obj_schema}->{$tmp}->{may}->{userPassword} ||
-	      exists $c->session->{ldap}->{obj_schema}->{$tmp}->{must}->{userPassword};
-	    if ( $tmp eq 'dynamicObject' ) {
-	      $is_dynamicObject = 1;
-	      $ttentries->{$_->dn}->{root}->{ts}->{entryExpireTimestamp} =
-		$self->ts({ ts => $_->get_value('entryExpireTimestamp'), gnrlzd => 1, gmt => 1 });
+
+	  if ( $_->exists('objectClass') ) {
+	    foreach $tmp ( @{$_->get_value('objectClass', asref => 1)} ) {
+	      $is_userPassword = 1
+		if exists $c->session->{ldap}->{obj_schema}->{$tmp}->{may}->{userPassword} ||
+		exists $c->session->{ldap}->{obj_schema}->{$tmp}->{must}->{userPassword};
+	      if ( $tmp eq 'dynamicObject' ) {
+		$is_dynamicObject = 1;
+		$ttentries->{$_->dn}->{root}->{ts}->{entryExpireTimestamp} =
+		  $self->ts({ ts => $_->get_value('entryExpireTimestamp'), gnrlzd => 1, gmt => 1 });
+	      }
 	    }
 	  }
 	  
@@ -203,6 +205,7 @@ sub proc :Path(proc) :Args(0) {
 				      base => $ldap_crud->cfg->{base}->{group},
 				      filter => sprintf('(&(cn=%s)(memberUid=%s))',
 							$ldap_crud->cfg->{stub}->{group_blocked},
+							# !!! WARNING !!! HARDCODE
 							substr( (reverse split /,/, $_->dn)[2], 4 )),
 				     });
 	  $blocked = $mesg->count;
@@ -322,19 +325,21 @@ sub proc :Path(proc) :Args(0) {
       @ttentries_keys = sort { lc $a cmp lc $b } keys %{$ttentries}
 	if $sort_order eq 'straight';
 
-      # p $ttentries;
+      # log_debug { np( $ttentries ) };
       $c->stash(
-		template => 'search/searchby.tt',
-		base_dn => $basedn,
-		filter => $filter,
-		entrieskeys => \@ttentries_keys,
-		entries => $ttentries,
-		schema => $c->session->{ldap}->{obj_schema_attr_equality},
-		services => $ldap_crud->cfg->{authorizedService},
-		base_icon => $ldap_crud->cfg->{base}->{icon},
-		final_message => $return,
-		form => $self->form,
+		attrs               => defined $params->{'show_attrs'} && $params->{'show_attrs'} ne '' ? split(/,/, $params->{'show_attrs'}) : undef,
+		base_dn             => $basedn,
+		base_icon           => $ldap_crud->cfg->{base}->{icon},
+		entries             => $ttentries,
+		entrieskeys         => \@ttentries_keys,
+		filter              => $filter,
+		final_message       => $return,
+		form                => $self->form,
 		from_searchadvanced => 1,
+		schema              => $c->session->{ldap}->{obj_schema_attr_equality},
+		scope               => $scope,
+		services            => $ldap_crud->cfg->{authorizedService},
+		template            => 'search/searchby.tt',
 	       );
     } else {
       $c->stash( template => 'signin.tt', );
