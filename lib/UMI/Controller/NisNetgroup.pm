@@ -36,7 +36,6 @@ sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
     my $params = $c->req->parameters;
     my $ldap_crud = $c->model('LDAP_CRUD');
-    my $entry = $self->attributes($ldap_crud->cfg->{objectClass}->{netgroup}, $params);
 
     $c->stash( template => 'nis/nisnetgroup.tt',
 	       form     => $self->form );
@@ -46,6 +45,8 @@ sub index :Path :Args(0) {
 				       params => $params,
 				       ldap_crud => $ldap_crud,
 				      );
+
+    my $entry = $self->attributes($ldap_crud->cfg->{objectClass}->{netgroup}, $params);
 
     if ( defined $params->{aux_dn_form_to_modify} && $params->{aux_dn_form_to_modify} ne '' ) {
       $entry->{dn}                    = $params->{aux_dn_form_to_modify};
@@ -91,7 +92,8 @@ sub attributes {
     # log_debug { np($self->form->field('triple')->fields) };
     foreach my $triple_part ( $self->form->field('triple')->fields ) {
       foreach ( $triple_part->fields ) {
-	# log_debug { np($_->value) };
+	log_debug { np($_->name) };
+	log_debug { np($_->value) };
 	next if $_->name eq 'rm-duplicate' || $_->name eq 'remove';
 	push @{$a}, $_->value // '';
       }
