@@ -3167,8 +3167,9 @@ sub create_account_branch_leaf {
 
   # log_debug { np($arg) };
   
-  my ($authorizedService, $sshkey, $authorizedService_add, $jpegPhoto_file, $sshPublicKey, $description );
-
+  my ($authorizedService, $sshkey, $authorizedService_add, $jpegPhoto_file, $description );
+  my $sshPublicKey = [];
+  
   if ( $arg->{service} eq 'ovpn' ||
        $arg->{service} eq 'ssh' ||
        ( $arg->{service} eq '802.1x-mac' ||
