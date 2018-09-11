@@ -227,8 +227,20 @@ html,body {
   text-align: left;
 }
 
-.umi-text-smaler {
-  font-size: 75%;
+.umi-text-smaller {
+  font-size: 60%;
+}
+
+.umi-text-lg {
+  font-size: 1.33em;
+}
+
+.umi-text-sm {
+  font-size: .875em;
+}
+
+.umi-text-xs {
+  font-size: .75em;
 }
 
 .umi-opacity05 {

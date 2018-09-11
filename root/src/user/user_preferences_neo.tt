@@ -129,7 +129,7 @@
       </h3>
     </div>
     <div id="collapse_dhcp" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_dhcp">
-      <div class="panel-body">
+      <!-- div class="panel-body" -->
 	[% IF c.check_user_roles('wheel') || c.check_user_roles('wheel') %]
 	<form role="form" method="POST"
 	      action="/searchby/proc">
@@ -150,7 +150,7 @@
 	  [% IF c.check_user_roles('admin') || c.check_user_roles('coadmin') %]
 	</form>
 	[% END %]
-      </div>
+      <!-- /div -->
     </div>
   </div>
   [% END %]
@@ -168,7 +168,6 @@
       </h3>
     </div>
     <div id="collapse_service" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_service">
-      <div class="panel-body table-responsive">
 	<table class="table table-condenced table-stripped table-hover">
 	  <tbody>
 	    [% FOREACH y IN service %]
@@ -210,7 +209,7 @@
 		  </ul>
 		</div>
 		[% END %]
-		[% z.value %]
+		<div>[% z.value %]</div>
 		[%   IF y.cert.${z.key} %]
 		<br><small class="pull-left"><em><dl class="dl-horizontal">
 		  [%   FOREACH cert IN y.cert.${z.key} %]
@@ -230,7 +229,6 @@
 	    [% END %]
 	  </tbody>
 	</table>
-      </div>
     </div>
   </div>
   [% END %]
@@ -247,7 +245,6 @@
       </h3>
     </div>
     <div id="collapse_inventory" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_inventory">
-      <div class="panel-body">
 	<div class="table-responsive">
 	  <table class="table table-condenced table-stripped table-hover">
 	    <thead>
@@ -282,7 +279,6 @@
 	    </tbody>
 	  </table>
 	</div>
-      </div>
     </div>
   </div>
   [% END %]

@@ -4,7 +4,7 @@
 
 <div class="row">
   <div class="btn-group col-10 clearfix">
-    <div class="btn">
+    <div class="">
       <a href="#"
 	 class="chevron_toggleable btn btn-link pull-left"
 	 title="Collapse In/Out This Panel"
@@ -15,7 +15,7 @@
       </a>
     </div>
     
-    <div class="btn dropdown pull-left">
+    <div class="dropdown pull-left">
     <button class="btn btn-link umi-search"
 	    type="button" id="dropdownMenuActions"
 	    data-toggle="dropdown"

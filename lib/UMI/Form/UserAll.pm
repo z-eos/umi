@@ -989,7 +989,7 @@ sub validate {
       
       #---[ login preparation for check ]------------------------------------------------
 
-      #---[ ssh-acc ]------------------------------------------------
+      #---[ ssh-acc ]--------------------------------------------------------------------
       if ( defined $element->field('authorizedservice')->value &&
 	   $element->field('authorizedservice')->value =~ /^ssh-acc.*$/ ) {
 
@@ -1011,10 +1011,13 @@ sub validate {
 				  '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
 				  '<b> <i class="fa fa-arrow-right"></i> SSH:</b> Empty duplicatee! Fill it or remove, please');
 	  }
-      }
-      #---[ ssh-acc ]------------------------------------------------
 
-      #---[ 802.1x ]------------------------------------------------
+
+	  
+      }
+      #---[ ssh-acc ]--------------------------------------------------------------------
+
+      #---[ 802.1x ]---------------------------------------------------------------------
       if ( defined $element->field('authorizedservice')->value &&
 	   $element->field('authorizedservice')->value =~ /^802.1x-.*$/ ) {
 
@@ -1093,7 +1096,7 @@ sub validate {
 	    if $mesg->count;
 	}
       }
-      #---[ 802.1x ]------------------------------------------------
+      #---[ 802.1x ]---------------------------------------------------------------------
 
       # prepare to know if login+service+fqdn is uniq?
       if ( ! $i ) {   # && defined $element->field('login')->value ) {
