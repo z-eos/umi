@@ -369,7 +369,7 @@
 	      <div class="col-2 pull-right btn btn-sm">
 
 		<!-- small class="umi-text-xs" -->
-		  <ul class="fa-ul umi-zerro-margin umi-text-smaller">
+		  <ul class="fa-ul text-left umi-zerro-margin umi-text-smaller">
 		    
 		    <li title="created, GMT" class="visible-lg-block visible-md-block">
 		      <i class="fa-li fa fa-sm fa-hourglass-start"></i>
