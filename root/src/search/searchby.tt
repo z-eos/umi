@@ -94,7 +94,7 @@
 	<td colspan=2>
 	  <div class="btn-group" role="group">
 	    <a href="#"
-	       class="chevron_toggleable collapse_in_out btn btn-link" role="button"
+	       class="collapse_in_out btn btn-link" role="button"
 	       title="Collapse In/Out Each Element On This Page"
 	       data-target="#collapse"
 	       data-toggle="collapse"
@@ -136,6 +136,8 @@
     </thead>
     <tbody>
 
+      [% # USE dumper() %]<!-- pre>[% # base_dn.split(',').last %]</pre1 -->
+      
       [% root_of_rec = '<span class="far fa-dot-circle fa-2x"></span>' %]
       [% FOREACH entrykey IN entrieskeys %]
       [%   entry.key = entrykey    # dn of the current entry
@@ -290,16 +292,16 @@
 		  [%   ELSIF entry.value.mgmnt.is_root && entry.key.match('reqStart') %]
 		  [%     IF entry.value.attrs.reqType.0 == 'add' %]
 		  [%       ph_title="History Object Request type: Add" %]
-		  [%       ph_class="umisearch-padding " _ entry_icon_size _ " fa-plus-square" %]
+		  [%       ph_class="umisearch-padding " _ entry_icon_size _ " fas fa-plus-square" %]
 		  [%     ELSIF entry.value.attrs.reqType.0 == 'delete' %]
 		  [%       ph_title="History Object Request type: Delete" %]
-		  [%       ph_class="umisearch-padding " _ entry_icon_size _ " fa-minus-square" %]
+		  [%       ph_class="umisearch-padding " _ entry_icon_size _ " fas fa-minus-square" %]
 		  [%     ELSIF entry.value.attrs.reqType.0 == 'modify' %]
 		  [%       ph_title="History Object Request type: Modify" %]
-		  [%       ph_class="umisearch-padding " _ entry_icon_size _ " fa-pen-square" %]
+		  [%       ph_class="umisearch-padding " _ entry_icon_size _ " fas fa-pen-square" %]
 		  [%     ELSIF entry.value.attrs.reqType.0 == 'modrdn' %]
 		  [%       ph_title="History Object Request type: ModRDN" %]
-		  [%       ph_class="umisearch-padding " _ entry_icon_size _ " fa-share-alt-square" %]
+		  [%       ph_class="umisearch-padding " _ entry_icon_size _ " fas fa-share-alt-square" %]
 		  [%     END %]
 		  [%   ELSIF entry.value.mgmnt.is_root && ! entry.key.match('People') %]
 		  [%     ph_title="Root Objectt" %]
@@ -494,13 +496,7 @@
 	[% ELSIF h_attr.key == 'userPKCS12' %]
 	<kbd class="fa fa-file-o">&nbsp;Binary Data</kbd>
 	[% ELSIF h_attr.key == 'jpegPhoto' %]
-	[% # bellow, value of jpegPhoto attribute contains no  `<img class="' part
-	   # to set background class here according the object type: root or child %]
-	[% entry.value.mgmnt.is_root ? '<img class="bg-info ' _ h_attr.value : '<img class="bg-success ' _  h_attr.value %]
-	[% ELSIF h_attr.key == 'uid' %]
-	[%   buttonizer( buttonizer_id= h_attr.value,
-	   buttonizer_dn='uid=' _ h_attr.value.0 _ ',ou=People,dc=umidb',
-	   buttonizer_text= h_attr.value.0 )%]		
+	<img class="bg-[% tr_color _ ' ' _ h_attr.value %]
 	[% ELSIF entry.value.is_arr.$attr_name %]
 	[%   FOREACH i IN h_attr.value %]
 	[%     IF h_attr.key == 'sshPublicKey' %]
@@ -546,14 +542,28 @@
 </div>
 
 <script>
- /*!
+
+ /*
   * searchby result/s un/collaps-er (@ searchby.tt)
   */ 
+
  $('.collapse_in_out').on('click', function() {
    console.log('toggle from searchby.tt');
    $("[id^=collapse]").toggleClass('panel-collapse collapse in').toggleClass('panel-collapse collapse');
    $("[id^=chevron_switcher]").toggleClass('[% site.icons.toggle_right %]').toggleClass('[% site.icons.toggle_down %]');
  });
+
+ // !!! NOT FINISHED
+ $('.chevron_toggleable').on('click', function() { 
+   if ($(this).closest('.panel-group').find('.panel-collapse').hasClass('in')) { 
+     console.log('searchby.tt: chevron_toggleable collapsed');
+     $(this).find('#chevron_switcher').removeClass('[% site.icons.toggle_down %]').addClass('[% site.icons.toggle_right %]')
+   } else { 
+     console.log('searchby.tt: chevron_toggleable');
+     $(this).find('#chevron_switcher').removeClass('[% site.icons.toggle_right %]').addClass('[% site.icons.toggle_down %]')
+   }
+ })
+
 </script>
 
 <script>

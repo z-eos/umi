@@ -182,8 +182,12 @@ html,body {
 }
 
 
+/* .mono {
+   font-family: "Courier New", Courier, monospace;
+						  word-break: break-all;
+} */
 .mono {
-  font-family: "Courier New", Courier, monospace;
+  font-family: monospace;
   word-break: break-all;
 }
 

@@ -308,8 +308,8 @@ sub index :Path :Args(0) {
 	    $return->{error} .= $ldap_crud->err( $mesg )->{html};
 	  } elsif ( $mesg->count ) {
 	    $gr_entry = $mesg->entry(0);
-	    p $ttentries->{$dn}->{root}->{PrimaryGroupNameDn} = $gr_entry->dn;
-	    p $ttentries->{$dn}->{root}->{PrimaryGroupName} = $gr_entry->get_value('cn');
+	    $ttentries->{$dn}->{root}->{PrimaryGroupNameDn} = $gr_entry->dn;
+	    $ttentries->{$dn}->{root}->{PrimaryGroupName} = $gr_entry->get_value('cn');
 	  }
 	}
 
