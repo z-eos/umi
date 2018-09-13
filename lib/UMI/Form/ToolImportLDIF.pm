@@ -35,13 +35,14 @@ has_field 'file'
 
 has_field 'ldif'
   => ( type => 'TextArea',
-       wrapper_attr => { id => 'fieldldif', },
-       label => 'LDIF Data',
-       label_class => [ 'col-xs-2', ],
-       element_wrapper_class => [ 'col-xs-10', 'col-lg-7', ],
-       element_attr => { placeholder => 'LDIF data', },
+       wrapper_attr          => { id => 'fieldldif', },
+       label                 => 'LDIF Data',
+       label_class           => [ 'col-xs-2', ],
+       element_wrapper_class => [ 'col-xs-10', 'col-lg-10', ],
+       element_class         => [ 'mono' ],
+       element_attr          => { placeholder => 'LDIF data', },
        # cols => 30,
-       rows => 20
+       rows                  => 20
      );
 
 has_field 'aux_reset' => ( type => 'Reset',

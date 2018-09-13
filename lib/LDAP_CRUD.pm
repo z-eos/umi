@@ -1614,7 +1614,7 @@ sub ldif {
 	     dn     => $args->{dn}     // undef,
 	     base   => $args->{base}   // undef,
 	     filter => $args->{filter} // 'objectClass=*',
-	     attrs  => [ $args->{attrs} ]  // [ '*' ],
+	     attrs  => defined $args->{attrs} ? [ $args->{attrs} ] : [ '*' ],
 	     scope  => $args->{scope},
 	     # scope  => $args->{recursive}  ? 'sub' : 'base',
 	    };

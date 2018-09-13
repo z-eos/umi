@@ -553,7 +553,6 @@
    $("[id^=chevron_switcher]").toggleClass('[% site.icons.toggle_right %]').toggleClass('[% site.icons.toggle_down %]');
  });
 
- // !!! NOT FINISHED
  $('.chevron_toggleable').on('click', function() { 
    if ($(this).closest('.panel-group').find('.panel-collapse').hasClass('in')) { 
      console.log('searchby.tt: chevron_toggleable collapsed');
@@ -565,6 +564,8 @@
  })
 
 </script>
+
+<script src="/static/js/umi-holder.js""></script>
 
 <script>
  $(function(){ $('#btnLegend').popover() });

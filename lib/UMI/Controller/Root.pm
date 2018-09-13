@@ -454,7 +454,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
     }
 
     # log_debug { np(@{[$c->user->roles]}) };
-    log_debug { np($arg) };
+    # log_debug { np($arg) };
     utf8::decode($arg->{givenname});
     utf8::decode($arg->{sn});
     # p $arg;
@@ -520,24 +520,26 @@ sub user_preferences :Path(user_prefs) :Args(0) {
     if ( $mesg->code ) { $return->{error} .= sprintf('<li>DHCP %s</li>',
 						     $ldap_crud->err($mesg)->{html}); }
     $entries = $mesg->as_struct;
+    # log_debug{ np($entries) };
     foreach (keys (%{$entries})) {
       @x = split(',', $_);
-      splice @x, 0, 1;
+      splice @x, 0, 2;
       $mesg = $ldap_crud->search( { base => join(',', @x),
 				    scope => 'base',
-				    attrs => [ 'dhcpOption' ], } );
+				    attrs => [ 'dhcpStatements' ], } );
       if ( $mesg->code ) { $return->{error} .= sprintf('<li>DHCP domain-name/s %s</li>',
 						       $ldap_crud->err($mesg)->{html}); }
+
+
+      
       foreach ( @{[$mesg->entry(0)->get_value('dhcpStatements')]} ) {
-	$domain_name = substr($_, 13, -1) if $_ =~ /domain-name /;
+	$domain_name = substr((split(' ', $_))[1],1,-2) if $_ =~ /ddns-domainname /;
       }
 
       push @{$dhcp}, {
 		      dn =>   $_,
 		      cn =>   $entries->{$_}->{cn}->[0],
 		      fqdn => $domain_name,
-#		      ip =>   substr($entries->{$_}->{dhcpstatements}->[0], 14),
-#		      mac =>  substr($entries->{$_}->{dhcphwaddress}->[0], 9),
 		      ip =>   (split(' ', $entries->{$_}->{dhcpstatements}->[0]))[1],
 		      mac =>  (split(' ', $entries->{$_}->{dhcphwaddress}->[0]))[1],
 		      desc => $entries->{$_}->{dhcpcomments}->[0],
@@ -547,7 +549,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
     #=================================================================
     # user services
     #
-    log_debug { np($arg) };
+    # log_debug { np($arg) };
 
     my ( $svc_entry, $service, $service_details );
     $mesg = $ldap_crud->search( { base => 'uid=' . $arg->{uid} . ',' .
@@ -590,6 +592,24 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	  $service_details->{cert}->{$_->dn}->{'device'}        = $_->get_value('umiOvpnAddDevType');
 	} elsif ( $service_details->{authorizedService} =~ /^mail\@/ ) {
 	  push @{$arg->{mail}}, $_->get_value('uid');
+	} elsif ( $service_details->{authorizedService} =~ /^802.1x.*\@/ ) {
+	  my $rgrp = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{rad_groups},
+					   sizelimit => 0,
+					   filter => sprintf("member=%s", $_->dn),
+					   attrs => [ 'cn'], } );
+	  $return->{error} .= sprintf('<li>%s rad group/s %s</li>', $ldap_crud->cfg->{base}->{rad_groups}, $ldap_crud->err($rgrp)->{html})
+	    if $rgrp->code;
+	  if ( $rgrp->count ) {
+	    my $rgrps = $rgrp->as_struct;
+	    # log_debug { np($rgrps) };
+	    foreach my $rg (keys (%{$rgrps})) {
+	      # log_debug { np($rgrps->{$rg}) };
+	      $service_details->{rad_grp} .= 'RAD grp: ' . $rgrps->{$rg}->{cn}->[0] . '; ';
+	    }
+	  } else {
+	    $return->{warning} .= '<li>no rad group found</li>';
+	  }
+	  
 	} elsif ( (split('@', $service_details->{authorizedService}))[0] eq 'ssh' ) {
 	  @{$service_details->{sshkey}->{$_->dn}} = $_->get_value('sshPublicKey');
 	}

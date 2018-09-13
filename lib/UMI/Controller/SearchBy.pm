@@ -344,13 +344,16 @@ sub index :Path :Args(0) {
 	map { utf8::decode($_); $_} @{$to_utf_decode};
 	@{$to_utf_decode} = sort @{$to_utf_decode};
 	$ttentries->{$dn}->{attrs}->{$attr} = $to_utf_decode;
-
+	log_debug { np($ttentries->{$dn}->{attrs}) };
 	if ( $attr eq 'jpegPhoto' ) {
+	  # if 
 	  $ttentries->{$dn}->{attrs}->{$attr} =
-	    sprintf('img-thumbnail" alt="jpegPhoto of %s" src="data:image/jpg;base64,%s" title="%s" />',
-		    $dn,
-		    encode_base64(join('',@{$ttentries->{$dn}->{attrs}->{$attr}})),
-		    $dn);
+	    ref($ttentries->{$dn}->{attrs}->{$attr}) eq 'ARRAY'
+	    ? sprintf('img-thumbnail" alt="jpegPhoto of %s" src="data:image/jpg;base64,%s" title="%s" />',
+		      $dn,
+		      encode_base64(join('',@{$ttentries->{$dn}->{attrs}->{$attr}})),
+		      $dn)
+	    : sprintf('img-thumbnail" alt="%s has empty image set" title="%s" src="holder.js/128x128" />', $dn, $dn);
 	} elsif ( $attr eq 'userCertificate;binary' ||
 		  $attr eq 'cACertificate;binary' ||
 		  $attr eq 'certificateRevocationList;binary' ) {
@@ -376,7 +379,12 @@ sub index :Path :Args(0) {
 	  }
 	}
       }
-
+      $ttentries->{$dn}->{attrs}->{jpegPhoto} =
+	sprintf('img-thumbnail holder-js" alt="%s has empty image set" title="%s" data-src="holder.js/128x128?theme=stub&text=ABSENT \n \n  ATTRIBUTE" />', $dn, $dn)
+	if ( $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ||
+	$dn =~ /^uid=.*,authorizedService=(mail|xmpp).*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) &&
+	! exists $ttentries->{$dn}->{attrs}->{jpegPhoto};
+      
       use Text::Diff;
       $tmp = diff \$diff->{reqOld}, \$diff->{reqMod}, { STYLE => 'Text::Diff::HTML' }
       	if defined $diff->{reqMod} &&  defined $diff->{reqMod};

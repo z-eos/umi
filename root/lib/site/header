@@ -203,16 +203,15 @@
     [% END %]
     [% # -------------------------------------------------------- %]
 
-    [% IF c.user %]
     <ul class="nav navbar-nav ml-auto">
-      [% IF navbar_note.size %][% # Root->end %]
+      [% IF c.user %]
+      [%   IF c.check_any_user_role ('admin', 'coadmin', 'operator') %]
+      [%     IF navbar_note.size %][% # Root->end %]
       <li class="nav-item dropdown">
-	
 	<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">
 	  <i class="fa fa-bell icon-bell"></i>
 	  <small><span class="badge badge-pill badge-danger bg-danger">[% navbar_note.size %]</span></small>
 	</a>
-	
 	<div class="dropdown-menu dropdown-menu-right">
 	  <div class="dropdown-header text-center text-dark">
 	    <strong>You have [% navbar_note.size %] notification</strong>
@@ -224,30 +223,28 @@
 	  [% END %]
 	</div>
       </li>
-      [% ELSE %]
+      [%     ELSE %]
       <li class="nav-item">
 	<div class="nav-link">
 	  <i class="fa fa-bell"></i>
 	</div>
       </li>
-      [% END %]
-      [% END %]
-      [% IF c.user %]
+      [%     END %]
+      [%   END %]
       <li class="nav-item dropdown">
       	<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-user-circle"></i> [% c.user() %]</a>
 	<div class="dropdown-menu">
-	    <a class="dropdown-item" href="/user_prefs"><i class="fa fa-cogs"></i>My Profile</a>
-	    <a class="dropdown-item ajaxless" href="/auth/signout" title="Sign Out"><i class="fa fa-sign-out-alt"></i> Sign Out</a>
+	  <a class="dropdown-item" href="/user_prefs"><i class="fa fa-cogs"></i>
+	    My Profile
+	  </a>
+	  <a class="dropdown-item ajaxless" href="/auth/signout" title="Sign Out"><i class="fa fa-sign-out-alt"></i>
+	    Sign Out
+	  </a>
 	</div>
       </li>
       [% ELSE %]
       <li class="nav-item">
 	<a href="/auth/signin" class="ajaxless" title="Sign In"><i class="fa fa-sign-in-alt"></i></a>
-      </li>
-      [% END %]
-      [% IF c.user %]
-      <li class="nav-item">
-	<!-- <button class="navbar-toggler aside-menu-toggle" type="button"><i class="fa fa-bars"></i></button> -->
       </li>
       [% END %]
     </ul>

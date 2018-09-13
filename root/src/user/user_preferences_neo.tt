@@ -15,15 +15,14 @@
       <h3 class="panel-title">
 	<a class="collapsed chevron_toggleable" data-toggle="collapse"
 	   href="#collapse_personal_data" aria-expanded="true" aria-controls="collapse_personal_data">
-          <i class="fa [% site.icons.toggle_down %] text-default"></i>
+          <i id="chevron_switcher" class="fa [% site.icons.toggle_down %] text-default"></i>
         </a>
-	<span class="fa fa-user col-xs-offset-1">&nbsp;</span>Personal data
+	<span class="fa fa-user col-xs-offset-1">&nbsp;</span><b>Personal data</b>
       </h3>
     </div>
     <div id="collapse_personal_data" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_personal_data">
       <div class="panel-body">
 	<div class="media">
-	  <div class="media-left"><img width="200" class="media-object img-thumbnail bg-info" [% jpegPhoto %]</div>
 	  <div class="media-body">
 	    <dl class="dl-horizontal fa-ul">
 	      <li class="media-heading">
@@ -60,6 +59,7 @@
 	      </i></li>
 	    </dl>
 	  </div>
+	  <div class="media-right"><img width="200" class="media-object img-thumbnail bg-info" [% jpegPhoto %]</div>
 	</div>
       </div>
     </div>
@@ -73,9 +73,9 @@
       <h3 class="panel-title">
 	<a class="collapsed chevron_toggleable" data-toggle="collapse"
 	   href="#collapse_org" aria-expanded="false" aria-controls="collapse_org">
-          <i class="fa [% site.icons.toggle_down %]"></i>
+          <i id="chevron_switcher" class="fa [% site.icons.toggle_right %]"></i>
         </a>
-	<span class="fa fa-industry col-xs-offset-1">&nbsp;</span>Organization/s
+	<span class="fa fa-industry col-xs-offset-1">&nbsp;</span><b>Organization/s</b>
       </h3>
     </div>
     <div id="collapse_org" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_org">
@@ -88,7 +88,7 @@
 		 href="#collapse_org_[% org.key.replace('[\. ]', '') %]" aria-expanded="false" aria-controls="collapse_org_[% org.key.replace('[\. ]', '') %]">
 		<span class="fa fa-caret-square-o-down text-default"></span>
               </a>
-	      <span class="fa fa-industry fa-xs col-xs-offset-1">&nbsp;</span>[% org.key %]
+	      <span class="fa fa-industry fa-xs col-xs-offset-1">&nbsp;</span><b>[% org.key %]</b>
 	    </h3>
 	  </div>
 	  <div id="collapse_org_[% org.key.replace('[\. ]', '') %]" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_org_[% org.key.replace('[\. ]', '') %]">
@@ -123,9 +123,9 @@
       <h3 class="panel-title">
 	<a class="collapsed chevron_toggleable" data-toggle="collapse"
 	   href="#collapse_dhcp" aria-expanded="false" aria-controls="collapse_dhcp">
-          <i class="fa [% site.icons.toggle_down %]"></i>
+          <i id="chevron_switcher" class="fa [% site.icons.toggle_down %]"></i>
         </a>
-	<span class="fa fa-sitemap col-xs-offset-1">&nbsp;</span>DHCP
+	<span class="fa fa-sitemap col-xs-offset-1">&nbsp;</span><b>DHCP</b>
       </h3>
     </div>
     <div id="collapse_dhcp" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_dhcp">
@@ -135,7 +135,7 @@
 	      action="/searchby/proc">
 	  [% END %]
 	  <table id="tbl_dhcp" class="table table-striped table-condensed table-hover">
-	    <thead><tr class="active"><th>Hostname</th><th>FQDN</th><th>IP</th><th>MAC</th><th>Description</th></tr></thead>
+	    <thead><tr class="active"><th>Hostname</th><th>DDNS</th><th>IP</th><th>MAC</th><th>Description</th></tr></thead>
 	    <tbody>
 	      [% FOREACH x IN dhcp %]
 	      <tr class="mono">
@@ -161,10 +161,9 @@
       <h3 class="panel-title">
 	<a class="collapsed chevron_toggleable" data-toggle="collapse"
 	   href="#collapse_service" aria-expanded="false" aria-controls="collapse_service">
-	  <i class="fa [% site.icons.toggle_down %]"></i>
+	  <i id="chevron_switcher" class="fa [% site.icons.toggle_down %]"></i>
 	</a>
-	<span class="fa fa-sliders col-xs-offset-1">&nbsp;</span>
-	Services
+	<span class="fa fa-sliders col-xs-offset-1">&nbsp;</span><b>Services</b>
       </h3>
     </div>
     <div id="collapse_service" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_service">
@@ -209,7 +208,12 @@
 		  </ul>
 		</div>
 		[% END %]
-		<div>[% z.value %]</div>
+		<div>
+		  [% z.value %]
+		  [% IF y.auth && y.authorizedService.search('802.1x') %]
+		  &nbsp;(&nbsp;[% y.rad_grp %]&nbsp;)
+		  [% END %]		  
+		</div>
 		[%   IF y.cert.${z.key} %]
 		<br><small class="pull-left"><em><dl class="dl-horizontal">
 		  [%   FOREACH cert IN y.cert.${z.key} %]
@@ -239,12 +243,12 @@
       <h3 class="panel-title">
 	<a class="collapsed chevron_toggleable" data-toggle="collapse"
 	   href="#collapse_inventory" aria-expanded="false" aria-controls="collapse_inventory">
-          <i class="fa [% site.icons.toggle_down %]"></i>
+          <i id="chevron_switcher" class="fa [% site.icons.toggle_right %]"></i>
         </a>
-	<span class="fa fa-sitemap col-xs-offset-1">&nbsp;</span>Inventory
+	<span class="fa fa-sitemap col-xs-offset-1">&nbsp;</span><b>Inventory</b>
       </h3>
     </div>
-    <div id="collapse_inventory" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_inventory">
+    <div id="collapse_inventory" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_inventory">
 	<div class="table-responsive">
 	  <table class="table table-condenced table-stripped table-hover">
 	    <thead>
@@ -284,6 +288,31 @@
   [% END %]
 
 </div>
+
+<script>
+
+ /*
+  * un/collaps-er (@ user_preferences_neo.tt)
+  */ 
+
+ $('.collapse_in_out').on('click', function() {
+   console.log('toggle from searchby.tt');
+   $("[id^=collapse]").toggleClass('panel-collapse collapse in').toggleClass('panel-collapse collapse');
+   $("[id^=chevron_switcher]").toggleClass('[% site.icons.toggle_right %]').toggleClass('[% site.icons.toggle_down %]');
+ });
+
+ $('.chevron_toggleable').on('click', function() { 
+   if ($(this).closest('.panel').find('.panel-collapse').hasClass('in')) { 
+     console.log('searchby.tt: chevron_toggleable collapsed');
+     $(this).find('#chevron_switcher').removeClass('[% site.icons.toggle_down %]').addClass('[% site.icons.toggle_right %]')
+   } else { 
+     console.log('searchby.tt: chevron_toggleable');
+     $(this).find('#chevron_switcher').removeClass('[% site.icons.toggle_right %]').addClass('[% site.icons.toggle_down %]')
+   }
+ })
+
+</script>
+
 
 <script> $(function(){ $('.svcDN').popover() }); </script>
 
