@@ -381,7 +381,7 @@ sub index :Path :Args(0) {
       }
       $ttentries->{$dn}->{attrs}->{jpegPhoto} =
 	sprintf('img-thumbnail holder-js" alt="%s has empty image set" title="%s" data-src="holder.js/128x128?theme=stub&text=ABSENT \n \n  ATTRIBUTE" />', $dn, $dn)
-	if ( $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ||
+	if ( $ttentries->{$dn}->{'mgmnt'}->{is_root} ||
 	$dn =~ /^uid=.*,authorizedService=(mail|xmpp).*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) &&
 	! exists $ttentries->{$dn}->{attrs}->{jpegPhoto};
       

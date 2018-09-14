@@ -1,4 +1,31 @@
 [% # -*- mode: web; -*- %]
+
+[% IF c.check_any_user_role ('admin', 'coadmin', 'operator') %]
+<div class="modal modal-warning" id="modal-is-accounts"
+     role="dialog" aria-labelledby="modal-area-is-accounts">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header ">
+	<h4 id="modal-area-is-accounts" class="modal-title">
+	  <i class="fas fa-exclamation-triangle"></i>
+	  <b>Are you really sure?</b>
+	</h4>
+      </div>
+      <div class="modal-body">
+	This will select info of all accounts, in one single,huge,big,fat and heavy table.
+      </div>
+      <div class="modal-footer">
+	<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+	<a href="/stat_acc" class="btn bg-warning">
+	  Yes
+	</a>
+      </div>
+
+    </div>
+  </div>
+</div>
+[% END %]
+
 <div id="sidebar" class="sidebar">
   <nav class="sidebar-nav">
     <ul class="nav">
@@ -8,8 +35,7 @@
 	<a class="nav-link nav-dropdown-toggle" href="#"><i class="fas fa-tasks"></i> Analyze</a>
 	<ul class="nav-dropdown-items">
           <li class="nav-item">
-	    <a class="nav-link" href="/stat_acc"
-	       title="All accounts info in one single,huge,big,fat and heavy table">
+	    <a class="nav-link" href="#modal-is-accounts" data-toggle="modal">
 	      <i class="fas fa-fw fa-id-card-alt"></i>
 	      Accounts
 	    </a>
@@ -212,4 +238,6 @@
       </li>      
     </ul>
   </nav>
+  
 </div> <!-- sidebar -->
+
