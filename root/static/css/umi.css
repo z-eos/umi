@@ -232,7 +232,7 @@ html,body {
 }
 
 .umi-text-smaller {
-  font-size: 60%;
+  font-size: 57%;
 }
 
 .umi-text-lg {
@@ -293,13 +293,6 @@ html,body {
   height: 350px;
 }
 
-.to-root-object {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-//  margin: 0;
-}
-
 .app-header.navbar .navbar-brand {
   width: 70px;
   border-bottom: none;
@@ -322,9 +315,22 @@ html,body {
   margin: 5px 15px;
 }
 
+.to-root-object {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+//  margin: 0;
+}
+
 .inline-group {
   display: flex;
   align-items: center;
+}
+
+.inline-item-fluid {
+   flex-grow: 1;
+   width: 0;
 }
 
 /* -------------------------------
