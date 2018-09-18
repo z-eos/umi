@@ -111,11 +111,12 @@
 	<div class="aside-options">
           <div class="clearfix mt-4">
             <small><b>Debug</b></small>
-            <label class="switch switch-text switch-success switch-sm float-right">
-              <input type="checkbox" class="switch-input" name="debug" [% c.session.settings.ui.debug ? ' checked=""' : '' %]>
-              <span class="switch-label" data-on="On" data-off="Off"></span>
-              <span class="switch-handle"></span>
-            </label>
+	    <select class="form-control input-sm pull-right col-2" name="debug">
+	      [% debug_levels = [ 0, 1, 2 ] %]
+	      [% FOREACH i IN debug_levels %]
+	      <option value="[% i %]" [% IF c.session.settings.ui.exists('debug') && c.session.settings.ui.debug == i %]selected[% END %]>[% i %]</option>
+	      [% END %]
+	    </select>
           </div>
 	</div>
 	<div class="aside-options">

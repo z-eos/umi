@@ -83,14 +83,14 @@ sub index :Path :Args(0) {
 	     form => $self->form,
 	     final_message => $final_message, );
 
-  if ( keys %{$params} == 1 ) {
+  # log_debug { np($params) };
+  if ( keys %{$params} == 2 ) {
   # if ( defined $params->{add_svc_acc} && $params->{add_svc_acc} ne '' ) {
     my $init_obj = { add_svc_acc => $params->{add_svc_acc} };
     return unless $self->form
       ->process( init_object => $init_obj,
 		 ldap_crud => $c->model('LDAP_CRUD'), );
   } else {
-    # log_debug { np( $params ) };
     return unless $self->form
       ->process( posted => ($c->req->method eq 'POST'),
 		 params => $params,
@@ -183,33 +183,34 @@ sub create_account {
     # p my $schemattr = $schema->attribute('gecos');
 
     $objectClass = $ldap_crud->cfg->{objectClass}->{acc_root};
+    push @{$objectClass}, 'umiSettings';
     push @{$objectClass}, 'dynamicObject' if $is_person_exp;
     
     my $root_add_options =
       [
-       uid  => $uid, # $ldap_crud->cfg->{rdn}->{acc_root} => $uid,
-       userPassword => $pwd->{root}->{ssha},
-       telephoneNumber => $args->{person_telephonenumber},
+       uid                        => $uid, # $ldap_crud->cfg->{rdn}->{acc_root} => $uid,
+       userPassword               => $pwd->{root}->{ssha},
+       telephoneNumber            => $args->{person_telephonenumber},
        physicalDeliveryOfficeName => $args->{'person_office'},
-       o => $args->{'person_org'},
-       givenName => $args->{person_givenname},
-       sn => $args->{person_sn},
-       cn => sprintf('%s %s',
-		     $args->{person_givenname},
-		     $args->{person_sn}),
-       uidNumber => $uidNumber,
-       gidNumber => $args->{person_gidnumber},
-       description => $descr,
-       gecos => $self->utf2lat( sprintf('%s %s',
-					$args->{person_givenname},
-					$args->{person_sn}) ),
-       homeDirectory => $ldap_crud->cfg->{stub}->{homeDirectory} . '/' . $uid,
-       jpegPhoto => [ $jpeg ],
-       loginShell => $ldap_crud->cfg->{stub}->{loginShell},
+       o                          => $args->{'person_org'},
+       givenName                  => $args->{person_givenname},
+       sn                         => $args->{person_sn},
+       cn                         => sprintf('%s %s',
+					     $args->{person_givenname},
+					     $args->{person_sn}),
+       uidNumber                  => $uidNumber,
+       gidNumber                  => $args->{person_gidnumber},
+       description                => $descr,
+       gecos                      => $self->utf2lat( sprintf('%s %s',
+							     $args->{person_givenname},
+							     $args->{person_sn}) ),
+       homeDirectory              => $ldap_crud->cfg->{stub}->{homeDirectory} . '/' . $uid,
+       jpegPhoto                  => [ $jpeg ],
+       loginShell                 => $ldap_crud->cfg->{stub}->{loginShell},
 
-       title => lc($args->{'person_title'}),
-
-       objectClass => $objectClass,
+       title                      => lc($args->{'person_title'}),
+       umiSettingsJson            => q({"ui":{"debug":0,"aside":0,"sidebar":0}}),
+       objectClass                => $objectClass,
       ];
 
     my $ldif = $ldap_crud->add( $root_add_dn, $root_add_options );

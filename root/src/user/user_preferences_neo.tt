@@ -2,6 +2,20 @@
 
 [% INCLUDE ldap_err.tt %]
 
+[% MACRO buttonizer  BLOCK %]
+<form id="buttonizer_form[% buttonizer_id %]"
+      method="POST"
+      action="/searchby"
+      class="form-inline formajaxer">
+  <input type="hidden" name="ldap_subtree" value="[% buttonizer_dn %]">
+  <button type="submit" class="btn btn-link btn-xs"
+	  title="click to open this object"
+	  id="buttonizer_button[% buttonizer_id %]">
+    [% buttonizer_text %]
+  </button>
+</form>
+[% END %]
+
 <div class="page-header">
   <[% site.pageheading %]>
     <b>[% auth_obj.givenname %]&nbsp;[% auth_obj.sn %]</b> <small class="mono">(<i>UID: &laquo;[% auth_obj.uid %]&raquo; preferences)</i></small>
@@ -17,46 +31,63 @@
 	   href="#collapse_personal_data" aria-expanded="true" aria-controls="collapse_personal_data">
           <i id="chevron_switcher" class="fa [% site.icons.toggle_down %] text-default"></i>
         </a>
-	<span class="fa fa-user col-xs-offset-1">&nbsp;</span><b>Personal data</b>
+	<div class="btn umi-zerro-padding col-xs-offset-1">
+	[%   buttonizer( buttonizer_id='to_user_dn',
+	       buttonizer_dn=auth_obj.dn
+	  buttonizer_text= '<i class="fas fa-2x fa-user-cog umi-search"></i>' )%]
+	</div>
+	<b>Personal data</b>
       </h3>
     </div>
     <div id="collapse_personal_data" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_personal_data">
       <div class="panel-body">
 	<div class="media">
 	  <div class="media-body">
-	    <dl class="dl-horizontal fa-ul">
-	      <li class="media-heading">
-		<i><span class="fa fa-li fa-lg fa-user-circle" title="first, last names"></span>
-		  <em><b>[% auth_obj.givenname %] [% auth_obj.sn %]</b></em></i>
-	      </li>
-	      <li><i>
+	    <dl class="dl-horizontal">
+	      <dt class="text-info">
+		name:
+	      </dt>
+	      <dd>
+		<b>[% auth_obj.givenname %] [% auth_obj.sn %]</b>
+	      </dd>
+	      <dt class="text-info">
+		uid:
+	      </dt>
+	      <dd>
 		<span class="fa fa-li fa-sign-in" title="login"></span>
 		[% auth_obj.uid %]
-	      </i></li>
-	      <li><i>
-		<span class="fas fa-li fa-graduation-cap" title="title/position"></span>
+	      </dd>
+	      <dt class="text-info">
+		role:
+	      </dt>
+	      <dd>
 		[% IF auth_obj.title.size %][% FOREACH i IN auth_obj.title %][% i %]<br>[% END %]
 		[% ELSE %]
 		[% auth_obj.title %]
 		[% END %]
-	      </i></li>
-	      [% IF c.check_any_user_role ('admin', 'coadmin') %]
-	      <li><i>
-		<span class="fa fa-li fa-users" title="UMI system group/s user belongs to"></span>
-		[%   FOREACH role IN auth_obj.roles.sort %][% role %]<br>[% END %]
-	      </i>
-	      </li>
-	      [% END %]
-	      <li><i>
-		<span class="fa fa-li fa-phone" title="phone number/s"></span>
+	      </dd>
+	      <dt class="text-info">
+		telephone:
+	      </dt>
+	      <dd>
 		[% IF auth_obj.telephonenumber.size %][% FOREACH i IN auth_obj.telephonenumber %][% i %]<br>[% END %]
 		[% ELSE %]<span class="text-danger">N/A</span>[% END %]
-	      </i></li>
-	      <li><i>
-		<span class="fa fa-li fa-envelope" title="email address/es"></span>
+	      </dd>
+	      <dt class="text-info">
+		email/s:
+	      </dt>
+	      <dd>
 		[% IF auth_obj.mail.size %][% FOREACH i IN auth_obj.mail %][% i %]<br>[% END %]
 		[% ELSE %]<span class="text-danger">N/A</span>[% END %]
-	      </i></li>
+	      </dd>
+	      [% IF c.check_any_user_role ('admin', 'coadmin') %]
+	      <dt class="text-info">
+		UMI sys.group/s:
+	      </dt>
+	      <dd>
+		[%   FOREACH role IN auth_obj.roles.sort %][% role %]<br>[% END %]
+	      </dd>
+	      [% END %]
 	    </dl>
 	  </div>
 	  <div class="media-right"><img width="200" class="media-object img-thumbnail bg-info" [% jpegPhoto %]</div>
@@ -81,27 +112,17 @@
     <div id="collapse_org" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_org">
       <div class="panel-body">
 	[% FOREACH org IN orgs %]
-	<div class="panel panel-info">
-	  <div class="panel-heading" id="heading_org_[% org.key.replace('[\. ]', '') %]">
-	    <h3 class="panel-title">
-	      <a class="collapsed" data-toggle="collapse"
-		 href="#collapse_org_[% org.key.replace('[\. ]', '') %]" aria-expanded="false" aria-controls="collapse_org_[% org.key.replace('[\. ]', '') %]">
-		<span class="fa fa-caret-square-o-down text-default"></span>
-              </a>
-	      <span class="fa fa-industry fa-xs col-xs-offset-1">&nbsp;</span><b>[% org.key %]</b>
-	    </h3>
-	  </div>
-	  <div id="collapse_org_[% org.key.replace('[\. ]', '') %]" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_org_[% org.key.replace('[\. ]', '') %]">
-	    <div class="panel-body">
-	      <dl class="dl-horizontal fa-ul">
-		<li><span class="fa fa-li fa-envelope"></span>[% org.value %]</li>
-		<li><span class="fa fa-li fa-globe"></span>
-		  [% FOREACH x IN fqdn.item(org.key) %][% x %]<br>[% END %]
-		</li>
-	      </dl>
-	    </div>
-	  </div>
-	</div>
+
+	<address>
+	  <strong>[% org.key %]</strong><br>
+	  [% org.value %]<br><br>
+	  <ul class="list-group">
+	    <li class="list-group-item list-group-item-info">
+	      <i class="fas fa-globe"></i> <b>domains bound to [% org.key %]</b>
+	    </li>
+	    [% FOREACH x IN fqdn.item(org.key) %]<li class="list-group-item">[% x %]</li>[% END %]
+	  </ul>
+	</address>
 
 	[% END %]
       </div>
@@ -183,51 +204,55 @@
 	    <tr>
 	      <td></td>
 	      <td>
-		[% IF y.auth && ( y.authorizedService.search('mail') ||
-		   y.authorizedService.search('xmpp') ||
-		   y.authorizedService.search('web') ) %]
-		<div class="dropdown pull-left">
-		  <button class="btn btn-link btn-sm"
-			  type="button" id="dropdownMenuActions"
-			  data-toggle="dropdown"
-			  title="Possible Actions Upon the Object">
-		    <span class="fas fa-ellipsis-h text-primary"></span>
-		  </button>
-		  <ul class="dropdown-menu dropdown-menu-left"
-		      aria-labelledby="dropdownMenuActions"
-		      role="menu">
-		    <li>
-		      <form role="form" method="POST" action="/searchby/modify_userpassword">
-			<button type="submit" title="modify password" class="btn btn-link" data-order="30"
-				value="[% z.key %]" name="ldap_modify_password">
-			  <span class="fa fa-user-lock text-danger"></span>
-			  password
-			</button>
-		      </form>
-		    </li>
-		  </ul>
-		</div>
-		[% END %]
-		<div>
-		  [% z.value %]
-		  [% IF y.auth && y.authorizedService.search('802.1x') %]
-		  &nbsp;(&nbsp;[% y.rad_grp %]&nbsp;)
-		  [% END %]		  
-		</div>
-		[%   IF y.cert.${z.key} %]
-		<br><small class="pull-left"><em><dl class="dl-horizontal">
-		  [%   FOREACH cert IN y.cert.${z.key} %]
-		  [%     NEXT IF cert.key == "cert" %]
-		  [%     NEXT IF cert.key == "error" && cert.value == "" %]
-		  <dt>[% cert.key %]</dt><dd class="mono">[% cert.value %]</dd>
+		<div class="inline-group">
+		  [% IF y.auth && ( y.authorizedService.search('mail') ||
+		     y.authorizedService.search('xmpp') ||
+		     y.authorizedService.search('web') ) %]
+		  <div class="dropdown pull-left">
+		    <button class="btn btn-link btn-sm"
+			    type="button" id="dropdownMenuActions"
+			    data-toggle="dropdown"
+			    title="Possible Actions Upon the Object">
+		      <span class="fas fa-ellipsis-h text-primary"></span>
+		    </button>
+		    <ul class="dropdown-menu dropdown-menu-left"
+			aria-labelledby="dropdownMenuActions"
+			role="menu">
+		      <li>
+			<form role="form" method="POST" action="/searchby/modify_userpassword">
+			  <button type="submit" title="modify password" class="btn btn-link" data-order="30"
+				  value="[% z.key %]" name="ldap_modify_password">
+			    <span class="fa fa-user-lock text-danger"></span>
+			    password
+			  </button>
+			</form>
+		      </li>
+		    </ul>
+		  </div>
+		  [% END %]
+		  <div>
+		    [% z.value %]
+		    [% IF y.auth && y.authorizedService.search('802.1x') %]
+		    &nbsp;(&nbsp;[% y.rad_grp %]&nbsp;)
+		    [% END %]		  
+		  </div>
+		  [%   IF y.cert.${z.key} %]
+		  <small class="pull-left">
+		      <dl class="dl-horizontal">
+			[% FOREACH cert IN y.cert.${z.key} %]
+			[%   NEXT IF cert.key == "cert" %]
+			[%   NEXT IF cert.key == "error" && cert.value == "" %]
+			<dt>[% cert.key %]</dt><dd class="mono">[% cert.value %]</dd>
+			[% END %]
+		      </dl>
+		  </small>
+		  [%   ELSIF y.sshkey.${z.key} %]
+		  [%     FOREACH cert IN y.sshkey.${z.key} %]
+		  <h6 class="pull-left mono"><em>[% cert %]</em></h6>
+		  [%     END %]
 		  [%   END %]
-		</dl></em></small>
-		[%   ELSIF y.sshkey.${z.key} %]
-		[%     FOREACH cert IN y.sshkey.${z.key} %]
-		<h6 class="pull-left mono"><em>[% cert %]</em></h6>
-		[%     END %]
-		[%   END %]
-		[% END %]
+		  [% END %]
+		</div>
 	      </td>
 	    </tr>
 	    [% END %]

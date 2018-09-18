@@ -403,14 +403,15 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	log_debug { np( $ttmmpp ) };
 	# log_debug { np($c->user->$ldap_crud->{cfg}->{rdn}->{acc_root}) };
 	$arg = {
-		uid => $entry->{$user_dn}->{uid}->[0],
-		givenname => $entry->{$user_dn}->{givenname}->[0],
-		mail => $entry->{$user_dn}->{mail} // [],
-		sn => $entry->{$user_dn}->{sn}->[0],
-		title => $entry->{$user_dn}->{title} // ['N/A'],
-		o => $entry->{$user_dn}->{o},
+		dn                         => $user_dn,
+		uid                        => $entry->{$user_dn}->{uid}->[0],
+		givenname                  => $entry->{$user_dn}->{givenname}->[0],
+		mail                       => $entry->{$user_dn}->{mail} // [],
+		sn                         => $entry->{$user_dn}->{sn}->[0],
+		title                      => $entry->{$user_dn}->{title} // ['N/A'],
+		o                          => $entry->{$user_dn}->{o},
 		physicaldeliveryofficename => $entry->{$user_dn}->{physicaldeliveryofficename},
-		telephonenumber => $entry->{$user_dn}->{telephonenumber} // ['N/A'],
+		telephonenumber            => $entry->{$user_dn}->{telephonenumber} // ['N/A'],
 		# roles => [ $c->user->roles ],
 	       };
       }
@@ -688,29 +689,38 @@ sub settings_save :Path(settings_save) :Args(0) POST {
   my ( $self, $c ) = @_;
 
   my $params = $c->req->parameters;
-  log_debug { np($params) };
+  # log_debug { np($params) };
 
   my $ldap_crud = $c->model('LDAP_CRUD');
   my $replace;
 
-  log_debug { np($c->session->{settings}->{ui}) };
+  # log_debug { np($c->session->{settings}->{ui}) };
   if ( ! defined $c->session->{settings}->{ui} ) {
     $c->session->{settings}->{ui} = $ldap_crud->{cfg}->{ui};
     push @{$replace}, add => [ objectClass => 'umiSettings' ];
   }
-  log_debug { np($c->session->{settings}->{ui}) };
+  # log_debug { np($c->session->{settings}->{ui}) };
 
   foreach (keys ( %{$c->session->{settings}->{ui}} )) {
-    $c->session->{settings}->{ui}->{$_} = defined $params->{$_} ? 1 : 0;
+    if ( $_ eq 'debug' ) {
+      $c->session->{settings}->{ui}->{$_} = $params->{$_} // 0;
+    } else {
+      $c->session->{settings}->{ui}->{$_} = defined $params->{$_} ? 1 : 0;
+    }
   }
-  log_debug { np($c->session->{settings}) };
+  # log_debug { np($c->session->{settings}) };
 
   use JSON;
   my $json = JSON->new->allow_nonref;
   my $json_text   = $json->encode( $c->session->{settings} );
   log_debug { np($json_text) };
-  log_debug { np($c->user->dn) };
-    
+  # log_debug { np($c->user->dn) };
+
+  ###
+  ### TO BE FINISHED, slapd.conf ACLs need to be adopted
+  ### self is unable to write but read ... ???
+  ###
+  
   push @{$replace},  replace => [ umiSettingsJson => $json_text, ];
 
   my $return;
@@ -882,10 +892,11 @@ sub end : ActionClass('RenderView') {
   }
   
   my @rep = $c->stats->report;
-  my $stats = { debug => UMI->config->{debug}->{level},
+  my $stats = { debug   => $c->session->{settings}->{ui}->{debug} // UMI->config->{debug}->{level},
 		elapsed => $c->stats->elapsed,
-		report => \@rep };
-  $c->stash( stats => $stats,
+		report  => \@rep };
+  
+  $c->stash( stats   => $stats,
 	     is_ajax => defined $c->request->headers->header('X-Requested-With') &&
 	     lc( $c->request->headers->header('X-Requested-With') ) eq lc( 'XMLHttpRequest' ) ? 1 : 0,
 	     navbar_note => $navbar_note );

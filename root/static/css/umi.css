@@ -192,7 +192,7 @@ html,body {
 }
 
 .mono-only {
-  font-family: "Andale Mono", monospace;
+  font-family: monospace;
 }
 
 .umi-search, .umi-search:active {
@@ -320,6 +320,11 @@ html,body {
 
 .json-controls-item {
   margin: 5px 15px;
+}
+
+.inline-group {
+  display: flex;
+  align-items: center;
 }
 
 /* -------------------------------

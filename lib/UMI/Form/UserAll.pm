@@ -7,6 +7,8 @@ use HTML::FormHandler::Moose;
 BEGIN { extends 'UMI::Form::LDAP';
 	with 'Tools', 'HTML::FormHandler::Render::RepeatableJs'; }
 
+use Logger;
+
 # use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable', 'StrongPassword', 'IPAddress' );
 use HTML::FormHandler::Types (':all');
 
@@ -885,7 +887,8 @@ sub validate {
       $ldap_crud->search({ scope => 'base',
 			   base => $self->add_svc_acc,
 			   attrs => [ 'givenName', 'sn' ], });
-    my $autologin_entry = $autologin_mesg->entry(0); p $autologin_mesg->as_struct;
+    my $autologin_entry = $autologin_mesg->entry(0);
+    log_debug { np($self->add_svc_acc) };
     $self->autologin( lc($autologin_entry->get_value('givenName') . '.' .
 			 $autologin_entry->get_value('sn') ));
   }

@@ -246,16 +246,7 @@ sub index :Path :Args(0) {
 	      $self->ts({ ts => $_->get_value('entryExpireTimestamp'), gnrlzd => 1, gmt => 1 });
 	  }
 	}
-	
-	# is this user blocked?
-	$c->stats->profile('is-blocked search for <i class="text-light">' . $_->dn . '</i>');
-	$mesg = $ldap_crud->search({ base => $ldap_crud->cfg->{base}->{group},
-				     filter => sprintf('(&(cn=%s)(memberUid=%s))',
-						       $ldap_crud->cfg->{stub}->{group_blocked},
-						       substr( (reverse split /,/, $_->dn)[2], 4 )), });
-	$blocked = $mesg->count;
-	$return->{error} .= $ldap_crud->err( $mesg )->{html}
-	  if $mesg->is_error();
+
 	@root_arr = split(',', $_->dn);
 	$root_i = $#root_arr;
 	@root_dn = splice(@root_arr, -1 * $dn_depth);
@@ -282,6 +273,17 @@ sub index :Path :Args(0) {
 	utf8::decode($ttentries->{$dn}->{root}->{givenName});
 	utf8::decode($ttentries->{$dn}->{root}->{sn});
 
+	# is this user blocked?
+	$c->stats->profile('is-blocked search for <i class="text-light">' . $_->dn . '</i>');
+	$mesg = $ldap_crud->search({ base => $ldap_crud->cfg->{base}->{group},
+				     filter => sprintf('(&(cn=%s)(memberUid=%s))',
+						       $ldap_crud->cfg->{stub}->{group_blocked},
+						       $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }), });
+	# log_debug { np($mesg->as_struct) };
+	$blocked = $mesg->count;
+	$return->{error} .= $ldap_crud->err( $mesg )->{html}
+	  if $mesg->is_error();
+	
 	$#root_arr = $#root_dn = -1;
 
 	$mesg = $ldap_crud->search({ base => sprintf('ou=group,ou=system,%s', $ldap_crud->cfg->{base}->{db}),
@@ -344,7 +346,7 @@ sub index :Path :Args(0) {
 	map { utf8::decode($_); $_} @{$to_utf_decode};
 	@{$to_utf_decode} = sort @{$to_utf_decode};
 	$ttentries->{$dn}->{attrs}->{$attr} = $to_utf_decode;
-	log_debug { np($ttentries->{$dn}->{attrs}) };
+	# log_debug { np($ttentries->{$dn}->{attrs}) };
 	if ( $attr eq 'jpegPhoto' ) {
 	  # if 
 	  $ttentries->{$dn}->{attrs}->{$attr} =

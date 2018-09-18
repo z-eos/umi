@@ -1,3 +1,5 @@
+[% ### data collected and prepared in Root->end() %]
+
 [% IF c.user_exists && c.session.auth_uid && c.session.settings.ui.debug %] [% # stats.debug %]
 
 [% default = '' %]

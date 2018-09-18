@@ -2,8 +2,8 @@
 
 [% fa_meta = 'fas fa-fw'%]
 
-<div class="row">
-  <div class="btn-group col-10 clearfix">
+<div class="row inline-group">
+  <div class="col-10 inline-group">
     <div class="">
       <a href="#"
 	 class="chevron_toggleable btn btn-link pull-left"
