@@ -372,7 +372,7 @@
 	      <div class="col-2 btn btn-sm">
 
 		<!-- small class="umi-text-xs" -->
-		  <ul class="fa-ul umi-zerro-margin umi-text-smaller mono">
+		  <ul class="fa-ul text-left umi-zerro-margin umi-text-smaller mono">
 		    
 		    [% crtd = entry.value.root.ts.createTimestamp _ ' by ' _ entry.value.root.ts.creatorsName _ '&nbsp' %]
 		    <li title="created (yymmddHHMM), GMT: [% crtd %]" class="visible-lg-block visible-md-block">
@@ -500,7 +500,7 @@
 	<img class="bg-[% tr_color _ ' ' _ h_attr.value %]
 	[% ELSIF entry.value.is_arr.$attr_name %]
 	[%   FOREACH i IN h_attr.value %]
-	[%     IF h_attr.key == 'sshPublicKey' %]
+	[%     IF h_attr.key == 'sshPublicKey' || h_attr.key == 'grayPublicKey' %]
 	<div class="panel panel-default"><div class="panel-body"><small class="mono">[% i %]</small></div></div>
 	[%     ELSE %]
 	
