@@ -79,6 +79,23 @@ sub signin :Path Global {
 	$meta_schema->{$_} += 1;
       }
     }
+    $meta_schema->{dhcpService} = 1;
+    $meta_schema->{dhcpSharedNetwork} = 1;
+    $meta_schema->{dhcpSubnet} = 1;
+    $meta_schema->{dhcpPool} = 1;
+    $meta_schema->{dhcpGroup} = 1;
+    $meta_schema->{dhcpHost} = 1;
+    $meta_schema->{dhcpClass} = 1;
+    $meta_schema->{dhcpSubClass} = 1;
+    $meta_schema->{dhcpOptions} = 1;
+    $meta_schema->{dhcpLeases} = 1;
+    $meta_schema->{dhcpLog} = 1;
+    $meta_schema->{dhcpServer} = 1;
+    $meta_schema->{dhcpTSigKey} = 1;
+    $meta_schema->{dhcpDnsZone} = 1;
+    $meta_schema->{dhcpFailOverPeer} = 1;
+    $meta_schema->{dhcpLocator} = 1;
+
     my $schema = $ldap_crud->schema; # ( dn => $ldap_crud->{base}->{db} );
     foreach $key ( sort ( keys %{$meta_schema} )) {
       next if $key eq 'top';

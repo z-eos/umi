@@ -757,10 +757,10 @@ sub last_seq {
 	      seq_pfx => $args->{seq_pfx},
 	      seq_cnt => 0, };
 
-  my $mesg = $self->ldap->search( base => $arg->{base},
-				  scope => $arg->{scope},
+  my $mesg = $self->ldap->search( base   => $arg->{base},
+				  scope  => $arg->{scope},
 				  filter => $arg->{filter},
-				  attrs => [ $arg->{attr} ], );
+				  attrs  => [ $arg->{attr} ], );
   if ( $mesg->count ) {
     @{$arg->{entries}} = $mesg->entries;
     foreach my $i ( @{$arg->{entries}} ) {
@@ -1143,7 +1143,7 @@ sub reassign {
     # is there dst branch?
     $result = $self->ldap->search( base   => $arg->{dst}->{str},
 				   filter => sprintf('(%s)', $arg->{src}->{branch_dn}->{arr}->[0]),
-				   scope => 'base' );
+				   scope  => 'base' );
     $arg->{dst}->{has_branch} = $result->count;
   } else {
     $arg->{dst}->{has_branch} = 1; # it is rather than it has
@@ -1497,7 +1497,7 @@ sub block {
 
   log_debug { np( $args ) };
 
-  $msg_usr = $self->search ( { base => $args->{dn},
+  $msg_usr = $self->search ( { base      => $args->{dn},
 			       sizelimit => 0, } );
   if ( $msg_usr->is_error() ) {
     $return->{error} = $self->err( $msg_usr )->{html};
@@ -1547,7 +1547,7 @@ sub block {
 	    $self->cfg->{stub}->{group_blocked},
 	    $self->cfg->{base}->{group});
   
-  $msg = $self->search ( { base => $self->cfg->{base}->{group},
+  $msg = $self->search ( { base   => $self->cfg->{base}->{group},
 			   filter => sprintf('(&(cn=%s)(memberUid=%s))',
 					     $self->cfg->{stub}->{group_blocked},
 					     substr( (split /,/, $args->{dn})[0], 4 )),
@@ -2042,18 +2042,18 @@ to add error correction
 sub select_key_val {
   my ($self, $args) = @_;
   my $arg = {
-	     base => $args->{'base'},
+	     base   => $args->{'base'},
 	     filter => $args->{'filter'},
-	     scope => $args->{'scope'},
-	     attrs => $args->{'attrs'},
+	     scope  => $args->{'scope'},
+	     attrs  => $args->{'attrs'},
 	    };
   my $mesg =
     $self->ldap->search(
-			base => $arg->{'base'},
+			base   => $arg->{'base'},
 			filter => $arg->{'filter'},
-			scope => $arg->{'scope'},
-			attrs => [ $arg->{'attrs'} ],
-			deref => 'never',
+			scope  => $arg->{'scope'},
+			attrs  => [ $arg->{'attrs'} ],
+			deref  => 'never',
 		       );
 
   my $entries = $mesg->as_struct;
@@ -2308,9 +2308,9 @@ sub dhcp_lease {
   $rnge->{l} = $self->ipam_ip2dec( $rnge->{l} );
   $rnge->{r} = $self->ipam_ip2dec( $rnge->{r} );
 
-  $mesg = $self->search({ base => $arg->{netdn},
-			  scope => 'children',
-			  attrs => [ 'cn', 'dhcpStatements', 'dhcpHWAddress' ],
+  $mesg = $self->search({ base      => $arg->{netdn},
+			  scope     => 'children',
+			  attrs     => [ 'cn', 'dhcpStatements', 'dhcpHWAddress' ],
 			  sizelimit => 0, });
 
   @leases = $mesg->sorted('dhcpStatements');
@@ -2429,7 +2429,7 @@ sub ipam_used {
 
   my $mesg_svc = $self->search({ base   => $arg->{base},
 				 filter => $arg->{filter},
-				 scope => 'base',
+				 scope  => 'base',
 				 attrs  => $arg->{attrs}, });
   if ( $mesg_svc->code ) {
     #    $return->{error} = sprintf("ipam_used(): No %s configuration for %s found .", uc( $arg->{svc} ), $arg->{netdn});
@@ -2470,10 +2470,10 @@ sub ipam_used {
 	  }
 
 	  # declare each existent lease as used ip
-	  my $mesg_dhcp = $self->search({ base   => $key,
-					  filter => 'dhcpStatements=fixed-address*',
+	  my $mesg_dhcp = $self->search({ base      => $key,
+					  filter    => 'dhcpStatements=fixed-address*',
 					  sizelimit => 0,
-					  attrs  => [ 'dhcpStatements', 'dhcpHWAddress' ], });
+					  attrs     => [ 'dhcpStatements', 'dhcpHWAddress' ], });
 	  if ( $mesg_dhcp->code ) {
 	    push @{$return->{error}}, sprintf("ipam_used(): problems with DN: %s; error: %s", $key, $self->err($mesg_dhcp)->{html});
 	    log_error { sprintf("%s : %s : %s", $self->err($mesg_dhcp)->{name},
@@ -2601,18 +2601,18 @@ sub _build_select_organizations {
 
   # all head offices
   my $mesg = $self->search({
-			    base => $self->{'cfg'}->{'base'}->{'org'},
-			    scope => 'one',
-			    attrs => [ qw(ou physicaldeliveryofficename l) ],
+			    base      => $self->{'cfg'}->{'base'}->{'org'},
+			    scope     => 'one',
+			    attrs     => [ qw(ou physicaldeliveryofficename l) ],
 			    sizelimit => 0
 			   });
   my @headOffices = $mesg->sorted('physicaldeliveryofficename');
   # branch offices
   foreach my $headOffice (@headOffices) {
     $mesg = $self->search({
-			   base => $headOffice->dn,
-			   # filter => '*',
-			   attrs => [ qw(ou physicaldeliveryofficename l) ],
+			   base      => $headOffice->dn,
+			   # filter    => '*',
+			   attrs     => [ qw(ou physicaldeliveryofficename l) ],
 			   sizelimit => 0
 			  });
     my @branchOffices = $mesg->sorted( 'ou' );
@@ -2658,10 +2658,10 @@ sub _build_select_associateddomains {
   # bld_select has to be fixed to deal with associatedDomains # 			     filter => '(associatedDomain=*)', });
 
   my @domains; # = ( {value => '0', label => '--- select domain ---', selected => 'selected'} );
-  my $mesg = $self->search( { base => $self->cfg->{base}->{org},
-			      filter => 'associatedDomain=*',
+  my $mesg = $self->search( { base      => $self->cfg->{base}->{org},
+			      filter    => 'associatedDomain=*',
 			      sizelimit => 0,
-			      attrs => ['associatedDomain' ],
+			      attrs     => ['associatedDomain' ],
 			    } );
   my $err_message = '';
   $err_message = '<div class="alert alert-danger">' .
@@ -2695,13 +2695,13 @@ has 'select_dhcp_nets' => ( traits => ['Array'],
 
 sub _build_select_dhcp_nets {
   my $self = shift;
-  my (@domains, @dhcp_cfg_arr, $dhcp_cfg, @net_arr, $net);
+  my (@domains, @dhcp_cfg_arr, $dhcp_cfg, $dhcp_comment, @net_arr, $net);
   my $err_message = '';
 
-  my $mesg = $self->search( { base => $self->cfg->{base}->{dhcp},
-			      filter => '(&(objectClass=dhcpService)(cn=*))',
+  my $mesg = $self->search( { base      => $self->cfg->{base}->{dhcp},
+			      filter    => '(&(objectClass=dhcpService)(cn=*))',
 			      sizelimit => 0,
-			      attrs => [ qw( cn ) ],
+			      attrs     => [ qw( cn ) ],
 			    } );
   if ( ! $mesg->count ) {
     $err_message =
@@ -2709,23 +2709,27 @@ sub _build_select_dhcp_nets {
   } else {
     @dhcp_cfg_arr = $mesg->sorted('cn');
     foreach $dhcp_cfg ( @dhcp_cfg_arr ) {
-      $mesg = $self->search( { base => $dhcp_cfg->dn,
-			      filter => '(&(objectClass=dhcpSubnet)(cn=*))',
+      $mesg = $self->search( { base     => $dhcp_cfg->dn,
+			      filter    => '(&(objectClass=dhcpSubnet)(cn=*))',
 			      sizelimit => 0,
-			      attrs => [ qw(cn dhcpOption dhcpNetMask) ],
+			      attrs     => [ qw(cn dhcpOption dhcpNetMask dhcpComments) ],
 			    } );
       if ( ! $mesg->count ) {
 	$err_message =
 	  $self->msg2html({ type => 'panel', data => $self->err($mesg)->{html} });
       } else {
 	@net_arr = $mesg->sorted('cn');
-	push @domains, { value => '--- select network assigned domain ---', label => '--- select network assigned domain ---'};
+	push @domains, { value => '--- select network assigned domain ---',
+			 label => '--- select network assigned domain ---'};
 	foreach $net ( @net_arr ) {
+	  $dhcp_comment = $net->exists('dhcpComments') ? ' - ' . $net->get_value('dhcpComments') : '';
 	  push @domains, { value => $net->dn,
-			   label => sprintf("[%s]: %s/%s",
+			   label => sprintf("[%s]: %s %18s/%s",
 					    $dhcp_cfg->get_value('cn'),
+					    $net->get_value('dhcpComments') // '',
 					    $net->get_value('cn'),
-					    $net->get_value('dhcpNetMask'))};
+					    $net->get_value('dhcpNetMask')
+					   )};
 	}
       }
     }
@@ -2752,10 +2756,10 @@ sub _build_select_dhcp_associateddomains {
   my ($net, $mask);
   
   my @domains;
-  my $mesg = $self->search( { base => $self->cfg->{base}->{dhcp},
-			      filter => '(&(objectClass=dhcpSubnet)(dhcpOption=domain-name *))',
+  my $mesg = $self->search( { base      => $self->cfg->{base}->{dhcp},
+			      filter    => '(&(objectClass=dhcpSubnet)(dhcpOption=domain-name *))',
 			      sizelimit => 0,
-			      attrs => [ qw(cn dhcpOption dhcpNetMask) ],
+			      attrs     => [ qw(cn dhcpOption dhcpNetMask) ],
 			    } );
   my $err_message = '';
 

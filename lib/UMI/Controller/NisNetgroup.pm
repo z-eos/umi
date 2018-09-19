@@ -70,11 +70,11 @@ returns hash of the object attributes with values
 
 sub attributes {
     my  ( $self, $objectClass, $args ) = @_;
-    my $attributes = { cn          => $args->{cn},
-		       objectClass => $objectClass,
-		       memberNisNetgroup => $args->{memberNisNetgroup} || undef, };
+    my $attributes = { cn                => $args->{cn},
+		       objectClass       => $objectClass, };
 
-    $attributes->{description} = $args->{description} if defined $args->{description};
+    $attributes->{description} = $args->{description}
+      if defined $args->{description} && $args->{description} ne '';
 
     if ( defined $attributes->{memberNisNetgroup} && $attributes->{memberNisNetgroup} ne '' ) {
       my $memberNisNetgroup;

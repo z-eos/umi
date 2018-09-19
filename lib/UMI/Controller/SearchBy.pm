@@ -184,18 +184,18 @@ sub index :Path :Args(0) {
 
     $params->{'filter'} = '(' . $filter . ')';
     my $mesg = $ldap_crud->search({
-				   base => $base,
-				   filter => '(' . $filter . ')',
+				   base      => $base,
+				   filter    => '(' . $filter . ')',
 				   sizelimit => $ldap_crud->cfg->{sizelimit},
-				   scope => $scope,
-				   attrs => [ '*',
-					      'createTimestamp',
-					      'creatorsName',
-					      'modifiersName',
-					      'modifyTimestamp',
-					      'entryTtl',
-					      'entryExpireTimestamp',
-					    ],
+				   scope     => $scope,
+				   attrs     => [ '*',
+					          'createTimestamp',
+					          'creatorsName',
+					          'modifiersName',
+					          'modifyTimestamp',
+					          'entryTtl',
+					          'entryExpireTimestamp',
+					        ],
 				  });
     # log_debug { np($mesg->as_struct) };
     my @entries = defined $params->{order_by} &&
@@ -275,7 +275,7 @@ sub index :Path :Args(0) {
 
 	# is this user blocked?
 	$c->stats->profile('is-blocked search for <i class="text-light">' . $_->dn . '</i>');
-	$mesg = $ldap_crud->search({ base => $ldap_crud->cfg->{base}->{group},
+	$mesg = $ldap_crud->search({ base   => $ldap_crud->cfg->{base}->{group},
 				     filter => sprintf('(&(cn=%s)(memberUid=%s))',
 						       $ldap_crud->cfg->{stub}->{group_blocked},
 						       $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }), });
@@ -286,10 +286,10 @@ sub index :Path :Args(0) {
 	
 	$#root_arr = $#root_dn = -1;
 
-	$mesg = $ldap_crud->search({ base => sprintf('ou=group,ou=system,%s', $ldap_crud->cfg->{base}->{db}),
+	$mesg = $ldap_crud->search({ base   => sprintf('ou=group,ou=system,%s', $ldap_crud->cfg->{base}->{db}),
 				     filter => sprintf('(memberUid=%s)',
 						       $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }),
-				     attrs => [ $ldap_crud->{cfg}->{rdn}->{group} ], });
+				     attrs  => [ $ldap_crud->{cfg}->{rdn}->{group} ], });
 
 	if ( $mesg->is_error() ) {
 	  $return->{error} .= $ldap_crud->err( $mesg )->{html};
@@ -302,7 +302,7 @@ sub index :Path :Args(0) {
 
 	# getting name of the primary group
 	if ( $_->exists('gidNumber') ) {
-	  $mesg = $ldap_crud->search({ base => sprintf('ou=group,%s', $ldap_crud->cfg->{base}->{db}),
+	  $mesg = $ldap_crud->search({ base   => sprintf('ou=group,%s', $ldap_crud->cfg->{base}->{db}),
 				       filter => sprintf('(gidNumber=%s)',
 							 $_->get_value('gidNumber')), });
 
@@ -556,7 +556,7 @@ sub proc :Path(proc) :Args(0) {
 
       my $ldap_crud = $c->model('LDAP_CRUD');
       my $id;
-      my $mesg = $ldap_crud->search( { base => $params->{'ldap_modify_group'},
+      my $mesg = $ldap_crud->search( { base  => $params->{'ldap_modify_group'},
 				       scope => 'base',
 				       attrs => [ 'uid' ], });
       push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
@@ -565,10 +565,10 @@ sub proc :Path(proc) :Args(0) {
 
       if ( ! defined $params->{groups} && ! defined $params->{aux_runflag} ) {
 	my ( $return, $base, $filter, $dn );
-	$mesg = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{group},
-				      filter => sprintf('memberUid=%s', $id),
+	$mesg = $ldap_crud->search( { base      => $ldap_crud->cfg->{base}->{group},
+				      filter    => sprintf('memberUid=%s', $id),
 				      sizelimit => 0,
-				      attrs => ['cn'], } );
+				      attrs     => ['cn'], } );
 	push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
 	  if $mesg->code != 0;
 
@@ -616,9 +616,9 @@ sub proc :Path(proc) :Args(0) {
 
       if ( ! defined $params->{groups} && ! defined $params->{aux_submit} ) {
 	my ( $return, $base, $filter, $dn );
-	my $mesg = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{rad_groups},
+	my $mesg = $ldap_crud->search( { base   => $ldap_crud->cfg->{base}->{rad_groups},
 					 filter => sprintf('member=%s', $params->{'ldap_modify_rad_group'}),
-					 attrs => ['cn'], } );
+					 attrs  => ['cn'], } );
 	push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
 	  if $mesg->code != 0;
 
@@ -928,7 +928,7 @@ sub proc :Path(proc) :Args(0) {
 
 	  # requesting data to be used in create_account_branch_leaf()
 	  my $mesg = $ldap_crud->search( {
-					  base => $params->{'add_svc_acc'},
+					  base  => $params->{'add_svc_acc'},
 					  scope => 'base',
 					  attrs => [ 'uidNumber', 'givenName', 'sn' ],
 					 } );
@@ -1118,7 +1118,7 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
 	  [ add => [ 'userPassword' => $pwd, ], ] ;
 	$mesg = $ldap_crud->modify( $arg->{mod_pwd_dn}, $modify_action );
       } else {
-	$mesg = $ldap_crud->search( { base => $arg->{mod_pwd_dn},
+	$mesg = $ldap_crud->search( { base  => $arg->{mod_pwd_dn},
 				      scope => 'base',
 				      attrs => [ 'userPassword' ], } );
 	$return->{error} .= $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
@@ -1197,7 +1197,7 @@ sub mod_groups {
   log_debug { np( $args ) };
   log_debug { np( $arg ) };
   my ( $mesg, $return);
-  $mesg = $ldap_crud->search( { base => $arg->{obj_dn},
+  $mesg = $ldap_crud->search( { base  => $arg->{obj_dn},
 				scope => 'base',
 				attrs => [ 'uid' ], });
   push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
@@ -1210,20 +1210,20 @@ sub mod_groups {
   }
   # $return;
   $mesg =
-    $ldap_crud->search( { base => $arg->{base},
-			  filter => $arg->{type} eq 'posixGroup' ? 'memberUid=' . $arg->{uid} : 'member=' . $arg->{obj_dn},
+    $ldap_crud->search( { base      => $arg->{base},
+			  filter    => $arg->{type} eq 'posixGroup' ? 'memberUid=' . $arg->{uid} : 'member=' . $arg->{obj_dn},
 			  sizelimit => 0,
-			  attrs => ['cn'], } );
+			  attrs     => ['cn'], } );
   push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
     if $mesg->code ne '0';
 
   my $g = $mesg->as_struct;
   # log_debug { np( $g ) };
 
-  $mesg = $ldap_crud->search( { base => $arg->{base},
-				scope => 'one',
+  $mesg = $ldap_crud->search( { base      => $arg->{base},
+				scope     => 'one',
 				sizelimit => 0,
-				attrs => ['cn'], } );
+				attrs     => ['cn'], } );
   push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
     if ! $mesg->count;
 
@@ -1295,7 +1295,7 @@ sub mod_memberUid {
   my $return;
   my ( $memberUid, @memberUid_old );
 
-  my $mesg = $ldap_crud->search( { base => $arg->{mod_group_dn},
+  my $mesg = $ldap_crud->search( { base  => $arg->{mod_group_dn},
 				   attrs => ['memberUid'], } );
 
   push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
