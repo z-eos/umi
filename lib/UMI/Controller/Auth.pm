@@ -75,10 +75,9 @@ sub signin :Path Global {
     my ( $meta_schema, $key, $value, $must_meta, $may_meta, $must, $may, $syntmp );
     
     while ( ($key, $value) = each %{$ldap_crud->{cfg}->{objectClass}}) {
-      foreach ( @{$value} ) {
-	$meta_schema->{$_} += 1;
-      }
+      $meta_schema->{$_} += 1 foreach ( @{$value} );
     }
+
     $meta_schema->{dhcpService} = 1;
     $meta_schema->{dhcpSharedNetwork} = 1;
     $meta_schema->{dhcpSubnet} = 1;

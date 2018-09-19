@@ -228,9 +228,9 @@ sub index :Path :Args(0) {
       $c_name = ldap_explode_dn( $_->get_value('creatorsName'), casefold => 'none' );
       $m_name = ldap_explode_dn( $_->get_value('modifiersName'), casefold => 'none' );
       $ttentries->{$dn}->{root}->{ts} =
-	{ createTimestamp => $self->ts({ ts => $_->get_value('createTimestamp'), gnrlzd => 1, gmt => 1, format => '%y%m%d%H%M' }),
+	{ createTimestamp => $self->ts({ ts => $_->get_value('createTimestamp'), gnrlzd => 1, gmt => 1, format => '%Y%m%d%H%M' }),
 	  creatorsName    => $c_name->[0]->{uid} // $c_name->[0]->{cn},
-	  modifyTimestamp => $self->ts({ ts => $_->get_value('modifyTimestamp'), gnrlzd => 1, gmt => 1, format => '%y%m%d%H%M' }),
+	  modifyTimestamp => $self->ts({ ts => $_->get_value('modifyTimestamp'), gnrlzd => 1, gmt => 1, format => '%Y%m%d%H%M' }),
 	  modifiersName   => $m_name->[0]->{uid} // $m_name->[0]->{cn}, };
 
       if ( $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {

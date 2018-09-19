@@ -266,7 +266,8 @@
 
 		  [% # --- ICON, WHICH IS AFTER CLICK-TO-OPEN-ROOT-OBJECT BUTTON --- %]
 		  [% IF entry.value.mgmnt.is_root && entry.key.match('People') %]
-		  <div class="btn umi-zerro-padding">
+		  <span class="inline-group to-root-object umi-text-lg" title="">
+		  <!-- div class="btn umi-zerro-padding" -->
 		    <form role="form" method="POST" class="formajaxer" action="/searchby/user_preferences">
 		      <input type="hidden" name="user_preferences" value="[% entry.key %]">
 		      <button type="submit"
@@ -278,80 +279,80 @@
 			<i class="[% base_icon.People _ ' ' _ entry_icon_size %]"></i>
 		      </button>
 		    </form>
-		  </div>
+		  <!-- /div -->
 		  [% ELSE %]
 		  [%   IF entry.value.mgmnt.is_root && entry.key.match('Inventory') %]
 		  [%     ph_title="Inventory Root Object" %]
-		  [%     ph_class="umisearch-padding " _ base_icon.inventory _ ' ' _ entry_icon_size %]
+		  [%     ph_class="umi-search-padding " _ base_icon.inventory _ ' ' _ entry_icon_size %]
 		  [%   ELSIF entry.value.mgmnt.is_root && entry.key.match('Sendmail') %]
 		  [%     ph_title="MTA Root Object" %]
-		  [%     ph_class="umisearch-padding " _ base_icon.mta _ ' ' _ entry_icon_size %]
+		  [%     ph_class="umi-search-padding " _ base_icon.mta _ ' ' _ entry_icon_size %]
 		  [%   ELSIF entry.value.mgmnt.is_root && entry.key.match('GitACL') %]
 		  [%     ph_title="GitACL Root Object" %]
-		  [%     ph_class="umisearch-padding " _ base_icon.GitACL _ ' ' _ entry_icon_size %]
+		  [%     ph_class="umi-search-padding " _ base_icon.GitACL _ ' ' _ entry_icon_size %]
 		  [%   ELSIF entry.value.mgmnt.is_root && entry.key.match('DHCP') %]
 		  [%     ph_title="DHCP Root Object" %]
-		  [%     ph_class="umisearch-padding " _ base_icon.DHCP _ ' ' _ entry_icon_size %]
+		  [%     ph_class="umi-search-padding " _ base_icon.DHCP _ ' ' _ entry_icon_size %]
 		  [%   ELSIF entry.value.mgmnt.is_root && entry.key.match('reqStart') %]
 		  [%     IF entry.value.attrs.reqType.0 == 'add' %]
 		  [%       ph_title="History Object Request type: Add" %]
-		  [%       ph_class="umisearch-padding " _ entry_icon_size _ " fas fa-plus-square" %]
+		  [%       ph_class="umi-search-padding " _ entry_icon_size _ " fas fa-plus-square" %]
 		  [%     ELSIF entry.value.attrs.reqType.0 == 'delete' %]
 		  [%       ph_title="History Object Request type: Delete" %]
-		  [%       ph_class="umisearch-padding " _ entry_icon_size _ " fas fa-minus-square" %]
+		  [%       ph_class="umi-search-padding " _ entry_icon_size _ " fas fa-minus-square" %]
 		  [%     ELSIF entry.value.attrs.reqType.0 == 'modify' %]
 		  [%       ph_title="History Object Request type: Modify" %]
-		  [%       ph_class="umisearch-padding " _ entry_icon_size _ " fas fa-pen-square" %]
+		  [%       ph_class="umi-search-padding " _ entry_icon_size _ " fas fa-pen-square" %]
 		  [%     ELSIF entry.value.attrs.reqType.0 == 'modrdn' %]
 		  [%       ph_title="History Object Request type: ModRDN" %]
-		  [%       ph_class="umisearch-padding " _ entry_icon_size _ " fas fa-share-alt-square" %]
+		  [%       ph_class="umi-search-padding " _ entry_icon_size _ " fas fa-share-alt-square" %]
 		  [%     END %]
 		  [%   ELSIF entry.value.mgmnt.is_root && ! entry.key.match('People') %]
 		  [%     ph_title="Root Objectt" %]
-		  [%     ph_class="umisearch-padding " _ base_icon.default _ ' ' _ entry_icon_size %]
+		  [%     ph_class="umi-search-padding " _ base_icon.default _ ' ' _ entry_icon_size %]
 		      
 		  [%   # --- SERVICE ICON START --------------------------------------------------------------- %]
 		  [%   ELSIF entry.key.match('^author') %]
 		  [%   cur_svc = dn.authorizedService.split('@').0 %]
 		  [%     IF services.$cur_svc.icon %]
 		  [%       ph_title=services.$cur_svc.descr _ " Service Account Branch" %]
-		  [%       ph_class="umisearch-padding " _ services.$cur_svc.icon _ ' ' _ entry_icon_size _ ' ' _ branch_class %]
+		  [%       ph_class="umi-search-padding " _ services.$cur_svc.icon _ ' ' _ entry_icon_size _ ' ' _ branch_class %]
 		  [%     ELSE %]
 		  [%       ph_title="Service Account Branch" %]
-		  [%       ph_class="umisearch-padding fa fa-code-fork " _ branch_class _ ' ' _ blocked %]
+		  [%       ph_class="umi-search-padding fa fa-code-fork " _ branch_class _ ' ' _ blocked %]
 		  [%     END %]
 		      
 		  [%   ELSIF entry.key.match('^[uid]|[cn]=.*,author') %]
 		  [%   cur_svc = dn.authorizedService.split('@').0 %]
 		  [%     IF services.$cur_svc.icon %]
 		  [%       ph_title=services.$cur_svc.descr _ " Service Account" %]
-		  [%       ph_class="umisearch-padding " _ services.$cur_svc.icon _ ' ' _ entry_icon_size _ ' ' _ icon_color _ ' ' _ leaf_class %]
+		  [%       ph_class="umi-search-padding " _ services.$cur_svc.icon _ ' ' _ entry_icon_size _ ' ' _ icon_color _ ' ' _ leaf_class %]
 		  [%     ELSE %]
 		  [%       ph_title="Service Account" %]
-		  [%       ph_class="umisearch-padding fa fa-leaf " _ leaf_class _ ' ' _ entry_icon_size %]
+		  [%       ph_class="umi-search-padding fa fa-leaf " _ leaf_class _ ' ' _ entry_icon_size %]
 		  [%     END %]
 		  [%   # --- SERVICES ICON STOP  -------------------------------------------------------------- %]
 		      
 		  [%   ELSIF entry.key.match('GitACL') %]
 		  [%     ph_title="Subject to GitACL" %]
-		  [%     ph_class="umisearch-padding" _ base_icon.GitACL _ ' ' _ branch_class _ ' ' _ entry_icon_size %]
+		  [%     ph_class="umi-search-padding" _ base_icon.GitACL _ ' ' _ branch_class _ ' ' _ entry_icon_size %]
 		  [%   ELSIF entry.key.match('DHCP') %]
 		  [%     ph_title="DHCP Object" %]
-		  [%     ph_class="umisearch-padding " _ base_icon.DHCP _ ' ' _ branch_class _ ' ' _ entry_icon_size %]
+		  [%     ph_class="umi-search-padding " _ base_icon.DHCP _ ' ' _ branch_class _ ' ' _ entry_icon_size %]
 		  [%   ELSIF entry.key.match('^cn=.*,ou=Inventory') %]
 		  [%     ph_title="Subject to Inventory" %]
-		  [%     ph_class="umisearch-padding fa fa-tag " _ branch_class _ ' ' _ entry_icon_size %]
+		  [%     ph_class="umi-search-padding fa fa-tag " _ branch_class _ ' ' _ entry_icon_size %]
 		  [%   ELSIF entry.key.match(',ou=Sendmail') %]
 		  [%     ph_title="Subject to Sendmail" %]
-		  [%     ph_class="umisearch-padding " _ base_icon.mta _ ' ' _ branch_class _ ' ' _ entry_icon_size %]
+		  [%     ph_class="umi-search-padding " _ base_icon.mta _ ' ' _ branch_class _ ' ' _ entry_icon_size %]
 		  [%   ELSIF base_ico.${dn.ou} %]
 		  [%     ph_title="Service Account Branch" %]
-		  [%     ph_class="umisearch-padding " _ base_icon.${dn.ou} _ ' ' _ entry_icon_size %]
+		  [%     ph_class="umi-search-padding " _ base_icon.${dn.ou} _ ' ' _ entry_icon_size %]
 		  [%   ELSE %]
 		  [%     ph_title="Service Account Branch" %]
-		  [%     ph_class="umisearch-padding fa fa-code-fork " _ blocked _ ' ' _ entry_icon_size %]
+		  [%     ph_class="umi-search-padding fa fa-code-fork " _ blocked _ ' ' _ entry_icon_size %]
 		  [%   END %]
-		  <span class=" to-root-object umi-text-sm" title="">
+		  <span class=" to-root-object [% entry_text_size %]" title="">
 		    <i class="[% ph_class %]" title="[% ph_title %]"></i>&nbsp;
 		  [% END %]
 		  [% # dn of the select result object %]
@@ -375,11 +376,11 @@
 		  <ul class="fa-ul text-left umi-zerro-margin umi-text-smaller mono">
 		    
 		    [% crtd = entry.value.root.ts.createTimestamp _ ' by ' _ entry.value.root.ts.creatorsName _ '&nbsp' %]
-		    <li title="created (yymmddHHMM), GMT: [% crtd %]" class="visible-lg-block visible-md-block">
+		    <li title="created (YYYYmmddHHMM), GMT: [% crtd %]" class="visible-lg-block visible-md-block">
 		      <i class="fa-li fa fa-sm fa-hourglass-start"></i>
 		      [% entry.value.root.ts.createTimestamp _ ' <b>' _ entry.value.root.ts.creatorsName _ '</b>&nbsp' %]
 		    </li>
-		    <li title="created (yymmddHHMM), GMT: [% crtd %]" class="visible-xs-block visible-sm-block">
+		    <li title="created (YYYYmmddHHMM), GMT: [% crtd %]" class="visible-xs-block visible-sm-block">
 		      <i class="fa-li fa fa-sm fa-hourglass-start"></i>
 		    </li>
 		    
