@@ -184,7 +184,7 @@
 	   href="#collapse_service" aria-expanded="false" aria-controls="collapse_service">
 	  <i id="chevron_switcher" class="fa [% site.icons.toggle_down %]"></i>
 	</a>
-	<span class="fa fa-sliders col-xs-offset-1">&nbsp;</span><b>Services</b>
+	<span class="fa fa-sliders-h col-xs-offset-1">&nbsp;</span><b>Services</b>
       </h3>
     </div>
     <div id="collapse_service" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_service">
@@ -270,7 +270,7 @@
 	   href="#collapse_inventory" aria-expanded="false" aria-controls="collapse_inventory">
           <i id="chevron_switcher" class="fa [% site.icons.toggle_right %]"></i>
         </a>
-	<span class="fa fa-sitemap col-xs-offset-1">&nbsp;</span><b>Inventory</b>
+	<span class="fa fa-pen-nib col-xs-offset-1">&nbsp;</span><b>Inventory</b>
       </h3>
     </div>
     <div id="collapse_inventory" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_inventory">
