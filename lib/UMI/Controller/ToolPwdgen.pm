@@ -44,18 +44,18 @@ sub index :Path :Args(0) {
   my $params = $c->req->parameters;
     
   $c->stash( template => 'tool/toolpwdgen.tt',
-	     form => $self->form );
+	     form     => $self->form );
 
   return unless
     $self->form->process( posted => ($c->req->method eq 'POST'),
 			  params => $params, );
 
-  my $pwd = $self->pwdgen({ len => $params->{'pwd_len'},
-			    num => $params->{'pwd_num'},
-			    cap => $params->{'pwd_cap'},
-			    pronounceable => defined $params->{pronounceable} ? $params->{pronounceable} : 0, });
+  my $pwd = $self->pwdgen({ len           => $params->{'pwd_len'}     || undef,
+			    num           => $params->{'pwd_num'}     || undef,
+			    cap           => $params->{'pwd_cap'}     || undef,
+			    pronounceable => $params->{pronounceable} || 0, });
 
-  my $final_message->{success} = 'Password generated:<table class="table table-vcenter">' .
+  my $final_message->{success} = '<table class="table table-vcenter">' .
     '<tr class="success"><td width="50%"><h1 class="mono text-center">' .
     $pwd->{clear} . '</h1></td><td class="text-center" width="50%">';
 

@@ -137,6 +137,8 @@ __PACKAGE__->deny_access_unless_any( "/gitacl",              [ qw/admin coadmin/
 __PACKAGE__->deny_access_unless_any( "/gitacl_root",         [ qw/admin coadmin/ ]);
 __PACKAGE__->deny_access_unless_any( "/group",               [ qw/admin coadmin/ ]);
 __PACKAGE__->deny_access_unless_any( "/group_root",          [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/mikrotik",            [ qw/admin coadmin/ ]);
+__PACKAGE__->deny_access_unless_any( "/mikrotikpsk",         [ qw/admin coadmin/ ]);
 __PACKAGE__->deny_access_unless_any( "/org",                 [ qw/admin coadmin acl-w-organizations/ ]);
 __PACKAGE__->deny_access_unless_any( "/org_root",            [ qw/admin coadmin acl-w-organizations/ ]);
 __PACKAGE__->deny_access_unless_any( "/inventory",           [ qw/admin coadmin acl-w-inventory/ ]);

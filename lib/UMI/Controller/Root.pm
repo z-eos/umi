@@ -123,12 +123,23 @@ sub sysinfo : Local {
     if $mesg->error;
   my $monitor = $mesg->as_struct;
 
+  my $syntaxes;
+  my $sch = $ldap_crud->schema;
+  foreach my $syn (@{[$sch->all_syntaxes]}) {
+    foreach (keys (%{$syn})) {
+      next if $_ eq 'oid';
+      $syntaxes->{$syn->{oid}}->{$_} = $syn->{$_};
+    }
+  }
+
   $sysinfo = { 'UMI session'    => { title => 'Session',
 				     data  => $x, },
 	       'LDAP_CRUD->cfg' => { title => 'LDAP_CRUD configuration ( internal UMI $c->model(LDAP_CRUD)->cfg )',
 				     data  => $c->model('LDAP_CRUD')->cfg, },
 	      'LDAP monitor'    => { title => 'OpenLDAP daemon monitor',
 				     data  => $monitor, },
+	      'LDAP syntaxes'   => { title => 'LDAP syntaxes',
+				     data  => $syntaxes, },
 	     };
 
   $c->stash( template      => 'sysinfo.tt',
@@ -148,7 +159,7 @@ sub stat_acc : Local {
   my ( $self, $c ) = @_;
 
   if ( $c->user_exists() ) {
-    my ( $account, $accounts, $utf_givenName, $utf_sn,
+    my ( $account, $accounts, $utf_givenName, $utf_sn, $gidNumber,
 	 $svc, @services, $service,
 	 $mesg_blk, @mesg_blk_entries,
 	 $mesg_svc, @mesg_svc_entries,
@@ -159,11 +170,11 @@ sub stat_acc : Local {
     
     my $ldap_crud = $c->model('LDAP_CRUD');
     #-- collect all root accounts
-    my $mesg = $ldap_crud->search({ base => $ldap_crud->{cfg}->{base}->{acc_root},
-				    scope => 'one',
+    my $mesg = $ldap_crud->search({ base      => $ldap_crud->{cfg}->{base}->{acc_root},
+				    scope     => 'one',
 				    sizelimit => 0,
-				    attrs   => [ 'uid', 'givenName', 'sn', ],
-				    filter => '(objectClass=*)', });
+				    attrs     => [ 'uid', 'givenName', 'sn', 'gidNumber', ],
+				    filter    => '(objectClass=*)', });
     if ( $mesg->code ) {
       push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
     } else {
@@ -172,20 +183,25 @@ sub stat_acc : Local {
 	$utf_sn = $account->get_value('sn');
 	utf8::decode($utf_givenName) if defined $utf_givenName;
 	utf8::decode($utf_sn) if defined $utf_sn;
+	$gidNumber  = $account->get_value('gidNumber');
 	# log_debug { $account->dn };
-	$accounts->{$account->dn} = { uid => $account->get_value('uid'),
-				      givenName => $utf_givenName,
-				      sn => $utf_sn,
-				      authorizedService => {},
-				      blocked => 0, };
+	$accounts->{$account->dn} =
+	  {
+	   uid               => $account->get_value('uid'),
+	   givenName         => $utf_givenName,
+	   sn                => $utf_sn,
+	   authorizedService => {},
+	   blocked           => $gidNumber == $ldap_crud->cfg->{stub}->{group_blocked_gid} ? 1 : 0,
+	  };
 
 	#-- is current account blocked?
-	$mesg_blk = $ldap_crud->search({ base => $ldap_crud->{cfg}->{base}->{group},
-					 scope => 'one',
+	$mesg_blk = $ldap_crud->search({ base      => $ldap_crud->{cfg}->{base}->{group},
+					 scope     => 'one',
 					 sizelimit => 0,
-					 filter => sprintf('(&(cn=blocked)(memberUid=%s))',
-							   $accounts->{$account->dn}->{uid}),
-					 attrs   => [ 'cn' ] });
+					 filter    => sprintf('(&(cn=%s)(memberUid=%s))',
+							      $ldap_crud->cfg->{stub}->{group_blocked},
+							      $accounts->{$account->dn}->{uid}),
+					 attrs     => [ 'cn' ] });
 	if ( $mesg_blk->code ) {
 	  push @{$return->{error}}, $ldap_crud->err($mesg_blk)->{html};
 	} else {
@@ -611,7 +627,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	    $return->{warning} .= '<li>no rad group found</li>';
 	  }
 	  
-	} elsif ( (split('@', $service_details->{authorizedService}))[0] eq 'ssh' ) {
+	} elsif ( (split('@', $service_details->{authorizedService}))[0] eq 'ssh-acc' ) {
 	  @{$service_details->{sshkey}->{$_->dn}} = $_->get_value('sshPublicKey');
 	}
       }
@@ -780,7 +796,7 @@ page to test code snipets
 sub test : Local {
   my ( $self, $c ) = @_;
   my $ldap_crud = $c->model('LDAP_CRUD');
-  my $return = '';
+  my $return;
   
 # DHCP STUFF #     my $svc;
 # DHCP STUFF #     my $fqdn;
@@ -844,11 +860,20 @@ sub test : Local {
 # tree build #   $return = $tree;
 
   # log_debug { np( $mesg ) };
-  $return = $ldap_crud->last_seq_val({ base  => $ldap_crud->cfg->{base}->{acc_root},
-				       attr  => 'uidNumber', });
+  # $return = $ldap_crud->last_seq_val({ base   => $ldap_crud->cfg->{base}->{acc_root},
+  # 				       filter => '(&(authorizedService=ssh-acc@*)(uidNumber=*))',
+  # 				       scope  => 'sub',
+  # 				       attr   => 'uidNumber', });
 
+  my $sch = $ldap_crud->schema;
+  log_debug { np(@{[$sch->all_attributes]}) };
+  foreach my $syn (@{[$sch->all_attributes]}) {
+    foreach (keys (%{$syn})) {
+      next if $_ eq 'oid';
+      $return->{$syn->{oid}}->{$_} = $syn->{$_};
+    }
+  }
 
-  
   $c->stash( template => 'test.tt',
 	     final_message => $return,
 	   );

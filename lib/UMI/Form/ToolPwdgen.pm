@@ -6,6 +6,9 @@ package UMI::Form::ToolPwdgen;
 use HTML::FormHandler::Moose;
 BEGIN { extends 'UMI::Form::LDAP'; with 'Tools'; }
 
+use Data::Printer;
+use Logger;
+
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable', 'PositiveNum' );
 
 has '+item_class' => ( default =>'ToolPwdgen' );
@@ -31,8 +34,16 @@ has_field 'pwd_len'
       label => 'Password Length',
       label_class => [ 'col-xs-2', ],
       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-      element_attr => { placeholder => 'max ' . UMI->config->{pwd}->{len} . ' for completely random and max ' .
-			UMI->config->{pwd}->{lenp} . ' for pronounceable' },
+      element_attr => { placeholder => sprintf("min: %s; default common: %s; max common: %s; max pronouceable: %s",
+					       UMI->config->{pwd}->{len_min},
+					       UMI->config->{pwd}->{len},
+					       UMI->config->{pwd}->{len_max},
+					       UMI->config->{pwd}->{lenp} ),
+			title       => sprintf("min: %s; default common: %s; max common: %s; max pronouceable: %s",
+					       UMI->config->{pwd}->{len_min},
+					       UMI->config->{pwd}->{len},
+					       UMI->config->{pwd}->{len_max},
+					       UMI->config->{pwd}->{lenp} ), },
      );
 
 has_field 'pwd_cap'
@@ -85,19 +96,20 @@ sub html_attributes {
 
 sub validate {
   my $self = shift;
-  # # use Data::Printer use_prototypes => 0;
 
-  if ( defined $self->field('pwd_len')->value &&
+  # log_debug { np($self->field('pronounceable')->value) };
+  
+  if ( ! $self->field('pronounceable')->value && defined $self->field('pwd_len')->value &&
        $self->field('pwd_len')->value ne '' &&
-       ( $self->field('pwd_len')->value < 2 ||
-	 $self->field('pwd_len')->value > UMI->config->{pwd}->{len} )
+       ( $self->field('pwd_len')->value < UMI->config->{pwd}->{len_min} ||
+	 $self->field('pwd_len')->value > UMI->config->{pwd}->{len_max} )
      ) {
     $self->field('pwd_len')
-      ->add_error('Incorrect password length! It can be 2 to ' . UMI->config->{pwd}->{len});
+      ->add_error('Incorrect password length! It can be greater than ' .
+		  UMI->config->{pwd}->{len_min} . ' and less than ' . UMI->config->{pwd}->{len_max} . ' characters long.');
   }
 
-  if ( defined $self->field('pronounceable')->value &&
-       $self->field('pronounceable')->value eq '1' &&
+  if ( $self->field('pronounceable')->value &&
        $self->field('pwd_len')->value > UMI->config->{pwd}->{lenp} ) {
     $self->field('pwd_len')
       ->add_error('Pronounceable max length ' . UMI->config->{pwd}->{lenp});

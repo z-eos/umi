@@ -494,7 +494,7 @@
 	[% ELSIF h_attr.key == 'gidNumber'%]
 	[%   buttonizer( buttonizer_id=entry.value.root.PrimaryGroupName,
 	       buttonizer_dn=entry.value.root.PrimaryGroupNameDn,
-	       buttonizer_text= h_attr.value.0 _ ' (' _ entry.value.root.PrimaryGroupName _ ')' )%]	
+	       buttonizer_text= h_attr.value.0 _ ' (' _ entry.value.root.PrimaryGroupName _ ')' ) %]	
 	[% ELSIF h_attr.key == 'userPKCS12' %]
 	<kbd class="fa fa-file-o">&nbsp;Binary Data</kbd>
 	[% ELSIF h_attr.key == 'jpegPhoto' %]

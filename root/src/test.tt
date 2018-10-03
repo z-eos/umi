@@ -3,6 +3,6 @@
 [% INCLUDE ldap_err.tt %]
 
 [% USE dumper() %]
-<pre>
+<pre class="umi-text-xs">
 [% dumper.dump(final_message) %]
 </pre>

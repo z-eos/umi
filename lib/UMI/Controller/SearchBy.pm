@@ -1103,10 +1103,10 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
 
       if ( $arg->{password_init} eq '' && $arg->{password_cnfm} eq '' ) {
 	$arg->{password_gen} =
-	  $self->pwdgen({ len => $params->{'pwd_len'},
-			  num => $params->{'pwd_num'},
-			  cap => $params->{'pwd_cap'},
-			  pronounceable => defined $params->{pronounceable} ? $params->{pronounceable} : 0, });
+	  $self->pwdgen({ len           => $params->{'pwd_len'}     || undef,
+			  num           => $params->{'pwd_num'}     || undef,
+			  cap           => $params->{'pwd_cap'}     || undef,
+			  pronounceable => $params->{pronounceable} || 0, });
       } elsif ( $arg->{'password_init'} ne '' ) {
 	$arg->{password_gen} = $self->pwdgen({ pwd => $arg->{'password_init'} });
       }
@@ -1517,7 +1517,7 @@ sub modify :Path(modify) :Args(0) {
 	'umiUserCertificateNotAfter'  => '' . $cert_info->{'Not  After'},
 	'umiUserCertificateSubject'   => '' . $cert_info->{'Subject'},
 	'umiUserCertificateIssuer'    => '' . $cert_info->{'Issuer'};
-      $moddn = 'cn=' . $cert_info->{'CN'};
+      $moddn = sprintf("%s=%s", $ldap_crud->{cfg}->{rdn}->{ovpn}, $cert_info->{'CN'});
     } elsif ( ( $attr eq 'cACertificate' ||
 		$attr eq 'certificateRevocationList' ) && $val_params ne '' ) {
       $binary = $self->file2var( $val_params->{'tempname'}, $return );

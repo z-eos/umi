@@ -1,0 +1,71 @@
+[% META title = 'MTA root'
+   link = '<link href="/static/css/dt-dataTables.bootstrap.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-buttons.jqueryui.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-buttons.dataTables.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-buttons.bootstrap.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-select.dataTables.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-select.bootstrap.min.css" rel="stylesheet" type="text/css">'
+   %]
+
+<[% site.pageheading %] class="page-header">MikroTik CAPsMAN registrations<small>Wifi</small>
+</[% site.pageheading %]>
+
+[% INCLUDE ldap_err.tt %]
+
+<div class="table-responsive">
+  <table id="dataTableToDraw" class="table table-condensed table-hover">
+    <thead>
+      <tr class="text-uppercase active">
+	<th>MAC</th>
+	<th>uid</th>
+	<th>IP</th>
+	<th>SSID</th>
+	<th>EAP ID</th>
+	<th>interface</th>
+	<th>uptime</th>
+	<th>config</th>
+      </tr>
+    </thead>
+    <tfoot>
+      <tr class="text-uppercase active">
+	<th>MAC</th>
+	<th>uid</th>
+	<th>IP</th>
+	<th>SSID</th>
+	<th>EAP ID</th>
+	<th>interface</th>
+	<th>uptime</th>
+	<th>config</th>
+      </tr>
+    </tfoot>
+    <tbody>
+      [% eap = 'eap-identity' %]
+      [% FOREACH reg IN final_message.registrats.keys %]
+      [% id = 'collapse' _ loop.index %]
+      [% hd = 'heading' _ loop.index %]
+
+      [% ifreg = final_message.registrats.$reg.interface %]
+
+	<tr class="[% mta.custom.$domain.smarthost.mx.html_class %]">
+	  <th>[% reg %]</th>
+	  <td>[% final_message.registrats.$reg.uid %]</td>
+	  <td>[% final_message.registrats.$reg.ip %]</td>
+	  <td>[% final_message.registrats.$reg.ssid %]</td>
+	  <td>[% final_message.registrats.$reg.$eap %]</td>
+	  <td>[% ifreg %]</td>
+	  <td>[% final_message.registrats.$reg.uptime %]</td>
+	  <td>[% final_message.interfaces.$ifreg.configuration %]</td>
+      </tr>
+      [% END %]
+    </tbody>
+  </table>
+</div>
+
+<script src="/static/js/dt-jquery.dataTables.min.js"></script>
+<script src="/static/js/dt-buttons.html5.min.js"></script>
+<script src="/static/js/dt-buttons.jqueryui.min.js"></script>
+<script src="/static/js/dt-buttons.print.min.js"></script>
+<script src="/static/js/dt-dataTables.buttons.min.js"></script>
+<script src="/static/js/dt-buttons.bootstrap.min.js"></script>
+<script src="/static/js/dt-dataTables.bootstrap.min.js"></script>
+
+<script src="/static/js/umi-datatables.js"></script>
+
+<script>
+ $(function () { $('[data-toggle="popover"]').popover() });
+</script>

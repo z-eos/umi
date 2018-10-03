@@ -48,6 +48,22 @@
 	      MTA
 	    </a>
 	  </li>
+          <li class="nav-item">
+	    <a class="nav-link" href="/mikrotik"
+	       tabindex="2"
+	       title="All MTAs info in one single table">
+	      <i class="fas fa-fw fa-broadcast-tower"></i>
+	      CAPsMAN reg
+	    </a>
+	  </li>
+          <li class="nav-item">
+	    <a class="nav-link" href="/mikrotikpsk"
+	       tabindex="2"
+	       title="all corp SSID-s PSK-s">
+	      <i class="fas fa-fw fa-wifi"></i>
+	      CAPsMAN PSK
+	    </a>
+	  </li>
 	</ul>
       </li>
       [% END %]

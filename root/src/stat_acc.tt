@@ -20,6 +20,20 @@
 
 [% INCLUDE ldap_err.tt %]
 
+[% MACRO buttonizer  BLOCK %]
+<form id="buttonizer_form[% buttonizer_id %]"
+      method="POST"
+      action="/searchby"
+      class="form-inline formajaxer">
+  <input type="hidden" name="ldap_subtree" value="[% buttonizer_dn %]">
+  <button type="submit" class="btn btn-link btn-xs"
+	  title="click to open this object"
+	  id="buttonizer_button[% buttonizer_id %]">
+    [% buttonizer_text %]
+  </button>
+</form>
+[% END %]
+
 <div class="table-responsive">
   <table id="dataTableToDraw" class="table table-condensed table-bordered">
     <thead>
@@ -55,7 +69,9 @@
 	<th>[% accounts.$dn.sn %]</th>
 	<th>[% accounts.$dn.givenName %]</th>
 	<td>[% accounts.$dn.blocked %]</td>
-	<td>[% accounts.$dn.uid %]</td>
+	<td>[% buttonizer( buttonizer_id='',
+	       buttonizer_dn=dn,
+	       buttonizer_text=accounts.$dn.uid ) %]</td>
 	<td>[% svc %]</td>
 	<td>[% fqdn %]</td>
 	<td>[% svcacc.cn %]</td>

@@ -61,7 +61,7 @@
 		role:
 	      </dt>
 	      <dd>
-		[% IF auth_obj.title.size %][% FOREACH i IN auth_obj.title %][% i %]<br>[% END %]
+		[% IF auth_obj.title.size %][% FOREACH i IN auth_obj.title.sort %][% i %]<br>[% END %]
 		[% ELSE %]
 		[% auth_obj.title %]
 		[% END %]
@@ -204,55 +204,62 @@
 	    <tr>
 	      <td></td>
 	      <td>
-		<div class="inline-group">
-		  [% IF y.auth && ( y.authorizedService.search('mail') ||
-		     y.authorizedService.search('xmpp') ||
-		     y.authorizedService.search('web') ) %]
-		  <div class="dropdown pull-left">
-		    <button class="btn btn-link btn-sm"
-			    type="button" id="dropdownMenuActions"
-			    data-toggle="dropdown"
-			    title="Possible Actions Upon the Object">
-		      <span class="fas fa-ellipsis-h text-primary"></span>
-		    </button>
-		    <ul class="dropdown-menu dropdown-menu-left"
-			aria-labelledby="dropdownMenuActions"
-			role="menu">
-		      <li>
-			<form role="form" method="POST" action="/searchby/modify_userpassword">
-			  <button type="submit" title="modify password" class="btn btn-link" data-order="30"
-				  value="[% z.key %]" name="ldap_modify_password">
-			    <span class="fa fa-user-lock text-danger"></span>
-			    password
-			  </button>
-			</form>
-		      </li>
-		    </ul>
-		  </div>
-		  [% END %]
-		  <div>
+		<dl>
+		  <dt class="inline-group">
+
+		    [% IF y.auth && ( y.authorizedService.search('mail') ||
+		       y.authorizedService.search('xmpp') ||
+		       y.authorizedService.search('web') ) %]
+		    <div class="dropdown pull-left">
+		      <button class="btn btn-link btn-sm"
+			      type="button" id="dropdownMenuActions"
+			      data-toggle="dropdown"
+			      title="Possible Actions Upon the Object">
+			<span class="fas fa-ellipsis-h text-primary"></span>
+		      </button>
+		      <ul class="dropdown-menu dropdown-menu-left"
+			  aria-labelledby="dropdownMenuActions"
+			  role="menu">
+			<li>
+			  <form role="form" method="POST" action="/searchby/modify_userpassword">
+			    <button type="submit" title="modify password" class="btn btn-link" data-order="30"
+				    value="[% z.key %]" name="ldap_modify_password">
+			      <span class="fa fa-user-lock text-danger"></span>
+			      password
+			    </button>
+			  </form>
+			</li>
+		      </ul>
+		    </div>
+		    [% END %]
+
 		    [% z.value %]
 		    [% IF y.auth && y.authorizedService.search('802.1x') %]
-		    &nbsp;(&nbsp;[% y.rad_grp %]&nbsp;)
+		    <span class="text-muted">&nbsp;(&nbsp;[% y.rad_grp %]&nbsp;)</span>
 		    [% END %]		  
-		  </div>
-		  [%   IF y.cert.${z.key} %]
-		  <small class="pull-left">
+
+		  </dt>
+		  <dd>
+		    
+		    [%   IF y.cert.${z.key} %]
+		    <h6 class="mono umi-text-xs">
 		      <dl class="dl-horizontal">
 			[% FOREACH cert IN y.cert.${z.key} %]
 			[%   NEXT IF cert.key == "cert" %]
 			[%   NEXT IF cert.key == "error" && cert.value == "" %]
-			<dt>[% cert.key %]</dt><dd class="mono">[% cert.value %]</dd>
+			<dt>[% cert.key %]</dt><dd>[% cert.value %]</dd>
 			[% END %]
 		      </dl>
-		  </small>
-		  [%   ELSIF y.sshkey.${z.key} %]
-		  [%     FOREACH cert IN y.sshkey.${z.key} %]
-		  <h6 class="pull-left mono"><em>[% cert %]</em></h6>
-		  [%     END %]
-		  [%   END %]
-		  [% END %]
-		</div>
+		    </h6>
+		    [%   ELSIF y.sshkey.${z.key} %]
+		    [%     FOREACH cert IN y.sshkey.${z.key} %]
+		    <h6 class="mono umi-text-xs">[% cert %]</h6>
+		    [%     END %]
+		    [%   END %]
+		    [% END %]
+
+		  </dd>
+		</dl>
 	      </td>
 	    </tr>
 	    [% END %]

@@ -350,31 +350,30 @@ sub pwdgen {
   my ( $self, $args ) = @_;
   my $pwdgen =
     {
-     pwd  => $args->{pwd}  || undef,
-     alg  => $args->{pwd}  || UMI->config->{pwd}->{alg} || '1',
-     len  => $args->{len}  || UMI->config->{pwd}->{len},
-     num  => $args->{num}  || UMI->config->{pwd}->{num},
-     cap  => $args->{cap}  || UMI->config->{pwd}->{cap},
-     cnt  => $args->{cnt}  || UMI->config->{pwd}->{cnt},
-     salt => $args->{salt} || UMI->config->{pwd}->{salt},
-     pronounceable => $args->{pronounceable} || UMI->config->{pwd}->{pronounceable},
+     pwd           => $args->{pwd}           // undef,
+     alg           => $args->{pwd}           // UMI->config->{pwd}->{alg} || '1',
+     len           => $args->{len}           // UMI->config->{pwd}->{len},
+     num           => $args->{num}           // UMI->config->{pwd}->{num},
+     cap           => $args->{cap}           // UMI->config->{pwd}->{cap},
+     cnt           => $args->{cnt}           // UMI->config->{pwd}->{cnt},
+     salt          => $args->{salt}          // UMI->config->{pwd}->{salt},
+     pronounceable => $args->{pronounceable} // UMI->config->{pwd}->{pronounceable},
     };
 
   $pwdgen->{len} = UMI->config->{pwd}->{lenp}
     if $pwdgen->{pronounceable} && $pwdgen->{len} > UMI->config->{pwd}->{lenp};
 
   # p $args;
-  # p $pwdgen;
+  p $pwdgen;
   use Crypt::GeneratePassword qw(word word3 chars);
 
   if ( ( ! defined $pwdgen->{'pwd'} || $pwdgen->{'pwd'} eq '' )
        && $pwdgen->{'pronounceable'} ) {
     $pwdgen->{'pwd'} = word3( $pwdgen->{'len'},
-			    $pwdgen->{'len'},
-			    'en',
-			    $pwdgen->{'num'},
-			    $pwdgen->{'cap'}
-			  );
+			      $pwdgen->{'len'},
+			      'en',
+			      $pwdgen->{'num'},
+			      $pwdgen->{'cap'} );
   } elsif ( ( ! defined $pwdgen->{'pwd'} || $pwdgen->{'pwd'} eq '' )
 	    && ! $pwdgen->{'pronounceable'} ) {
     $pwdgen->{'pwd'} = chars( $pwdgen->{'len'}, $pwdgen->{'len'} );
@@ -1509,6 +1508,82 @@ sub tree_buid {
 
 }
 
+# 'DC:4F:22:10:33:2C' => {
+#                          'eap-identity' => '',
+#                          'rx-rate' => '54Mbps',
+#                          'uptime' => '1h18m8s210ms',
+#                          'interface' => 'cap-402-h-2-1',
+#                          'tx-rate' => '72.2Mbps-20MHz/1S/SGI',
+#                          'tx-rate-set' => 'CCK:1-11 OFDM:6-54 BW:1x-2x SGI:1x HT:0-7',
+#                          'rx-signal' => '-50',
+#                          'packets' => '216,226',
+#                          'ssid' => 'NXC',
+#                          'mac-address' => 'DC:4F:22:10:33:2C',
+#                          '.id' => '*44507',
+#                          'bytes' => '47591,22659'
+#                        }
+# 'cap-402-h-2-3' => {
+#                      'disabled' => 'false',
+#                      'dynamic' => 'true',
+#                      'running' => 'false',
+#                      'bound' => 'true',
+#                      'master-interface' => 'cap-402-h-2',
+#                      'current-basic-rate-set' => 'CCK:1-11',
+#                      'current-state' => 'running-ap',
+#                      'l2mtu' => '1600',
+#                      'master' => 'false',
+#                      '.id' => '*F4',
+#                      'current-rate-set' => 'CCK:1-11 OFDM:6-54 BW:1x-2x SGI:1x-2x HT:0-15',
+#                      'mac-address' => '66:D1:54:3C:83:E1',
+#                      'current-registered-clients' => '0',
+#                      'configuration' => 'cfg_2_VLAN2101_psk',
+#                      'name' => 'cap-402-h-2-3',
+#                      'inactive' => 'false',
+#                      'radio-mac' => '00:00:00:00:00:00',
+#                      'arp-timeout' => 'auto',
+#                      'current-authorized-clients' => '0'
+#                    },
+
+sub ask_mikrotik {
+  my ($self, $args) = @_;
+  my $arg = { host     => $args->{host},
+	      username => $args->{username},
+	      password => $args->{password},
+	      type     => $args->{type} };
+  my $return;
+  
+  use MikroTik::API;
+
+  my $api = MikroTik::API->new({
+				host     => $arg->{host},
+				username => $arg->{username},
+				password => $arg->{password},
+				use_ssl  => 1,
+			       });
+
+  my $ret_code;
+  if ( $arg->{type} eq 'registrations' ) {
+    my ( @ifs, @usr );
+    ( $ret_code, @ifs ) = $api->query( '/caps-man/interface/print' );
+    $return->{interfaces}->{$_->{name}} = $_ foreach (@ifs);
+    
+    ( $ret_code, @usr ) = $api->query( '/caps-man/registration-table/print' );
+    $return->{registrats}->{$_->{'mac-address'}} = $_ foreach (@usr);
+
+  } elsif ( $arg->{type} eq 'get_psk' ) {
+      my @arr;
+      ( $ret_code, @arr ) = $api->query( '/caps-man/security/print' );
+      $return->{$_->{name}} = $_ foreach (@arr);
+      # log_debug { np(@arr) };
+  } else {
+    $return = {};
+  }
+  
+  $api->logout();
+
+  # log_debug { np($return) };
+  return $return;
+}
 
 =head1 AUTHOR
 

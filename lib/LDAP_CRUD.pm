@@ -222,9 +222,10 @@ sub _build_cfg {
 		  acc_root =>       UMI->config->{authentication}->{realms}->{ldap}->{store}->{user_field},
 		  acc_svc_branch => 'authorizedService',
 		  acc_svc_common => 'uid',
-		  gitacl =>         'cn',
-		  group =>          'cn',
-		  org =>            'ou',
+		  gitacl         => 'cn',
+		  group          => 'cn',
+		  org            => 'ou',
+		  ovpn           => 'uid',
 		 },
 	  objectClass => {
 			  acc_root => [ qw(
@@ -401,7 +402,7 @@ sub _build_cfg {
 			 auth                 => 1,
 			 login_delim          => '_',
 			 homeDirectory_prefix => '/usr/local/home',
-			 icon                 => 'fa fa-key',
+			 icon                 => 'fas fa-key',
 			 loginShell           => '/usr/bin/false',
 			 descr                => 'SSH',
 			 disabled             => 0,
@@ -649,6 +650,7 @@ sub build_last_uidNumber_ssh {
   my $self = shift;
   return $self->last_seq_val({ base   => $self->cfg->{base}->{acc_root},
 			       filter => '(&(authorizedService=ssh-acc@*)(uidNumber=*))',
+			       scope  => 'sub',
 			       attr   => 'uidNumber', })
     // $self->cfg->{defaults}->{ldap}->{uidNumber_ssh_start};
 }
@@ -701,7 +703,7 @@ sub last_seq_val {
 	      filter => $args->{filter} // sprintf("(%s=*)", $args->{attr}),
 	      scope  => $args->{scope}  // 'one',
 	      deref  => $args->{deref}  // 'never', };
-
+  # log_debug { np($arg) };
   my $callername = (caller(1))[3];
   $callername = 'main' if ! defined $callername;
   my $return = 'call to LDAP_CRUD->last_seq_val from ' . $callername . ': ';
@@ -935,7 +937,7 @@ sub moddn {
 	      newrdn       => $args->{newrdn},
 	      deleteoldrdn => $args->{deleteoldrdn} || '1',
 	      newsuperior  => $args->{newsuperior}  || undef };
-  
+  log_debug { np($arg) };
   my $callername = (caller(1))[3];
   $callername = 'main' if ! defined $callername;
   my $return;
