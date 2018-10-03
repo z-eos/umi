@@ -937,7 +937,7 @@ sub moddn {
 	      newrdn       => $args->{newrdn},
 	      deleteoldrdn => $args->{deleteoldrdn} || '1',
 	      newsuperior  => $args->{newsuperior}  || undef };
-  log_debug { np($arg) };
+  # log_debug { np($arg) };
   my $callername = (caller(1))[3];
   $callername = 'main' if ! defined $callername;
   my $return;
