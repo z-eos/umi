@@ -23,8 +23,8 @@
 
 .tree-point {
     position: relative;
-    padding: 2px 5px 2px;
-    line-height: 21px;
+    padding: 1px 5px 1px;
+    line-height: 1.05;
     border-radius: 3px;
 }
 
@@ -40,7 +40,7 @@
     /* transition: .1s; */
     position: absolute;
     right: 100%;
-    top: 0px;
+    top: 2px;
     bottom: 0px;
     height: 16px;
     padding: 3px 8px;
@@ -60,9 +60,9 @@
 }
 
 .tree-item-link-list {
-    margin-right: 8px;
+    margin-right: 0px;
     display: inline;
-    margin-left: 5px;
+    margin-left: 3px;
     position: relative;
     top: 1px;
     cursor: pointer;

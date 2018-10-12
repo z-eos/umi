@@ -210,10 +210,10 @@ sub _build_cfg {
 		   gidNumber => UMI->config->{default}->{gidNumber},
 		   group => UMI->config->{default}->{group},
 		   noavatar_mgmnt => UMI->path_to('root', 'static', 'images', '/avatar-mgmnt.png'),
-		   icon => 'fa fa-user-circle',
-		   icon_error => 'fa fa-exclamation-circle',
-		   icon_warning => 'fa fa-exclamation-triangle',
-		   icon_success => 'fa fa-check-circle',
+		   icon => 'fas fa-user-circle',
+		   icon_error => 'fas fa-exclamation-circle',
+		   icon_warning => 'fas fa-exclamation-triangle',
+		   icon_success => 'fas fa-check-circle',
 		   group_blocked => 'blocked',
 		   group_blocked_gid => 20001,
 		   core_mta => 'relay.umi',
@@ -241,14 +241,14 @@ sub _build_cfg {
 						  account
 						  authorizedServiceObject
 					       ) ],
-			  acc_svc_802_1x => [ qw(
-						  account
-						  authorizedServiceObject
-						  domainRelatedObject
-						  radiusprofile
-						  simpleSecurityObject
+			  acc_svc_dot1x => [ qw(
+						 account
+						 authorizedServiceObject
+						 domainRelatedObject
+						 radiusprofile
+						 simpleSecurityObject
 					       ) ],
-			  acc_svc_802_1x_eaptls => [ qw(
+			  acc_svc_dot1x_eap_tls => [ qw(
 							 account
 							 authorizedServiceObject
 							 domainRelatedObject
@@ -334,7 +334,7 @@ sub _build_cfg {
 		      login_delim          => '@',
 		      homeDirectory_prefix => '/mail/fast/imap/',
 		      gidNumber            => 26,
-		      icon                 => 'fa fa-envelope',
+		      icon                 => 'fas fa-envelope',
 		      data_fields          => 'login,logindescr,password1,password2',
 		      data_relation        => 'passw',
 		     },
@@ -345,42 +345,42 @@ sub _build_cfg {
 		      login_delim             => '@',
 		      gidNumber               => 10106,
 		      jpegPhoto_noavatar      => UMI->path_to('root', 'static', 'images', '/avatar-xmpp.png'),
-		      icon                    => 'fa fa-lightbulb',
+		      icon                    => 'fas fa-lightbulb',
 		      data_fields             => 'login,logindescr,password1,password2',
 		      data_relation           => 'passw',
 		      associateddomain_prefix => {
 						  'talax.startrek.in' => 'im.',
 						 },
 		     },
-	   '802.1x-mac' => {
-			    auth => 1,
-			    descr => 'auth 802.1x EAP-MD5 (MAC)',
-			    disabled => 0,
-			    icon => 'fa fa-id-badge',
-			    data_fields => 'login,radiusgroupname,radiusprofile',
-			    data_relation => '8021x',
-			   },
-	   '802.1x-eap-tls' => {
-				auth => 1,
-				descr => 'auth 802.1x EAP-TLS',
-				disabled => 0,
-				icon => 'fa fa-id-badge',
-				data_fields => 'login,password1,password2,radiusgroupname,radiusprofile,userCertificate',
-				data_relation => '8021xeaptls',
-				login_prefix => 'rad-',
-			       },
+	   'dot1x-eap-md5' => {
+			       auth => 1,
+			       descr => 'auth 802.1x EAP-MD5 (MAC)',
+			       disabled => 0,
+			       icon => 'fas fa-id-badge',
+			       data_fields => 'login,radiusgroupname,radiusprofile',
+			       data_relation => 'dot1x',
+			      },
+	   'dot1x-eap-tls' => {
+			       auth => 1,
+			       descr => 'auth 802.1x EAP-TLS',
+			       disabled => 0,
+			       icon => 'fas fa-id-badge',
+			       data_fields => 'login,password1,password2,radiusgroupname,radiusprofile,userCertificate',
+			       data_relation => 'dot1xeaptls',
+			       login_prefix => 'rad-',
+			      },
 	   'otrs' => {
 		      auth => 1,
 		      descr => 'OTRS',
 		      disabled => 1,
-		      icon => 'fa fa-ticket',
+		      icon => 'fas fa-ticket',
 		      data_fields => 'login,password1,password2',
 		     },
 	   'web' => {
 		     auth => 1,
 		     descr => 'Web Account',
 		     disabled => 0,
-		     icon => 'fa fa-puzzle-piece',
+		     icon => 'fas fa-puzzle-piece',
 		     data_fields => 'login,logindescr,password1,password2',
 		     data_relation => 'passw',
 		    },
@@ -394,7 +394,7 @@ sub _build_cfg {
 			  auth => 1,
 			  descr => 'CISCO Commutators',
 			  disabled => 0,
-			  icon => 'fa fa-terminal',
+			  icon => 'fas fa-terminal',
 			  data_fields => 'login,logindescr,password1,password2',
 			  data_relation => 'passw',
 			 },
@@ -408,7 +408,7 @@ sub _build_cfg {
 			 disabled             => 0,
 			 gidNumber            => 11102,
 			 uidNumberShift       => 10000,
-			 icon                 => 'fa fa-key',
+			 icon                 => 'fas fa-key',
 			 data_fields          => 'login,logindescr,password1,password2,sshkey,sshkeyfile,sshhome,sshshell,sshgid',
 			 data_relation        => 'sshacc',
 			},
@@ -416,13 +416,13 @@ sub _build_cfg {
 		     auth => 0,
 		     descr => 'GPG key',
 		     disabled => 1,
-		     icon => 'fa fa-key',
+		     icon => 'fas fa-key',
 		    },
 	   'ovpn' => {
 		      auth => 0,
 		      descr => 'OpenVPN client',
 		      disabled => 0,
-		      icon => 'fa fa-certificate',
+		      icon => 'fas fa-certificate',
 		      # data_fields => 'block_crt',
 		     },
 	  },
@@ -434,32 +434,32 @@ sub _build_cfg {
 			   ap => {
 				  descr => 'singleboard inventory item, Access Point',
 				  disabled => 0,
-				  icon => 'fa fa-lg fa-cog',
+				  icon => 'fas fa-lg fa-cog',
 				 },
 			   com  => {
 				    descr => 'singleboard inventory item, commutator',
 				    disabled => 0,
-				    icon => 'fa fa-lg fa-cog',
+				    icon => 'fas fa-lg fa-cog',
 				   },
 			   wrt => {
 				   descr => 'singleboard inventory item, WRT',
 				   disabled => 0,
-				   icon => 'fa fa-lg fa-cog',
+				   icon => 'fas fa-lg fa-cog',
 				  },
 			   monitor => {
 				       descr => 'singleboard inventory item, monitor',
 				       disabled => 0,
-				       icon => 'fa fa-lg fa-cog',
+				       icon => 'fas fa-lg fa-cog',
 				      },
 			   prn => {
 				   descr => 'singleboard inventory item, printer',
 				   disabled => 0,
-				   icon => 'fa fa-lg fa-cog',
+				   icon => 'fas fa-lg fa-cog',
 				  },
 			   mfu => {
 				   descr => 'singleboard inventory item, MFU',
 				   disabled => 0,
-				   icon => 'fa fa-lg fa-cog',
+				   icon => 'fas fa-lg fa-cog',
 				  },
 			  },
 	   composite => {
@@ -467,12 +467,12 @@ sub _build_cfg {
 			 ws => {
 				descr => 'composite inventory item, workstation',
 				disabled => 0,
-				icon => 'fa fa-lg fa-desktop',
+				icon => 'fas fa-lg fa-desktop',
 			       },
 			 srv => {
 				 descr => 'composite inventory item, server',
 				 disabled => 0,
-				 icon => 'fa fa-lg fa-desktop',
+				 icon => 'fas fa-lg fa-desktop',
 				},
 			},
 	   consumable => {
@@ -480,17 +480,17 @@ sub _build_cfg {
 			  kbd => {
 				  descr => 'consumable inventory item, keyboard',
 				  disabled => 0,
-				  icon => 'fa fa-lg fa-recycle',
+				  icon => 'fas fa-lg fa-recycle',
 				 },
 			  ms => {
 				 descr => 'consumable inventory item, mouse',
 				 disabled => 0,
-				 icon => 'fa fa-lg fa-recycle',
+				 icon => 'fas fa-lg fa-recycle',
 				},
 			  hs => {
 				 descr => 'consumable inventory item, headset',
 				 disabled => 0,
-				 icon => 'fa fa-lg fa-recycle',
+				 icon => 'fas fa-lg fa-recycle',
 				},
 			 },
 	   compart => {
@@ -498,22 +498,22 @@ sub _build_cfg {
 		       mb => {
 			      descr => 'compart inventory item, motherboard',
 			      disabled => 0,
-			      icon => 'fa fa-lg fa-cogs',
+			      icon => 'fas fa-lg fa-cogs',
 			     },
 		       cpu => {
 			       descr => 'compart inventory item, CPU',
 			       disabled => 0,
-			       icon => 'fa fa-lg fa-cogs',
+			       icon => 'fas fa-lg fa-cogs',
 			      },
 		       ram => {
 			       descr => 'compart inventory item, RAM',
 			       disabled => 0,
-			       icon => 'fa fa-lg fa-cogs',
+			       icon => 'fas fa-lg fa-cogs',
 			      },
 		       disk => {
 			       descr => 'compart inventory item, disk',
 			       disabled => 0,
-			       icon => 'fa fa-lg fa-cogs',
+			       icon => 'fas fa-lg fa-cogs',
 			      },
 		      },
 	   furniture => {
@@ -521,17 +521,17 @@ sub _build_cfg {
 			 tbl => {
 				 descr => 'furniture inventory item, table',
 				 disabled => 0,
-				 icon => 'fa fa-lg fa-bed',
+				 icon => 'fas fa-lg fa-bed',
 				},
 			 chr => {
 				 descr => 'furniture inventory item, chair',
 				 disabled => 0,
-				 icon => 'fa fa-lg fa-wheelchair',
+				 icon => 'fas fa-lg fa-wheelchair',
 				},
 			},
 	  },
 	  err => {
-		  0 => '<div class="alert list-group-item-success" role="alert"><i class="fa fa-info-circle fa-lg"></i>&nbsp;<b>Your request returned no result. Try to change query parameter/s.</b></div>',
+		  0 => '<div class="alert list-group-item-success" role="alert"><i class="fas fa-info-circle fa-lg"></i>&nbsp;<b>Your request returned no result. Try to change query parameter/s.</b></div>',
 		  50 => 'Do not panic! This situation needs your security officer and system administrator attention, please contact them to solve the issue.',
 		 },
 
@@ -2134,7 +2134,7 @@ sub obj_mod {
     warn sprintf('object dn: %s wasn notmodified! errors: %s', $attrs->{'dn'}, $mesg);
   } else {
     $message .= '<div class="alert alert-success">' .
-      '<span style="font-size: 140%" class="fa fa-check-circle"></span>' .
+      '<span style="font-size: 140%" class="fas fa-check-circle"></span>' .
 	'&nbsp;Object <em>&laquo;' . $self->utf2lat( $params->{'physicalDeliveryOfficeName'} ) .
 	    '&raquo;</em> of type <em>&laquo;' . $type .
 	      '&raquo;</em> was successfully modified.</div>';
@@ -3106,7 +3106,7 @@ returns reference to hash of arrays
 
 sub create_account_branch_leaf {
   my  ( $self, $args ) = @_;
-  log_debug { np( $args )};
+  # log_debug { np( $args )};
   my $arg =
     {
       basedn                 => $args->{basedn},
@@ -3178,8 +3178,8 @@ sub create_account_branch_leaf {
   
   if ( $arg->{service} eq 'ovpn' ||
        $arg->{service} eq 'ssh' ||
-       ( $arg->{service} eq '802.1x-mac' ||
-	 $arg->{service} eq '802.1x-eap-tls' ) ||
+       ( $arg->{service} eq 'dot1x-eap-md5' ||
+	 $arg->{service} eq 'dot1x-eap-tls' ) ||
        $arg->{service} eq 'web' ) {
     $authorizedService = [];
   } else {
@@ -3230,48 +3230,48 @@ sub create_account_branch_leaf {
       jpegPhoto => [ $self->file2var( $jpegPhoto_file, $return) ];
 
   #=== SERVICE: 802.1x ===============================================
-  } elsif ( $arg->{service} eq '802.1x-mac' ||
-	    $arg->{service} eq '802.1x-eap-tls' ) {
+  } elsif ( $arg->{service} eq 'dot1x-eap-md5' ||
+	    $arg->{service} eq 'dot1x-eap-tls' ) {
     undef $authorizedService;
 
-    if ( $arg->{service} eq '802.1x-mac' ) {
+    if ( $arg->{service} eq 'dot1x-eap-md5' ) {
       $arg->{dn} = sprintf('uid=%s,%s',
 			   $self->macnorm({ mac => $arg->{login} }),
 			   $arg->{basedn}); # DN for MAC AUTH differs
       push @{$authorizedService},
-	objectClass => [ @{$self->cfg->{objectClass}->{acc_svc_802_1x}}, @{$arg->{objectclass}} ],
-	uid => $self->macnorm({ mac => $arg->{login} }),
-	cn =>  $self->macnorm({ mac => $arg->{login} });
+	objectClass => [ @{$self->cfg->{objectClass}->{acc_svc_dot1x}}, @{$arg->{objectclass}} ],
+	uid         => $self->macnorm({ mac => $arg->{login} }),
+	cn          =>  $self->macnorm({ mac => $arg->{login} });
     } else {
       $arg->{dn} = sprintf('uid=%s,%s', $arg->{prefixed_uid}, $arg->{basedn}); # DN for EAP-TLS differs
       push @{$authorizedService},
-	objectClass => [ @{$self->cfg->{objectClass}->{acc_svc_802_1x_eaptls}}, @{$arg->{objectclass}} ],
-	uid => $arg->{prefixed_uid},
-	cn => $arg->{prefixed_uid};
+	objectClass => [ @{$self->cfg->{objectClass}->{acc_svc_dot1x_eap_tls}}, @{$arg->{objectclass}} ],
+	uid         => $arg->{prefixed_uid},
+	cn          => $arg->{prefixed_uid};
     }
 
     push @{$authorizedService},
       authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
-      associatedDomain => $arg->{associatedDomain},
-      userPassword => $arg->{password}->{$arg->{service}}->{clear};
+      associatedDomain  => $arg->{associatedDomain},
+      userPassword      => $arg->{password}->{$arg->{service}}->{clear};
 
-    push @{$authorizedService},
-      radiusprofiledn => $arg->{radiusprofiledn}
+    push @{$authorizedService}, radiusprofiledn => $arg->{radiusprofiledn}
       if $arg->{radiusprofiledn} ne '';
 
-    if ( $arg->{service} eq '802.1x-eap-tls' ) {
+    push @{$authorizedService}, radiusgroupname => $arg->{radiusgroupname}
+      if $arg->{radiusgroupname} ne '';
+
+    if ( $arg->{service} eq 'dot1x-eap-tls' ) {
       $arg->{cert_info} =
-	$self->cert_info({
-			  cert => $self->file2var($arg->{userCertificate}->{'tempname'}, $return),
-			  ts => "%Y%m%d%H%M%S",
-			 });
+	$self->cert_info({ cert => $self->file2var($arg->{userCertificate}->{'tempname'}, $return),
+			   ts   => "%Y%m%d%H%M%S", });
       push @{$authorizedService},
-	umiUserCertificateSn => '' . $arg->{cert_info}->{'S/N'},
+	umiUserCertificateSn        => '' . $arg->{cert_info}->{'S/N'},
 	umiUserCertificateNotBefore => '' . $arg->{cert_info}->{'Not Before'},
-	umiUserCertificateNotAfter => '' . $arg->{cert_info}->{'Not  After'},
-	umiUserCertificateSubject => '' . $arg->{cert_info}->{'Subject'},
-	umiUserCertificateIssuer => '' . $arg->{cert_info}->{'Issuer'},
-	'userCertificate;binary' => $arg->{cert_info}->{cert};
+	umiUserCertificateNotAfter  => '' . $arg->{cert_info}->{'Not  After'},
+	umiUserCertificateSubject   => '' . $arg->{cert_info}->{'Subject'},
+	umiUserCertificateIssuer    => '' . $arg->{cert_info}->{'Issuer'},
+	'userCertificate;binary'    => $arg->{cert_info}->{cert};
     }
 
   #=== SERVICE: ssh-acc ==============================================
@@ -3388,7 +3388,7 @@ sub create_account_branch_leaf {
 
 
       ### !!! RADIUS group modify with new member add if 802.1x
-      if ( $arg->{service} eq '802.1x-mac' || $arg->{service} eq '802.1x-eap-tls' &&
+      if ( $arg->{service} eq 'dot1x-eap-md5' || $arg->{service} eq 'dot1x-eap-tls' &&
 	   defined $arg->{radiusgroupname} && $arg->{radiusgroupname} ne '' ) {
 	$if_exist = $self->search( { base => $arg->{radiusgroupname},
 					  scope => 'base',
@@ -3502,7 +3502,7 @@ for composite object it is:
             ]
         }
     },
-    hwType            "<i title="composite inventory item, workstation" class="fa fa-lg fa-desktop"></i>",
+    hwType            "<i title="composite inventory item, workstation" class="fas fa-lg fa-desktop"></i>",
     inventoryNumber   "234-xdfsg8"
 
 for compart object it is:

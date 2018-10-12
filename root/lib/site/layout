@@ -66,8 +66,8 @@
                 v-if="item.branch > 0 && !loading"
                 @click="toggleBranches">
 
-                <i class="text-muted fa fa-caret-right" aria-hidden="true" v-if="!opened"></i>
-                <i class="text-muted fa fa-caret-down" aria-hidden="true" v-if="opened"></i>
+                <i class="text-muted fas fa-caret-right" aria-hidden="true" v-if="!opened"></i>
+                <i class="text-info fas fa-caret-down" aria-hidden="true" v-if="opened"></i>
             </div>
 
             <div class="tree-subitem-loader" v-if="loading"><!-- v-if="loading" -->
@@ -81,8 +81,9 @@
                 v-if="item.branch > 0" 
                 title="Show all sub items">
 
-                <i class="text-muted fa fa-ellipsis-h" aria-hidden="true"></i>
+                <i class="text-muted fas fa-expand" aria-hidden="true"></i>
             </span>
+            <i class="text-muted fas fa-redo-alt" aria-hidden="true" title="Reload sub items" @click="loadBranches()"></i> 
         </div>
 
         <div class="tree-subitem">
@@ -98,7 +99,7 @@
 </script>
 
 <script type="text/x-template" id="template-tree">
-    <div class="tree-container">    
+    <div class="tree-container mono umi-text-xs">
         <ul class="tree-root tree">
             <tree-item
                 v-for="(item, index) in tree" 

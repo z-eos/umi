@@ -234,8 +234,8 @@
 		    [% END %]
 
 		    [% z.value %]
-		    [% IF y.auth && y.authorizedService.search('802.1x') %]
-		    <span class="text-muted">&nbsp;(&nbsp;[% y.rad_grp %]&nbsp;)</span>
+		    [% IF y.auth && y.authorizedService.search('dot1x') %]
+		    <span class="text-muted">&nbsp;(&nbsp;[% y.rad_grp.${z.key} %]&nbsp;)</span>
 		    [% END %]		  
 
 		  </dt>

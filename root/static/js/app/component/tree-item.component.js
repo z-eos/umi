@@ -35,7 +35,7 @@ Vue.component('tree-item', {
 
         openBranches: function () {
             if( this.item.branch < 1 ) {
-                return;
+               return;
             }
 
             this.opened = true;

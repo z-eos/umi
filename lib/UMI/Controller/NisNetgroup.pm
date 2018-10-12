@@ -72,7 +72,7 @@ sub attributes {
     my  ( $self, $objectClass, $args ) = @_;
     my $attributes = { cn                => $args->{cn},
 		       objectClass       => $objectClass, };
-
+    # log_debug { np($attributes) };
     $attributes->{description} = $args->{description}
       if defined $args->{description} && $args->{description} ne '';
 

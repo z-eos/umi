@@ -435,12 +435,12 @@ we skip empty (criteria of emptiness is a concatenation of each field value) rep
 	$x->{objectclass} = $is_person_exp ? [ 'dynamicObject' ] : [];
 
 	if ( $form_field eq 'account' ) {
-	  if ( $element->field('authorizedservice')->value =~ /^802.1x-.*/ ) {
-	    if ( $element->field('authorizedservice')->value eq '802.1x-mac' ) {
+	  if ( $element->field('authorizedservice')->value =~ /^dot1x-.*/ ) {
+	    if ( $element->field('authorizedservice')->value eq 'dot1x-eap-md5' ) {
 	      $x->{password} = { $element->field('authorizedservice')->value =>
 				 { clear => $self->macnorm({ mac => $element->field('login')->value }) }
 			       };
-	    } elsif ( $element->field('authorizedservice')->value eq '802.1x-eap-tls' ) {
+	    } elsif ( $element->field('authorizedservice')->value eq 'dot1x-eap-tls' ) {
 	      $x->{password} = { $element->field('authorizedservice')->value =>
 				 { clear =>
 				   sprintf('%s%s',

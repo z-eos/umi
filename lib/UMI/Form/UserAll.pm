@@ -369,7 +369,7 @@ has_field 'account.password1'
        minlength => 7, maxlength => 128,
        label => 'Password',
        label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
-       wrapper_class => [  qw{hidden passw sshacc 8021xeaptls relation col-xs-12}, ],
+       wrapper_class => [  qw{hidden passw sshacc dot1xeaptls relation col-xs-12}, ],
        element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        ne_username => 'login',
@@ -385,7 +385,7 @@ has_field 'account.password2'
        minlength => 7, maxlength => 128,
        label => '',
        label_class => [ qw{col-xs-12 col-sm-2}, ],
-       wrapper_class => [  qw{hidden passw sshacc 8021xeaptls relation col-xs-12}, ],
+       wrapper_class => [  qw{hidden passw sshacc dot1xeaptls relation col-xs-12}, ],
        element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        ne_username => 'login',
@@ -413,7 +413,7 @@ has_field 'account.radiusgroupname'
        label => 'RADIUS Group',
        do_id => 'no',
        label_class => [ qw{col-xs-12 col-sm-2 atleastone}, ],
-       wrapper_class => [  qw{hidden 8021x 8021xeaptls relation col-xs-12}, ],
+       wrapper_class => [  qw{hidden dot1x dot1xeaptls relation col-xs-12}, ],
        element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
        element_class => [ 'input-sm', ],
        element_attr => { 'data-name' => 'radiusgroupname',
@@ -425,7 +425,7 @@ has_field 'account.radiusgroupname'
 has_field 'account.radiusprofiledn'
   => ( type => 'Select',
        label => 'RADIUS Profile',
-       wrapper_class => [  qw{hidden 8021x 8021xeaptls relation col-xs-12}, ],
+       wrapper_class => [  qw{hidden dot1x dot1xeaptls relation col-xs-12}, ],
        do_id => 'no',
        label_class => [ qw{col-xs-12 col-sm-2 atleastone}, ],
        element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
@@ -440,7 +440,7 @@ has_field 'account.radiusprofiledn'
 has_field 'account.userCertificate'
   => ( type => 'Upload',
        label => 'Cert (.DER)',
-       wrapper_class => [  qw{hidden 8021xeaptls relation col-xs-12}, ],
+       wrapper_class => [  qw{hidden dot1xeaptls relation col-xs-12}, ],
        do_id => 'no',
        label_class => [ qw{col-xs-12 col-sm-2 required}, ],
        element_wrapper_class => [ 'col-xs-2', 'col-lg-3', ],
@@ -1022,9 +1022,9 @@ sub validate {
 
       #---[ 802.1x ]---------------------------------------------------------------------
       if ( defined $element->field('authorizedservice')->value &&
-	   $element->field('authorizedservice')->value =~ /^802.1x-.*$/ ) {
+	   $element->field('authorizedservice')->value =~ /^dot1x-.*$/ ) {
 
-	if ( $element->field('authorizedservice')->value =~ /^802.1x-mac$/ ) {
+	if ( $element->field('authorizedservice')->value =~ /^dot1x-eap-md5$/ ) {
 	  $element->field('login')->add_error('MAC address is mandatory!')
 	    if ! defined $element->field('login')->value || $element->field('login')->value eq '';
 	  $element->field('login')->add_error('MAC address is not valid!')
@@ -1035,7 +1035,7 @@ sub validate {
 	  $passwd_acc_filter = '(cn=' . $logintmp . ')';
 	}
 
-	if ( $element->field('authorizedservice')->value eq '802.1x-eap-tls' ) {
+	if ( $element->field('authorizedservice')->value eq 'dot1x-eap-tls' ) {
 	  if ( defined $element->field('userCertificate')->value &&
 	       ref($element->field('userCertificate')->value) eq 'HASH' ) {
 	    $cert = $self->file2var( $element->field('userCertificate')->value->{tempname}, $cert_msg);

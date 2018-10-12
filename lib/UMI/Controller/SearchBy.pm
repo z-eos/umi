@@ -126,7 +126,7 @@ sub index :Path :Args(0) {
     } elsif ( defined $params->{'ldapsearch_by_mac'} ) {
       push @{$return->{error}}, 'incorrect MAC address'
 	if ! $self->macnorm({ mac => $filter_meta });
-      $filter = sprintf("|(dhcpHWAddress=ethernet %s)(&(uid=%s)(authorizedService=802.1*))(&(cn=%s)(authorizedService=802.1*))(hwMac=%s)",
+      $filter = sprintf("|(dhcpHWAddress=ethernet %s)(&(uid=%s)(authorizedService=dot1x*))(&(cn=%s)(authorizedService=dot1x*))(hwMac=%s)",
 			$self->macnorm({ mac => $filter_meta, dlm => ':', }),
 			$self->macnorm({ mac => $filter_meta }),
 			$self->macnorm({ mac => $filter_meta }),
@@ -881,7 +881,7 @@ sub proc :Path(proc) :Args(0) {
 	    $params->{'associateddomain_prefix'} = '';
 	  }
 
-	  $uid = $_ =~ /^802.1x-/ ?
+	  $uid = $_ =~ /^dot1x-/ ?
 	    $self->macnorm({ mac => $login }) :
 	    sprintf('%s@%s',
 		    $login,
@@ -893,7 +893,7 @@ sub proc :Path(proc) :Args(0) {
 	    $pwd = { $_ => $self->pwdgen };
 	  } elsif ( $_ eq 'ssh' ) {
 	    $pwd->{$_}->{clear} = 'N/A';
-	  } elsif ( $_ =~ /^802.1x-/ &&
+	  } elsif ( $_ =~ /^dot1x-/ &&
 		    $params->{'password0'} eq '' &&
 		    $params->{'password1'} eq '' ) {
 	    $pwd->{$_}->{clear} = $self->macnorm({ mac => $params->{'login'} });
@@ -1112,7 +1112,7 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
       }
 
       if ( ! $arg->{checkonly} ) {
-	$pwd = $arg->{mod_pwd_dn} =~ /.*authorizedService=802.1x-mac.*/ ? $arg->{password_gen}->{clear} : $arg->{password_gen}->{ssha};
+	$pwd = $arg->{mod_pwd_dn} =~ /.*authorizedService=dot1x-eap-md5.*/ ? $arg->{password_gen}->{clear} : $arg->{password_gen}->{ssha};
 	$modify_action = defined $arg->{pwd_orig} && $arg->{pwd_orig} ne '' ?
 	  [ replace => [ 'userPassword' => $pwd, ], ] :
 	  [ add => [ 'userPassword' => $pwd, ], ] ;

@@ -191,7 +191,7 @@ sub options_authorizedservice {
   		     };
 
   foreach my $key ( sort {$b cmp $a} keys %{$self->ldap_crud->cfg->{authorizedService}}) {
-    next if $key =~ /^802.1x-.*/;
+    next if $key =~ /^dot1x-.*/;
     # if ( $key eq 'mail' || $key eq 'xmpp' ) {
     #   push @services, {
     # 		       value => $key,

@@ -42,8 +42,8 @@ sub index :Path :Args(0) {
     if ( $c->check_user_roles('wheel') ||
 	 $c->check_user_roles('email') ||
 	 $c->check_user_roles('xmpp') ||
-	 $c->check_user_roles('802.1x-mac') ||
-	 $c->check_user_roles('802.1x-eap-tls') ) {
+	 $c->check_user_roles('dot1x-eap-md5') ||
+	 $c->check_user_roles('dot1x-eap-tls') ) {
       my $params = $c->req->parameters;
       $params->{'avatar'} = $c->req->upload('avatar') if $params->{'avatar'};
 
@@ -205,11 +205,11 @@ sub create_account {
     my ($create_account_branch_return, $create_account_branch_leaf_return);
     foreach my $service ( @services ) {
       $ldif = 0;
-      # next if $service =~ /^802.1x-.*/;
+      # next if $service =~ /^dot1x-.*/;
 
       if ( ! defined $args->{'password1'} or $args->{'password1'} eq '' ) {
     	$pwd = { $service => $self->pwdgen };
-      } elsif ( $service =~ /^802.1x-.*/ ) {
+      } elsif ( $service =~ /^dot1x-.*/ ) {
 	$pwd->{service}->{clear} = $args->{login};
       } else {
     	$pwd = { $service => $self->pwdgen( { pwd => $args->{'password1'} } ) };
@@ -413,8 +413,8 @@ sub create_account_branch_leaf {
     # left empty for latter amendations
   } elsif ( $arg->{service} eq 'ssh' ) {
     # left empty for latter amendations
-  } elsif ( $arg->{service} eq '802.1x-mac' ||
-	    $arg->{service} eq '802.1x-eap-tls' ) {
+  } elsif ( $arg->{service} eq 'dot1x-eap-md5' ||
+	    $arg->{service} eq 'dot1x-eap-tls' ) {
     $authorizedService = [];
   } else {
     $authorizedService = [
@@ -467,15 +467,15 @@ sub create_account_branch_leaf {
        telephonenumber => $arg->{telephoneNumber},
        jpegPhoto => [ $jpeg ],
       ];
-  } elsif ( $arg->{service} eq '802.1x-mac' ||
-	    $arg->{service} eq '802.1x-eap-tls' ) {
+  } elsif ( $arg->{service} eq 'dot1x-eap-md5' ||
+	    $arg->{service} eq 'dot1x-eap-tls' ) {
     $arg->{uid} = $arg->{'login'};
     $authorizedService_add =
       [
        authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
        uid => $self->macnorm({ mac => $arg->{uid} }),
        cn => $self->macnorm({ mac => $arg->{uid}}),
-       objectClass => $ldap_crud->cfg->{objectClass}->{acc_svc_802_1x},
+       objectClass => $ldap_crud->cfg->{objectClass}->{acc_svc_dot1x},
        userPassword => $arg->{password}->{clear},
        description => uc($arg->{service}) . ': ' . $arg->{'login'},
        radiusgroupname => $arg->{radiusgroupname},

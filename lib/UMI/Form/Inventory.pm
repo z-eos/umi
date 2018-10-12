@@ -1294,9 +1294,9 @@ sub validate {
 
   #     #---[ 802.1x ]------------------------------------------------
   #     if ( defined $element->field('authorizedservice')->value &&
-  # 	   $element->field('authorizedservice')->value =~ /^802.1x-.*$/ ) {
+  # 	   $element->field('authorizedservice')->value =~ /^dot1x-.*$/ ) {
 
-  # 	if ( $element->field('authorizedservice')->value =~ /^802.1x-mac$/ ) {
+  # 	if ( $element->field('authorizedservice')->value =~ /^dot1x-eap-md5$/ ) {
   # 	  $element->field('login')->add_error('MAC address is mandatory!')
   # 	    if ! defined $element->field('login')->value || $element->field('login')->value eq '';
   # 	  $element->field('login')->add_error('MAC address is not valid!')
@@ -1307,7 +1307,7 @@ sub validate {
   # 	  $passwd_acc_filter = '(cn=' . $logintmp . ')';
   # 	}
 
-  # 	if ( $element->field('authorizedservice')->value eq '802.1x-eap-tls' ) {
+  # 	if ( $element->field('authorizedservice')->value eq 'dot1x-eap-tls' ) {
   # 	  if ( defined $element->field('userCertificate')->value &&
   # 	       ref($element->field('userCertificate')->value) eq 'HASH' ) {
   # 	    $cert = $self->file2var( $element->field('userCertificate')->value->{tempname}, $cert_msg);

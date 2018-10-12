@@ -609,19 +609,25 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	  $service_details->{cert}->{$_->dn}->{'device'}        = $_->get_value('umiOvpnAddDevType');
 	} elsif ( $service_details->{authorizedService} =~ /^mail\@/ ) {
 	  push @{$arg->{mail}}, $_->get_value('uid');
-	} elsif ( $service_details->{authorizedService} =~ /^802.1x.*\@/ ) {
+	} elsif ( $service_details->{authorizedService} =~ /^dot1x.*\@/ ) {
+	  $service_details->{cert}->{$_->dn} = $self->cert_info({ cert => $_->get_value('userCertificate;binary') })
+	    if $service_details->{authorizedService} =~ /^dot1x-eap-tls\@/;
+
 	  my $rgrp = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{rad_groups},
 					   sizelimit => 0,
 					   filter => sprintf("member=%s", $_->dn),
 					   attrs => [ 'cn'], } );
-	  $return->{error} .= sprintf('<li>%s rad group/s %s</li>', $ldap_crud->cfg->{base}->{rad_groups}, $ldap_crud->err($rgrp)->{html})
+	  $return->{error} .= sprintf('<li>%s rad group/s %s</li>',
+				      $ldap_crud->cfg->{base}->{rad_groups},
+				      $ldap_crud->err($rgrp)->{html})
 	    if $rgrp->code;
+	  
 	  if ( $rgrp->count ) {
 	    my $rgrps = $rgrp->as_struct;
 	    # log_debug { np($rgrps) };
 	    foreach my $rg (keys (%{$rgrps})) {
 	      # log_debug { np($rgrps->{$rg}) };
-	      $service_details->{rad_grp} .= 'RAD grp: ' . $rgrps->{$rg}->{cn}->[0] . '; ';
+	      $service_details->{rad_grp}->{$_->dn} .= 'RAD grp: ' . $rgrps->{$rg}->{cn}->[0] . '; ';
 	    }
 	  } else {
 	    $return->{warning} .= '<li>no rad group found</li>';

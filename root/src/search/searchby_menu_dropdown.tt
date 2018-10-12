@@ -235,7 +235,7 @@
 	</form>
       </li>
       [%   END %]
-      [%   IF entry.key.match('802.1x-') %]
+      [%   IF entry.key.match('dot1x-') %]
       <li>
 	<form role="form" method="POST" 
 	      action="/searchby/proc">
