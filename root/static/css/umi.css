@@ -187,12 +187,12 @@ html,body {
 						  word-break: break-all;
 } */
 .mono {
-  font-family: monospace;
+  font-family: "Input Mono", monospace;
   word-break: break-all;
 }
 
 .mono-only {
-  font-family: monospace;
+  font-family: "Input Mono", monospace;
 }
 
 .umi-search, .umi-search:active {
