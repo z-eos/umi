@@ -82,7 +82,7 @@
        title="Show all sub items">
    <i class="text-muted far fa-folder-open" aria-hidden="true"></i>
  </span>
- <i class="text-muted fas fa-sync-alt" aria-hidden="true"
+ <i class="text-muted fas fa-sync" aria-hidden="true"
     title="Reload sub items"
     v-if="item.branch > 0" 
     @click="loadBranches()"></i> 
