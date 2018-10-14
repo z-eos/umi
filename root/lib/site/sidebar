@@ -48,6 +48,7 @@
 	      MTA
 	    </a>
 	  </li>
+	  [% IF c.session.settings.sidebar.mikrotik %]
           <li class="nav-item">
 	    <a class="nav-link" href="/mikrotik"
 	       tabindex="2"
@@ -64,6 +65,7 @@
 	      CAPsMAN PSK
 	    </a>
 	  </li>
+	  [% END %]
 	</ul>
       </li>
       [% END %]

@@ -69,6 +69,9 @@ sub signin :Path Global {
       $c->session->{settings} = $json->decode( $umiSettingsJson );
       # log_debug { np($c->session->{settings}) };
     }
+
+    $c->session->{settings}->{sidebar}->{mikrotik} = 
+      exists UMI->config->{mikrotik} ? 1 : 0;
     
     # log_debug { np( $c->user->ldap_entry->ldif ) };
     my $ldap_crud = $c->model('LDAP_CRUD');
