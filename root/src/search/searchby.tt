@@ -27,6 +27,7 @@
      })();
     </script>
   </div>
+
   [% END %]
 
 [% USE date(time = date.now, format = '%Y.%m.%d', locale = 'en_US') %]
@@ -136,7 +137,7 @@
     </thead>
     <tbody>
 
-      [% # USE dumper() %]<!-- pre>[% # base_dn.split(',').last %]</pre1 -->
+      <!-- >pre>[% # USE dumper() %][% # dumper.dump(base_dn,base_icon,entries,entrieskeys,filter,final_message,from_searchadvanced,schema,scope,services,template) %]</pre -->
       
       [% root_of_rec = '<span class="far fa-dot-circle fa-2x"></span>' %]
       [% FOREACH entrykey IN entrieskeys %]
@@ -257,7 +258,7 @@
 		  <!-- p class="visible-lg-block visible-md-block"></p>&nbsp; -->
 		  
 		  [% icon_color = '' %]
-		  [% # --- DISABLED "ANYTHING" DETECTION, TO COLOR ICON AND TEXT --- %]
+		  [% # --- DETECTION OF "ANYTHING" DISABLED, TO COLOR IT'S ICON AND TEXT --- %]
 		  [% #     if certificate and it is not enabled then color to danger %]
 		  [% IF entry.value.attrs.exists('umiOvpnAddStatus') && entry.value.attrs.umiOvpnAddStatus.0 != 'enabled' %]
 		  [%   icon_color = 'text-danger' %]

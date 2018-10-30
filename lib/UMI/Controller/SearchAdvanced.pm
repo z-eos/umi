@@ -5,6 +5,8 @@ package UMI::Controller::SearchAdvanced;
 
 use Net::LDAP::Util qw(	ldap_explode_dn );
 
+use Logger;
+
 use Moose;
 use namespace::autoclean;
 
@@ -39,7 +41,6 @@ sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
 # --- #     if ( defined $c->session->{"auth_uid"} ) {
       my $params = $c->req->params;
-
 # --- #       $c->stash( template => 'search/search_advanced.tt',
 # --- #       		 form => $self->form, );
 # --- # 
@@ -53,7 +54,7 @@ sub index :Path :Args(0) {
 # --- #       # $c->stash( final_message => '' );
 # --- #     } else {
 # --- #       $c->stash( template => 'signin.tt', );
-      # --- #     }
+# --- #     }
 
     $c->stash( template => 'search/search_advanced.tt',
 	       form => $self->form,
@@ -62,7 +63,7 @@ sub index :Path :Args(0) {
     if ( keys %{$params} > 0 ) {
       my $init_obj = { base_dn       => $params->{base_dn},
 		       search_filter => $params->{search_filter},
-		       search_scope => $params->{search_scope}, };
+		       search_scope  => $params->{search_scope}, };
       return unless $self->form
 	->process( init_object => $init_obj,
 		   ldap_crud => $c->model('LDAP_CRUD'), );
@@ -83,10 +84,11 @@ sub index :Path :Args(0) {
 sub proc :Path(proc) :Args(0) {
     my ( $self, $c ) = @_;
     my $params = $c->req->params;
-
+    # log_debug { np($params) };
+    
     if ( defined $c->user_exists ) {
       my ( $ldap_crud, $basedn, @filter_arr, $filter, $scope, $sort_order );
-
+      
       $c->stash( template => 'search/search_advanced.tt',
       		 form => $self->form, );
       return unless
@@ -96,7 +98,7 @@ sub proc :Path(proc) :Args(0) {
 			     # ldap_crud => $c->model('LDAP_CRUD'),
 			    );
 
-      $c->stash( template => 'search/searchby.tt', );
+      # $c->stash( template => 'search/searchby.tt', );
 
       if ( defined $params->{search_history} && $params->{search_history} eq '1' ) {
 	$basedn = UMI->config->{ldap_crud_db_log};
@@ -119,6 +121,7 @@ sub proc :Path(proc) :Args(0) {
 	$scope = 'sub';
 	$sort_order = 'straight';
       } else {
+	# log_debug { np($params) };
 	$basedn = $params->{'base_dn'};
 	$filter = $params->{'search_filter'};
 	$scope = $params->{'search_scope'};
@@ -153,7 +156,7 @@ sub proc :Path(proc) :Args(0) {
 #      	'pwdHistory',
       	'entryTtl',
       	'entryExpireTimestamp';
-      
+
       $ldap_crud = $c->model('LDAP_CRUD');
       my $mesg = $ldap_crud->search({
 				     base => $basedn,
@@ -164,13 +167,13 @@ sub proc :Path(proc) :Args(0) {
 				    });
       my $return;
       $return->{warning} = $ldap_crud->err($mesg)->{html} if ! $mesg->count;
-      
+
       my @entries = defined $params->{order_by} &&
 	$params->{order_by} ne '' ? $mesg->sorted(split(/,/,$params->{order_by})) : $mesg->sorted('dn');
 
       $c->stats->profile("search by filter requested");
 
-      my ( $ttentries, @ttentries_keys, $attr, $dn_depth,  $dn_depthes, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry, @root_groups, $obj_item, $tmp, $c_name, $m_name );
+      my ( $ttentries, @ttentries_keys, $attr, $dn_depth,  $dn_depthes, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry, @root_groups, $root_gr, $gr_entry, $obj_item, $tmp, $c_name, $m_name );
       my $blocked = 0;
       my $is_userPassword  = 0;
       my $is_dynamicObject = 0;
@@ -201,70 +204,87 @@ sub proc :Path(proc) :Args(0) {
 	  }
 	  
 	  # is this user blocked?
+	  $c->stats->profile('is-blocked search for <i class="text-light">' . $_->dn . '</i>');
 	  $mesg = $ldap_crud->search({
 				      base => $ldap_crud->cfg->{base}->{group},
 				      filter => sprintf('(&(cn=%s)(memberUid=%s))',
 							$ldap_crud->cfg->{stub}->{group_blocked},
-							# !!! WARNING !!! HARDCODE
-							substr( (reverse split /,/, $_->dn)[2], 4 )),
+							$ttentries->{$_->dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }),
+				     #### !!! WARNING !!! HARDCODE
+				     ### substr( (reverse split /,/, $_->dn)[2], 4 )),
 				     });
 	  $blocked = $mesg->count;
 	  $return->{error} .= $ldap_crud->err( $mesg )->{html}
 	    if $mesg->is_error();
 
-	  $c->stats->profile('is-blocked search for <i class="text-light">' . $_->dn . '</i>');
 	
-	  @root_arr = split(',', $_->dn);
-	  $root_i = $#root_arr;
-	  @root_dn = splice(@root_arr, -1 * $dn_depth);
-	  $ttentries->{$_->dn}->{root}->{dn} = join(',', @root_dn);
-
-	  # here, for each entry we are preparing data of the root object it belongs to
-	  $root_i++;
-	  if ( $root_i == $dn_depth ) {
-	    $ttentries->{$_->dn}->{root}->{givenName} = $_->get_value('givenName');
-	    $ttentries->{$_->dn}->{root}->{sn} = $_->get_value('sn');
-	    $ttentries->{$_->dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
-	      $_->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
-	  } else {
-	    $root_mesg = $ldap_crud->search({ dn => $ttentries->{$_->dn}->{root}->{dn}, });
-	    $return->{error} .= $ldap_crud->err( $root_mesg )->{html}
-	      if $root_mesg->is_error();
-	    $root_entry = $root_mesg->entry(0);
-	    $ttentries->{$_->dn}->{root}->{givenName} = $root_entry->get_value('givenName');
-	    $ttentries->{$_->dn}->{root}->{sn} = $root_entry->get_value('sn');
-	    $ttentries->{$_->dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
-	      $root_entry->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
-	  }
-
-	  # p $ttentries->{$_->dn}->{root};
-
-	  # $to_utf_decode = $ttentries->{$_->dn}->{root}->{givenName};
-	  # utf8::decode($to_utf_decode);
-	  # $ttentries->{$_->dn}->{root}->{givenName} = $to_utf_decode;
-	  utf8::decode($ttentries->{$_->dn}->{root}->{givenName});
-
-	  # $to_utf_decode = $ttentries->{$_->dn}->{root}->{sn};
-	  # utf8::decode($to_utf_decode);
-	  # $ttentries->{$_->dn}->{root}->{sn} = $to_utf_decode;
-	  utf8::decode($ttentries->{$_->dn}->{root}->{sn});
+### 20181029 # 	  @root_arr = split(',', $_->dn);
+### 20181029 # 	  $root_i = $#root_arr;
+### 20181029 # 	  @root_dn = splice(@root_arr, -1 * $dn_depth);
+### 20181029 # 	  $ttentries->{$_->dn}->{root}->{dn} = join(',', @root_dn);
+### 20181029 # 
+### 20181029 # 	  # here, for each entry we are preparing data of the root object it belongs to
+### 20181029 # 	  $root_i++;
+### 20181029 # 	  if ( $root_i == $dn_depth ) {
+### 20181029 # 	    $ttentries->{$_->dn}->{root}->{givenName} = $_->get_value('givenName');
+### 20181029 # 	    $ttentries->{$_->dn}->{root}->{sn} = $_->get_value('sn');
+### 20181029 # 	    $ttentries->{$_->dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
+### 20181029 # 	      $_->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
+### 20181029 # 	  } else {
+### 20181029 # 	    $root_mesg = $ldap_crud->search({ dn => $ttentries->{$_->dn}->{root}->{dn}, });
+### 20181029 # 	    $return->{error} .= $ldap_crud->err( $root_mesg )->{html}
+### 20181029 # 	      if $root_mesg->is_error();
+### 20181029 # 	    $root_entry = $root_mesg->entry(0);
+### 20181029 # 	    $ttentries->{$_->dn}->{root}->{givenName} = $root_entry->get_value('givenName');
+### 20181029 # 	    $ttentries->{$_->dn}->{root}->{sn} = $root_entry->get_value('sn');
+### 20181029 # 	    $ttentries->{$_->dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
+### 20181029 # 	      $root_entry->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
+### 20181029 # 	  }
+### 20181029 # 
+### 20181029 # 	  # p $ttentries->{$_->dn}->{root};
+### 20181029 # 
+### 20181029 # 	  # $to_utf_decode = $ttentries->{$_->dn}->{root}->{givenName};
+### 20181029 # 	  # utf8::decode($to_utf_decode);
+### 20181029 # 	  # $ttentries->{$_->dn}->{root}->{givenName} = $to_utf_decode;
+### 20181029 # 	  utf8::decode($ttentries->{$_->dn}->{root}->{givenName});
+### 20181029 # 
+### 20181029 # 	  # $to_utf_decode = $ttentries->{$_->dn}->{root}->{sn};
+### 20181029 # 	  # utf8::decode($to_utf_decode);
+### 20181029 # 	  # $ttentries->{$_->dn}->{root}->{sn} = $to_utf_decode;
+### 20181029 # 	  utf8::decode($ttentries->{$_->dn}->{root}->{sn});
 
 	  $#root_arr = $#root_dn = -1;
 
 	  # p $ttentries->{$_->dn}->{root};
-	  $mesg = $ldap_crud->search({ base => sprintf('ou=group,ou=system,%s', $ldap_crud->cfg->{base}->{db}),
+	  $mesg = $ldap_crud->search({ base   => $ldap_crud->cfg->{base}->{system_group},
 				       filter => sprintf('(memberUid=%s)',
 							 $ttentries->{$_->dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }),
-				       attrs => [ $ldap_crud->{cfg}->{rdn}->{group} ], });
+				       attrs  => [ $ldap_crud->{cfg}->{rdn}->{group} ], });
 
 	  if ( $mesg->is_error() ) {
 	    $return->{error} .= $ldap_crud->err( $mesg )->{html};
 	  } else {
 	    @root_groups = $mesg->entries;
 	    foreach ( @root_groups ) {
-	      $ttentries->{$_->dn}->{'mgmnt'}->{root_obj_groups}->{ $_->get_value('cn') } = 1;
+	      $root_gr->{ $_->get_value('cn') } = 1;
 	    }
 	  }
+
+	  # getting name of the primary group
+	  if ( $_->exists('gidNumber') ) {
+	    $mesg = $ldap_crud->search({ base   => sprintf('ou=group,%s', $ldap_crud->cfg->{base}->{db}),
+					 filter => sprintf('(gidNumber=%s)',
+							   $_->get_value('gidNumber')), });
+
+	    if ( $mesg->is_error() ) {
+	      $return->{error} .= $ldap_crud->err( $mesg )->{html};
+	    } elsif ( $mesg->count ) {
+	      $gr_entry = $mesg->entry(0);
+	      $ttentries->{$_->dn}->{root}->{PrimaryGroupNameDn} = $gr_entry->dn;
+	      $ttentries->{$_->dn}->{root}->{PrimaryGroupName}   = $gr_entry->get_value('cn');
+	    }
+	  }
+
 	} elsif ( $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ) {
 	  $dn_depth = scalar split(/,/, $ldap_crud->{cfg}->{base}->{inventory}) + 1;
 	} else {
@@ -275,18 +295,19 @@ sub proc :Path(proc) :Args(0) {
 
 	$ttentries->{$_->dn}->{'mgmnt'} =
 	  {
-	   is_blocked => $blocked,
-	   is_log => $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{db_log}/ ? $_->get_value( 'reqType' ) : 'no',
-	   is_root => scalar split(',', $_->dn) <= $dn_depth ? 1 : 0,
-	   is_account => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
 	   dynamicObject   => $is_dynamicObject,
-	   is_group => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{group}/ ? 1 : 0,
-	   is_inventory => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ? 1 : 0,
-	   jpegPhoto => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
-	   gitAclProject => $_->exists('gitAclProject') ? 1 : 0,
-	   userPassword    => $is_userPassword,
-	   userDhcp => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ &&
+	   gitAclProject   => $_->exists('gitAclProject') ? 1 : 0,
+	   is_account      => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
+	   is_blocked      => $blocked,
+	   is_group        => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{group}/ ? 1 : 0,
+	   is_inventory    => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ? 1 : 0,
+	   is_log          => defined $tmp && $tmp =~ /.*,$ldap_crud->{cfg}->{base}->{db_log}/ ? $_->get_value( 'reqType' ) : 'no',
+	   is_root         => scalar split(',', $_->dn) <= $dn_depth ? 1 : 0,
+	   jpegPhoto       => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
+	   root_obj_groups => defined $root_gr ? $root_gr : undef,
+	   userDhcp        => $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ &&
 	   scalar split(',', $_->dn) <= 3 ? 1 : 0,
+	   userPassword    => $is_userPassword,
 	  };
 
 	foreach $attr (sort $_->attributes) {
@@ -308,7 +329,8 @@ sub proc :Path(proc) :Args(0) {
 	  }
 	}
 	push @ttentries_keys, $_->dn if $sort_order eq 'reverse'; # for not history searches
-	$blocked = 0;
+	$blocked = $is_dynamicObject = 0;
+	# log_debug { np($ttentries->{$_->dn}) };
       }
 
       # suffix array of dn preparation to respect LDAP objects "inheritance"
@@ -325,21 +347,20 @@ sub proc :Path(proc) :Args(0) {
       @ttentries_keys = sort { lc $a cmp lc $b } keys %{$ttentries}
 	if $sort_order eq 'straight';
 
-      # log_debug { np( $ttentries ) };
-      $c->stash(
-		attrs               => defined $params->{'show_attrs'} && $params->{'show_attrs'} ne '' ? split(/,/, $params->{'show_attrs'}) : undef,
-		base_dn             => $basedn,
-		base_icon           => $ldap_crud->cfg->{base}->{icon},
-		entries             => $ttentries,
-		entrieskeys         => \@ttentries_keys,
-		filter              => $filter,
-		final_message       => $return,
-		form                => $self->form,
-		from_searchadvanced => 1,
-		schema              => $c->session->{ldap}->{obj_schema_attr_equality},
-		scope               => $scope,
-		services            => $ldap_crud->cfg->{authorizedService},
-		template            => 'search/searchby.tt',
+      # log_debug { np( $basedn ) };
+      $c->stash( attrs               => defined $params->{'show_attrs'} && $params->{'show_attrs'} ne '' ? [ split(/,/, $params->{'show_attrs'}) ] : undef,
+		 base_dn             => $basedn,
+		 base_icon           => $ldap_crud->cfg->{base}->{icon},
+		 entries             => $ttentries,
+		 entrieskeys         => \@ttentries_keys,
+		 filter              => $filter,
+		 final_message       => $return,
+		 form                => $self->form,
+		 from_searchadvanced => 1,
+		 schema              => $c->session->{ldap}->{obj_schema_attr_equality},
+		 scope               => $scope,
+		 services            => $ldap_crud->cfg->{authorizedService},
+		 template            => 'search/searchby.tt',
 	       );
     } else {
       $c->stash( template => 'signin.tt', );

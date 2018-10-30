@@ -105,10 +105,6 @@
 	 attr.key == 'certificateRevocationList;binary' %]
       <input type="file" class="btn btn-default btn-sm" name="[% attr.key %]" accept=".der">
 
-      [% ELSIF attr.key == 'userPassword' %]
-      <input type="password" name="[% attr.key %]0" class="form-control" placeholder="password is here">
-      <input type="password" name="[% attr.key %]1" class="form-control" placeholder="confirm password">
-      
       [% ELSE %]
       [%   FOREACH val IN attr.value %]
       [%   id = attr.key _ '_' _ loop.index %]
@@ -136,7 +132,7 @@
 	[%   END %]
 	
 	[%   IF attr.key == rdn %]
-	<input type=text value="[% val %]" name="[% attr.key %]" id="[% 'val_' _ id %]" disabled="" class="form-control" title="this field is RDN, to modify it, use menu &rarr; moddn">
+	<input type="text" value="[% val %]" name="[% attr.key %]" id="[% 'val_' _ id %]" disabled="" class="form-control" title="this field is RDN, to modify it, use menu &rarr; moddn">
 	
 	[%   ELSIF attr.key.match('umiUserCertificate') %]
 	<input type=text value="[% val %]" name="[% attr.key %]" id="[% 'val_' _ id %]" disabled="" class="form-control"

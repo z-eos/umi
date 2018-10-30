@@ -50,11 +50,13 @@ sub index :Path :Args(0) {
 				     username => UMI->config->{mikrotik}->{caps_username},
 				     password => UMI->config->{mikrotik}->{caps_password}, });
 
-    $final_message->{success} = '<table class="table table-striped text-center">';
+    $final_message->{success}  = '<a class="btn btn-default buttons-print btn-primary btn-sm print-psk" href="#"><span><i title="Print current page" class="fa fa-print fa-lg"></i></span></a>';
+    $final_message->{success} .= '<table id="mikrotik-psk" class="table table-striped text-center">';
+    
     foreach my $psk (sort (keys (%{$psks}))) {
       next if $psks->{$psk}->{'authentication-types'} !~ /psk/;
       for ( my $i = 0; $i < 41; $i++ ) {
-	$qr = $self->qrcode({ txt => $psks->{$psk}->{passphrase}, ver => $i, mod => 5 });
+	$qr = $self->qrcode({ txt => $psks->{$psk}->{passphrase}, ver => $i, mod => 7 });
 	last if ! exists $qr->{error};
       }
       $final_message->{error} = $qr->{error} if $qr->{error};

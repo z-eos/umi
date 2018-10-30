@@ -105,29 +105,30 @@ sub _build_cfg {
 
   return {
 	  base => {
-		   db => UMI->config->{ldap_crud_db},
-		   db_log => UMI->config->{ldap_crud_db_log},
-		   dc_num => $#dc_count + 1,
-		   acc_root =>       'ou=People,'              . UMI->config->{ldap_crud_db},
+		   db             => UMI->config->{ldap_crud_db},
+		   db_log         => UMI->config->{ldap_crud_db_log},
+		   dc_num         => $#dc_count + 1,
+		   acc_root       =>'ou=People,'              . UMI->config->{ldap_crud_db},
 		   acc_svc_branch => 'ou=People,'              . UMI->config->{ldap_crud_db},
 		   acc_svc_common => 'ou=People,'              . UMI->config->{ldap_crud_db},
-		   alias =>          'ou=alias,'               . UMI->config->{ldap_crud_db},
-		   dhcp =>           'ou=DHCP,'                . UMI->config->{ldap_crud_db},
-		   gitacl =>         'ou=GitACL,'              . UMI->config->{ldap_crud_db},
-		   group =>          'ou=group,'               . UMI->config->{ldap_crud_db},
-		   system =>         'ou=group,ou=system,'     . UMI->config->{ldap_crud_db},
-		   inventory =>      'ou=hw,ou=Inventory,'     . UMI->config->{ldap_crud_db},
-		   machines =>       'ou=machines,'            . UMI->config->{ldap_crud_db},
-		   mta =>            'ou=Sendmail,'            . UMI->config->{ldap_crud_db},
-		   netgroup =>       'ou=access,ou=Netgroups,' . UMI->config->{ldap_crud_db},
-		   org =>            'ou=Organizations,'       . UMI->config->{ldap_crud_db},
-		   ovpn =>           'ou=OpenVPN,'             . UMI->config->{ldap_crud_db},
-		   rad_groups =>     'ou=groups,ou=RADIUS,'    . UMI->config->{ldap_crud_db},
-		   rad_profiles =>   'ou=profiles,ou=RADIUS,'  . UMI->config->{ldap_crud_db},
-		   sudo =>           'ou=SUDOers,'             . UMI->config->{ldap_crud_db},
-		   workstations =>   'ou=workstations,'        . UMI->config->{ldap_crud_db},
-		   monitor =>        'cn=Monitor',
-		   objects =>        [ qw(
+		   alias          => 'ou=alias,'               . UMI->config->{ldap_crud_db},
+		   dhcp           => 'ou=DHCP,'                . UMI->config->{ldap_crud_db},
+		   gitacl         => 'ou=GitACL,'              . UMI->config->{ldap_crud_db},
+		   group          => 'ou=group,'               . UMI->config->{ldap_crud_db},
+		   system_group   => 'ou=group,ou=system,'     . UMI->config->{ldap_crud_db},
+		   system_bind    => 'ou=bind,ou=system,'      . UMI->config->{ldap_crud_db},
+		   inventory      => 'ou=hw,ou=Inventory,'     . UMI->config->{ldap_crud_db},
+		   machines       => 'ou=machines,'            . UMI->config->{ldap_crud_db},
+		   mta            => 'ou=Sendmail,'            . UMI->config->{ldap_crud_db},
+		   netgroup       => 'ou=access,ou=Netgroups,' . UMI->config->{ldap_crud_db},
+		   org            => 'ou=Organizations,'       . UMI->config->{ldap_crud_db},
+		   ovpn           => 'ou=OpenVPN,'             . UMI->config->{ldap_crud_db},
+		   rad_groups     => 'ou=groups,ou=RADIUS,'    . UMI->config->{ldap_crud_db},
+		   rad_profiles   => 'ou=profiles,ou=RADIUS,'  . UMI->config->{ldap_crud_db},
+		   sudo           => 'ou=SUDOers,'             . UMI->config->{ldap_crud_db},
+		   workstations   => 'ou=workstations,'        . UMI->config->{ldap_crud_db},
+		   monitor        => 'cn=Monitor',
+		   objects        => [ qw(
 					   acc_root
 					   alias
 					   dhcp
@@ -146,18 +147,18 @@ sub _build_cfg {
 					   monitor
 					) ],
 		   icon => {
-			    DHCP =>          'fas fa-sitemap',
-			    GitACL =>        'fab fa-git',
-			    OpenVPN =>       'fas fa-sitemap',
+			    DHCP          => 'fas fa-sitemap',
+			    GitACL        => 'fab fa-git',
+			    OpenVPN       => 'fas fa-sitemap',
 			    Organizations => 'fas fa-industry',
-			    People =>        'fas fa-user-tag',
-			    default =>       'fas fa-star',
-			    group =>         'fas fa-users',
-			    history =>       'fas fa-history',
-			    inventory =>     'fas fa-tag',
-			    mta =>           'fas fa-envelope',
-			    rad_groups =>    'fas fa-users',
-			    rad_profiles =>  'fas fa-cogs',
+			    People        => 'fas fa-user-tag',
+			    default       => 'fas fa-star',
+			    group         => 'fas fa-users',
+			    history       => 'fas fa-history',
+			    inventory     => 'fas fa-tag',
+			    mta           => 'fas fa-envelope',
+			    rad_groups    => 'fas fa-users',
+			    rad_profiles  => 'fas fa-cogs',
 			   }, },
 	  exclude_prefix => 'aux_',
 	  sizelimit => 50,
@@ -1608,6 +1609,8 @@ sub modify {
 
 LDIF export
 
+    attrs - is expected to be array ref
+
 =cut
 
 sub ldif {
@@ -1616,7 +1619,7 @@ sub ldif {
 	     dn     => $args->{dn}     // undef,
 	     base   => $args->{base}   // undef,
 	     filter => $args->{filter} // 'objectClass=*',
-	     attrs  => defined $args->{attrs} ? [ $args->{attrs} ] : [ '*' ],
+	     attrs  => defined $args->{attrs} ? $args->{attrs} : [ '*' ],
 	     scope  => $args->{scope},
 	     # scope  => $args->{recursive}  ? 'sub' : 'base',
 	    };
@@ -1634,7 +1637,7 @@ sub ldif {
       'subschemaSubentry';
   }
   
-  log_debug{np($args)};
+  # log_debug{np($args)};
   log_debug{np($arg)};
   my $ts = strftime "%Y-%m-%d %H:%M:%S", localtime;
   my $return->{ldif} = sprintf("
@@ -3241,7 +3244,7 @@ sub create_account_branch_leaf {
       push @{$authorizedService},
 	objectClass => [ @{$self->cfg->{objectClass}->{acc_svc_dot1x}}, @{$arg->{objectclass}} ],
 	uid         => $self->macnorm({ mac => $arg->{login} }),
-	cn          =>  $self->macnorm({ mac => $arg->{login} });
+	cn          => $self->macnorm({ mac => $arg->{login} });
     } else {
       $arg->{dn} = sprintf('uid=%s,%s', $arg->{prefixed_uid}, $arg->{basedn}); # DN for EAP-TLS differs
       push @{$authorizedService},

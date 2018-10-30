@@ -454,9 +454,9 @@ sub user_preferences :Path(user_prefs) :Args(0) {
       undef $o;
     }
 
-    $mesg = $ldap_crud->search({ base => $ldap_crud->cfg->{base}->{system},
+    $mesg = $ldap_crud->search({ base   => $ldap_crud->cfg->{base}->{system_group},
 				 filter => '(memberUid=' . $arg->{uid} . ')',
-				 attrs => [ 'cn' ], });
+				 attrs  => [ 'cn' ], });
     if ( $mesg->code ) {
       $return->{error} .= sprintf('<li>personal info %s</li>',
  				  $ldap_crud->err($mesg)->{html});
@@ -866,19 +866,20 @@ sub test : Local {
 # tree build #   $return = $tree;
 
   # log_debug { np( $mesg ) };
+  $return = $ldap_crud->last_uidNumber;
   # $return = $ldap_crud->last_seq_val({ base   => $ldap_crud->cfg->{base}->{acc_root},
-  # 				       filter => '(&(authorizedService=ssh-acc@*)(uidNumber=*))',
+  # 				       filter => '(uidNumber=*)',
   # 				       scope  => 'sub',
   # 				       attr   => 'uidNumber', });
 
-  my $sch = $ldap_crud->schema;
-  log_debug { np(@{[$sch->all_attributes]}) };
-  foreach my $syn (@{[$sch->all_attributes]}) {
-    foreach (keys (%{$syn})) {
-      next if $_ eq 'oid';
-      $return->{$syn->{oid}}->{$_} = $syn->{$_};
-    }
-  }
+  # my $sch = $ldap_crud->schema;
+  # log_debug { np(@{[$sch->all_attributes]}) };
+  # foreach my $syn (@{[$sch->all_attributes]}) {
+  #   foreach (keys (%{$syn})) {
+  #     next if $_ eq 'oid';
+  #     $return->{$syn->{oid}}->{$_} = $syn->{$_};
+  #   }
+  # }
 
   $c->stash( template => 'test.tt',
 	     final_message => $return,

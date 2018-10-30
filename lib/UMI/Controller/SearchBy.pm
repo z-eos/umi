@@ -233,19 +233,22 @@ sub index :Path :Args(0) {
 	  modifyTimestamp => $self->ts({ ts => $_->get_value('modifyTimestamp'), gnrlzd => 1, gmt => 1, format => '%Y%m%d%H%M' }),
 	  modifiersName   => $m_name->[0]->{uid} // $m_name->[0]->{cn}, };
 
+      foreach $tmp ( @{$_->get_value('objectClass', asref => 1)} ) {
+	# log_debug { np( $tmp ) };
+	# log_debug { np( $c->session->{ldap}->{obj_schema}->{$tmp}->{may}->{userPassword} ) };
+	# log_debug { np( $c->session->{ldap}->{obj_schema}->{$tmp}->{must}->{userPassword} ) };
+	$is_userPassword = 1
+	  if exists $c->session->{ldap}->{obj_schema}->{$tmp}->{may}->{userPassword} ||
+	  exists $c->session->{ldap}->{obj_schema}->{$tmp}->{must}->{userPassword};
+	if ( $tmp eq 'dynamicObject' ) {
+	  $is_dynamicObject = 1;
+	  $ttentries->{$dn}->{root}->{ts}->{entryExpireTimestamp} =
+	    $self->ts({ ts => $_->get_value('entryExpireTimestamp'), gnrlzd => 1, gmt => 1 });
+	}
+      }
+
       if ( $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
 	$dn_depth = scalar split(/,/, $ldap_crud->{cfg}->{base}->{acc_root}) + 1;
-
-	foreach $tmp ( @{$_->get_value('objectClass', asref => 1)} ) {
-	  $is_userPassword = 1
-	    if exists $c->session->{ldap}->{obj_schema}->{$tmp}->{may}->{userPassword} ||
-	    exists $c->session->{ldap}->{obj_schema}->{$tmp}->{must}->{userPassword};
-	  if ( $tmp eq 'dynamicObject' ) {
-	    $is_dynamicObject = 1;
-	    $ttentries->{$dn}->{root}->{ts}->{entryExpireTimestamp} =
-	      $self->ts({ ts => $_->get_value('entryExpireTimestamp'), gnrlzd => 1, gmt => 1 });
-	  }
-	}
 
 	@root_arr = split(',', $_->dn);
 	$root_i = $#root_arr;
@@ -286,7 +289,7 @@ sub index :Path :Args(0) {
 	
 	$#root_arr = $#root_dn = -1;
 
-	$mesg = $ldap_crud->search({ base   => sprintf('ou=group,ou=system,%s', $ldap_crud->cfg->{base}->{db}),
+	$mesg = $ldap_crud->search({ base   => $ldap_crud->{cfg}->{base}->{system_group},
 				     filter => sprintf('(memberUid=%s)',
 						       $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }),
 				     attrs  => [ $ldap_crud->{cfg}->{rdn}->{group} ], });
@@ -311,7 +314,7 @@ sub index :Path :Args(0) {
 	  } elsif ( $mesg->count ) {
 	    $gr_entry = $mesg->entry(0);
 	    $ttentries->{$dn}->{root}->{PrimaryGroupNameDn} = $gr_entry->dn;
-	    $ttentries->{$dn}->{root}->{PrimaryGroupName} = $gr_entry->get_value('cn');
+	    $ttentries->{$dn}->{root}->{PrimaryGroupName}   = $gr_entry->get_value('cn');
 	  }
 	}
 
@@ -324,20 +327,20 @@ sub index :Path :Args(0) {
 
       $ttentries->{$dn}->{'mgmnt'} =
 	{
-	 is_blocked      => $blocked,
-	 is_log          => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{db_log}/ ? $_->get_value( 'reqType' ) : 'no',
-	 is_root         => scalar split(',', $dn) <= $dn_depth ? 1 : 0,
-	 is_account      => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
+		 # userPassword  => $_->exists('userPassword') ? 1 : 0,
 	 dynamicObject   => $is_dynamicObject,
+	 gitAclProject   => $_->exists('gitAclProject') ? 1 : 0,
+	 is_account      => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
+	 is_blocked      => $blocked,
 	 is_group        => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{group}/ ? 1 : 0,
 	 is_inventory    => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ? 1 : 0,
-	 root_obj_groups => defined $root_gr ? $root_gr : undef,
+	 is_log          => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{db_log}/ ? $_->get_value( 'reqType' ) : 'no',
+	 is_root         => scalar split(',', $dn) <= $dn_depth ? 1 : 0,
 	 jpegPhoto       => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
-	 gitAclProject   => $_->exists('gitAclProject') ? 1 : 0,
-	 # userPassword  => $_->exists('userPassword') ? 1 : 0,
-	 userPassword    => $is_userPassword,
+	 root_obj_groups => defined $root_gr ? $root_gr : undef,
 	 userDhcp        => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ &&
 	 scalar split(',', $dn) <= $dn_depth ? 1 : 0,
+	 userPassword    => $is_userPassword,
 	};
 
       my $diff = undef;
@@ -418,17 +421,18 @@ sub index :Path :Args(0) {
     
     # p $c->request->cookies;
 
+    # log_debug { np( $ttentries ) };
     $c->stash(
-	      template      => 'search/searchby.tt',
 	      base_dn       => $base,
-	      filter        => $filter,
-	      scope         => $scope,
-	      entrieskeys   => \@ttentries_keys,
-	      entries       => $ttentries,
-	      schema        => $c->session->{ldap}->{obj_schema_attr_equality},
-	      services      => $ldap_crud->cfg->{authorizedService},
 	      base_icon     => $ldap_crud->cfg->{base}->{icon},
+	      entries       => $ttentries,
+	      entrieskeys   => \@ttentries_keys,
+	      filter        => $filter,
 	      final_message => $return,
+	      schema        => $c->session->{ldap}->{obj_schema_attr_equality},
+	      scope         => $scope,
+	      services      => $ldap_crud->cfg->{authorizedService},
+	      template      => 'search/searchby.tt',
 	     );
   } else {
     $c->stash( template => 'signin.tt', );
@@ -494,8 +498,8 @@ sub proc :Path(proc) :Args(0) {
 	    sprintf("data:image/jpg;base64,%s",
 		    encode_base64(join('', @{$entry_tmp->get_value($attr, asref => 1)}))
 		   );
-	} elsif ( $attr eq 'userPassword' ) {
-	  next;	#   $entry->{$attr} = '*' x 8;
+	# } elsif ( $attr eq 'userPassword' ) {
+	#   next;	#   $entry->{$attr} = '*' x 8;
 	} else {
 	  $entry->{$attr} = $entry_tmp->get_value($attr, asref => 1);
 	  map { utf8::decode($_),$_ } @{$entry->{$attr}};
@@ -1340,9 +1344,18 @@ Since it is separate action, it is poped out of action proc()
 sub ldif_gen :Path(ldif_gen) :Args(0) {
   my ( $self, $c ) = @_;
   my $params = $c->req->parameters;
+  log_debug { np($params) };
+
+  my $attrs;
+  if ( defined $params->{ldap_ldif_attrs} && ref($params->{ldap_ldif_attrs}) eq 'ARRAY' ) {
+    $attrs = $params->{ldap_ldif_attrs};
+  } elsif ( defined $params->{ldap_ldif_attrs} && ref($params->{ldap_ldif_attrs}) eq 'SCALAR' ) {
+    $attrs =  [ $params->{ldap_ldif_attrs} ];
+  }
+  
   my $ldif = $c->model('LDAP_CRUD')->
     ldif({
-	   attrs     => $params->{ldap_ldif_attrs},
+	   attrs     => $attrs,
 	   base      => $params->{ldap_ldif_base},
 	   dn        => $params->{ldap_ldif},
 	   filter    => $params->{ldap_ldif_filter},
@@ -1366,9 +1379,17 @@ sub ldif_gen2f :Path(ldif_gen2f) :Args(0) {
   my ( $self, $c ) = @_;
   my $params = $c->req->parameters;
   log_debug { np($params) };
+
+  my $attrs;
+  if ( defined $params->{ldap_ldif_attrs} && ref($params->{ldap_ldif_attrs}) eq 'ARRAY' ) {
+    $attrs = $params->{ldap_ldif_attrs};
+  } elsif ( defined $params->{ldap_ldif_attrs} && ref($params->{ldap_ldif_attrs}) eq 'SCALAR' ) {
+    $attrs =  [ $params->{ldap_ldif_attrs} ];
+  }
+
   my $ldif = $c->model('LDAP_CRUD')->
     ldif({
-	   attrs     => $params->{ldap_ldif_attrs},
+	   attrs     => $attrs,
 	   base      => $params->{ldap_ldif_base},
 	   dn        => $params->{ldap_ldif},
 	   filter    => $params->{ldap_ldif_filter},
@@ -1467,8 +1488,8 @@ sub modify :Path(modify) :Args(0) {
   my $replace = undef;
   foreach $attr ( sort ( keys %{$params} )) {
     next if $attr =~ /$ldap_crud->{cfg}->{exclude_prefix}/ ||
-      $attr eq 'dn' ||
-      $attr =~ /userPassword/; ## !! stub, not processed yet !!
+      $attr eq 'dn'; # ||
+      # $attr =~ /userPassword/; ## !! stub, not processed yet !!
     if ( $attr eq 'jpegPhoto' ||
 	 $attr eq 'cACertificate' ||
 	 $attr eq 'certificateRevocationList' ||
