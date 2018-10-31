@@ -226,7 +226,7 @@ sub _build_cfg {
 		  gitacl         => 'cn',
 		  group          => 'cn',
 		  org            => 'ou',
-		  ovpn           => 'uid',
+		  ovpn           => 'cn',
 		 },
 	  objectClass => {
 			  acc_root => [ qw(

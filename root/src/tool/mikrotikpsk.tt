@@ -11,10 +11,10 @@
 <script>
  $('.print-psk').on("click", function () {
    var today = new Date();
-   var lastDayOfMonth = new Date(today.getFullYear(), today.getMonth()+1, 0);
+   var lastDayOfMonth = new Date(today.getFullYear(), today.getMonth()+1, 0, 23,59);
    $('#mikrotik-psk').printThis({
-     header: '<center><h1><b>NorseDigital OD office WiFi PSKs</b></h1><h4>printed on '+Date()+'</h4></center><br><br><br>',
-     footer: '<br><br><center><h4>expires on '+lastDayOfMonth+'</h4></center>'
+     header: '<center><h1><b>NorseDigital OD office WiFi PSKs</b></h1><h4><i>printed on '+Date()+'</i></h4></center><br><br><br>',
+  footer: '<br><br><center><h4><i>expires on '+lastDayOfMonth+'</i></h4></center>'
    });
  });
 </script>

@@ -1537,8 +1537,7 @@ sub modify :Path(modify) :Args(0) {
 	'umiUserCertificateNotBefore' => '' . $cert_info->{'Not Before'},
 	'umiUserCertificateNotAfter'  => '' . $cert_info->{'Not  After'},
 	'umiUserCertificateSubject'   => '' . $cert_info->{'Subject'},
-	'umiUserCertificateIssuer'    => '' . $cert_info->{'Issuer'},
-	'cn'                          => $cert_info->{'CN'};
+	'umiUserCertificateIssuer'    => '' . $cert_info->{'Issuer'};
       $moddn = sprintf("%s=%s", $ldap_crud->{cfg}->{rdn}->{ovpn}, $cert_info->{'CN'});
     } elsif ( ( $attr eq 'cACertificate' ||
 		$attr eq 'certificateRevocationList' ) && $val_params ne '' ) {
@@ -1563,8 +1562,8 @@ sub modify :Path(modify) :Args(0) {
   }
 
   my $modx;
-  push @{$modx}, delete => $delete   if defined $delete && $#{$delete} > -1;
-  push @{$modx}, add => $add         if defined $add && $#{$add} > -1;
+  push @{$modx}, delete  => $delete  if defined $delete && $#{$delete} > -1;
+  push @{$modx}, add     => $add     if defined $add && $#{$add} > -1;
   push @{$modx}, replace => $replace if defined $replace && $#{$replace} > -1;
 
   if ( defined $modx && $#{$modx} > -1 ) {
