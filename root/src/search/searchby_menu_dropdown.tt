@@ -175,7 +175,7 @@
 	  <input type="hidden" name="ldap_modify" value="[% entry.key %]">
 	  <button type="submit" title="edit all fields" class="btn btn-link"
 		  data-order="[% site.searchby.menu.order.ldap_modify %]">
-	  <span class="[% fa_meta %] fa-edit text-warning"></span>
+	  <span class="[% fa_meta %] fa-hammer text-warning"></span>
 	  edit (all)
 	  </button>
 	</form>

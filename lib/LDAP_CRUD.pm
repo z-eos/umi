@@ -220,9 +220,10 @@ sub _build_cfg {
 		   core_mta => 'relay.umi',
 		  },
 	  rdn => {
-		  acc_root =>       UMI->config->{authentication}->{realms}->{ldap}->{store}->{user_field},
+		  acc_root       => UMI->config->{authentication}->{realms}->{ldap}->{store}->{user_field},
 		  acc_svc_branch => 'authorizedService',
 		  acc_svc_common => 'uid',
+		  'dot1x-eap-tls'=> 'uid',
 		  gitacl         => 'cn',
 		  group          => 'cn',
 		  org            => 'ou',
@@ -367,7 +368,7 @@ sub _build_cfg {
 			       disabled => 0,
 			       icon => 'fas fa-id-badge',
 			       data_fields => 'login,password1,password2,radiusgroupname,radiusprofile,userCertificate',
-			       data_relation => 'dot1xeaptls',
+			       data_relation => 'dot1x-eap-tls',
 			       login_prefix => 'rad-',
 			      },
 	   'otrs' => {
@@ -3238,19 +3239,14 @@ sub create_account_branch_leaf {
     undef $authorizedService;
 
     if ( $arg->{service} eq 'dot1x-eap-md5' ) {
-      $arg->{dn} = sprintf('uid=%s,%s',
+      $arg->{dn} = sprintf('%s=%s,%s',
+			   $self->cfg->{rdn}->{acc_root},
 			   $self->macnorm({ mac => $arg->{login} }),
-			   $arg->{basedn}); # DN for MAC AUTH differs
+			   $arg->{basedn});
       push @{$authorizedService},
 	objectClass => [ @{$self->cfg->{objectClass}->{acc_svc_dot1x}}, @{$arg->{objectclass}} ],
 	uid         => $self->macnorm({ mac => $arg->{login} }),
 	cn          => $self->macnorm({ mac => $arg->{login} });
-    } else {
-      $arg->{dn} = sprintf('uid=%s,%s', $arg->{prefixed_uid}, $arg->{basedn}); # DN for EAP-TLS differs
-      push @{$authorizedService},
-	objectClass => [ @{$self->cfg->{objectClass}->{acc_svc_dot1x_eap_tls}}, @{$arg->{objectclass}} ],
-	uid         => $arg->{prefixed_uid},
-	cn          => $arg->{prefixed_uid};
     }
 
     push @{$authorizedService},
@@ -3268,7 +3264,13 @@ sub create_account_branch_leaf {
       $arg->{cert_info} =
 	$self->cert_info({ cert => $self->file2var($arg->{userCertificate}->{'tempname'}, $return),
 			   ts   => "%Y%m%d%H%M%S", });
+
+      $arg->{dn} = sprintf('%s=%s,%s', $self->cfg->{rdn}->{acc_root}, $arg->{cert_info}->{'CN'}, $arg->{basedn});
+
       push @{$authorizedService},
+	objectClass                 => [ @{$self->cfg->{objectClass}->{acc_svc_dot1x_eap_tls}}, @{$arg->{objectclass}} ],
+	uid                         => '' . $arg->{cert_info}->{'CN'},
+	cn                          => '' . $arg->{cert_info}->{'CN'},
 	umiUserCertificateSn        => '' . $arg->{cert_info}->{'S/N'},
 	umiUserCertificateNotBefore => '' . $arg->{cert_info}->{'Not Before'},
 	umiUserCertificateNotAfter  => '' . $arg->{cert_info}->{'Not  After'},

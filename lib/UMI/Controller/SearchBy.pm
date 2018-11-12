@@ -1475,6 +1475,7 @@ sub modify :Path(modify) :Args(0) {
   my $dn = $params->{dn};
   my $ldap_crud = $c->model('LDAP_CRUD');
   my $mesg = $ldap_crud->search( { base => $dn, scope => 'base' } );
+  my $service = (split(/\@/, $params->{authorizedService}))[0];
   my $return;
   $return->{error} = $ldap_crud->err($mesg)->{html} if $mesg->code;
 
@@ -1538,7 +1539,14 @@ sub modify :Path(modify) :Args(0) {
 	'umiUserCertificateNotAfter'  => '' . $cert_info->{'Not  After'},
 	'umiUserCertificateSubject'   => '' . $cert_info->{'Subject'},
 	'umiUserCertificateIssuer'    => '' . $cert_info->{'Issuer'};
-      $moddn = sprintf("%s=%s", $ldap_crud->{cfg}->{rdn}->{ovpn}, $cert_info->{'CN'});
+
+      # !!! TODO: looks like kludge ...
+      push @{$replace}, 'cn' => '' . $cert_info->{'CN'}, 'userPassword' => '' . $cert_info->{'CN'}
+	if $service ne 'ovpn';
+
+      $moddn = sprintf("%s=%s",
+		       $ldap_crud->{cfg}->{rdn}->{$service},
+		       $cert_info->{'CN'});
     } elsif ( ( $attr eq 'cACertificate' ||
 		$attr eq 'certificateRevocationList' ) && $val_params ne '' ) {
       $binary = $self->file2var( $val_params->{'tempname'}, $return );
@@ -1567,7 +1575,7 @@ sub modify :Path(modify) :Args(0) {
   push @{$modx}, replace => $replace if defined $replace && $#{$replace} > -1;
 
   if ( defined $modx && $#{$modx} > -1 ) {
-    # log_debug { np( $modx ) };
+    log_debug { np( $modx ) };
     $mesg = $ldap_crud->modify( $params->{dn}, $modx, );
     if ( $mesg ne "0" ) {
       push @{$return->{error}}, $mesg->{html};
