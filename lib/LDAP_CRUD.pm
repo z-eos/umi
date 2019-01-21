@@ -206,18 +206,18 @@ sub _build_cfg {
 	  #=====================================================================
 
 	  stub => {
-		   homeDirectory => '/usr/local/home',
-		   loginShell => '/usr/bin/false',
-		   gidNumber => UMI->config->{default}->{gidNumber},
-		   group => UMI->config->{default}->{group},
-		   noavatar_mgmnt => UMI->path_to('root', 'static', 'images', '/avatar-mgmnt.png'),
-		   icon => 'fas fa-user-circle',
-		   icon_error => 'fas fa-exclamation-circle',
-		   icon_warning => 'fas fa-exclamation-triangle',
-		   icon_success => 'fas fa-check-circle',
-		   group_blocked => 'blocked',
+		   homeDirectory     => '/usr/local/home',
+		   loginShell        => '/usr/bin/false',
+		   gidNumber         => UMI->config->{default}->{gidNumber},
+		   group             => UMI->config->{default}->{group},
+		   noavatar_mgmnt    => UMI->path_to('root', 'static', 'images', '/avatar-mgmnt.png'),
+		   icon              => 'fas fa-user-circle',
+		   icon_error        => 'fas fa-exclamation-circle',
+		   icon_warning      => 'fas fa-exclamation-triangle',
+		   icon_success      => 'fas fa-check-circle',
+		   group_blocked     => 'blocked',
 		   group_blocked_gid => 20001,
-		   core_mta => 'relay.umi',
+		   core_mta          => 'relay.umi',
 		  },
 	  rdn => {
 		  acc_root       => UMI->config->{authentication}->{realms}->{ldap}->{store}->{user_field},
@@ -229,131 +229,132 @@ sub _build_cfg {
 		  org            => 'ou',
 		  ovpn           => 'cn',
 		 },
-	  objectClass => {
-			  acc_root => [ qw(
-					    grayAccount
-					    inetLocalMailRecipient
-					    inetOrgPerson
-					    organizationalPerson
-					    person
-					    posixAccount
-					    top
-					 ) ],  # umiSettings
-			  acc_svc_branch => [ qw(
-						  account
-						  authorizedServiceObject
-					       ) ],
-			  acc_svc_dot1x => [ qw(
-						 account
-						 authorizedServiceObject
-						 domainRelatedObject
-						 radiusprofile
-						 simpleSecurityObject
-					       ) ],
-			  acc_svc_dot1x_eap_tls => [ qw(
-							 account
-							 authorizedServiceObject
-							 domainRelatedObject
-							 pkiUser
-							 radiusprofile
-							 simpleSecurityObject
-							 umiUserCertificate
-						      ) ],
-			  acc_svc_common => [ qw(
-						  authorizedServiceObject
-						  domainRelatedObject
-						  inetOrgPerson
-						  posixAccount
-						  shadowAccount
-					       ) ],
-			  acc_svc_email => [ qw(
-						 mailutilsAccount
-					      ) ],
-			  acc_svc_web => [ qw(
-					       account
-					       authorizedServiceObject
-					       domainRelatedObject
-					       simpleSecurityObject
-					       uidObject
-					    ) ],
-			  acc_svc_ssh => [ qw(
-					       ldapPublicKey
-					    ) ],
-			  gitacl => [ qw(
-				    	  gitACL
-				    	  top
+	  objectClass =>
+	  {
+	   acc_root              => [ qw(
+					  grayAccount
+					  inetLocalMailRecipient
+					  inetOrgPerson
+					  organizationalPerson
+					  person
+					  posixAccount
+					  top
+				       ) ], # umiSettings
+	   acc_svc_branch        => [ qw(
+					  account
+					  authorizedServiceObject
 				       ) ],
-			  group =>  [ qw(
-				    	  posixGroup
-				    	  top
+	   acc_svc_dot1x         => [ qw(
+					  account
+					  authorizedServiceObject
+					  domainRelatedObject
+					  radiusprofile
+					  simpleSecurityObject
 				       ) ],
-			  dhcp => [ qw(
-					dhcpHost
-					top
-					uidObject
-				     ) ],
-			  netgroup =>  [ qw(
-					     top
-					     nisNetgroup
-					  ) ],
-			  ovpn => [ qw(
-					authorizedServiceObject
-					domainRelatedObject
-					organizationalRole
-					pkiUser
-					top
-					umiOvpnCfg
-					umiUserCertificate
-				     ) ],
-			  org => [ qw(
-				       domainRelatedObject
-				       organizationalUnit
-				       top
-				    ) ],
-			  ssh => [ qw(
-				       account
-				       ldapPublicKey
-				       top
-				    ) ],
-			  sudo =>  [ qw(
-					 top
-				    	 sudoRole
-				      ) ],
-			  inventory => [ qw(
-					     hwInventory
-					     top
-					  ) ],
-			 },
+	   acc_svc_dot1x_eap_tls => [ qw(
+					  account
+					  authorizedServiceObject
+					  domainRelatedObject
+					  pkiUser
+					  radiusprofile
+					  simpleSecurityObject
+					  umiUserCertificate
+				       ) ],
+	   acc_svc_common        => [ qw(
+					  authorizedServiceObject
+					  domainRelatedObject
+					  inetOrgPerson
+					  posixAccount
+					  shadowAccount
+				       ) ],
+	   acc_svc_email         => [ qw(
+					  mailutilsAccount
+				       ) ],
+	   acc_svc_web           => [ qw(
+					  account
+					  authorizedServiceObject
+					  domainRelatedObject
+					  simpleSecurityObject
+					  uidObject
+				       ) ],
+	   acc_svc_ssh           => [ qw(
+					  ldapPublicKey
+				       ) ],
+	   gitacl                => [ qw(
+					  gitACL
+					  top
+				       ) ],
+	   group                 => [ qw(
+					  posixGroup
+					  top
+				       ) ],
+	   dhcp                  => [ qw(
+					  dhcpHost
+					  top
+					  uidObject
+				       ) ],
+	   netgroup              => [ qw(
+					  domainRelatedObject
+					  nisNetgroup
+				       ) ],
+	   ovpn                  => [ qw(
+					  authorizedServiceObject
+					  domainRelatedObject
+					  organizationalRole
+					  pkiUser
+					  top
+					  umiOvpnCfg
+					  umiUserCertificate
+				       ) ],
+	   org                   => [ qw(
+					  domainRelatedObject
+					  organizationalUnit
+					  top
+				       ) ],
+	   ssh                   => [ qw(
+					  account
+					  ldapPublicKey
+					  top
+				       ) ],
+	   sudo                  => [ qw(
+					  top
+					  sudoRole
+				       ) ],
+	   inventory             => [ qw(
+					  hwInventory
+					  top
+				       ) ],
+	  },
 	  jpegPhoto => {
 			'stub' => 'user-6-128x128.jpg',
 		       },
 	  authorizedService =>
 	  {
-	   'mail' => {
-		      auth                 => 1,
-		      descr                => 'Email',
-		      disabled             => 0,
-		      login_delim          => '@',
-		      homeDirectory_prefix => '/mail/fast/imap/',
-		      gidNumber            => 26,
-		      icon                 => 'fas fa-envelope',
-		      data_fields          => 'login,logindescr,password1,password2',
-		      data_relation        => 'passw',
-		     },
-	   'xmpp' => {
-		      auth                    => 1,
-		      descr                   => 'XMPP (Jabber)',
-		      disabled                => 0,
-		      login_delim             => '@',
-		      gidNumber               => 10106,
-		      jpegPhoto_noavatar      => UMI->path_to('root', 'static', 'images', '/avatar-xmpp.png'),
-		      icon                    => 'fas fa-lightbulb',
-		      data_fields             => 'login,logindescr,password1,password2',
-		      data_relation           => 'passw',
-		      associateddomain_prefix => {
-						  'talax.startrek.in' => 'im.',
-						 },
-		     },
+	   'mail'          => {
+			       auth                 => 1,
+			       descr                => 'Email',
+			       disabled             => 0,
+			       login_delim          => '@',
+			       homeDirectory_prefix => '/mail/fast/imap/',
+			       gidNumber            => 26,
+			       icon                 => 'fas fa-envelope',
+			       data_fields          => 'login,logindescr,password1,password2',
+			       data_relation        => 'passw',
+			      },
+	   'xmpp'          => {
+			       auth                    => 1,
+			       descr                   => 'XMPP (Jabber)',
+			       disabled                => 0,
+			       login_delim             => '@',
+			       gidNumber               => 10106,
+			       jpegPhoto_noavatar      => UMI->path_to('root', 'static', 'images', '/avatar-xmpp.png'),
+			       icon                    => 'fas fa-lightbulb',
+			       data_fields             => 'login,logindescr,password1,password2',
+			       data_relation           => 'passw',
+			       associateddomain_prefix => {
+							   'talax.startrek.in' => 'im.',
+							  },
+			      },
 	   'dot1x-eap-md5' => {
 			       auth => 1,
 			       descr => 'auth 802.1x EAP-MD5 (MAC)',
@@ -371,62 +372,62 @@ sub _build_cfg {
 			       data_relation => 'dot1x-eap-tls',
 			       login_prefix => 'rad-',
 			      },
-	   'otrs' => {
-		      auth => 1,
-		      descr => 'OTRS',
-		      disabled => 1,
-		      icon => 'fas fa-ticket',
-		      data_fields => 'login,password1,password2',
-		     },
-	   'web' => {
-		     auth => 1,
-		     descr => 'Web Account',
-		     disabled => 0,
-		     icon => 'fas fa-puzzle-piece',
-		     data_fields => 'login,logindescr,password1,password2',
-		     data_relation => 'passw',
-		    },
-	   'sms' => {
-		     auth => 1,
-		     descr => 'SMSter',
-		     disabled => 1,
-		     data_fields => 'login,password1,password2',
-		    },
-	   'comm-acc' => {
-			  auth => 1,
-			  descr => 'CISCO Commutators',
-			  disabled => 0,
-			  icon => 'fas fa-terminal',
-			  data_fields => 'login,logindescr,password1,password2',
-			  data_relation => 'passw',
-			 },
-	   'ssh-acc' => {
-			 auth                 => 1,
-			 login_delim          => '_',
-			 homeDirectory_prefix => '/usr/local/home',
-			 icon                 => 'fas fa-key',
-			 loginShell           => '/usr/bin/false',
-			 descr                => 'SSH',
-			 disabled             => 0,
-			 gidNumber            => 11102,
-			 uidNumberShift       => 10000,
-			 icon                 => 'fas fa-key',
-			 data_fields          => 'login,logindescr,password1,password2,sshkey,sshkeyfile,sshhome,sshshell,sshgid',
-			 data_relation        => 'sshacc',
-			},
-	   'gpg' => {
-		     auth => 0,
-		     descr => 'GPG key',
-		     disabled => 1,
-		     icon => 'fas fa-key',
-		    },
-	   'ovpn' => {
-		      auth => 0,
-		      descr => 'OpenVPN client',
-		      disabled => 0,
-		      icon => 'fas fa-certificate',
-		      # data_fields => 'block_crt',
-		     },
+	   'otrs'          => {
+			       auth => 1,
+			       descr => 'OTRS',
+			       disabled => 1,
+			       icon => 'fas fa-ticket',
+			       data_fields => 'login,password1,password2',
+			      },
+	   'web'           => {
+			       auth => 1,
+			       descr => 'Web Account',
+			       disabled => 0,
+			       icon => 'fas fa-puzzle-piece',
+			       data_fields => 'login,logindescr,password1,password2',
+			       data_relation => 'passw',
+			      },
+	   'sms'           => {
+			       auth => 1,
+			       descr => 'SMSter',
+			       disabled => 1,
+			       data_fields => 'login,password1,password2',
+			      },
+	   'comm-acc'      => {
+			       auth => 1,
+			       descr => 'CISCO Commutators',
+			       disabled => 0,
+			       icon => 'fas fa-terminal',
+			       data_fields => 'login,logindescr,password1,password2',
+			       data_relation => 'passw',
+			      },
+	   'ssh-acc'       => {
+			       auth                 => 1,
+			       login_delim          => '_',
+			       homeDirectory_prefix => '/usr/local/home',
+			       icon                 => 'fas fa-key',
+			       loginShell           => '/usr/bin/false',
+			       descr                => 'SSH',
+			       disabled             => 0,
+			       gidNumber            => 11102,
+			       uidNumberShift       => 10000,
+			       icon                 => 'fas fa-key',
+			       data_fields          => 'login,logindescr,password1,password2,sshkey,sshkeyfile,sshhome,sshshell,sshgid',
+			       data_relation        => 'sshacc',
+			      },
+	   'gpg'           => {
+			       auth => 0,
+			       descr => 'GPG key',
+			       disabled => 1,
+			       icon => 'fas fa-key',
+			      },
+	   'ovpn'          => {
+			       auth => 0,
+			       descr => 'OpenVPN client',
+			       disabled => 0,
+			       icon => 'fas fa-certificate',
+			       # data_fields => 'block_crt',
+			      },
 	  },
 	  
 	  hwType =>
@@ -871,10 +872,14 @@ sub search {
   # log_debug { np($args) };
 
   if ( defined $args->{dn} && $args->{dn} ne '' ) {
-    my @args_arr = split(/,/, $args->{dn});
-    $args->{filter} = shift @args_arr;
-    $args->{base} = join(',', @args_arr);
-    $args->{scope} = 'one';
+    # my @args_arr    = split(/,/, $args->{dn});
+    # $args->{filter} = shift @args_arr;
+    # $args->{base}   = join(',', @args_arr);
+    # $args->{scope}  = 'one';
+
+    $args->{base}   = $args->{dn};
+    $args->{scope}  = 'base';
+
   }
 
   my $arg = {
@@ -2686,6 +2691,47 @@ sub _build_select_associateddomains {
   @domains = map { { value => $_, label => $_ } } sort @j;
   
   return \@domains;
+}
+
+=head2 select_uid
+
+Method, options builder for select element of uids
+
+uses sub bld_select()
+
+=cut
+
+has 'select_uid' => ( traits => ['Array'],
+		      is => 'ro', isa => 'ArrayRef', required => 0, lazy => 1,
+		      builder => '_build_select_uid',
+	     );
+
+sub _build_select_uid {
+  my $self = shift;
+
+  my @uids;
+  my $mesg = $self->search( { base      => $self->cfg->{base}->{acc_root},
+			      scope     => 'one',
+			      sizelimit => 0,
+			      attrs     => [ 'uid' ],
+			    } );
+  my $err_message = '';
+  $err_message = '<div class="alert alert-danger">' .
+    '<i class="' . $self->{cfg}->{stub}->{icon_error} . '"></i><ul>' .
+    $self->err($mesg) . '</ul></div>'
+      if ! $mesg->count;
+
+  my @entries = $mesg->sorted('uid');
+  my (@i, @j);
+  foreach my $entry ( @entries ) {
+    @i = $entry->get_value('uid');
+    foreach (@i) {
+      push @j, $_;
+    }
+  }
+  @uids = map { { value => $_, label => $_ } } sort @j;
+  
+  return \@uids;
 }
 
 =head2 select_dhcp_nets

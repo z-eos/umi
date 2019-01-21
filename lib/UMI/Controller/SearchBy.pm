@@ -14,6 +14,7 @@ use namespace::autoclean;
 
 use Data::Printer { use_prototypes => 0, caller_info => 1 };
 use Time::Piece;
+use List::MoreUtils qw(uniq);
 
 # use Try::Tiny;
 
@@ -479,6 +480,7 @@ sub proc :Path(proc) :Args(0) {
 # Modify (all fields form), here we pass data to a sub modify() bellow
 #=====================================================================
     if (defined $params->{'ldap_modify'} && $params->{'ldap_modify'} ne '') {
+      log_debug { np($params) };
 
       $c->stats->profile( begin => "searchby_modify" );
   
@@ -487,8 +489,8 @@ sub proc :Path(proc) :Args(0) {
       $entry_tmp = $mesg->entry(0);
 
       $c->stats->profile('search for <i class="text-light">' . $params->{ldap_modify} . '</i>');
-      #log_debug { np($entry_tmp) };
-      #log_debug { np($return) };
+      log_debug { np($entry_tmp) };
+      log_debug { np($return) };
       foreach $attr ( $entry_tmp->attributes ) {
 	if ( $attr =~ /;binary/ or
 	   $attr eq "userPKCS12" ) { ## !!! temporary stub !!! 	  next;
@@ -1502,7 +1504,7 @@ sub modify :Path(modify) :Args(0) {
     $val_params  = $params->{$attr};
     next if ! defined $val_params;
     if ( ref($params->{$attr} ) eq 'ARRAY' ) {
-      $val_entry      = $entry->get_value($attr, asref => 1);
+      $val_entry      = $entry->exists($attr) ? $entry->get_value($attr, asref => 1) : [];
       @{$val_params}  = sort( @{$val_params} );
       @{$val_entry}   = sort( @{$val_entry} );
       next if $val_params ~~ $val_entry;
@@ -1676,7 +1678,30 @@ log_debug { np($init_obj) };
     $c->stash( template => 'gitacl/gitacl_wrap.tt',
 	       final_message => $return, );
 
+# old, low/middle level variant #   } elsif ( $params->{aux_dn_form_to_modify} =~ /$ldap_crud->{cfg}->{base}->{netgroup}/ ) { ## NIS NETGROUPS
+# old, low/middle level variant #     if ( ref($init_obj->{nisNetgroupTriple}) eq 'ARRAY' ) {
+# old, low/middle level variant #       $init_obj->{nisNetgroupTriple_arr} = $init_obj->{nisNetgroupTriple};
+# old, low/middle level variant #     } else {
+# old, low/middle level variant #       push @{$init_obj->{nisNetgroupTriple_arr}}, $init_obj->{nisNetgroupTriple};
+# old, low/middle level variant #     }
+# old, low/middle level variant # 
+# old, low/middle level variant #     foreach $triple ( @{$init_obj->{nisNetgroupTriple_arr}} ) {
+# old, low/middle level variant #       # according to the order used in LDAP attr "nisNetgroupTriple" value
+# old, low/middle level variant #       ( $host, $user, $domain ) = split(/,/, $triple);
+# old, low/middle level variant #       push @{$init_obj->{triple}},
+# old, low/middle level variant # 	{ host => substr($host, 1),
+# old, low/middle level variant # 	  user => $user,
+# old, low/middle level variant # 	  domain => substr($domain, 0, -1), };
+# old, low/middle level variant #     }
+# old, low/middle level variant #     delete $init_obj->{nisNetgroupTriple_arr};
+# old, low/middle level variant #     delete $init_obj->{nisNetgroupTriple};
+# old, low/middle level variant # 
+# old, low/middle level variant #     use UMI::Form::NisNetgroup;
+# old, low/middle level variant #     $form = UMI::Form::NisNetgroup->new( init_object => $init_obj, );
+# old, low/middle level variant #     $c->stash( template => 'nis/nisnetgroup.tt', );
+# old, low/middle level variant # 
   } elsif ( $params->{aux_dn_form_to_modify} =~ /$ldap_crud->{cfg}->{base}->{netgroup}/ ) { ## NIS NETGROUPS
+    my $associatedDomain = exists $init_obj->{associatedDomain} ? 1 : 0;
     if ( ref($init_obj->{nisNetgroupTriple}) eq 'ARRAY' ) {
       $init_obj->{nisNetgroupTriple_arr} = $init_obj->{nisNetgroupTriple};
     } else {
@@ -1685,18 +1710,23 @@ log_debug { np($init_obj) };
 
     foreach $triple ( @{$init_obj->{nisNetgroupTriple_arr}} ) {
       # according to the order used in LDAP attr "nisNetgroupTriple" value
-      ( $host, $user, $domain ) = split(/,/, $triple);
-      push @{$init_obj->{triple}},
-	{ host => substr($host, 1),
-	  user => $user,
-	  domain => substr($domain, 0, -1), };
+      ( $host, $user, $domain ) = split(/,/, substr($triple,1,-1));
+      push @{$init_obj->{uids_raw}}, $user;
+      push @{$init_obj->{associatedDomain_raw}}, sprintf("%s.%s", $host, $domain)
+	if ! $associatedDomain;
     }
+    @{$init_obj->{uids}} = uniq( @{$init_obj->{uids_raw}} );
+    @{$init_obj->{associatedDomain}} = uniq( @{$init_obj->{associatedDomain_raw}} )
+      if ! $associatedDomain;
     delete $init_obj->{nisNetgroupTriple_arr};
-    delete $init_obj->{nisNetgroupTriple};
+    delete $init_obj->{uids_raw};
+    delete $init_obj->{associatedDomain_raw};
 
-    use UMI::Form::NisNetgroup;
-    $form = UMI::Form::NisNetgroup->new( init_object => $init_obj, );
-    $c->stash( template => 'nis/nisnetgroup.tt', );
+    log_debug { np($init_obj) };
+
+    use UMI::Form::abstrNisNetgroup;
+    $form = UMI::Form::abstrNisNetgroup->new( init_object => $init_obj, );
+    $c->stash( template => 'nis/abstr_nis_netgroup.tt', );
 
   } elsif ( $params->{aux_dn_form_to_modify} =~ /$ldap_crud->{cfg}->{base}->{sudo}/ ) { ## SUDO
 

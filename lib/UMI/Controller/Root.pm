@@ -476,6 +476,34 @@ sub user_preferences :Path(user_prefs) :Args(0) {
     utf8::decode($arg->{sn});
     # p $arg;
     #=================================================================
+    # user groups
+    #
+    my $groups;
+    $mesg = $ldap_crud->search({ base   => $ldap_crud->cfg->{base}->{group},
+				 filter => '(memberUid=' . $arg->{uid} . ')',
+				 attrs  => [ 'cn' ], });
+    if ( $mesg->code ) {
+      $return->{error} .= sprintf('<li>personal info %s</li>',
+ 				  $ldap_crud->err($mesg)->{html});
+    } else {
+      foreach ( @{[$mesg->entries]} ) {
+	push @{$groups->{group}}, $_->get_value('cn');
+      }
+    }
+
+    $mesg = $ldap_crud->search({ base   => $ldap_crud->cfg->{base}->{netgroup},
+				 filter => '(nisNetgroupTriple=*' . $arg->{uid} . '*)',
+				 attrs  => [ 'cn' ], });
+    if ( $mesg->code ) {
+      $return->{error} .= sprintf('<li>personal info %s</li>',
+ 				  $ldap_crud->err($mesg)->{html});
+    } else {
+      foreach ( @{[$mesg->entries]} ) {
+	push @{$groups->{netgroup}}, $_->get_value('cn');
+      }
+    }
+
+    #=================================================================
     # user organizations
     #
     if ( ref($arg->{o}) eq 'ARRAY' ) {
@@ -670,16 +698,16 @@ sub user_preferences :Path(user_prefs) :Args(0) {
     #=================================================================
     # FINISH
     #
-    # $c->stash( template => 'user/user_preferences.tt',
-    $c->stash( template => 'user/user_preferences_neo.tt',
-	       auth_obj => $arg,
-	       jpegPhoto => $jpegPhoto,
-	       orgs => $orgs,
-	       fqdn => $fqdn,
-	       dhcp => $dhcp,
-	       inventory => \@inventory,
-	       service => $service,
-	       session => $c->session,
+    $c->stash( template      => 'user/user_preferences_neo.tt',
+	       auth_obj      => $arg,
+	       dhcp          => $dhcp,
+	       fqdn          => $fqdn,
+	       groups        => $groups,
+	       inventory     => \@inventory,
+	       jpegPhoto     => $jpegPhoto,
+	       orgs          => $orgs,
+	       service       => $service,
+	       session       => $c->session,
 	       final_message => $return, );
   } else {
     $c->stash( template => 'signin.tt', );

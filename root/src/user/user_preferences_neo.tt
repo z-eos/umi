@@ -34,7 +34,7 @@
 	<div class="btn umi-zerro-padding col-xs-offset-1">
 	[%   buttonizer( buttonizer_id='to_user_dn',
 	       buttonizer_dn=auth_obj.dn
-	  buttonizer_text= '<i class="fas fa-2x fa-user-cog umi-search"></i>' )%]
+	   buttonizer_text= '<i class="fas fa-2x fa-user-cog umi-search"></i>' ) %]
 	</div>
 	<b>Personal data</b>
       </h3>
@@ -87,6 +87,23 @@
 	      <dd>
 		[%   FOREACH role IN auth_obj.roles.sort %][% role %]<br>[% END %]
 	      </dd>
+
+	      <dt class="text-info">
+		group/s:
+	      </dt>
+	      <dd>
+		[%   IF groups.group.size %][% FOREACH group IN groups.group.sort %][% group %]<br>[% END %]
+		[%   ELSE %]N/A[% END %]
+	      </dd>
+	      <dt class="text-info">
+		netgroup/s:
+	      </dt>
+	      <dd>
+		[%   IF groups.group.size %][% FOREACH netgroup IN groups.netgroup.sort %][% netgroup %]<br>[% END %]
+		[%   ELSE %]N/A[% END %]
+	      </dd>
+
+	      
 	      [% END %]
 	    </dl>
 	  </div>

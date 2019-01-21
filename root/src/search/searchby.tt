@@ -244,7 +244,7 @@
 		  <button class="[% root_of_rec_btn %] btn [% btn_blocked %] umi-search visible-lg-block visible-md-block"
 			  title="[% user_name %] click to open root object [% blocked_title %]"
 			  type="submit">
-		    <span class="to-root-object [% entry_text_size %] [%# blocked %]"><b>[% root_of_rec %]</b></span>
+		    <span class="to-root-object [% entry_text_size %] [% blocked %]"><b>[% root_of_rec %]</b></span>
 		  </button>
 		  <button class="btn btn-link umi-search visible-xs-block visible-sm-block"
 			  title="Click to open root object of this account. [% blocked_title %]"
@@ -353,11 +353,20 @@
 		  [%     ph_title="Service Account Branch" %]
 		  [%     ph_class="umi-search-padding fa fa-code-fork " _ blocked _ ' ' _ entry_icon_size %]
 		  [%   END %]
-		  <span class=" to-root-object [% entry_text_size %]" title="">
-		    <i class="[% ph_class %]" title="[% ph_title %]"></i>&nbsp;
+		  <!-- span class=" to-root-object [% # entry_text_size %]" title="" -->
+		    <!-- i class="[% # ph_class %]" title="[% # ph_title %]"></i>&nbsp; -->
 		  [% END %]
 		  [% # dn of the select result object %]
-		    <b class="[% icon_color  # _ ' ' _ entry_text_size %]">
+
+		    <form class="formajaxer" role="form" method="POST" action="/searchby">
+		      <input type="hidden"  name="ldap_subtree" value="[% entry.key %]">
+		      <button class="[% root_of_rec_btn %] btn [% btn_blocked %] umi-search visible-lg-block visible-md-block"
+			      title='click to open \xf0c0 this and children (if any) of this object'
+			      type="submit">
+
+		    <span class="to-root-object">
+		    <i class="[% ph_class %]" title="[% ph_title %]"></i>
+		    <b class="[% icon_color _ ' ' _ entry_text_size %]">
 		      [% IF entry.key.match('People') %]
 		      [% entry.key.replace('uid=','').replace('authorizedService=','').split(',').slice(0,-3).join('&nbsp;&nbsp;<i class="fa fa-ellipsis-h"></i>&nbsp;&nbsp;') %]
 		      [% entry.value.attrs.reqStart.0 %]
@@ -365,7 +374,14 @@
 		      [% entry.key %]
 		      [% END %]
 		    </b>
-		  </span>
+		    </span>
+
+		  </button>
+		</form>
+
+
+		    
+		  <!-- /span -->
 		</div>
 	      </div> <!-- searchby_menu_dropdown.tt inline-group div -->
 

@@ -198,8 +198,8 @@ has_field 'search_filter'
        label_class => [ 'col-md-2', 'required' ],
        wrapper_class => [ 'searchaccount', ],
        element_wrapper_class => [ 'col-xs-10', 'col-lg-10', ],
-       element_attr => { placeholder => '(objectClass=*)',
-			 title => q{A filter that defines the conditions an entry in the directory must meet in order for it to be returned by the search. It is a string. Values inside filters may need to be escaped to avoid security problems.}, },
+       element_attr => { placeholder => 'objectClass=*',
+			 title => q{A filter that defines the conditions an entry in the directory must meet in order for it to be returned by the search. It is a string (without parenthesis). Values inside filters may need to be escaped to avoid security problems.}, },
 			 rows => 1, );
 
 has_field 'show_attrs' => ( label => 'Show Attributes',

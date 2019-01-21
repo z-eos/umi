@@ -41,6 +41,14 @@
 	    </a>
 	  </li>
           <li class="nav-item">
+	    <a class="nav-link" href="/abstrstataccgroups"
+	       tabindex="2"
+	       title="Acc ←→ Group">
+	      <i class="fas fa-fw fa-at"></i>
+	      Acc <i class="fas fa-exchange-alt"></i> Group
+	    </a>
+	  </li>
+          <li class="nav-item">
 	    <a class="nav-link" href="/servermta"
 	       tabindex="2"
 	       title="All MTAs info in one single table">

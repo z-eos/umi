@@ -1585,6 +1585,25 @@ sub ask_mikrotik {
   return $return;
 }
 
+=head2 nisnetgroup_host_split
+
+split input string by the first dot caracter, to be used like in
+memberNisNetgroup attribute
+
+=cut
+
+sub nisnetgroup_host_split {
+  my  ( $self, $host ) = @_;
+  if ( $host =~ /^\..*$/ ) {
+    return [ '', substr($host, 1) ];
+  } else {
+    return [ split(/\./, $host, 2) ];
+  }
+}
+
+
+
+
 =head1 AUTHOR
 
 Zeus
