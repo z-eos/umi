@@ -32,27 +32,27 @@
 
       [% IF c.check_any_user_role ('admin', 'coadmin', 'operator') %]
       <li class="nav-item nav-dropdown">
-	<a class="nav-link nav-dropdown-toggle" href="#"><i class="fas fa-tasks"></i> Analyze</a>
+	<a class="nav-link nav-dropdown-toggle" href="#"><i class="fas fa-microscope"></i> Analyze</a>
 	<ul class="nav-dropdown-items">
           <li class="nav-item">
 	    <a class="nav-link" href="#modal-is-accounts" data-toggle="modal">
-	      <i class="fas fa-fw fa-id-card-alt"></i>
+	      <i class="fas fa-fw fa-id-card"></i>
 	      Accounts
 	    </a>
 	  </li>
           <li class="nav-item">
 	    <a class="nav-link" href="/abstrstataccgroups"
 	       tabindex="2"
-	       title="Acc ←→ Group">
-	      <i class="fas fa-fw fa-at"></i>
-	      Acc <i class="fas fa-exchange-alt"></i> Group
+	       title="Acc &harr; Group">
+	      <i class="fas fa-fw fa-users"></i>
+	      User ↔ Group
 	    </a>
 	  </li>
           <li class="nav-item">
 	    <a class="nav-link" href="/servermta"
 	       tabindex="2"
 	       title="All MTAs info in one single table">
-	      <i class="fas fa-fw fa-at"></i>
+	      <i class="fas fa-fw fa-mail-bulk"></i>
 	      MTA
 	    </a>
 	  </li>

@@ -361,7 +361,7 @@
 		    <form class="formajaxer" role="form" method="POST" action="/searchby">
 		      <input type="hidden"  name="ldap_subtree" value="[% entry.key %]">
 		      <button class="[% root_of_rec_btn %] btn [% btn_blocked %] umi-search visible-lg-block visible-md-block"
-			      title='click to open \xf0c0 this and children (if any) of this object'
+			      title='click to open this and children (if any) of this object'
 			      type="submit">
 
 		    <span class="to-root-object">

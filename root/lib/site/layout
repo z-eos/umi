@@ -66,26 +66,30 @@
       v-if="item.branch > 0 && !loading"
       @click="toggleBranches">
 
-   <i class="text-muted fas fa-caret-right" aria-hidden="true" v-if="!opened"></i>
-   <i class="text-info fas fa-caret-down" aria-hidden="true" v-if="opened"></i>
+   <!-- i class="text-muted fas fa-caret-right fa-lg" aria-hidden="true" v-if="!opened"></i>
+   <i class="text-info fas fa-caret-down fa-lg" aria-hidden="true" v-if="opened"></i -->
+   <i class="text-muted fas fa-folder" aria-hidden="true" v-if="!opened"></i>
+   <i class="text-info  fas fa-folder-open" aria-hidden="true" v-if="opened"></i>
  </div>
 
  <div class="tree-subitem-loader" v-if="loading"><!-- v-if="loading" -->
    <i class="text-muted fa fa-spinner fa-pulse fa-fw margin-bottom"></i>
  </div>
 
- <a class="tree-item-link" @click="showItem()">{{ item.id }}</a>
-
  <span class="tree-item-link-list" 
        @click="showItemBranches()"
        v-if="item.branch > 0" 
        title="Show all sub items">
-   <i class="text-muted fas fa-layer-group" aria-hidden="true"></i>
+   <i class="text-muted fas fa-layer-group fa-xs" aria-hidden="true"></i>
  </span>
- <i class="text-muted fas fa-sync" aria-hidden="true"
+ <i class="text-muted fas fa-sync fa-xs" aria-hidden="true"
     title="Reload sub items"
     v-if="item.branch > 0" 
-    @click="loadBranches()"></i> 
+    @click="loadBranches()">
+ </i> 
+
+ <a class="tree-item-link" @click="showItem()">{{ item.id }}</a>
+
  </div>
 
  <div class="tree-subitem">

@@ -175,7 +175,7 @@
 	  <input type="hidden" name="ldap_modify" value="[% entry.key %]">
 	  <button type="submit" title="edit all fields" class="btn btn-link"
 		  data-order="[% site.searchby.menu.order.ldap_modify %]">
-	  <span class="[% fa_meta %] fa-tools text-warning"></span>
+	  <span class="[% fa_meta %] fa-hammer text-warning"></span>
 	  edit as is
 	  </button>
 	</form>
@@ -256,7 +256,7 @@
 	  <input type="hidden" name="ldap_modify_password" value="[% entry.key %]">
 	  <button type="submit" title="password change / check" class="btn btn-link"
 		  data-order="[% site.searchby.menu.order.ldap_modify_password %]">
-	  <span class="[% fa_meta %] fa-user-lock text-danger"></span>
+	  <span class="[% fa_meta %] fa-fingerprint text-danger"></span>
 	  password
 	  </button>
 	</form>
