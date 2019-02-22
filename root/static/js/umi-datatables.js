@@ -13,7 +13,7 @@ var table = $('#dataTableToDraw').DataTable({
 	"buttons": [
 	    {
 		extend: 'copy',
-		text: '<i title="Copy current page data to clipboard" class="fa fa-copy fa-lg"></i>',
+		text: '<i title="Copy current page data to clipboard" class="fas fa-copy fa-lg fa-fw"></i>',
 		className: 'btn btn-primary btn-sm',
 		exportOptions: {
 		    modifier: {
@@ -23,7 +23,7 @@ var table = $('#dataTableToDraw').DataTable({
 	    },
 	    {
 		extend: 'print',
-		text: '<i title="Print current page" class="fa fa-print fa-lg"></i>',
+		text: '<i title="Print current page" class="fas fa-print fa-lg fa-fw"></i>',
 		className: 'btn btn-primary btn-sm',
 		autoPrint: false,
 		exportOptions: {
@@ -34,7 +34,7 @@ var table = $('#dataTableToDraw').DataTable({
 	    },
 	    {
 		extend: 'csv',
-		text: '<i title="Download current page as CSV file" class="fa fa-download fa-lg"></i>',
+		text: '<i title="Download current page as CSV file" class="fas fa-download fa-lg fa-fw"></i>',
 		className: 'btn btn-primary btn-sm',
 		exportOptions: {
 		    modifier: {
@@ -45,13 +45,13 @@ var table = $('#dataTableToDraw').DataTable({
 	]
     },
     "language": {
-	"search": "<i class='fa fa-search fa-lg'></i>",
+	"search": "<i class='fas fa-search fa-lg fa-fw'></i>",
 	"lengthMenu": "_MENU_",
 	"paginate": {
-            "first": "<i class='fa fa-fast-backward fa-lg'></i>",
-            "last": "<i class='fa fa-fast-forward fa-lg'></i>",
-            "next": "<i class='fa fa-step-forward fa-lg'></i>",
-            "previous": "<i class='fa fa-step-backward fa-lg'></i>", },
+            "first": "<i class='fas fa-fast-backward fa-lg fa-fw'></i>",
+            "last": "<i class='fas fa-fast-forward fa-lg fa-fw'></i>",
+            "next": "<i class='fas fa-step-forward fa-lg fa-fw'></i>",
+            "previous": "<i class='fas fa-step-backward fa-lg fa-fw'></i>", },
     },
     "renderer": {
         "header": "bootstrap",

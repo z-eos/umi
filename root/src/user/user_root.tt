@@ -26,7 +26,7 @@
 	     create new</a>
 	     </li> -->
       <li><a href="/userall" title="Add new user">
-	  <span class="fa fa-user-plus fa-3x"></span>
+	  <span class="fa fa-user-plus fa-lg"></span>
 	  create new</a>
       </li>
     </ul>

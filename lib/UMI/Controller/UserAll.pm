@@ -233,14 +233,15 @@ sub create_account {
       }
       
       push @{$final_message->{success}},
-	sprintf('<i class="fa fa-user-circle fa-lg fa-fw"></i>&nbsp;<em>root account login:</em> <strong class="text-success">%s</strong> <em>password:</em> <strong class="text-success mono">%s</strong>%s',
+	sprintf('<i class="%s fa-lg fa-fw"></i>&nbsp;<em>root account login:</em> <strong class="text-success">%s</strong> <em>password:</em> <strong class="text-success text-monospace">%s</strong>%s',
+		$ldap_crud->{cfg}->{stub}->{icon},
 		$uid,
 		$pwd->{root}->{'clear'},
-		$self->search_result_item_as_button({ uri => $args->{action_searchby},
-						      dn => $root_add_dn,
+		$self->search_result_item_as_button({ uri     => $args->{action_searchby},
+						      dn      => $root_add_dn,
 						      btn_txt => $root_add_dn,
 						      css_btn => 'btn-success',
-						      css_frm => 'pull-right' }) ) ;
+						      css_frm => 'float-right' }) ) ;
     }
     # p $final_message->{success};
   } else {
@@ -254,12 +255,12 @@ sub create_account {
 
     my $add_to_obj = $add_to->entry(0);
 
-    $uidNumber = $add_to_obj->get_value('uidNumber');
-    $args->{'person_givenname'} = $add_to_obj->get_value('givenName');
-    $args->{'person_sn'} = $add_to_obj->get_value('sn');
+    $uidNumber                        = $add_to_obj->get_value('uidNumber');
+    $args->{'person_givenname'}       = $add_to_obj->get_value('givenName');
+    $args->{'person_sn'}              = $add_to_obj->get_value('sn');
     $args->{'person_telephonenumber'} = $add_to_obj->exists('telephonenumber') ?
       $add_to_obj->get_value('telephonenumber') : '666';
-    $descr = $add_to_obj->exists('description') ?
+    $descr                            = $add_to_obj->exists('description') ?
       $add_to_obj->get_value('description') : 'description has to be here';
 
     $uid = $add_to_obj->get_value($ldap_crud->cfg->{rdn}->{acc_root});
@@ -282,33 +283,33 @@ sub create_account {
     #---------------------------------------------------------------------
     $attr_hash = { uid => $uid,
 		   authorizedservice => 'mail',
-		   associateddomain => $args->{person_associateddomain},
-		   objectclass => $args->{dynamic_object} || $is_person_exp ? [ 'dynamicObject' ] : [],
-		   requestttl => $is_person_exp ? $args->{person_exp} : '', };
+		   associateddomain  => $args->{person_associateddomain},
+		   objectclass       => $args->{dynamic_object} || $is_person_exp ? [ 'dynamicObject' ] : [],
+		   requestttl        => $is_person_exp ? $args->{person_exp} : '', };
     $branch =
       $ldap_crud
       ->create_account_branch ( $attr_hash );
 
     push @{$final_message->{success}}, $branch->{success} if defined $branch->{success};
     push @{$final_message->{warning}}, $branch->{warning} if defined $branch->{warning};
-    push @{$final_message->{error}}, $branch->{error} if defined $branch->{error};
+    push @{$final_message->{error}},   $branch->{error}   if defined $branch->{error};
 
     #---------------------------------------------------------------------
     # Simplified Leaf of the account mail branch of ROOT Object
     #---------------------------------------------------------------------
     my $x =
       {
-       basedn => $branch->{dn},
+       basedn            => $branch->{dn},
        authorizedservice => 'mail',
-       associateddomain => $branch->{associateddomain_prefix} . $args->{person_associateddomain},
-       uidNumber => $uidNumber,
-       givenName => $args->{person_givenname},
-       sn => $args->{person_sn},
-       telephoneNumber => $args->{person_telephonenumber},
-       login => defined $args->{person_login} &&
+       associateddomain  => $branch->{associateddomain_prefix} . $args->{person_associateddomain},
+       uidNumber         => $uidNumber,
+       givenName         => $args->{person_givenname},
+       sn                => $args->{person_sn},
+       telephoneNumber   => $args->{person_telephonenumber},
+       login             => defined $args->{person_login} &&
        $args->{person_login} ne '' ? $args->{person_login} : $uid,
-       objectclass => $args->{dynamic_object} || $is_person_exp ? [ 'dynamicObject' ] : [],
-       requestttl => $is_person_exp ? $args->{person_exp} : '',
+       objectclass       => $args->{dynamic_object} || $is_person_exp ? [ 'dynamicObject' ] : [],
+       requestttl        => $is_person_exp ? $args->{person_exp} : '',
       };
 
     if ( ! $args->{person_password1} &&
@@ -324,7 +325,7 @@ sub create_account {
       $ldap_crud->create_account_branch_leaf ( $x );
     push @{$final_message->{success}}, @{$leaf->{success}} if defined $leaf->{success};
     push @{$final_message->{warning}}, @{$leaf->{warning}} if defined $leaf->{warning};
-    push @{$final_message->{error}}, @{$leaf->{error}} if defined $leaf->{error};
+    push @{$final_message->{error}},   @{$leaf->{error}}   if defined $leaf->{error};
 
     #---------------------------------------------------------------------
     # Simplified Account xmpp branch of ROOT Object Creation
@@ -338,21 +339,21 @@ sub create_account {
 
     push @{$final_message->{success}}, $branch->{success} if defined $branch->{success};
     push @{$final_message->{warning}}, $branch->{warning} if defined $branch->{warning};
-    push @{$final_message->{error}}, $branch->{error} if defined $branch->{error};
+    push @{$final_message->{error}},   $branch->{error}   if defined $branch->{error};
 
     #---------------------------------------------------------------------
     # Simplified Leaf of the account email branch of ROOT Object
     #---------------------------------------------------------------------
-    $x->{basedn} = $branch->{dn};
+    $x->{basedn}            = $branch->{dn};
     $x->{authorizedservice} = 'xmpp';
-    $x->{objectclass} = $args->{dynamic_object} || $is_person_exp ? [ 'dynamicObject' ] : [];
-    $x->{requestttl} = $is_person_exp ? $args->{person_exp} : '';
+    $x->{objectclass}       = $args->{dynamic_object} || $is_person_exp ? [ 'dynamicObject' ] : [];
+    $x->{requestttl}        = $is_person_exp ? $args->{person_exp} : '';
 
     $leaf = $ldap_crud->create_account_branch_leaf ( $x );
     
     push @{$final_message->{success}}, @{$leaf->{success}} if defined $leaf->{success};
     push @{$final_message->{warning}}, @{$leaf->{warning}} if defined $leaf->{warning};
-    push @{$final_message->{error}}, @{$leaf->{error}} if defined $leaf->{error};
+    push @{$final_message->{error}},   @{$leaf->{error}}   if defined $leaf->{error};
 
       
     #===========================================================================
@@ -394,7 +395,7 @@ we skip empty (criteria of emptiness is a concatenation of each field value) rep
 
 	push @{$final_message->{success}}, $branch->{success} if defined $branch->{success};
 	push @{$final_message->{warning}}, $branch->{warning} if defined $branch->{warning};
-	push @{$final_message->{error}}, $branch->{error} if defined $branch->{error};
+	push @{$final_message->{error}},   $branch->{error}   if defined $branch->{error};
 
 	#---------------------------------------------------------------------
 	# LEAF of the account BRANCH
@@ -488,15 +489,12 @@ we skip empty (criteria of emptiness is a concatenation of each field value) rep
 					   { clear => '<del>NOPASSWORD</del>' } };
 	  $x->{associateddomain}       = $element->field('associateddomain')->value;
 	  $x->{umiOvpnCfgIfconfigPush} = $element->field('ifconfigpush')->value || 'NA';
-	  $x->{umiOvpnCfgIroute}       = $element->field('iroute')->value || 'NA';
-	  $x->{umiOvpnCfgPush}         = $element->field('push')->value || 'NA';
-	  $x->{umiOvpnCfgConfig}       = $element->field('config')->value || 'NA';
-	  $x->{umiOvpnAddStatus}       = $element->field('status')->value || 'blocked';
-	  $x->{umiOvpnAddDevType}      = $element->field('devtype')->value || 'NA';
-	  $x->{umiOvpnAddDevMake}      = $element->field('devmake')->value || 'NA';
-	  $x->{umiOvpnAddDevModel}     = $element->field('devmodel')->value || 'NA';
-	  $x->{umiOvpnAddDevOS}        = $element->field('devos')->value || 'NA';
-	  $x->{umiOvpnAddDevOSVer}     = $element->field('devosver')->value || 'NA';
+	  $x->{umiOvpnCfgIroute}       = $element->field('iroute')->value       || 'blocked';
+	  $x->{umiOvpnAddDevType}      = $element->field('devtype')->value      || 'NA';
+	  $x->{umiOvpnAddDevMake}      = $element->field('devmake')->value      || 'NA';
+	  $x->{umiOvpnAddDevModel}     = $element->field('devmodel')->value     || 'NA';
+	  $x->{umiOvpnAddDevOS}        = $element->field('devos')->value        || 'NA';
+	  $x->{umiOvpnAddDevOSVer}     = $element->field('devosver')->value     || 'NA';
 	}
 
 	# log_debug { np($x) };
@@ -504,7 +502,7 @@ we skip empty (criteria of emptiness is a concatenation of each field value) rep
 	  $ldap_crud->create_account_branch_leaf ( $x );
 	push @{$final_message->{success}}, @{$leaf->{success}} if defined $leaf->{success};
 	push @{$final_message->{warning}}, @{$leaf->{warning}} if defined $leaf->{warning};
-	push @{$final_message->{error}}, @{$leaf->{error}} if defined $leaf->{error};
+	push @{$final_message->{error}},   @{$leaf->{error}}   if defined $leaf->{error};
       }
       $is_svc_empty = '';
     }

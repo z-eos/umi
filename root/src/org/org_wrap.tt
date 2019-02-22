@@ -1,10 +1,14 @@
 [% META title = 'Org root' %]
 
+<[% site.pageheading %] class="font-weight-bold p-3">
+<i class="fas fa-building fa-lg mr-3 text-muted"></i>
 [% IF form.init_object.aux_dn_form_to_modify %]
-<[% site.pageheading %]>Form to Update Org <small><em>[% form.init_object.aux_dn_form_to_modify %]</em></small></[% site.pageheading %]>
+  Org Update Form <small><em>[% form.init_object.aux_dn_form_to_modify %]</em></small>
 [% ELSE %]
-<[% site.pageheading %]>Form to Create Org <small><em>all stuff</em></small></[% site.pageheading %]>
+  Org Creation Form <small><em>all stuff</em></small>
 [% END %]
+</[% site.pageheading %]>
+<hr class="mb-5">
 
 [% INCLUDE ldap_err.tt %]
 

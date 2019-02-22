@@ -2,11 +2,10 @@
 [% IF c.user %]  
 [% PROCESS site/header %]
 
-<div class="app-body"> <!-- APP BODY -->
+<div class="wrapper"> <!-- APP BODY -->
 
   [% PROCESS site/sidebar %]
 
-  <main class="main">
     <noscript>
       <div class="panel panel-danger text-center">
 	<div class="panel-heading">
@@ -18,7 +17,7 @@
 	</div>
       </div>
     </noscript>
-    <div class="container-fluid" id="workingfield">
+    <div class="container-fluid mb-3" id="workingfield">
       [% END %]
       
       [% content %]
@@ -26,7 +25,6 @@
       [% IF c.user %]  
 
     </div>
-  </main>
 
   [% PROCESS site/aside %]
   
@@ -35,19 +33,10 @@
 [% # PROCESS site/footer %]
 
 <script src="/static/js/vue.js"></script>
+
 <script src="/static/js/nprogress.js"></script>   
+
 <script src="/static/js/umi-core-ajax.js"></script>   
-
-
-<!-- <script src="/static/js/dt-jquery.dataTables.min.js"></script>
-	<script src="/static/js/dt-dataTables.bootstrap.min.js"></script> -->
-
-<!-- GenesisUI main scripts -->
-<script src="/static/js/app.js"></script>
-
-<!-- Custom scripts required by this view -->
-<!-- <script src="/static/js/views/main.js"></script> -->
-
 <script src="/static/js/umi-header.js"></script>
 <script src="/static/js/umi-searchby-modals.js"></script>
 
@@ -60,48 +49,56 @@
 
 <!-- LDAP tree related (Vue based) -->
 <script type="text/x-template" id="template-tree-item">
- <li class="tree-item" :class="{opened: opened, closed: !opened}">
- <div class="tree-point">
- <div class="tree-item-status" 
-      v-if="item.branch > 0 && !loading"
-      @click="toggleBranches">
+  <li class="tree-item" :class="{opened: opened, closed: !opened}">
+ <div class="tree-point"
+      :class="{'last-item':!(item.branch > 0 && !loading || item.branch > 0 || item.branch > 0)}">
+      
+      <div class="tree-item-options">
+	
+	<div class="tree-item-status" 
+	     v-if="item.branch > 0 && !loading"
+	     @click="toggleBranches">
+	  <i class="text-white-50 fas fa-folder" aria-hidden="true" v-if="!opened"></i>
+	  <i class="text-light fas fa-folder-open" aria-hidden="true" v-if="opened"></i>
+	</div>
+	
+	<div class="tree-subitem-loader" v-if="loading"><!-- v-if="loading" -->
+	  <i class="text-white-50 fas fa-circle-notch fa-pulse fa-fw margin-bottom"></i>
+	</div>
 
-   <!-- i class="text-muted fas fa-caret-right fa-lg" aria-hidden="true" v-if="!opened"></i>
-   <i class="text-info fas fa-caret-down fa-lg" aria-hidden="true" v-if="opened"></i -->
-   <i class="text-muted fas fa-folder" aria-hidden="true" v-if="!opened"></i>
-   <i class="text-info  fas fa-folder-open" aria-hidden="true" v-if="opened"></i>
+	<span class="tree-item-link-list" 
+	      @click="showItemBranches()"
+	      v-if="item.branch > 0" 
+	      title="Show sub items">
+	  <i class="text-white-50 fas fa-layer-group fa-xs" aria-hidden="true"></i>
+	</span>
+	
+	<i class="text-white-50 fas fa-sync fa-xs" aria-hidden="true"
+	   title="Reload sub items"
+	   v-if="item.branch > 0" 
+	   @click="loadBranches()">
+	</i>
+	
+      </div>
+
+ <i class="fas fa-ellipsis-h text-success tree-item-leaf"
+    v-if="!(item.branch > 0 && !loading || item.branch > 0 || item.branch > 0)"></i>
+
+ <a class="text-light tree-item-link"
+    @click="showItem()">{{ item.id }}</a>
+ 
+
  </div>
 
- <div class="tree-subitem-loader" v-if="loading"><!-- v-if="loading" -->
-   <i class="text-muted fa fa-spinner fa-pulse fa-fw margin-bottom"></i>
- </div>
-
- <span class="tree-item-link-list" 
-       @click="showItemBranches()"
-       v-if="item.branch > 0" 
-       title="Show all sub items">
-   <i class="text-muted fas fa-layer-group fa-xs" aria-hidden="true"></i>
- </span>
- <i class="text-muted fas fa-sync fa-xs" aria-hidden="true"
-    title="Reload sub items"
-    v-if="item.branch > 0" 
-    @click="loadBranches()">
- </i> 
-
- <a class="tree-item-link" @click="showItem()">{{ item.id }}</a>
-
- </div>
-
- <div class="tree-subitem">
-   <ul v-if="branches.length" class="tree" :class="{opened: opened, closed: !opened}">
-     <tree-item
-       :item="item" 
-       v-for="(item, index) in branches" 
-       key="subtree.index">
-     </tree-item>
-   </ul>
- </div>
- </li>
+    <div class="tree-subitem">
+      <ul v-if="branches.length" class="tree" :class="{opened: opened, closed: !opened}">
+	<tree-item :item="item" 
+		   v-for="(item, index) in branches" 
+		   key="subtree.index">
+	</tree-item>
+      </ul>
+    </div>
+  </li>
 </script>
 
 <script type="text/x-template" id="template-tree">

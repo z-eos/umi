@@ -2,8 +2,8 @@ $(function(){
     $('.umi-multiselect').multiSelect({
 	keepOrder: true,
 
-	selectableHeader: "<div class='input-group has-warning'><span class='input-group-addon bg-warning' id='basic-addon1' title='Available groups search'><i class='fas fa-users text-light'></i></span><input type='text' autocomplete='off' aria-describedby='basic-addon1' class='form-control search-input input-sm' placeholder='Search for available' title='Search for available'></div>",
-	selectionHeader: "<div class='input-group has-success'><span class='input-group-addon bg-success' id='basic-addon2' title='Available groups search'><i class='fas fa-users text-light'></i></span><input type='text' autocomplete='off' aria-describedby='basic-addon2' class='form-control search-input input-sm' placeholder='Search for selected' title='Search for selected'></div>",
+	selectableHeader: "<div class='input-group has-warning'><div class='input-group-prepend'><span class='input-group-text bg-warning' id='basic-addon1' title='Available groups search'><i class='fas fa-users text-light'></i></span></div><input type='text' autocomplete='off' aria-describedby='basic-addon1' class='form-control search-input input-sm' placeholder='Search for available' title='Search for available'></div>",
+	selectionHeader: "<div class='input-group has-success'><div class='input-group-prepend'><span class='input-group-text bg-success' id='basic-addon2' title='Available groups search'><i class='fas fa-users text-light'></i></span></div><input type='text' autocomplete='off' aria-describedby='basic-addon2' class='form-control search-input input-sm' placeholder='Search for selected' title='Search for selected'></div>",
 
 	afterInit: function(ms){
 	    var that = this,

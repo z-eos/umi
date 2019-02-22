@@ -24,78 +24,84 @@ has_field 'aux_dn_form_to_modify' => ( type => 'Hidden', );
 
 has_field 'aux_parent'
   => (
-      type => 'Select',
-      label => 'Parent Office',
-      label_class => [ 'col-xs-3', ],
-      empty_select => '--- Choose a Parent Office if any ---',
-      element_wrapper_class => [ 'col-xs-9', 'col-sm-9', 'col-md-9', 'col-lg-9', ],
-      wrapper_class => [ 'hide4update', ],
-      options_method => \&parent_offices,
+      type                  => 'Select',
+      label                 => 'Parent Office',
+      label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+      empty_select          => '--- Choose a Parent Office if any ---',
+      element_class         => [ 'custom-select', ],
+      element_wrapper_class => [ 'input-sm', 'col-10', ],
+      wrapper_class         => [ 'row', 'hide4update', ],
+      options_method        => \&parent_offices,
      );
 
 has_field 'physicalDeliveryOfficeName'
   => (
-      apply => [ NotAllDigits, Printable, ],
-      label => 'physicalDeliveryOfficeName',
-      label_class => [ 'col-xs-3', ],
-      label_attr => { title => 'official office name as it is known to the world', },
-      element_attr => { placeholder => 'Horns & Hooves LLC',
-			title => 'official office name as it is known to the world', },
-      element_wrapper_class => [ 'col-xs-9', 'col-sm-9', 'col-md-9', 'col-lg-9', ],
+      apply                 => [ NotAllDigits, Printable, ],
+      label                 => 'physicalDeliveryOfficeName',
+      label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
+      label_attr            => { title       => 'office name as it is known to the world', },
+      element_attr          => { placeholder => 'Horns & Hooves LLC',
+				 title       => 'office name as it is known to the world', },
+      element_wrapper_class => [ 'input-sm', 'col-10', ],
+      wrapper_class         => [ 'row', ],
       required => 1,
      );
 
 has_field 'destinationIndicator'
   => (
-      apply => [ NotAllDigits, Printable, ],
-      label => 'destinationIndicator',
-      label_class => [ 'col-xs-3', ],
-      label_attr => { title => 'unique code of the office organization occupies, to be used for references to it (like physicalDeliveryOfficeName of the person preferences)' },
-      element_attr => { placeholder => 'example: abc, yz04, kl-01',
-			title => 'unique code of the office organization occupies, to be used for references to it (like physicalDeliveryOfficeName of the person preferences)', },
-      element_wrapper_class => [ 'col-xs-9', 'col-sm-9', 'col-md-9', 'col-lg-9', ],
+      apply                 => [ NotAllDigits, Printable, ],
+      label                 => 'destinationIndicator',
+      label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+      label_attr            => { title       => 'unique code of the office organization occupies, to be used for references to it (like physicalDeliveryOfficeName of the person preferences)' },
+      element_attr          => { placeholder => 'example: abc, yz04, kl-01',
+				 title       => 'unique code of the office organization occupies, to be used for references to it (like physicalDeliveryOfficeName of the person preferences)', },
+      element_wrapper_class => [ 'input-sm', 'col-10', ],
+      wrapper_class         => [ 'row', ],
       required => 1,
      );
 
 has_field 'associatedDomain'
   => (
-      apply => [ NotAllDigits, Printable,
-		 { check => qr/^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/,
-		   message => 'Must be valid FQDN' }, ],
-      label => 'associatedDomain',
-      label_class => [ 'col-xs-3', ],
-      label_attr => { title => 'FQDN assigned to this org, at least an internal one, something like oXXX.local', },
+      apply                 => [ NotAllDigits, Printable,
+	                    	 { check => qr/^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/,
+	                    	   message => 'Must be valid FQDN' }, ],
+      label                 => 'associatedDomain',
+      label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+      label_attr            => { title => 'FQDN assigned to this org, at least an internal one, something like oXXX.local', },
+      element_wrapper_class => [ 'input-sm', 'col-10', ],
       element_attr => { placeholder => 'orgXXX.foo.bar',
-			title => 'FQDN assigned to this org, at least an internal one, something like oXXX.local', },
-      element_wrapper_class => [ 'col-xs-9', 'col-sm-9', 'col-md-9', 'col-lg-9', ],
-      required => 1,
+			title       => 'FQDN assigned to this org, at least an internal one, something like oXXX.local', },
+      wrapper_class         => [ 'row', ],
+      required              => 1,
      );
 
 has_field 'ou'
   => (
-      apply => [ NoSpaces, NotAllDigits, Printable, ],
-      label => 'Org Unit',
-      label_class => [ 'col-xs-3', ],
-      label_attr => { title => 'short name as it is used in object DN', },
-      element_wrapper_class => [ 'col-xs-9', 'col-sm-9', 'col-md-9', 'col-lg-9', ],
-      element_attr => { placeholder => 'hrns-n-hvs',
-			title => 'short name as it is used in object DN', },
-      required => 1,
+      apply                 => [ NoSpaces, NotAllDigits, Printable, ],
+      label                 => 'Org Unit',
+      label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+      label_attr            => { title => 'short name as it is used in object DN', },
+      element_wrapper_class => [ 'input-sm', 'col-10', ],
+      element_attr          => { placeholder => 'hrns-n-hvs',
+				 title       => 'short name as it is used in object DN', },
+      wrapper_class         => [ 'row', ],
+      required              => 1,
      );
 
 has_field 'telephoneNumber'
   => (
-      label => 'telephoneNumber',
-      label_class => [ 'col-xs-3', ],
-      element_wrapper_class => [ 'col-xs-9', 'col-sm-9', 'col-md-9', 'col-lg-9', ],
-      element_attr => { placeholder => '666' },
+      label                 => 'telephoneNumber',
+      label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+      element_wrapper_class => [ 'input-sm', 'col-10', ],
+      element_attr          => { placeholder => '666' },
+      wrapper_class         => [ 'row', ],
      );
 
 has_field 'businessCategory'
-  => ( type => 'Multiple',
-       label => 'Business Category',
-       label_class => [ 'col-xs-3', ],
-       element_wrapper_class => [ 'col-xs-5', 'col-lg-5', ],
+  => ( type                  => 'Multiple',
+       label                 => 'Business Category',
+       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class => [ 'input-sm', 'col-10', ],
        options => [
 		   { value => 'na', label => 'N/A', },
 		   { value => 'it', label => 'IT', },
@@ -105,87 +111,126 @@ has_field 'businessCategory'
 		   { value => 'tv', label => 'TV', },
 		   { value => 'logistics', label => 'Logistics' },
 		  ],
+       wrapper_class       => [ 'row', ],
      );
 
 has_field 'postOfficeBox'
-  => ( label => 'PB',
-       label_class => [ 'col-xs-3', ],
-       element_wrapper_class => [ 'col-xs-5', 'col-lg-1', ],
-       element_attr => { placeholder => '121' },
+  => ( label                 => 'PB',
+       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class => [ 'input-sm', 'col-10', ],
+       element_attr          => { placeholder => '121' },
+       wrapper_class         => [ 'row', ],
      );
 
 has_field 'street'
-  => ( label => 'Street',
-       label_class => [ 'col-xs-3', ],
-       element_wrapper_class => [ 'col-xs-5', 'col-lg-3', ],
-       element_attr => { placeholder => 'Shevchenka' },
+  => ( label                 => 'Street',
+       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class => [ 'input-sm', 'col-10', ],
+       element_attr          => { placeholder => 'Shevchenka' },
+       wrapper_class         => [ 'row', ],
      );
 
 has_field 'postalCode'
   => (
-      label => 'Postalcode',
-      label_class => [ 'col-xs-3', ],
-      element_wrapper_class => [ 'col-xs-5', 'col-lg-2', ],
-      element_attr => { placeholder => '12345' },
+      label                 => 'Postalcode',
+      label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+      element_wrapper_class => [ 'input-sm', 'col-10', ],
+      element_attr          => { placeholder => '12345' },
+      wrapper_class         => [ 'row', ],
      );
 
 has_field 'l'
   => (
-      label => 'Location',
-      label_class => [ 'col-xs-3', ],
-      label_attr => { title => 'location, commonly the city the office situated at' },
-      element_wrapper_class => [ 'col-xs-5', 'col-lg-2', ],
-      element_attr => { placeholder => 'Fort Baker',
-			title => 'location, commonly the city the office situated at', },
-      required => 1,
+      label                 => 'Location',
+      label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+      label_attr            => { title => 'location, commonly the city the office situated at' },
+      element_wrapper_class => [ 'input-sm', 'col-10', ],
+      element_attr          => { placeholder => 'Fort Baker',
+				 title       => 'location, commonly the city', },
+      wrapper_class         => [ 'row', ],
+      required              => 1,
      );
 
 has_field 'st'
-  => ( label => 'State',
-       label_class => [ 'col-xs-3', ],
-       label_attr => { title => 'state, commonly short form of the city' },
-       element_wrapper_class => [ 'col-xs-5', 'col-lg-1', ],
-       element_attr => { placeholder => 'CA' },
+  => ( label                 => 'State',
+       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       label_attr            => { title => 'state, commonly short form of the city' },
+       element_wrapper_class => [ 'input-sm', 'col-10', ],
+       element_attr          => { placeholder => 'CA' },
+       wrapper_class         => [ 'row', ],
      );
 
 has_field 'postalAddress'
-  => ( label => 'PostalAdress',
-       label_class => [ 'col-xs-3', ],
-       element_wrapper_class => [ 'col-xs-9', 'col-sm-9', 'col-md-9', 'col-lg-9', ],
-       element_attr => { placeholder => '121, 4th floor' },
+  => ( label                         => 'PostalAdress',
+       label_class                   => [ 'col', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class         => [ 'input-sm', 'col-10', ],
+       element_attr                  => { placeholder => '121, 4th floor' },
+       wrapper_class         => [ 'row', ],
      );
 
 has_field 'registeredAddress'
-  => ( label => 'Registered Adress',
-       label_class => [ 'col-xs-3', ],
-       element_wrapper_class => [ 'col-xs-9', 'col-sm-9', 'col-md-9', 'col-lg-9', ],
-       element_attr => { placeholder => '121, 4th floor' },
+  => ( label                 => 'Registered Adress',
+       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class => [ 'input-sm', 'col-10', ],
+       element_attr          => { placeholder => '121, 4th floor' },
+       wrapper_class         => [ 'row', ],
      );
 
 has_field 'description'
-  => ( type => 'TextArea',
-       label => 'Description',
-       label_class => [ 'col-xs-3', ],
-       element_wrapper_class => [ 'col-xs-9', 'col-sm-9', 'col-md-9', 'col-lg-9', ],
-       element_attr => { placeholder => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed dapibus nulla. Mauris vehicula vehicula ligula ac dapibus. Fusce vehicula a turpis sed. ' },
+  => ( type                  => 'TextArea',
+       label                 => 'Description',
+       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class => [ 'input-sm', 'col-10', ],
+       element_attr          => { placeholder => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed dapibus nulla. Mauris vehicula vehicula ligula ac dapibus. Fusce vehicula a turpis sed. ' },
        # cols => 30,
-       rows => 2
+       rows                  => 2,
+       wrapper_class         => [ 'row', ],
      );
 
-has_field 'aux_reset' => ( type => 'Reset',
-			   wrapper_class => [ 'col-xs-4' ],
-			   element_class => [ 'btn', 'btn-danger', 'btn-block', ],
-			   element_wrapper_class => [ 'col-xs-12', ],
-			   # value => 'Reset'
-			 );
+has_field 'aux_reset'
+  => ( type          => 'Reset',
+       element_class => [ qw( btn
+			      btn-danger
+			      btn-block
+			      font-weight-bold
+			      text-uppercase) ],
+       wrapper_class => [ 'col-4' ],
+       value         => 'Reset' );
 
-has_field 'aux_submit' => (
-			   type => 'Submit',
-			   wrapper_class => [ 'col-xs-8'],
-			   element_class => [ 'btn', 'btn-success', 'btn-block', ],
-			   # label_no_filter => 1,
-			   value => 'Submit'
-			  );
+has_field 'aux_submit'
+  => ( type          => 'Submit',
+       element_class => [ qw( btn
+			      btn-success
+			      btn-block
+			      font-weight-bold
+			      text-uppercase) ],
+       wrapper_class => [ 'col-8', ],
+       value         => 'Submit' );
+
+has_block 'aux_submitit'
+  => ( tag => 'fieldset',
+       render_list => [ 'aux_reset', 'aux_submit'],
+       class => [ 'row', ]
+     );
+
+sub build_render_list {[ qw( 
+			     aux_dn_form_to_modify
+			     aux_parent
+			     physicalDeliveryOfficeName
+			     destinationIndicator
+			     associatedDomain
+			     ou
+			     telephoneNumber
+			     businessCategory
+			     postOfficeBox
+			     street
+			     postalCode
+			     l
+			     st
+			     postalAddress
+			     registeredAddress
+			     description
+			     aux_submitit ) ]}
 
 ######################################################################
 # ====================================================================

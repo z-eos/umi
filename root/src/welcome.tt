@@ -20,8 +20,8 @@
 <div class="card text-white [% bg %] mb-3" style="max-width: 40rem;">
   <div class="card-header">Do chant</div>
   <div class="card-body">
-    <h3 class="card-title"><b>Do chant user's <a href="/motto">motto</a>!</b></h3>
+    <h3 class="card-title"><b>Do chant user's <a href="/motto" class="text-dark">motto</a>!</b></h3>
     <p class="card-text">it is as simple as important to do that each time any question arise ...</p>
-    <a href="/motto" class="card-link">the motto</a>
+    <a href="/motto" class="card-link text-dark">the motto</a>
   </div>
 </div>

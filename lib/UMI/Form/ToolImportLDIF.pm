@@ -23,50 +23,70 @@ sub html_attributes {
 has '+enctype' => ( default => 'multipart/form-data');
 
 has_field 'file'
-  => ( type => 'Upload',
-       wrapper_attr => { id => 'fieldfile', },
-       label => 'LDIF File',
-       label_class => [ 'col-xs-2' ],
-       element_class => [ 'btn', 'btn-default', ],
-       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-       max_size => '100000',
+  => ( type                  => 'File',
+       wrapper_attr          => { id => 'fieldfile', },
+       wrapper_class         => [ 'custom-file', 'mb-3', 'col-4', 'offset-md-2', ],
+       label                 => 'Select LDIF File',
+       label_class           => [ 'custom-file-label', ],
+       label_attr            => {  'data-browse' => 'Chose File', },
+       element_class         => [ 'btn', 'btn-default', 'btn-secondary', 'custom-file-input', ],
+       element_wrapper_class => [ 'input-sm', ],
+       max_size              => '100000',
        # required => 1,
      );
 
+# has_field 'file'
+#   => ( type                  => 'Upload',
+#        wrapper_attr          => { id => 'fieldfile', },
+#        wrapper_class         => [ 'row', ],
+#        label                 => 'LDIF File',
+#        label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+#        element_class         => [ 'btn', 'btn-default', 'btn-secondary', ],
+#        element_wrapper_class => [ 'input-sm', 'col-10', ],
+#        max_size              => '100000',
+#        # required => 1,
+#      );
+
 has_field 'ldif'
-  => ( type => 'TextArea',
+  => ( type                  => 'TextArea',
        wrapper_attr          => { id => 'fieldldif', },
+       wrapper_class         => [ 'row', ],
        label                 => 'LDIF Data',
-       label_class           => [ 'col-xs-2', ],
-       element_wrapper_class => [ 'col-xs-10', 'col-lg-10', ],
-       element_class         => [ 'mono' ],
+       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class => [ 'input-sm', 'col-10', ],
+       element_class         => [ 'text-monospace' ],
        element_attr          => { placeholder => 'LDIF data', },
        # cols => 30,
        rows                  => 20
      );
 
-has_field 'aux_reset' => ( type => 'Reset',
-			   wrapper_class => [ 'col-xs-4' ],
-			   element_class => [ 'btn', 'btn-danger', 'btn-block', ],
-			   element_wrapper_class => [ 'col-xs-12', ],
-			   # value => 'Reset'
-			 );
+has_field 'aux_reset'
+  => ( type          => 'Reset',
+       element_class => [ qw( btn
+			      btn-danger
+			      btn-block
+			      font-weight-bold
+			      text-uppercase) ],
+       wrapper_class => [ 'col-4' ],
+       value         => 'Reset' );
 
-has_field 'aux_submit' => (
-			   type => 'Submit',
-			   wrapper_class => [ 'col-xs-8'],
-			   element_class => [ 'btn', 'btn-success', 'btn-block', ],
-			   # label_no_filter => 1,
-			   value => 'Submit'
-			  );
+has_field 'aux_submit'
+  => ( type          => 'Submit',
+       element_class => [ qw( btn
+			      btn-success
+			      btn-block
+			      font-weight-bold
+			      text-uppercase) ],
+       wrapper_class => [ 'col-8', ],
+       value         => 'Submit' );
 
-has_block 'submitit' => ( tag => 'fieldset',
-			  render_list => [ 'aux_reset', 'aux_submit'],
-			  label => '&nbsp;',
-			  class => [ 'container-fluid' ]
-			);
+has_block 'aux_submitit'
+  => ( tag => 'fieldset',
+       render_list => [ 'aux_reset', 'aux_submit'],
+       class => [ 'row', ]
+     );
 
-sub build_render_list {[ 'file', 'ldif', 'submitit' ]}
+sub build_render_list {[ 'file', 'ldif', 'aux_submitit' ]}
 
 ######################################################################
 # == VALIDATION ======================================================

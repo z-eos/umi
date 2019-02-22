@@ -18,23 +18,44 @@ sub html_attributes {
 }
 
 has_field 'ldap_modify_group' => ( type => 'Hidden', );
-has_field 'aux_runflag' => ( type => 'Hidden', value => '0' );
+has_field 'aux_runflag'       => ( type => 'Hidden', value => '0' );
 
-has_field 'groups' => ( type => 'Multiple',
-			label => '',
-			element_class => [ 'umi-multiselect', ],
-			options_method => \&group, );
+has_field 'groups'
+  => ( type           => 'Multiple',
+       label          => '',
+       element_class  => [ 'umi-multiselect', ],
+       options_method => \&group, );
 
-has_field 'aux_reset' => ( type => 'Reset',
-			   wrapper_class => [ 'col-xs-4' ],
-			   element_class => [ 'btn', 'btn-danger', 'btn-block', ],
-			   element_wrapper_class => [ 'col-xs-12', ],
-			   value => 'Reset' );
+has_field 'aux_reset'
+  => ( type          => 'Reset',
+       element_class => [ qw( btn
+			      btn-danger
+			      btn-block
+			      font-weight-bold
+			      text-uppercase) ],
+       wrapper_class => [ 'col-4' ],
+       value         => 'Reset' );
 
-has_field 'aux_submit' => ( type => 'Submit',
-			    wrapper_class => [ 'col-xs-8' ],
-			    element_class => [ 'btn', 'btn-success', 'btn-block', ],
-			    value => 'Submit' );
+has_field 'aux_submit'
+  => ( type          => 'Submit',
+       element_class => [ qw( btn
+			      btn-success
+			      btn-block
+			      font-weight-bold
+			      text-uppercase) ],
+       wrapper_class => [ 'col-8', ],
+       value         => 'Submit' );
+
+has_block 'aux_submitit'
+  => ( tag => 'fieldset',
+       render_list => [ 'aux_reset', 'aux_submit'],
+       class => [ 'row', ]
+     );
+
+sub build_render_list {[ qw( ldap_modify_group
+			     aux_runflag
+			     groups
+			     aux_submitit ) ]}
 
 sub validate {
   my $self = shift;

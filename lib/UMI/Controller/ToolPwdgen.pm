@@ -55,9 +55,9 @@ sub index :Path :Args(0) {
 			    cap           => $params->{'pwd_cap'}     || undef,
 			    pronounceable => $params->{pronounceable} || 0, });
 
-  my $final_message->{success} = '<table class="table table-vcenter">' .
-    '<tr class="success"><td width="50%"><h1 class="mono text-center">' .
-    $pwd->{clear} . '</h1></td><td class="text-center" width="50%">';
+  my $final_message->{success} = '<table class="table table-vcenter table-borderless">' .
+    '<tr><td><h1 class="text-monospace text-center">' .
+    $pwd->{clear} . '</h1></td><td class="text-center">';
 
   my $qr;
   for( my $i = 0; $i < 41; $i++ ) {

@@ -4,12 +4,10 @@
 package UMI::Controller::Group;
 use Moose;
 use namespace::autoclean;
+use Data::Printer;
+use Logger;
 
 BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
-
-use Data::Printer;
-
-use Logger;
 
 use UMI::Form::Group;
 
@@ -36,40 +34,31 @@ Catalyst Controller.
 =cut
 
 sub index :Path :Args(0) {
-    my ( $self, $c ) = @_;
-    my $params = $c->req->parameters;
-    # if ( $c->check_user_roles('wheel')) {
-      # use Data::Dumper;
+  my ( $self, $c ) = @_;
+  my $params = $c->req->parameters;
+  # if ( $c->check_user_roles('wheel')) {
+  # use Data::Dumper;
 
-    $c->stash( template => 'group/group_wrap.tt',
-	       form => $self->form );
+  $c->stash( template => 'group/group_wrap.tt',
+	     form => $self->form );
 
-    log_debug { np( $params ) };
+  log_debug { np( $params ) };
 
-    return unless $self->form->process( posted => ($c->req->method eq 'POST'),
-					params => $params,
-					ldap_crud => $c->model('LDAP_CRUD'),
-				      );
+  if ( keys %{$params} > 0 ) {
+    return unless
+      $self->form->process( posted      => ($c->req->method eq 'POST'),
+			    params      => $params,
+			    init_object => { aux_dn_form_to_modify => $params->{aux_dn_form_to_modify}, },
+			    ldap_crud   => $c->model('LDAP_CRUD'), );
+  } else {
+    return unless
+      $self->form->process( posted    => ($c->req->method eq 'POST'),
+			    params    => $params,
+			    ldap_crud => $c->model('LDAP_CRUD'), );
+  }
+    
+  $c->stash( final_message => $self->create_group($c->model('LDAP_CRUD'), $params), );
 
-    $c->stash( final_message => $self->create_group($c->model('LDAP_CRUD'),
-						    {
-						     cn => $params->{cn},
-						     descr => $params->{descr},
-						     memberUid => $params->{memberUid},
-						    }),
-	     );
-
-    # } elsif ( defined $c->session->{"auth_uid"} ) {
-    #   if (defined $c->session->{'unauthorized'}->{ $c->action } ) {
-    # 	$c->session->{'unauthorized'}->{ $c->action } += 1;
-    #   } else {
-    # 	$c->session->{'unauthorized'}->{ $c->action } = 1;
-    #   }
-    #   $c->stash( 'template' => 'unauthorized.tt',
-    # 		 'unauth_action' => $c->action, );
-    # } else {
-    #   $c->stash( template => 'signin.tt', );
-    # }
 }
 
 =head2 create_group
@@ -80,9 +69,10 @@ sub create_group {
     my  ( $self, $ldap_crud, $args ) = @_;
 
     my $arg = {
-	       cn => $args->{cn},
+	       cn          => $args->{cn},
+	       branch      => $args->{branch},
 	       description => $args->{descr} || 'description-stub',
-	       memberUid => $args->{memberUid} || undef,
+	       memberUid   => $args->{memberUid} || undef,
 	      };
 
     log_debug { np( $args ) };
@@ -97,12 +87,12 @@ sub create_group {
     my $group_attrs = [
 		       'objectClass' => $ldap_crud->cfg->{objectClass}->{group},
 		       'description' => $arg->{description},
-		       'gidNumber' => $ldap_crud->last_gidNumber + 1,
-		       'memberUid' => $memberUid,
+		       'gidNumber'   => $ldap_crud->last_gidNumber + 1,
+		       'memberUid'   => $memberUid,
 		      ];
     my $mesg =
       $ldap_crud->add(
-		      sprintf('cn=%s,%s', $arg->{cn}, $ldap_crud->cfg->{base}->{group}),
+		      sprintf('cn=%s,%s', $arg->{cn}, $arg->{branch}),
 		      $group_attrs
     		     );
 

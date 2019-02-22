@@ -22,130 +22,107 @@ sub html_attributes {
 
 has_field 'ldap_add_dhcp' => ( type => 'Hidden', );
 
-has_field 'requestttl' => ( type => 'Text',
-			    label => 'Expiration',
-			    label_attr => { title => 'Object Expiration', },
-			    label_class => [ 'col-xs-2', 'col-sm-2', 'col-md-2', 'col-lg-2', 'atleastone', ],
-			    wrapper_class => [ 'col-xs-8' ],
-			    element_wrapper_class => [ 'col-xs-10', 'col-sm-10', 'col-md-10', 'col-lg-10', ],
-			    element_class => [ 'input-sm', ],
-			    element_attr => { title => 'Object Expiration', },
-			    required => 0 );
+has_field 'requestttl' 
+  => ( type                  => 'Text',
+       label                 => 'Expiration',
+       label_attr            => { title => 'Object Expiration', },
+       label_class           => [ 'col', 'atleastone', 'text-right', 'font-weight-bold', ],
+       wrapper_class         => [ 'row' ],
+       element_wrapper_class => [ 'input-sm', 'col-10', ],
+       element_attr          => { title => 'Object Expiration', },
+       required              => 0 );
 
-has_field 'net' => ( type => 'Select',
-		     label => 'Network',
-		     label_class => [ 'col-xs-2' ],
-		     wrapper_class => [ 'col-xs-8' ],
-		     element_wrapper_class => [ 'col-xs-10', 'col-lg-10', ],
-		     label_attr => { title => 'net (of the offices) the user assign to' },
-		     options_method => \&dhcp_nets,
-		   );
+has_field 'net' 
+  => ( type                  => 'Select',
+       label                 => 'Network',
+       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       wrapper_class         => [ 'row' ],
+       element_wrapper_class => [ 'col-10', ],
+       element_class         => [ 'custom-select', ],
+       label_attr            => { title => 'net (of the offices) the user assign to' },
+       options_method        => \&dhcp_nets,
+     );
 
-# sub options_net {
-#   my $self = shift;
-#   use Data::Printer;
+has_field 'cn' 
+  => (
+      label                 => 'Hostname',
+      label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+      label_attr            => { title => 'hostname in general' },
+      element_wrapper_class => [ 'input-sm', 'col-10', ],
+      wrapper_class         => [ 'row', ],
+      element_attr          => { placeholder => 'r2d2' },
+      # required => 1,
+     );
 
-#   my ( $i, $mesg, @domains, @org, $domain, $return );
+has_field 'dhcpHWAddress' 
+  => (
+      label                 => 'MAC',
+      label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+      label_attr            => { title => 'MAC address' },
+      element_wrapper_class => [ 'input-sm', 'col-10', ],
+      wrapper_class         => [ 'row', ],
+      element_attr          => { placeholder => '00:11:22:33:44:55' },
+      # required              => 1,
+     );
 
-#   return unless $self->ldap_crud;
+has_field 'dhcpStatements' 
+  => (
+      apply                 => [ IPAddress ],
+      label                 => 'IP',
+      label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+      label_attr            => { title => 'IP address, if not set, then first free available is picked up' },
+      element_wrapper_class => [ 'input-sm', 'col-10', ],
+      wrapper_class         => [ 'row', ],
+      element_attr          => { placeholder => '192.168.0.1' },
+      # required => 1,
+     );
 
-#   my $ldap_crud = $self->ldap_crud;
-
-#   $mesg = $ldap_crud->search({
-# 			      base => $self->field('ldap_add_dhcp')->input,
-# 			      scope => 'base',
-# 			      attrs => [ 'physicalDeliveryOfficeName' ],
-# 			     });
-
-#   push @{$return->{error}}, $ldap_crud->err($mesg) if ! $mesg->count;
-
-#   @org = $mesg->sorted('physicalDeliveryOfficeName');
-
-#   foreach ( @org ) {
-#     $mesg = $ldap_crud->search({
-# 				base => $_->get_value('physicalDeliveryOfficeName'),
-# 				scope => 'base',
-# 				attrs => [ 'associatedDomain', 'physicalDeliveryOfficeName' ],
-# 			       });
-#     push @{$return->{error}}, $ldap_crud->err($mesg) if ! $mesg->count;
-#     $domain = $mesg->as_struct;
-#     foreach $i ( @{$domain->{$_->get_value('physicalDeliveryOfficeName')}->{associateddomain}} ) {
-#        	push @domains,
-# 	  {
-# 	   value => $i,
-# 	   label => sprintf('%s (%s)',
-# 			    $i,
-# 			    $domain->{$_->get_value('physicalDeliveryOfficeName')}->{physicaldeliveryofficename}->[0])
-# 	  };
-#       }
-#   }
-#   return \@domains;
-# }
-
-has_field 'cn' => (
-		   label => 'Hostname',
-		   label_class => [ 'col-xs-2' ],
-		   label_attr => { title => 'hostname in general' },
-		   element_wrapper_class => [ 'col-xs-10', 'col-lg-10', ],
-		   wrapper_class => 'col-xs-8',
-		   element_attr => { placeholder => 'r2d2' },
-		   # required => 1,
-		  );
-
-has_field 'dhcpHWAddress' => (
-			      label => 'MAC',
-			      label_class => [ 'col-xs-2' ],
-			      label_attr => { title => 'MAC address' },
-			      element_wrapper_class => [ 'col-xs-10', 'col-lg-10', ],
-			      wrapper_class => 'col-xs-8',
-			      element_attr => { placeholder => '00:11:22:33:44:55' },
-#			      required => 1,
-			     );
-
-has_field 'dhcpStatements' => (
-			       apply => [ IPAddress ],
-			       label => 'IP',
-			       label_class => [ 'col-xs-2' ],
-			       label_attr => { title => 'IP address, if not set, then first free available is picked up' },
-			       element_wrapper_class => [ 'col-xs-10', 'col-lg-10', ],
-			       wrapper_class => 'col-xs-8',
-			       element_attr => { placeholder => '192.168.0.1' },
-			       # required => 1,
-			      );
-
-has_field 'dhcpComments' => (
-			     type => 'TextArea',
-			     label => 'Comments',
-			     label_class => [ 'col-xs-2' ],
-			     element_wrapper_class => [ 'col-xs-10', 'col-lg-10', ],
-			     wrapper_class => 'col-xs-8',
-			     element_attr => { placeholder => 'this static lease any comment (type/purpose/state of the device/user)', },
-			     rows => 2,
-			    );
+has_field 'dhcpComments' 
+  => (
+      type                  => 'TextArea',
+      label                 => 'Comments',
+      label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+      element_wrapper_class => [ 'input-sm', 'col-10', ],
+      wrapper_class         => [ 'row', ],
+      element_attr          => { placeholder => 'this static lease any comment (type/purpose/state of the device/user)', },
+      rows                  => 2,
+     );
 
 has_field 'hspace' => ( type => 'Display',
 			html => '<div class="clearfix"></div>',
 		      );
 
 has_field 'aux_reset' => ( type => 'Reset',
-			   wrapper_class => [ 'col-xs-3' ],
+			   wrapper_class => [ 'col' ],
 			   element_class => [ 'btn', 'btn-danger', 'btn-block', ],
 			   element_wrapper_class => [ 'col-xs-12', ],
 			   value => 'Reset' );
 
-has_field 'aux_submit' => (
-			   type => 'Submit',
-			   wrapper_class => [ 'col-xs-9', ],
-			   element_class => [ 'btn', 'btn-success', 'btn-block', ],
-			   # label => '&nbsp;',
-			   # label_class => [ 'col-xs-2', ],
-			   value => 'Submit'
-			  );
+has_field 'aux_reset'
+  => ( type          => 'Reset',
+       element_class => [ qw( btn
+			      btn-danger
+			      btn-block
+			      font-weight-bold
+			      text-uppercase) ],
+       wrapper_class => [ 'col-4' ],
+       value         => 'Reset' );
 
-has_block 'submitit' => ( tag => 'div',
-			  render_list => [ 'aux_reset', 'aux_submit'],
-			  class => [ 'row', ]
-			);
+has_field 'aux_submit'
+  => ( type          => 'Submit',
+       element_class => [ qw( btn
+			      btn-success
+			      btn-block
+			      font-weight-bold
+			      text-uppercase) ],
+       wrapper_class => [ 'col-8', ],
+       value         => 'Submit' );
+
+has_block 'aux_submitit'
+  => ( tag => 'fieldset',
+       render_list => [ 'aux_reset', 'aux_submit'],
+       class => [ 'row', ]
+     );
 
 sub build_render_list {[ 'ldap_add_dhcp',
 			 'requestttl',
@@ -155,7 +132,7 @@ sub build_render_list {[ 'ldap_add_dhcp',
 			 'dhcpStatements',
 			 'dhcpComments',
 			 'hspace',
-			 'submitit' ]}
+			 'aux_submitit' ]}
 
 sub validate {
   my $self = shift;

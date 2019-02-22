@@ -2,6 +2,8 @@
 
 [% INCLUDE ldap_err.tt %]
 
+[% h = site.pageheading.substr(1,1) + 1 %]
+[% card_header = 'h' _ h %]
 [% MACRO buttonizer  BLOCK %]
 <form id="buttonizer_form[% buttonizer_id %]"
       method="POST"
@@ -16,89 +18,88 @@
 </form>
 [% END %]
 
-<div class="page-header">
+<div class="w-100 pt-2 pb-2">
   <[% site.pageheading %]>
-    <b>[% auth_obj.givenname %]&nbsp;[% auth_obj.sn %]</b> <small class="mono">(<i>UID: &laquo;[% auth_obj.uid %]&raquo; preferences)</i></small>
-  </[% site.pageheading %]>
+    <b>[% auth_obj.givenname %]&nbsp;[% auth_obj.sn %]</b> <small class="text-monospace text-muted">(<i>UID: &laquo;[% auth_obj.uid %]&raquo; preferences)</i></small>
+    </[% site.pageheading %]>
+    <hr>
 </div>
 
-<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-
-  <div class="panel panel-info">
-    <div class="panel-heading" id="heading_personal_data">
-      <h3 class="panel-title">
-	<a class="collapsed chevron_toggleable" data-toggle="collapse"
+  <div class="card w-100">
+    <div class="card-header bg-info p-0" id="heading_personal_data">
+      <[% card_header %] class="card-title text-light m-0 mt-1">
+	<a class="collapsed chevron_toggleable btn btn-link text-light" data-toggle="collapse"
 	   href="#collapse_personal_data" aria-expanded="true" aria-controls="collapse_personal_data">
           <i id="chevron_switcher" class="fa [% site.icons.toggle_down %] text-default"></i>
         </a>
-	<div class="btn umi-zerro-padding col-xs-offset-1">
+	<div class="btn p-0">
 	[%   buttonizer( buttonizer_id='to_user_dn',
 	       buttonizer_dn=auth_obj.dn
-	   buttonizer_text= '<i class="fas fa-2x fa-user-cog umi-search"></i>' ) %]
-	</div>
+	   buttonizer_text= '<i class="fas fa-lg fa-user-cog umi-search"></i>' ) %]
+	</div> 
 	<b>Personal data</b>
-      </h3>
+      </[% card_header %]>
     </div>
-    <div id="collapse_personal_data" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_personal_data">
-      <div class="panel-body">
+    <div id="collapse_personal_data" class="collapse in" role="tabcard" aria-labelledby="heading_personal_data">
+      <div class="card-body">
 	<div class="media">
 	  <div class="media-body">
-	    <dl class="dl-horizontal">
-	      <dt class="text-info">
+	    <dl class="row">
+	      <dt class="col-2 text-info text-right">
 		name:
 	      </dt>
-	      <dd>
+	      <dd class="col-10">
 		<b>[% auth_obj.givenname %] [% auth_obj.sn %]</b>
 	      </dd>
-	      <dt class="text-info">
+	      <dt class="col-2 text-info text-right">
 		uid:
 	      </dt>
-	      <dd>
+	      <dd class="col-10">
 		<span class="fa fa-li fa-sign-in" title="login"></span>
 		[% auth_obj.uid %]
 	      </dd>
-	      <dt class="text-info">
+	      <dt class="col-2 text-info text-right">
 		role:
 	      </dt>
-	      <dd>
+	      <dd class="col-10">
 		[% IF auth_obj.title.size %][% FOREACH i IN auth_obj.title.sort %][% i %]<br>[% END %]
 		[% ELSE %]
 		[% auth_obj.title %]
 		[% END %]
 	      </dd>
-	      <dt class="text-info">
+	      <dt class="col-2 text-info text-right">
 		telephone:
 	      </dt>
-	      <dd>
+	      <dd class="col-10">
 		[% IF auth_obj.telephonenumber.size %][% FOREACH i IN auth_obj.telephonenumber %][% i %]<br>[% END %]
 		[% ELSE %]<span class="text-danger">N/A</span>[% END %]
 	      </dd>
-	      <dt class="text-info">
+	      <dt class="col-2 text-info text-right">
 		email/s:
 	      </dt>
-	      <dd>
+	      <dd class="col-10">
 		[% IF auth_obj.mail.size %][% FOREACH i IN auth_obj.mail %][% i %]<br>[% END %]
 		[% ELSE %]<span class="text-danger">N/A</span>[% END %]
 	      </dd>
 	      [% IF c.check_any_user_role ('admin', 'coadmin') %]
-	      <dt class="text-info">
+	      <dt class="col-2 text-info text-right">
 		UMI sys.group/s:
 	      </dt>
-	      <dd>
+	      <dd class="col-10">
 		[%   FOREACH role IN auth_obj.roles.sort %][% role %]<br>[% END %]
 	      </dd>
 
-	      <dt class="text-info">
+	      <dt class="col-2 text-info text-right">
 		group/s:
 	      </dt>
-	      <dd>
+	      <dd class="col-10">
 		[%   IF groups.group.size %][% FOREACH group IN groups.group.sort %][% group %]<br>[% END %]
 		[%   ELSE %]N/A[% END %]
 	      </dd>
-	      <dt class="text-info">
+	      <dt class="col-2 text-info text-right">
 		netgroup/s:
 	      </dt>
-	      <dd>
+	      <dd class="col-10">
 		[%   IF groups.group.size %][% FOREACH netgroup IN groups.netgroup.sort %][% netgroup %]<br>[% END %]
 		[%   ELSE %]N/A[% END %]
 	      </dd>
@@ -107,27 +108,29 @@
 	      [% END %]
 	    </dl>
 	  </div>
-	  <div class="media-right"><img width="200" class="media-object img-thumbnail bg-info" [% jpegPhoto %]</div>
+	  <img width="200" class="media-object img-thumbnail bg-info" [% jpegPhoto %]
 	</div>
       </div>
     </div>
   </div>
 
+  [% h = site.pageheading.substr(1,1) + 2 %]
+  [% card_header = 'h' _ h %]
 
   [% IF orgs.size > 0 %]
 
-  <div class="panel panel-info">
-    <div class="panel-heading" id="heading_org">
-      <h3 class="panel-title">
-	<a class="collapsed chevron_toggleable" data-toggle="collapse"
+  <div class="card w-100">
+    <div class="card-header bg-info p-0" id="heading_org">
+      <[% card_header %] class="card-title text-light m-0 mt-1">
+	<a class="collapsed chevron_toggleable btn btn-link text-light" data-toggle="collapse"
 	   href="#collapse_org" aria-expanded="false" aria-controls="collapse_org">
           <i id="chevron_switcher" class="fa [% site.icons.toggle_right %]"></i>
         </a>
-	<span class="fa fa-industry col-xs-offset-1">&nbsp;</span><b>Organization/s</b>
-      </h3>
+	<i class="fas fa-industry ml-5"></i> <b>Organization/s</b>
+      </[% card_header %]>
     </div>
-    <div id="collapse_org" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_org">
-      <div class="panel-body">
+    <div id="collapse_org" class="collapse" role="tabcard" aria-labelledby="heading_org">
+      <div class="card-body">
 	[% FOREACH org IN orgs %]
 
 	<address>
@@ -156,18 +159,18 @@
   [% END %]
 
   [% IF dhcp.size > 0 %]
-  <div class="panel panel-success">
-    <div class="panel-heading" id="heading_dhcp">
-      <h3 class="panel-title">
-	<a class="collapsed chevron_toggleable" data-toggle="collapse"
+  <div class="card w-100">
+    <div class="card-header bg-success p-0" id="heading_dhcp">
+      <[% card_header %] class="card-title text-light m-0 mt-1">
+	<a class="collapsed chevron_toggleable btn btn-link text-light" data-toggle="collapse"
 	   href="#collapse_dhcp" aria-expanded="false" aria-controls="collapse_dhcp">
           <i id="chevron_switcher" class="fa [% site.icons.toggle_down %]"></i>
         </a>
-	<span class="fa fa-sitemap col-xs-offset-1">&nbsp;</span><b>DHCP</b>
-      </h3>
+	<i class="fas fa-network-wired ml-5"></i> <b>DHCP</b>
+      </[% card_header %]>
     </div>
-    <div id="collapse_dhcp" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_dhcp">
-      <!-- div class="panel-body" -->
+    <div id="collapse_dhcp" class="collapse in" role="tabcard" aria-labelledby="heading_dhcp">
+      <!-- div class="card-body" -->
 	[% IF c.check_user_roles('wheel') || c.check_user_roles('wheel') %]
 	<form role="form" method="POST"
 	      action="/searchby/proc">
@@ -176,7 +179,7 @@
 	    <thead><tr class="active"><th>Hostname</th><th>DDNS</th><th>IP</th><th>MAC</th><th>Description</th></tr></thead>
 	    <tbody>
 	      [% FOREACH x IN dhcp %]
-	      <tr class="mono">
+	      <tr class="text-monospace">
 		<td>
 		  [% x.cn %]
 		</td>
@@ -194,21 +197,21 @@
   [% END %]
 
   [% IF service.size > 0 %]
-  <div class="panel panel-success">
-    <div class="panel-heading" id="heading_service">
-      <h3 class="panel-title">
-	<a class="collapsed chevron_toggleable" data-toggle="collapse"
+  <div class="card w-100">
+    <div class="card-header bg-success p-0" id="heading_service">
+      <[% card_header %] class="card-title text-light m-0 mt-1">
+	<a class="collapsed chevron_toggleable btn btn-link text-light" data-toggle="collapse"
 	   href="#collapse_service" aria-expanded="false" aria-controls="collapse_service">
 	  <i id="chevron_switcher" class="fa [% site.icons.toggle_down %]"></i>
 	</a>
-	<span class="fa fa-sliders-h col-xs-offset-1">&nbsp;</span><b>Services</b>
-      </h3>
+	<i class="fas fa-sliders-h ml-5"></i> <b>Services</b>
+      </[% card_header %]>
     </div>
-    <div id="collapse_service" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_service">
+    <div id="collapse_service" class="collapse in" role="tabcard" aria-labelledby="heading_service">
 	<table class="table table-condenced table-stripped table-hover">
 	  <tbody>
 	    [% FOREACH y IN service %]
-	    <tr class="active mono">
+	    <tr class="active text-monospace">
 	      <th colspan="2">
 		<span class="text-success">
 		  <span class="[% y.icon %] fa-lg"></span>
@@ -221,7 +224,7 @@
 	    <tr>
 	      <td></td>
 	      <td>
-		<dl>
+		<dl class="row">
 		  <dt class="inline-group">
 
 		    [% IF y.auth && ( y.authorizedService.search('mail') ||
@@ -241,7 +244,7 @@
 			  <form role="form" method="POST" action="/searchby/modify_userpassword">
 			    <button type="submit" title="modify password" class="btn btn-link" data-order="30"
 				    value="[% z.key %]" name="ldap_modify_password">
-			      <span class="fa fa-user-lock text-danger"></span>
+			      <span class="fa fa-fingerprint text-danger"></span>
 			      password
 			    </button>
 			  </form>
@@ -259,18 +262,18 @@
 		  <dd>
 		    
 		    [%   IF y.cert.${z.key} %]
-		    <h6 class="mono umi-text-xs">
-		      <dl class="dl-horizontal">
+		    <h6 class="text-monospace umi-text-xs">
+		      <dl class="row">
 			[% FOREACH cert IN y.cert.${z.key} %]
 			[%   NEXT IF cert.key == "cert" %]
 			[%   NEXT IF cert.key == "error" && cert.value == "" %]
-			<dt>[% cert.key %]</dt><dd>[% cert.value %]</dd>
+			<dt class="col-2 text-right">[% cert.key %]</dt><dd class="col-10">[% cert.value %]</dd>
 			[% END %]
 		      </dl>
 		    </h6>
 		    [%   ELSIF y.sshkey.${z.key} %]
 		    [%     FOREACH cert IN y.sshkey.${z.key} %]
-		    <h6 class="mono umi-text-xs">[% cert %]</h6>
+		    <h6 class="text-monospace umi-text-xs">[% cert %]</h6>
 		    [%     END %]
 		    [%   END %]
 		    [% END %]
@@ -287,17 +290,17 @@
   [% END %]
 
   [% IF inventory.size > 0 %]
-  <div class="panel panel-success">
-    <div class="panel-heading" id="heading_inventory">
-      <h3 class="panel-title">
-	<a class="collapsed chevron_toggleable" data-toggle="collapse"
+  <div class="card w-100">
+    <div class="card-header bg-success p-0" id="heading_inventory">
+      <[% card_header %] class="card-title text-light m-0 mt-1">
+	<a class="collapsed chevron_toggleable btn btn-link text-light" data-toggle="collapse"
 	   href="#collapse_inventory" aria-expanded="false" aria-controls="collapse_inventory">
           <i id="chevron_switcher" class="fa [% site.icons.toggle_right %]"></i>
         </a>
-	<span class="fa fa-pen-nib col-xs-offset-1">&nbsp;</span><b>Inventory</b>
-      </h3>
+	<i class="fas fa-pen-nib ml-5"></i> <b>Inventory</b>
+      </[% card_header %]>
     </div>
-    <div id="collapse_inventory" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_inventory">
+    <div id="collapse_inventory" class="collapse" role="tabcard" aria-labelledby="heading_inventory">
 	<div class="table-responsive">
 	  <table class="table table-condenced table-stripped table-hover">
 	    <thead>
@@ -311,7 +314,7 @@
 	      [% FOREACH x IN inventory %]
 	      <tr class="success"><td>[% x.hwType %]</td><td>[% x.inventoryNumber %]</td><td>[% x.dn %]</td></tr>
 	      <tr><td></td><td colspan="2">
-		<table class="table table-bordered table-condenced table-stripped table-hover">
+		<table class="table table-sm table-condenced table-stripped table-hover">
 		  <thead>
 		    <tr class="active">
 		      <th class="text-right"">compart</th>
@@ -336,8 +339,6 @@
   </div>
   [% END %]
 
-</div>
-
 <script>
 
  /*
@@ -346,12 +347,12 @@
 
  $('.collapse_in_out').on('click', function() {
    console.log('toggle from searchby.tt');
-   $("[id^=collapse]").toggleClass('panel-collapse collapse in').toggleClass('panel-collapse collapse');
+   $("[id^=collapse]").toggleClass('collapse in').toggleClass('collapse');
    $("[id^=chevron_switcher]").toggleClass('[% site.icons.toggle_right %]').toggleClass('[% site.icons.toggle_down %]');
  });
 
  $('.chevron_toggleable').on('click', function() { 
-   if ($(this).closest('.panel').find('.panel-collapse').hasClass('in')) { 
+   if ($(this).closest('.card').find('.card-collapse').hasClass('in')) { 
      console.log('searchby.tt: chevron_toggleable collapsed');
      $(this).find('#chevron_switcher').removeClass('[% site.icons.toggle_down %]').addClass('[% site.icons.toggle_right %]')
    } else { 

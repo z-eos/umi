@@ -15,11 +15,6 @@ sub build_form_element_class { [ qw(formajaxer) ] }
 
 has '+enctype' => ( default => 'multipart/form-data');
 
-#sub build_form_element_class { [ 'form-horizontal', ] }
-# sub build_update_subfields {
-#   by_flag => { repeatable => { do_wrapper => 1, do_label => 1, controls_div => 1, } }
-# }
-
 sub html_attributes {
   my ( $self, $field, $type, $attr ) = @_;
   push @{$attr->{class}}, 'required'
@@ -33,18 +28,24 @@ sub html_attributes {
 
 has_field 'aux_dn_form_to_modify' => ( type => 'Hidden', );
 
-has_field 'cn' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
-		    label => 'Name',
-		    # label_class => [ 'h2', ],
-		    element_attr => { placeholder => 'users-allowed-to-fly' },
-		    # wrapper_class => [ 'col-xs-11', 'col-lg-2', ],
-		    required => 1 );
+has_field 'cn' 
+  => ( apply                 => [ NoSpaces, NotAllDigits, Printable ],
+       label                 => 'Name',
+       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class => [ 'input-sm', 'col-11', ],
+       element_attr          => { placeholder => 'users-allowed-to-fly' },
+       wrapper_class         => [ 'row', ],
+       required              => 1 );
 
 
-has_field 'description' => ( type => 'TextArea',
-		       label => 'Description',
-		       element_attr => { placeholder => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed dapibus nulla. Mauris vehicula vehicula ligula ac dapibus. Fusce vehicula a turpis sed. ' },
-		       cols => 30, rows => 2);
+has_field 'description' 
+  => ( type                  => 'TextArea',
+       label                 => 'Description',
+       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class => [ 'input-sm', 'col-11', ],
+       element_attr          => { placeholder => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed dapibus nulla. Mauris vehicula vehicula ligula ac dapibus. Fusce vehicula a turpis sed. ' },
+       wrapper_class         => [ 'row', ],
+       cols => 30, rows => 2 );
 
 
 has_field 'aux_delim_triple'
@@ -53,26 +54,29 @@ has_field 'aux_delim_triple'
      );
 
 has_field 'aux_add_triple'
-  => ( type => 'AddElement',
-       repeatable => 'triple',
-       value => 'Add new triple',
+  => ( type          => 'AddElement',
+       repeatable    => 'triple',
+       value         => 'Add new triple',
        element_class => [ 'btn-success', ],
        # wrapper_class => [ 'col-xs-12', 'col-lg-offset-10', 'col-lg-2', ],
      );
 
 has_field 'triple'
-  => ( type => 'Repeatable',
-       setup_for_js => 1,
-       do_wrapper => 1,
+  => ( type                  => 'Repeatable',
+       setup_for_js          => 1,
+       do_wrapper            => 1,
+       label                 => 'Host-User-Domain Triple/s',
        # tags => { controls_div => 1 },
-       element_class => [ 'btn-success', ],
        element_wrapper_class => [ 'controls', ],
-       # wrapper_attr => { class => [ 'no-has-error', ], },
+       element_class         => [ 'row', ],
+       # element_attr => { class => [ 'row777', ], },
+       # wrapper_class         => [ 'row', ],
+       # wrapper_attr => { class => [ 'row', ], },
        # wrap_repeatable_element_method => \&wrap_triple_elements,
      );
 # sub wrap_triple_elements {
 #   my ( $self, $input, $subfield ) = @_;
-#   my $output = sprintf('%s%s%s', qq{\n<div class="controls">},
+#   my $output = sprintf('%s%s%s', qq{\n<div class="row 123456">},
 # 		       $input,
 # 		       qq{</div>});
 # }
@@ -84,43 +88,43 @@ has_field 'triple'
 # }
 
 has_field 'triple.host'
-  => ( apply => [ NoSpaces, NotAllDigits, Printable ],
-       do_label => 0,
-       label => 'Host',
-       element_attr => { placeholder => 'host01',
-			 title => 'host',
-			 'data-name' => 'host',
-			 'data-group' => 'triple', },
-       wrapper_class => [ 'col-xs-11', 'col-lg-3', ],
+  => ( apply         => [ NoSpaces, NotAllDigits, Printable ],
+       do_label      => 0,
+       label         => 'Host',
+       element_attr  => { placeholder  => 'host01',
+			  title        => 'host',
+			  'data-name'  => 'host',
+			  'data-group' => 'triple', },
+       wrapper_class => [ 'col-md-3', ],
      );
 
 has_field 'triple.user'
-  => ( apply => [ NoSpaces, NotAllDigits, Printable ],
-       do_label => 0,
-       label => 'User',
-       element_attr => { placeholder => 'user06',
-			 title => 'user',
-			 'data-name' => 'user',
-			 'data-group' => 'triple', },
-       wrapper_class => [ 'col-xs-11', 'col-lg-3', ],
+  => ( apply         => [ NoSpaces, NotAllDigits, Printable ],
+       do_label      => 0,
+       label         => 'User',
+       element_attr  => { placeholder  => 'user06',
+			  title        => 'user',
+			  'data-name'  => 'user',
+			  'data-group' => 'triple', },
+       wrapper_class => [ 'col-md-3', ],
      );
 
 has_field 'triple.domain'
-  => ( apply => [ NoSpaces, NotAllDigits, Printable ],
+  => ( apply    => [ NoSpaces, NotAllDigits, Printable ],
        do_label => 0,
-       label => 'Domain',
-       element_attr => { placeholder => 'foo.bar',
-			 title => 'domain',
-			 'data-name' => 'domain',
+       label    => 'Domain',
+       element_attr => { placeholder  => 'foo.bar',
+			 title        => 'domain',
+			 'data-name'  => 'domain',
 			 'data-group' => 'triple', },
-       wrapper_class => [ 'col-xs-11', 'col-lg-3', ],
+       wrapper_class => [ 'col-md-3', ],
      );
 
 has_field 'triple.remove'
   => ( type => 'RmElement',
        value => 'Remove this triple',
        element_class => [ 'btn-danger', ],
-       wrapper_class => [ 'col-xs-11', 'col-lg-3', ],
+       wrapper_class => [ 'col-md-3', ],
      );
 
 has_block 'nistriple'
@@ -135,16 +139,14 @@ has_block 'nistriple'
        # 	 role => "tabpanel", },
 );
 
-has_field 'aux_delim_memberNisNetgroup'
-  => ( type => 'Display',
-       html => '<br><br><br><br><br><br><h4>NIS Sub Groups</h4>',
+has_field 'memberNisNetgroup'
+  => ( type                  => 'Multiple',
+       label                 => 'NisNetgroup Subgroups',
+       label_class           => [ 'font-weight-bold', ],
+       element_wrapper_class => [ 'input-sm', ],
+       element_class         => [ 'umi-multiselect' ],
+       # required => 1,
      );
-
-has_field 'memberNisNetgroup' => ( type => 'Multiple',
-			   label => 'NisNetgroup Subgroups',
-			   element_class => [ 'umi-multiselect' ],
-			   # required => 1,
-			 );
 
 sub options_memberNisNetgroup {
   my $self = shift;
@@ -168,17 +170,41 @@ sub options_memberNisNetgroup {
   return \@memberNisNetgroup;
 }
 
+# has_field 'aux_reset'
+#   => ( type          => 'Reset',
+#        element_class => [ qw( btn
+# 			      btn-danger
+# 			      btn-block
+# 			      font-weight-bold
+# 			      text-uppercase) ],
+#        wrapper_class => [ 'col-4' ],
+#        value         => 'Reset' );
 
-has_field 'aux_reset' => ( type => 'Reset',
-			   wrapper_class => [ 'col-xs-4' ],
-			   element_class => [ 'btn', 'btn-danger', 'btn-block' ],
-			   element_wrapper_class => [ 'col-xs-12', ],
-			   value => 'Reset' );
+has_field 'aux_submit'
+  => ( type          => 'Submit',
+       element_class => [ qw( btn
+			      btn-success
+			      btn-block
+			      mt-3
+			      font-weight-bold
+			      text-uppercase) ],
+       wrapper_class => [ 'col-8', 'float-right', ],
+       value         => 'Submit' );
 
-has_field 'aux_submit' => ( type => 'Submit',
-			    wrapper_class => [ 'col-xs-8' ],
-			    element_class => [ 'btn', 'btn-success', 'col-xs-12' ],
-			    value => 'Submit' );
+# has_block 'aux_submitit'
+#   => ( tag => 'fieldset',
+#        render_list => [ 'aux_reset', 'aux_submit'],
+#        class => [ 'row', ]
+#      );
+
+# sub build_render_list {[ qw( cn
+# 			     description
+# 			     aux_delim_triple
+# 			     aux_add_triple
+# 			     triple
+# 			     nistriple
+# 			     aux_delim_memberNisNetgroup
+# 			     aux_submitit ) ]}
 
 sub validate {
   my $self = shift;

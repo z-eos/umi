@@ -41,10 +41,20 @@ sub index :Path :Args(0) {
     $c->stash( template => 'nis/abstr_nis_netgroup.tt',
 	       form     => $self->form );
 
-    return unless $self->form->process( posted    => ($c->req->method eq 'POST'),
-					params    => $params,
-					ldap_crud => $ldap_crud, );
+    if ( keys %{$params} > 0 ) {
+      return unless
+	$self->form->process( posted      => ($c->req->method eq 'POST'),
+			      params      => $params,
+			      init_object => { aux_dn_form_to_modify => $params->{aux_dn_form_to_modify}, },
+			      ldap_crud => $ldap_crud, );
+    } else {
+    
+      return unless $self->form->process( posted    => ($c->req->method eq 'POST'),
+					  params    => $params,
+					  ldap_crud => $ldap_crud, );
+    }
     my $entry = $self->attributes($ldap_crud->cfg->{objectClass}->{netgroup}, $params);
+    log_debug { np($entry) };
 
     if ( defined $params->{aux_dn_form_to_modify} && $params->{aux_dn_form_to_modify} ne '' ) {
       $entry->{dn}                    = $params->{aux_dn_form_to_modify};
@@ -76,6 +86,7 @@ sub attributes {
       if defined $args->{description} && $args->{description} ne '';
 
     $attributes->{associatedDomain} = $args->{associatedDomain};
+    $attributes->{netgroup} = $args->{netgroup};
 
       my $nisNetgroupTriple;
       if ( ref($args->{uids}) eq 'ARRAY' && ref($args->{associatedDomain}) eq 'ARRAY' ) {
@@ -123,24 +134,26 @@ add nisNetgroup object
 =cut
 
 sub add {
-    my  ( $self, $ldap_crud, $args ) = @_;
-    my @arr = map { $_ => $args->{$_} } keys(%{$args});
-    # log_debug { np( @arr ) };
+  my  ( $self, $ldap_crud, $args ) = @_;
+  my $netgroup = $args->{netgroup};
+  delete $args->{netgroup};
+  my @arr = map { $_ => $args->{$_} } keys(%{$args});
+  # log_debug { np( @arr ) };
 
-    my $mesg =
-      $ldap_crud->add( sprintf('cn=%s,%s', $args->{cn}, $ldap_crud->cfg->{base}->{netgroup}),
-		       \@arr );
+  my $mesg =
+    $ldap_crud->add( sprintf('cn=%s,%s', $args->{cn}, $netgroup),
+		     \@arr );
 
-    my $return;
-    if ( $mesg ) {
-      $return->{error} = sprintf('netgroup <em><b>%s</b></em> creation error occured %s',
-				 $args->{cn},
-				 $mesg->{html});
-    } else {
-      $return->{success} = sprintf('netgroup <em><b>%s</b></em> was created successfully',
-				   $args->{cn});
-    }
-    return $return;
+  my $return;
+  if ( $mesg ) {
+    $return->{error} = sprintf('netgroup <em><b>%s</b></em> creation error occured %s',
+			       $args->{cn},
+			       $mesg->{html});
+  } else {
+    $return->{success} = sprintf('netgroup <em><b>%s</b></em> was created successfully',
+				 $args->{cn});
+  }
+  return $return;
 }
 
 

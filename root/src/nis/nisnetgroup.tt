@@ -5,17 +5,16 @@
 
 <link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">
 
-<div class="page-header">
+<[% site.pageheading %] class="font-weight-bold p-3">
+<i class="fas fa-user-friends fa-lg mr-3 text-muted"></i>
 [% IF form.init_object.aux_dn_form_to_modify %]
-  <[% site.pageheading %]>
   Nis NetGroup Update Form <small><em>[% form.init_object.aux_dn_form_to_modify %]</em></small>
   </[% site.pageheading %]>
 [% ELSE %]
-  <[% site.pageheading %]>
   Nis NetGroup Creation Form <small><em>all stuff</em></small>
-  </[% site.pageheading %]>
 [% END %]
-</div>
+</[% site.pageheading %]>
+<hr>
 
 [% INCLUDE ldap_err.tt %]
 

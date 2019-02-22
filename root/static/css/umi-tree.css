@@ -1,76 +1,95 @@
 .tree {
-    list-style: none;
-    padding: 0;
+  list-style: none;
+  padding: 0;
 }
 
 .tree > .tree-item {
-    padding-left: 25px;
+  padding-left: 20px;
+}
+
+.tree-root > .tree-item {
+  padding-left: 10px;
 }
 
 .tree-item {
-    position: relative;
+  position: relative;
 }
 
 .tree-item-link {
-    color: #333;
-    text-decoration: none;
-    cursor: pointer;
+  color: #333;
+  text-decoration: none;
+  cursor: pointer;
+  width: 0;
 }
 
 .tree-item-link:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .tree-point {
-    position: relative;
-    padding: 1px 5px 1px;
-    line-height: 1.05;
-    border-radius: 3px;
+  position: relative;
+  padding: 1px 5px 1px;
+  line-height: 1.05;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
 }
 
 .tree.opened {
-    display: block;
+  display: block;
 }
 
 .tree.closed {
-    display: none;
+  display: none;
 }
 
 .tree-item-status {
-    /* transition: .1s; */
-    position: absolute;
-    right: 100%;
-    top: 2px;
-    bottom: 0px;
-    height: 16px;
-    padding: 3px 8px;
+  transition: .1s;
+  /*! position: absolute; */
+  /*! right: 100%; */
+  /*! top: 2px; */
+  /*! bottom: 0px; */
+  height: 16px;
+  padding: 3px 0px;
+}
+
+.tree-item-leaf {
+  margin-right: 10px;
+  display: inline-block;
+}
+
+.tree-item-options {
+  width: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-right: 10px;
+}
+
+.last-item .tree-item-options {
+  width: 25px;
 }
 
 .tree-item-status:hover {
-    color: blue;
+  color: blue;
 }
 
 .tree-subitem-loader {
-    position: absolute;
-    right: 100%;
-    top: 0px;
-    bottom: 0px;
-    height: 16px;
-    padding: 3px 0px;
+
 }
 
 .tree-item-link-list {
-    margin-right: 0px;
-    display: inline;
-    margin-left: 3px;
-    position: relative;
-    top: 1px;
-    cursor: pointer;
-    font-size: 14px;
+  margin-right: 0px;
+  display: inline;
+  /*! margin-left: 3px; */
+  position: relative;
+  top: 1px;
+  cursor: pointer;
+  font-size: 14px;
 }
 
 .tree-search {
-    color: #333;
-    margin: 0px 6px 5px;
-    width: calc(100% - 12px);
+  color: #333;
+  margin: 0px 6px 5px;
+  width: calc(100% - 12px);
 }

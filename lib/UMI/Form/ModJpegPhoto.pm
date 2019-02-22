@@ -16,41 +16,41 @@ has '+action' => ( default => '/searchby/proc' );
 
 has_field 'ldap_modify_jpegphoto' => ( type => 'Hidden', );
 
-has_field 'remove' => ( type => 'Checkbox',
-       label => 'Remove Avatar',
-       wrapper_class => [ 'checkbox', ],
-       element_wrapper_class => [ 'col-xs-offset-2', 'col-10' ],
-       element_attr => { title => 'When checked, this checkbox causes avatar removal.',}, );
+has_field 'remove' 
+  => ( type                  => 'Checkbox',
+       label                 => 'Remove Avatar',
+       wrapper_class         => [ 'checkbox', ],
+       element_wrapper_class => [ 'offset-md-2', 'col-10' ],
+       element_attr          => { title => 'When checked, this checkbox causes avatar removal.',}, );
 
-has_field 'avatar' => ( type => 'Upload',
-			label => 'Photo User ID',
-			label_class => [ 'col-xs-2' ],
-			element_class => [ 'btn', 'btn-default', ],
-			element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-			max_size => '50000',
-			# required => 1,
-		      );
+has_field 'avatar' 
+  => ( type                  => 'Upload',
+       label                 => 'Photo User ID',
+       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       element_class         => [ 'btn', 'btn-default', 'btn-secondary', ],
+       element_wrapper_class => [ 'col-10', ],
+       wrapper_class         => [ 'row', ],
+       max_size              => '50000',
+       # required => 1,
+     );
 
-has_field 'aux_hspace' => ( type => 'Display',
-                            html => '<p>&nbsp;</p>',
-                          );
+has_field 'aux_reset' 
+  => ( type                  => 'Reset',
+       wrapper_class         => [ 'col-4' ],
+       element_class         => [ 'btn', 'btn-danger', 'btn-block', ],
+       value                 => 'Reset' );
 
-has_field 'aux_reset' => ( type => 'Reset',
-			   wrapper_class => [ 'col-xs-4' ],
-			   element_class => [ 'btn', 'btn-danger', 'btn-block', ],
-			   element_wrapper_class => [ 'col-xs-12', ],
-			   value => 'Reset' );
+has_field 'aux_submit' 
+  => ( type          => 'Submit',
+       wrapper_class => [ 'col-8', ],
+       element_class => [ 'btn', 'btn-success', 'btn-block', ],
+       value         => 'Submit' );
 
-has_field 'aux_submit' => ( type => 'Submit',
-			    wrapper_class => [ 'col-xs-8', ],
-			    element_class => [ 'btn', 'btn-success', 'btn-block', ],
-			    value => 'Submit' );
-
-has_block 'aux_submitit' => ( tag => 'fieldset',
-			      render_list => [ 'aux_hspace', 'aux_reset', 'aux_submit'],
-			      # label => '&nbsp;',
-			      class => [ 'container-fluid' ]
-			    );
+has_block 'aux_submitit' 
+  => ( tag         => 'div',
+       render_list => [ 'aux_reset', 'aux_submit'],
+       class       => [ 'row' ]
+     );
 
 sub build_render_list {[ 'ldap_modify_jpegphoto', 'remove', 'avatar', 'aux_submitit' ]}
 

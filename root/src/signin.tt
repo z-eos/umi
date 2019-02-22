@@ -6,19 +6,35 @@
 <div class="container umi-bg ajaxless">
   <form id="form-signin" class="form-signin formajaxer" role="form" method="POST" action="signin">
   [% INCLUDE ldap_err.tt %]
-    <div class="form-group has-feedback">
 	<img src="/static/images/umi-logo-black-diagonal.png"
 	     alt="Unified Management Interface"
+	     width="290" height="290"
 	     class="img-responsive mx-auto">
       <[% site.pageheading %] class="form-signin-heading text-center text-light text-uppercase">please sign in</[% site.pageheading %]>
 
       <div class="input-group">
-	<span class="input-group-addon" id="basic-login"><i class="fa fa-user-circle"></i></span>
-	<input type="text" class="form-control" placeholder="login" aria-describedby="basic-login" name="auth_uid" required autofocus>
+	<div class="input-group-prepend" id="basic-login">
+	  <span class="input-group-text btn-secondary" id="basic-login-prepend">
+	    <i class="fas fa-fw fa-user-circle"></i>
+	  </span>
+	</div>
+	<input type="text" class="form-control"
+	       placeholder="login"
+	       aria-label="login"
+	       aria-describedby="basic-login-prpend"
+	       name="auth_uid" required autofocus>
       </div>
       <div class="input-group">
-	<span class="input-group-addon" id="basic-password"><i class="fa fa-unlock-alt"></i></span>
-	<input type="password" class="form-control" placeholder="password" aria-describedby="basic-password" name="auth_pwd" required>
+	<div class="input-group-prepend" id="basic-password">
+	  <span class="input-group-text btn-default" id="basic-password-prepend">
+	    <i class="fa fa-fw fa-unlock-alt"></i>
+	  </span>
+	</div>
+	<input type="password" class="form-control"
+	       placeholder="password"
+	       aria-label="password"
+	       aria-describedby="basic-password-prepend"
+	       name="auth_pwd" required>
       </div>
       <!-- <div class="checkbox text-light">
 	      <label>
@@ -27,6 +43,5 @@
 	      </div> -->
 
       <button class="btn btn-primary btn-block" type="submit">Sign in</button>
-    </div>
   </form>
 </div> <!-- /container -->

@@ -1,8 +1,9 @@
 [% META title = 'DHCP root' %]
 
-<div class="page-header">
-  <[% site.pageheading %]>New DHCP Lease Creation Form <small><em>IP address to MAC binding</em></small></[% site.pageheading %]>
-</div>
+<[% site.pageheading %] class="font-weight-bold p-3">
+<i class="fas fa-network-wired fa-lg mr-3 text-muted"></i>
+New DHCP Lease Creation Form <small><em class="text-muted">( IP address to MAC binding )</em></small>
+</[% site.pageheading %]>
 
 [% INCLUDE ldap_err.tt %]
 

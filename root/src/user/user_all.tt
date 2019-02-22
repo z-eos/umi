@@ -1,25 +1,39 @@
+[% # -*- mode: web; mode: follow; -*- %]
 [% META
    title = 'Add Service Account (New)'
    link = '<link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">'
-%]
+   %]
 
 <link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">
 
-<div class="page-header">
-  <[% site.pageheading %]>[% IF ! form.field('add_svc_acc').value %]Root And [% ELSE %]Additional [% END %]Services Object/s Creation Form[% IF form.field('add_svc_acc').value %] for user: [% form.field('add_svc_acc').value %][% END %]
-    <small>
-      <em>
-	(complex form for all possible stuff (user's personal data and services),
-	sign &laquo;<span class="fa fa-exclamation-circle text-danger umi-opacity05"></span>&raquo; marks mandatory fields, sign &laquo;<span class="fa fa-exclamation-triangle text-warning umi-opacity05"></span>&raquo; marks optional fields)
-      </em>
-    </small>
-  </[% site.pageheading %]>
-</div>
+<[% site.pageheading %] class="font-weight-bold p-3">
+<i class="fas fa-user fa-lg mr-3 text-muted"></i>
+[% IF ! form.field('add_svc_acc').value %] Root And
+[% ELSE %] Additional 
+[% END %]
+Services 
+[% IF form.field('add_svc_acc').value %]
+for: [% form.field('add_svc_acc').value %]
+[% END %]
+<i class="h6 text-muted text-nowrap float-right">(
+  <span class="text-danger">
+    <i class="fas fa-exclamation-circle text-danger umi-opacity05"></i>
+    mandatory
+  </span>,
+  <span class="text-warning">
+    <i class="fas fa-exclamation-triangle text-warning umi-opacity05"></i>
+    optional
+  </span>
+  )</i>
+</[% site.pageheading %]>
+
+<hr>
 
 [% INCLUDE ldap_err.tt %]
 
-<form id="[% form.name %]" class="formajaxer umi-margings-fixer form-horizontal tab-content" method="post" enctype="multipart/form-data" action="/userall">
-<!-- <form class="form-horizontal tab-content" method="post" enctype="multipart/form-data"> -->
+<form id="[% form.name %]"
+	class="formajaxer umi-margings-fixer form-horizontal tab-content"
+	method="post" enctype="multipart/form-data" action="/userall">
 
   [% form.field('add_svc_acc').render %]
   [% form.field('dynamic_object').render %]
@@ -27,12 +41,12 @@
   [% IF ! form.field('add_svc_acc').value %]
   [%      form.field('person_givenname').render %]
   [%      form.field('person_sn').render %]
-  <div class="col-xs-offset-1 col-xs-5 col-lg-5 row">
-    <div class="col-xs-6">
-      [% form.field('person_namesake').render %]
+  <div class="row m-0">
+    <div class="offset-md-2 col-md-2">
+	[% form.field('person_namesake').render %]
     </div>
-    <div class="col-xs-6">
-      [% form.field('person_simplified').render %]
+    <div class="col-md-2">
+	[% form.field('person_simplified').render %]
     </div>
   </div>
   <br class="clear">
@@ -41,104 +55,101 @@
   [% # IF ! form.field('add_svc_acc').value || (form.field('add_svc_acc').value && form.field('dynamic_object').value)%]
   [% form.field('person_exp').render %]
   [% # END %]
-  
-  <!-- <nav role="navigation" class="well well-sm" title="menu of the actions to perform upon the object"> -->
-    <ul class="nav nav-pills nav-justified well well-sm" id="myTab">
-      <li role="presentation" class="nav-item addsvcacc [% IF ! form.field('add_svc_acc').value %]active [% END %]text-left">
-	<a aria-controls="person" data-toggle="tab" role="button"
-	   id="person-tab" href="#person" title="Personal Data"
-	   [% IF ! form.field('add_svc_acc').value %]aria-expanded="true"[% ELSE %]aria-expanded="false"[% END %]>
-	  <span class="fa-stack">
-	    <span class="fa fa-fw fa-user fa-lg"></span>
-	  </span>
-	  <span class="visible-lg-inline visible-md-inline">Person</span>
-	</a>
-      </li>
 
-      <li role="presentation" class="nav-item complex text-left[% IF form.field('add_svc_acc').value %] active[% END %]">
-	<a aria-controls="auth" data-toggle="tab" role="button"
-	   id="auth-tab" href="#auth" title="Login/Password Dependent Services"
-	   [% IF ! form.field('add_svc_acc').value %]aria-expanded="false"[% ELSE %]aria-expanded="true"[% END %]>
-	  <!-- <span class="fa fa-user-plus fa-lg"></span>
-	      <span class="visible-lg-inline">Login</span> -->
-	  <span class="fa-stack">
-	    <i class="fa fa-cog fa-stack-2x text-muted umi-opacity02"></i>
-	    <i class="fa fa-key pull-right fa-stack-1x"></i>
-	  </span>
-	  <span class="visible-lg-inline visible-md-inline">&nbsp;&nbsp;</span>
-	  <span class="visible-lg-inline visible-md-inline">&nbsp;Pass</span>
-	</a>
-      </li>
+  <ul class="nav nav-pills nav-fill border-top border-bottom border-muted px-3 py-3" id="myTab" role="tablist">
+    <li class="nav-item addsvcacc">
+      <a class="nav-link d-flex justify-content-center align-items-center [% IF ! form.field('add_svc_acc').value %]active [% END %]"
+	 aria-controls="person" data-toggle="tab"
+	 id="person-tab" href="#person" title="Personal Data"
+	 [% IF ! form.field('add_svc_acc').value %]
+	 aria-expanded="true"
+	 [% ELSE %]
+	 aria-expanded="false"
+	 [% END %]>
+	<i class="fas fa-user fa-lg mr-2"></i>
+	<span class="d-none d-md-block">Person</span>
+      </a>
+    </li>
 
-      <li role="presentation" class="nav-item complex dropdown text-left">
+    <li class="nav-item complex">
+      <a class="nav-link d-flex justify-content-center align-items-center [% IF form.field('add_svc_acc').value %]active [% END %]"
+	 aria-controls="auth" data-toggle="tab"
+	 id="auth-tab" href="#auth" title="Login/Password Dependent Services"
+	 [% IF ! form.field('add_svc_acc').value %]
+	 aria-expanded="false"
+	 [% ELSE %]
+	 aria-expanded="true"
+	 [% END %]>
+	<i class="fa fa-key pull-right fa-lg mr-2"></i>
+	<span class="d-none d-md-block">Pass</span>
+      </a>
+    </li>
+
+    <li id="nopass" class="nav-item complex dropdown">
 	<a aria-controls="sec-contents" data-toggle="dropdown"
-	   class="dropdown-toggle" role="button" id="umiSec" href="#"
-	   title="Services Without Login/Password" aria-expanded="false">
-	  <span class="fa-stack">
-	      <i class="fa fa-cog fa-stack-2x text-muted umi-opacity02"></i>
-	      <i class="fa fa-lock-open pull-right fa-stack-1x"></i>
-	  </span>
-	  <!-- <span class="fa fa-user-times fa-lg"></span> -->
-	  <!-- <span class="caret"></span> -->
-	  <span class="visible-lg-inline visible-md-inline">NoPass</span>
+	   class="nav-link dropdown-toggle d-flex justify-content-center align-items-center" id="umiSec" href="#"
+	   title="Services Without Login/Password" aria-haspopup="true" aria-expanded="false">
+	  <i class="fa fa-lock-open fa-lg mr-2"></i>
+	  <span class="d-none d-md-block">NoPass</span>
 	</a>
-	<ul id="umiSec-contents" aria-labelledby="umiSec"
-	    class="dropdown-menu">
-	  <li role="presentation">
-	    <a aria-controls="ovpn" data-toggle="tab" id="ovpn-tab"
-	       role="button" tabindex="-1" href="#ovpn" aria-expanded="false">
-	      <span class="fa fa-certificate"></span>
-	      OpenVPN
-	    </a>
-	  </li>
-	</ul>
-      </li>
+	<div id="umiSec-contents" aria-labelledby="umiSec" class="dropdown-menu dropdown-menu-right">
+	  <a class="dropdown-item d-flex justify-content-center align-items-center"
+	     aria-controls="ovpn" data-toggle="tab" id="ovpn-tab"
+	     tabindex="-1" href="#ovpn" aria-expanded="false">
+	    <span class="fas fa-certificate mr-2"></span>
+	    <span class="d-none d-md-block">OpenVPN</span>
+	  </a>
+	</div>
+    </li>
 
-      [% IF ! form.field('add_svc_acc').value %]
-      <li role="presentation" class="nav-item complex text-left">
-	<a aria-controls="groups" data-toggle="tab" id="groups-tab"
-	   role="button" href="#groups" title="Group/s User Belongs to"
-	   aria-expanded="false">
-	  <span class="fa-stack">
-	    <span class="fa fa-fw fa-users fa-lg"></span>
-	  </span>
-	  <span class="visible-lg-inline visible-md-inline">Group</span>
-	</a>
-      </li>
-      [% END %]
-    </ul>
-    <!-- </nav> -->
-  <br class="clear"><br>
+    [% IF ! form.field('add_svc_acc').value %]
+    <li class="nav-item complex">
+      <a class="nav-link d-flex justify-content-center align-items-center"
+	 aria-controls="groups" data-toggle="tab" id="groups-tab"
+	 href="#groups" title="Group/s User Belongs to" aria-expanded="false">
+	<i class="fas fa-fw fa-users fa-lg mr-2"></i>
+	<span class="d-none d-md-block">Group</span>
+      </a>
+    </li>
+    [% END %]
+  </ul>
 
   [% # form.render %]
   [% form.render_repeatable_js %]
-  [% IF ! form.field('add_svc_acc').value %][% form.block('person').render %][% END %]
+  [% IF ! form.field('add_svc_acc').value %]
+  [%   form.block('person').render %]
+  [% END %]
   [% form.block('auth').render %]
   [% form.block('ovpn').render %]
   [% form.block('groupsselect').render %]
 
   <hr>
-  <div class="form-group">
-  [% form.field('aux_reset').render %]
   [% form.field('aux_submit').render %]
-  </div>
 </form>
 
 [% IF params.size %]
-<br><br><br>
-<div class="panel panel-info">
-  <div class="panel-heading">
+<div class="card mt-3">
+  <div class="card-header bg-info">
     <h4><span class="fa fa-exclamation-triangle">&nbsp;</span>Parameters passed to form!</h4>
   </div>
-  <div class="panel-body">
-    <dl class="dl-horizontal">
-    [% FOREACH param IN params %]
-      <dt>[% param.key %]</dt><dd>[% param.value %]</dd>
-      [% END %]
+  <div class="card-body">
+    <dl class="row">
+	[% FOREACH param IN params %]
+	<dt class="col-2">[% param.key %]</dt><dd class="col-10">[% param.value %]</dd>
+	[% END %]
     </dl>
   </div>
 </div>
 [% END %]
+
+<script>
+  /* BootStrap leaves .active for dropdown-menu items clicked
+     after once been clicked such element considered active and doesn't spawn events */
+  $('#nopass').on('hidden.bs.dropdown', function () {
+  // console.log('nopass hidden');
+  $('#ovpn-tab').removeClass('active');
+})
+</script>
 
 [% IF form.field('add_svc_acc').value %]
 <script type="text/javascript">

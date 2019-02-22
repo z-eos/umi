@@ -34,35 +34,45 @@ sub html_attributes {
 has_field 'aux_dn_form_to_modify' => ( type => 'Hidden', );
 
 has_field 'cn'
-  => ( apply => [ NoSpaces, NotAllDigits, Printable ],
-       label => 'Common Name',
-       element_attr => { placeholder => '' },
-       element_wrapper_class => [ 'input-group', 'input-group-sm', ],
-       required => 1 );
+  => ( apply                 => [ NoSpaces, NotAllDigits, Printable ],
+       label                 => 'Common Name',
+       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class => [ 'input-sm', 'col-10', ],
+       element_attr          => { placeholder => '' },
+       wrapper_class         => [ 'row', ],
+       required              => 1 );
 
 has_field 'sudoUser'
-  => ( apply => [ NoSpaces, NotAllDigits, Printable ],
-       label => 'User Name',
-       element_wrapper_class => [ 'input-group', 'input-group-sm', ],
-       element_attr => { placeholder => '' }, );
+  => ( apply                 => [ NoSpaces, NotAllDigits, Printable ],
+       label                 => 'User Name',
+       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class => [ 'input-group', 'col-10', ],
+       element_attr          => { placeholder => '' },
+       wrapper_class         => [ 'row', ], );
 
 has_field 'sudoHost'
-  => ( apply => [ NoSpaces, NotAllDigits, Printable ],
-       label => 'Host',
-       element_wrapper_class => [ 'input-group', 'input-group-sm', ],
-       element_attr => { placeholder => '' }, );
+  => ( apply                 => [ NoSpaces, NotAllDigits, Printable ],
+       label                 => 'Host',
+       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class => [ 'input-sm', 'col-10', ],
+       wrapper_class         => [ 'row', ],
+       element_attr          => { placeholder => '' }, );
 
 has_field 'sudoRunAsUser'
-  => ( apply => [ NoSpaces, NotAllDigits, Printable ],
-       label => 'Run As User',
-       element_wrapper_class => [ 'input-group', 'input-group-sm', ],
-       element_attr => { placeholder => '' }, );
+  => ( apply                 => [ NoSpaces, NotAllDigits, Printable ],
+       label                 => 'Run As User',
+       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class => [ 'input-sm', 'col-10', ],
+       wrapper_class         => [ 'row', ],
+       element_attr          => { placeholder => '' }, );
 
 has_field 'sudoRunAsGroup'
-  => ( apply => [ NoSpaces, NotAllDigits, Printable ],
-       label => 'Run As Group',
-       element_wrapper_class => [ 'input-group', 'input-group-sm', ],
-       element_attr => { placeholder => '' }, );
+  => ( apply                 => [ NoSpaces, NotAllDigits, Printable ],
+       label                 => 'Run As Group',
+       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class => [ 'input-sm', 'col-10', ],
+       wrapper_class         => [ 'row', ],
+       element_attr          => { placeholder => '' }, );
 
 
 has_field 'aux_delim_com'
@@ -71,37 +81,39 @@ has_field 'aux_delim_com'
      );
 
 has_field 'aux_add_com'
-  => ( type => 'AddElement',
-       repeatable => 'com',
-       value => 'Add new command',
+  => ( type          => 'AddElement',
+       repeatable    => 'com',
+       value         => 'Add new command',
        element_class => [ 'btn-success', 'btn-sm', ],
      );
 
 has_field 'com'
-  => ( type => 'Repeatable',
-       setup_for_js => 1,
-       do_wrapper => 1,
-       element_class => [ 'btn-success', ],
+  => ( type                  => 'Repeatable',
+       setup_for_js          => 1,
+       do_wrapper            => 1,
        element_wrapper_class => [ 'controls', ],
+       element_class         => [ 'row', ],
      );
 
 has_field 'com.sudoCommand'
-  => ( apply => [ NoSpaces, NotAllDigits, Printable ],
-       do_label => 0,
-       label => 'New Command',
-       element_attr => { placeholder => '',
-			 title => 'command',
-			 'data-name' => 'command',
-			 'data-group' => 'com', },
-       element_wrapper_class => [ 'input-group', 'input-group-sm', ],
-       wrapper_class => [ 'col-xs-10', 'col-lg-10', ],
+  => ( apply                 => [ NoSpaces, NotAllDigits, Printable ],
+       do_label              => 0,
+       label                 => 'New Command',
+       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       element_attr          => { placeholder  => '',
+				  title        => 'command',
+				  'data-name'  => 'command',
+				  'data-group' => 'com', },
+       element_wrapper_class => [ 'input-sm', ],
+       wrapper_class         => [ 'col-10', ],
      );
 
 has_field 'com.remove'
-  => ( type => 'RmElement',
-       value => 'Remove this command',
-       element_class => [ 'btn-danger', 'btn-sm', ],
-       wrapper_class => [ 'col-xs-2', 'col-lg-2', ],
+  => ( type                  => 'RmElement',
+       value                 => 'Remove this command',
+       element_class         => [ 'btn-danger', 'btn-sm', ],
+       element_wrapper_class => [ 'input-sm', ],
+       wrapper_class         => [ 'col-2', ],
      );
 
 
@@ -111,56 +123,88 @@ has_field 'aux_delim_opt'
      );
 
 has_field 'aux_add_opt'
-  => ( type => 'AddElement',
-       repeatable => 'opt',
-       value => 'Add new option',
+  => ( type          => 'AddElement',
+       repeatable    => 'opt',
+       value         => 'Add new option',
        element_class => [ 'btn-success', 'btn-sm', ],
      );
 
 has_field 'opt'
-  => ( type => 'Repeatable',
-       setup_for_js => 1,
-       do_wrapper => 1,
-       element_class => [ 'btn-success', 'btn-sm', ],
+  => ( type                  => 'Repeatable',
+       setup_for_js          => 1,
+       do_wrapper            => 1,
        element_wrapper_class => [ 'controls', ],
+       element_class         => [ 'row', ],
      );
 
 has_field 'opt.sudoOption'
-  => ( apply => [ NoSpaces, NotAllDigits, Printable ],
-       do_label => 0,
-       label => 'New Option',
-       element_attr => { placeholder => '',
-			 title => 'command', },
+  => ( apply                 => [ NoSpaces, NotAllDigits, Printable ],
+       do_label              => 0,
+       label                 => 'New Option',
+       element_attr          => { placeholder => '',
+				  title => 'command', },
        element_wrapper_class => [ 'input-group', 'input-group-sm', ],
-       wrapper_class => [ 'col-xs-10', 'col-lg-10', ],
+       wrapper_class         => [ 'col-xs-10', 'col-lg-10', ],
      );
 
 has_field 'opt.remove'
-  => ( type => 'RmElement',
-       value => 'Remove this option',
+  => ( type          => 'RmElement',
+       value         => 'Remove this option',
        element_class => [ 'btn-danger', 'btn-sm', ],
        wrapper_class => [ 'col-xs-2', 'col-lg-2', ],
      );
 
 
 has_field 'description' 
-  => ( type => 'TextArea',
-       label => 'Description',
-       element_attr => { placeholder => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed dapibus nulla. Mauris vehicula vehicula ligula ac dapibus. Fusce vehicula a turpis sed. ' },
-       element_wrapper_class => [ 'input-group', 'input-group-sm', ],
-       cols => 30, rows => 2);
+  => ( type                  => 'TextArea',
+       label                 => 'Description',
+       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class => [ 'input-sm', 'col-10', ],
+       element_attr          => { placeholder => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed dapibus nulla. Mauris vehicula vehicula ligula ac dapibus. Fusce vehicula a turpis sed. ' },
+       wrapper_class         => [ 'row', ],
+       cols                  => 30, rows => 2
+     );
 
+has_field 'aux_reset'
+  => ( type          => 'Reset',
+       element_class => [ qw( btn
+			      btn-danger
+			      btn-block
+			      font-weight-bold
+			      text-uppercase) ],
+       wrapper_class => [ 'col-4' ],
+       value         => 'Reset' );
 
-has_field 'aux_reset' => ( type => 'Reset',
-			   wrapper_class => [ 'col-xs-4' ],
-			   element_class => [ 'btn', 'btn-danger', 'btn-block' ],
-			   element_wrapper_class => [ 'col-xs-12', ],
-			   value => 'Reset' );
+has_field 'aux_submit'
+  => ( type          => 'Submit',
+       element_class => [ qw( btn
+			      btn-success
+			      btn-block
+			      font-weight-bold
+			      text-uppercase) ],
+       wrapper_class => [ 'col-8', ],
+       value         => 'Submit' );
 
-has_field 'aux_submit' => ( type => 'Submit',
-			    wrapper_class => [ 'col-xs-8' ],
-			    element_class => [ 'btn', 'btn-success', 'col-xs-12' ],
-			    value => 'Submit' );
+has_block 'aux_submitit'
+  => ( tag => 'fieldset',
+       render_list => [ 'aux_reset', 'aux_submit'],
+       class => [ 'row', ]
+     );
+
+sub build_render_list {[ qw( aux_dn_form_to_modify
+			     cn
+			     description
+			     sudoUser
+			     sudoHost
+			     sudoRunAsUser
+			     sudoRunAsGroup
+			     aux_delim_com
+			     aux_add_com
+			     com
+			     aux_delim_opt
+			     aux_add_opt
+			     opt
+			     aux_submitit ) ]}
 
 
 ######################################################################

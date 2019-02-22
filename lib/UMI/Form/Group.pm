@@ -19,16 +19,35 @@ sub html_attributes {
 }
 has '+item_class' => ( default =>'Group' );
 
-has_field 'cn' => ( apply => [ NoSpaces, NotAllDigits, Printable ],
-		    label => 'Group Name',
-		    element_attr => { placeholder => 'users-allowed-to-fly' },
-		    required => 1 );
+has_field 'branch'
+  => ( type                  => 'Select',
+       label                 => 'Branch',
+       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class => [ 'input-sm', 'col-10' ],
+       element_class         => [ 'input-sm', 'custom-select', ],
+       wrapper_class         => [ 'row', 'umi-hide', ],
+       options_method        => \&branch,
+       # required              => 1,
+     );
 
-has_field 'memberUid' => ( type => 'Multiple',
-			   label => 'Group Members',
-			   element_class => [ 'umi-multiselect' ],
-			   # required => 1,
-			 );
+has_field 'cn'
+  => ( apply                 => [ NoSpaces, NotAllDigits, Printable ],
+       label                 => 'Group Name',
+       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class => [ 'input-sm', 'col-10', ],
+       element_attr          => { placeholder => 'users-allowed-to-fly' },
+       wrapper_class         => [ 'row' ],
+       required              => 1 );
+
+has_field 'memberUid' 
+  => ( type                  => 'Multiple',
+       label                 => 'Group Members',
+       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class => [ 'input-sm', 'col-10', ],
+       element_class         => [ 'umi-multiselect' ],
+       wrapper_class         => [ 'row' ],
+       # required => 1,
+     );
 
 sub options_memberUid {
   my $self = shift;
@@ -60,30 +79,42 @@ sub options_memberUid {
   return \@memberUid;
 }
 
-has_field 'descr' => ( type => 'TextArea',
-		       label => 'Description',
-		       element_attr => { placeholder => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed dapibus nulla. Mauris vehicula vehicula ligula ac dapibus. Fusce vehicula a turpis sed. ' },
-		       cols => 30, rows => 2);
+has_field 'descr' 
+  => ( type                  => 'TextArea',
+       label                 => 'Description',
+       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class => [ 'input-sm', 'col-10', ],
+       element_attr          => { placeholder => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed dapibus nulla. Mauris vehicula vehicula ligula ac dapibus. Fusce vehicula a turpis sed. ' },
+       wrapper_class         => [ 'row' ],
+       cols                  => 30, rows => 2);
 
-has_field 'aux_reset' => ( type => 'Reset',
-			   wrapper_class => [ 'col-xs-4' ],
-			   element_class => [ 'btn', 'btn-danger', 'btn-block' ],
-			   element_wrapper_class => [ 'col-xs-12', ],
-			   # value => 'Reset'
-			 );
+has_field 'aux_reset'
+  => ( type          => 'Reset',
+       element_class => [ qw( btn
+			      btn-danger
+			      btn-block
+			      font-weight-bold
+			      text-uppercase) ],
+       wrapper_class => [ 'col-4' ],
+       value         => 'Reset' );
 
-has_field 'aux_submit' => ( type => 'Submit',
-			    wrapper_class => [ 'col-xs-8' ],
-			    element_class => [ 'btn', 'btn-success', 'btn-block' ],
-			    value => 'Submit' );
+has_field 'aux_submit'
+  => ( type          => 'Submit',
+       element_class => [ qw( btn
+			      btn-success
+			      btn-block
+			      font-weight-bold
+			      text-uppercase) ],
+       wrapper_class => [ 'col-8', ],
+       value         => 'Submit' );
 
-# has_block 'submitit' => ( tag => 'fieldset',
-# 			render_list => [ 'reset', 'submit'],
-# 			label => '&nbsp;',
-# 			class => [ 'row' ]
-# 		      );
+has_block 'aux_submitit'
+  => ( tag => 'fieldset',
+       render_list => [ 'aux_reset', 'aux_submit'],
+       class => [ 'row', ]
+     );
 
-# sub build_render_list {[ 'cn', 'memberUid', 'descr', 'submitit' ]}
+sub build_render_list {[ 'branch', 'cn', 'memberUid', 'descr', 'aux_submitit' ]}
 
 
 sub validate {
@@ -103,6 +134,19 @@ sub validate {
 }
 
 ######################################################################
+
+sub branch {
+  my $self = shift;
+  return unless $self->form->ldap_crud;
+  my $branch = $self->form->ldap_crud->
+    bld_select({ base   => $self->form->ldap_crud->cfg->{base}->{group},
+		 filter => '(ou=*)',
+#		 scope  => 'one',
+		 attr   => [ 'ou', 'description', ],});
+
+  unshift @{$branch}, { label => "root --- groups in ou=group,dc=umidb", value => "ou=group,dc=umidb"};
+  return $branch;
+}
 
 no HTML::FormHandler::Moose;
 

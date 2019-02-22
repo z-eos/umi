@@ -1,6 +1,10 @@
 [% META title = 'To QR Code' %]
 
-<[% site.pageheading %]><i class="fa fa-qrcode fa-lg"></i> Text to QR Code <small><em>all stuff</em></small></[% site.pageheading %]>
+<[% site.pageheading %] class="font-weight-bold p-3">
+<i class="fas fa-qrcode fa-lg mr-3 text-muted"></i>
+Text to QR-code<small><em class="text-muted text-monospace"></em></small>
+</[% site.pageheading %]>
+<hr>
 
 [% INCLUDE ldap_err.tt %]
 

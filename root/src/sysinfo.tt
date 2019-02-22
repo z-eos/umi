@@ -2,40 +2,35 @@
 
 <link href="/static/css/jquery.json-browse.css" rel="stylesheet" type="text/css">
 
-<h3>System Info <small><em> ... </em></small></h3>
+<[% site.pageheading %] class="font-weight-bold p-3">
+<i class="fas fa-info-circle fa-lg mr-3 text-muted"></i>
+System Info<small><em class="text-muted text-monospace"></em></small>
+</[% site.pageheading %]>
+<hr>
 
 <!-- https://www.npmjs.com/package/json-browse -->
 <script src="/static/js/jquery.json-browse.js"></script>
 
 
-<div class="form-inline json-controls">
-  <div class="form-group json-controls-item">
-    <i class="fas fa-compress text-info"></i>
-    <label class="switch switch-text switch-info switch-sm">
-      <input type="checkbox" class="switch-input" name="collapsed" checked="" id="collapsed">
-      <span class="switch-label" data-on="On" data-off="Off" title="data collapsed"></span>
-      <span class="switch-handle"></span>
-    </label>
+<div class="row json-controls mb-3">
+  <div class="custom-control custom-switch json-controls-item col-1">
+    <input type="checkbox" class="custom-control-input" checked id="collapsed" name="collapsed">
+    <label class="custom-control-label" for="collapsed">collapsed</label>
   </div>
-
-  <div class="form-group json-controls-item">
-    <i class="fas fa-quote-right text-info"></i>
-    <label class="switch switch-text switch-info switch-sm">
-      <input type="checkbox" class="switch-input" name="with-quotes" id="with-quotes">
-      <span class="switch-label" data-on="On" data-off="Off" title="keys with quotes"></span>
-      <span class="switch-handle"></span>
-    </label>
+  <div class="custom-control custom-switch json-controls-item col-1">
+    <input type="checkbox" class="custom-control-input" id="with-quotes" name="with-quotes">
+    <label class="custom-control-label" for="with-quotes">quoted</label>
   </div>
-  
-  <button id="btn-json-browse" title="re-render JSON" class="btn btn-info btn-sm json-controls-item">
-    <i class="fas fa-redo fa-lg"></i>
-  </button>
+  <div class="col1">
+    <button id="btn-json-browse" title="re-render JSON" class="btn btn-info json-controls-item">
+      <i class="fas fa-redo fa-lg"></i>
+    </button>
+  </div>
 </div>
 
-
-<div class="panel panel-default">
-  <div class="panel-heading">system info data ( JSON formated )</div>
-  <div id="json-renderer" class="json-body"></div>
+<div class="card card-default">
+  <div class="card-header">system info data ( JSON formated )</div>
+  <div id="json-renderer" class="json-body p-3"></div>
 </div>
 
 

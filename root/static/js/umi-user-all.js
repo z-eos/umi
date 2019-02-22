@@ -79,19 +79,19 @@ $(function(){
 		    relation = $option.data("relation");
 		
 		if (!relation || !relation.length) return;
-		$select.parents(".hfh.repinst.form-group").find(".form-group.relation."+relation).removeClass("hidden");
+		$select.parents(".hfh.repinst.form-group").find(".form-group.relation."+relation).removeClass("d-none");
 	    });
 	    
 
 	},
 	switchRelations = function(obj, newRelation) {
-	    var $formGroupsRelated = $(".form-group.relation", obj).addClass("hidden");
+	    var $formGroupsRelated = $(".form-group.relation", obj).addClass("d-none");
 	    
 	    if (newRelation)
 		$formGroupsRelated.each(function(id, element) {
 		    var $el = $(element);
 		    if ($el.hasClass(newRelation)) {
-			$el.toggleClass("hidden");
+			$el.toggleClass("d-none");
 			$("input:text, input:password, input:file, select, textarea, input:radio, input:checkbox", $el).each(function(index, item){
 			    resetElement($(item));
 			});

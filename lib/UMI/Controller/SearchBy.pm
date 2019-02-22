@@ -114,15 +114,15 @@ sub index :Path :Args(0) {
       # $filter = sprintf("mail=%s", $filter_meta);
       $filter = sprintf("|(mail=%s)(&(uid=%s)(authorizedService=mail@*))",
 			$filter_meta, $filter_meta );
-      $base = $ldap_crud->cfg->{base}->{acc_root};
+      $base   = $ldap_crud->cfg->{base}->{acc_root};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_jid'} ) {
       $filter = sprintf("&(authorizedService=xmpp@*)(uid=*%s*)", $filter_meta);
-      $base = $ldap_crud->cfg->{base}->{acc_root};
+      $base   = $ldap_crud->cfg->{base}->{acc_root};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_ip'} ) {
       $filter = sprintf("dhcpStatements=fixed-address %s", $filter_meta);
-      $base = $ldap_crud->cfg->{base}->{dhcp};
+      $base   = $ldap_crud->cfg->{base}->{dhcp};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_mac'} ) {
       push @{$return->{error}}, 'incorrect MAC address'
@@ -133,34 +133,33 @@ sub index :Path :Args(0) {
 			$self->macnorm({ mac => $filter_meta }),
 			$self->macnorm({ mac => $filter_meta }) );
 
-      $base = $ldap_crud->cfg->{base}->{db};
+      $base   = $ldap_crud->cfg->{base}->{db};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_name'} ) {
-      $filter = 
+      $params->{'ldapsearch_base'} = $base = $ldap_crud->cfg->{base}->{acc_root};
+      $filter                      =
 	sprintf("|(givenName=%s)(sn=%s)(uid=%s)(cn=%s)", $filter_meta, $filter_meta, $filter_meta, $filter_meta);
-      $base = $ldap_crud->cfg->{base}->{acc_root};
-      $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_telephone'} ) {
-      $filter = sprintf("|(telephoneNumber=%s)(mobile=%s)(homePhone=%s)",
+      $params->{'ldapsearch_base'} = $base = $ldap_crud->cfg->{base}->{acc_root};
+      $filter                      =
+	sprintf("|(telephoneNumber=%s)(mobile=%s)(homePhone=%s)",
 			$filter_meta, $filter_meta, $filter_meta);
-      $base = $ldap_crud->cfg->{base}->{acc_root};
-      $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_filter'} &&
 	      $params->{'ldapsearch_filter'} ne '' ) {
       $filter = $params->{'ldapsearch_filter'};
-      $base = $params->{'ldapsearch_base'};
+      $base   = $params->{'ldapsearch_base'};
     } elsif ( defined $params->{'ldap_subtree'} &&
 	      $params->{'ldap_subtree'} ne '' ) {
       $filter = 'objectClass=*';
-      $base = $params->{'ldap_subtree'};
+      $base   = $params->{'ldap_subtree'};
     } elsif ( defined $params->{'ldap_history'} &&
 	      $params->{'ldap_history'} ne '' ) {
-      $filter = 'reqDN=' . $params->{'ldap_history'};
+      $filter     = 'reqDN=' . $params->{'ldap_history'};
       $sort_order = 'straight';
-      $base = UMI->config->{ldap_crud_db_log};
+      $base       = UMI->config->{ldap_crud_db_log};
     } else {
       $filter = 'objectClass=*';
-      $base = $params->{'ldapsearch_base'};
+      $base   = $params->{'ldapsearch_base'};
     }
 
     # my $scope = defined $params->{ldapsearch_scope} ? $params->{ldapsearch_scope} : 'sub';
@@ -168,8 +167,8 @@ sub index :Path :Args(0) {
     
     if ( ! $c->check_any_user_role( qw/admin coadmin/ ) &&
 	 ! $self->may_i({ base_dn => $base,
-			  filter => $filter,
-			  user => $c->user, }) ) {
+			  filter  => $filter,
+			  user    => $c->user, }) ) {
       log_error { sprintf('User roles or Tools->may_i() check does not allow search by base dn: %s and/or filter: %s',
 			  $base,
 			  $filter ) };
@@ -283,6 +282,14 @@ sub index :Path :Args(0) {
 				     filter => sprintf('(&(cn=%s)(memberUid=%s))',
 						       $ldap_crud->cfg->{stub}->{group_blocked},
 						       $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }), });
+	
+	# $mesg = $ldap_crud->search({ base   => sprintf('cn=%s,%s',
+	# 					       $ldap_crud->cfg->{stub}->{group_blocked},
+	# 					       $ldap_crud->cfg->{base}->{group}),
+	# 			     filter => sprintf('(memberUid=%s)',
+	# 					       $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }), });
+
+	log_debug { np( $ldap_crud->cfg->{base}->{group} . " | " . $ldap_crud->cfg->{stub}->{group_blocked} . " | " . $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root}} ) };
 	# log_debug { np($mesg->as_struct) };
 	$blocked = $mesg->count;
 	$return->{error} .= $ldap_crud->err( $mesg )->{html}
@@ -581,7 +588,7 @@ sub proc :Path(proc) :Args(0) {
 	my @groups_usr = $mesg->sorted('cn');
 	push @{$params->{groups}}, $_->dn foreach ( $mesg->sorted('cn') );
       }
-      # log_debug { np( $params ) };
+      log_debug { np( $params ) };
 
       $c->stash( template => 'user/user_mod_group.tt',
 		 form => $self->form_mod_groups,
@@ -1589,25 +1596,26 @@ sub modify :Path(modify) :Args(0) {
 	} else {
 	  $dn =~ s/^(.+?),/$moddn,/;
 	  push @{$return->{success}},
-	    sprintf("<div class='panel panel-info'>
-  <div class='panel-heading'>RDN changed as well</div>
-  <div class='panel-body'>
-    <dl class='dl-horizontal'>
-      <dt>old DN</dt><dd class='mono'>%s</dd>
-      <dt>new DN</dt><dd class='mono'>%s</dd>
+	    sprintf("<div class='card bg-info'>
+  <div class='card-header'>RDN changed as well</div>
+  <div class='card-body'>
+    <dl class='row'>
+      <dt class='col'>old DN</dt><dd class='col-11 text-monospace'>%s</dd>
+      <dt class='col'>new DN</dt><dd class='col-11 text-monospace'>%s</dd>
     </dl>
   </div>
 </div>", $params->{dn}, $dn);
 	}
       }
-      push @{$return->{success}}, 'Modification/s made:<pre class="mono">' .
-	np($modx,
-	   caller_info    => 0,
-	   colored        => 0,
-	   hash_separator => ': ',
-	   indent         => 2,
-	   multiline      => 0,
-	   index          => 0) . '</pre>';
+      push @{$return->{success}}, 'Modification/s made:<pre class="text-monospace">' . "\n" .
+	np($modx) . '</pre>';
+      # 	  , caller_info    => 0,
+      # 	   colored        => 0,
+      # 	   hash_separator => ': ',
+      # 	   separator      => "\n",
+      # 	   multiline      => 0,
+      # 	   index          => 0) . '</pre>';
+      # log_debug { np ($modx)};
     }
   } else {
     push @{$return->{warning}}, 'No change was performed!';
@@ -2012,8 +2020,8 @@ sub block :Path(block) :Args(0) {
 					       data => $err->{error} });
     } else {
       $c->stash( template => 'stub.tt',
-		 err => $err,
-		 params => $params, );
+		 err      => $err,
+		 params   => $params, );
     }
   }
 }

@@ -21,70 +21,83 @@ sub html_attributes {
 }
 
 has_field 'toqr'
-  => ( type => 'TextArea',
-       label => 'Text to QR Code',
-       label_class => [ 'col-xs-2', ],
-       element_wrapper_class => [ 'col-xs-10', 'col-lg-7', ],
-       element_attr => { placeholder => 'Варкалось. Хливкие шорьки, Пырялись по наве, И хрюкотали зелюки, Как мюмзики в мове.' },
-       maxlength => 1660,
+  => ( type                  => 'TextArea',
+       label                 => 'Text to QR Code',
+       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class => [ 'input-sm', 'col-10', ],
+       element_attr          => { placeholder => 'Варкалось. Хливкие шорьки, Пырялись по наве, И хрюкотали зелюки, Как мюмзики в мове.' },
+       maxlength             => 1660,
        # cols => 30,
-       rows => 4,
+       rows                  => 4,
+       wrapper_class         => [ 'row', 'mt-3', ],
      );
 
 has_field 'mod'
-  => ( type => 'Select',
-       label => 'Module Size',
-       label_class => [ 'col-xs-2', ],
-       element_wrapper_class => [ 'col-xs-10', 'col-lg-7', ],
-       element_attr => { title => 'Size of modules (QR code unit)', },
-       options => [{ value =>  '1', label =>  '1', },
-		   { value =>  '2', label =>  '2', },
-		   { value =>  '3', label =>  '3', },
-		   { value =>  '4', label =>  '4', },
-		   { value =>  '5', label =>  '5', selected => 'on', },
-		   { value =>  '6', label =>  '6', },
-		   { value =>  '7', label =>  '7', },
-		   { value =>  '8', label =>  '8', },
-		   { value =>  '9', label =>  '9', },
-		   { value => '10', label => '10', },
-		   { value => '11', label => '11', },
-		   { value => '12', label => '12', },
-		   { value => '13', label => '13', },
-		   { value => '14', label => '14', },
-		   { value => '15', label => '15', },
-		   { value => '16', label => '16', },
-		   { value => '17', label => '17', },
-		   { value => '18', label => '18', },
-		   { value => '19', label => '19', },
-		   { value => '20', label => '20', },
-		   { value => '21', label => '21', },
-		   { value => '22', label => '22', },
-		   { value => '23', label => '23', },
-		   { value => '24', label => '24', },
-		   { value => '25', label => '25', },
-		   { value => '26', label => '26', },
-		   { value => '27', label => '27', },
-		   { value => '28', label => '28', },
-		   { value => '29', label => '29', },
-		   { value => '30', label => '30', },],
+  => ( type                  => 'Select',
+       label                 => 'Module Size',
+       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class => [ 'input-sm', 'col-10', ],
+       element_attr          => { title => 'Size of modules (QR code unit)', },
+       options               => [{ value =>  '1', label =>  '1', },
+				 { value =>  '2', label =>  '2', },
+				 { value =>  '3', label =>  '3', },
+				 { value =>  '4', label =>  '4', },
+				 { value =>  '5', label =>  '5', selected => 'on', },
+				 { value =>  '6', label =>  '6', },
+				 { value =>  '7', label =>  '7', },
+				 { value =>  '8', label =>  '8', },
+				 { value =>  '9', label =>  '9', },
+				 { value => '10', label => '10', },
+				 { value => '11', label => '11', },
+				 { value => '12', label => '12', },
+				 { value => '13', label => '13', },
+				 { value => '14', label => '14', },
+				 { value => '15', label => '15', },
+				 { value => '16', label => '16', },
+				 { value => '17', label => '17', },
+				 { value => '18', label => '18', },
+				 { value => '19', label => '19', },
+				 { value => '20', label => '20', },
+				 { value => '21', label => '21', },
+				 { value => '22', label => '22', },
+				 { value => '23', label => '23', },
+				 { value => '24', label => '24', },
+				 { value => '25', label => '25', },
+				 { value => '26', label => '26', },
+				 { value => '27', label => '27', },
+				 { value => '28', label => '28', },
+				 { value => '29', label => '29', },
+				 { value => '30', label => '30', },],
+       wrapper_class         => [ 'row', ],
      );
 
-has_field 'aux_reset' => ( type => 'Reset',
-			   wrapper_class => [ 'col-xs-4' ],
-			   element_class => [ 'btn', 'btn-danger', 'btn-block', ],
-			   element_wrapper_class => [ 'col-xs-12', ], );
+has_field 'aux_reset'
+  => ( type          => 'Reset',
+       element_class => [ qw( btn
+			      btn-danger
+			      btn-block
+			      font-weight-bold
+			      text-uppercase) ],
+       wrapper_class => [ 'col-4' ],
+       value         => 'Reset' );
 
-has_field 'aux_submit' => ( type => 'Submit',
-			    wrapper_class => [ 'col-xs-8'],
-			    element_class => [ 'btn', 'btn-success', 'btn-block', ],
-			    value => 'Submit', );
+has_field 'aux_submit'
+  => ( type          => 'Submit',
+       element_class => [ qw( btn
+			      btn-success
+			      btn-block
+			      font-weight-bold
+			      text-uppercase) ],
+       wrapper_class => [ 'col-8', ],
+       value         => 'Submit' );
 
-has_block 'submitit' => ( tag => 'fieldset',
-			  render_list => [ 'aux_reset', 'aux_submit'],
-			  label => '&nbsp;',
-			  class => [ 'container-fluid' ], );
+has_block 'aux_submitit'
+  => ( tag => 'fieldset',
+       render_list => [ 'aux_reset', 'aux_submit'],
+       class => [ 'row', ]
+     );
 
-sub build_render_list {[ 'toqr', 'mod', 'submitit' ]}
+sub build_render_list {[ 'toqr', 'mod', 'aux_submitit' ]}
 
 ######################################################################
 # ====================================================================

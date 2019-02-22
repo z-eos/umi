@@ -1,6 +1,6 @@
 $.fn.sort = function (sortType) {
     return $(this).each(function () {
-	$(this).append($(this).find('li').get().sort(function (el1, el2) {
+	$(this).append($(this).find('div.dropdown-item').get().sort(function (el1, el2) {
 	    return typeof sortType === 'function' ? sortType( $(el1), $(el2) ) : false;	
 	}));
     })

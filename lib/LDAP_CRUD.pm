@@ -120,7 +120,7 @@ sub _build_cfg {
 		   inventory      => 'ou=hw,ou=Inventory,'     . UMI->config->{ldap_crud_db},
 		   machines       => 'ou=machines,'            . UMI->config->{ldap_crud_db},
 		   mta            => 'ou=Sendmail,'            . UMI->config->{ldap_crud_db},
-		   netgroup       => 'ou=access,ou=Netgroups,' . UMI->config->{ldap_crud_db},
+		   netgroup       => 'ou=Netgroups,' . UMI->config->{ldap_crud_db},
 		   org            => 'ou=Organizations,'       . UMI->config->{ldap_crud_db},
 		   ovpn           => 'ou=OpenVPN,'             . UMI->config->{ldap_crud_db},
 		   rad_groups     => 'ou=groups,ou=RADIUS,'    . UMI->config->{ldap_crud_db},
@@ -157,6 +157,7 @@ sub _build_cfg {
 			    history       => 'fas fa-history',
 			    inventory     => 'fas fa-tag',
 			    mta           => 'fas fa-envelope',
+			    netgroup      => 'fas fa-user-friends',
 			    rad_groups    => 'fas fa-users',
 			    rad_profiles  => 'fas fa-cogs',
 			   }, },
@@ -534,7 +535,7 @@ sub _build_cfg {
 			},
 	  },
 	  err => {
-		  0 => '<div class="alert list-group-item-success" role="alert"><i class="fas fa-info-circle fa-lg"></i>&nbsp;<b>Your request returned no result. Try to change query parameter/s.</b></div>',
+		  0 => '<div class="alert bg-success" role="alert"><i class="fas fa-info-circle fa-lg"></i>&nbsp;<b>Your request returned no result. Try to change query parameter/s.</b></div>',
 		  50 => 'Do not panic! This situation needs your security officer and system administrator attention, please contact them to solve the issue.',
 		 },
 
@@ -809,14 +810,14 @@ sub err {
   $err->{supplementary} = '<div class="well well-sm"><ul class="list-unstyled">' . $err->{supplementary} . '</ul></div>'
     if $err->{supplementary} ne '';
   
-  $err->{html} = sprintf( 'call from <em>%s</em>: <dl class="dl-horizontal">
-  <dt>admin note</dt><dd>%s</dd>
-  <dt>supplementary data</dt><dd>%s</dd>
-  <dt>code</dt><dd>%s</dd>
-  <dt>error name</dt><dd>%s</dd>
-  <dt>error text</dt><dd><em><small><pre>%s</pre></small></em></dd>
-  <dt>error description</dt><dd>%s</dd>
-  <dt>server_error</dt><dd>%s</dd>
+  $err->{html} = sprintf( 'call from <em>%s</em>: <dl class="row">
+  <dt class="col-2 text-right">admin note</dt><dd class="col-10 text-monospace">%s</dd>
+  <dt class="col-2 text-right">supplementary data</dt><dd class="col-10 text-monospace">%s</dd>
+  <dt class="col-2 text-right">code</dt><dd class="col-10 text-monospace">%s</dd>
+  <dt class="col-2 text-right">error name</dt><dd class="col-10 text-monospace">%s</dd>
+  <dt class="col-2 text-right">error text</dt><dd class="col-10 text-monospace"><em><small><pre><samp>%s</samp></pre></small></em></dd>
+  <dt class="col-2 text-right">error description</dt><dd class="col-10 text-monospace">%s</dd>
+  <dt class="col-2 text-right">server_error</dt><dd class="col-10 text-monospace">%s</dd>
 </dl>',
 			   $caller,
 			   defined $self->cfg->{err}->{$mesg->code} && $self->cfg->{err}->{$mesg->code} ne '' ?
@@ -3234,13 +3235,14 @@ sub create_account_branch_leaf {
     $authorizedService = [];
   } else {
     $authorizedService = [
-			  objectClass => [ @{$self->cfg->{objectClass}->{acc_svc_common}}, @{$arg->{objectclass}} ],
+			  objectClass       => [ @{$self->cfg->{objectClass}->{acc_svc_common}},
+						 @{$arg->{objectclass}} ],
 			  authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
-			  associatedDomain => $arg->{associatedDomain},
-			  uid => $arg->{uid},
-			  cn => $arg->{uid},
+			  associatedDomain  => $arg->{associatedDomain},
+			  uid       => $arg->{uid},
+			  cn        => $arg->{uid},
 			  givenName => $arg->{givenName},
-			  sn => $arg->{sn},
+			  sn        => $arg->{sn},
 # moved to each svc	  uidNumber => $arg->{uidNumber},
 # moved to ssh-acc        loginShell => $self->cfg->{stub}->{loginShell},
 			  gecos => $self->utf2lat( sprintf('%s %s', $args->{givenName}, $args->{sn}) ),
@@ -3271,13 +3273,13 @@ sub create_account_branch_leaf {
     }
 
     push @{$authorizedService},
-      homeDirectory => $self->cfg->{stub}->{homeDirectory},
-      gidNumber => $self->cfg->{authorizedService}->{$arg->{service}}->{gidNumber},
-      loginShell => $self->cfg->{stub}->{loginShell},
-      uidNumber => $arg->{uidNumber},
-      userPassword => $arg->{password}->{$arg->{service}}->{'ssha'},
+      homeDirectory   => $self->cfg->{stub}->{homeDirectory},
+      gidNumber       => $self->cfg->{authorizedService}->{$arg->{service}}->{gidNumber},
+      loginShell      => $self->cfg->{stub}->{loginShell},
+      uidNumber       => $arg->{uidNumber},
+      userPassword    => $arg->{password}->{$arg->{service}}->{'ssha'},
       telephonenumber => $arg->{telephoneNumber},
-      jpegPhoto => [ $self->file2var( $jpegPhoto_file, $return) ];
+      jpegPhoto       => [ $self->file2var( $jpegPhoto_file, $return) ];
 
   #=== SERVICE: 802.1x ===============================================
   } elsif ( $arg->{service} eq 'dot1x-eap-md5' ||
@@ -3342,7 +3344,7 @@ sub create_account_branch_leaf {
     push @{$authorizedService}, sshPublicKey => [ @$sshPublicKey ],
       gidNumber     => $arg->{sshgid}   // $self->cfg->{authorizedService}->{$arg->{service}}->{gidNumber},
 #      uidNumber => $arg->{uidNumber} + $self->cfg->{authorizedService}->{$arg->{service}}->{uidNumberShift},
-      uidNumber => $self->last_uidNumber_ssh + 1,
+      uidNumber     => $self->last_uidNumber_ssh + 1,
       userPassword  => $arg->{password}->{$arg->{service}}->{'ssha'},
       loginShell    => $arg->{sshshell} // $self->cfg->{authorizedService}->{$arg->{service}}->{loginShell},
       homeDirectory => $arg->{sshhome}  // sprintf("%s/%s",
@@ -3357,28 +3359,29 @@ sub create_account_branch_leaf {
     $arg->{dn} = 'cn=' . substr($arg->{userCertificate}->{filename},0,-4) . ',' . $arg->{basedn};
     $arg->{cert_info} =
       $self->cert_info({ cert => $self->file2var($arg->{userCertificate}->{'tempname'}, $return),
-			 ts => "%Y%m%d%H%M%S", });
+			 ts   => "%Y%m%d%H%M%S", });
     $authorizedService = [
-			  cn => '' . $arg->{cert_info}->{CN},
-			  associatedDomain => $arg->{associatedDomain},
-			  authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
-			  objectClass => [ @{$self->cfg->{objectClass}->{ovpn}}, @{$arg->{objectclass}} ],
-			  umiOvpnCfgIfconfigPush => $arg->{umiOvpnCfgIfconfigPush},
-			  umiOvpnCfgIroute => $arg->{umiOvpnCfgIroute},
-			  umiOvpnCfgPush => $arg->{umiOvpnCfgPush},
-			  umiOvpnCfgConfig => $arg->{umiOvpnCfgConfig},
-			  umiOvpnAddStatus => $arg->{umiOvpnAddStatus},
-			  umiUserCertificateSn => '' . $arg->{cert_info}->{'S/N'},
+			  cn                          => '' . $arg->{cert_info}->{CN},
+			  associatedDomain            => $arg->{associatedDomain},
+			  authorizedService           => $arg->{service} . '@' . $arg->{associatedDomain},
+			  objectClass                 => [ @{$self->cfg->{objectClass}->{ovpn}},
+						           @{$arg->{objectclass}} ],
+			  umiOvpnCfgIfconfigPush      => $arg->{umiOvpnCfgIfconfigPush},
+			  umiOvpnCfgIroute            => $arg->{umiOvpnCfgIroute},
+			  umiOvpnCfgPush              => $arg->{umiOvpnCfgPush},
+			  umiOvpnCfgConfig            => $arg->{umiOvpnCfgConfig},
+			  umiOvpnAddStatus            => $arg->{umiOvpnAddStatus},
+			  umiUserCertificateSn        => '' . $arg->{cert_info}->{'S/N'},
 			  umiUserCertificateNotBefore => '' . $arg->{cert_info}->{'Not Before'},
-			  umiUserCertificateNotAfter => '' . $arg->{cert_info}->{'Not  After'},
-			  umiUserCertificateSubject => '' . $arg->{cert_info}->{'Subject'},
-			  umiUserCertificateIssuer => '' . $arg->{cert_info}->{'Issuer'},
-			  umiOvpnAddDevType => $arg->{umiOvpnAddDevType},
-			  umiOvpnAddDevMake => $arg->{umiOvpnAddDevMake},
-			  umiOvpnAddDevModel => $arg->{umiOvpnAddDevModel},
-			  umiOvpnAddDevOS => $arg->{umiOvpnAddDevOS},
-			  umiOvpnAddDevOSVer => $arg->{umiOvpnAddDevOSVer},
-			  'userCertificate;binary' => $arg->{cert_info}->{cert},
+			  umiUserCertificateNotAfter  => '' . $arg->{cert_info}->{'Not  After'},
+			  umiUserCertificateSubject   => '' . $arg->{cert_info}->{'Subject'},
+			  umiUserCertificateIssuer    => '' . $arg->{cert_info}->{'Issuer'},
+			  umiOvpnAddDevType           => $arg->{umiOvpnAddDevType},
+			  umiOvpnAddDevMake           => $arg->{umiOvpnAddDevMake},
+			  umiOvpnAddDevModel          => $arg->{umiOvpnAddDevModel},
+			  umiOvpnAddDevOS             => $arg->{umiOvpnAddDevOS},
+			  umiOvpnAddDevOSVer          => $arg->{umiOvpnAddDevOSVer},
+			  'userCertificate;binary'    => $arg->{cert_info}->{cert},
 			 ];
 
     push @{$return->{error}}, $arg->{cert_info}->{error} if defined $arg->{cert_info}->{error};
@@ -3386,11 +3389,12 @@ sub create_account_branch_leaf {
   #=== SERVICE: web ==================================================
   } elsif ( $arg->{service} eq 'web' ) {
     $authorizedService = [
-			  objectClass => [ @{$self->cfg->{objectClass}->{acc_svc_web}}, @{$arg->{objectclass}} ],
+			  objectClass       => [ @{$self->cfg->{objectClass}->{acc_svc_web}},
+						 @{$arg->{objectclass}} ],
 			  authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
-			  associatedDomain => $arg->{associatedDomain},
-			  uid => $arg->{uid},
-			  userPassword => $arg->{password}->{$arg->{service}}->{'ssha'},
+			  associatedDomain  => $arg->{associatedDomain},
+			  uid               => $arg->{uid},
+			  userPassword      => $arg->{password}->{$arg->{service}}->{'ssha'},
 			 ];
   }
 
@@ -3431,7 +3435,7 @@ sub create_account_branch_leaf {
 	}
       }
       push @{$return->{success}},
-	sprintf('<i class="%s fa-fw"></i>&nbsp;<em>%s account login:</em> <strong class="text-success">%s</strong> <em>password:</em> <strong class="text-success mono">%s</strong>',
+	sprintf('<i class="%s fa-fw"></i>&nbsp;<em>%s account login:</em> <strong class="text-success">%s</strong> <em>password:</em> <strong class="text-success text-monospace">%s</strong>',
 		$self->cfg->{authorizedService}->{$arg->{service}}->{icon},
 		$arg->{service},
 		(split(/=/,(split(/,/,$arg->{dn}))[0]))[1], # taking RDN value

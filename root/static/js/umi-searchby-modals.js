@@ -74,7 +74,7 @@ $(function(){
 	    var data = $form.serialize();
 	    var $tr = obj.parents("tr");
 	    var action = obj.data("action");
-	    var $modal = obj.parents(".modal.in");
+	    var $modal = obj.parents(".modal");
 
 	    //clearPopupForm($(".modal:not(.in)"));// REMOVE
 
@@ -132,6 +132,7 @@ $(function(){
 	    event.preventDefault();
 	    var $this = $(this);
 
+	    // console.log('GET LOGIC TYPE: ', getLogicType($this));
 	    switch(getLogicType($this)) {
 	    default:
 	    case "close":
@@ -142,6 +143,8 @@ $(function(){
 		break;
 	    case "ajax":
 		runAjaxLogic($this);
+		// $('.modal-open').removeClass('modal-open');
+		// $('.modal-backdrop').remove();
 		break;
 	    }
 	    return false;

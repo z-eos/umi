@@ -1,67 +1,66 @@
-[% # -*- mode: web; -*- %]
+[% # -*- mode: web; mode: follow; -*- %]
 <!-- BEGIN site/header -->
-<header class="app-header navbar navbar-dark bg-dark" id="header">
-    <a id="navbarbrand" class="navbar-brand bg-dark" href="/"></a>
-    [% IF c.user_exists && c.session.auth_uid # !!! to fix, looks like a stub %]
-    <a class="navbar-toggler sidebar-minimizer btn btn-link borderless" href="#"><i class="fa fa-bars"></i></a>
-    <!-- <button class="navbar-toggler sidebar-minimizer d-md-down-none" type="button"><i class="fa fa-bars"></i></button> -->
-    [% END %]
-    [% IF c.user_exists && c.check_any_user_role ('admin', 'coadmin', 'operator') %]
-    <form class="form-inline formajaxer"
+<nav class="navbar navbar-dark bg-dark" id="header">
+  [% IF c.user_exists && c.session.auth_uid # !!! to fix, looks like a stub %]
+  <a id="sidebarCollapse" class="navbar-toggler btn btn-link p-0 pr-3" href="#">
+    <i class="fa fa-bars"></i>
+  </a>
+  [% END %]
+
+  <a id="navbarbrand" class="navbar-brand" href="/">
+    <img src="/static/images/umi-logo.50x50.png" width="30" height="30" alt="logo">
+  </a>
+
+  [% IF c.user_exists && c.check_any_user_role ('admin', 'coadmin', 'operator') %]
+
+  <div class="col">
+    <form class="form-inline formajaxer justify-content-center"
 	  role="form"
 	  id="searchby"
 	  method="POST"
 	  action="/searchby">
-      
-      <!-- <div class="input-group"> -->
-      <input type="text"
-	     size="50%"
-	     class="form-control col-sm-3 col-xs-3 col-md-7 col-lg-10 mono"
-	     id="ldapsearch_filter"
-	     name="ldapsearch_filter"
-	     title="LDAP search filter input field"
-	     placeholder='attributeName=*value*'
-	     data-animation="false"
-	     data-trigger="hover"
-	     data-placement="bottom"
-	     data-html="true"
-	     data-toggle="popover"
-	     data-original-title="Legend"
-	     data-template="<div class='popover hidden-xs' role='tooltip'><div class='arrow'></div><h3 class='popover-title'></h3><div class='popover-content'></div></div>"
-	     data-content="<ul>
-	     <li>default sort criteria is <i class='text-info'>by name</i> (First/Last Name, uid and cn)</li>
-	     <li>for each search criteria, <i class='text-info'>objectClass=<i class='fa fa-asterisk'></i></i> is used if empty</li>
-	     <li>use <i class='fa fa-asterisk text-info'></i> as substring</li>
-	     <li>narrow search results for non &laquo;by ...&raquo; presets, by providing attribute in filter, like: <i class='text-info'>uid=<i class='fa fa-asterisk'></i>dreii.<i class='fa fa-asterisk'></i></i></li>
-	     <li>to search in access log, use base <i class='text-info'>[% helper_cfg('cfg_local','ldap_crud_db_log') %]</i></li>
-	     </ul>">
 
-      <input type="hidden" name="ldap_base_case" id="ldap_base_case" >
-      
-	<!-- <div class="input-group-btn"> -->
-      <div class="btn-group">
-	<button type="submit" class="btn btn-secondary"
-		onClick="document.getElementById('ldap_base_case').value=this.value"
-                value="ldapsearch_by_name" tabindex="13"
-                title="Search &laquo;by name&raquo;">
-          <i class="fa fa-search"></i>
-        </button>
-	<!-- <div onClick="window.Service.api.updateViewSearchBy('ldapsearch_by_name=1',document.getElementById('ldapsearch_filter').value)"
-	       class="btn btn-secondary">
-	       <i class="fa fa-search"></i>
-	       </div> -->
+      <div class="input-group col-10">
+	<input type="text"
+	       class="form-control text-monospace"
+	       id="ldapsearch_filter"
+	       name="ldapsearch_filter"
+	       placeholder='attributeName=*value*'
+	       data-animation="false"
+	       data-toggle="popover"
+	       data-trigger="hover"
+	       data-placement="bottom"
+	       data-html="true"
+	       data-content="<ul>
+	       <li>default sort criteria is <i class='text-info'>by name</i> (First/Last Name, uid and cn)</li>
+	       <li>for each search criteria, <i class='text-info'>objectClass=<i class='fa fa-asterisk'></i></i> is used if empty</li>
+	       <li>use <i class='fa fa-asterisk text-info'></i> as substring</li>
+	       <li>narrow search results for non &laquo;by ...&raquo; presets, by providing attribute in filter, like: <i class='text-info'>uid=<i class='fa fa-asterisk'></i>dreii.<i class='fa fa-asterisk'></i></i></li>
+	       <li>to search in access log, use base <i class='text-info'>[% helper_cfg('cfg_local','ldap_crud_db_log') %]</i></li>
+	       </ul>">
+
+	<input type="hidden" name="ldap_base_case" id="ldap_base_case" >
+	
+	<div class="input-group-append">
+	  <button type="submit"
+		  class="btn btn-secondary"
+		  onClick="document.getElementById('ldap_base_case').value=this.value"
+                  value="ldapsearch_by_name" tabindex="13"
+                  title="Search &laquo;by name&raquo;">
+            <i class="fas fa-search"></i>
+          </button>
 	  
 	  <div type="submit" 
-		  class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
-		  data-toggle="dropdown" 
-		  aria-haspopup="false" 
-		  aria-expanded="false">
+	       class="btn btn-secondary dropdown-toggle"
+	       data-toggle="dropdown" 
+	       aria-haspopup="true" 
+	       aria-expanded="false">
 	    <i class="sr-only">Toggle Dropdown</i>
 	  </div>
 
-	  [% icon_class = "fas fa-fw text-light" %]
-	  [% menu_item = "dropdown-item btn btn-secondary " %]
-	  [% color = "bg-success" %]
+	  [% icon_class = "fas fa-fw text-success" %]
+	  [% menu_item = "dropdown-item btn btn-link umi-font-bold " %]
+	  [% color = "text-success" %]
 
 	  <div class="dropdown-menu dropdown-menu-right">
 
@@ -107,14 +106,15 @@
 		    title="filter pattern in telephone number">
 	      <i class="[% icon_class %] fa-phone"></i> by phone num
 	    </button>
-	    <button type="submit" class="[% menu_item %] bg-primary text-dark"
+	    <button type="submit" class="[% menu_item %] text-dark"
 		    onClick="document.getElementById('ldap_base_case').value=this.value"
 		    value="ldapsearch_global"
 		    title="global search through all DB, by attrName=*value*">
 	      <i class="fas fa-fw fa-database text-dark"></i> GLOBAL
 	    </button>
 	    	    
-	    [% color = "bg-info" %]
+	    [% icon_class = "fas fa-fw text-info" %]
+	    [% color = "text-info" %]
 
 	    <button type="submit" class="[% menu_item %][% color %]"
 		    onClick="document.getElementById('ldap_base_case').value=this.value"
@@ -147,7 +147,7 @@
 		    value="[% helper_cfg('cfg_ldap_crud','base', 'dhcp') %]"
 		    tabindex="21"
 		    title="filter pattern with base DHCP">
-	      <i class="[% icon_class %] fa-sitemap"></i> DHCP
+	      <i class="[% icon_class %] fa-network-wired"></i> DHCP
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
 		    onClick="document.getElementById('ldap_base_case').value=this.value"
@@ -187,7 +187,7 @@
 		    onClick="document.getElementById('ldap_base_case').value=this.value"
 		    value="[% helper_cfg('cfg_ldap_crud','base', 'gitacl') %]"
 		    tabindex="25">
-	      <i class="fab fa-fw fa-git text-light"></i> GitACL
+	      <i class="fab fa-fw text-info fa-git"></i> GitACL
 	    </button>
 	  </div>
 	  <a href="/searchadvanced"
@@ -196,64 +196,63 @@
 	    <i class="fa fa-search-plus"></i>
 	  </a>
 	</div>
-	<!-- </div> -->
-	<!-- </div> -->
+	</div>
     </form>
-
-    [% END %]
-    [% # -------------------------------------------------------- %]
-
-    <ul class="nav navbar-nav ml-auto">
-      [% IF c.user %]
-      [%   IF c.check_any_user_role ('admin', 'coadmin', 'operator') %]
-      [%     IF navbar_note.size %][% # Root->end %]
-      <li class="nav-item dropdown">
-	<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">
-	  <i class="fa fa-bell icon-bell"></i>
-	  <small><span class="badge badge-pill badge-danger bg-danger">[% navbar_note.size %]</span></small>
-	</a>
-	<div class="dropdown-menu dropdown-menu-right">
-	  <div class="dropdown-header text-center text-dark">
-	    <strong>You have [% navbar_note.size %] notification</strong>
-	  </div>
-	  [% FOREACH note IN navbar_note %]
-	  <a href="#" class="dropdown-item">
-	    <i class="fa [% note.icon %] text-[% note.color %]"></i> [% note.note %]
-	  </a>
-	  [% END %]
-	</div>
-      </li>
-      [%     ELSE %]
-      <li class="nav-item">
-	<div class="nav-link">
-	  <i class="fa fa-bell"></i>
-	</div>
-      </li>
-      [%     END %]
-      [%   END %]
-      <li class="nav-item dropdown">
-      	<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-user-circle"></i> [% c.user() %]</a>
-	<div class="dropdown-menu">
-	  <a class="dropdown-item" href="/user_prefs"><i class="fa fa-cogs"></i>
-	    My Profile
-	  </a>
-	  <a class="dropdown-item ajaxless" href="/auth/signout" title="Sign Out"><i class="fa fa-sign-out-alt"></i>
-	    Sign Out
-	  </a>
-	</div>
-      </li>
-      [% ELSE %]
-      <li class="nav-item">
-	<a href="/auth/signin" class="ajaxless" title="Sign In"><i class="fa fa-sign-in-alt"></i></a>
-      </li>
-      [% END %]
-    </ul>
-    <!-- <button class="navbar-toggler aside-menu-toggler" type="button"><i class="fa fa-bars"></i></button> -->
-    <a class="navbar-toggler aside-menu-toggler btn btn-link borderless" href="#" title="additional stuff">
-      <i class="fa fa-bars"></i>
-    </a>
   </div>
-</header>
+
+  [% END %]
+  [% # -------------------------------------------------------- %]
+
+  <ul class="nav mr-auto">
+    [% IF c.user %]
+    [%   IF c.check_any_user_role ('admin', 'coadmin', 'operator') %]
+    [%     IF navbar_note.size %][% # @ Root->end %]
+    <li class="nav-item dropdown">
+      <a class="nav-link text-white-50" data-toggle="dropdown" href="#">
+	<i class="fas fa-sticky-note content-plus-circle"></i>
+	<!-- small><span class="badge badge-pill badge-danger bg-danger">[% navbar_note.size %]</span></small -->
+      </a>
+      <div class="dropdown-menu dropdown-menu-right">
+	<div class="dropdown-header text-center text-dark">
+	  <strong>You have [% navbar_note.size %] notification</strong>
+	</div>
+	[% FOREACH note IN navbar_note %]
+	<a href="#" class="dropdown-item">
+	  <i class="fa [% note.icon %] text-[% note.color %]"></i> [% note.note %]
+	</a>
+	[% END %]
+      </div>
+    </li>
+    [%     ELSE %]
+    <li class="nav-item">
+      <div class="nav-link">
+	<i class="fas fa-sticky-note"></i>
+      </div>
+    </li>
+    [%     END %]
+    [%   END %]
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle text-white-50" data-toggle="dropdown" href="#"><i class="fa fa-user-alt"></i> [% c.user() %]</a>
+      <div class="dropdown-menu dropdown-menu-right">
+	<a class="dropdown-item" href="/user_prefs"><i class="fas fa-cogs"></i>
+	  My Profile
+	</a>
+	<a class="dropdown-item ajaxless" href="/auth/signout" title="Sign Out"><i class="fas fa-sign-out-alt"></i>
+	  Sign Out
+	</a>
+      </div>
+    </li>
+    [% ELSE %]
+    <li class="nav-item">
+      <a href="/auth/signin" class="ajaxless" title="Sign In"><i class="fas fa-sign-in-alt"></i></a>
+    </li>
+    [% END %]
+  </ul>
+  <a id="sidebarRightCollapse" class="navbar-toggler btn btn-link p-0" href="#" title="additional stuff">
+    <i class="fas fa-bars"></i>
+  </a>
+</nav>
+
 
 <script type="text/javascript">
  $(function () { $('#ldapsearch_filter').popover() });

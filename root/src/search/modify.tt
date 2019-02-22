@@ -3,15 +3,16 @@
    link = '<link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">'
    %]
 
-<div class="page-header">
-  <[% site.pageheading %]>Modify Fields of DN: <small><em>
+<[% site.pageheading %] class="font-weight-bold p-3">
+<i class="fas fa-hammer fa-lg mr-3 text-muted"></i>
+Modify Fields of DN: <small><em>
   [% IF modify %]
   [% modify %]
   [% ELSE %]
   [% params.dn %]
   [% END %]
-  </em></small></[% site.pageheading %]>
-</div>
+</em></small></[% site.pageheading %]>
+<hr>
 
 [% # IF modify.search('authorizedService') || params.dn.search('authorizedService') %]
 [% # schema.associatedDomain = 1 %]
@@ -25,17 +26,17 @@
 <form method="POST"
       id="modify-tt-form"
       enctype="multipart/form-data"
-      class="form-horizontal formajaxer"
+      class="form-horizontal formajaxer pt-3"
       action="/searchby/modify">
   <input type="hidden" name="dn" id="dn" value="[% modify %]">
 
-  <div class="well">
+  <div class="alert alert-success mb-3">
     <div class="input-group">
       <label class="col-sm-3 text-right h5">
 	<b>Attributes Available:</b>
       </label>
       <div class="col-sm-9">
-	<select class="form-control" name="aux_attrs_rest" id="aux_attrs_rest">
+	<select class="custom-select custom-select-sm" name="aux_attrs_rest" id="aux_attrs_rest">
 	  <option value=""> --- Choose An Attribute ---</option>
 	  [% FOREACH attr_rest IN attrs_rest %]
 	  <option value="[% attr_rest.key %]">[% attr_rest.key %]</option>
@@ -46,7 +47,7 @@
   </div>
   [% FOREACH attr_rest IN attrs_rest %]
   [% id = attr_rest.key _ '_' _ loop.index %]
-  <div id="[% attr_rest.key %]" class="form-group hidden attrs-rest row">
+  <div id="[% attr_rest.key %]" class="form-group attrs-rest row d-none">
     <label class="col-sm-3 text-right h5">
       <b>[% attr_rest.key %]</b>
     </label>
@@ -55,17 +56,17 @@
 	[% # !!! TO FINISH in LIKENESS WITH BELLOW ... %]
 	[%   IF schema.${attr_rest.key} == 0 && ( attr_rest.value.size == 1 || attr_rest.value.first == attr_rest.value ) %]
 	<span class="input-group-btn">
-          <button class="btn btn-secondary btn-default btn-add element-add"
+          <button class="btn btn-secondary btn-sm btn-add element-add"
 		  id="[% id %]"
 		  type="button" title="click to add another [% attr_rest.key %] field">
-	    <i class="fa fa-copy text-success"></i>
+	    <i class="far fa-copy"></i>
 	  </button>
 	</span>
 	[%   ELSE %]
 	<span class="input-group-btn">
-	  <button class="btn btn-secondary btn-default btn-erase" type="button" title="erase field value"
+	  <button class="btn btn-secondary btn-sm btn-erase" type="button" title="erase field value"
 		  id="[% id %]">
-	    <i class="fa fa-eraser text-danger"></i>
+	    <i class="fas fa-eraser"></i>
 	  </button>
 	</span>
 	[%   END %]
@@ -85,8 +86,8 @@
   [% # -------------------------------------------------------------------------------------------- %]
   [% FOREACH attr IN entries %]
   [% attrId = attr.key _ '_' _ loop.index %]
-  <div class="form-group">
-    <label class="col-sm-3 text-right h5">
+  <div class="form-group row">
+    <label class="col-sm-3 text-right h6 font-weight-bold">
       <b>[% attr.key %]:</b>
     </label>
     <div class="col-sm-9 controls">
@@ -103,7 +104,7 @@
       [% ELSIF attr.key == 'userCertificate;binary' ||
 	 attr.key == 'cACertificate;binary' ||
 	 attr.key == 'certificateRevocationList;binary' %]
-      <input type="file" class="btn btn-default btn-sm" name="[% attr.key %]" accept=".der">
+      <input type="file" class="btn btn-secondary btn-sm" name="[% attr.key %]" accept=".der">
 
       [% ELSE %]
       [%   FOREACH val IN attr.value %]
@@ -116,17 +117,17 @@
 	[%   IF schema.${attr.key} == 0 &&
 	   ( attr.value.size == 1 || attr.value.last == val ) %]
 	<span class="input-group-btn">
-          <button class="btn btn-secondary btn-default btn-add element-add"
+          <button class="btn btn-secondary btn-sm btn-add element-add"
 		  id="[% id %]"
 		  type="button" title="click to add another [% attr.key %] field">
-	    <i class="fa fa-copy text-success"></i>
+	    <i class="far fa-copy"></i>
 	  </button>
 	</span>
 	[%   ELSE %]
 	<span class="input-group-btn">
-	  <button class="btn btn-secondary btn-default btn-erase" type="button" title="erase field value"
+	  <button class="btn btn-secondary btn-sm btn-erase" type="button" title="erase field value"
 		  id="[% id %]">
-	    <i class="fa fa-eraser text-danger"></i>
+	    <i class="fas fa-eraser"></i>
 	  </button>
 	</span>
 	[%   END %]
@@ -139,10 +140,10 @@
 	       title="auto changed by new, .der format certificate (see the field &laquo;userCertificate&raquo;) upload">
 	
 	[%   ELSIF attr.key == 'sshPublicKey' %]
-	<textarea name="[% attr.key %]" id="[% 'val_' _ id %]" class="form-control" rows=2>[% val %]</textarea>
+	<textarea name="[% attr.key %]" id="[% 'val_' _ id %]" class="form-control" rows=5>[% val %]</textarea>
 	
 	[%   ELSIF attr.key == 'grayPublicKey' %]
-	<textarea name="[% attr.key %]" id="[% 'val_' _ id %]" class="form-control" rows=2>[% val %]</textarea>
+	<textarea name="[% attr.key %]" id="[% 'val_' _ id %]" class="form-control" rows=5>[% val %]</textarea>
 	
 	[%   ELSIF attr.key == 'mu-sieveOnReceive' %]
 	<textarea name="[% attr.key %]" id="[% 'val_' _ id %]" class="form-control" rows=2>[% val %]</textarea>
@@ -158,12 +159,7 @@
   </div>
   [% END %]
 
-  <div class="form-group">
-    <label class="col-sm-2 control-label"></label>
-    <div class="col-sm-10">
-      <input type="submit" value="Submit" name="aux_submit" class="btn btn-success btn-block">
-    </div>
-  </div>
+  <input type="submit" value="Submit" name="aux_submit" class="btn btn-success btn-block float-right w-50">
 
 </form>
 
@@ -185,8 +181,7 @@
          newEntry.find('.form-control').val('');
          controlForm.find('.entry:not(:last) .btn-add')
 		    .removeClass('btn-add').addClass('btn-erase')
-		    .removeClass('btn-success').addClass('text-danger')
-		    .html('<span class="fa fa-eraser"></span>');
+		    .html('<span class="fas fa-eraser"></span>');
 	 return false;
        }).on('click', '.btn-erase', function(e)
        {
@@ -215,7 +210,7 @@
 			       .prop("selected",true);
 		   }).val('');
 	  });
-     $form.find("div#"+value).removeClass("hidden");     
+     $form.find("div#"+value).removeClass("d-none");     
    });
  });
 

@@ -7,11 +7,11 @@
 <div class="hidden">
   <div id="stat-from">
 
-    <table class="table table-condensed">
+    <table class="table table-condensed text-light">
       <thead>
 	<tr>
 	  <th colspan="2">
-	    <i class="fa fa-pie-chart"></i>
+	    <i class="fas fa-pie-chart"></i>
 	    Page Statistics <small><em>(debug level [% stats.debug %])</em></small>
 	  </th>
 	</tr>

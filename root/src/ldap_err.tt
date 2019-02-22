@@ -1,27 +1,37 @@
+[% # final_message.error = 'error test' %]
+[% # final_message.warning = 'warning test' %]
+[% # final_message.success = 'success test' %]
+
 [% IF form.errors || ( final_message.error && final_message.error != '') %]
-<div class="panel-group umi-zerro-margin" id="accordion">
-  <div class="panel panel-danger">
-    <div class="panel-heading clearfix umi-zerro-padding" role="tab" id="headErr">
-      <a class="chevron_toggleable btn btn-danger pull-left borderless"
-	 href="#" title="Collapse In/Out This Panel" data-target="#collapseErr"
-	 data-toggle="collapse" data-parent="#accordion">
-	<i class="fa [% site.icons.toggle_up %]"></i>
+<div class="card-group m-0 mb-3" id="accordion">
+  <div class="card card-sm border-danger">
+    <div class="card-header bg-danger clearfix p-0 pt-2" role="tab" id="headErr">
+      <a class="chevron_toggleable btn btn-danger btn-borderless float-left"
+	 href="#cardBodyError"
+	 title="Collapse In/Out"
+	 data-toggle="collapse"
+	 role="button"
+	 aria-expanded="true"
+	 aria-controls="cardBodyError">
+	<i class="fa [% site.icons.toggle_down %]"></i>
       </a>
-      <h4>&nbsp;&nbsp;<span class="fa fa-exclamation-circle">&nbsp;</span>Error!</h4>
+      <h4 class="text-light">
+	<i class="fa fa-exclamation-circle mr-3"></i><strong>Error!</strong>
+      </h4>
     </div>
-    <div id="collapseErr" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingErr">
-      <div class="panel-body">
+    <div class="collapse" id="cardBodyError">
+      <div class="card-body">
 	[% IF form.errors %]
 	<b class="text-danger">Form contains error/s! Check for fields constraints met, please!</b>
 	<ul class="list-unstyled">
-	  [% FOREACH i IN form.errors.reverse %]
+	  [% FOREACH i IN form.errors %]
 	  [% IF i != '' %]<li>[% i %]</li>[% END %]
 	  [% END %]
 	</ul>
 	[% END %]
 	[% IF final_message.error %]
 	<ul class="list-unstyled">
-	  [% FOREACH i IN final_message.error.sort %]
+	  [% FOREACH i IN final_message.error %]
 	  [% IF i != '' %]<li>[% i %]</li>[% END %]
 	  [% END %]
 	</ul>
@@ -32,36 +42,58 @@
 </div>
 <br>
 [% END %]
+
 [% IF final_message.warning %]
-<div class="panel panel-warning">
-  <div class="panel-heading clearfix umi-zerro-padding">
-    <button type="button" class="close borderless" data-dismiss="alert" aria-label="Close"
-	    onclick="$(this).closest('.panel').hide(200)"
-	    title="Dismiss this panel.">
-      <span aria-hidden="true" class="fa fa-times-circle"></span>&nbsp;
+<div class="card m-0 mb-3 border-warning">
+  <div class="card-header bg-warning clearfix p-0 pt-2">
+    <button type="button" class="close borderless pr-3" data-dismiss="alert" aria-label="Close"
+	    onclick="$(this).closest('.card').hide(200)"
+	    title="Dismiss this card.">
+      <span aria-hidden="true">&times;</span>
+      <!-- span aria-hidden="true" class="fa fa-times-circle"></span -->
     </button>
-    <h4>&nbsp;&nbsp;<span class="fa fa-exclamation-triangle">&nbsp;</span>Warning!<em class="h5">(relax and do not panic! mostly it is just a note to let you know some detail/s)</em></h4>
+    <h4 class="text-light">
+      <i class="fas fa-exclamation-triangle pl-3"></i>
+      <b>Warning!</b>
+      <em><small>
+	<b>(relax and do not panic! mostly it is just a note to let you know some detail/s)</b>
+      </small></em>
+    </h4>
   </div>
-  <div class="panel-body">
+  <div class="card-body">
     <ul class="list-unstyled">
-      [% FOREACH i IN final_message.warning.sort %]
+      [% FOREACH i IN final_message.warning %]
       <li>[% i %]</li>
       [% END %]
     </ul>
   </div>
 </div>
 [% END %]
+
 [% IF final_message.success %]
-<div class="panel panel-success">
-  <div class="panel-heading clearfix umi-zerro-padding">
-    <h4>&nbsp;&nbsp;<span class="fa fa-check-circle">&nbsp;</span>Success! [% final_message.title %]</h4>
+<div class="card m-0 mb-3 border-success">
+  <div class="card-header bg-success clearfix p-0 pt-2">
+    <h4 class="text-light">
+      <a class="chevron_toggleable btn btn-success btn-borderless float-left"
+	 href="#cardBodySuccess"
+	 title="Collapse In/Out"
+	 data-toggle="collapse"
+	 role="button"
+	 aria-expanded="true"
+	 aria-controls="cardBodySuccess">
+	<i class="fa [% site.icons.toggle_down %]"></i>
+      </a>
+      <i class="fa fa-check-circle ml-1 mr-3"></i><strong>Success! [% final_message.title %]</strong>
+    </h4>
   </div>
-  <div class="panel-body">
-    <ul class="list-unstyled">
-      [% FOREACH i IN final_message.success.sort %]
-      <li>[% IF i == 1 %]Operation went well![% ELSE %][% i %][% END %]</li>
-      [% END %]
-    </ul>
+  <div class="collapse show" id="cardBodySuccess">
+    <div class="card-body">
+      <ul class="list-unstyled">
+	[% FOREACH i IN final_message.success %]
+	<li>[% IF i == 1 %]Operation went well![% ELSE %][% i %][% END %]</li>
+	[% END %]
+      </ul>
+    </div>
   </div>
 </div>
 [% END %]

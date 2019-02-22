@@ -56,8 +56,8 @@ sub index :Path :Args(0) {
 # --- #       $c->stash( template => 'signin.tt', );
 # --- #     }
 
-    $c->stash( template => 'search/search_advanced.tt',
-	       form => $self->form,
+    $c->stash( template      => 'search/search_advanced.tt',
+	       form          => $self->form,
 	       final_message => '', );
 
     if ( keys %{$params} > 0 ) {
@@ -66,14 +66,14 @@ sub index :Path :Args(0) {
 		       search_scope  => $params->{search_scope}, };
       return unless $self->form
 	->process( init_object => $init_obj,
-		   ldap_crud => $c->model('LDAP_CRUD'), );
+		   ldap_crud   => $c->model('LDAP_CRUD'), );
     } else {
       # log_debug { np( $params ) };
       return unless $self->form
-	->process( posted => ($c->req->method eq 'POST'),
-		   params => $params,
+	->process( posted    => ($c->req->method eq 'POST'),
+		   params    => $params,
 		   ldap_crud => $c->model('LDAP_CRUD'), );
-      
+
       $self->form->base_dn( $params->{base_dn} );
       $self->form->search_filter( $params->{search_filter} );
       # $params->{action_searchby} = $c->uri_for_action('searchby/index');
@@ -85,12 +85,12 @@ sub proc :Path(proc) :Args(0) {
     my ( $self, $c ) = @_;
     my $params = $c->req->params;
     # log_debug { np($params) };
-    
+
     if ( defined $c->user_exists ) {
       my ( $ldap_crud, $basedn, @filter_arr, $filter, $scope, $sort_order );
-      
+
       $c->stash( template => 'search/search_advanced.tt',
-      		 form => $self->form, );
+      		 form     => $self->form, );
       return unless
 	$self->form->process(
 			     posted => ($c->req->method eq 'POST'),
@@ -130,16 +130,15 @@ sub proc :Path(proc) :Args(0) {
 
       if ( ! $c->check_any_user_role( qw/admin coadmin/ ) &&
 	   ! $self->may_i({ base_dn => $basedn,
-			    filter => $filter,
-			    user => $c->user, }) ) {
+			    filter  => $filter,
+			    user    => $c->user, }) ) {
 	log_error { sprintf('User roles or Tools->may_i() check does not allow search by base dn: %s and/or filter: %s',
 			    $basedn,
 			    $filter ) };
-	$c->stash( template => 'ldap_err.tt',
-		   final_message => { error
-				      => sprintf('Your roles or Tools->may_i() check does not allow search by base dn:<h5>&laquo;<b><em>%s</em></b>&raquo;</h5> and/or filter:<h5>&laquo;<b><em>%s</em></b>&raquo;</h5>ask UMI admin for explanation/s and provide above info.',
-						 $basedn,
-						 $filter ), }, );
+	$c->stash( template      => 'ldap_err.tt',
+		   final_message => { error => sprintf('Your roles or Tools->may_i() check does not allow search by base dn:<h5>&laquo;<b><em>%s</em></b>&raquo;</h5> and/or filter:<h5>&laquo;<b><em>%s</em></b>&raquo;</h5>ask UMI admin for explanation/s and provide above info.',
+						       $basedn,
+						       $filter ), }, );
 	return 0;
       }
 
@@ -159,11 +158,11 @@ sub proc :Path(proc) :Args(0) {
 
       $ldap_crud = $c->model('LDAP_CRUD');
       my $mesg = $ldap_crud->search({
-				     base => $basedn,
-				     filter => $filter,
-				     scope => $scope,
+				     base      => $basedn,
+				     filter    => $filter,
+				     scope     => $scope,
 				     sizelimit => $params->{'search_results'},
-				     attrs => \@attrs,
+				     attrs     => \@attrs,
 				    });
       my $return;
       $return->{warning} = $ldap_crud->err($mesg)->{html} if ! $mesg->count;

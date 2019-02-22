@@ -18,22 +18,29 @@ sub build_form_element_class { [ 'form-horizontal formajaxer' ] }
 
 has_field 'pronounceable'
   => (
-      type => 'Checkbox',
-      label => 'Pronounceable',
-      label_class => [ 'col-xs-2', ],
-      wrapper_class => [ 'checkbox', ],
-      element_wrapper_class => [ 'col-xs-3', 'col-xs-offset-2', 'col-lg-1', ],
-      element_attr => { title => 'Completely random word if unchecked, othervise max lengh is ' .
-			UMI->config->{pwd}->{lenp} },
+      type                  => 'Checkbox',
+      label                 => 'Pronounceable',
+      element_wrapper_class => [ 'offset-md-2', 'col-10', ],
+      element_class         => [ qw( disabler-checkbox
+				     disableable
+				     disabled-if-pwdcheckonly
+				     disabled-if-pwddefault ) ],
+      element_attr          => { title => 'Completely random word if unchecked, othervise max lengh is ' .
+				 UMI->config->{pwd}->{lenp} },
+      wrapper_class         => [ 'row', 'deactivate-top', 'mt-5', ],
      );
 
 has_field 'pwd_len'
   => (
-      type => 'Integer',
-      apply => [ NoSpaces, PositiveNum ],
-      label => 'Password Length',
-      label_class => [ 'col-xs-2', ],
-      element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
+      type                  => 'Integer',
+      apply                 => [ NoSpaces, PositiveNum ],
+      label                 => 'Password Length',
+      label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+      element_wrapper_class => [ 'input-sm', 'col-10', ],
+      element_class         => [ qw( disabler-input
+				     disableable
+				     disabled-if-pwdcheckonly
+				     disabled-if-pwddefault ) ],
       element_attr => { placeholder => sprintf("min: %s; default common: %s; max common: %s; max pronouceable: %s",
 					       UMI->config->{pwd}->{len_min},
 					       UMI->config->{pwd}->{len},
@@ -44,49 +51,61 @@ has_field 'pwd_len'
 					       UMI->config->{pwd}->{len},
 					       UMI->config->{pwd}->{len_max},
 					       UMI->config->{pwd}->{lenp} ), },
+      wrapper_class         => [ 'row', 'deactivate-top', ],
      );
 
 has_field 'pwd_cap'
   => (
-      type => 'Integer',
-      apply => [ NoSpaces, PositiveNum ],
-      label => 'Capital Characters',
-      label_class => [ 'col-xs-2', ],
-      element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-      element_attr => { placeholder => 'max ' . UMI->config->{pwd}->{cap},
-			title => 'up to this many characters will be upper case' },
+      type                  => 'Integer',
+      apply                 => [ NoSpaces, PositiveNum ],
+      label                 => 'Capital Characters',
+      label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+      element_wrapper_class => [ 'input-sm', 'col-10', ],
+      element_attr          => { placeholder => 'max ' . UMI->config->{pwd}->{cap},
+				 title       => 'up to this many characters will be upper case', },
+      wrapper_class         => [ 'row', 'deactivate-top', ],
      );
 
 has_field 'pwd_num'
   => (
-      type => 'Integer',
-      apply => [ NoSpaces, PositiveNum ],
-      label => 'Numbers And Spec. Characters',
-      label_class => [ 'col-xs-2', ],
-      element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-      element_attr => { placeholder => 'max ' . UMI->config->{pwd}->{num},
-			title => 'up to that many, numbers and special characters will occur in the password' },
+      type                  => 'Integer',
+      apply                 => [ NoSpaces, PositiveNum ],
+      label                 => 'Numbers And Spec. Characters',
+      label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+      element_wrapper_class => [ 'input-sm', 'col-10', ],
+      element_attr          => { placeholder => 'max ' . UMI->config->{pwd}->{num},
+				 title       => 'up to that many, numbers and special characters will occur in the password',
+				 'data-mode' => "pwdpronounceable", },
+      wrapper_class         => [ 'row', 'deactivate-top', ],
      );
 
-has_field 'aux_reset' => ( type => 'Reset',
-			   element_wrapper_class => [ 'col-xs-12' ],
-			   element_class => [ 'btn', 'btn-danger', 'btn-block', ],
-			   wrapper_class => [ 'col-xs-4' ],
-			   value => 'Reset' );
+has_field 'aux_reset'
+  => ( type          => 'Reset',
+       element_class => [ qw( btn
+			      btn-danger
+			      btn-block
+			      font-weight-bold
+			      text-uppercase) ],
+       wrapper_class => [ 'col-4' ],
+       value         => 'Reset' );
 
-has_field 'aux_submit' => ( type => 'Submit',
-			    wrapper_class => [ 'col-xs-8', ],
-			    element_class => [ 'btn', 'btn-success', 'btn-block' ],
-			    value => 'Submit' );
+has_field 'aux_submit'
+  => ( type          => 'Submit',
+       element_class => [ qw( btn
+			      btn-success
+			      btn-block
+			      font-weight-bold
+			      text-uppercase) ],
+       wrapper_class => [ 'col-8', ],
+       value         => 'Submit' );
 
+has_block 'aux_submitit'
+  => ( tag => 'fieldset',
+       render_list => [ 'aux_reset', 'aux_submit'],
+       class => [ 'row', ]
+     );
 
-has_block 'submitit' => ( tag => 'fieldset',
-			  render_list => [ 'aux_reset', 'aux_submit'],
-			  label => '&nbsp;',
-			  class => [ 'container-fluid' ]
-			);
-
-sub build_render_list {[ 'pronounceable', 'pwd_len', 'pwd_cap', 'pwd_num', 'submitit' ]}
+sub build_render_list {[ 'pronounceable', 'pwd_len', 'pwd_cap', 'pwd_num', 'aux_submitit' ]}
 
 sub html_attributes {
   my ( $self, $field, $type, $attr ) = @_;

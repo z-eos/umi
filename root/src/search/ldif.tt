@@ -1,10 +1,20 @@
 [% META title = 'Search Simple Results' %]
 
-<[% site.pageheading %]>Search Simple Results <small><em>base: [% final_message.dn %]; &nbsp;&nbsp; filter: (objectClass=*)</em></small></[% site.pageheading %]>
+<[% site.pageheading %] class="font-weight-bold p-3">
+<i class="fas fa-file-code fa-lg mr-3 text-muted"></i>
+LDIF<small><em class="text-muted text-monospace">
+  base: [% final_message.dn %]; &nbsp;&nbsp; filter: (objectClass=*)
+</em></small>
+</[% site.pageheading %]>
+<hr mb-5>
 
 [% INCLUDE ldap_err.tt %]
 
-<form method="POST" role="form" action="/searchby/ldif_gen2f" id="f_ldif_gen2f">
+<form method="POST"
+      class="mt-5"
+      role="form"
+      action="/searchby/ldif_gen2f"
+      id="f_ldif_gen2f">
   <input id="ldap_ldif_recursive"
 	 class="form-control"
 	 type="hidden"
@@ -16,7 +26,7 @@
 	 value="[%final_message.sysinfo %]"
 	 name="ldap_ldif_sysinfo">
   
-  <button class="btn btn-info btn-sm umi-btn-event umi-btn-logic"
+  <button class="btn btn-info umi-btn-event umi-btn-logic"
 	  value="[%final_message.dn %]"
 	  name="ldap_ldif"
 	  data-umiact="/searchby/ldif_gen2f"

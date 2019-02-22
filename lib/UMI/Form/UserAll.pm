@@ -1,11 +1,12 @@
-# -*- mode: cperl -*-
+# -*- mode: cperl; mode: follow; -*-
 #
 
 package UMI::Form::UserAll;
 
 use HTML::FormHandler::Moose;
 BEGIN { extends 'UMI::Form::LDAP';
-	with 'Tools', 'HTML::FormHandler::Render::RepeatableJs'; }
+	with 'Tools', 'HTML::FormHandler::Render::RepeatableJs';
+      }
 
 use Logger;
 
@@ -46,71 +47,74 @@ has_field 'dynamic_object' => ( type => 'Hidden', );
 #== PERSONAL DATA ====================================================
 ######################################################################
 has_field 'person_givenname'
-  => ( apply => [ NoSpaces ],
-       label => 'FName',
-       label_class => [ 'col-xs-1', 'col-sm-1', 'col-md-1', 'col-lg-1',  ],
-       element_wrapper_class => [ 'col-xs-11', 'col-sm-11', 'col-md-11', 'col-lg-11', ],
-       element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'John' },
-       required => 1 );
+  => ( apply                 => [ NoSpaces ],
+       label                 => 'FName',
+       label_class           => [ 'col', 'text-right' ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', ],
+       wrapper_class         => [ 'row' ],
+       element_attr          => { placeholder => 'John' },
+       required              => 1 );
 
 has_field 'person_sn'
-  => ( apply => [ NoSpaces ],
-       label => 'LName',
-       label_class => [ 'col-xs-1', 'col-sm-1', 'col-md-1', 'col-lg-1',  ],
-       element_wrapper_class => [ 'col-xs-11', 'col-sm-11', 'col-md-11', 'col-lg-11', ],
-       element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'Doe' },
-       required => 1 );
+  => ( apply                 => [ NoSpaces ],
+       label                 => 'LName',
+       label_class           => [ 'col', 'text-right' ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', ],
+       element_attr          => { placeholder => 'Doe' },
+       wrapper_class         => [ 'row' ],
+       required              => 1 );
 
 has_field 'person_exp'
-  => ( type => 'Text',
-       label => 'Exp.',
-       label_attr => { title => 'Object Expiration', },
-       label_class => [ 'col-xs-1', 'col-sm-1', 'col-md-1', 'col-lg-1', 'atleastone', ],
-       element_wrapper_class => [ 'col-xs-2', 'col-sm-2', 'col-md-2', 'col-lg-2', ],
-       element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'Expiration on',
-			 title => 'Object Expiration', },
-       required => 0 );
+  => ( type                  => 'Text',
+       label                 => 'Exp.',
+       label_attr            => { title => 'Object Expiration', },
+       label_class           => [ 'col', 'text-right' ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', ],
+       element_attr          => { placeholder => 'Expiration on',
+				  title => 'Object Expiration', },
+       wrapper_class         => [ 'row' ],
+       required              => 0 );
 
 has_field 'person_namesake'
-  => ( type => 'Checkbox',
-       label => 'namesake',
-       label_class => [ 'col-xs-1', ],
-       element_attr => { title => 'This new user has the same name/s as of some existent one. Check it if sure this new user does not exist and is not that existent one' },
-       # element_class => [ 'custom-control-input', ],
-       # element_wrapper_class => [ 'custom-control', 'custom-checkbox', ],
+  => ( type                  => 'Checkbox',
+       label                 => 'namesake',
+       element_attr          => { title => 'This new user has the same name/s as of some existent one. Check it if sure this new user does not exist and is not that existent one' },
+       element_class         => [ 'form-check-input' ],
+       wrapper_class         => [ 'form-check' ],
      );
 
 has_field 'person_simplified'
-  => ( type => 'Checkbox',
-       label => 'simplified',
-       label_class => [ 'col-xs-1', ],
-       element_attr => { title => 'When checked, this checkbox causes user account been created in a simplified manner. Only Email and XMPP services will be created for FQDN choosen with Domain Name field in section Person bellow.',
-		       },
-       # element_wrapper_class => [ 'text-success', ],
-       # wrapper_class => [],
+  => ( type                  => 'Checkbox',
+       label                 => 'simplified',
+       element_attr          => { title => 'When checked, this checkbox causes user account been created in a simplified manner. Only Email and XMPP services will be created for FQDN choosen with Domain Name field in section Person bellow.',
+				},
+       element_class         => [ 'form-check-input' ],
+       wrapper_class         => [ 'form-check' ],
      );
 
 has_field 'person_avatar'
-  => ( type => 'Upload',
-       label => 'User Photo ID',
-       label_class => [ 'col-xs-2', ],
-       element_wrapper_class => [ 'col-xs-2', 'col-lg-3', ],
-       element_class => [ 'btn', 'btn-default', 'btn-sm', ],
+  => ( type                  => 'Upload',
+       label                 => 'User Photo ID',
+       label_class           => [ 'col', 'text-right' ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'btn', 'btn-default', 'btn-sm', ],
+       wrapper_class         => [ 'row' ],
        max_size => '50000' );
 
 has_field 'person_gidnumber'
-  => ( type => 'Select',
-       label => 'Group',
-       label_class => [ 'col-xs-2', ],
+  => ( type                  => 'Select',
+       label                 => 'Group',
+       label_class           => [ 'col', 'text-right' ],
        # empty_select => $form->ldap_crud->{cfg}->{stub}->{gidNumber},
-       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-       element_class => [ 'input-sm', ],
-       element_attr => { title => 'User primary group. RFC2307: An integer uniquely identifying a group in an administrative domain', },
-       options_method => \&groups,
-       # required => 1,
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', 'custom-select', ],
+       element_attr          => { title => 'User primary group. RFC2307: An integer uniquely identifying a group in an administrative domain', },
+       wrapper_class         => [ 'row' ],
+       options_method        => \&groups,
+       # required              => 1,
      );
 
 sub options_person_gidnumber {
@@ -150,41 +154,45 @@ sub options_person_gidnumber {
 
 
 has_field 'person_org'
-  => ( type => 'Select',
-       label => 'Organization',
-       label_class => [ 'col-xs-2', ],
-       empty_select => '--- Choose an Organization ---',
-       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-       element_class => [ 'input-sm', ],
-       options_method => \&offices,
-       required => 1 );
+  => ( type                  => 'Select',
+       label                 => 'Organization',
+       label_class           => [ 'col', 'text-right' ],
+       empty_select          => '--- Choose an Organization ---',
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', 'custom-select', ],
+       wrapper_class         => [ 'row' ],
+       options_method        => \&offices,
+       required              => 1 );
 
 has_field 'person_title'
-  => ( label => 'Position',
-       label_class => [ 'col-xs-2', ],
-       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-       element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'manager' }, );
+  => ( label                 => 'Position',
+       label_class           => [ 'col', 'text-right' ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', ],
+       element_attr          => { placeholder => 'manager' },
+       wrapper_class         => [ 'row' ], );
 
 has_field 'person_office'
-  => ( type => 'Select',
-       label => 'Office',
-       label_class => [ 'col-xs-2' ],
-       empty_select => '--- Choose an Office ---',
-       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-       element_class => [ 'input-sm', ],
-       options_method => \&physicaldeliveryofficename,
-       required => 1 );
+  => ( type                  => 'Select',
+       label                 => 'Office',
+       label_class           => [ 'col', 'text-right' ],
+       empty_select          => '--- Choose an Office ---',
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', 'custom-select', ],
+       options_method        => \&physicaldeliveryofficename,
+       wrapper_class         => [ 'row' ],
+       required              => 1 );
 
 has_field 'person_telephonenumber'
-  => ( apply => [ NoSpaces ],
-       label => 'SIP/Cell',
-       label_class => [ 'col-xs-2', ],
-       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-       element_class => [ 'input-sm', ],
-       wrapper_attr => { id => 'items' },
-       element_attr => { name => 'telephonenumber\[\]',
-			 placeholder => '123@pbx0.umi, +380xxxxxxxxx' });
+  => ( apply                 => [ NoSpaces ],
+       label                 => 'SIP/Cell',
+       label_class           => [ 'col', 'text-right' ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', ],
+       wrapper_attr          => { id => 'items' },
+       element_attr          => { name => 'telephonenumber\[\]',
+				  placeholder => '123@pbx0.umi, +380xxxxxxxxx' },
+       wrapper_class         => [ 'row' ], );
 
 # has_field 'person_telcomment'
 #   => ( type => 'Display',
@@ -193,64 +201,68 @@ has_field 'person_telephonenumber'
 #      );
 
 has_field 'person_login'
-  => ( apply => [ NoSpaces, NotAllDigits, Printable ],
-       label => 'Login',
-       label_class => [ 'col-xs-2', ],
-       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-       element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'john.doe', },
-     );
+  => ( apply                 => [ NoSpaces, NotAllDigits, Printable ],
+       label                 => 'Login',
+       label_class           => [ 'col', 'text-right' ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', ],
+       element_attr          => { placeholder => 'john.doe', },
+       wrapper_class         => [ 'row' ], );
 
 has_field 'person_associateddomain'
-  => ( type => 'Select',
-       wrapper_attr => { id => 'simplified', },
-       wrapper_class => [ 'simplified', ],
-       label => 'Domain Name',
-       label_class => [ 'col-xs-2', 'required', ],
-       empty_select => '--- Choose Domain ---',
-       # element_attr => { disabled => 'dissabled', },
-       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-       element_class => [ 'input-sm', ],
-       options_method => \&associateddomains,
-       required => 0 );
+  => ( type                  => 'Select',
+       wrapper_attr          => { id => 'simplified', },
+       wrapper_class         => [ 'simplified', 'row', ],
+       label                 => 'Domain Name',
+       label_class           => [ 'col', 'text-right', 'required' ],
+       empty_select          => '--- Choose Domain ---',
+       # element_attr          => { disabled => 'dissabled', },
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', 'custom-select', ],
+       options_method        => \&associateddomains,
+       required              => 0 );
 
 has_field 'person_password1'
-  => ( type => 'Password',
-       label => 'Password',
-       label_class => [ 'col-xs-2', ],
-       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-       element_class => [ 'input-sm', ],
-       ne_username => 'login',
-       apply => [ NoSpaces, NotAllDigits, Printable, StrongPassword ],
-       element_attr => { placeholder => 'Password',
-			 'autocomplete' => 'off', },
+  => ( type                  => 'Password',
+       label                 => 'Password',
+       label_class           => [ 'col', 'text-right' ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', ],
+       ne_username           => 'login',
+       apply                 => [ NoSpaces, NotAllDigits, Printable, StrongPassword ],
+       element_attr          => { placeholder => 'Password',
+				  'autocomplete' => 'off', },
+       wrapper_class         => [ 'row' ],
      );
 
 has_field 'person_password2'
-  => ( type => 'Password',
-       label => '',
-       label_class => [ 'col-xs-2', ],
-       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-       element_class => [ 'input-sm', ],
-       ne_username => 'login',
-       apply => [ NoSpaces, NotAllDigits, Printable, StrongPassword ],
-       element_attr => { placeholder => 'Confirm Password',
-			 'autocomplete' => 'off', },
+  => ( type                  => 'Password',
+       label                 => '',
+       label_class           => [ 'col', 'text-right' ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', ],
+       ne_username           => 'login',
+       apply                 => [ NoSpaces, NotAllDigits, Printable, StrongPassword ],
+       element_attr          => { placeholder => 'Confirm Password',
+				  'autocomplete' => 'off', },
+       wrapper_class         => [ 'row' ],
      );
 
 
 has_field 'person_description'
-  => ( type => 'TextArea',
-       label => 'Description',
-       label_class => [ 'col-xs-2', ],
-       element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-       element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'Any description.',
-			 'autocomplete' => 'off', },
-       cols => 30, rows => 1);
+  => ( type                  => 'TextArea',
+       label                 => 'Description',
+       label_class           => [ 'col', 'text-right' ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', ],
+       element_attr          => { placeholder => 'Any description.',
+				  'autocomplete' => 'off', },
+       wrapper_class         => [ 'row' ],
+       cols                  => 30,
+       rows                  => 1);
 
 has_block 'group_person'
-  => ( tag => 'div',
+  => ( tag         => 'div',
        render_list => [ 'person_org',
 			'person_title',
 			'person_office',
@@ -264,14 +276,14 @@ has_block 'group_person'
 			'person_gidnumber',
 			'person_description',
 		      ],
-       attr => { id => 'group_person', },
+       attr        => { id => 'group_person', },
      );
 
 has_block 'person'
   => ( tag => 'fieldset',
        label => 'New User Personal Data',
        render_list => [ 'group_person', ],
-       class => [ 'tab-pane', 'fade', 'in', 'active', ],
+       class => [ 'tab-pane', 'fade', 'show', 'active', ],
        attr => { id => 'person',
 		 'aria-labelledby' => "person-tab",
 		 role => "tabpanel",
@@ -282,20 +294,20 @@ has_block 'person'
 #== SERVICES WITH LOGIN ==============================================
 ######################################################################
 has_field 'aux_add_account'
-  => ( type => 'AddElement',
-       repeatable => 'account',
-       value => 'Add new account',
+  => ( type          => 'AddElement',
+       repeatable    => 'account',
+       value         => 'Add new account',
        element_class => [ 'btn-success', ],
-       element_attr => { title => 'new account fields will be added to the bottom, bellow existent ones', },
+       element_attr  => { title => 'new fields are added to the bottom, bellow existent ones', },
        wrapper_class => [ qw{col-lg-2 col-md-2}, ],
      );
 
 has_field 'account'
-  => ( type => 'Repeatable',
-       setup_for_js => 1,
-       do_wrapper => 1,
+  => ( type                  => 'Repeatable',
+       setup_for_js          => 1,
+       do_wrapper            => 1,
        element_wrapper_class => [ qw{controls}, ],
-       wrapper_attr => { class => 'no-has-error' },
+       wrapper_attr          => { class => 'no-has-error' },
        # wrap_repeatable_element_method => \&wrap_account_elements,
        # wrapper_class => [ qw{bg-info}, ],
        # init_contains => { element_class => [ qw{hfh repinst bg-info}], },
@@ -310,242 +322,242 @@ has_field 'account'
 # }
 
 has_field 'account.associateddomain'
-  => ( type => 'Select',
-       label => 'Domain Name',
-       label_class => [ qw{col-xs-12 col-sm-2 required}, ],
-       empty_select => '--- Choose Domain ---',
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', ],
-       options_method => \&associateddomains,
-       element_attr => { 'data-name' => 'associateddomain',
-			 'data-group' => 'account', },
-       wrapper_class => [ qw{col-xs-12}, ],
+  => ( type                  => 'Select',
+       label                 => 'Domain Name',
+       label_class           => [ 'col', 'text-right' ],
+       empty_select          => '--- Choose Domain ---',
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', 'custom-select', ],
+       options_method        => \&associateddomains,
+       element_attr          => { 'data-name' => 'associateddomain',
+				  'data-group' => 'account', },
+       wrapper_class         => [ 'row' ],
        required => 0 );
 
 has_field 'account.authorizedservice'
-  => ( type => 'Select',
-       label => 'Service',
-       label_class => [ qw{col-xs-12 col-sm-2 required}, ],
-       empty_select => '--- Choose Service ---',
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', ],
-       options_method => \&authorizedservice,
-       element_attr => { 'data-name' => 'authorizedservice',
-			 'data-group' => 'account', },
-       wrapper_class => [ qw{col-xs-12}, ],
+  => ( type                  => 'Select',
+       label                 => 'Service',
+       label_class           => [ 'col', 'text-right' ],
+       empty_select          => '--- Choose Service ---',
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', 'custom-select', ],
+       options_method        => \&authorizedservice,
+       element_attr          => { 'data-name' => 'authorizedservice',
+				  'data-group' => 'account', },
+       wrapper_class         => [ 'row' ],
        required => 0,
      );
 
 has_field 'account.login'
-  => ( apply => [ NoSpaces, NotAllDigits, Printable, NonEmptyStr ],
-       label => 'Login',
-       do_id => 'no',
-       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'john.doe',
-			 title => 'login to be added with @domain in the end; root uid is used if not provided.',
-			 'autocomplete' => 'off',
-			 'data-name' => 'login',
-			 'data-group' => 'account', },
-       wrapper_class => [ qw{col-xs-12}, ],
+  => ( apply                 => [ NoSpaces, NotAllDigits, Printable, NonEmptyStr ],
+       label                 => 'Login',
+       do_id                 => 'no',
+       label_class           => [ 'col', 'text-right' ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', ],
+       element_attr          => { placeholder => 'john.doe',
+				  title => 'login to be added with @domain in the end; root uid is used if not provided.',
+				  'autocomplete' => 'off',
+				  'data-name' => 'login',
+				  'data-group' => 'account', },
+       wrapper_class         => [ 'row' ],
      );
 
 has_field 'account.logindescr'
-  => ( type => 'Display',
-       html => '<div class="form-group hidden relation passw">' .
-       '<label class="col-xs-12 col-sm-2 control-label"></label>' .
-       '<div class="col-xs-10 col-lg-5">' .
+  => ( type          => 'Display',
+       html          => '<div class="form-group d-none relation passw row">' .
+       '<label class="col"></label>' .
+       '<div class="col-8 col-md-10">' .
        '<small class="text-muted"><em>' .
        'login will be added with @domain' .
        '</em></small></div></div>',
-       element_attr => { 'data-name' => 'logindescr',
-			 'data-group' => 'account', },
-       wrapper_class => [ qw{col-xs-12}, ],
+       element_attr  => { 'data-name' => 'logindescr',
+			  'data-group' => 'account', },
+       wrapper_class => [ 'row', ],
      );
 
 has_field 'account.password1'
-  => ( type => 'Password',
-       minlength => 7, maxlength => 128,
-       label => 'Password',
-       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
-       wrapper_class => [  qw{hidden passw sshacc dot1x-eap-tls relation col-xs-12}, ],
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', ],
-       ne_username => 'login',
-       apply => [ NoSpaces, NotAllDigits, Printable, StrongPassword ],
-       element_attr => { placeholder => 'Password',
-			 'autocomplete' => 'off',
-			 'data-name' => 'password1',
-			 'data-group' => 'account', },
+  => ( type                  => 'Password',
+       minlength             => 7, maxlength => 128,
+       label                 => 'Password',
+       label_class           => [ 'col', 'text-right' ],
+       wrapper_class         => [  qw{ d-none passw sshacc
+				       dot1x-eap-tls relation row}, ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', ],
+       ne_username           => 'login',
+       apply                 => [ NoSpaces, NotAllDigits, Printable, StrongPassword ],
+       element_attr          => { placeholder    => 'Password',
+				  'autocomplete' => 'off',
+				  'data-name'    => 'password1',
+				  'data-group'   => 'account', },
      );
 
 has_field 'account.password2'
-  => ( type => 'Password',
-       minlength => 7, maxlength => 128,
-       label => '',
-       label_class => [ qw{col-xs-12 col-sm-2}, ],
-       wrapper_class => [  qw{hidden passw sshacc dot1x-eap-tls relation col-xs-12}, ],
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', ],
-       ne_username => 'login',
-       apply => [ NoSpaces, NotAllDigits, Printable, StrongPassword ],
-       element_attr => { placeholder => 'Confirm Password',
-			 'autocomplete' => 'off',
-			 'data-name' => 'password2',
-			 'data-group' => 'account', },
+  => ( type                  => 'Password',
+       minlength             => 7, maxlength => 128,
+       label                 => '',
+       label_class           => [ 'col', 'text-right' ],
+       wrapper_class         => [  qw{ d-none passw sshacc
+				       dot1x-eap-tls relation row}, ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', ],
+       ne_username           => 'login',
+       apply                 => [ NoSpaces, NotAllDigits, Printable, StrongPassword ],
+       element_attr          => { placeholder    => 'Confirm Password',
+				  'autocomplete' => 'off',
+				  'data-name'    => 'password2',
+				  'data-group'   => 'account', },
      );
 
 has_field 'account.description'
-  => ( type => 'TextArea',
-       label => 'Description',
-       label_class => [ qw{col-xs-12 col-sm-2}, ],
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'Any description.',
-			 'autocomplete' => 'off',
-			 'data-group' => 'account', },
-       cols => 30, rows => 1,
-       wrapper_class => [ qw{col-xs-12}, ], );
+  => ( type                  => 'TextArea',
+       label                 => 'Description',
+       label_class           => [ 'col', 'text-right' ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', ],
+       element_attr          => { placeholder    => 'Any description.',
+				  'autocomplete' => 'off',
+				  'data-group'   => 'account', },
+       cols                  => 30, rows => 1,
+       wrapper_class         => [ 'row', ], );
 
 has_field 'account.radiusgroupname'
-  => ( type => 'Select',
-       label => 'RADIUS Group',
-       do_id => 'no',
-       label_class => [ qw{col-xs-12 col-sm-2 atleastone}, ],
-       wrapper_class => [  qw{hidden dot1x dot1x-eap-tls relation col-xs-12}, ],
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', ],
-       element_attr => { 'data-name' => 'radiusgroupname',
-			 'data-group' => 'account', },
-       empty_select => '--- Choose RADIUS default Group ---',
-       options_method => \&radgroup,
+  => ( type                  => 'Select',
+       label                 => 'RADIUS Group',
+       do_id                 => 'no',
+       label_class           => [ 'col', 'text-right', 'atleastone' ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', 'custom-select', ],
+       element_attr          => { 'data-name'  => 'radiusgroupname',
+				  'data-group' => 'account', },
+       empty_select          => '--- Choose RADIUS default Group ---',
+       options_method        => \&radgroup,
+       wrapper_class         => [ qw{d-none dot1x dot1x-eap-tls relation row}, ],
      );
 
 has_field 'account.radiusprofiledn'
-  => ( type => 'Select',
-       label => 'RADIUS Profile',
-       wrapper_class => [  qw{hidden dot1x dot1x-eap-tls relation col-xs-12}, ],
-       do_id => 'no',
-       label_class => [ qw{col-xs-12 col-sm-2 atleastone}, ],
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', ],
-       element_attr => { 'autocomplete' => 'off',
-			 'data-name' => 'radiusprofiledn',
-			 'data-group' => 'account', },
-       empty_select => '--- Choose RADIUS Profile ---',
-       options_method => \&radprofile,
+  => ( type                  => 'Select',
+       label                 => 'RADIUS Profile',
+       do_id                 => 'no',
+       label_class           => [ 'col', 'text-right', 'atleastone', ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', 'custom-select', ],
+       element_attr          => { 'autocomplete' => 'off',
+				  'data-name'    => 'radiusprofiledn',
+				  'data-group'   => 'account', },
+       empty_select          => '--- Choose RADIUS Profile ---',
+       options_method        => \&radprofile,
+       wrapper_class         => [  qw{d-none dot1x dot1x-eap-tls relation row}, ],
      );
 
 has_field 'account.userCertificate'
-  => ( type => 'Upload',
-       label => 'Cert (.DER)',
-       wrapper_class => [  qw{hidden dot1x-eap-tls relation col-xs-12}, ],
-       do_id => 'no',
-       label_class => [ qw{col-xs-12 col-sm-2 required}, ],
-       element_wrapper_class => [ 'col-xs-2', 'col-lg-3', ],
-       element_class => [ 'btn', 'btn-default', 'btn-sm',],
-       element_attr => {
-			'data-group' => 'account',
-			'data-name' => 'userCertificate'
-		       },
+  => ( type                  => 'Upload',
+       label                 => 'Cert (.DER)',
+       do_id                 => 'no',
+       label_class           => [ 'col', 'text-right', 'required', ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'btn', 'btn-default', 'btn-sm', 'btn-secondary', ],
+       element_attr          => {
+				 'data-group' => 'account',
+				 'data-name'  => 'userCertificate'
+				},
+       wrapper_class         => [  qw{d-none dot1x-eap-tls relation row}, ],
      );
 
 has_field 'account.sshgid'
-  => ( apply => [ NoSpaces, NotAllDigits, Printable ],
-       label => 'gidNumber',
-       wrapper_class => [  qw{hidden sshacc relation col-xs-12}, ],
-       do_id => 'no',
-       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', 'mono' ],
-       element_attr => { placeholder => 'default is 11102 (ssh-ci)',
-			 title => 'Group ID of the user.',
-			 'autocomplete' => 'off',
-			 'data-name' => 'sshgid',
-			 'data-group' => 'account', },
+  => ( apply                 => [ NoSpaces, NotAllDigits, Printable ],
+       label                 => 'gidNumber',
+       do_id                 => 'no',
+       label_class           => [ 'col', 'text-right' ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', 'text-monospaced' ],
+       element_attr          => { placeholder    => 'default is 11102 (ssh-ci)',
+				  title          => 'Group ID of the user.',
+				  'autocomplete' => 'off',
+				  'data-name'    => 'sshgid',
+				  'data-group'   => 'account', },
+       wrapper_class         => [  qw{d-none sshacc relation row}, ],
      );
 
 has_field 'account.sshhome'
-  => ( apply => [ NoSpaces, NotAllDigits, Printable ],
-       label => 'homeDir',
-       wrapper_class => [  qw{hidden sshacc relation col-xs-12}, ],
-       do_id => 'no',
-       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', 'mono' ],
-       element_attr => { placeholder => '/nonexistent',
-			 title => 'Home directory of the user.',
-			 'autocomplete' => 'off',
-			 'data-name' => 'sshhome',
-			 'data-group' => 'account', },
+  => ( apply                 => [ NoSpaces, NotAllDigits, Printable ],
+       label                 => 'homeDir',
+       do_id                 => 'no',
+       label_class           => [ 'col', 'text-right' ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', 'mono' ],
+       element_attr          => { placeholder    => '/nonexistent',
+				  title          => 'Home directory of the user.',
+				  'autocomplete' => 'off',
+				  'data-name'    => 'sshhome',
+				  'data-group'   => 'account', },
+       wrapper_class         => [  qw{d-none sshacc relation row}, ],
      );
 
 has_field 'account.sshshell'
-  => ( apply => [ NoSpaces, NotAllDigits, Printable ],
-       label => 'loginShell',
-       wrapper_class => [  qw{hidden sshacc relation col-xs-12}, ],
-       do_id => 'no',
-       label_class => [ qw{col-xs-12 col-sm-2 control-label}, ],
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', 'mono' ],
-       element_attr => { placeholder => '/bin/bash',
-			 title => 'Shell of the user.',
-			 'autocomplete' => 'off',
-			 'data-name' => 'sshshell',
-			 'data-group' => 'account', },
+  => ( apply                 => [ NoSpaces, NotAllDigits, Printable ],
+       label                 => 'loginShell',
+       do_id                 => 'no',
+       label_class           => [ 'col', 'text-right' ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', 'mono' ],
+       element_attr          => { placeholder    => '/bin/bash',
+				  title          => 'Shell of the user.',
+				  'autocomplete' => 'off',
+				  'data-name'    => 'sshshell',
+				  'data-group'   => 'account', },
+       wrapper_class         => [  qw{d-none sshacc relation row}, ],
      );
 
 has_field 'account.sshkey'
-  => ( type => 'TextArea',
-       label => 'SSH Pub Key',
-       label_class => [ 'col-xs-2', 'required', ],
-       wrapper_class => [  qw{hidden sshacc relation col-xs-12}, ],
-       do_id => 'no',
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', 'mono', ],
-       element_attr => { title => 'Paste SSH key (read sshd(8) section AUTHORIZED_KEYS FILE FORMAT for reference)',
-			 placeholder => q{command=&quot;...&quot;, environment=&quot;NAME=value&quot;,...,from=&quot;...&quot; no-agent-forwarding,no-port-forwarding,no-pty,no-user-rc,no-x11-forwarding,permitopen=&quot;host:port&quot;,tunnel=&quot;n&quot; ssh-rsa AAA...bZN Lorem ipsum dolor sit amet potenti},
-			 'data-name' => 'sshkey',
-			 'data-group' => 'account', },
-       cols => 30, rows => 4,
+  => ( type                  => 'TextArea',
+       do_id                 => 'no',
+       label                 => 'SSH Pub Key',
+       label_class           => [ 'col', 'text-right', 'required', ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', 'text-monospaced', ],
+       element_attr          => { title        => 'Paste SSH key (read sshd(8) section AUTHORIZED_KEYS FILE FORMAT for reference)',
+				  placeholder  => q{command=&quot;...&quot;, environment=&quot;NAME=value&quot;,...,from=&quot;...&quot; no-agent-forwarding,no-port-forwarding,no-pty,no-user-rc,no-x11-forwarding,permitopen=&quot;host:port&quot;,tunnel=&quot;n&quot; ssh-rsa AAA...bZN Lorem ipsum dolor sit amet potenti},
+				  'data-name'  => 'sshkey',
+				  'data-group' => 'account', },
+       cols                  => 30, rows => 4,
+       wrapper_class         => [  qw{d-none sshacc relation row}, ],
      );
 
 
 has_field 'account.sshkeyfile'
-  => ( type => 'Upload',
-       label => 'SSH Pub Key/s File',
-       label_class => [ 'col-xs-2', 'required', ],
-#       wrapper_attr => { id => 'sshkeyfile', },
-       wrapper_class => [  qw{hidden sshacc relation col-xs-12}, ],
-       do_id => 'no',
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'btn', 'btn-default', 'btn-sm',],
-       element_attr => {title => 'SSH key file (read sshd(8) section AUTHORIZED_KEYS FILE FORMAT for reference)',
-			'data-name' => 'sshkeyfile',
-			'data-group' => 'account',
-			# 'onchange' => 'global.triggerTextarea(this)',
-		       },
+  => ( type                  => 'Upload',
+       do_id                 => 'no',
+       label                 => 'SSH Pub Key/s File',
+       label_class           => [ 'col', 'text-right', 'required', ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'btn', 'btn-default', 'btn-sm', 'btn-secondary', ],
+       element_attr          => {title        => 'SSH key file (read sshd(8) section AUTHORIZED_KEYS FILE FORMAT for reference)',
+				 'data-name'  => 'sshkeyfile',
+				 'data-group' => 'account',
+				 # 'onchange' => 'global.triggerTextarea(this)',
+				},
+       wrapper_class         => [  qw{d-none sshacc relation row}, ],
      );
 
 
 has_field 'account.remove'
-  => ( type => 'RmElement',
-       value => 'Remove this (above fields) account',
-       element_class => [ qw{btn-danger}, ],
-       element_wrapper_class => [ qw{col-xs-offset-2 col-xs-10 col-lg-5 col-md-5}, ],
-       wrapper_class => [ qw{well}, ],
+  => ( type                  => 'RmElement',
+       value                 => 'Remove this (above fields) account',
+       element_class         => [ 'btn-danger', ],
+       element_wrapper_class => [ 'col-3', ],
      );
 
 has_block 'auth'
-  => ( tag => 'fieldset',
-       label => 'Login And Password Dependent Service&nbsp;<small class="text-muted"><em>(' .
+  => ( tag         => 'fieldset',
+       label       => 'Login And Password Dependent Service&nbsp;<small class="text-muted"><em>(' .
        'login and password fields are autogenerated if empty, login will be the same as master account login)</em></small>',
        render_list => [ 'aux_add_account', 'account', ],
-       class => [ qw{tab-pane fade}, ],
-       attr => { id => 'auth',
-		 'aria-labelledby' => "auth-tab",
-		 role => "tabpanel", },
+       class       => [ qw{tab-pane fade show}, ],
+       attr        => { id                => 'auth',
+			'aria-labelledby' => 'auth-tab',
+			role              => 'tabpanel', },
      );
 
 ######################################################################
@@ -555,20 +567,20 @@ has_block 'auth'
 #=== OpenVPN =========================================================
 
 has_field 'aux_add_loginless_ovpn'
-  => ( type => 'AddElement',
-       repeatable => 'loginless_ovpn',
-       value => 'Add new OpenVPN account',
+  => ( type          => 'AddElement',
+       repeatable    => 'loginless_ovpn',
+       value         => 'Add new OpenVPN account',
        element_class => [ 'btn-success', ],
        wrapper_class => [ qw{col-lg-4 col-md-4}, ],
      );
 
 has_field 'loginless_ovpn'
-  => ( type => 'Repeatable',
-       setup_for_js => 1,
-       do_wrapper => 1,
-       element_class => [ 'btn-success', ],
+  => ( type                  => 'Repeatable',
+       setup_for_js          => 1,
+       do_wrapper            => 1,
+       # element_class         => [ 'btn-success', ],
        element_wrapper_class => [ 'controls', ],
-       wrapper_attr => { class => 'no-has-error' },
+       wrapper_attr          => { class => 'no-has-error' },
        # wrap_repeatable_element_method => \&wrap_loginless_ovpn_elements,
        # tags => { controls_div => 1 },
        # init_contains => { wrapper_attr => { class => ['hfh', 'repinst'] } },
@@ -582,201 +594,198 @@ has_field 'loginless_ovpn'
 # }
 
 has_field 'loginless_ovpn.status'
-  => ( type => 'Select',
-       label => 'Account status',
-       label_class => [ 'col-xs-2', ],
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'Initial state of the account',
-			 'autocomplete' => 'off',
-			 'data-name' => 'status',
-			 'data-group' => 'loginless_ovpn', },
-       options => [{ value => '', label => '--- Choose State ---'},
-		   { value => 'enabled', label => 'Enabled'},
-		   { value => 'disabled', label => 'Disabled'},
-		   { value => 'revoked', label => 'Revoked'}, ],
-       wrapper_class => [ qw{col-xs-12}, ],
+  => ( type                  => 'Select',
+       label                 => 'Account status',
+       label_class           => [ 'col', 'text-right' ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', 'custom-select', ],
+       element_attr          => { placeholder    => 'Initial state of the account',
+				  'autocomplete' => 'off',
+				  'data-name'    => 'status',
+				  'data-group'   => 'loginless_ovpn', },
+       options               => [{ value => '',        label => '--- Choose State ---'},
+				 { value => 'enabled', label => 'Enabled'},
+				 { value => 'disabled',label => 'Disabled'},
+				 { value => 'revoked', label => 'Revoked'}, ],
+       wrapper_class         => [ 'row', ],
      );
 
 has_field 'loginless_ovpn.associateddomain'
-  => ( type => 'Select',
-       label => 'FQDN',
-       label_class => [ 'col-xs-2', 'required', ],
-       empty_select => '--- Choose Domain ---',
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', ],
-       options_method => \&associateddomains,
-       element_attr => { title => 'FQDN of the VPN server, client is configured for',
-			 'data-name' => 'associateddomain',
-			 'data-group' => 'loginless_ovpn', },
-       wrapper_class => [ qw{col-xs-12}, ],
+  => ( type                  => 'Select',
+       label                 => 'FQDN',
+       label_class           => [ 'col', 'text-right', 'required' ],
+       empty_select          => '--- Choose Domain ---',
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', 'custom-select', ],
+       options_method        => \&associateddomains,
+       element_attr          => { title        => 'FQDN of the VPN server, client is configured for',
+				  'data-name'  => 'associateddomain',
+				  'data-group' => 'loginless_ovpn', },
+       wrapper_class         => [ 'row', ],
      );
 
 has_field 'loginless_ovpn.userCertificate'
-  => ( type => 'Upload',
-       label => 'Cert (.DER)',
-       label_class => [ 'col-xs-2', 'required', ],
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'btn', 'btn-default', 'btn-sm',],
-       element_attr => {
-			'data-name' => 'cert',
-			'data-group' => 'loginless_ovpn',
-		       },
-       wrapper_class => [ qw{col-xs-12}, ],
+  => ( type                  => 'Upload',
+       label                 => 'Cert (.DER)',
+       label_class           => [ 'col', 'text-right', 'required' ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'btn', 'btn-default', 'btn-sm', 'btn-secondary', ],
+       element_attr          => { 'data-name'  => 'cert',
+				  'data-group' => 'loginless_ovpn', },
+       wrapper_class         => [ 'row', ],
      );
 
 has_field 'loginless_ovpn.ifconfigpush'
-  => ( apply => [ Printable, ],
-       label => 'Ifconfig',
-       label_class => [ 'col-xs-2', 'required', ],
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', ],
-       element_attr => { placeholder => '10.0.91.1 10.0.91.2 or 10.0.97.135 10.0.97.1 or 10.13.83.192 10.0.97.1',
-			 title => 'openvpn(8) option &#96;--ifconfig l rn&#39; (Set TUN/TAP adapter parameters.  l is the IP address of the local VPN endpoint. rn is the IP address of the remote VPN endpoint.)',
-			 'data-name' => 'ifconfigpush',
-			 'data-group' => 'loginless_ovpn', },
-       wrapper_class => [ qw{col-xs-12}, ],
+  => ( apply                 => [ Printable, ],
+       label                 => 'Ifconfig',
+       label_class           => [ 'col', 'text-right', 'required', ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', ],
+       element_attr          => { placeholder  => '10.0.91.1 10.0.91.2 or 10.0.97.135 10.0.97.1 or 10.13.83.192 10.0.97.1',
+				  title        => 'openvpn(8) option &#96;--ifconfig l rn&#39; (Set TUN/TAP adapter parameters.  l is the IP address of the local VPN endpoint. rn is the IP address of the remote VPN endpoint.)',
+				  'data-name'  => 'ifconfigpush',
+				  'data-group' => 'loginless_ovpn', },
+       wrapper_class         => [ 'row', ],
      );
 
 has_field 'loginless_ovpn.iroute'
-  => ( apply => [ Printable, ],
-       label => 'Iroute',
-       label_class => [ 'col-xs-2', ],
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', ],
-       element_attr => { placeholder => '10.0.99.2 255.255.255.0',
-			 title => 'openvpn(8) option &#96;--iroute network [netmask]&#39; (Generate an internal route to a specific client. The netmask parameter, if omitted, defaults to 255.255.255.255.)',
-			 'data-name' => 'iroute',
-			 'data-group' => 'loginless_ovpn', },
-       wrapper_class => [ qw{col-xs-12}, ],
+  => ( apply                 => [ Printable, ],
+       label                 => 'Iroute',
+       label_class           => [ 'col', 'text-right', ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', ],
+       element_attr          => { placeholder  => '10.0.99.2 255.255.255.0',
+				  title        => 'openvpn(8) option &#96;--iroute network [netmask]&#39; (Generate an internal route to a specific client. The netmask parameter, if omitted, defaults to 255.255.255.255.)',
+				  'data-name'  => 'iroute',
+				  'data-group' => 'loginless_ovpn', },
+       wrapper_class         => [ 'row', ],
      );
 
 has_field 'loginless_ovpn.push'
-  => ( apply => [ Printable, ],
-       label => 'Push',
-       label_class => [ 'col-xs-2', ],
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'route 192.168.222.144 255.255.255.128',
-			 title => 'openvpn(8) option &#96;--push option&#39; (Push a config file option back to the client for remote execution.)',
-			 'data-name' => 'push',
-			 'data-group' => 'loginless_ovpn', },
-       wrapper_class => [ qw{col-xs-12}, ],
+  => ( apply                 => [ Printable, ],
+       label                 => 'Push',
+       label_class           => [ 'col', 'text-right' ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', ],
+       element_attr          => { placeholder  => 'route 192.168.222.144 255.255.255.128',
+				  title        => 'openvpn(8) option &#96;--push option&#39; (Push a config file option back to the client for remote execution.)',
+				  'data-name'  => 'push',
+				  'data-group' => 'loginless_ovpn', },
+       wrapper_class         => [ 'row', ],
      );
 
 has_field 'loginless_ovpn.devtype'
-  => ( apply => [ NoSpaces, Printable ],
-       label => 'Device Type',
-       label_class => [ 'col-xs-2', ],
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'notebook, netbook, smartphone',
-			 title => 'OS type (defines which address to assign: /30 for Win like and /32 for XNIX like)',
-			 'data-name' => 'dev',
-			 'data-group' => 'loginless_ovpn', },
-       wrapper_class => [ qw{col-xs-12}, ],
+  => ( apply                 => [ NoSpaces, Printable ],
+       label                 => 'Device Type',
+       label_class           => [ 'col', 'text-right' ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', ],
+       element_attr          => { placeholder  => 'notebook, netbook, smartphone',
+				  title        => 'OS type (defines which address to assign: /30 for Win like and /32 for XNIX like)',
+				  'data-name'  => 'dev',
+				  'data-group' => 'loginless_ovpn', },
+       wrapper_class         => [ 'row', ],
      );
 
 has_field 'loginless_ovpn.devos'
-  => ( apply => [ Printable ],
-       label => 'OS',
-       label_class => [ 'col-xs-2', ],
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'xNIX, MacOS, Android, Windows',
-			 'data-name' => 'devos',
-			 'data-group' => 'loginless_ovpn', },
-       wrapper_class => [ qw{col-xs-12}, ],
+  => ( apply                 => [ Printable ],
+       label                 => 'OS',
+       label_class           => [ 'col', 'text-right' ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', ],
+       element_attr          => { placeholder  => 'xNIX, MacOS, Android, Windows',
+				  'data-name'  => 'devos',
+				  'data-group' => 'loginless_ovpn', },
+       wrapper_class         => [ 'row', ],
      );
 
 has_field 'loginless_ovpn.config'
-  => ( apply => [ Printable, ],
-       label => 'Config',
-       label_class => [ 'col-xs-2', ],
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'path/to/some/additional/configfile.conf',
-			 title => 'openvpn(8) option &#96;--config&#39; (Load additional config options from file where each line corresponds to one command line option, but with the leading &#39;--&#39; removed.)',
-			 'data-name' => 'config',
-			 'data-group' => 'loginless_ovpn', },
-       wrapper_class => [ qw{col-xs-12}, ],
+  => ( apply                 => [ Printable, ],
+       label                 => 'Config',
+       label_class           => [ 'col', 'text-right' ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', ],
+       element_attr          => { placeholder  => 'path/to/some/additional/configfile.conf',
+				  title        => 'openvpn(8) option &#96;--config&#39; (Load additional config options from file where each line corresponds to one command line option, but with the leading &#39;--&#39; removed.)',
+				  'data-name'  => 'config',
+				  'data-group' => 'loginless_ovpn', },
+       wrapper_class         => [ 'row', ],
      );
 
 has_field 'loginless_ovpn.devmake'
-  => ( apply => [ Printable ],
-       label => 'Device Maker',
-       label_class => [ 'col-xs-2', ],
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'HP, Dell, Asus, Lenovo',
-			 'data-name' => 'devmake',
-			 'data-group' => 'loginless_ovpn', },
-       wrapper_class => [ qw{col-xs-12}, ],
+  => ( apply                 => [ Printable ],
+       label                 => 'Device Maker',
+       label_class           => [ 'col', 'text-right' ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', ],
+       element_attr          => { placeholder  => 'HP, Dell, Asus, Lenovo',
+				  'data-name'  => 'devmake',
+				  'data-group' => 'loginless_ovpn', },
+       wrapper_class         => [ 'row', ],
      );
 
 has_field 'loginless_ovpn.devmodel'
-  => ( apply => [ Printable ],
-       label => 'Device Model',
-       label_class => [ 'col-xs-2', ],
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'Pavilion dm1',
-			 'data-name' => 'devmodel',
-			 'data-group' => 'loginless_ovpn', },
-       wrapper_class => [ qw{col-xs-12}, ],
+  => ( apply                 => [ Printable ],
+       label                 => 'Device Model',
+       label_class           => [ 'col', 'text-right' ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', ],
+       element_attr          => { placeholder  => 'Pavilion dm1',
+				  'data-name'  => 'devmodel',
+				  'data-group' => 'loginless_ovpn', },
+       wrapper_class         => [ 'row', ],
      );
 
 has_field 'loginless_ovpn.devosver'
-  => ( apply => [ Printable ],
-       label => 'OS version',
-       label_class => [ 'col-xs-2', ],
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', ],
-       element_attr => { placeholder => '1.2.3',
-			 'data-name' => 'devosv',
-			 'data-group' => 'loginless_ovpn', },
-       wrapper_class => [ qw{col-xs-12}, ],
+  => ( apply                 => [ Printable ],
+       label                 => 'OS version',
+       label_class           => [ 'col', 'text-right' ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', ],
+       element_attr          => { placeholder  => '1.2.3',
+				  'data-name'  => 'devosv',
+				  'data-group' => 'loginless_ovpn', },
+       wrapper_class         => [ 'row', ],
      );
 
 has_field 'loginless_ovpn.description'
-  => ( type => 'TextArea',
-       label => 'Description',
-       label_class => [ 'col-xs-2', ],
-       element_wrapper_class => [ qw{col-xs-10 col-lg-5 col-md-5}, ],
-       element_class => [ 'input-sm', ],
-       element_attr => { placeholder => 'Any description.',
-			 'autocomplete' => 'off',
-			 'data-group' => 'loginless_ovpn', },
-       cols => 30, rows => 1,
-       wrapper_class => [ qw{col-xs-12}, ],
+  => ( type                  => 'TextArea',
+       label                 => 'Description',
+       label_class           => [ 'col', 'text-right' ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', ],
+       element_attr          => { placeholder    => 'Any description.',
+				  'autocomplete' => 'off',
+				  'data-group'   => 'loginless_ovpn', },
+       cols                  => 30, rows => 1,
+       wrapper_class         => [ 'row', ],
      );
 
 has_field 'loginless_ovpn.remove'
-  => ( type => 'RmElement',
-       value => 'Remove this (above fields) account',
-       element_class => [ qw{btn-danger}, ],
-       element_wrapper_class => [ qw{col-xs-offset-2 col-xs-10 col-lg-5 col-md-5}, ],
-       wrapper_class => [ qw{well}, ],
+  => ( type                  => 'RmElement',
+       value                 => 'Remove this (above fields) account',
+       element_class         => [ 'btn-danger', ],
+       element_wrapper_class => [ 'col-3', ],
      );
 
 has_block 'ovpn'
   => ( tag => 'fieldset',
-       label => 'OpenVPN configuration&nbsp;<small class="text-muted"><em>( <span class="fa fa-ellipsis-h"></span> )</em></small>',
+       label       => 'OpenVPN configuration&nbsp;<small class="text-muted"><em>( <span class="fa fa-ellipsis-h"></span> )</em></small>',
        render_list => [ 'aux_add_loginless_ovpn', 'loginless_ovpn', ],
-       class => [ 'tab-pane', 'fade', ],
-       attr => { id => 'ovpn',
-		 'aria-labelledby' => "ovpn-tab",
-		 role => "tabpanel",
-	       },
+       class       => [ 'tab-pane', 'fade', ],
+       attr        => { id                => 'ovpn',
+			'aria-labelledby' => 'ovpn-tab',
+			role              => 'tabpanel',
+		      },
      );
 
 #=== GROUPS ==========================================================
 
 has_field 'groups'
-  => ( type => 'Multiple',
-       label => '',
-       element_wrapper_class => [ 'col-xs-12', ],
-       element_class => [ 'multiselect', 'input-sm', 'umi-multiselect', ],
+  => ( type                  => 'Multiple',
+       label                 => '',
+       element_wrapper_class => [ 'col-12', ],
+       element_class         => [ 'multiselect', 'input-sm', 'umi-multiselect', ],
        # required => 1,
      );
 
@@ -787,20 +796,19 @@ sub options_groups {
   return unless $self->ldap_crud;
 
   my $ldap_crud = $self->ldap_crud;
-  my $mesg = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{group},
-				   scope => 'one',
+  my $mesg = $ldap_crud->search( { base      => $ldap_crud->cfg->{base}->{group},
+				   scope     => 'one',
 				   sizelimit => 0,
-				   attrs => ['cn' ], } );
+				   attrs     => [ 'cn' ], } );
 
-  if ( ! $mesg->count ) {
-    push @{$return->{error}}, $ldap_crud->err($mesg);
-  }
+  push @{$return->{error}}, $ldap_crud->err($mesg)
+    if ! $mesg->count;
 
   my @groups_all = $mesg->sorted('cn');
 
-  foreach ( @groups_all ) {
-    push @groups, { value => $_->get_value('cn'), label => $_->get_value('cn'), };
-  }
+  push @groups, { value => $_->get_value('cn'), label => $_->get_value('cn'), }
+    foreach @groups_all;
+
   return \@groups;
 }
 
@@ -811,34 +819,26 @@ has_field 'groupspace'
 
 
 has_block 'groupsselect'
-  => ( tag => 'fieldset',
-       label => 'Groups user belongs to',
+  => ( tag         => 'fieldset',
+       label       => 'Groups user belongs to',
        render_list => [ 'groups', ], # 'groupspace', ],
-       class => [ 'tab-pane', 'fade', ],
-       attr => { id => 'groups',
-		 'aria-labelledby' => "groups-tab",
-		 role => "tabpanel",
-	       },
+       class       => [ 'tab-pane', 'fade', ],
+       attr        => { id                => 'groups',
+			'aria-labelledby' => 'groups-tab',
+			role              => 'tabpanel',
+		      },
      );
 
 ######################################################################
 #== REST OF THE FORM =================================================
 ######################################################################
 
-has_field 'aux_reset'
-  => ( type => 'Reset',
-       element_class => [ 'btn', 'btn-danger', 'btn-block', ],
-       element_wrapper_class => [ 'col-xs-12', ],
-       wrapper_class => [ 'col-xs-4' ],
-       # value => 'Reset All'
-     );
-
 has_field 'aux_submit'
-  => ( type => 'Submit',
-       element_class => [ 'btn', 'btn-success', 'btn-block', ],
-       element_wrapper_class => [ 'col-xs-12', ],
-       wrapper_class => [ 'col-xs-8', ], # 'pull-right' ],
-       value => 'Submit' );
+  => ( type                  => 'Submit',
+       element_class         => [ 'btn', 'btn-success', 'btn-block', 'text-uppercase', ],
+       element_wrapper_class => [ 'col', ],
+       wrapper_class         => [ 'row' ],
+       value                 => 'Submit' );
 
 
 
@@ -850,16 +850,16 @@ has_field 'aux_submit'
 ######################################################################
 
 before 'validate_form' => sub {
-   my $self = shift;
-   if( defined $self->params->{add_svc_acc} &&
+  my $self = shift;
+  if ( defined $self->params->{add_svc_acc} &&
        $self->params->{add_svc_acc} ne '' ) {
-     $self->field('person_givenname')->required(0);
-     $self->field('person_sn')->required(0);
-     $self->field('person_org')->required(0);
-     $self->field('person_office')->required(0);
-     $self->field('person_title')->required(0);
-   }
- };
+    $self->field('person_givenname')->required(0);
+    $self->field('person_sn')->required(0);
+    $self->field('person_org')->required(0);
+    $self->field('person_office')->required(0);
+    $self->field('person_title')->required(0);
+  }
+};
 
 sub validate {
   my $self = shift;
@@ -885,7 +885,7 @@ sub validate {
   } else {
     my $autologin_mesg =
       $ldap_crud->search({ scope => 'base',
-			   base => $self->add_svc_acc,
+			   base  => $self->add_svc_acc,
 			   attrs => [ 'givenName', 'sn' ], });
     my $autologin_entry = $autologin_mesg->entry(0);
     log_debug { np($self->add_svc_acc) };
@@ -895,10 +895,10 @@ sub validate {
 
   if ( $self->add_svc_acc eq '' ) {
     $mesg =
-      $ldap_crud->search({ scope => 'one',
+      $ldap_crud->search({ scope  => 'one',
 			   filter => '(uid=' . $self->autologin . '*)',
-			   base => $ldap_crud->cfg->{base}->{acc_root},
-			   attrs => [ 'uid' ], });
+			   base   => $ldap_crud->cfg->{base}->{acc_root},
+			   attrs  => [ 'uid' ], });
     my $uid_namesake;
     if ( $mesg->count == 1 &&
 	 defined $self->field('person_namesake')->value &&
@@ -996,24 +996,24 @@ sub validate {
       if ( defined $element->field('authorizedservice')->value &&
 	   $element->field('authorizedservice')->value =~ /^ssh-acc.*$/ ) {
 
-	  if ( defined $element->field('associateddomain')->value &&
-	       ! defined $element->field('sshkey')->value &&
-	       ! defined $element->field('sshkeyfile')->value ) { # fqdn but no key
-	    $element->field('sshkey')->add_error('Either Key, KeyFile or both field/s have to be defined!');
-	    $element->field('sshkeyfile')->add_error('Either KeyFile, Key or both field/s have to be defined!');
-	  } elsif ( ( defined $element->field('sshkey')->value ||
-		      defined $element->field('sshkeyfile')->value ) &&
-		    ! defined $element->field('associateddomain')->value ) { # key but no fqdn
-	    $element->field('associateddomain')->add_error('Domain field have to be defined!');
-	  } elsif ( ! defined $element->field('sshkey')->value &&
-		    ! defined $element->field('sshkeyfile')->value &&
-		    ! defined $element->field('associateddomain')->value ) {	# empty duplicatee
-	    $self->add_form_error('<span class="fa-stack fa-fw">' .
-				  '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
-				  '<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
-				  '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
-				  '<b> <i class="fa fa-arrow-right"></i> SSH:</b> Empty duplicatee! Fill it or remove, please');
-	  }
+	if ( defined $element->field('associateddomain')->value &&
+	     ! defined $element->field('sshkey')->value &&
+	     ! defined $element->field('sshkeyfile')->value ) { # fqdn but no key
+	  $element->field('sshkey')->add_error('Either Key, KeyFile or both field/s have to be defined!');
+	  $element->field('sshkeyfile')->add_error('Either KeyFile, Key or both field/s have to be defined!');
+	} elsif ( ( defined $element->field('sshkey')->value ||
+		    defined $element->field('sshkeyfile')->value ) &&
+		  ! defined $element->field('associateddomain')->value ) { # key but no fqdn
+	  $element->field('associateddomain')->add_error('Domain field have to be defined!');
+	} elsif ( ! defined $element->field('sshkey')->value &&
+		  ! defined $element->field('sshkeyfile')->value &&
+		  ! defined $element->field('associateddomain')->value ) { # empty duplicatee
+	  $self->add_form_error('<span class="fa-stack fa-fw">' .
+				'<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
+				'<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
+				'<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
+				'<b> <i class="fa fa-arrow-right"></i> SSH:</b> Empty duplicatee! Fill it or remove, please');
+	}
 
 
 	  
@@ -1162,105 +1162,105 @@ sub validate {
       $i++;
     }
   
-# to rewrite due to loginless_ssh removal #     #---[ ssh + ]------------------------------------------------
-# to rewrite due to loginless_ssh removal #     my $sshpubkeyuniq;
-# to rewrite due to loginless_ssh removal #     $i = 0;
-# to rewrite due to loginless_ssh removal #     foreach $element ( $self->field('loginless_ssh')->fields ) {
-# to rewrite due to loginless_ssh removal #       if ( defined $element->field('associateddomain')->value &&
-# to rewrite due to loginless_ssh removal # 	   ! defined $element->field('key')->value &&
-# to rewrite due to loginless_ssh removal # 	   ! defined $element->field('keyfile')->value ) { # fqdn but no key
-# to rewrite due to loginless_ssh removal # 	$element->field('key')->add_error('Either Key, KeyFile or both field/s have to be defined!');
-# to rewrite due to loginless_ssh removal # 	$element->field('keyfile')->add_error('Either KeyFile, Key or both field/s have to be defined!');
-# to rewrite due to loginless_ssh removal #       } elsif ( ( defined $element->field('key')->value ||
-# to rewrite due to loginless_ssh removal # 		  defined $element->field('keyfile')->value ) &&
-# to rewrite due to loginless_ssh removal # 		! defined $element->field('associateddomain')->value ) { # key but no fqdn
-# to rewrite due to loginless_ssh removal # 	$element->field('associateddomain')->add_error('Domain field have to be defined!');
-# to rewrite due to loginless_ssh removal #       } elsif ( ! defined $element->field('key')->value &&
-# to rewrite due to loginless_ssh removal # 		! defined $element->field('keyfile')->value &&
-# to rewrite due to loginless_ssh removal # 		! defined $element->field('associateddomain')->value &&
-# to rewrite due to loginless_ssh removal # 		$i > 0 ) {	# empty duplicatee
-# to rewrite due to loginless_ssh removal # 	$self->add_form_error('<span class="fa-stack fa-fw">' .
-# to rewrite due to loginless_ssh removal # 			      '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
-# to rewrite due to loginless_ssh removal # 			      '<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
-# to rewrite due to loginless_ssh removal # 			      '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
-# to rewrite due to loginless_ssh removal # 			      '<b> <i class="fa fa-arrow-right"></i> SSH:</b> Empty duplicatee! Fill it or remove, please');
-# to rewrite due to loginless_ssh removal #       }
-# to rewrite due to loginless_ssh removal # 
-# to rewrite due to loginless_ssh removal #       # prepare to know if fqdn+key+keyfile is uniq?
-# to rewrite due to loginless_ssh removal #       $sshpubkeyuniq->{associateddomain} = $element->field('associateddomain')->value // '';
-# to rewrite due to loginless_ssh removal #       $sshpubkeyuniq->{key} =              $element->field('key')->value // '';
-# to rewrite due to loginless_ssh removal #       $sshpubkeyuniq->{keyfile} =          $element->field('keyfile')->value->{filename} // '';
-# to rewrite due to loginless_ssh removal #       $sshpubkeyuniq->{hash} = sprintf('%s%s%s',
-# to rewrite due to loginless_ssh removal # 				       $sshpubkeyuniq->{associateddomain},
-# to rewrite due to loginless_ssh removal # 				       $sshpubkeyuniq->{key},,
-# to rewrite due to loginless_ssh removal # 				       $sshpubkeyuniq->{keyfile});
-# to rewrite due to loginless_ssh removal #       $elementcmp->{$sshpubkeyuniq->{hash}} = ! $i ? 1 : $elementcmp->{$sshpubkeyuniq->{hash}}++;
-# to rewrite due to loginless_ssh removal # 
-# to rewrite due to loginless_ssh removal #       # validate keyfile if provided
-# to rewrite due to loginless_ssh removal #       my $sshpubkey_hash = {};
-# to rewrite due to loginless_ssh removal #       my ( $sshpubkey, $key_file, $key_file_msg );
-# to rewrite due to loginless_ssh removal #       if ( defined $element->field('keyfile')->value &&
-# to rewrite due to loginless_ssh removal # 	   ref($element->field('keyfile')->value) eq 'Catalyst::Request::Upload' ) {
-# to rewrite due to loginless_ssh removal # 	$key_file = $self->file2var( $element->field('keyfile')->value->{tempname}, $key_file_msg, 1);
-# to rewrite due to loginless_ssh removal # 	$element->field('keyfile')->add_error($key_file_msg->{error})
-# to rewrite due to loginless_ssh removal # 	  if defined $key_file_msg->{error};
-# to rewrite due to loginless_ssh removal # 	foreach (@{$key_file}) {
-# to rewrite due to loginless_ssh removal # 	  my $abc = $_;
-# to rewrite due to loginless_ssh removal # 	  if ( ! $self->sshpubkey_parse(\$abc, $sshpubkey_hash) ) {
-# to rewrite due to loginless_ssh removal # 	    $self->add_form_error('<span class="fa-stack fa-fw">' .
-# to rewrite due to loginless_ssh removal # 				  '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
-# to rewrite due to loginless_ssh removal # 				  '<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
-# to rewrite due to loginless_ssh removal # 				  '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
-# to rewrite due to loginless_ssh removal # 				  '<b> <i class="fa fa-arrow-right"></i> SSH:</b> ' . $sshpubkey_hash->{error});
-# to rewrite due to loginless_ssh removal # 	  }
-# to rewrite due to loginless_ssh removal # 	  $sshpubkey_hash = {};
-# to rewrite due to loginless_ssh removal # 	}
-# to rewrite due to loginless_ssh removal #       }
-# to rewrite due to loginless_ssh removal #       
-# to rewrite due to loginless_ssh removal #       $sshpubkey = defined $element->field('key')->value ? $element->field('key')->value : undef;
-# to rewrite due to loginless_ssh removal #       if( defined $sshpubkey && ! $self->sshpubkey_parse(\$sshpubkey, $sshpubkey_hash) ) {
-# to rewrite due to loginless_ssh removal # 	$self->add_form_error('<span class="fa-stack fa-fw">' .
-# to rewrite due to loginless_ssh removal # 			      '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
-# to rewrite due to loginless_ssh removal # 			      '<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
-# to rewrite due to loginless_ssh removal # 			      '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
-# to rewrite due to loginless_ssh removal # 			      '<b> <i class="fa fa-arrow-right"></i> SSH:</b> ' . $sshpubkey_hash->{error});
-# to rewrite due to loginless_ssh removal #       }
-# to rewrite due to loginless_ssh removal #       $i++;
-# to rewrite due to loginless_ssh removal #     }
-# to rewrite due to loginless_ssh removal # 
-# to rewrite due to loginless_ssh removal #     foreach $element ( $self->field('loginless_ssh')->fields ) {
-# to rewrite due to loginless_ssh removal #       $sshpubkeyuniq->{associateddomain} = defined $element->field('associateddomain')->value ?
-# to rewrite due to loginless_ssh removal # 	$element->field('associateddomain')->value : '';
-# to rewrite due to loginless_ssh removal #       $sshpubkeyuniq->{key} = defined $element->field('key')->value ?
-# to rewrite due to loginless_ssh removal # 	$element->field('key')->value : '';
-# to rewrite due to loginless_ssh removal #       $sshpubkeyuniq->{keyfile} = defined $element->field('keyfile')->value ?
-# to rewrite due to loginless_ssh removal # 	$element->field('keyfile')->value->{filename} : '';
-# to rewrite due to loginless_ssh removal #       $sshpubkeyuniq->{hash} = sprintf('%s%s%s',
-# to rewrite due to loginless_ssh removal # 				       $sshpubkeyuniq->{associateddomain},
-# to rewrite due to loginless_ssh removal # 				       $sshpubkeyuniq->{key},,
-# to rewrite due to loginless_ssh removal # 				       $sshpubkeyuniq->{keyfile});
-# to rewrite due to loginless_ssh removal #       $element->field('key')->add_error('The same key is defined more than once for the same FQDN')
-# to rewrite due to loginless_ssh removal # 	if $elementcmp->{$sshpubkeyuniq->{hash}} > 1 &&
-# to rewrite due to loginless_ssh removal # 	$sshpubkeyuniq->{keyfile} eq '' &&
-# to rewrite due to loginless_ssh removal # 	$sshpubkeyuniq->{key} ne '';
-# to rewrite due to loginless_ssh removal #       $element->field('keyfile')->add_error('The same keyfile is defined more than once for the same FQDN')
-# to rewrite due to loginless_ssh removal # 	if $elementcmp->{$sshpubkeyuniq->{hash}} > 1 &&
-# to rewrite due to loginless_ssh removal # 	$sshpubkeyuniq->{key} eq '' &&
-# to rewrite due to loginless_ssh removal # 	$sshpubkeyuniq->{keyfile} ne '';
-# to rewrite due to loginless_ssh removal #       $element->field('key')->add_error('The same key and keyfile are defined more than once for the same FQDN')
-# to rewrite due to loginless_ssh removal # 	if $elementcmp->{$sshpubkeyuniq->{hash}} > 1 &&
-# to rewrite due to loginless_ssh removal # 	$sshpubkeyuniq->{keyfile} ne '' &&
-# to rewrite due to loginless_ssh removal # 	$sshpubkeyuniq->{key} ne '';
-# to rewrite due to loginless_ssh removal #     }
-# to rewrite due to loginless_ssh removal # 
-# to rewrite due to loginless_ssh removal #     $self->add_form_error('<span class="fa-stack fa-fw">' .
-# to rewrite due to loginless_ssh removal # 			  '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
-# to rewrite due to loginless_ssh removal # 			  '<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
-# to rewrite due to loginless_ssh removal # 			  '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
-# to rewrite due to loginless_ssh removal # 			  '<b> <i class="fa fa-arrow-right"></i> SSH:</b> Has error/s! Correct or remove, please')
-# to rewrite due to loginless_ssh removal #       if $self->field('loginless_ssh')->has_error_fields;
-# to rewrite due to loginless_ssh removal #   
-# to rewrite due to loginless_ssh removal #     #---[ ssh - ]------------------------------------------------
+    # to rewrite due to loginless_ssh removal #     #---[ ssh + ]------------------------------------------------
+    # to rewrite due to loginless_ssh removal #     my $sshpubkeyuniq;
+    # to rewrite due to loginless_ssh removal #     $i = 0;
+    # to rewrite due to loginless_ssh removal #     foreach $element ( $self->field('loginless_ssh')->fields ) {
+    # to rewrite due to loginless_ssh removal #       if ( defined $element->field('associateddomain')->value &&
+    # to rewrite due to loginless_ssh removal # 	   ! defined $element->field('key')->value &&
+    # to rewrite due to loginless_ssh removal # 	   ! defined $element->field('keyfile')->value ) { # fqdn but no key
+    # to rewrite due to loginless_ssh removal # 	$element->field('key')->add_error('Either Key, KeyFile or both field/s have to be defined!');
+    # to rewrite due to loginless_ssh removal # 	$element->field('keyfile')->add_error('Either KeyFile, Key or both field/s have to be defined!');
+    # to rewrite due to loginless_ssh removal #       } elsif ( ( defined $element->field('key')->value ||
+    # to rewrite due to loginless_ssh removal # 		  defined $element->field('keyfile')->value ) &&
+    # to rewrite due to loginless_ssh removal # 		! defined $element->field('associateddomain')->value ) { # key but no fqdn
+    # to rewrite due to loginless_ssh removal # 	$element->field('associateddomain')->add_error('Domain field have to be defined!');
+    # to rewrite due to loginless_ssh removal #       } elsif ( ! defined $element->field('key')->value &&
+    # to rewrite due to loginless_ssh removal # 		! defined $element->field('keyfile')->value &&
+    # to rewrite due to loginless_ssh removal # 		! defined $element->field('associateddomain')->value &&
+    # to rewrite due to loginless_ssh removal # 		$i > 0 ) {	# empty duplicatee
+    # to rewrite due to loginless_ssh removal # 	$self->add_form_error('<span class="fa-stack fa-fw">' .
+    # to rewrite due to loginless_ssh removal # 			      '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
+    # to rewrite due to loginless_ssh removal # 			      '<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
+    # to rewrite due to loginless_ssh removal # 			      '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
+    # to rewrite due to loginless_ssh removal # 			      '<b> <i class="fa fa-arrow-right"></i> SSH:</b> Empty duplicatee! Fill it or remove, please');
+    # to rewrite due to loginless_ssh removal #       }
+    # to rewrite due to loginless_ssh removal # 
+    # to rewrite due to loginless_ssh removal #       # prepare to know if fqdn+key+keyfile is uniq?
+    # to rewrite due to loginless_ssh removal #       $sshpubkeyuniq->{associateddomain} = $element->field('associateddomain')->value // '';
+    # to rewrite due to loginless_ssh removal #       $sshpubkeyuniq->{key} =              $element->field('key')->value // '';
+    # to rewrite due to loginless_ssh removal #       $sshpubkeyuniq->{keyfile} =          $element->field('keyfile')->value->{filename} // '';
+    # to rewrite due to loginless_ssh removal #       $sshpubkeyuniq->{hash} = sprintf('%s%s%s',
+    # to rewrite due to loginless_ssh removal # 				       $sshpubkeyuniq->{associateddomain},
+    # to rewrite due to loginless_ssh removal # 				       $sshpubkeyuniq->{key},,
+    # to rewrite due to loginless_ssh removal # 				       $sshpubkeyuniq->{keyfile});
+    # to rewrite due to loginless_ssh removal #       $elementcmp->{$sshpubkeyuniq->{hash}} = ! $i ? 1 : $elementcmp->{$sshpubkeyuniq->{hash}}++;
+    # to rewrite due to loginless_ssh removal # 
+    # to rewrite due to loginless_ssh removal #       # validate keyfile if provided
+    # to rewrite due to loginless_ssh removal #       my $sshpubkey_hash = {};
+    # to rewrite due to loginless_ssh removal #       my ( $sshpubkey, $key_file, $key_file_msg );
+    # to rewrite due to loginless_ssh removal #       if ( defined $element->field('keyfile')->value &&
+    # to rewrite due to loginless_ssh removal # 	   ref($element->field('keyfile')->value) eq 'Catalyst::Request::Upload' ) {
+    # to rewrite due to loginless_ssh removal # 	$key_file = $self->file2var( $element->field('keyfile')->value->{tempname}, $key_file_msg, 1);
+    # to rewrite due to loginless_ssh removal # 	$element->field('keyfile')->add_error($key_file_msg->{error})
+    # to rewrite due to loginless_ssh removal # 	  if defined $key_file_msg->{error};
+    # to rewrite due to loginless_ssh removal # 	foreach (@{$key_file}) {
+    # to rewrite due to loginless_ssh removal # 	  my $abc = $_;
+    # to rewrite due to loginless_ssh removal # 	  if ( ! $self->sshpubkey_parse(\$abc, $sshpubkey_hash) ) {
+    # to rewrite due to loginless_ssh removal # 	    $self->add_form_error('<span class="fa-stack fa-fw">' .
+    # to rewrite due to loginless_ssh removal # 				  '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
+    # to rewrite due to loginless_ssh removal # 				  '<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
+    # to rewrite due to loginless_ssh removal # 				  '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
+    # to rewrite due to loginless_ssh removal # 				  '<b> <i class="fa fa-arrow-right"></i> SSH:</b> ' . $sshpubkey_hash->{error});
+    # to rewrite due to loginless_ssh removal # 	  }
+    # to rewrite due to loginless_ssh removal # 	  $sshpubkey_hash = {};
+    # to rewrite due to loginless_ssh removal # 	}
+    # to rewrite due to loginless_ssh removal #       }
+    # to rewrite due to loginless_ssh removal #       
+    # to rewrite due to loginless_ssh removal #       $sshpubkey = defined $element->field('key')->value ? $element->field('key')->value : undef;
+    # to rewrite due to loginless_ssh removal #       if( defined $sshpubkey && ! $self->sshpubkey_parse(\$sshpubkey, $sshpubkey_hash) ) {
+    # to rewrite due to loginless_ssh removal # 	$self->add_form_error('<span class="fa-stack fa-fw">' .
+    # to rewrite due to loginless_ssh removal # 			      '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
+    # to rewrite due to loginless_ssh removal # 			      '<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
+    # to rewrite due to loginless_ssh removal # 			      '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
+    # to rewrite due to loginless_ssh removal # 			      '<b> <i class="fa fa-arrow-right"></i> SSH:</b> ' . $sshpubkey_hash->{error});
+    # to rewrite due to loginless_ssh removal #       }
+    # to rewrite due to loginless_ssh removal #       $i++;
+    # to rewrite due to loginless_ssh removal #     }
+    # to rewrite due to loginless_ssh removal # 
+    # to rewrite due to loginless_ssh removal #     foreach $element ( $self->field('loginless_ssh')->fields ) {
+    # to rewrite due to loginless_ssh removal #       $sshpubkeyuniq->{associateddomain} = defined $element->field('associateddomain')->value ?
+    # to rewrite due to loginless_ssh removal # 	$element->field('associateddomain')->value : '';
+    # to rewrite due to loginless_ssh removal #       $sshpubkeyuniq->{key} = defined $element->field('key')->value ?
+    # to rewrite due to loginless_ssh removal # 	$element->field('key')->value : '';
+    # to rewrite due to loginless_ssh removal #       $sshpubkeyuniq->{keyfile} = defined $element->field('keyfile')->value ?
+    # to rewrite due to loginless_ssh removal # 	$element->field('keyfile')->value->{filename} : '';
+    # to rewrite due to loginless_ssh removal #       $sshpubkeyuniq->{hash} = sprintf('%s%s%s',
+    # to rewrite due to loginless_ssh removal # 				       $sshpubkeyuniq->{associateddomain},
+    # to rewrite due to loginless_ssh removal # 				       $sshpubkeyuniq->{key},,
+    # to rewrite due to loginless_ssh removal # 				       $sshpubkeyuniq->{keyfile});
+    # to rewrite due to loginless_ssh removal #       $element->field('key')->add_error('The same key is defined more than once for the same FQDN')
+    # to rewrite due to loginless_ssh removal # 	if $elementcmp->{$sshpubkeyuniq->{hash}} > 1 &&
+    # to rewrite due to loginless_ssh removal # 	$sshpubkeyuniq->{keyfile} eq '' &&
+    # to rewrite due to loginless_ssh removal # 	$sshpubkeyuniq->{key} ne '';
+    # to rewrite due to loginless_ssh removal #       $element->field('keyfile')->add_error('The same keyfile is defined more than once for the same FQDN')
+    # to rewrite due to loginless_ssh removal # 	if $elementcmp->{$sshpubkeyuniq->{hash}} > 1 &&
+    # to rewrite due to loginless_ssh removal # 	$sshpubkeyuniq->{key} eq '' &&
+    # to rewrite due to loginless_ssh removal # 	$sshpubkeyuniq->{keyfile} ne '';
+    # to rewrite due to loginless_ssh removal #       $element->field('key')->add_error('The same key and keyfile are defined more than once for the same FQDN')
+    # to rewrite due to loginless_ssh removal # 	if $elementcmp->{$sshpubkeyuniq->{hash}} > 1 &&
+    # to rewrite due to loginless_ssh removal # 	$sshpubkeyuniq->{keyfile} ne '' &&
+    # to rewrite due to loginless_ssh removal # 	$sshpubkeyuniq->{key} ne '';
+    # to rewrite due to loginless_ssh removal #     }
+    # to rewrite due to loginless_ssh removal # 
+    # to rewrite due to loginless_ssh removal #     $self->add_form_error('<span class="fa-stack fa-fw">' .
+    # to rewrite due to loginless_ssh removal # 			  '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
+    # to rewrite due to loginless_ssh removal # 			  '<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
+    # to rewrite due to loginless_ssh removal # 			  '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
+    # to rewrite due to loginless_ssh removal # 			  '<b> <i class="fa fa-arrow-right"></i> SSH:</b> Has error/s! Correct or remove, please')
+    # to rewrite due to loginless_ssh removal #       if $self->field('loginless_ssh')->has_error_fields;
+    # to rewrite due to loginless_ssh removal #   
+    # to rewrite due to loginless_ssh removal #     #---[ ssh - ]------------------------------------------------
 
     #----------------------------------------------------------
     #== VALIDATION password less ------------------------------
@@ -1351,9 +1351,8 @@ sub validate {
 	} elsif ( $ovpn_tmp ) {
 	  $element->field('ifconfigpush')->add_error( $ovpn_tmp->{error} );
 	}
-      }
-      elsif ( defined $element->field('ifconfigpush')->value &&
-      	   $element->field('ifconfigpush')->value !~ /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-5][0-9]) (([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-5][0-9])$/ ) {
+      } elsif ( defined $element->field('ifconfigpush')->value &&
+		$element->field('ifconfigpush')->value !~ /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-5][0-9]) (([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-5][0-9])$/ ) {
       	$element->field('ifconfigpush')->add_error( 'The input is not two IP addresses!' );
       }
 
@@ -1364,13 +1363,13 @@ sub validate {
       $i++;
     }
 
-  $self->add_form_error('<span class="fa-stack fa-fw">' .
-			'<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
-			'<i class="fa fa-lock-open pull-right fa-stack-1x"></i></span>' .
-			'<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
-			'<b> <i class="fa fa-arrow-right"></i> OpenVPN:</b> Has error/s! Correct or remove, please')
-    if $self->field('loginless_ovpn')->has_error_fields;
-  #---[ OpenVPN - ]--------------------------------------------
+    $self->add_form_error('<span class="fa-stack fa-fw">' .
+			  '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
+			  '<i class="fa fa-lock-open pull-right fa-stack-1x"></i></span>' .
+			  '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
+			  '<b> <i class="fa fa-arrow-right"></i> OpenVPN:</b> Has error/s! Correct or remove, please')
+      if $self->field('loginless_ovpn')->has_error_fields;
+    #---[ OpenVPN - ]--------------------------------------------
 
   }
   # not simplified variant stop

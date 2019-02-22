@@ -1,3 +1,27 @@
+/* -*- mode: web; mode: follow -*- */
+
+html,body {
+  height: 100%;
+  font-size: 0.95rem;
+}
+
+/* @include media-breakpoint-up(sm) {
+   html {
+	 font-size: 1.2rem;
+			   }
+}
+
+@include media-breakpoint-up(md) {
+				  html {
+				    font-size: 1.4rem;
+				  }
+}
+
+@include media-breakpoint-up(lg) {
+				  html {
+				    font-size: 1.6rem;
+				  }
+} */
 
 .umi-bg:after {
   content: ' ';
@@ -50,10 +74,6 @@
 }
 */
 
-html,body {
-  height: 100%;
-}
-
 /* body { */
 /*     background-color: [% site.col.page %]; */
 /*     color: [% site.col.text %]; */
@@ -91,19 +111,6 @@ html,body {
   margin-bottom: -75px;
 }
 
-/* h1.title { */
-/*     padding: 4px; */
-/*     margin: 0px; */
-/* } */
-
-/* .message { */
-/*     color: [% site.col.message %]; */
-/* } */
-
-/* .error { */
-/*     color: [% site.col.error %]; */
-/* } */
-
 .required:after {
   content: "\f06a";
   font-family: "Font Awesome 5 Free";
@@ -127,11 +134,11 @@ html,body {
 }
 
 .content-plus-circle:after {
-  content: "\f055";
+  content: "\f111";
   font-family: "Font Awesome 5 Free";
   font-size: 70%;
   font-weight: 900;
-  //    color: #fff;
+  color: #E74C3C;
   vertical-align: 60%;
   margin: 0 0 0 -4px;
   padding: 0 0 0 0;
@@ -181,7 +188,6 @@ html,body {
   padding: 0 0 0 0;
 }
 
-
 .mono {
 /*  font-family: "Input Mono", monospace; */
   font-family: "Input Mono",Monaco,Menlo,Consolas,monospace,"Courier New";
@@ -190,6 +196,10 @@ html,body {
 
 .mono-only {
   font-family: "Input Mono",Monaco,Menlo,Consolas,monospace,"Courier New";
+}
+
+.umi-font-bold {
+  font-weight: bold;
 }
 
 .umi-search, .umi-search:active {
@@ -220,7 +230,7 @@ html,body {
   padding: 8px 12px;
 }
 
-  .table-vcenter td {
+.table-vcenter td {
   vertical-align: middle!important;
 }
 
@@ -261,26 +271,6 @@ html,body {
   clear: both;
 }
 
-.umi-zerro-padding {
-  padding: 0 !important;
-}
-
-.umi-zerro-margin {
-  margin: 0 !important;
-}
-
-.umi-1-margin-left {
-  margin: 0pt 0pt 0pt 15pt;
-}
-
-.umi-2-margin-left {
-  margin: 0pt 0pt 0pt 30pt;
-}
-
-.umi-1-margin-top {
-  margin: 15pt 0pt 0pt 0pt;
-}
-
 .umi-margings-fixer.form-horizontal .form-group {
   margin-left: 0;
   margin-right: 0;
@@ -288,15 +278,6 @@ html,body {
 
 .ms-container .ms-list{
   height: 350px;
-}
-
-.app-header.navbar .navbar-brand {
-  width: 70px;
-  border-bottom: none;
-}
-
-.app-header.navbar {
-  border-bottom: none;
 }
 
 #searchby {
@@ -330,13 +311,139 @@ html,body {
    width: 0;
 }
 
+.outmost_wrapper {
+  overflow: hidden;
+}
+
+.wrapper {
+  display: flex;
+  overflow: hidden;
+  width: 100%;
+  align-items: stretch;
+}
+
 /* -------------------------------
 
-   KLUDGE patches to Bootstrap
+   SIDEBAR LEFT
 
    ------------------------------- */
 
-.btn:not(.btn-secondary) {
+#sidebar {
+  width: 210px;
+  min-height: 100vh;
+  transition: width ease 250ms;
+}
+
+#sidebar.folded:not(:hover) {
+  width: 70px;
+  text-align: center;
+}
+
+#sidebar.folded:hover {
+  width: 210px;
+}
+
+/*
+#sidebar.folded:hover #sidebar-menu, #sidebar:not(.folded) #sidebar-menu {
+   padding-left: 1em;
+}
+*/
+
+/*
+#sidebar .nav-link {
+  padding: 0.2rem 1rem;
+  text-align: left;
+  font-size: 0.85rem;
+  max-height: 1000px;
+}
+*/
+
+#sidebar ul.show li a {
+  text-align: left;
+  font-size: 0.80em;
+  max-height: 1000px;
+}
+
+#sidebar-menu ul.show {
+  padding: 0.2rem 1rem;
+}
+
+#sidebar.folded:not(:hover) ul.nav.show {
+  max-height: 0px;
+  max-width: 0px;
+  opacity: 0;
+}
+
+#sidebar.folded:not(:hover) ul li a {
+  text-align: center;
+  font-size: 0.85em;
+}
+
+#sidebar.folded:not(:hover) ul li a b {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  #sidebar.folded:not(:hover) {
+    min-width: 70px;
+    max-width: 70px;
+    text-align: center;
+    margin-left: -70px !important;
+  }
+
+  /* Reappearing the sidebar on toggle button click */
+  #sidebar {
+    margin-left: 0; 
+  }
+}
+
+
+/* -------------------------------
+
+   SIDEBAR RIGHT
+
+   ------------------------------- */
+
+#sidebar-right .nav-tabs .nav-link.active, #sidebar-right .nav-tabs .nav-item.show .nav-link {
+  background-color: transparent;
+}
+
+#sidebar-right {
+  width: 370px;
+  min-height: 100vh;
+  transition: width ease 250ms;
+}
+
+#sidebar-right.folded {
+  width: 0;
+}
+
+/* -------------------------------
+
+   KLUDGE patches to BootStrap
+
+   ------------------------------- */
+
+a, input, div, ul, li, span, select, .card, .card-group, .card-header, .btn, .input-group, .input-group-sm, .input-group-text, .form-group, .form-control, .ms-list, .ms-selection, .nav, .nav-link, .nav-item, .custom-file-input, .custom-file-label, .card-group > .card:only-child .card-img-top, .card-group > .card:only-child .card-header {
+  border-radius: 0 !important;
+}
+
+//  border: none;
+.btn {
+  border-radius: 0;
+}
+
+.btn-borderless {
+  border-color: transparent;
+}
+
+/* .btn:not(.btn-secondary) {
+  border: none;
+  border-radius: 0;
+} */
+
+td .card, td .card-header, td .card-footer, .navbar-toggler {
+  border-color: transparent;
   border: none;
 }
 
@@ -363,9 +470,19 @@ html,body {
 
    ------------------------------- */
 
+.aside-menu {
+  color: #fff;
+  flex: 0 0 350px;
+}
+
+.aside-menu-hidden .aside-menu {
+  margin-right: -350px;
+}
+
 /* .app-header.navbar .navbar-toggler {
    color: #ffffff; } */
 
+/*
 .app-body .sidebar {
   flex: 0 0 200px;
   order: -1;
@@ -373,14 +490,6 @@ html,body {
 
 .app-body .aside-menu {
   flex: 0 0 350px;
-}
-
-.aside-menu {
-  color: #fff;
-}
-
-.aside-menu-hidden .aside-menu {
-  margin-right: -350px;
 }
 
 .app-header.navbar .navbar-brand {
@@ -413,11 +522,13 @@ html,body {
   color: #fff;
 }
 
-.panel-heading .chevron_toggleable {
+.card-header .chevron_toggleable {
   color: #fff;
 }
+*/
 
 /* kludge to make <select> looking normal with CoreUI */
+/*
 select.form-control:not([size]):not([multiple]) {
   height: auto;
 }
@@ -429,6 +540,7 @@ select.form-control:not([size]):not([multiple]) {
   font-size: 100%;
   color: #536c79;
 }
+*/
 
 /* -------------------------------
 
