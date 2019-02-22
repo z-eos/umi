@@ -1,0 +1,91 @@
+--- Bootstrap3.pm	2017-07-20 19:51:00.000000000 +0300
++++ /storage/work-stuff/Catalyst/UMI/lib/UMI/HTML/FormHandler/Widget/Wrapper/Bootstrap4.pm	2019-02-20 11:05:24.469550000 +0200
+@@ -1,6 +1,6 @@
+-package HTML::FormHandler::Widget::Wrapper::Bootstrap3;
+-# ABSTRACT: Twitter Bootstrap 3.0 field wrapper
+-$HTML::FormHandler::Widget::Wrapper::Bootstrap3::VERSION = '0.40068';
++package UMI::HTML::FormHandler::Widget::Wrapper::Bootstrap4;
++# ABSTRACT: Twitter Bootstrap 4.0 field wrapper
++
+ use Moose::Role;
+ use namespace::autoclean;
+ use HTML::FormHandler::Render::Util ('process_attrs');
+@@ -8,12 +8,14 @@ use List::Util 1.33 ('any');
+ 
+ with 'HTML::FormHandler::Widget::Wrapper::Base';
+ 
++use Data::Printer caller_info => 1, colored => 1;
++use Logger;
+ 
+ sub is_b3 {1}
+ 
+ sub build_wrapper_tags {
+     {
+-        radio_element_wrapper => 1,
++        radio_element_wrapper    => 1,
+         checkbox_element_wrapper => 1,
+     }
+ }
+@@ -30,6 +32,7 @@ sub wrap_field {
+         my $div_class = 'form-group';
+         unshift @{$attr->{class}}, $div_class;
+         my $attr_str = process_attrs( $attr );
++	# log_debug { np("\n" . $attr_str . "\n") };
+         # wrapper is always a div
+         $output .= $self->get_tag('before_wrapper');
+         $output .= qq{\n<div$attr_str>};
+@@ -43,8 +46,29 @@ sub wrap_field {
+     # the 'element_wrapper_class'. Used for column layout.
+     my $ew_attr = $self->element_wrapper_attributes($result);
+     my $element_wrapper_attrs =  process_attrs( $ew_attr );
+-    $output .= qq{\n<div$element_wrapper_attrs>}
+-        unless !$self->do_wrapper;
++
++
++    # original code
++    # ---
++    # $output .= qq{\n<div$element_wrapper_attrs>}
++    #     unless !$self->do_wrapper;
++    # ---
++    # is causing emty <div> wrapping Repeatable::Instance objects
++    #
++    # here the kludge to overcome this behavior, to use element_class
++    # of that Repeatable::Instance parent
++    
++    unless ( !$self->do_wrapper ) {
++      if ( $result->field_def->type eq "Repeatable::Instance" &&
++	   $result->field_def->is_compound ) {
++	$output .= sprintf("\n<div class=\"%s\">",
++			   join(' ', @{$result->field_def->parent->element_class}));
++      } elsif ( $element_wrapper_attrs ne '' ) {
++	$output .= qq{\n<div$element_wrapper_attrs>};
++      } else {
++	$output .= qq{\n<div>};
++      }
++    }
+ 
+     # yet another tag
+     $output .= $self->get_tag('before_element_inside_div');
+@@ -120,7 +144,7 @@ sub add_standard_element_wrapper_classes
+         }
+         if ( exists $classes->{no_label_element_wrapper_class} &&
+              ( ! $self->do_label || $self->type_attr eq 'checkbox' ) &&
+-             not any { $_ =~ /^col\-.*offset/ } @$class ) {
++             not any { $_ =~ /^offset\-.*/ } @$class ) {
+             push @$class, @{$classes->{no_label_element_wrapper_class}};
+         }
+     }
+@@ -150,11 +174,11 @@ sub do_prepend_append {
+ 
+     my @class;
+     if( my $ip_tag = $self->get_tag('input_prepend' ) ) {
+-        $rendered_widget = qq{<span class="input-group-addon">$ip_tag</span>$rendered_widget};
++        $rendered_widget = qq{<div class="input-group-prepend"><span class="input-group-text">$ip_tag</span></div>$rendered_widget};
+         push @class, 'input-group';
+     }
+     if ( my $ia_tag = $self->get_tag('input_append' ) ) {
+-        $rendered_widget = qq{$rendered_widget<span class="input-group-addon">$ia_tag</span>};
++        $rendered_widget = qq{$rendered_widget<div class="input-group-prepend"><span class="input-group-text">$ia_tag</span></div>};
+         push @class, 'input-group';
+     }
+     if ( my $iab_tag = $self->get_tag('input_append_button') ) {
