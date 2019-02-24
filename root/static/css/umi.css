@@ -332,6 +332,7 @@ html,body {
   width: 210px;
   min-height: 100vh;
   transition: width ease 250ms;
+/*!  transition: border-radius .15s cubic-bezier(0.4,0.0,0.2,1),margin .15s cubic-bezier(0.4,0.0,0.2,1),width .15s cubic-bezier(0.4,0.0,0.2,1);*/
 }
 
 #sidebar.folded:not(:hover) {

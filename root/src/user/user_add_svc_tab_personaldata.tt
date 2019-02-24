@@ -1,0 +1,54 @@
+<div aria-labelledby="name-tab" id="name" class="tab-pane fade in active" role="tabpanel">
+
+  <h3>Personal Data <small>first/last name, title, e.t.c.</small></h3>
+
+  <div class="form-group">
+    <label for="jpegPhoto" class="control-label col-xs-2">Avatar</label>
+    <div class="col-xs-10">
+      <img src="/static/images/avatar-mgmnt.png" alt="Avatar" class="img-thumbnail" title="Default avatar">
+    </div>
+    <div class="col-xs-offset-2 col-xs-2">
+      <input id="jpegPhoto" class="btn btn-default btn-xs form-control" type="file">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="givenName" class="control-label col-xs-2">First, Last Names</label>
+    <div class="col-xs-5">
+      <input id="givenName" class="form-control" type="text" placeholder="First Name">
+    </div>
+    <div class="col-xs-5">
+      <input id="sn" class="form-control" type="text" placeholder="Last Name">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="o" class="control-label col-xs-2">Organization</label>
+    <div class="col-xs-3">
+      <select id="o" class="form-control">
+	<option value="1">Org 1</option>
+	<option value="2">Org 2</option>
+	<option value="3">Org 3</option>
+	<option value="4">Org 4</option>
+	<option value="5" selected>--- select organization ---</option>
+      </select>
+    </div>
+    <div class="col-xs-3">
+      <input id="department" class="form-control" type="text" placeholder="Department">
+    </div>
+    <div class="col-xs-3">
+      <input id="title" class="form-control" type="text" placeholder="Title/Position">
+    </div>
+    <div class="col-xs-1">
+      <input id="room" class="form-control" type="text" placeholder="Room">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="telephoneNumber" class="control-label col-xs-2">Telephone</label>
+    <div class="col-xs-10">
+      <input id="telephoneNumber" class="form-control" type="text" placeholder="Telephone Number/s (international format, comma or space delimited if several)">
+    </div>
+  </div>
+
+</div>

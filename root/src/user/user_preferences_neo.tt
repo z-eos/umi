@@ -49,7 +49,7 @@
 		name:
 	      </dt>
 	      <dd class="col-10">
-		<b>[% auth_obj.givenname %] [% auth_obj.sn %]</b>
+		<b>[% auth_obj.givenname _ ' ' _ auth_obj.sn %]</b>
 	      </dd>
 	      <dt class="col-2 text-info text-right">
 		uid:

@@ -1,0 +1,59 @@
+[% META title = 'System Info' %] 
+
+<link href="/static/css/jquery.json-browse.css" rel="stylesheet" type="text/css">
+
+<h3>System Info <small><em> ... </em></small></h3>
+
+<!-- https://github.com/abodelot/jquery.json-viewer -->
+<script src="/static/js/jquery.json-browse.js"></script>
+<script>
+  $(function() {
+    var data = [% json %];
+    $('#json-renderer').jsonBrowse(data, {collapsed: true, withQuotes: true});
+  });
+</script>
+<div id="json-renderer" class="well well-sm json-body"></div>
+
+
+[% i = 0 %]
+[% FOREACH key IN sysinfo.keys.sort %]
+<div class="panel panel-info">
+  <div class="panel-heading umi-zerro-padding">
+    <button class="chevron_toggleable btn btn-link"
+	    type="button" data-toggle="collapse"
+	    data-target="#collapseSession[% i %]"
+	    aria-expanded="true"
+	    aria-controls="collapseSession[% i %]">
+      <span id="chevron_switcher" class="fa [% site.icons.toggle_down %]"></span>
+      <!-- span id="chevron_switcher" class="fa fa-toggle-up text-primary"></span -->
+    </button>
+    [% sysinfo.$key.title %]
+  </div>
+  <div class="panel-body collapse"  id="collapseSession[% i %]">
+    <pre>
+      [% sysinfo.$key.data %]
+    </pre>
+  </div>
+</div>
+[% i = i + 1 %]
+[% END %]
+
+<!--
+<script>
+ $('.chevron_toggleable').on('click', function() {
+   $(this).find('.fa').toggleClass('[% site.icons.toggle_down %]').toggleClass('[% site.icons.toggle_up %]')
+ });
+</script>
+-->
+
+<script>
+ /*!
+  * searchby result/s un/collaps-er (@ sysinfo.tt)
+  */ 
+ $('.collapse_in_out').on('click', function() {
+   $("[id^=collapse]").toggleClass('panel-collapse collapse in').toggleClass('panel-collapse collapse');
+   $("[id^=chevron_switcher]").toggleClass('[% site.icons.toggle_down %]').toggleClass('[% site.icons.toggle_up %]');
+ });
+</script>
+
+

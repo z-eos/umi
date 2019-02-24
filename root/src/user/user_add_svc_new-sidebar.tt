@@ -1,0 +1,59 @@
+[% META
+   title = 'Add Service Account (New)'
+   link = '<link href="/static/css/dashboard.css" rel="stylesheet">'
+%]
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-9 col-md-10 main">
+      <h1 class="page-header">Dashboard</h1>
+
+      <[% site.pageheading %] class="sub-header">Section title</[% site.pageheading %]>
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Header</th>
+              <th>Header</th>
+              <th>Header</th>
+              <th>Header</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1,001</td>
+              <td>Lorem</td>
+              <td>ipsum</td>
+              <td>dolor</td>
+              <td>sit</td>
+            </tr>
+            <tr>
+              <td>1,002</td>
+              <td>amet</td>
+              <td>consectetur</td>
+              <td>adipiscing</td>
+              <td>elit</td>
+            </tr>
+            <tr>
+              <td>1,003</td>
+              <td>Integer</td>
+              <td>nec</td>
+              <td>odio</td>
+              <td>Praesent</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    <div class="col-sm-1 col-sm-offset-11 col-md-1 col-md-offset-11 sidebar">
+      <ul class="nav nav-sidebar">
+        <li><a href="#"><span class="fa fa-user">&nbsp;</span>Person</a></li>
+        <li><a href="#"><span class="fa fa-envelope-o">&nbsp;</span>Email</a></li>
+        <li><a href="#"><span class="fa fa-key">&nbsp;</span>SSH</a></li>
+        <li><a href="#"><span class="fa fa-certificate">&nbsp;</span>OpenVPN</a></li>
+        <li><a href="#"><span class="fa fa-image">&nbsp;</span>Avatar</a></li>
+      </ul>
+    </div>
+    </div>
+  </div>
+</div>

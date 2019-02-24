@@ -1,0 +1,44 @@
+<div aria-labelledby="ssh-tab" id="ssh" class="tab-pane fade" role="tabpanel">
+  
+  <div class="form-group">
+    <label for="ssh" class="control-label col-xs-2">SSH Pub Key</label>
+    <div class="col-xs-5">
+      <select id="fqdn" class="form-control">
+	<option value="1">Domain 1</option>
+	<option value="2">Domain 2</option>
+	<option value="3">Domain 3</option>
+	<option value="4">Domain 4</option>
+	<option value="5" selected>--- select domain ---</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-xs-10 col-xs-offset-2">
+      <textarea id="ssh" class="form-control" cols="30" rows="4" placeholder="Paste SSH key"></textarea>
+    </div>
+  </div>
+
+</div>
+
+
+
+<div aria-labelledby="ovpn-tab" id="ovpn" class="tab-pane fade col-xs-12" role="tabpanel">
+  
+  <div class="form-group">
+    <label for="ovpn" class="control-label col-xs-2">OpenVPN certificate</label>
+    <div class="col-xs-5">
+      <select id="fqdn" class="form-control">
+	<option value="1">Domain 1</option>
+	<option value="2">Domain 2</option>
+	<option value="3">Domain 3</option>
+	<option value="4">Domain 4</option>
+	<option value="5" selected>--- select domain ---</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-xs-2 col-xs-offset-2">
+      <input id="ovpn" class="btn btn-default btn-xs form-control" type="file">
+    </div>
+  </div>
+</div>

@@ -2,14 +2,17 @@
    link = '<link href="/static/css/dt-dataTables.bootstrap.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-buttons.jqueryui.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-buttons.dataTables.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-buttons.bootstrap.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-select.dataTables.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-select.bootstrap.min.css" rel="stylesheet" type="text/css">'
    %]
 
-<[% site.pageheading %] class="page-header">MTA
+<[% site.pageheading %] class="font-weight-bold p-3">
+<i class="fas fa-envelope fa-2x mr-3 text-muted"></i>
+MTA
       <sup>
 	<abbr  title="[% mta.default.description %]">
 	  <i class="fa fa-info-circle text-info"></i>
 	</abbr>
       </sup>
-      related <small>manipulations</small>
+      related <small><em class="text-muted text-monospace">manipulations</em></small>
 </[% site.pageheading %]>
+<hr>
 
 [% INCLUDE ldap_err.tt %]
 
@@ -39,7 +42,7 @@
       [% FOREACH domain IN mta.custom.keys %]
       [% id = 'collapse' _ loop.index %]
       [% hd = 'heading' _ loop.index %]
-      <tr class="[% mta.custom.$domain.smarthost.mx.html_class %]">
+      <tr class="table-[% mta.custom.$domain.smarthost.mx.html_class %]">
 	<th>[% domain %]</th>
 	<td>[% mta.custom.$domain.smarthost.mx.fqdn %]</td>
 	<td>[% mta.custom.$domain.smarthost.mx.a %]</td>

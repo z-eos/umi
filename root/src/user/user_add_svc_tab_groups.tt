@@ -1,0 +1,26 @@
+<div aria-labelledby="ggroups-tab" id="groups" class="tab-pane fade" role="tabpanel">
+
+  <div class="page-header">
+    <h3>Groups <small>user belongs to</small></h3>
+  </div>
+
+  <div class="form-group">
+    <div class="col-xs-6">
+      <select id="service" class="form-control" multiple>
+	<option value="1">Group 1</option>
+	<option value="2">Group 2</option>
+	<option value="3">Group 3</option>
+	<option value="4">Group 4</option>
+      </select>
+    </div>
+    <div class="col-xs-6">
+      <select id="fqdn" class="form-control" multiple>
+	<option value="1">Group 5</option>
+	<option value="2">Group 6</option>
+	<option value="3">Group 7</option>
+	<option value="4">Group 8</option>
+      </select>
+    </div>
+  </div>
+  
+</div>

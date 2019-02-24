@@ -1,0 +1,104 @@
+[% META
+   title = 'Add Service Account (New)'
+   link = '<link href="/static/css/dashboard.css" rel="stylesheet">'
+%]
+
+<[% site.pageheading %]>
+  New User Data and Services add/chg Form <small><em class="mono">for user: [% add_svc_acc %]</em></small>
+</[% site.pageheading %]>
+
+<ul role="tablist" class="nav nav-tabs" id="myTab">
+  <li class="active">
+    <a aria-controls="name"
+       data-toggle="tab"
+       id="name-tab"
+       role="tab"
+       href="#name"
+       title="Personal Data"
+       aria-expanded="true">
+      <span class="fa fa-bookmark"></span>
+    </a>
+  </li>
+
+  <li>
+    <a aria-controls="gensvc"
+       data-toggle="tab"
+       id="gensvc-tab"
+       role="tab"
+       href="#gensvc"
+       title="Login/Password Dependent Services"
+       aria-expanded="false">
+      <span class="fa fa-user"></span>
+    </a>
+  </li>
+
+  <li class="dropdown">
+    <a aria-controls="sec-contents"
+       data-toggle="dropdown"
+       class="dropdown-toggle"
+       id="umiSec"
+       href="#"
+       title="Services Without Login/Password"
+       aria-expanded="false">
+      <span class="fa-stack">
+	<i class="fa fa-user fa-stack-1x"></i>
+	<i class="fa fa-ban fa-stack-2x text-warning"></i>
+      </span>
+      <span class="caret"></span>
+    </a>
+    <ul id="umiSec-contents"
+	aria-labelledby="umiSec"
+	role="menu"
+	class="dropdown-menu">
+      <li>
+	<a aria-controls="ovpn"
+	   data-toggle="tab"
+	   id="ovpn-tab"
+	   role="tab"
+	   tabindex="-1"
+	   href="#ovpn"
+	   aria-expanded="false">
+	  <span class="fa fa-certificate"></span>
+	  OpenVPN Certificate
+	</a>
+      </li>
+      <li>
+	<a aria-controls="ssk"
+	   data-toggle="tab"
+	   id="ssh-tab"
+	   role="tab"
+	   tabindex="-1"
+	   href="#ssh"
+	   aria-expanded="false">
+	  <span class="fa fa-key"></span>
+	  SSH Key
+	</a>
+      </li>
+    </ul>
+  </li>
+
+  <li>
+    <a aria-controls="groups"
+       data-toggle="tab"
+       id="groups-tab"
+       role="tab"
+       href="#groups"
+       title="Group/s User Belongs to"
+       aria-expanded="false">
+      <span class="fa fa-group"></span>
+    </a>
+  </li>
+
+</ul>
+
+<form class="form-horizontal">
+  <div class="tab-content" id="umiTabContent">
+    [% INCLUDE user/user_add_svc_tab_personaldata.tt %]
+    [% INCLUDE user/user_add_svc_tab_gensvc.tt %]
+    [% INCLUDE user/user_add_svc_tab_sec.tt %]
+    [% INCLUDE user/user_add_svc_tab_groups.tt %]
+    <p class="help-block">&nbsp;</p>
+    <button type="submit" class="btn btn-default col-xs-12">Submit</button>
+  </div>
+</form>
+<p class="help-block">&nbsp;</p>

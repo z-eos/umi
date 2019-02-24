@@ -1,0 +1,61 @@
+[% META title = 'UMI XMPP client' %] 
+
+[% # CONVERSE.JS https://github.com/jcbrand/converse.js/releases %]
+
+<link rel="stylesheet" type="text/css" media="screen" href="/static/converse.js/css/converse.css">
+<!-- link rel="stylesheet" type="text/css" media="screen" href="/static/converse.js/css/inverse.css" -->
+
+<script src="/static/converse.js/converse.js"></script>
+
+<script>
+ converse.initialize({
+   allow_chat_pending_contacts: true,
+   allow_registration: false,
+   /* auto_join_rooms: [
+      'tech_support@conference.im.ibs.dn.ua',
+      ], */
+   bosh_service_url: 'https://im.ibs.dn.ua:5281/bosh',
+   i18n: 'en',
+   keepalive: true,
+   message_carbons: true,
+   roster_groups: true,
+   show_controlbox_by_default: true,
+   show_send_button: true,
+   strict_plugin_dependencies: false,
+//   view_mode: 'fullscreen',
+//   debug: true,
+   xhr_user_search: false
+ });
+</script>
+
+
+
+[% # JSXC %]
+
+[% #
+   #<script src="/static/jsxc/lib/jquery.slimscroll.js"></script>
+   #<script src="/static/jsxc/lib/jquery.fullscreen.js"></script>
+   #
+   #<script src="/static/jsxc/lib/jsxc.dep.js"></script>
+   #<script src="/static/jsxc/jsxc.js"></script>
+   #
+   #<script src="/static/js/umi-jsxc.js"></script>
+   #
+   #<!-- Stylesheets -->
+   #<link href="/static/jsxc/css/jsxc.css" media="all" rel="stylesheet" type="text/css" />
+   #
+   #<link href="/static/css/jsxc.example.css" media="all" rel="stylesheet" type="text/css" />
+   #
+   #<script>
+   #
+   # /* $(document).on('ready.roster.jsxc', function(){
+   #    $('#content').css('right', $('#jsxc_roster').outerWidth() + parseFloat($('#jsxc_roster').css('right')));
+   #    });
+   #    $(document).on('toggle.roster.jsxc', function(event, state, duration){
+   #    $('#content').animate({
+   #    right: ((state === 'shown') ? $('#jsxc_roster').outerWidth() : 0) + 'px'
+   #    }, duration);
+   #    }); */
+   #
+   #</script>
+-%]

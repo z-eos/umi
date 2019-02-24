@@ -1,0 +1,83 @@
+[% META title = 'Users Accounts Statistics'
+   link = '<link href="/static/css/dt-dataTables.bootstrap.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-buttons.jqueryui.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-buttons.dataTables.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-buttons.bootstrap.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-select.dataTables.min.css" rel="stylesheet" type="text/css"><link href="/static/css/dt-select.bootstrap.min.css" rel="stylesheet" type="text/css">'
+   %] 
+
+<link href="/static/css/dt-dataTables.bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/static/css/dt-buttons.jqueryui.min.css" rel="stylesheet" type="text/css">
+<link href="/static/css/dt-buttons.dataTables.min.css" rel="stylesheet" type="text/css">
+<link href="/static/css/dt-buttons.bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="/static/css/dt-select.dataTables.min.css" rel="stylesheet" type="text/css">
+<link href="/static/css/dt-select.bootstrap.min.css" rel="stylesheet" type="text/css">
+
+<div class="page-header">
+  <[% site.pageheading %]>
+    Account <i class="fas fa-exchange-alt"></i> Group Statistics
+    <small><em>
+      you can sort by multiple columns at the same time (<b>Shift-click</b> on a column adds it as a secondary, tertiary etc ordering column)
+    </em></small>
+  </[% site.pageheading %]>
+</div>
+
+[% INCLUDE ldap_err.tt %]
+
+[% MACRO buttonizer  BLOCK %]
+<form id="buttonizer_form[% buttonizer_id %]"
+      method="POST"
+      action="/searchby"
+      class="form-inline formajaxer">
+  <input type="hidden" name="ldap_subtree" value="[% buttonizer_dn %]">
+  <button type="submit" class="btn btn-link btn-xs"
+	  title="click to open this object"
+	  id="buttonizer_button[% buttonizer_id %]">
+    [% buttonizer_text %]
+  </button>
+</form>
+[% END %]
+
+<div class="table-responsive">
+  <table id="dataTableToDraw" class="table table-condensed table-bordered">
+    <thead>
+      <tr class="text-uppercase info">
+	<th>Last Name</th>
+	<th>First Name</th>
+	<th>blocked</th>
+	<th>root uid</th>
+	<th>groups</th>
+	<th>netgroups</th>
+      </tr>
+    </thead>
+    <tfoot>
+      <tr class="text-uppercase info">
+	<th>Last Name</th>
+	<th>First Name</th>
+	<th>blocked</th>
+	<th>root uid</th>
+	<th>groups</th>
+	<th>netgroups</th>
+      </tr>
+    </tfoot>
+    <tbody>
+      [% FOREACH dn IN accounts.keys %]
+      <tr>
+	<th>[% accounts.$dn.sn %]</th>
+	<th>[% accounts.$dn.givenName %]</th>
+	<td>[% accounts.$dn.blocked %]</td>
+	<td>[% accounts.$dn.uid %]</td>
+	<td>[% accounts.$dn.groups.group.cn.join(', ') %]</td>
+	<td>[% accounts.$dn.groups.netgroup.cn.join(', ') %]</td>
+      </tr>
+      [% END %]
+    </tbody>
+  </table>
+</div>
+
+<script src="/static/js/dt-jquery.dataTables.min.js"></script>
+<script src="/static/js/dt-buttons.html5.min.js"></script>
+<script src="/static/js/dt-buttons.jqueryui.min.js"></script>
+<script src="/static/js/dt-buttons.print.min.js"></script>
+<script src="/static/js/dt-dataTables.buttons.min.js"></script>
+<script src="/static/js/dt-buttons.bootstrap.min.js"></script>
+<script src="/static/js/dt-dataTables.bootstrap.min.js"></script>
+
+<script src="/static/js/umi-datatables.js"></script>
+

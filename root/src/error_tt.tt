@@ -1,0 +1,15 @@
+
+[% TRY %]
+[% CATCH %]
+<div class="panel panel-danger">
+  <div class="panel-heading">
+    TT ERROR
+  </div>
+  <div class="panel-body">
+    <dl class="dl-horizontal">
+      <dt>Type</dt><dd>[% error.type %]</dd>
+      <dt>Info</dt><dd>[% error.info %]</dd>
+    </dl>
+  </div>
+</div>
+[% END %]

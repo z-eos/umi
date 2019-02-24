@@ -1,0 +1,256 @@
+[% # -*- mode: web -*- %]
+<div class="row">
+<div class="btn-group col-10 clearfix">
+  <button class="chevron_toggleable btn btn-secondary btn-link pull-left"
+	  title="Collapse In/Out This Panel"
+	  data-target="#collapse[% loop.index %]" data-toggle="collapse"
+	  data-parent="#accordion[% loop.index %]">
+    <span id="chevron_switcher" class="fa [% site.icons.toggle %][% chevron_toggle %]"></span>
+  </button>
+
+  <div class="dropdown pull-left">
+    <button class="btn btn-link umi-search"
+	    type="button" id="dropdownMenuActions"
+	    data-toggle="dropdown"
+	    title="Possible Actions Upon the Object">
+      <span class="fa fa-cogs"></span>
+    </button>
+    
+    <ul class="dropdown-menu dropdown-menu-left"
+	aria-labelledby="dropdownMenuActions"
+	role="menu">
+      
+      [% # DATA-ORDER VALUES ARE DEFINED IN root/lib/config/searchby_menu %]
+
+      [% IF entry.value.mgmnt.is_root && entry.value.mgmnt.is_account %]
+      <li>
+	<form role="form" method="POST" 
+	      action="/searchby/user_preferences">
+	  <button type="submit" class="btn btn-link"
+		  title="look user object subtree data"
+		  value="[% entry.key %]"
+		  data-order="[% site.searchby.menu.order.user_preferences %]"
+		  name="user_preferences">
+	    <span class="fa fa-fw fa-list-alt text-info"></span>
+	    user prefs
+	  </button>
+	</form>
+      </li>
+      [% IF admin_owned %]
+      <li>
+	<div onClick="window.Service.api.updateViewSearchByResultMenu('/userall', 'add_svc_acc','[% entry.key %]')"
+	  class="btn btn-link btn-info umi-btn-event umi-btn-logic"
+	  title="add new service account">
+	  <span class="fa fa-fw fa-plus text-success"></span>
+	  new service
+	</div>
+      </li>
+      <li>
+	<div onClick="window.Service.api.updateViewSearchByResultMenu('/searchby/proc','ldap_modify_group','[% entry.key %]')"
+		  title="modify group/s user belongs to"
+	     data-order="[% site.searchby.menu.order.ldap_modify_group %]"
+	     class="btn btn-link">
+	  <span class="fa fa-fw fa-group text-info"></span>
+	  group
+	</div>
+      </li>
+      [% END %]
+      [% IF ! entry.value.mgmnt.is_blocked %]
+      <li>
+	<button type="button" title="block all accounts (password changed to random ones, ssh key bound to localhost only) of the user with DN: [% entry.key %]" class="btn btn-link"
+		value="[% entry.key %]"
+		name="user_block"
+		data-order="[% site.searchby.menu.order.user_block %]"
+		data-toggle="modal"
+		data-target="#modal_block[% id_sufix %]">
+	  <span class="fa fa-fw fa-ban text-danger"></span>
+	  block
+	</button>
+      </li>
+      [% END %]
+      [% END %]
+
+      [% IF admin_owned && ! is_log_obj %][% # admin_owned start %]
+      <li>
+	<button type="button" title="delete object" class="btn btn-link"
+		value="[% entry.key %]"
+		name="ldap_delete"
+		data-order="[% site.searchby.menu.order.ldap_delete %]"
+		data-toggle="modal"
+		data-target="#modal_delete[% id_sufix %]">
+	  <span class="fa fa-fw fa-trash-o text-danger"></span>
+	  delete
+	</button>
+      </li>
+      [%   IF ! entry.value.mgmnt.is_root %]
+      <li>
+	<form role="form" method="POST" 
+	      action="/searchby/proc">
+	  <button type="button" title="reassign to other root account (move this object to another root account)"
+		  class="btn btn-link" value="[% entry.key %]"
+		  name="chg_acc"
+		  data-order="[% site.searchby.menu.order.chg_acc %]"
+		  data-toggle="modal"
+		  data-target="#modal_reassign[% id_sufix %]">
+	    <span class="fa fa-fw fa-recycle text-danger"></span>
+	    reassign
+	  </button>
+	</form>
+      </li>
+      [%   END %]
+      [% END %][% # admin_owned stop %]
+      
+      [% IF entry.key.match('mail') || entry.key.match('xmpp') || (entry.value.mgmnt.is_root && entry.value.mgmnt.is_account) %]
+      <li>
+	<button type="button" title="export as vCard"
+		class="btn btn-link"
+		value="[% entry.key %]"
+		data-order="[% site.searchby.menu.order.vcard %]"
+		name="vcard"
+		data-toggle="modal"
+		data-target="#modal_vcard[% id_sufix %]">
+	  <span class="fa fa-fw fa-upload text-info"></span>
+	  export vCard
+	</button>
+      </li>
+      [% END %]
+
+      [% IF admin_owned %][% # admin_owned start %]
+      <li>
+	<button type="button" title="export as LDIF"
+		class="btn btn-link"
+		value="[% entry.key %]"
+		data-order="[% site.searchby.menu.order.ldap_ldif %]"
+		name="ldap_ldif"
+		data-toggle="modal"
+		data-target="#modal_ldif[% id_sufix %]">
+	  <span class="fa fa-fw fa-upload text-info"></span>
+	  export LDIF
+	</button>
+      </li>
+      [%   IF ! is_log_obj %]
+      <li>
+	<form role="form" method="POST" 
+	      action="/searchby/modform">
+	  <button type="submit" class="btn btn-link"
+		  title="edit form (the one used for object creation)"
+		  value="[% entry.key %]"
+		  disabled="disabled"
+		  data-order="[% site.searchby.menu.order.ldap_modify %]"
+		  name="aux_dn_form_to_modify">
+	    <span class="fa fa-fw fa-edit text-warning"></span>
+	    edit form
+	  </button>
+	</form>
+      </li>
+      <li>
+	<div onClick="window.Service.api.updateViewSearchByProcMenuItem('ldap_modify','[% entry.key %]')"
+	     data-order="[% site.searchby.menu.order.ldap_modify %]"
+	     class="btn btn-link btn-info umi-btn-event umi-btn-logic">
+	  <span class="fa fa-fw fa-pencil text-warning"></span>
+	  edit (all)
+	</div>
+      </li>
+      <li>
+	<div onClick="window.Service.api.updateViewSearchByMenuItem('ldap_history','[% entry.key %]')"
+	     data-order="[% site.searchby.menu.order.ldap_history %]"
+	     class="btn btn-link btn-info umi-btn-event umi-btn-logic">
+	  <span class="fa fa-fw fa-history text-info"></span>
+	  history
+	</div>
+      </li>
+      [%   END %]
+      [%   IF to_rollback %]
+      <li>
+	<button type="button" class="btn btn-link"
+		title="rollback this object changes"
+		value="[% entry.key %]"
+		name="ldap_rollback"
+		disabled="disabled"
+		data-order="[% site.searchby.menu.order.ldap_rollback %]"
+		data-toggle="modal"
+		data-target="#modal_rollback[% id_sufix %]">
+	  <span class="fa fa-fw fa-undo text-danger"></span>
+	  rollback
+	</button>
+      </li>
+      [%   END %]
+      [%   IF entry.value.mgmnt.is_group %]
+      <li>
+	<form role="form" method="POST" 
+	      action="/searchby/proc">
+	  <button type="submit" title="modify group members" class="btn btn-link"
+		  value="[% entry.key %]"
+		  data-order="[% site.searchby.menu.order.ldap_modify_memberUid %]"
+		  name="ldap_modify_memberUid">
+	    <span class="fa fa-fw fa-group text-info"></span>
+	    members
+	  </button>
+	</form>
+      </li>
+      [%   END %]
+      [%   IF entry.key.match('dot1x-') %]
+      <li>
+	<form role="form" method="POST" 
+	      action="/searchby/proc">
+	  <button type="submit" title="modify group members" class="btn btn-link"
+		  value="[% entry.key %]"
+		  data-order="[% site.searchby.menu.order.ldap_modify_rad_group %]"
+		  name="ldap_modify_rad_group">
+	    <span class="fa fa-fw fa-group text-info"></span>
+	    RADIUS group
+	  </button>
+	</form>
+      </li>
+      [%   END %]
+      [%   IF entry.value.mgmnt.userPassword && ! entry.key.match('^author') %]
+      <li>
+	<div onClick="window.Service.api.updateViewSearchByResultMenu('/searchby/modify_userpassword','ldap_modify_password','[% entry.key %]')"
+	      tabindex="1"
+	     data-order="[% site.searchby.menu.order.ldap_modify_password %]"
+	     class="btn btn-link">
+	  <span class="fa fa-fw fa-unlock-alt text-danger"></span>
+	  password
+	</div>
+      </li>
+      [%   END %]
+      [%   IF entry.value.mgmnt.userDhcp %]
+      <li>
+	<div onClick="window.Service.api.updateViewSearchByResultMenu('/searchby/dhcp_add','ldap_add_dhcp','[% entry.key %]')"
+	     title="add DHCP (MAC to IP binding)"
+	     data-order="[% site.searchby.menu.order.ldap_add_dhcp %]"
+	     class="btn btn-link">
+	  <span class="fa fa-fw fa-sitemap text-info"></span>
+	  DHCP
+	</div>
+      </li>
+      [%   END %]
+      [%   IF entry.value.mgmnt.jpegPhoto %]
+      <li>
+	<div onClick="window.Service.api.updateViewSearchByResultMenu('/searchby/proc','ldap_modify_jpegphoto','[% entry.key %]')"
+		  title="change jpegPhoto (like avatar e.t.c.)"
+	     data-order="[% site.searchby.menu.order.ldap_modify_jpegphoto %]"
+	     class="btn btn-link">
+	  <span class="fa fa-fw fa-file-image-o text-warning"></span>
+	  image
+	</div>
+      </li>
+      [%   END %]
+
+      [%   IF entry.value.mgmnt.gitAclProject %]
+      <li>
+	<form role="form" method="POST" 
+	      action="/searchby/proc">
+	  <button type="submit" title="reorder gitAcl" class="btn btn-link"
+		  value="[% entry.key %]"
+		  data-order="[% site.searchby.menu.order.ldap_gitacl_reorder %]"
+		  name="ldap_gitacl_reorder">
+	    <span class="fa fa-fw fa-sort text-warning"></span>
+	    reorder
+	  </button>
+	</form>
+      </li>
+      [%   END %]
+      [% END %][% # admin_owned stop %]
+    </ul>
+  </div>
