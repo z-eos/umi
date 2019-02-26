@@ -160,7 +160,7 @@ sub validate {
        $self->field('dhcpHWAddress')->value ne '' ) { # MAC is set
     $mesg =
       $self->ldap_crud->search({
-				base => $self->ldap_crud->cfg->{base}->{dhcp},
+				base => $self->field('net')->value,
 				filter => sprintf('dhcpHWAddress=ethernet %s',
 						  $self->field('dhcpHWAddress')->value),
 			       });
