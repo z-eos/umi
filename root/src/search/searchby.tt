@@ -137,7 +137,7 @@
 	    [% END %]
 	    
 	  </div>
-	  <div class="float-right text-primary">
+	  <div class="float-right">
 	    found [% entrieskeys.size %] objects
 	  </div>
 	</td>

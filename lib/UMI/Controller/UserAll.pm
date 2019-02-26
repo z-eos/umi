@@ -490,12 +490,13 @@ we skip empty (criteria of emptiness is a concatenation of each field value) rep
 	  $x->{associateddomain}       = $element->field('associateddomain')->value;
 	  $x->{umiOvpnCfgConfig}       = $element->field('config')->value       || 'NA';
 	  $x->{umiOvpnCfgIfconfigPush} = $element->field('ifconfigpush')->value || 'NA';
-	  $x->{umiOvpnCfgIroute}       = $element->field('iroute')->value       || 'blocked';
+	  $x->{umiOvpnCfgIroute}       = $element->field('iroute')->value       || 'NA';
 	  $x->{umiOvpnAddDevType}      = $element->field('devtype')->value      || 'NA';
 	  $x->{umiOvpnAddDevMake}      = $element->field('devmake')->value      || 'NA';
 	  $x->{umiOvpnAddDevModel}     = $element->field('devmodel')->value     || 'NA';
 	  $x->{umiOvpnAddDevOS}        = $element->field('devos')->value        || 'NA';
 	  $x->{umiOvpnAddDevOSVer}     = $element->field('devosver')->value     || 'NA';
+	  $x->{umiOvpnAddStatus}       = $element->field('status')->value       || 'blocked';
 	}
 
 	# log_debug { np($x) };
