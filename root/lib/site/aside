@@ -1,6 +1,6 @@
 [% # -*- mode: web; -*- %]
 
-<nav id="sidebar-right" class="aaaside-menu bg-dark float-right" data-url-tree="/ldap_tree">
+<nav id="sidebar-right" class="text-light bg-dark float-right" data-url-tree="/ldap_tree">
   <ul class="nav nav-tabs nav-fill" role="tablist">
     <li class="nav-item" title="LDAP tree">
       <a class="nav-link text-white-50" data-toggle="tab" href="#tree" role="tab"><i class="fas fa-tree"></i></a>
@@ -85,7 +85,7 @@
 
     
     <!-- === SETTINGS ===  -->
-    <div class="tab-pane p-3" id="settings" role="tabpanel">
+    <div class="tab-pane p-3 text-light" id="settings" role="tabpanel">
       <h6>Settings</h6>
       <form role="form" id="settings-save" class="settings-save" method="POST" action="/settings_save">
 	<div class="aside-options">

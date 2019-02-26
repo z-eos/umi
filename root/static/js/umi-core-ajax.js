@@ -70,13 +70,15 @@ var handleResponce = function(html) {
 /*! 
  * AJAX to load on click-s (not submits)
  */    
-$('#sidebar,#workingfield,#header').on('click', 'a:not([href^="#"],[href="/"],.ajaxless)', function(e) {
+$('#sidebar,#workingfield,#header,#sidebar-modal-1').on('click', 'a:not([href^="#"],[href="/"],.ajaxless)', function(e) {
     e.preventDefault();
 
     var a = this;
     var href = a.getAttribute('href');
 
     console.log('UMI CORE AJAX: ONCLICK ' + href);
+
+    $('#modal-is-accounts').modal('hide');
     
     $.get(href, handleResponce );
 });

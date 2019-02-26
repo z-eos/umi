@@ -86,7 +86,7 @@
 		    onClick="document.getElementById('ldap_base_case').value=this.value"
 		    value="ldapsearch_by_ip"
 		    title="filter pattern in ip address">
-	      <i class="[% icon_class %] fa-laptop"></i> by IP
+	      <i class="[% icon_class %] fa-network-wired"></i> by IP
 	    </button>
 	    <button type="submit" class="[% menu_item %][% color %]"
 		    onClick="document.getElementById('ldap_base_case').value=this.value"
@@ -104,7 +104,7 @@
 		    onClick="document.getElementById('ldap_base_case').value=this.value"
 		    value="ldapsearch_by_telephone"
 		    title="filter pattern in telephone number">
-	      <i class="[% icon_class %] fa-phone"></i> by phone num
+	      <i class="[% icon_class %] fa-phone"></i> by tel num
 	    </button>
 	    <button type="submit" class="[% menu_item %] text-dark"
 		    onClick="document.getElementById('ldap_base_case').value=this.value"

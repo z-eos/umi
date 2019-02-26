@@ -9,14 +9,13 @@
 <link href="/static/css/dt-select.dataTables.min.css" rel="stylesheet" type="text/css">
 <link href="/static/css/dt-select.bootstrap.min.css" rel="stylesheet" type="text/css">
 
-<div class="page-header">
-  <[% site.pageheading %]>
-    Account <i class="fas fa-exchange-alt"></i> Group Statistics
-    <small><em>
-      you can sort by multiple columns at the same time (<b>Shift-click</b> on a column adds it as a secondary, tertiary etc ordering column)
-    </em></small>
-  </[% site.pageheading %]>
-</div>
+<[% site.pageheading %] class="font-weight-bold p-3">
+<i class="fas fa-user fa-2x mr-3 text-muted"></i>
+<i class="fas fa-exchange-alt fa-2x mr-3 text-muted"></i>
+<i class="fas fa-users fa-2x mr-3 text-muted"></i>
+Account <i class="fas fa-exchange-alt"></i> Group Statistics<br><small><em class="text-muted text-monospace"> you can sort by multiple columns at the same time (<b>Shift-click</b> on a column adds it as a secondary, tertiary etc ordering column)</em></small>
+</[% site.pageheading %]>
+<hr>
 
 [% INCLUDE ldap_err.tt %]
 
@@ -35,9 +34,9 @@
 [% END %]
 
 <div class="table-responsive">
-  <table id="dataTableToDraw" class="table table-condensed table-bordered">
-    <thead>
-      <tr class="text-uppercase info">
+  <table id="dataTableToDraw" class="table table-hover">
+    <thead class="thead-dark">
+      <tr class="text-uppercase border-0">
 	<th>Last Name</th>
 	<th>First Name</th>
 	<th>blocked</th>
@@ -47,7 +46,7 @@
       </tr>
     </thead>
     <tfoot>
-      <tr class="text-uppercase info">
+      <tr class="text-uppercase border-0">
 	<th>Last Name</th>
 	<th>First Name</th>
 	<th>blocked</th>
@@ -58,7 +57,7 @@
     </tfoot>
     <tbody>
       [% FOREACH dn IN accounts.keys %]
-      <tr>
+      <tr class="border-0">
 	<th>[% accounts.$dn.sn %]</th>
 	<th>[% accounts.$dn.givenName %]</th>
 	<td>[% accounts.$dn.blocked %]</td>

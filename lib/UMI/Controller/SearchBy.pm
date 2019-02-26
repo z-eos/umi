@@ -289,7 +289,7 @@ sub index :Path :Args(0) {
 	# 			     filter => sprintf('(memberUid=%s)',
 	# 					       $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }), });
 
-	log_debug { np( $ldap_crud->cfg->{base}->{group} . " | " . $ldap_crud->cfg->{stub}->{group_blocked} . " | " . $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root}} ) };
+	# log_debug { np( $ldap_crud->cfg->{base}->{group} . " | " . $ldap_crud->cfg->{stub}->{group_blocked} . " | " . $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root}} ) };
 	# log_debug { np($mesg->as_struct) };
 	$blocked = $mesg->count;
 	$return->{error} .= $ldap_crud->err( $mesg )->{html}

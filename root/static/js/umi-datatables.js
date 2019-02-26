@@ -3,8 +3,8 @@ var table = $('#dataTableToDraw').DataTable({
     // "dom": "<'h6 col-12'i><'row container-fluid'<'col-6 pull-left btn-group'B><'col-6 pull-right'f>>" +
     // 	"rt" + "<'row container-fluid clearfix'<'col-2'l><'col-10'p>>",
 
-    "dom": "<'h6 col-12'i><'row col'<'col-auto mr-auto btn-group'B><'col-auto'f>>" +
-	"rt" + "<'row col'<'col-auto mr-auto'l><'col-auto'p>>",
+    "dom": "<'h6 col-12'i><'row'<'col-auto mr-auto btn-group'B><'col-auto'f>>" +
+	"rt" + "<'row'<'col-auto mr-auto'l><'col-auto'p>>",
 
     // "dom": "<'row container-fluid'<'col-sm-6'l><'col-sm-6'f>>" +
     // 	"<'row container-fluid'<'col-sm-12'tr>>" +
@@ -44,22 +44,22 @@ var table = $('#dataTableToDraw').DataTable({
 	    },
 	]
     },
-    "language": {
-	"search": "<i class='fas fa-search fa-lg fa-fw'></i>",
-	"lengthMenu": "_MENU_",
-	"paginate": {
-            "first": "<i class='fas fa-fast-backward fa-lg fa-fw'></i>",
-            "last": "<i class='fas fa-fast-forward fa-lg fa-fw'></i>",
-            "next": "<i class='fas fa-step-forward fa-lg fa-fw'></i>",
-            "previous": "<i class='fas fa-step-backward fa-lg fa-fw'></i>", },
-    },
+//    "language": {
+//	"search": "<i class='fas fa-search fa-lg fa-fw'></i>",
+//	"lengthMenu": "_MENU_",
+//	"paginate": {
+//            "first":    "<i class='fas fa-fw fa-fast-backward'></i>",
+//            "last":     "<i class='fas fa-fw fa-fast-forward'></i>",
+//            "next":     "<i class='fas fa-fw fa-step-forward'></i>",
+//            "previous": "<i class='fas fa-fw fa-step-backward'></i>", },
+//    },
     "renderer": {
         "header": "bootstrap",
         "pageButton": "bootstrap", },
     "search": {
 	"regex": true,
 	"smart": true, },
-    "responsive": true,
+    "responsive": false,
     "order": [[ 0, 'asc' ]],
     // "paging": false,
     // "scrolly": 400,
