@@ -4,7 +4,8 @@
 
 [% default = '' %]
 
-<div class="hidden">
+<div class="hidden"><!-- stat -->
+  [% # #stat-form is relocated on ajaxCom in umi-core-ajax.js %]
   <div id="stat-from">
 
     <table class="table table-condensed text-light">
@@ -69,5 +70,5 @@
     </table>
 
   </div>
-</div>
+</div><!-- stat -->
 [% END %]

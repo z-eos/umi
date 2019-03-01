@@ -154,6 +154,14 @@
 	    </a>
 	  </li>
 	  [% END %]
+	  [% IF c.check_any_user_role ('admin', 'coadmin', 'dhcp') %]
+          <li class="disabled">
+	    <a class="text-light nav-link" href="/dhcp" tabindex="7">
+              <i class="fa fa-fw fa-network-wired"></i>
+              DHCP
+	    </a>
+	  </li>
+	  [% END %]
 	  [% IF c.check_user_roles('admin') %]
           <li class="nav-item">
 	    <a class="text-light nav-link" href="/sudo" tabindex="5">
@@ -205,14 +213,6 @@
 	    <a class="text-light nav-link" href="/inventory" tabindex="4">
               <i class="fa fa-fw fa-pen-nib"></i>
               Inventory
-	    </a>
-	  </li>
-	  [% END %]
-	  [% IF c.check_any_user_role ('admin', 'coadmin', 'dhcp') %]
-          <li class="disabled">
-	    <a class="text-light nav-link" href="/dhcp" tabindex="7">
-              <i class="fa fa-fw fa-network-wired"></i>
-              DHCP
 	    </a>
 	  </li>
 	  [% END %]

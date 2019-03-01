@@ -11,7 +11,7 @@
 	 data-target="#collapse[% loop.index %]"
 	 data-toggle="collapse"
 	 data-parent="#accordion[% loop.index %]">
-	<span id="chevron_switcher" class="text-white fa [% site.icons.toggle %][% chevron_toggle %]"></span>
+	<i id="chevron_switcher" class="text-white fas fa-fw [% site.icons.toggle %][% chevron_toggle %]"></i>
       </a>
     </div>
     

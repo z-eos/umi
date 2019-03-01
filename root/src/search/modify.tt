@@ -59,14 +59,14 @@ Modify Fields of DN: <small><em>
           <button class="btn btn-secondary btn-sm btn-add element-add"
 		  id="[% id %]"
 		  type="button" title="click to add another [% attr_rest.key %] field">
-	    <i class="far fa-copy"></i>
+	    <i class="far fa-fw fa-copy"></i>
 	  </button>
 	</span>
 	[%   ELSE %]
 	<span class="input-group-btn">
 	  <button class="btn btn-secondary btn-sm btn-erase" type="button" title="erase field value"
 		  id="[% id %]">
-	    <i class="fas fa-eraser"></i>
+	    <i class="fas fa-fw fa-eraser"></i>
 	  </button>
 	</span>
 	[%   END %]
@@ -87,7 +87,7 @@ Modify Fields of DN: <small><em>
   [% FOREACH attr IN entries %]
   [% attrId = attr.key _ '_' _ loop.index %]
   <div class="form-group row">
-    <label class="col-sm-3 text-right h6 font-weight-bold">
+    <label class="col-sm-3 text-right text-truncate h6 font-weight-bold">
       <b>[% attr.key %]:</b>
     </label>
     <div class="col-sm-9 controls">
@@ -120,14 +120,14 @@ Modify Fields of DN: <small><em>
           <button class="btn btn-secondary btn-sm btn-add element-add"
 		  id="[% id %]"
 		  type="button" title="click to add another [% attr.key %] field">
-	    <i class="far fa-copy"></i>
+	    <i class="far fa-fw fa-copy"></i>
 	  </button>
 	</span>
 	[%   ELSE %]
 	<span class="input-group-btn">
 	  <button class="btn btn-secondary btn-sm btn-erase" type="button" title="erase field value"
 		  id="[% id %]">
-	    <i class="fas fa-eraser"></i>
+	    <i class="fas fa-fw fa-eraser"></i>
 	  </button>
 	</span>
 	[%   END %]

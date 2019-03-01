@@ -1,23 +1,26 @@
 [% META title = 'welcome' %] 
 
-[% USE date;
-   SWITCH date.format(format = '%s').substr(-1, 1);
-   CASE [1,3];
-   bg='bg-info';
-   CASE [2,4];
-   bg='bg-danger';
-   CASE [5,7];
-   bg='bg-warning';
-   CASE [6,8];
-   bg='bg-primary';
-   CASE;
-   bg='bg-success';
-   END;
-   -%]
+[% USE date %]
+[% color = [ 'blue', 'indigo', 'purple', 'pink', 'red', 'orange', 'yellow', 'green', 'teal', 'cyan', 'white', 'gray', 'gray-dark', 'info', 'danger', 'warning', 'success', 'primary' ] %]
+
+[% idx1 =  date.format(format = '%s').substr(-2, 1) %]
+[% idx2 =  date.format(format = '%s').substr(-1, 1) %]
+
+[% IF idx1 > 9 %]
+[% idx1 = 1 %]
+[% ELSE %]
+[% idx1 = '' %]
+[% END %]
+
+[% IF idx2 == 9 %]
+[% idx2 = 7 %]
+[% END %]
+
+[% idx = idx1 _ idx2 %]
 
 <br>
 
-<div class="card text-white [% bg %] mb-3" style="max-width: 40rem;">
+<div class="card text-white bg-[% color.$idx %] mb-3" style="max-width: 40rem;">
   <div class="card-header">Do chant</div>
   <div class="card-body">
     <h3 class="card-title"><b>Do chant user's <a href="/motto" class="text-dark">motto</a>!</b></h3>

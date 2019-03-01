@@ -17,7 +17,7 @@ Users Accounts Statistics
       action="/searchby"
       class="form-inline formajaxer">
   <input type="hidden" name="ldap_subtree" value="[% buttonizer_dn %]">
-  <button type="submit" class="btn btn-link btn-sm"
+  <button type="submit" class="btn btn-link btn-sm text-left text-nowrap"
 	  title="click to open this object"
 	  id="buttonizer_button[% buttonizer_id %]">
     [% buttonizer_text %]

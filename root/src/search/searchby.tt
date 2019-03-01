@@ -2,66 +2,60 @@
 [% META title = 'Search Results' %]
 [% # stash.name %]
 
-<div class="row">
-  [% IF from_searchadvanced %]
-  <div class="col-12">
-    <[% site.pageheading %] class="font-weight-bold p-3">
-    <i class="fas fa-search-plus fa-2x mr-3 text-muted"></i>
-    Search Advanced
-    <small><em class="text-muted text-monospace">( advanced search form )</em></small>
+[% IF from_searchadvanced %]
+<[% site.pageheading %] class="font-weight-bold p-3">
+<i class="fas fa-search-plus fa-2x mr-3 text-muted"></i>
+Search Advanced
+<small><em class="text-muted text-monospace">( advanced search form )</em></small>
+</[% site.pageheading %]>
+<hr>
+
+[% form.render %]
+
+<script>
+ $(function() {
+   var $search_history = $("#search_history");
+   var $searchhistory = $('.searchhistory');
+   var $searchaccount = $('.searchaccount');
+   var $base_dn = $("#base_dn");
+   // if no checkbox exist (some other page for example)
+   if ( !$search_history.length ) return;
+   // is checkbox attribute `checked' set?
+   function search_history () {
+     $search_history[0].checked ? $searchhistory.show(300) : $searchhistory.hide(300);
+     $search_history[0].checked ? $searchaccount.hide(300) : $searchaccount.show(300);
+   };
+   // first run hides checkbox related fields
+   search_history();
+   // checkbox click unhides/hides the fields
+   $search_history.on('click', search_history);		
+ })();
+</script>
+[% ELSE %]
+<div class="row w-100 p-3">
+  <div class="col-xs-6 col-sm-6 col-md-3 col-lg-3">
+    <[% site.pageheading %] class="font-weight-bold">
+    Search Results
+    <sup>
+      <abbr  title="not all objects could be found via predefined search items, to search for all objects use advanced search menu item" class="initialism">
+	<i class="fa fa-info-circle text-info"></i>
+      </abbr>
+    </sup>
     </[% site.pageheading %]>
-    <hr>
-
-    [% form.render %]
-
-    <script>
-     $(function() {
-       var $search_history = $("#search_history");
-       var $searchhistory = $('.searchhistory');
-       var $searchaccount = $('.searchaccount');
-       var $base_dn = $("#base_dn");
-       // if no checkbox exist (some other page for example)
-       if ( !$search_history.length ) return;
-       // is checkbox attribute `checked' set?
-       function search_history () {
-	 $search_history[0].checked ? $searchhistory.show(300) : $searchhistory.hide(300);
-	 $search_history[0].checked ? $searchaccount.hide(300) : $searchaccount.show(300);
-       };
-       // first run hides checkbox related fields
-       search_history();
-       // checkbox click unhides/hides the fields
-       $search_history.on('click', search_history);		
-     })();
-    </script>
   </div>
-  [% ELSE %]
-  <div class="col-12 row p-3">
-    <div class="col-xs-6 col-sm-6 col-md-3 col-lg-3">
-      <[% site.pageheading %] class="font-weight-bold">
-      Search Results
-      <sup>
-	<abbr  title="not all objects could be found via predefined search items, to search for all objects use advanced search menu item" class="initialism">
-	  <i class="fa fa-info-circle text-info"></i>
-	</abbr>
-      </sup>
-      </[% site.pageheading %]>
-    </div>
-    <div class="col-xs-6 col-sm-6 col-md-9 col-lg-9">
-      <dl class="row text-monospace text-info">
-	<dt class="col font-weight-bold">base:</dt>  <dd class="col-11">[% base_dn %]</dd>
-	<dt class="col font-weight-bold">filter:</dt><dd class="col-11">[% filter %]</dd>
-      </dl>
-    </div>
+  <div class="col-xs-6 col-sm-6 col-md-9 col-lg-9">
+    <dl class="row text-monospace text-info">
+      <dt class="col font-weight-bold">base:</dt>  <dd class="col-11">[% base_dn %]</dd>
+      <dt class="col font-weight-bold">filter:</dt><dd class="col-11">[% filter %]</dd>
+    </dl>
   </div>
-  [% END %]
+</div>
+[% END %]
 
 [% USE date(time = date.now, format = '%Y.%m.%d', locale = 'en_US') %]
 [% dds_max_ttl_years = 10 %]
 
-
-<div class="col-12">
-  [% INCLUDE ldap_err.tt %]
-</div>
+[% INCLUDE ldap_err.tt %]
 
 [% # fa_child = 'fa-circle-thin' %]
 [% # child = '<i class="fa fa-fw ' _ fa_child _ ' text-default"></i>' %]
@@ -96,7 +90,7 @@
 </form>
 [% END %]
 
-<div class="table-responsive umi-overflow-x-vis col-12">
+<div class="table-responsive umi-overflow-x-vis">
   <table class="table table-borderless table-sm">
     <thead>
       <tr>
@@ -109,7 +103,7 @@
 	       data-toggle="collapse"
 	       data-parent="#accordion"
 	       tabindex="0">
-	      <span id="chevron_switcher" class="fas [% site.icons.toggle %][% chevron_toggle %]"></span>
+	      <i id="chevron_switcher" class="fas fa-fw [% site.icons.toggle %][% chevron_toggle %]"></i>
 	    </a>
 
 	    [% IF c.check_user_roles('admin') %]
@@ -127,9 +121,9 @@
 		      value="[% base_dn %]"
 		      name="ldap_ldif"
 		      data-umiact="/searchby/ldif_gen2f"
-		      title='save LDIF bellow as file: [% final_message.outfile_name %]_LDIF.txt'
+		      title='save LDIF bellow as file: [% final_message.outfile_name %]'
 		      type="submit">
-		<span class="fa fa-download fa-lg"></span>
+		<i class="fas fa-fw fa-file-export fa-lg"></i>
 	      </a>
 	    </form>
 	    <!-- ###### Search Results LDIF end -->
@@ -170,17 +164,17 @@
       [%     entry_text_size = 'umi-text-lg'
 	     entry_icon_size = 'fa-lg'
 	     # root_of_rec_btn = 'col-lg-2 col-md-2 col-xs-1'
-	     root_of_rec_btn = 'col-xs-12 to-root-object' %]
+	     root_of_rec_btn = 'col-xs-12 text-truncate' %]
       [%   ELSIF entry.key.match('^author') %]
       [%     entry_text_size = ''
 	     entry_icon_size = ''
 	     # root_of_rec_btn = 'col-lg-2 col-md-2 col-xs-1'
-	     root_of_rec_btn = 'col-xs-12 to-root-object' %]
+	     root_of_rec_btn = 'col-xs-12 text-truncate' %]
       [%   ELSE %]
       [%     entry_text_size = 'umi-text-sm'
 	     entry_icon_size = 'fa-sm'
 	     # root_of_rec_btn = 'col-lg-2 col-md-2 col-xs-1'
-	     root_of_rec_btn = 'col-xs-12 to-root-object' %]
+	     root_of_rec_btn = 'col-xs-12 text-truncate' %]
       [%   END %]
 
       [% # === OBJECT TYPE PANEL COLOR DEFINING === %]
@@ -233,7 +227,7 @@
 		[% ELSIF entry.key.match('Inventory') && entry.key.split(',').size <= ( 3 + num_of_dc)  %]
 		[%   root_of_rec = '<i class="fa fa-th-large fa-2x"></i>' %]
 		[% ELSIF entry.key.match('reqStart') %]
-		[%   root_of_rec = '<i class="' _ base_icon.history _ ' fa-2x"></i>' %]
+		[%   root_of_rec = '<i class="' _ base_icon.history _ ' fa-lg"></i>' %]
 		[% END %]
 
 		[% # !!! HARDCODED customization, depends of DN structure !!! %]

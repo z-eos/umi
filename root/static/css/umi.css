@@ -335,29 +335,15 @@ html,body {
 /*!  transition: border-radius .15s cubic-bezier(0.4,0.0,0.2,1),margin .15s cubic-bezier(0.4,0.0,0.2,1),width .15s cubic-bezier(0.4,0.0,0.2,1);*/
 }
 
-#sidebar.folded:not(:hover) {
-  width: 70px;
-  text-align: center;
-}
-
 #sidebar.folded:hover {
   width: 210px;
+/*!  transition-delay: 1s;
+  transition-property: width; */
 }
 
-/*
-#sidebar.folded:hover #sidebar-menu, #sidebar:not(.folded) #sidebar-menu {
-   padding-left: 1em;
-}
-*/
-
-/*
-#sidebar .nav-link {
-  padding: 0.2rem 1rem;
-  text-align: left;
-  font-size: 0.85rem;
-  max-height: 1000px;
-}
-*/
+/* #sidebar.folded:hover ul.nav.show {
+  transition-delay: 1s;
+} */
 
 #sidebar ul.show li a {
   text-align: left;
@@ -367,6 +353,11 @@ html,body {
 
 #sidebar-menu ul.show {
   padding: 0.2rem 1rem;
+}
+
+#sidebar.folded:not(:hover) {
+  width: 55px;
+  text-align: center;
 }
 
 #sidebar.folded:not(:hover) ul.nav.show {
@@ -386,10 +377,10 @@ html,body {
 
 @media (max-width: 768px) {
   #sidebar.folded:not(:hover) {
-    min-width: 70px;
-    max-width: 70px;
+    min-width: 55px;
+    max-width: 55px;
     text-align: center;
-    margin-left: -70px !important;
+    margin-left: -55px !important;
   }
 
   /* Reappearing the sidebar on toggle button click */
@@ -448,6 +439,33 @@ td .card, td .card-header, td .card-footer, .navbar-toggler {
   border: none;
 }
 
+.bg-blue	 { background-color: var(--blue)      !important; }
+.bg-indigo	 { background-color: var(--indigo)    !important; }
+.bg-purple	 { background-color: var(--purple)    !important; }
+.bg-pink	 { background-color: var(--pink)      !important; }
+.bg-red	 { background-color: var(--red)       !important; }
+.bg-orange	 { background-color: var(--orange)    !important; }
+.bg-yellow	 { background-color: var(--yellow)    !important; }
+.bg-green	 { background-color: var(--green)     !important; }
+.bg-teal	 { background-color: var(--teal)      !important; }
+.bg-cyan	 { background-color: var(--cyan)      !important; }
+.bg-white	 { background-color: var(--white)     !important; }
+.bg-gray	 { background-color: var(--gray)      !important; }
+.bg-gray-dark { background-color: var(--gray-dark) !important; }
+
+.text-blue	   { color: var(--blue)      !important; }
+.text-indigo	   { color: var(--indigo)    !important; }
+.text-purple	   { color: var(--purple)    !important; }
+.text-pink	   { color: var(--pink)      !important; }
+.text-red	   { color: var(--red)       !important; }
+.text-orange	   { color: var(--orange)    !important; }
+.text-yellow	   { color: var(--yellow)    !important; }
+.text-green	   { color: var(--green)     !important; }
+.text-teal	   { color: var(--teal)      !important; }
+.text-cyan	   { color: var(--cyan)      !important; }
+.text-white	   { color: var(--white)     !important; }
+.text-gray	   { color: var(--gray)      !important; }
+.text-gray-dark { color: var(--gray-dark) !important; }
 
 /* -------------------------------
 

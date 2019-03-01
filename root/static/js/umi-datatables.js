@@ -33,14 +33,27 @@ var table = $('#dataTableToDraw').DataTable({
 		},
 	    },
 	    {
-		extend: 'csv',
-		text: '<i title="Download current page as CSV file" class="fas fa-download fa-lg fa-fw"></i>',
+		extend: 'csvHtml5',
+		text: '<i title="Download current page as CSV file" class="fas fa-file-csv fa-lg fa-fw"></i>',
 		className: 'btn btn-primary btn-sm',
 		exportOptions: {
 		    modifier: {
 			page: 'current'
 		    }
 		},
+		filename: 'datatable-export',
+	    },
+	    {
+		extend: 'pdfHtml5',
+		text: '<i title="Download current page as PDF file" class="fas fa-file-pdf fa-lg fa-fw"></i>',
+		className: 'btn btn-primary btn-sm',
+		exportOptions: {
+		    modifier: {
+			page: 'current'
+		    }
+		},
+		filename: 'datatable-export',
+		orientation: 'landscape',
 	    },
 	]
     },

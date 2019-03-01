@@ -1,136 +1,138 @@
 [% # -*- mode: web; -*- %]
 
-<nav id="sidebar-right" class="text-light bg-dark float-right" data-url-tree="/ldap_tree">
-  <ul class="nav nav-tabs nav-fill" role="tablist">
-    <li class="nav-item" title="LDAP tree">
-      <a class="nav-link text-white-50" data-toggle="tab" href="#tree" role="tab"><i class="fas fa-tree"></i></a>
-    </li>
-    <li class="nav-item" title="statistics">
-      <a class="nav-link text-white-50" data-toggle="tab" href="#statistics" role="tab"><i class="fas fa-chart-pie"></i></a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link text-white-50" data-toggle="tab" href="#messages" role="tab"><i class="fas fa-globe"></i></a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link text-white-50" data-toggle="tab" href="#settings" role="tab"><i class="fas fa-cogs"></i></a>
-    </li>
-  </ul>
+<aside>
+  <nav id="sidebar-right" class="text-light bg-dark float-right" data-url-tree="/ldap_tree">
+    <ul class="nav nav-tabs nav-fill" role="tablist">
+      <li class="nav-item" title="LDAP tree">
+	<a class="nav-link text-white-50" data-toggle="tab" href="#tree" role="tab"><i class="fas fa-tree"></i></a>
+      </li>
+      <li class="nav-item" title="statistics">
+	<a class="nav-link text-white-50" data-toggle="tab" href="#statistics" role="tab"><i class="fas fa-chart-pie"></i></a>
+      </li>
+      <li class="nav-item">
+	<a class="nav-link text-white-50" data-toggle="tab" href="#messages" role="tab"><i class="fas fa-globe"></i></a>
+      </li>
+      <li class="nav-item">
+	<a class="nav-link text-white-50" data-toggle="tab" href="#settings" role="tab"><i class="fas fa-cogs"></i></a>
+      </li>
+    </ul>
 
-  <!-- Tab panes -->
-  <div class="tab-content bg-dark">
-    <div class="tab-pane active" id="tree" role="tabpanel">
-      [% IF c.check_user_roles('admin') %]
-      <div class="callout m-0 py-2 text-white-50 text-center text-uppercase">
-	<!-- <a class="nav-link" href="/ldap_tree"> -->
+    <!-- Tab panes -->
+    <div class="tab-content bg-dark">
+      <div class="tab-pane active" id="tree" role="tabpanel">
+	[% IF c.check_user_roles('admin') %]
+	<div class="callout m-0 py-2 text-white-50 text-center text-uppercase">
+	  <!-- <a class="nav-link" href="/ldap_tree"> -->
           <small><b>LDAP tree</b></small>
 	  <!-- </a> -->
+	</div>
+	<div id="App">
+	  <tree :tree="tree"></tree>
+	</div>
+	[% END %]
       </div>
-      <div id="App">
-      <tree :tree="tree"></tree>
-      </div>
-      [% END %]
-    </div>
 
 
-    <!-- === STATISTICS ===  -->
-    <div class="tab-pane p-3" id="statistics" role="tabpanel">
-      <div id="stat-to" class="message">
+      <!-- === STATISTICS ===  -->
+      <div class="tab-pane p-3" id="statistics" role="tabpanel">
+	<div id="stat-to" class="message">
+	</div>
       </div>
-    </div>
-    
+      
       <!-- === MESSAGES ===  -->
-    <div class="tab-pane p-3" id="messages" role="tabpanel">
-      <div class="message">
-        <div>
-          <small class="text-muted">Lukasz Holeczek</small>
-          <small class="text-muted float-right mt-1">1:52 PM</small>
-        </div>
-        <div class="text-truncate font-weight-bold">Lorem ipsum dolor sit amet</div>
-        <small class="text-muted">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt...</small>
-      </div>
-      <hr>
-      <div class="message">
-        <div class="py-3 pb-5 mr-3 float-left">
-        </div>
-        <div>
-          <small class="text-muted">Lukasz Holeczek</small>
-          <small class="text-muted float-right mt-1">1:52 PM</small>
-        </div>
-        <div class="text-truncate font-weight-bold">Lorem ipsum dolor sit amet</div>
-        <small class="text-muted">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt...</small>
-      </div>
-      <hr>
-      <div class="message">
-        <div class="py-3 pb-5 mr-3 float-left">
-        </div>
-        <div>
-          <small class="text-muted">Lukasz Holeczek</small>
-          <small class="text-muted float-right mt-1">1:52 PM</small>
-        </div>
-        <div class="text-truncate font-weight-bold">Lorem ipsum dolor sit amet</div>
-        <small class="text-muted">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt...</small>
-      </div>
-      <hr>
-      <div class="message">
-        <div class="py-3 pb-5 mr-3 float-left">
-        </div>
-        <div>
-          <small class="text-muted">Lukasz Holeczek</small>
-          <small class="text-muted float-right mt-1">1:52 PM</small>
-        </div>
-        <div class="text-truncate font-weight-bold">Lorem ipsum dolor sit amet</div>
-        <small class="text-muted">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt...</small>
-      </div>
-    </div>
-
-    
-    <!-- === SETTINGS ===  -->
-    <div class="tab-pane p-3 text-light" id="settings" role="tabpanel">
-      <h6>Settings</h6>
-      <form role="form" id="settings-save" class="settings-save" method="POST" action="/settings_save">
-	<div class="aside-options">
-	  <div class="custom-control custom-switch">
-	    <input type="checkbox" class="custom-control-input" id="checkboxSidebar"
-		   name="sidebar" [% c.session.settings.ui.sidebar ? ' checked=""' : '' %]>
-	    <label class="custom-control-label" for="checkboxSidebar">Sidebar On Start</label>
-	  </div>
-	  <div class="custom-control custom-switch">
-	    <input type="checkbox" class="custom-control-input" id="checkboxAside"
-		   name="aside" [% c.session.settings.ui.aside ? ' checked=""' : '' %]>
-	    <label class="custom-control-label" for="checkboxAside">Aside On Start</label>
-	  </div>
-	  <div class="custom-control custom-switch">
-	    <input type="checkbox" class="custom-control-input" disabled id="rfc4515"
-		   name="rfc4515" checked="" aria-describedby="rfc4515help">
-	    <label class="custom-control-label" for="rfc4515">RFC4515</label>
-            <small class="text-muted" id="rfc4515help">Extended Search Filter Syntax.</small>
-	  </div>
-	</div>
-	    
-	<div class="aside-options">
-          <div class="clearfix mt-4">
-            <small><b>Debug</b></small>
-	    <select class="form-control input-sm pull-right col custom-select" name="debug">
-	      [% debug_levels = [ 0, 1, 2 ] %]
-	      [% FOREACH i IN debug_levels %]
-	      <option value="[% i %]" [% IF c.session.settings.ui.exists('debug') && c.session.settings.ui.debug == i %]selected[% END %]>[% i %]</option>
-	      [% END %]
-	    </select>
+      <div class="tab-pane p-3" id="messages" role="tabpanel">
+	<div class="message">
+          <div>
+            <small class="text-muted">Lukasz Holeczek</small>
+            <small class="text-muted float-right mt-1">1:52 PM</small>
           </div>
+          <div class="text-truncate font-weight-bold">Lorem ipsum dolor sit amet</div>
+          <small class="text-muted">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt...</small>
 	</div>
-	
 	<hr>
-	  
-	<div>
-	  <button type="submit" class="btn btn-success col-12">
-	    <i class="fas fa-save fa-lg"></i>
-	    Save
-	  </button>
+	<div class="message">
+          <div class="py-3 pb-5 mr-3 float-left">
+          </div>
+          <div>
+            <small class="text-muted">Lukasz Holeczek</small>
+            <small class="text-muted float-right mt-1">1:52 PM</small>
+          </div>
+          <div class="text-truncate font-weight-bold">Lorem ipsum dolor sit amet</div>
+          <small class="text-muted">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt...</small>
 	</div>
-      </form>
+	<hr>
+	<div class="message">
+          <div class="py-3 pb-5 mr-3 float-left">
+          </div>
+          <div>
+            <small class="text-muted">Lukasz Holeczek</small>
+            <small class="text-muted float-right mt-1">1:52 PM</small>
+          </div>
+          <div class="text-truncate font-weight-bold">Lorem ipsum dolor sit amet</div>
+          <small class="text-muted">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt...</small>
+	</div>
+	<hr>
+	<div class="message">
+          <div class="py-3 pb-5 mr-3 float-left">
+          </div>
+          <div>
+            <small class="text-muted">Lukasz Holeczek</small>
+            <small class="text-muted float-right mt-1">1:52 PM</small>
+          </div>
+          <div class="text-truncate font-weight-bold">Lorem ipsum dolor sit amet</div>
+          <small class="text-muted">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt...</small>
+	</div>
+      </div>
+
+      
+      <!-- === SETTINGS ===  -->
+      <div class="tab-pane p-3 text-light" id="settings" role="tabpanel">
+	<h6>Settings</h6>
+	<form role="form" id="settings-save" class="settings-save" method="POST" action="/settings_save">
+	  <div class="aside-options">
+	    <div class="custom-control custom-switch">
+	      <input type="checkbox" class="custom-control-input" id="checkboxSidebar"
+		     name="sidebar" [% c.session.settings.ui.sidebar ? ' checked=""' : '' %]>
+	      <label class="custom-control-label" for="checkboxSidebar">Sidebar On Start</label>
+	    </div>
+	    <div class="custom-control custom-switch">
+	      <input type="checkbox" class="custom-control-input" id="checkboxAside"
+		     name="aside" [% c.session.settings.ui.aside ? ' checked=""' : '' %]>
+	      <label class="custom-control-label" for="checkboxAside">Aside On Start</label>
+	    </div>
+	    <div class="custom-control custom-switch">
+	      <input type="checkbox" class="custom-control-input" disabled id="rfc4515"
+		     name="rfc4515" checked="" aria-describedby="rfc4515help">
+	      <label class="custom-control-label" for="rfc4515">RFC4515</label>
+              <small class="text-muted" id="rfc4515help">Extended Search Filter Syntax.</small>
+	    </div>
+	  </div>
+	  
+	  <div class="aside-options">
+            <div class="clearfix mt-4">
+              <small><b>Debug</b></small>
+	      <select class="form-control input-sm pull-right col custom-select" name="debug">
+		[% debug_levels = [ 0, 1, 2 ] %]
+		[% FOREACH i IN debug_levels %]
+		<option value="[% i %]" [% IF c.session.settings.ui.exists('debug') && c.session.settings.ui.debug == i %]selected[% END %]>[% i %]</option>
+		[% END %]
+	      </select>
+            </div>
+	  </div>
+	  
+	  <hr>
+	  
+	  <div>
+	    <button type="submit" class="btn btn-success col-12">
+	      <i class="fas fa-save fa-lg"></i>
+	      Save
+	    </button>
+	  </div>
+	</form>
+      </div>
     </div>
-  </div>
-</nav>
+  </nav>
+</aside>
 
 <script>
  $(document).ready(function () {

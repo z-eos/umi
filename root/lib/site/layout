@@ -1,4 +1,24 @@
 [% # -*- mode: web; -*- %]
+
+<noscript>
+  <div class="alert alert-danger text-center h1 mt-5 mx-5"
+       role="alert"
+       style="margin-bottom: 1100px;">
+    <h1 class="alert-heading">
+      <i class="fas fa-skull"></i>
+      ERROR
+      <i class="fas fa-skull"></i>
+    </h1>
+    <hr>
+    <h2>
+      JavaScript is disabled in your browser.
+    </h2>
+    <h2>
+      Enable JavaScript!
+    </h2>
+  </div>
+</noscript>
+
 [% IF c.user %]  
 [% PROCESS site/header %]
 
@@ -6,25 +26,15 @@
 
   [% PROCESS site/sidebar %]
 
-    <noscript>
-      <div class="panel panel-danger text-center">
-	<div class="panel-heading">
-	  <span class="fa fa-exclamation-triangle fa-lg"></span>
-	  <strong>Warning! JavaScript is disabled!</strong>
-	</div>
-	<div class="panel-body">
-	  Important functionality is missing! You are strongly recommended to enable JS!
-	</div>
-      </div>
-    </noscript>
-    <div class="container-fluid mb-3" id="workingfield">
-      [% END %]
-      
-      [% content %]
-      
-      [% IF c.user %]  
+  <main class="container-fluid flex-grow-1 mb-3 w-25" id="workingfield">
 
-    </div>
+[% END %]
+
+[% content %]
+      
+[% IF c.user %]  
+
+  </main>
 
   [% PROCESS site/aside %]
   
@@ -62,30 +72,33 @@
 	  <i class="text-light fas fa-folder-open" aria-hidden="true" v-if="opened"></i>
 	</div>
 	
-	<div class="tree-subitem-loader" v-if="loading"><!-- v-if="loading" -->
-	  <i class="text-white-50 fas fa-circle-notch fa-pulse fa-fw margin-bottom"></i>
+	<div class="tree-subitem-loader"
+	     v-if="loading">
+	  <i class="text-white-50 fas fa-circle-notch fa-pulse fa-fw"></i>
 	</div>
 
-	<span class="tree-item-link-list" 
-	      @click="showItemBranches()"
-	      v-if="item.branch > 0" 
-	      title="Show sub items">
+	<div class="tree-item-link-list" 
+	     @click="showItemBranches()"
+	     v-if="item.branch > 0" 
+	     title="Show sub items">
 	  <i class="text-white-50 fas fa-layer-group fa-xs" aria-hidden="true"></i>
-	</span>
+	</div>
 	
-	<i class="text-white-50 fas fa-sync fa-xs" aria-hidden="true"
-	   title="Reload sub items"
-	   v-if="item.branch > 0" 
-	   @click="loadBranches()">
-	</i>
+	<div class="tree-item-link-list"
+	     @click="loadBranches()"
+	     v-if="item.branch > 0" 
+	     title="Reload sub items">
+	  <i class="text-white-50 fas fa-sync fa-xs" aria-hidden="true"></i>
+	</div>
 	
       </div>
 
- <i class="fas fa-ellipsis-h text-success tree-item-leaf"
-    v-if="!(item.branch > 0 && !loading || item.branch > 0 || item.branch > 0)"></i>
-
- <a class="text-light tree-item-link"
-    @click="showItem()">{{ item.id }}</a>
+ <a class="text-light text-nowrap tree-item-link"
+    @click="showItem()">
+   <i class="fas fa-ellipsis-h text-success"
+      v-if="!(item.branch > 0 && !loading || item.branch > 0 || item.branch > 0)"></i>
+   {{ item.id }}
+ </a>
  
 
  </div>

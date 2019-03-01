@@ -42,8 +42,10 @@
  [% body_class = '' %]
  [% END %]
  <body class="[% body_class %]">
+
    <!-- div class="outmost_wrapper" -->
      [% content %]
-   <!-- /div -->
+   <!-- /div class="outmost_wrapper" -->
+   
  </body>
 </html>
