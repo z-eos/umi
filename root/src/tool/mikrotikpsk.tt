@@ -1,8 +1,10 @@
 [% META title = 'PSK' %]
 
-<div class="page-header">
-  <[% site.pageheading %]><i class="fa fa-wifi fa-lg"></i> CAPsMAN PSK-s <small><em class="mono"> (PSK based WiFi SSID-s)</em></small></[% site.pageheading %]>
-</div>
+<[% site.pageheading %] class="font-weight-bold p-3">
+<i class="fas fa-wifi fa-lg mr-3 text-muted"></i>
+CAPsMAN PSK-s<em class="h6 text-muted text-monospace">(PSK based WiFi SSID-s)</em>
+</[% site.pageheading %]>
+<hr>
 
 [% INCLUDE ldap_err.tt %]
 

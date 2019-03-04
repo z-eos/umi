@@ -412,7 +412,7 @@ html,body {
 
 /* -------------------------------
 
-   KLUDGE patches to BootStrap
+   BootStrap "amendments"
 
    ------------------------------- */
 
@@ -420,8 +420,8 @@ a, input, div, ul, li, span, select, .card, .card-group, .card-header, .btn, .in
   border-radius: 0 !important;
 }
 
-//  border: none;
 .btn {
+  border: none;
   border-radius: 0;
 }
 
@@ -439,32 +439,32 @@ td .card, td .card-header, td .card-footer, .navbar-toggler {
   border: none;
 }
 
-.bg-blue	 { background-color: var(--blue)      !important; }
-.bg-indigo	 { background-color: var(--indigo)    !important; }
-.bg-purple	 { background-color: var(--purple)    !important; }
-.bg-pink	 { background-color: var(--pink)      !important; }
-.bg-red	 { background-color: var(--red)       !important; }
-.bg-orange	 { background-color: var(--orange)    !important; }
-.bg-yellow	 { background-color: var(--yellow)    !important; }
-.bg-green	 { background-color: var(--green)     !important; }
-.bg-teal	 { background-color: var(--teal)      !important; }
-.bg-cyan	 { background-color: var(--cyan)      !important; }
-.bg-white	 { background-color: var(--white)     !important; }
-.bg-gray	 { background-color: var(--gray)      !important; }
+.bg-blue      { background-color: var(--blue)      !important; }
+.bg-indigo    { background-color: var(--indigo)    !important; }
+.bg-purple    { background-color: var(--purple)    !important; }
+.bg-pink      { background-color: var(--pink)      !important; }
+.bg-red	      { background-color: var(--red)       !important; }
+.bg-orange    { background-color: var(--orange)    !important; }
+.bg-yellow    { background-color: var(--yellow)    !important; }
+.bg-green     { background-color: var(--green)     !important; }
+.bg-teal      { background-color: var(--teal)      !important; }
+.bg-cyan      { background-color: var(--cyan)      !important; }
+.bg-white     { background-color: var(--white)     !important; }
+.bg-gray      { background-color: var(--gray)      !important; }
 .bg-gray-dark { background-color: var(--gray-dark) !important; }
 
-.text-blue	   { color: var(--blue)      !important; }
-.text-indigo	   { color: var(--indigo)    !important; }
-.text-purple	   { color: var(--purple)    !important; }
-.text-pink	   { color: var(--pink)      !important; }
-.text-red	   { color: var(--red)       !important; }
-.text-orange	   { color: var(--orange)    !important; }
-.text-yellow	   { color: var(--yellow)    !important; }
-.text-green	   { color: var(--green)     !important; }
-.text-teal	   { color: var(--teal)      !important; }
-.text-cyan	   { color: var(--cyan)      !important; }
-.text-white	   { color: var(--white)     !important; }
-.text-gray	   { color: var(--gray)      !important; }
+.text-blue	{ color: var(--blue)      !important; }
+.text-indigo	{ color: var(--indigo)    !important; }
+.text-purple	{ color: var(--purple)    !important; }
+.text-pink	{ color: var(--pink)      !important; }
+.text-red	{ color: var(--red)       !important; }
+.text-orange	{ color: var(--orange)    !important; }
+.text-yellow	{ color: var(--yellow)    !important; }
+.text-green	{ color: var(--green)     !important; }
+.text-teal	{ color: var(--teal)      !important; }
+.text-cyan	{ color: var(--cyan)      !important; }
+.text-white	{ color: var(--white)     !important; }
+.text-gray	{ color: var(--gray)      !important; }
 .text-gray-dark { color: var(--gray-dark) !important; }
 
 /* -------------------------------

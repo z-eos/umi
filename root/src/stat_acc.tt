@@ -3,7 +3,7 @@
 <link href="/static/datatables/datatables.min.css" rel="stylesheet" type="text/css">
 
 <[% site.pageheading %] class="font-weight-bold p-3">
-<i class="fas fa-chart-pie fa-2x mr-3 text-muted"></i>
+<i class="fas fa-chart-pie fa-lg mr-3 text-muted"></i>
 Users Accounts Statistics
 <small><em class="text-muted text-monospace h6">you can sort by multiple columns at the same time (<b>Shift-click</b> on a column adds it as a secondary, tertiary etc ordering column)</em></small>
 </[% site.pageheading %]>

@@ -5,7 +5,7 @@
 
 
 <[% site.pageheading %] class="font-weight-bold p-3">
-<i class="fas fa-broadcast-tower fa-2x mr-3 text-muted"></i>
+<i class="fas fa-broadcast-tower fa-lg mr-3 text-muted"></i>
 MikroTik CAPsMAN registrations <small><em class="text-muted text-monospace">WiFi</em></small>
 </[% site.pageheading %]>
 <hr>

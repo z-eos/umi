@@ -50,8 +50,8 @@ sub index :Path :Args(0) {
 				     username => UMI->config->{mikrotik}->{caps_username},
 				     password => UMI->config->{mikrotik}->{caps_password}, });
 
-    $final_message->{success}  = '<a class="btn btn-default buttons-print btn-primary btn-sm print-psk" href="#"><span><i title="Print current page" class="fa fa-print fa-lg"></i></span></a>';
-    $final_message->{success} .= '<table id="mikrotik-psk" class="table table-striped text-center">';
+    $final_message->{success}  = '<a class="btn btn-secondary buttons-print btn-sm print-psk" href="#"><span><i title="Print current page" class="fas fa-fw fa-print fa-lg"></i></span></a>';
+    $final_message->{success} .= '<table id="mikrotik-psk" class="table table-striped text-center text-monospace">';
     
     foreach my $psk (sort (keys (%{$psks}))) {
       next if $psks->{$psk}->{'authentication-types'} !~ /psk/;
@@ -62,7 +62,7 @@ sub index :Path :Args(0) {
       $final_message->{error} = $qr->{error} if $qr->{error};
 
       $final_message->{success} .=
-	sprintf('<tr><td class="mono h3"><b>%s: </b>%s</td><tr><td><img class="img-thumbnail" alt="PSK: %s" src="data:image/jpg;base64,%s" title="%s"/></td></tr>',
+	sprintf('<tr><td class="h3"><b>%s: </b>%s</td><tr><td><img class="img-thumbnail" alt="PSK: %s" src="data:image/jpg;base64,%s" title="%s"/></td></tr>',
 		$psk,
 		$psks->{$psk}->{passphrase},
 		$psk,

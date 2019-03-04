@@ -1596,12 +1596,12 @@ sub modify :Path(modify) :Args(0) {
 	} else {
 	  $dn =~ s/^(.+?),/$moddn,/;
 	  push @{$return->{success}},
-	    sprintf("<div class='card bg-info'>
-  <div class='card-header'>RDN changed as well</div>
+	    sprintf("<div class='card border border-info'>
+  <div class='card-header bg-info'>RDN changed as well</div>
   <div class='card-body'>
     <dl class='row'>
-      <dt class='col'>old DN</dt><dd class='col-11 text-monospace'>%s</dd>
-      <dt class='col'>new DN</dt><dd class='col-11 text-monospace'>%s</dd>
+      <dt class='col-2'>old DN</dt><dd class='col-10 text-monospace'>%s</dd>
+      <dt class='col-2'>new DN</dt><dd class='col-10 text-monospace'>%s</dd>
     </dl>
   </div>
 </div>", $params->{dn}, $dn);

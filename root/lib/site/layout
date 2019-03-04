@@ -95,7 +95,7 @@
 
  <a class="text-light text-nowrap tree-item-link"
     @click="showItem()">
-   <i class="fas fa-ellipsis-h text-success"
+   <i class="fas fa-ellipsis-h text-cyan"
       v-if="!(item.branch > 0 && !loading || item.branch > 0 || item.branch > 0)"></i>
    {{ item.id }}
  </a>
