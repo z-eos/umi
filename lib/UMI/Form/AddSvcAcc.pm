@@ -137,14 +137,14 @@ has_field 'submit' => ( type => 'Submit',
 			element_class => [ 'btn', 'btn-default', 'col-md-12' ],
 			value => 'Submit' );
 
-has_block 'account' => ( tag => 'fieldset',
+has_block 'account' => ( tag => 'div',
 			 render_list => [ 'login', 'password1', 'password2', 'pwdcomment' ],
 			 label => '<abbr title="User Accounts (Management and Srvice/s) Credentials" class="initialism"><span class="icon_key_alt" aria-hidden="true"></span></abbr>',
 			 label_class => [ 'pull-left' ],
 			 class => [ 'form-inline' ],
 		       );
 
-has_block 'services' => ( tag => 'fieldset',
+has_block 'services' => ( tag => 'div',
 			  render_list => [ 'associateddomain', 'authorizedservice' ],
 			  label => '<abbr title="Services Assigned" class="initialism"><span class="icon_cloud_alt" aria-hidden="true"></span></abbr>',
 			  # label => '<span class="icon_menu-square_alt2" aria-hidden="true"></span>',
@@ -152,7 +152,7 @@ has_block 'services' => ( tag => 'fieldset',
 			  class => [ 'row' ]
 			);
 
-has_block 'submitit' => ( tag => 'fieldset',
+has_block 'submitit' => ( tag => 'div',
 			  render_list => [ 'reset', 'submit'],
 			  label => '&nbsp;',
 			  class => [ 'row' ]

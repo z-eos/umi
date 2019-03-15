@@ -44,8 +44,6 @@
 
 <script src="/static/js/vue.js"></script>
 
-<script src="/static/js/nprogress.js"></script>   
-
 <script src="/static/js/umi-core-ajax.js"></script>   
 <script src="/static/js/umi-header.js"></script>
 <script src="/static/js/umi-searchby-modals.js"></script>

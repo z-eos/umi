@@ -128,7 +128,7 @@ has_field 'triple.remove'
      );
 
 has_block 'nistriple'
-  => ( tag => 'fieldset',
+  => ( tag => 'div',
        label => '<a href="#" class="btn btn-success btn-sm" data-duplicate="duplicate" title="Duplicate this section">' .
        '<span class="fa fa-plus-circle fa-lg"></span></a>&nbsp;' .
        'NIS Netgroup Triple&nbsp;<small class="text-muted"><em>(host,user,domain)</em></small>',
@@ -192,7 +192,7 @@ has_field 'aux_submit'
        value         => 'Submit' );
 
 # has_block 'aux_submitit'
-#   => ( tag => 'fieldset',
+#   => ( tag => 'div',
 #        render_list => [ 'aux_reset', 'aux_submit'],
 #        class => [ 'row', ]
 #      );

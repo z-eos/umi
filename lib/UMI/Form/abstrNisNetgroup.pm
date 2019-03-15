@@ -30,7 +30,7 @@ has_field 'aux_dn_form_to_modify' => ( type => 'Hidden', );
 has_field 'netgroup'
   => ( type                  => 'Select',
        label                 => 'Netgroup',
-       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       label_class           => [ 'col-1', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'input-sm', 'col-11' ],
        element_class         => [ 'input-sm', 'custom-select', ],
        wrapper_class         => [ 'row', 'umi-hide', ],
@@ -41,7 +41,7 @@ has_field 'netgroup'
 has_field 'cn' 
   => ( apply                 => [ NoSpaces, NotAllDigits, Printable ],
        label                 => 'Name',
-       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       label_class           => [ 'col-1', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'input-sm', 'col-11', ],
        element_attr          => { placeholder => 'users-allowed-to-fly' },
        wrapper_class         => [ 'row', 'umi-hide', ],
@@ -51,27 +51,29 @@ has_field 'cn'
 has_field 'uids' 
   => ( type                  => 'Multiple',
        label                 => 'Users',
-       label_class           => [ 'font-weight-bold', ],
-       element_wrapper_class => [ 'input-sm', ],
+       label_class           => [ 'col-1', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class => [ 'input-sm', 'col-11' ],
        element_class         => [ 'umi-multiselect' ],
        options_method        => \&uids,
+       wrapper_class         => [ 'row', 'umi-hide', ],
        required              => 1,
      );
 
 has_field 'associatedDomain'
   => ( type                  => 'Multiple',
        label                 => 'Hosts',
-       label_class           => [ 'font-weight-bold', ],
-       element_wrapper_class => [ 'input-sm', ],
+       label_class           => [ 'col-1', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class => [ 'input-sm', 'col-11' ],
        element_class         => [ 'umi-multiselect' ],
        options_method        => \&associatedDomain,
+       wrapper_class         => [ 'row', 'umi-hide', ],
        required              => 1,
      );
 
 has_field 'description'
   => ( type                  => 'TextArea',
        label                 => 'Description',
-       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       label_class           => [ 'col-1', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'input-sm', 'col-11', ],
        element_attr          => { placeholder => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed dapibus nulla. Mauris vehicula vehicula ligula ac dapibus. Fusce vehicula a turpis sed. ' },
        wrapper_class         => [ 'row', 'mt-5', ],
@@ -98,7 +100,7 @@ has_field 'aux_submit'
        value         => 'Submit' );
 
 has_block 'aux_submitit'
-  => ( tag => 'fieldset',
+  => ( tag => 'div',
        render_list => [ 'aux_reset', 'aux_submit'],
        class => [ 'row', 'mt-5', ]
      );

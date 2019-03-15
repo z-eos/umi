@@ -94,7 +94,7 @@ has_field 'aux_submit'
        value         => 'Submit' );
 
 has_block 'aux_submitit'
-  => ( tag => 'fieldset',
+  => ( tag => 'div',
        render_list => [ 'aux_reset', 'aux_submit'],
        class => [ 'row', ]
      );

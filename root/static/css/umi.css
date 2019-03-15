@@ -311,6 +311,10 @@ html,body {
    width: 0;
 }
 
+.kludge-minus-700px {
+  max-width: calc(100vw - 700px);
+}
+
 .outmost_wrapper {
   overflow: hidden;
 }
@@ -618,3 +622,4 @@ table.dataTable thead .sorting::after, table.dataTable thead .sorting_asc::after
   font-weight: 900 !important;
   font-family: "Font Awesome 5 Free" !important;
 }
+

@@ -83,7 +83,7 @@
 	 aria-controls="cardBodySuccess">
 	<i class="fa [% site.icons.toggle_down %]"></i>
       </a>
-      <i class="fa fa-check-circle ml-1 mr-3"></i><strong>Success! [% final_message.title %]</strong>
+      <i class="fa fa-check ml-1 mr-3"></i><strong>Success! [% final_message.title %]</strong>
     </h4>
   </div>
   <div class="collapse show" id="cardBodySuccess">

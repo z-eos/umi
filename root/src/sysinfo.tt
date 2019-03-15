@@ -23,13 +23,13 @@ System Info<small><em class="text-muted text-monospace"></em></small>
   </div>
   <div class="col1">
     <button id="btn-json-browse" title="re-render JSON" class="btn btn-info json-controls-item">
-      <i class="fas fa-redo fa-lg"></i>
+      <i class="fas fa-redo fa-fw"></i>
     </button>
   </div>
 </div>
 
-<div class="card card-default">
-  <div class="card-header">system info data ( JSON formated )</div>
+<div class="card">
+  <div class="card-header">system info data ( as JSON )</div>
   <div id="json-renderer" class="json-body p-3"></div>
 </div>
 

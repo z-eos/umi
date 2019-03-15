@@ -74,7 +74,7 @@ has_field 'person_exp'
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        element_attr          => { placeholder => 'Expiration on',
-				  title => 'Object Expiration', },
+				  title       => 'Object Expiration', },
        wrapper_class         => [ 'row' ],
        required              => 0 );
 
@@ -262,7 +262,7 @@ has_field 'person_description'
        rows                  => 1);
 
 has_block 'group_person'
-  => ( tag         => 'div',
+  => ( tag         => 'fieldset',
        render_list => [ 'person_org',
 			'person_title',
 			'person_office',
@@ -298,8 +298,9 @@ has_field 'aux_add_account'
        repeatable    => 'account',
        value         => 'Add new account',
        element_class => [ 'btn-success', ],
+       element_wrapper_class => [ 'col-3', 'offset-md-2', ],
        element_attr  => { title => 'new fields are added to the bottom, bellow existent ones', },
-       wrapper_class => [ qw{col-lg-2 col-md-2}, ],
+       wrapper_class => [ 'row', ],
      );
 
 has_field 'account'
@@ -546,7 +547,8 @@ has_field 'account.remove'
   => ( type                  => 'RmElement',
        value                 => 'Remove this (above fields) account',
        element_class         => [ 'btn-danger', ],
-       element_wrapper_class => [ 'col-3', ],
+       element_wrapper_class => [ 'col-3', 'pr-0', 'offset-md-2', ],
+       wrapper_class         => [ 'row', ],
      );
 
 has_block 'auth'
@@ -571,7 +573,8 @@ has_field 'aux_add_loginless_ovpn'
        repeatable    => 'loginless_ovpn',
        value         => 'Add new OpenVPN account',
        element_class => [ 'btn-success', ],
-       wrapper_class => [ qw{col-lg-4 col-md-4}, ],
+       element_wrapper_class => [ 'col-3', 'offset-md-2', ],
+       wrapper_class => [ 'row', ],
      );
 
 has_field 'loginless_ovpn'
@@ -765,7 +768,8 @@ has_field 'loginless_ovpn.remove'
   => ( type                  => 'RmElement',
        value                 => 'Remove this (above fields) account',
        element_class         => [ 'btn-danger', ],
-       element_wrapper_class => [ 'col-3', ],
+       element_wrapper_class => [ 'col-3', 'pr-0', 'offset-md-2', ],
+       wrapper_class         => [ 'row', ],
      );
 
 has_block 'ovpn'
@@ -833,13 +837,31 @@ has_block 'groupsselect'
 #== REST OF THE FORM =================================================
 ######################################################################
 
-has_field 'aux_submit'
-  => ( type                  => 'Submit',
-       element_class         => [ 'btn', 'btn-success', 'btn-block', 'text-uppercase', ],
-       element_wrapper_class => [ 'col', ],
-       wrapper_class         => [ 'row' ],
-       value                 => 'Submit' );
+has_field 'aux_reset'
+  => ( type          => 'Reset',
+       element_class => [ qw( btn
+			      btn-danger
+			      btn-block
+			      font-weight-bold
+			      text-uppercase) ],
+       wrapper_class => [ 'col-4' ],
+       value         => 'Reset' );
 
+has_field 'aux_submit'
+  => ( type          => 'Submit',
+       element_class => [ qw( btn
+			      btn-success
+			      btn-block
+			      font-weight-bold
+			      text-uppercase) ],
+       wrapper_class => [ 'col-8', ],
+       value         => 'Submit' );
+
+has_block 'aux_submitit'
+  => ( tag => 'div',
+       render_list => [ 'aux_reset', 'aux_submit'],
+       class => [ 'row', ]
+     );
 
 
 

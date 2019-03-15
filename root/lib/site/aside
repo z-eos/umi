@@ -139,6 +139,7 @@
    
    $('#sidebarRightCollapse').on('click', function () {
      $('#sidebar-right').toggleClass('folded');
+//     $('body').toggleClass('folded');
    });
  });
 </script>

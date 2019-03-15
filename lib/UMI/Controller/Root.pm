@@ -893,23 +893,27 @@ sub test : Local {
 # tree build #   }
 # tree build #   $return = $tree;
 
+  use Net::CIDR::Set;
+  use JSON;
+
+  my $ipa = Net::CIDR::Set->new;
+
   # log_debug { np( $mesg ) };
-  $return = $ldap_crud->last_uidNumber;
-  # $return = $ldap_crud->last_seq_val({ base   => $ldap_crud->cfg->{base}->{acc_root},
-  # 				       filter => '(uidNumber=*)',
-  # 				       scope  => 'sub',
-  # 				       attr   => 'uidNumber', });
 
-  # my $sch = $ldap_crud->schema;
-  # log_debug { np(@{[$sch->all_attributes]}) };
-  # foreach my $syn (@{[$sch->all_attributes]}) {
-  #   foreach (keys (%{$syn})) {
-  #     next if $_ eq 'oid';
-  #     $return->{$syn->{oid}}->{$_} = $syn->{$_};
-  #   }
-  # }
+  my $dhcp_addresses = $ldap_crud->search({ base   => $ldap_crud->cfg->{base}->{dhcp},
+					    filter => '(dhcpStatements=fixed-address *)', });
+  
+  foreach my $entry (@{[$dhcp_addresses->entries]}) {
+    foreach my $val (@{[$entry->get_value('dhcpStatements')]}) {
+      $ipa->add( (split(/ /, $val))[1] )
+	if $val =~ /^fixed-address /;
+    }
+  }
 
-  $c->stash( template => 'test.tt',
+#  @{$return} = split(/, /, $ipa->as_string);
+  $return = [$ipa->as_address_array];
+
+  $c->stash( template      => 'test.tt',
 	     final_message => $return,
 	   );
 }

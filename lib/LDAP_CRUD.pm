@@ -108,15 +108,13 @@ sub _build_cfg {
 		   db             => UMI->config->{ldap_crud_db},
 		   db_log         => UMI->config->{ldap_crud_db_log},
 		   dc_num         => $#dc_count + 1,
-		   acc_root       =>'ou=People,'              . UMI->config->{ldap_crud_db},
+		   acc_root       => 'ou=People,'              . UMI->config->{ldap_crud_db},
 		   acc_svc_branch => 'ou=People,'              . UMI->config->{ldap_crud_db},
 		   acc_svc_common => 'ou=People,'              . UMI->config->{ldap_crud_db},
 		   alias          => 'ou=alias,'               . UMI->config->{ldap_crud_db},
 		   dhcp           => 'ou=DHCP,'                . UMI->config->{ldap_crud_db},
 		   gitacl         => 'ou=GitACL,'              . UMI->config->{ldap_crud_db},
 		   group          => 'ou=group,'               . UMI->config->{ldap_crud_db},
-		   system_group   => 'ou=group,ou=system,'     . UMI->config->{ldap_crud_db},
-		   system_bind    => 'ou=bind,ou=system,'      . UMI->config->{ldap_crud_db},
 		   inventory      => 'ou=hw,ou=Inventory,'     . UMI->config->{ldap_crud_db},
 		   machines       => 'ou=machines,'            . UMI->config->{ldap_crud_db},
 		   mta            => 'ou=Sendmail,'            . UMI->config->{ldap_crud_db},
@@ -125,7 +123,10 @@ sub _build_cfg {
 		   ovpn           => 'ou=OpenVPN,'             . UMI->config->{ldap_crud_db},
 		   rad_groups     => 'ou=groups,ou=RADIUS,'    . UMI->config->{ldap_crud_db},
 		   rad_profiles   => 'ou=profiles,ou=RADIUS,'  . UMI->config->{ldap_crud_db},
+		   sargon         => 'ou=sargon,'              . UMI->config->{ldap_crud_db},
 		   sudo           => 'ou=SUDOers,'             . UMI->config->{ldap_crud_db},
+		   system_bind    => 'ou=bind,ou=system,'      . UMI->config->{ldap_crud_db},
+		   system_group   => 'ou=group,ou=system,'     . UMI->config->{ldap_crud_db},
 		   workstations   => 'ou=workstations,'        . UMI->config->{ldap_crud_db},
 		   monitor        => 'cn=Monitor',
 		   objects        => [ qw(
@@ -311,6 +312,9 @@ sub _build_cfg {
 					  domainRelatedObject
 					  organizationalUnit
 					  top
+				       ) ],
+	   sargon                => [ qw(
+					  sargonACL
 				       ) ],
 	   ssh                   => [ qw(
 					  account
@@ -535,7 +539,7 @@ sub _build_cfg {
 			},
 	  },
 	  err => {
-		  0 => '<div class="alert bg-success" role="alert"><i class="fas fa-info-circle fa-lg"></i>&nbsp;<b>Your request returned no result. Try to change query parameter/s.</b></div>',
+		  0 => '<div class="alert alert-success" role="alert"><i class="fas fa-info-circle fa-lg"></i>&nbsp;<b>Your request returned no result. Try to change query parameter/s.</b></div>',
 		  50 => 'Do not panic! This situation needs your security officer and system administrator attention, please contact them to solve the issue.',
 		 },
 
@@ -547,10 +551,10 @@ sub _build_cfg {
 	 };
 }
 
-has 'host' => ( is => 'ro', isa => 'Str', required => 1,
-		default => UMI->config->{authentication}->{realms}->{ldap}->{store}->{ldap_server});
-has 'uid' => ( is => 'ro', isa => 'Str', required => 1 );
-has 'pwd' => ( is => 'ro', isa => 'Str', required => 1 );
+has 'host'    => ( is => 'ro', isa => 'Str', required => 1,
+		   default => UMI->config->{authentication}->{realms}->{ldap}->{store}->{ldap_server});
+has 'uid'     => ( is => 'ro', isa => 'Str', required => 1 );
+has 'pwd'     => ( is => 'ro', isa => 'Str', required => 1 );
 has 'dry_run' => ( is => 'ro', isa => 'Bool', default => 0 );
 # has 'path_to_images' => ( is => 'ro', isa => 'Str', required => 1 );
 
@@ -599,24 +603,28 @@ around 'ldap' =>
 
     my $ldap = $self->$orig(@_);
 
-    my $dn = sprintf( "%s=%s,%s",
-		      $self->cfg->{rdn}->{acc_root},
-		      $self->uid,
-		      $self->cfg->{base}->{acc_root} );
+    # my $dn = sprintf( "%s=%s,%s",
+    # 		      $self->cfg->{rdn}->{acc_root},
+    # 		      $self->uid,
+    # 		      $self->cfg->{base}->{acc_root} );
 
-    my $mesg;
-    $mesg = $ldap->bind( $dn,
-			 password => $self->pwd,
-			 version  => 3, );
+    my $mesg = $ldap->bind( sprintf( "%s=%s,%s",
+				     $self->cfg->{rdn}->{acc_root},
+				     $self->uid,
+				     $self->cfg->{base}->{acc_root} ),
+			    password => $self->pwd,
+			    version  => 3, );
 
-    log_fatal { sprintf( "%s\nUMI WARNING: Net::LDAP->bind related problem occured!\nerror_name: %s \nerror_desc: %s \nerror_text: %s \nserver_error: %s",
+    if ( $mesg->is_error ) {
+      my $err = sprintf( "%s\nUMI WARNING: Net::LDAP->bind related problem occured!\nerror_name: %s \nerror_desc: %s \nerror_text: %s \nserver_error: %s",
 			 '#' x 60,
 			 $mesg->error_name,
 			 $mesg->error_desc,
 			 $mesg->error_text,
-			 $mesg->server_error ) }
-      if $mesg->is_error;
-    
+			 $mesg->server_error );
+      log_fatal { $err };
+    }
+
     return $ldap;
   };
 

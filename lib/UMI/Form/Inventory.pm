@@ -601,7 +601,7 @@ has_block 'group_common'
      );
 
 has_block 'common'
-  => ( tag => 'fieldset',
+  => ( tag => 'div',
        label => 'New Inventory Data',
        render_list => [ 'group_common', ],
        class => [ 'tab-pane', 'fade', 'in', 'active', ],
@@ -1059,7 +1059,7 @@ has_field 'compart.remove'
      );
 
 has_block 'compart'
-  => ( tag => 'fieldset',
+  => ( tag => 'div',
        label => 'Compart/s&nbsp;<small class="text-muted"><em>(in case, no dedicated field found, write the data to the description)</em></small>',
        render_list => [ 'aux_add_compart', 'compart', ],
        class => [ 'tab-pane', 'fade', ],

@@ -221,7 +221,7 @@ has_field 'aux_submit' => ( type => 'Submit',
 
 
 
-has_block 'block_acc' => ( tag => 'fieldset',
+has_block 'block_acc' => ( tag => 'div',
 			 attr => { id => 'block_acc', },
 			 render_list => [
 					 'login',
@@ -234,7 +234,7 @@ has_block 'block_acc' => ( tag => 'fieldset',
 			 #			 class => [ 'form-inline' ],
 		       );
 
-has_block 'block_802' => ( tag => 'fieldset',
+has_block 'block_802' => ( tag => 'div',
 			 attr => { id => 'block_802', },
 			 render_list => [
 					 'radiusgroupname',
@@ -245,7 +245,7 @@ has_block 'block_802' => ( tag => 'fieldset',
 			 #			 class => [ 'form-inline' ],
 		       );
 
-has_block 'block_ssh' => ( tag => 'fieldset',
+has_block 'block_ssh' => ( tag => 'div',
 			 attr => { id => 'block_ssh', },
 			 render_list => [
 					 'to_sshkeygen',
@@ -257,7 +257,7 @@ has_block 'block_ssh' => ( tag => 'fieldset',
 			 label_class => [ 'text-info' ],
 		       );
 
-has_block 'block_crt' => ( tag => 'fieldset',
+has_block 'block_crt' => ( tag => 'div',
 			 attr => { id => 'block_crt', },
 			 render_list => [
 					 'usercertificate',
@@ -266,7 +266,7 @@ has_block 'block_crt' => ( tag => 'fieldset',
 			 label_class => [ 'text-info' ],
 		       );
 
-has_block 'services' => ( tag => 'fieldset',
+has_block 'services' => ( tag => 'div',
 			  render_list => [
 					  'authorizedservice',
 					  'associateddomain',
@@ -277,7 +277,7 @@ has_block 'services' => ( tag => 'fieldset',
 			  #			  class => [ 'row' ]
 			);
 
-has_block 'submitit' => ( tag => 'fieldset',
+has_block 'submitit' => ( tag => 'div',
 			  label => '<hr>',
 			  render_list => [ 'aux_reset', 'aux_submit', ],
 			  class => [ 'row' ]

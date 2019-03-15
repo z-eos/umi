@@ -234,28 +234,28 @@ has_field 'aux_submit' => ( type => 'Submit',
 
 
 
-has_block 'person' => ( tag => 'fieldset',
+has_block 'person' => ( tag => 'div',
 			render_list => [ 'givenname', 'sn', 'telephonenumber', 'avatar' ],
 			label => '<abbr title="Personal Data" class="initialism"><span class="fa fa-user"></span></abbr>',
 			label_class => [ 'pull-left' ],
 			class => [ 'form-inline' ]
 		      );
 
-has_block 'job' => ( tag => 'fieldset',
+has_block 'job' => ( tag => 'div',
 		     render_list => [ 'title', 'office' ],
 #		     label => '<abbr title="Job Related Details" class="initialism"><span class="icon_building" aria-hidden="true"></span></abbr>',
 		     label_class => [ 'pull-left' ],
 		     class => [ 'form-inline' ]
 		   );
 
-has_block 'account' => ( tag => 'fieldset',
+has_block 'account' => ( tag => 'div',
 			 render_list => [ 'login', 'password1', 'password2', 'pwdcomment' ],
 			 label => '<abbr title="User Accounts (Management and Srvice/s) Credentials" class="initialism"><span class="fa fa-key"></span></abbr>',
 			 label_class => [ 'pull-left' ],
 			 class => [ 'form-inline' ],
 		       );
 
-has_block 'services' => ( tag => 'fieldset',
+has_block 'services' => ( tag => 'div',
 			  render_list => [ 'associateddomain', 'authorizedservice', 'descr' ],
 			  label => '<abbr title="Services Assigned" class="initialism"><span class="fa fa-sliders"></span></abbr>',
 			  # label => '<span class="icon_menu-square_alt2" aria-hidden="true"></span>',
@@ -263,7 +263,7 @@ has_block 'services' => ( tag => 'fieldset',
 			  class => [ 'form-inline' ]
 			);
 
-has_block 'aux_submitit' => ( tag => 'fieldset',
+has_block 'aux_submitit' => ( tag => 'div',
 			render_list => [ 'aux_hspace', 'aux_reset', 'aux_submit'],
 			# label => '&nbsp;',
 			class => [ 'container-fluid' ]

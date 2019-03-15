@@ -13,14 +13,20 @@
 	</h4>
 	</div>
 	<form role="form" method="POST" action="/searchby/delete">
-	  <div class="modal-body text-primary">
-	    <i class="fa fa-refresh"></i>
-	    <input type="checkbox" name="ldap_delete_recursive">
-	    Recursive deletion of all children of this object as well
-	    </input>
+	  <div class="modal-body">
+	    <div class="custom-control custom-switch">
+	      <input type="checkbox"
+		     class="custom-control-input"
+		     name="ldap_delete_recursive"
+		     id="modal_delete_switch[% id_suffix %]">
+	      <label class="custom-control-label"
+		     for="modal_delete_switch[% id_suffix %]">
+		Recursive deletion of all children of this object as well
+	      </label>
+	    </div>
 	  </div>
 	  <div class="modal-footer">
-	    <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
+	    <button type="button" class="btn btn-secondary umi-btn-event" data-dismiss="modal">Close</button>
 	    <button type="submit" class="btn btn-danger umi-btn-event umi-btn-ajax"  name="ldap_delete"
 		    value="[% entry.key %]" data-action="delete">
 	      Yes, I really want to delete it and yes, I understand all consequences!
@@ -50,7 +56,7 @@
           <p>Now, there is no way to show you what will happen, so, if you hesitate, then please, inspect the history first!</p>
 	</div>
 	<div class="modal-footer">
-	  <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
+	  <button type="button" class="btn btn-secondary umi-btn-event" data-dismiss="modal">Close</button>
 	  <button type="submit" class="btn bg-danger umi-btn-event umi-btn-ajax"  name="ldap_rollback"
 		  value="[% entry.key %]" data-action="rollback">
 	    Yes, I really want to rollback it and yes, I understand all consequences!
@@ -78,7 +84,7 @@
 	<!-- <div class="modal-body text-primary"></div> -->
 	<div class="modal-footer">
 	  <div>
-	    <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
+	    <button type="button" class="btn btn-secondary umi-btn-event" data-dismiss="modal">Close</button>
 	    <button type="submit" class="btn bg-danger text-light umi-btn-event umi-btn-ajax"
 		    name="user_block" value="[% entry.key %]"
 		    onClick="$(modal_block[% id_suffix %]).modal('hide')"
@@ -133,7 +139,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	</div>
 	<div class="modal-footer">
 	  <div>
-	    <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
+	    <button type="button" class="btn btn-secondary umi-btn-event" data-dismiss="modal">Close</button>
 	    <button type="submit" class="btn bg-danger umi-btn-event umi-btn-ajax"
 		    onClick="$(modal_reassign[% id_suffix %]).modal('hide')"
 		    name="src_dn"
@@ -184,7 +190,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	</div>
 	<div class="modal-footer">
 	  <div>
-	    <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
+	    <button type="button" class="btn btn-secondary umi-btn-event" data-dismiss="modal">Close</button>
 	    <button type="submit" class="btn bg-danger text-light umi-btn-event umi-btn-ajax"
 		    onClick="$(modal_moddn[% id_suffix %]).modal('hide')"
 		    name="src_dn"
@@ -210,41 +216,47 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	  LDIF of DN: <b>[% entry.key.replace(',', ', ') %]</b>
 	</h4>
       </div>
-      <div class="modal-body text-primary">
-	<div class="checkbox">
-	  <span class="fa fa-object-group fa-lg col-xs-1 text-right"></span>&nbsp;
-	  <label>
-	    <input type="checkbox"  name="ldap_ldif_recursive">
-	    include object subtree
-	  </label>
-	</div>
-	<form role="form" method="POST" class="formajaxer form-horizontal">
+      <div class="modal-body">
+	<form role="form" method="POST" class="formajaxer">
+	  <div class="custom-control custom-switch ">
+	    <input type="checkbox"
+		   class="custom-control-input"
+		   name="ldap_ldif_recursive"
+		   disabled
+		   id="modal_ldif_switch[% id_suffix %]">
+	    <label class="custom-control-label"
+		   for="modal_ldif_switch[% id_suffix %]">
+	      include object subtree
+	    </label>
+	  </div>
 	  <div class="form-group row">
 	    <label class="col-1 control-label">Scope</label>
 	    <div class="col-11">
-	      <select class="input-sm form-control" name="ldap_ldif_scope">
+	      <select class="input-sm form-control custom-select" name="ldap_ldif_scope">
 		<option value="sub">sub</option>
 		<option value="children">children</option>
 		<option value="one">one</option>
 		<option value="base" selected="selected">base</option>
 	      </select>
 	    </div>	    
-	    <div class="col-xs-offset-1 col-11">
-	      <div class="form-group">
-		<div class="checkbox">
-		  <label>
-		    <input type="checkbox"  name="ldap_ldif_sysinfo">
-		    include system info
-		  </label>
-		</div>
-	      </div>
+	  </div>
+	  <div class="form-group">
+	    <div class="custom-control custom-switch">
+	      <input type="checkbox"
+		     class="custom-control-input"
+		     name="ldap_ldif_sysinfo"
+		     id="modal_ldif_sysinfo_switch[% id_suffix %]">
+	      <label class="custom-control-label"
+		     for="modal_ldif_sysinfo_switch[% id_suffix %]">
+		include system info
+	      </label>
 	    </div>
 	  </div>
-	  <div class="row">
-	    <button type="button" class="col-3 btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
+	  <div class="row pr-3">
+	    <button type="button" class="offset-md-2 col-3 btn btn-secondary umi-btn-event" data-dismiss="modal">Close</button>
 	    <button type="submit"
 		    onClick="$(modal_ldif[% id_suffix %]).modal('hide')"
-		    class="btn bg-info text-light umi-btn-event umi-btn-logic col-9"
+		    class="btn bg-info text-light umi-btn-event umi-btn-logic col-7"
 		    data-umiact="/searchby/ldif_gen"
 		    name="ldap_ldif"
 		    value="[% entry.key %]">
@@ -270,15 +282,17 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	</h4>
       </div>
       <form role="form" method="POST" class="formajaxer">
-	<div class="modal-body text-primary">
+	<div class="modal-body">
 	  vCard file contains user image/s if any, while QR code not.<br><br>
+
 	  <div class="radio">
 	    <span class="fa fa-battery-quarter fa-lg col-xs-1 text-right"></span>
 	    <label>
-	      <input type="radio" name="vcard_type" id="ldap_vcard1" value="qr_min" checked>
+	      <input type="radio" name="vcard_type" id="ldap_vcard1" value="qr_max" checked>
 	      minimal info vCard (name, email/s, IM id/s and telephone number/s)
 	    </label>
 	  </div>
+	  
 	  <div class="radio">
 	    <span class="fa fa-battery-full fa-lg col-xs-1 text-right"></span>
 	    <label>
@@ -286,16 +300,20 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	      full info vCard
 	    </label>
 	  </div>
-	  <div class="checkbox">
-	    <span class="fa fa-text-width fa-lg col-xs-1 text-right"></span>
-	    <label>
-	      <input type="checkbox" name="vcard_translit" value="1">
-	      to translit all to latin1
-	    </label>
+	  
+	  <div class="custom-control custom-switch">
+	    <input type="checkbox"
+		   class="custom-control-input"
+		   name="vcard_translit"
+		   id="vcard_translit_switch[% id_suffix %]">
+	      <label class="custom-control-label"
+		     for="vcard_translit_switch[% id_suffix %]">
+		to translit all to latin1
+	      </label>
 	  </div>
 	</div>
 	<div class="modal-footer">
-	  <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
+	  <button type="button" class="btn btn-secondary umi-btn-event" data-dismiss="modal">Close</button>
 	  <button type="submit"
 		  onClick="$(modal_vcard[% id_suffix %]).modal('hide')"
 		  class="btn bg-info text-light umi-btn-event umi-btn-logic"
@@ -338,7 +356,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	</div>
 	<div class="modal-footer">
 	  <div>
-	    <button type="button" class="btn btn-default umi-btn-event" data-dismiss="modal">Close</button>
+	    <button type="button" class="btn btn-secondary umi-btn-event" data-dismiss="modal">Close</button>
 	    <button type="submit" class="btn bg-info umi-btn-event umi-btn-ajax"
 		    onClick="$(modal_refresh[% id_suffix %]).modal('hide')"
 		    name="dn_to_refresh"

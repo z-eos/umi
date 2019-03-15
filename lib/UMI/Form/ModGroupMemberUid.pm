@@ -65,7 +65,7 @@ has_field 'aux_submit' => ( type => 'Submit',
 			   element_wrapper_class => [ 'col-xs-12', ],
 			value => 'Submit' );
 
-# has_block 'submitit' => ( tag => 'fieldset',
+# has_block 'submitit' => ( tag => 'div',
 #                         render_list => [ 'reset', 'submit'],
 #                         label => '&nbsp;',
 #                         class => [ 'row' ]

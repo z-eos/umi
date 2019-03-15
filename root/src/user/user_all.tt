@@ -124,7 +124,7 @@ for: [% form.field('add_svc_acc').value %]
   [% form.block('groupsselect').render %]
 
   <hr>
-  [% form.field('aux_submit').render %]
+  [% form.block('aux_submitit').render %]
 </form>
 
 [% IF params.size %]
@@ -190,4 +190,3 @@ for: [% form.field('add_svc_acc').value %]
    maxDate:[% date.format(format = '%Y') + dds_max_ttl_years %]+'.01.01'
  });
 </script>
-

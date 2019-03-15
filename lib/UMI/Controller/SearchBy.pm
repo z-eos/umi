@@ -394,7 +394,8 @@ sub index :Path :Args(0) {
       }
       $ttentries->{$dn}->{attrs}->{jpegPhoto} =
 	sprintf('img-thumbnail holder-js" alt="%s has empty image set" title="%s" data-src="holder.js/128x128?theme=stub&text=ABSENT \n \n  ATTRIBUTE" />', $dn, $dn)
-	if ( $ttentries->{$dn}->{'mgmnt'}->{is_root} ||
+	if ( ($ttentries->{$dn}->{'mgmnt'}->{is_root} &&
+	      $dn =~ /^uid=.*,$ldap_crud->{cfg}->{base}->{acc_root}/) ||
 	$dn =~ /^uid=.*,authorizedService=(mail|xmpp).*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) &&
 	! exists $ttentries->{$dn}->{attrs}->{jpegPhoto};
       
@@ -1659,7 +1660,8 @@ sub modform :Path(modform) :Args(0) {
     $init_obj->{$attr} = $#{$tmp} > 0 ? $tmp : $tmp->[0];
   }
   $init_obj->{aux_dn_form_to_modify} = $params->{aux_dn_form_to_modify};
-log_debug { np($init_obj) };
+
+  log_debug { np($init_obj) };
 
   ####################################################################
   # TARGETS TO MODIFY
@@ -1736,6 +1738,70 @@ log_debug { np($init_obj) };
     $form = UMI::Form::abstrNisNetgroup->new( init_object => $init_obj, );
     $c->stash( template => 'nis/abstr_nis_netgroup.tt', );
 
+  } elsif ( $params->{aux_dn_form_to_modify} =~ /$ldap_crud->{cfg}->{base}->{sargon}/ ) { ## SARGON
+    $init_obj->{cn}    = $init_obj->{cn};
+    $init_obj->{priv}  = $init_obj->{sargonAllowPrivileged} eq 'TRUE' ? '1' : '0';
+    $init_obj->{order} //= '' . $init_obj->{sargonOrder};
+
+    foreach ( @{$init_obj->{'sargonUser'}} ) {
+      if ( $_ =~ /^\+/ ) {
+	push @{$init_obj->{groups}},
+	  sprintf("cn=%s,%s",substr($_, 1),
+		  $ldap_crud->{cfg}->{base}->{group});
+      } else {
+	push @{$init_obj->{uid}}, $_;
+      }
+    }
+
+    foreach ( @{$init_obj->{'sargonHost'}} ) {
+      if ( $_ =~ /^%/ ) {
+	push @{$init_obj->{netgroups}},
+	  sprintf("cn=%s,ou=category,%s",substr($_, 1),
+		  $ldap_crud->{cfg}->{base}->{netgroup});
+      } else {
+	push @{$init_obj->{host}}, $_;
+      }
+    }
+
+    if ( $init_obj->{'sargonMount'} ) {
+      my $i = 0;
+      foreach ( @{$init_obj->{'sargonMount'}} ) {
+	push @{$init_obj->{'mount.'. $i .'.mount'}}, $_;
+	$i++;
+      }
+
+      if ( ref($init_obj->{sargonMount}) eq 'ARRAY' ) {
+	$init_obj->{sargonMount_arr} = $init_obj->{sargonMount};
+      } else {
+	push @{$init_obj->{sargonMount_arr}}, $init_obj->{sargonMount};
+      }
+      push @{$init_obj->{mount}}, { mount => $_ }
+	foreach ( @{$init_obj->{sargonMount_arr}} );
+      delete $init_obj->{sargonMount_arr};
+      delete $init_obj->{sargonMount};
+    }
+    
+    $init_obj->{allow}      //= $init_obj->{'sargonAllow'};
+    $init_obj->{deny}       //= $init_obj->{'sargonDeny'};
+    $init_obj->{capab}      //= $init_obj->{'sargonAllowCapability'};
+    $init_obj->{maxmem}     //= $init_obj->{'sargonMaxMemory'};
+    $init_obj->{maxkernmem} //= $init_obj->{'sargonMaxKernelMemory'};
+
+    delete $init_obj->{'sargonAllowCapability'};
+    delete $init_obj->{'sargonAllow'};
+    delete $init_obj->{'sargonDeny'};
+    delete $init_obj->{'sargonUser'};
+    delete $init_obj->{'sargonMount'};
+    delete $init_obj->{'sargonAllowPrivileged'};
+    delete $init_obj->{'sargonHost'};
+    delete $init_obj->{'sargonOrder'};
+
+    log_debug { np($init_obj) };
+
+    use UMI::Form::Sargon;
+    $form = UMI::Form::Sargon->new( init_object => $init_obj, );
+    $c->stash( template => 'sargon/sargon.tt', );
+
   } elsif ( $params->{aux_dn_form_to_modify} =~ /$ldap_crud->{cfg}->{base}->{sudo}/ ) { ## SUDO
 
     if ( ref($init_obj->{sudoCommand}) eq 'ARRAY' ) {
@@ -1762,12 +1828,10 @@ log_debug { np($init_obj) };
     delete $init_obj->{sudoOption_arr};
     delete $init_obj->{sudoOption};
 
-    
-    
     use UMI::Form::Sudo;
     $form = UMI::Form::Sudo->new( init_object => $init_obj, );
     $c->stash( template => 'sudo/sudo.tt', );
-    
+
   } elsif ( $params->{aux_dn_form_to_modify} =~ /$ldap_crud->{cfg}->{base}->{org}/ ) { ## ORGANIZATIONs
     use UMI::Form::Org;
     $form = UMI::Form::Org->new( init_object => $init_obj, );

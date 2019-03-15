@@ -171,20 +171,26 @@
 	  </li>
           <li class="nav-item">
 	    <a class="text-light nav-link" href="/group" tabindex="3">
-              <i class="fa fa-fw fa-users"> </i>
+              <i class="fas fa-fw fa-users"> </i>
               Group
 	    </a>
 	  </li>
           <li class="nav-item">
 	    <a class="text-light nav-link" href="/abstrnisnetgroup" tabindex="3">
-              <i class="fa fa-fw fa-user-friends"> </i>
+              <i class="fas fa-fw fa-user-friends"> </i>
               NetGr abstr
 	    </a>
 	  </li>
           <li class="nav-item">
 	    <a class="text-light nav-link" href="/nisnetgroup" tabindex="3">
-              <i class="fa fa-fw fa-user-friends"> </i>
+              <i class="fas fa-fw fa-user-friends"> </i>
               NetGr
+	    </a>
+	  </li>
+          <li class="nav-item">
+	    <a class="text-light nav-link" href="/sargon" tabindex="3">
+              <i class="fab fa-fw fa-docker"> </i>
+              Sargon
 	    </a>
 	  </li>
           <li class="nav-item">
@@ -195,7 +201,7 @@
 	  </li>
           <li class="disabled">
 	    <a class="text-light nav-link" href="#" tabindex="6">
-              <i class="fa fa-fw fa-globe"></i>
+              <i class="fas fa-fw fa-globe"></i>
               DNS
 	    </a>
 	  </li>
@@ -203,7 +209,7 @@
 	  [% IF c.check_any_user_role ('admin', 'coadmin', 'acl-w-organizations') %]
           <li class="nav-item">
 	    <a class="text-light nav-link" href="/org" tabindex="4">
-              <i class="fa fa-fw fa-building"></i>
+              <i class="fas fa-fw fa-building"></i>
               Org
 	    </a>
 	  </li>
@@ -211,7 +217,7 @@
 	  [% IF c.check_any_user_role ('admin', 'coadmin', 'acl-w-inventory')  %]
           <li class="nav-item">
 	    <a class="text-light nav-link" href="/inventory" tabindex="4">
-              <i class="fa fa-fw fa-pen-nib"></i>
+              <i class="fas fa-fw fa-pen-nib"></i>
               Inventory
 	    </a>
 	  </li>
@@ -224,17 +230,17 @@
       
       <li class="nav-link">
 	<a href="#submenuInfo" data-toggle="collapse" aria-expanded="false" class="text-white-50">
-	  <i class="fa fa-lg fa-fw fa-info-circle"></i>
+	  <i class="fas fa-lg fa-fw fa-info-circle"></i>
 	  <div class="d-none d-inline-flex">
 	    <b class="text-uppercase">Info</b>
 	  </div>
 	</a>
 	<ul class="nav flex-column collapse m-0 p-0" id="submenuInfo">
 	  <li class="nav-item">
-	    <a class="text-light nav-link" href="/motto"><i class="fa fa-hand-spock"></i> user's motto</a>
+	    <a class="text-light nav-link" href="/motto"><i class="fas fa-hand-spock"></i> user's motto</a>
 	  </li>
 	  <li class="nav-item">
-	    <a class="text-light nav-link" href="/about"><i class="fa fa-question-circle"></i> help</a>
+	    <a class="text-light nav-link" href="/about"><i class="fas fa-question-circle"></i> help</a>
 	  </li>
 	  <li class="nav-item">
 	    <a class="text-light nav-link" href="https://github.com/z-eos/umi/wiki"><i class="fab fa-fw fa-wikipedia-w"></i> UMI wiki</a>
@@ -245,7 +251,7 @@
 	    [% helper_cfg('cfg_local','header','help', 'item2', 'txt') %]</a>
 	  </li>
 	  <li class="nav-item">
-	    <a class="text-light nav-link" href="#chat" ><i class="fa fa-fw fa-comment-alt"></i> chat</a>
+	    <a class="text-light nav-link" href="#chat" ><i class="fas fa-fw fa-comment-alt"></i> chat</a>
 	    
 	    <script>
 	     /* CONVERSEJS https://conversejs.org */
@@ -285,7 +291,7 @@
 	    
 	    </li>
 	  <li class="nav-item">
-	    <a class="text-white-50 nav-link" href="#"><i class="fa fa-fw fa-bug text-danger"></i> bug</a>
+	    <a class="text-white-50 nav-link" href="#"><i class="fas fa-fw fa-bug text-danger"></i> bug</a>
 	  </li>
 	</ul>
       </li>      

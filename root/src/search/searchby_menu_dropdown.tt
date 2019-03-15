@@ -183,7 +183,7 @@
 	    </button>
 	  </form>
 	</div>
-	[%     IF entry.key.match('Netgroups') || entry.key.match('Org') || entry.key.match('GitACL') || entry.key.match('SUDO') %]
+	[%     IF entry.key.match('Netgroups') || entry.key.match('Org') || entry.key.match('GitACL') || entry.key.match('SUDO') || entry.key.match('sargon') %]
 	<div class="dropdown-item">
 	  <form role="form" method="POST" class="formajaxer STUB123"
 		action="/searchby/modform">
