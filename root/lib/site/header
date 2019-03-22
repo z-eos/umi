@@ -3,8 +3,8 @@
 <header>
   <nav class="navbar navbar-dark bg-dark" id="header">
     [% IF c.user_exists && c.session.auth_uid # !!! to fix, looks like a stub %]
-    <a id="sidebarCollapse" class="navbar-toggler btn btn-link p-0 pr-3" href="#">
-      <i class="fa fa-bars"></i>
+    <a id="sidebarCollapse" class="navbar-toggler btn btn-link p-0 pr-3" href="#" title="show/hide left panel">
+      <i id="sidebarLeftToggler" class="fas fa-fw [% toggle_a %][% # defined in layout %]"></i>
     </a>
     [% END %]
 
@@ -27,6 +27,12 @@
 		 id="ldapsearch_filter"
 		 name="ldapsearch_filter"
 		 placeholder='attributeName=*value*'
+		 title="
+&bull; default sort criteria is by name (First/Last Name, uid and cn)
+&bull; for each search criteria, objectClass=* is used if empty
+&bull; use * as substring
+&bull; narrow search results for non &laquo;by ...&raquo; presets, by providing attribute in filter, like: uid=*dreii.*
+&bull; to search in access log, use base [% helper_cfg('cfg_local','ldap_crud_db_log') %]"
 		 data-animation="false"
 		 data-toggle="popover"
 		 data-trigger="hover"
@@ -249,15 +255,15 @@
       </li>
       [% END %]
     </ul>
-    <a id="sidebarRightCollapse" class="navbar-toggler btn btn-link p-0" href="#" title="additional stuff">
-      <i class="fas fa-bars"></i>
+    <a id="sidebarRightCollapse" class="navbar-toggler btn btn-link p-0" href="#" title="show/hide right panel">
+      <i id="sidebarRightToggler" class="fas fa-fw [% toggle_a %][% # defined in layout %]"></i>
     </a>
   </nav>
 </header>
 
 <script type="text/javascript">
- $(function () { $('#ldapsearch_filter').popover() });
- $(function () { $('#ldapsearch_filter').tooltip() });
+// $(function () { $('#ldapsearch_filter').popover() });
+// $(function () { $('#ldapsearch_filter').tooltip() });
 // $(function () { $('[data-toggle="tooltip"]').tooltip() });
 </script>
 

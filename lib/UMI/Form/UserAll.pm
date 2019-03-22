@@ -49,7 +49,7 @@ has_field 'dynamic_object' => ( type => 'Hidden', );
 has_field 'person_givenname'
   => ( apply                 => [ NoSpaces ],
        label                 => 'FName',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        wrapper_class         => [ 'row' ],
@@ -59,7 +59,7 @@ has_field 'person_givenname'
 has_field 'person_sn'
   => ( apply                 => [ NoSpaces ],
        label                 => 'LName',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        element_attr          => { placeholder => 'Doe' },
@@ -70,7 +70,7 @@ has_field 'person_exp'
   => ( type                  => 'Text',
        label                 => 'Exp.',
        label_attr            => { title => 'Object Expiration', },
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        element_attr          => { placeholder => 'Expiration on',
@@ -98,16 +98,16 @@ has_field 'person_simplified'
 has_field 'person_avatar'
   => ( type                  => 'Upload',
        label                 => 'User Photo ID',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
-       element_class         => [ 'btn', 'btn-default', 'btn-sm', ],
+       element_class         => [ 'btn', 'btn-secondary', 'btn-sm', ],
        wrapper_class         => [ 'row' ],
        max_size => '50000' );
 
 has_field 'person_gidnumber'
   => ( type                  => 'Select',
        label                 => 'Group',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        # empty_select => $form->ldap_crud->{cfg}->{stub}->{gidNumber},
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', 'custom-select', ],
@@ -156,7 +156,7 @@ sub options_person_gidnumber {
 has_field 'person_org'
   => ( type                  => 'Select',
        label                 => 'Organization',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        empty_select          => '--- Choose an Organization ---',
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', 'custom-select', ],
@@ -166,7 +166,7 @@ has_field 'person_org'
 
 has_field 'person_title'
   => ( label                 => 'Position',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        element_attr          => { placeholder => 'manager' },
@@ -175,7 +175,7 @@ has_field 'person_title'
 has_field 'person_office'
   => ( type                  => 'Select',
        label                 => 'Office',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        empty_select          => '--- Choose an Office ---',
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', 'custom-select', ],
@@ -186,7 +186,7 @@ has_field 'person_office'
 has_field 'person_telephonenumber'
   => ( apply                 => [ NoSpaces ],
        label                 => 'SIP/Cell',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        wrapper_attr          => { id => 'items' },
@@ -203,7 +203,7 @@ has_field 'person_telephonenumber'
 has_field 'person_login'
   => ( apply                 => [ NoSpaces, NotAllDigits, Printable ],
        label                 => 'Login',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        element_attr          => { placeholder => 'john.doe', },
@@ -214,7 +214,7 @@ has_field 'person_associateddomain'
        wrapper_attr          => { id => 'simplified', },
        wrapper_class         => [ 'simplified', 'row', ],
        label                 => 'Domain Name',
-       label_class           => [ 'col', 'text-right', 'required' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', 'required' ],
        empty_select          => '--- Choose Domain ---',
        # element_attr          => { disabled => 'dissabled', },
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
@@ -225,7 +225,7 @@ has_field 'person_associateddomain'
 has_field 'person_password1'
   => ( type                  => 'Password',
        label                 => 'Password',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        ne_username           => 'login',
@@ -238,7 +238,7 @@ has_field 'person_password1'
 has_field 'person_password2'
   => ( type                  => 'Password',
        label                 => '',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        ne_username           => 'login',
@@ -252,7 +252,7 @@ has_field 'person_password2'
 has_field 'person_description'
   => ( type                  => 'TextArea',
        label                 => 'Description',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        element_attr          => { placeholder => 'Any description.',
@@ -325,7 +325,7 @@ has_field 'account'
 has_field 'account.associateddomain'
   => ( type                  => 'Select',
        label                 => 'Domain Name',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        empty_select          => '--- Choose Domain ---',
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', 'custom-select', ],
@@ -338,7 +338,7 @@ has_field 'account.associateddomain'
 has_field 'account.authorizedservice'
   => ( type                  => 'Select',
        label                 => 'Service',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        empty_select          => '--- Choose Service ---',
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', 'custom-select', ],
@@ -353,7 +353,7 @@ has_field 'account.login'
   => ( apply                 => [ NoSpaces, NotAllDigits, Printable, NonEmptyStr ],
        label                 => 'Login',
        do_id                 => 'no',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        element_attr          => { placeholder => 'john.doe',
@@ -381,7 +381,7 @@ has_field 'account.password1'
   => ( type                  => 'Password',
        minlength             => 7, maxlength => 128,
        label                 => 'Password',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        wrapper_class         => [  qw{ d-none passw sshacc
 				       dot1x-eap-tls relation row}, ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
@@ -398,7 +398,7 @@ has_field 'account.password2'
   => ( type                  => 'Password',
        minlength             => 7, maxlength => 128,
        label                 => '',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        wrapper_class         => [  qw{ d-none passw sshacc
 				       dot1x-eap-tls relation row}, ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
@@ -414,7 +414,7 @@ has_field 'account.password2'
 has_field 'account.description'
   => ( type                  => 'TextArea',
        label                 => 'Description',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        element_attr          => { placeholder    => 'Any description.',
@@ -427,7 +427,7 @@ has_field 'account.radiusgroupname'
   => ( type                  => 'Select',
        label                 => 'RADIUS Group',
        do_id                 => 'no',
-       label_class           => [ 'col', 'text-right', 'atleastone' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', 'atleastone' ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', 'custom-select', ],
        element_attr          => { 'data-name'  => 'radiusgroupname',
@@ -441,7 +441,7 @@ has_field 'account.radiusprofiledn'
   => ( type                  => 'Select',
        label                 => 'RADIUS Profile',
        do_id                 => 'no',
-       label_class           => [ 'col', 'text-right', 'atleastone', ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', 'atleastone', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', 'custom-select', ],
        element_attr          => { 'autocomplete' => 'off',
@@ -456,7 +456,7 @@ has_field 'account.userCertificate'
   => ( type                  => 'Upload',
        label                 => 'Cert (.DER)',
        do_id                 => 'no',
-       label_class           => [ 'col', 'text-right', 'required', ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', 'required', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'btn', 'btn-default', 'btn-sm', 'btn-secondary', ],
        element_attr          => {
@@ -470,7 +470,7 @@ has_field 'account.sshgid'
   => ( apply                 => [ NoSpaces, NotAllDigits, Printable ],
        label                 => 'gidNumber',
        do_id                 => 'no',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', 'text-monospaced' ],
        element_attr          => { placeholder    => 'default is 11102 (ssh-ci)',
@@ -485,7 +485,7 @@ has_field 'account.sshhome'
   => ( apply                 => [ NoSpaces, NotAllDigits, Printable ],
        label                 => 'homeDir',
        do_id                 => 'no',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', 'mono' ],
        element_attr          => { placeholder    => '/nonexistent',
@@ -500,7 +500,7 @@ has_field 'account.sshshell'
   => ( apply                 => [ NoSpaces, NotAllDigits, Printable ],
        label                 => 'loginShell',
        do_id                 => 'no',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', 'mono' ],
        element_attr          => { placeholder    => '/bin/bash',
@@ -515,7 +515,7 @@ has_field 'account.sshkey'
   => ( type                  => 'TextArea',
        do_id                 => 'no',
        label                 => 'SSH Pub Key',
-       label_class           => [ 'col', 'text-right', 'required', ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', 'required', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', 'text-monospaced', ],
        element_attr          => { title        => 'Paste SSH key (read sshd(8) section AUTHORIZED_KEYS FILE FORMAT for reference)',
@@ -531,7 +531,7 @@ has_field 'account.sshkeyfile'
   => ( type                  => 'Upload',
        do_id                 => 'no',
        label                 => 'SSH Pub Key/s File',
-       label_class           => [ 'col', 'text-right', 'required', ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', 'required', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'btn', 'btn-default', 'btn-sm', 'btn-secondary', ],
        element_attr          => {title        => 'SSH key file (read sshd(8) section AUTHORIZED_KEYS FILE FORMAT for reference)',
@@ -599,7 +599,7 @@ has_field 'loginless_ovpn'
 has_field 'loginless_ovpn.status'
   => ( type                  => 'Select',
        label                 => 'Account status',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', 'custom-select', ],
        element_attr          => { placeholder    => 'Initial state of the account',
@@ -616,7 +616,7 @@ has_field 'loginless_ovpn.status'
 has_field 'loginless_ovpn.associateddomain'
   => ( type                  => 'Select',
        label                 => 'FQDN',
-       label_class           => [ 'col', 'text-right', 'required' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', 'required' ],
        empty_select          => '--- Choose Domain ---',
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', 'custom-select', ],
@@ -630,7 +630,7 @@ has_field 'loginless_ovpn.associateddomain'
 has_field 'loginless_ovpn.userCertificate'
   => ( type                  => 'Upload',
        label                 => 'Cert (.DER)',
-       label_class           => [ 'col', 'text-right', 'required' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', 'required' ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'btn', 'btn-default', 'btn-sm', 'btn-secondary', ],
        element_attr          => { 'data-name'  => 'cert',
@@ -641,7 +641,7 @@ has_field 'loginless_ovpn.userCertificate'
 has_field 'loginless_ovpn.ifconfigpush'
   => ( apply                 => [ Printable, ],
        label                 => 'Ifconfig',
-       label_class           => [ 'col', 'text-right', 'required', ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', 'required', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        element_attr          => { placeholder  => '10.0.91.1 10.0.91.2 or 10.0.97.135 10.0.97.1 or 10.13.83.192 10.0.97.1',
@@ -654,7 +654,7 @@ has_field 'loginless_ovpn.ifconfigpush'
 has_field 'loginless_ovpn.iroute'
   => ( apply                 => [ Printable, ],
        label                 => 'Iroute',
-       label_class           => [ 'col', 'text-right', ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        element_attr          => { placeholder  => '10.0.99.2 255.255.255.0',
@@ -667,7 +667,7 @@ has_field 'loginless_ovpn.iroute'
 has_field 'loginless_ovpn.push'
   => ( apply                 => [ Printable, ],
        label                 => 'Push',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        element_attr          => { placeholder  => 'route 192.168.222.144 255.255.255.128',
@@ -680,7 +680,7 @@ has_field 'loginless_ovpn.push'
 has_field 'loginless_ovpn.devtype'
   => ( apply                 => [ NoSpaces, Printable ],
        label                 => 'Device Type',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        element_attr          => { placeholder  => 'notebook, netbook, smartphone',
@@ -693,7 +693,7 @@ has_field 'loginless_ovpn.devtype'
 has_field 'loginless_ovpn.devos'
   => ( apply                 => [ Printable ],
        label                 => 'OS',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        element_attr          => { placeholder  => 'xNIX, MacOS, Android, Windows',
@@ -705,7 +705,7 @@ has_field 'loginless_ovpn.devos'
 has_field 'loginless_ovpn.config'
   => ( apply                 => [ Printable, ],
        label                 => 'Config',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        element_attr          => { placeholder  => 'path/to/some/additional/configfile.conf',
@@ -718,7 +718,7 @@ has_field 'loginless_ovpn.config'
 has_field 'loginless_ovpn.devmake'
   => ( apply                 => [ Printable ],
        label                 => 'Device Maker',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        element_attr          => { placeholder  => 'HP, Dell, Asus, Lenovo',
@@ -730,7 +730,7 @@ has_field 'loginless_ovpn.devmake'
 has_field 'loginless_ovpn.devmodel'
   => ( apply                 => [ Printable ],
        label                 => 'Device Model',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        element_attr          => { placeholder  => 'Pavilion dm1',
@@ -742,7 +742,7 @@ has_field 'loginless_ovpn.devmodel'
 has_field 'loginless_ovpn.devosver'
   => ( apply                 => [ Printable ],
        label                 => 'OS version',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        element_attr          => { placeholder  => '1.2.3',
@@ -754,7 +754,7 @@ has_field 'loginless_ovpn.devosver'
 has_field 'loginless_ovpn.description'
   => ( type                  => 'TextArea',
        label                 => 'Description',
-       label_class           => [ 'col', 'text-right' ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        element_attr          => { placeholder    => 'Any description.',

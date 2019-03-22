@@ -1,5 +1,8 @@
 [% # -*- mode: web; -*- %]
 
+[% toggle_a = 'fa-ellipsis-v' %]
+[% toggle_b = 'fa-ellipsis-h' %]
+
 <noscript>
   <div class="alert alert-danger text-center h1 mt-5 mx-5"
        role="alert"
@@ -130,5 +133,82 @@
 <script src="/static/js/app/component/tree-item.component.js"></script>
 <script src="/static/js/app/component/tree.component.js"></script>
 <script src="/static/js/app/app.js"></script>
+
+<script>
+ $(document).ready(function () {
+   var $panel = $('#sidebar');
+   var $toggl = $('#sidebarCollapse');
+   var $image = $('#sidebarLeftToggler');
+   
+   $toggl.on('click', function () {
+     $panel.toggleClass('folded');
+
+     if ($panel.hasClass('folded')) {
+       $image.removeClass('[% toggle_a %]').addClass('[% toggle_b %]');
+     } else {
+       $image.removeClass('[% toggle_b %]').addClass('[% toggle_a %]');
+     }
+     
+   });
+
+   if ($panel.hasClass('folded')) {
+     $image.removeClass('[% toggle_a %]').addClass('[% toggle_b %]');
+   } else {
+     $image.removeClass('[% toggle_b %]').addClass('[% toggle_a %]');
+   }
+   
+ });
+
+ $(document).ready(function () {
+   var $panel = $('#sidebar-right');
+   var $toggl = $('#sidebarRightCollapse');
+   var $image = $('#sidebarRightToggler');
+   
+   $toggl.on('click', function () {
+     $panel.toggleClass('folded');
+
+     if ($panel.hasClass('folded')) {
+       $image.removeClass('[% toggle_a %]').addClass('[% toggle_b %]');
+     } else {
+       $image.removeClass('[% toggle_b %]').addClass('[% toggle_a %]');
+     }
+     
+   });
+
+   if ($panel.hasClass('folded')) {
+     $image.removeClass('[% toggle_a %]').addClass('[% toggle_b %]');
+   } else {
+     $image.removeClass('[% toggle_b %]').addClass('[% toggle_a %]');
+   }
+   
+ });
+
+ /*
+ $(document).ready(function () {
+   var $panel = $('#sidebar-right');
+   var $toggl = $('#sidebarRightCollapse');
+   var $image = $('#sidebarRightToggler');
+   
+   $toggl.on('click', function () {
+     $panel.toggleClass('folded');
+
+     if ($panel.hasClass('folded')) {
+       $image.removeClass('[% toggle_b %]').addClass('[% toggle_a %]');
+     } else {
+       $image.removeClass('[% toggle_a %]').addClass('[% toggle_b %]');
+     }
+     
+   });
+
+   if ($panel.hasClass('folded')) {
+     $image.removeClass('[% toggle_b %]').addClass('[% toggle_a %]');
+   } else {
+     $image.removeClass('[% toggle_a %]').addClass('[% toggle_b %]');
+   }
+   
+ });
+*/
+</script>
+
 
 [% END %]

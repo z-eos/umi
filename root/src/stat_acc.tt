@@ -26,8 +26,8 @@ Users Accounts Statistics
 [% END %]
 
 <div class="table-responsive">
-  <table id="dataTableToDraw" class="table table-sm table-hover">
-    <thead class="thead-dark">
+  <table id="dataTableToDraw" class="table table-sm table-hover table-sm">
+    <thead class="bg-dark text-light">
       <tr class="text-uppercase info">
 	<th>LName</th>
 	<th>FName</th>

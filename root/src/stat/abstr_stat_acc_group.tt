@@ -28,7 +28,7 @@ Account <i class="fas fa-exchange-alt"></i> Group Statistics<br><em class="h6 te
 
 <div class="table-responsive">
   <table id="dataTableToDraw" class="table table-sm table-hover text-monospace">
-    <thead class="thead-dark">
+    <thead class="bg-dark text-light">
       <tr class="text-uppercase border-0">
 	<th>LName</th>
 	<th>FName</th>

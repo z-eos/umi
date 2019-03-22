@@ -22,15 +22,41 @@ sub html_attributes {
 
 has_field 'ldap_add_dhcp' => ( type => 'Hidden', );
 
-has_field 'requestttl' 
-  => ( type                  => 'Text',
-       label                 => 'Expiration',
-       label_attr            => { title => 'Object Expiration', },
-       label_class           => [ 'col', 'atleastone', 'text-right', 'font-weight-bold', ],
-       wrapper_class         => [ 'row' ],
-       element_wrapper_class => [ 'input-sm', 'col-10', ],
-       element_attr          => { title => 'Object Expiration', },
-       required              => 0 );
+has_field 'requestttl'
+  => ( type          => 'Display',
+       html          => sprintf('
+<div class="row">
+  <label class="col-2 text-right font-weight-bold control-label atleastone" title="Object Expiration">
+    Expiration
+  </label>
+  <div class="col-3">
+    <div class="form-group">
+      <div class="input-group date" id="requestttl" data-target-input="nearest">
+        <input name="requestttl" type="text" class="form-control datetimepicker-input" data-target="#requestttl"/>
+        <div class="input-group-append" data-target="#requestttl" data-toggle="datetimepicker">
+          <div class="input-group-text"><i class="fas fa-calendar-alt"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>'),
+       element_attr  => { 'data-name' => 'logindescr',
+			  'data-group' => 'account', },
+       wrapper_class => [ 'row', ],
+     );
+
+
+
+
+# has_field 'requestttl' 
+#   => ( type                  => 'Text',
+#        label                 => 'Expiration',
+#        label_attr            => { title => 'Object Expiration', },
+#        label_class           => [ 'col', 'atleastone', 'text-right', 'font-weight-bold', ],
+#        wrapper_class         => [ 'row' ],
+#        element_wrapper_class => [ 'input-sm', 'col-10', ],
+#        element_attr          => { title => 'Object Expiration', },
+#        required              => 0 );
 
 has_field 'net' 
   => ( type                  => 'Select',

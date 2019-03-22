@@ -98,7 +98,7 @@ Search Advanced
 	<td colspan=2>
 	  <div class="btn-group" role="group">
 	    <a href="#"
-	       class="collapse_in_out btn btn-info text-light" role="button"
+	       class="collapse_in_out btn btn-secondary text-light" role="button"
 	       title="Collapse In/Out Each Element On This Page"
 	       data-target="#collapse"
 	       data-toggle="collapse"
@@ -118,7 +118,7 @@ Search Advanced
 	      [% FOREACH item IN attrs %]
 	      <input type="hidden"  name="ldap_ldif_attrs" value="[% item %]">
 	      [% END %]
-	      <a href="#" class="btn btn-info text-light umi-btn-event umi-btn-logic"
+	      <a href="#" class="btn btn-secondary text-light umi-btn-event umi-btn-logic"
 		      value="[% base_dn %]"
 		      name="ldap_ldif"
 		      data-umiact="/searchby/ldif_gen2f"

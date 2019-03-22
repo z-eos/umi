@@ -77,14 +77,16 @@ has_field 'sudoRunAsGroup'
 
 has_field 'aux_delim_com'
   => ( type => 'Display',
-       html => '<div class="form-group h4">New Command</div>',
+       html => '<div class="form-group row"><label class="col-2 text-right font-weight-bold">New Command</label></div>',
      );
 
 has_field 'aux_add_com'
   => ( type          => 'AddElement',
        repeatable    => 'com',
        value         => 'Add new command',
-       element_class => [ 'btn-success', 'btn-sm', ],
+       element_class => [ 'btn-success', ],
+       element_wrapper_class => [ 'col-3', 'px-0', ],
+       wrapper_class => [ 'row', 'offset-md-2', ],
      );
 
 has_field 'com'
@@ -92,41 +94,40 @@ has_field 'com'
        setup_for_js          => 1,
        do_wrapper            => 1,
        element_wrapper_class => [ 'controls', ],
-       element_class         => [ 'row', ],
+       element_class         => [ 'row', 'offset-md-2', 'col-10', 'p-0', ],
      );
 
 has_field 'com.sudoCommand'
   => ( apply                 => [ NoSpaces, NotAllDigits, Printable ],
        do_label              => 0,
        label                 => 'New Command',
-       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
        element_attr          => { placeholder  => '',
 				  title        => 'command',
 				  'data-name'  => 'command',
 				  'data-group' => 'com', },
-       element_wrapper_class => [ 'input-sm', ],
-       wrapper_class         => [ 'col-10', ],
+       wrapper_class         => [ 'col-8', 'px-0', ],
      );
 
 has_field 'com.remove'
   => ( type                  => 'RmElement',
        value                 => 'Remove this command',
-       element_class         => [ 'btn-danger', 'btn-sm', ],
-       element_wrapper_class => [ 'input-sm', ],
-       wrapper_class         => [ 'col-2', ],
+       element_class         => [ 'btn-danger', ],
+       wrapper_class         => [ 'col-4', 'pr-0', ],
      );
 
 
 has_field 'aux_delim_opt'
   => ( type => 'Display',
-       html => '<div class="form-group h4">New Option</div>',
+       html => '<div class="form-group row"><label class="col-2 text-right font-weight-bold">New Option</label></div>',
      );
 
 has_field 'aux_add_opt'
   => ( type          => 'AddElement',
        repeatable    => 'opt',
        value         => 'Add new option',
-       element_class => [ 'btn-success', 'btn-sm', ],
+       element_class => [ 'btn-success', ],
+       element_wrapper_class => [ 'col-3', 'px-0', ],
+       wrapper_class => [ 'row', 'offset-md-2', ],
      );
 
 has_field 'opt'
@@ -134,24 +135,22 @@ has_field 'opt'
        setup_for_js          => 1,
        do_wrapper            => 1,
        element_wrapper_class => [ 'controls', ],
-       element_class         => [ 'row', ],
+       element_class         => [ 'row', 'offset-md-2', 'col-10', 'p-0', ],
      );
 
 has_field 'opt.sudoOption'
   => ( apply                 => [ NoSpaces, NotAllDigits, Printable ],
        do_label              => 0,
-       label                 => 'New Option',
        element_attr          => { placeholder => '',
 				  title => 'command', },
-       element_wrapper_class => [ 'input-group', 'input-group-sm', ],
-       wrapper_class         => [ 'col-xs-10', 'col-lg-10', ],
+       wrapper_class         => [ 'col-8', 'px-0', ],
      );
 
 has_field 'opt.remove'
   => ( type          => 'RmElement',
        value         => 'Remove this option',
-       element_class => [ 'btn-danger', 'btn-sm', ],
-       wrapper_class => [ 'col-xs-2', 'col-lg-2', ],
+       element_class => [ 'btn-danger', ],
+       wrapper_class => [ 'col-4', 'pr-0', ],
      );
 
 

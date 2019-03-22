@@ -14,7 +14,7 @@ MikroTik CAPsMAN registrations <small><em class="text-muted text-monospace">WiFi
 
 <!-- div class="table-responsive" -->
   <table id="dataTableToDraw" class="table table-sm table-hover my-3 text-monospace">
-    <thead class="thead-dark">
+    <thead class="bg-dark text-light">
       <tr class="text-uppercase active">
 	<th>MAC</th>
 	<th>uid</th>
@@ -26,7 +26,7 @@ MikroTik CAPsMAN registrations <small><em class="text-muted text-monospace">WiFi
 	<th>config</th>
       </tr>
     </thead>
-    <tfoot>
+    <tfoot class="bg-dark text-light">
       <tr class="text-uppercase active">
 	<th>MAC</th>
 	<th>uid</th>

@@ -31,7 +31,7 @@ has_field 'aux_dn_form_to_modify' => ( type => 'Hidden', );
 has_field 'cn' 
   => ( apply                 => [ NoSpaces, NotAllDigits, Printable ],
        label                 => 'Name',
-       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       label_class           => [ 'col-1', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'input-sm', 'col-11', ],
        element_attr          => { placeholder => 'users-allowed-to-fly' },
        wrapper_class         => [ 'row', ],
@@ -41,7 +41,7 @@ has_field 'cn'
 has_field 'description' 
   => ( type                  => 'TextArea',
        label                 => 'Description',
-       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       label_class           => [ 'col-1', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'input-sm', 'col-11', ],
        element_attr          => { placeholder => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed dapibus nulla. Mauris vehicula vehicula ligula ac dapibus. Fusce vehicula a turpis sed. ' },
        wrapper_class         => [ 'row', ],
@@ -50,7 +50,7 @@ has_field 'description'
 
 has_field 'aux_delim_triple'
   => ( type => 'Display',
-       html => '<br><h4>Host-User-Domain Triple/s</h4>',
+       html => '<div class="form-group row"><label class="col-2 text-right font-weight-bold">Host-User-Domain Triple/s</label></div>',
      );
 
 has_field 'aux_add_triple'
@@ -58,7 +58,8 @@ has_field 'aux_add_triple'
        repeatable    => 'triple',
        value         => 'Add new triple',
        element_class => [ 'btn-success', ],
-       # wrapper_class => [ 'col-xs-12', 'col-lg-offset-10', 'col-lg-2', ],
+       element_wrapper_class => [ 'col-3', ],
+       wrapper_class => [ 'row', ],
      );
 
 has_field 'triple'

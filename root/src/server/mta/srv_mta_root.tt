@@ -17,8 +17,8 @@ MTA
 [% INCLUDE ldap_err.tt %]
 
 <div class="table-responsive">
-  <table id="dataTableToDraw" class="table table-condensed table-hover">
-    <thead class="thead-dark">
+  <table id="dataTableToDraw" class="table table-condensed table-hover table-sm">
+    <thead class="bg-dark text-light">
       <tr class="text-uppercase active">
 	<th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">Domain</th>
 	<th title="the highest priority MX record">primary MX</th>

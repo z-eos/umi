@@ -10,6 +10,49 @@ Test code page<em class="h6 text-muted text-monospace"> (page to show test code 
 
 [% USE dumper() %]
 
+<link rel="stylesheet" href="/static/css/tempusdominus-bootstrap-4.css" />
+<script type="text/javascript" src="/static/js/moment-with-locales.js"></script>
+<script type="text/javascript" src="/static/js/tempusdominus-bootstrap-4.min.js"></script>
+
+<!-- div class="container" -->
+  <div class="row">
+    <div class="col-10 offset-md-2">
+      <div class="form-group">
+        <div class="input-group date" id="datetimepicker1" data-target-input="nearest">
+          <input type="text" class="form-control datetimepicker-input" data-target="#datetimepicker1"/>
+          <div class="input-group-append" data-target="#datetimepicker1" data-toggle="datetimepicker">
+            <div class="input-group-text"><i class="fas fa-calendar"></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+     $(function () {
+       $('#datetimepicker1').datetimepicker({
+         /* locale: 'uk', */
+	 format: "dddd, MMMM Do YYYY, HH:mm:ss Z",
+	 icons: {
+           time: 'fas fa-clock',
+           date: 'fas fa-calendar',
+           up: 'fas fa-arrow-up',
+           down: 'fas fa-arrow-down',
+           previous: 'fas fa-chevron-left',
+           next: 'fas fa-chevron-right',
+           today: 'fas fa-calendar-check',
+           clear: 'fas fa-trash',
+           close: 'fas fa-times'
+         }
+       });
+     });
+    </script>
+  </div>
+<!-- /div -->
+
+<div class="custom-file">
+  <label class="custom-file-label" for="customFile">Choose file</label>
+  <input type="file" class="custom-file-input" id="customFile">
+</div>
+
 <pre class="h6 text-monospace">
 
   [% dumper.dump(final_message) %]

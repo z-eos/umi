@@ -20,68 +20,77 @@ sub html_attributes {
 
 has_field 'aux_dn_form_to_modify' => ( type => 'Hidden', );
 
-has_field 'gitAclProject' => (apply => [ NoSpaces ],
-			      label => 'Project Name',
-			      label_class => [ 'col-xs-2', ],
-			      label_attr => { title => 'gitAclProject field description' },
-			      # wrapper_class => 'col-xs-3',
-			      element_wrapper_class => [ 'col-xs-10', 'col-lg-10', ],
-			      element_attr => { placeholder => 'Horns & Hooves LLC' },
-			      required => 1,
-			     );
+has_field 'gitAclProject'
+  => ( apply                 => [ NoSpaces ],
+       label                 => 'Project Name',
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
+       label_attr => { title => 'gitAclProject field description' },
+       element_wrapper_class => [ 'input-sm', 'col-10', ],
+       element_attr          => { placeholder => 'Horns & Hooves LLC' },
+       wrapper_class         => [ 'row', ],
+       required              => 1,
+     );
 
-has_field 'gitAclOrder' => (apply => [ NoSpaces, PositiveNum ],
-			    label => 'Order',
-			    label_class => [ 'col-xs-2', ],
-			    label_attr => { title => 'gitAcl order if many' },
-			    element_wrapper_class => [ 'col-lg-5', ],
-			    element_attr => { placeholder => '321' },
-			   );
+has_field 'gitAclOrder'
+  => ( apply                 => [ NoSpaces, PositiveNum ],
+       label                 => 'Order',
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
+       label_attr            => { title => 'gitAcl order if many' },
+       element_wrapper_class => [ 'input-sm', 'col-10', ],
+       element_attr          => { placeholder => '321' },
+       wrapper_class         => [ 'row', ],
+     );
 
-has_field 'gitAclOp' => ( type => 'Multiple',
-			  label => 'Operation/s',
-			  label_class => [ 'col-xs-2', ],
-			  element_wrapper_class => [ 'col-lg-5', ],
-			  options => [
-				      {
-				       value => 'C', label => 'CREATE', selected => 'on' },
-				      {
-				       value => 'R', label => 'READ', selected => 'on' },
-				      {
-				       value => 'U', label => 'UPDATE', selected => 'on' },
-				      {
-				       value => 'D', label => 'DELETE', selected => 'on' },
-				     ],
-			  size => 4,
-			  required => 1,
-			);
+has_field 'gitAclOp' 
+  => ( type                  => 'Multiple',
+       label                 => 'Operation/s',
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class => [ 'input-sm', 'col-10', ],
+       element_attr          => { 'data-ico-l'       => 'fa-terminal',
+				  'data-ico-r'       => 'fa-terminal',
+				  'data-placeholder' => 'operation/s', },
+       element_class         => [ 'umi-multiselect', ],
+       options               => [ { value => 'C', label => 'CREATE', selected => 'on' },
+				  { value => 'R', label => 'READ',   selected => 'on' },
+				  { value => 'U', label => 'UPDATE', selected => 'on' },
+				  { value => 'D', label => 'DELETE', selected => 'on' }, ],
+       size                  => 4,
+       required              => 1,
+       wrapper_class         => [ 'row', ],
+     );
 
-has_field 'gitAclVerb' => ( type => 'Select',
-			    label => 'Verb',
-			    label_class => [ 'col-xs-2', ],
-			    element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-			    options => [{ value => 'allow', label => 'allow'},
-					{ value => 'deny', label => 'deny'},
-				       ],
-			    required => 1 );
+has_field 'gitAclVerb'
+  => ( type                  => 'Select',
+       label                 => 'Verb',
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class => [ 'input-sm', 'col-10', ],
+       element_class         => [ 'custom-select', ],
+       options               => [ { value => 'allow', label => 'allow'},
+				  { value => 'deny', label => 'deny'}, ],
+       wrapper_class         => [ 'row', ],
+       required              => 1 );
 
-has_field 'gitAclRef' => (apply => [ NoSpaces ],
-			  label => 'Reference',
-			  label_class => [ 'col-xs-2', ],
-			  label_attr => { title => 'gitAclRef field description' },
-			  element_wrapper_class => [ 'col-xs-10', 'col-lg-5', ],
-			  element_attr => { placeholder => 'Horns/Hooves/Super/Pooper' },
-			  # required => 1,
-			 );
+has_field 'gitAclRef'
+  => ( apply                 => [ NoSpaces ],
+       label                 => 'Reference',
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
+       label_attr            => { title => 'gitAclRef field description' },
+       element_wrapper_class => [ 'input-sm', 'col-10', ],
+       element_attr          => { placeholder => 'Horns/Hooves/Super/Pooper' },
+       wrapper_class         => [ 'row', ],
+       # required              => 1,
+     );
 
-has_field 'gitAclUser_user' => ( type => 'Select',
-				 label => 'User',
-				 label_class => [ 'col-xs-2', 'control-label', ],
-				 # label_class => [ qw(requiredwhen control-label) ],
-				 label_attr => { title => 'gitAclUser field description' },
-				 element_wrapper_class => [ 'col-lg-5', ],
-				 required_when => { gitAclUser_group => 0 },
-			       );
+has_field 'gitAclUser_user'
+  => ( type                  => 'Select',
+       label                 => 'User',
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
+       label_attr            => { title => 'gitAclUser field description' },
+       element_wrapper_class => [ 'input-sm', 'col-10', ],
+       element_class         => [ 'custom-select', ],
+       required_when         => { gitAclUser_group => 0 },
+       wrapper_class         => [ 'row', ],
+     );
 
 sub options_gitAclUser_user {
   my $self = shift;
@@ -89,15 +98,13 @@ sub options_gitAclUser_user {
   return unless $self->ldap_crud;
 
   my $ldap_crud = $self->ldap_crud;
-  my $mesg = $ldap_crud->search(
-				{
-				 base => $ldap_crud->cfg->{base}->{acc_root},
-				 scope => 'one',
-				 filter => 'uid=*',
-				 attrs => [ qw(uid givenName sn) ],
+  my $mesg = $ldap_crud->search({
+				 base      => $ldap_crud->cfg->{base}->{acc_root},
+				 scope     => 'one',
+				 filter    => 'uid=*',
+				 attrs     => [ qw(uid givenName sn) ],
 				 sizelimit => 0
-				}
-			       );
+				});
   my @users = ( { value => '0', label => '--- choose user ---' } );
   my @entries = $mesg->sorted('uid');
   my $label;
@@ -116,13 +123,16 @@ sub options_gitAclUser_user {
   return \@users;
 }
 
-has_field 'gitAclUser_group' => ( type => 'Select',
-				  label => 'Group',
-				  label_class => [ 'col-xs-2', ],
-				  label_attr => { title => 'gitAclUser group' },
-				  element_wrapper_class => [ 'col-lg-5', ], # 'col-lg-offset-3', ],
-				  required_when => { gitAclUser_user => 0 },
-				);
+has_field 'gitAclUser_group'
+  => ( type                  => 'Select',
+       label                 => 'Group',
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
+       label_attr            => { title => 'gitAclUser group' },
+       element_wrapper_class => [ 'input-sm', 'col-10' ],
+       element_class         => [ 'custom-select', ],
+       required_when         => { gitAclUser_user => 0 },
+       wrapper_class         => [ 'row', ],
+     );
 
 sub options_gitAclUser_group {
   my $self = shift;
@@ -130,15 +140,11 @@ sub options_gitAclUser_group {
   return unless $self->ldap_crud;
 
   my $ldap_crud = $self->ldap_crud;
-  my $mesg = $ldap_crud->search(
-				{
-				 base => $ldap_crud->cfg->{base}->{group},
-				 scope => 'one',
-				 filter => 'cn=*',
-				 attrs => [ qw(cn description) ],
-				 sizelimit => 0
-				}
-			       );
+  my $mesg = $ldap_crud->search({ base      => $ldap_crud->cfg->{base}->{group},
+				  scope     => 'one',
+				  filter    => 'cn=*',
+				  attrs     => [ qw(cn description) ],
+				  sizelimit => 0 });
   my @groups = ( { value => '0', label => '--- choose group ---' } );
   my @entries = $mesg->sorted('cn');
   foreach my $entry ( @entries ) {
@@ -155,28 +161,52 @@ sub options_gitAclUser_group {
   # $ldap_crud->unbind;
 }
 
-has_field 'gitAclUser_cidr' => ( apply => [ CIDR ],
-				 label => 'CIDR',
-				 label_class => [ 'col-xs-2', ],
-				 label_attr => { title => 'gitAclUser CIDR' },
-				 element_wrapper_class => [ 'col-lg-5', ], # 'col-lg-offset-8', ],
-				 element_attr => { placeholder => '172.16.157.193/32' },
-			       );
+has_field 'gitAclUser_cidr'
+  => ( apply                 => [ CIDR ],
+       label                 => 'CIDR',
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
+       label_attr            => { title => 'gitAclUser CIDR' },
+       element_wrapper_class => [ 'input-sm', 'col-10' ],
+       element_attr          => { placeholder => '172.16.157.193/32' },
+       wrapper_class         => [ 'row', ],
+     );
 
-has_field 'aux_reset' => ( type => 'Reset',
-			   wrapper_class => [ 'col-xs-4' ],
-			   element_class => [ 'btn', 'btn-danger', 'btn-block', ],
-			   element_wrapper_class => [ 'col-xs-12', ],
-			   value => 'Reset' );
+has_field 'aux_reset'
+  => ( type          => 'Reset',
+       element_class => [ qw( btn
+			      btn-danger
+			      btn-block
+			      font-weight-bold
+			      text-uppercase) ],
+       wrapper_class => [ 'col-4' ],
+       value         => 'Reset' );
 
-has_field 'aux_submit' => (
-			   type => 'Submit',
-			   wrapper_class => [ 'col-xs-8'],
-			   element_class => [ 'btn', 'btn-success', 'btn-block', ],
-			   element_wrapper_class => [ 'col-xs-12', ],
-			   # label_no_filter => 1,
-			   value => 'Submit'
-			  );
+has_field 'aux_submit'
+  => ( type          => 'Submit',
+       element_class => [ qw( btn
+			      btn-success
+			      btn-block
+			      font-weight-bold
+			      text-uppercase) ],
+       wrapper_class => [ 'col-8', ],
+       value         => 'Submit' );
+
+has_block 'aux_submitit'
+  => ( tag => 'fieldset',
+       render_list => [ 'aux_reset', 'aux_submit'],
+       class => [ 'row', ]
+     );
+
+sub build_render_list {[ qw( aux_dn_form_to_modify
+			     gitAclProject
+			     gitAclOrder
+			     gitAclOp
+			     gitAclVerb
+			     gitAclRef
+			     gitAclUser_user
+			     gitAclUser_group
+			     gitAclUser_cidr
+                             aux_submitit ) ]}
 
 sub validate {
   my $self = shift;
