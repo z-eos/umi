@@ -201,7 +201,7 @@ sub utf2lat {
 
   # Lingua::Translit::Tables
   # "ALA-LC RUS", "GOST 7.79 RUS", "DIN 1460 RUS"
-  my $table = "ALA-LC RUS";
+  my $table = "GOST 7.79 RUS";
 
   my ($tr, $return);
   use utf8;
@@ -212,6 +212,7 @@ sub utf2lat {
     # escape important non ascii
     $return =~ s/ĭ/j/g;
     $return =~ s/ė/e/g;
+    $return =~ s/′//g;
     # remove non-alphas (like ' and `)
     $return =~ tr/a-zA-Z0-9\,\.\_\-\ \@\#\%\*\(\)\!//cds;
     return $return;
@@ -230,6 +231,7 @@ sub utf2lat {
     $return->{'UMI use ' . $table . ' with non-alphas removed'} =~ s/є/e/g;
     $return->{'UMI use ' . $table . ' with non-alphas removed'} =~ s/і/i/g;
     $return->{'UMI use ' . $table . ' with non-alphas removed'} =~ s/ī/i/g;
+    $return->{'UMI use ' . $table . ' with non-alphas removed'} =~ s/′//g;
     $return->{'UMI use ' . $table . ' with non-alphas removed'} =~ tr/a-zA-Z0-9\,\.\_\-\ \@\#\%\*\(\)\!//cds;
     return $return;
   }

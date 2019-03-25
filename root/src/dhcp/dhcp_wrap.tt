@@ -29,14 +29,14 @@ New DHCP Lease Creation Form <small><em class="text-muted">( IP address to MAC b
      calendarWeeks: true,
      debug: true,
      icons: {
-       time: 'fas fa-clock',
-       date: 'fas fa-calendar-alt',
+       time: 'far fa-clock',
+       date: 'far fa-calendar-alt',
        up: 'fas fa-caret-up',
        down: 'fas fa-caret-down',
        previous: 'fas fa-caret-left',
        next: 'fas fa-caret-right',
        today: 'fas fa-calendar-check',
-       clear: 'fas fa-trash',
+       clear: 'far fa-trash-alt',
        close: 'fas fa-times'
      }
    });
