@@ -3,7 +3,7 @@
 <header>
   <nav class="navbar navbar-dark bg-dark" id="header">
     [% IF c.user_exists && c.session.auth_uid # !!! to fix, looks like a stub %]
-    <a id="sidebarCollapse" class="navbar-toggler btn btn-link p-0 pr-3" href="#" title="show/hide left panel">
+    <a id="sidebarLeftCollapse" class="navbar-toggler btn btn-link p-0 pr-3" href="#" title="show/hide left panel">
       <i id="sidebarLeftToggler" class="fas fa-fw [% toggle_a %][% # defined in layout %]"></i>
     </a>
     [% END %]
@@ -262,9 +262,9 @@
 </header>
 
 <script type="text/javascript">
-// $(function () { $('#ldapsearch_filter').popover() });
-// $(function () { $('#ldapsearch_filter').tooltip() });
-// $(function () { $('[data-toggle="tooltip"]').tooltip() });
+ /* $(function () { $('#ldapsearch_filter').popover() });
+    $(function () { $('#ldapsearch_filter').tooltip() });
+    $(function () { $('[data-toggle="tooltip"]').tooltip() }); */
 </script>
 
 <!-- END site/header -->

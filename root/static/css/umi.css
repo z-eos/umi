@@ -149,7 +149,7 @@ html,body {
   font-family: "Font Awesome 5 Free";
   font-size: 70%;
   font-weight: 900;
-  //    color: #fff;
+  /*    color: #fff; */
   vertical-align: 60%;
   margin: 0 0 0 0;
   padding: 0 0 0 0;
@@ -298,7 +298,7 @@ html,body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-//  margin: 0;
+/*  margin: 0; */
 }
 
 .inline-group {
@@ -315,13 +315,12 @@ html,body {
   max-width: calc(100vw - 700px);
 }
 
-.outmost_wrapper {
+.outmost-wrapper {
   overflow: hidden;
 }
 
 .wrapper {
   display: flex;
-  overflow: hidden;
   width: 100%;
   align-items: stretch;
 }
@@ -332,55 +331,55 @@ html,body {
 
    ------------------------------- */
 
-#sidebar {
+#sidebar-left {
   width: 210px;
   min-height: 100vh;
   transition: width ease 250ms;
 /*!  transition: border-radius .15s cubic-bezier(0.4,0.0,0.2,1),margin .15s cubic-bezier(0.4,0.0,0.2,1),width .15s cubic-bezier(0.4,0.0,0.2,1);*/
 }
 
-#sidebar.folded:hover {
+#sidebar-left.folded:not(:hover) {
+  width: 55px;
+  text-align: center;
+}
+
+#sidebar-left.folded:hover {
   width: 210px;
 /*!  transition-delay: 1s;
   transition-property: width; */
 }
 
-/* #sidebar.folded:hover ul.nav.show {
+/* #sidebar-left.folded:hover ul.nav.show {
   transition-delay: 1s;
 } */
 
-#sidebar ul.show li a {
+#sidebar-left ul.show li a {
   text-align: left;
   font-size: 0.80em;
   max-height: 1000px;
 }
 
-#sidebar-menu ul.show {
+#sidebar-left-menu ul.show {
   padding: 0.2rem 1rem;
 }
 
-#sidebar.folded:not(:hover) {
-  width: 55px;
-  text-align: center;
-}
-
-#sidebar.folded:not(:hover) ul.nav.show {
+#sidebar-left.folded:not(:hover) ul.nav.show {
   max-height: 0px;
   max-width: 0px;
   opacity: 0;
 }
 
-#sidebar.folded:not(:hover) ul li a {
+#sidebar-left.folded:not(:hover) ul li a {
   text-align: center;
   font-size: 0.85em;
 }
 
-#sidebar.folded:not(:hover) ul li a b {
+#sidebar-left.folded:not(:hover) ul li a b {
   display: none;
 }
 
 @media (max-width: 768px) {
-  #sidebar.folded:not(:hover) {
+  #sidebar-left.folded:not(:hover) {
     min-width: 55px;
     max-width: 55px;
     text-align: center;
@@ -388,7 +387,7 @@ html,body {
   }
 
   /* Reappearing the sidebar on toggle button click */
-  #sidebar {
+  #sidebar-left {
     margin-left: 0; 
   }
 }
@@ -410,10 +409,34 @@ html,body {
   transition: width ease 250ms;
 }
 
-#sidebar-right.folded {
-  width: 0;
+#sidebar-right.folded:not(:hover) {
+  width: 55px;
+  text-align: center;
 }
 
+#sidebar-right.folded:hover {
+  width: 370px;
+}
+
+#sidebar-right.folded:not(:hover) div.tab-content {
+  max-height: 0px;
+  max-width: 0px;
+  opacity: 0;
+}
+
+@media (max-width: 768px) {
+  #sidebar-right.folded:not(:hover) {
+    min-width: 55px;
+    max-width: 55px;
+    text-align: center;
+    margin-left: -55px !important;
+  }
+
+  /* Reappearing the sidebar on toggle button click */
+  #sidebar-right {
+    margin-left: 0; 
+  }
+}
 /* -------------------------------
 
    BootStrap "amendments"

@@ -27,9 +27,9 @@
 [% END %]
 
 
-<nav id="sidebar" class="bg-dark [% c.session.settings.ui.sidebar == 0 ? 'folded' : '' %]">
+<nav id="sidebar-left" class="bg-dark [% c.session.settings.ui.sidebar == 0 ? 'folded' : '' %]">
 
-    <ul id="sidebar-menu" class="nav nav-pills">
+    <ul id="sidebar-left-menu" class="nav nav-pills">
 
       [% IF c.check_any_user_role ('admin', 'coadmin', 'operator') %]
       <li class="nav-link">

@@ -1,7 +1,7 @@
 [% # -*- mode: web; -*- %]
 
-[% toggle_a = 'fa-ellipsis-v' %]
-[% toggle_b = 'fa-ellipsis-h' %]
+[% toggle_a = 'fa-caret-left' %]
+[% toggle_b = 'fa-caret-right' %]
 
 <noscript>
   <div class="alert alert-danger text-center h1 mt-5 mx-5"
@@ -22,25 +22,28 @@
   </div>
 </noscript>
 
-[% IF c.user %]  
-[% PROCESS site/header %]
+<div class="outmost-wrapper">
 
-<div class="wrapper"> <!-- APP BODY -->
+  [% IF c.user %]  
+  [% PROCESS site/header %]
 
-  [% PROCESS site/sidebar %]
+  <div class="wrapper"> <!-- APP BODY -->
 
-  <main class="container-fluid flex-grow-1 mb-3 w-25" id="workingfield">
+    [% PROCESS site/sidebar %]
 
-[% END %]
+    <main class="container-fluid flex-grow-1 mb-3 w-25" id="workingfield">
 
-[% content %]
+      [% END %]
+
+      [% content %]
       
-[% IF c.user %]  
+      [% IF c.user %]  
 
-  </main>
+    </main>
 
-  [% PROCESS site/aside %]
-  
+    [% PROCESS site/aside %]
+
+  </div> <!-- div layout -->
 </div> <!-- APP BODY -->
 
 [% # PROCESS site/footer %]
@@ -136,8 +139,8 @@
 
 <script>
  $(document).ready(function () {
-   var $panel = $('#sidebar');
-   var $toggl = $('#sidebarCollapse');
+   var $panel = $('#sidebar-left');
+   var $toggl = $('#sidebarLeftCollapse');
    var $image = $('#sidebarLeftToggler');
    
    $toggl.on('click', function () {
@@ -168,17 +171,17 @@
      $panel.toggleClass('folded');
 
      if ($panel.hasClass('folded')) {
-       $image.removeClass('[% toggle_a %]').addClass('[% toggle_b %]');
-     } else {
        $image.removeClass('[% toggle_b %]').addClass('[% toggle_a %]');
+     } else {
+       $image.removeClass('[% toggle_a %]').addClass('[% toggle_b %]');
      }
      
    });
 
    if ($panel.hasClass('folded')) {
-     $image.removeClass('[% toggle_a %]').addClass('[% toggle_b %]');
-   } else {
      $image.removeClass('[% toggle_b %]').addClass('[% toggle_a %]');
+   } else {
+     $image.removeClass('[% toggle_a %]').addClass('[% toggle_b %]');
    }
    
  });

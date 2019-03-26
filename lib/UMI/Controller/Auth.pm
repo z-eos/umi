@@ -151,6 +151,8 @@ sub signin :Path Global {
       }
     }
 
+    $c->session->{ldap}->{base} = $ldap_crud->{cfg}->{base};
+    
     log_info { 'user ' . $c->session->{auth_uid} . ' successfully logged in' };
 
     $c->stash( template => 'welcome.tt', );
