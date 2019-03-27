@@ -116,7 +116,7 @@
 	      <button type="submit" class="[% menu_item %] text-dark"
 		      onClick="document.getElementById('ldap_base_case').value=this.value"
 		      value="ldapsearch_global"
-		      title="global search through all DB, by attrName=*value*">
+		      title="base: [% c.session.ldap.base.db %]">
 		<i class="fas fa-fw fa-database text-dark"></i> GLOBAL
 	      </button>
 	      
@@ -126,74 +126,75 @@
 	      <button type="submit" class="[% menu_item %][% color %]"
 		      onClick="document.getElementById('ldap_base_case').value=this.value"
 		      value="[% helper_cfg('cfg_ldap_crud','base', 'group') %]"
-		      title="filter pattern with base Groups">
+		      title="base: [% c.session.ldap.base.group %]">
 		<i class="[% icon_class %] fa-users"></i> group
 	      </button>
 	      <button type="submit" class="[% menu_item %][% color %]"
 		      onClick="document.getElementById('ldap_base_case').value=this.value"
 		      value="[% helper_cfg('cfg_ldap_crud','base', 'netgroup') %]"
-		      title="filter pattern with base NisNetgroups">
+		      title="base: [% c.session.ldap.base.netgroup %]">
 		<i class="[% icon_class %] fa-user-friends"></i> netgroup
 	      </button>
 	      <button type="submit" class="[% menu_item %][% color %]"
 		      onClick="document.getElementById('ldap_base_case').value=this.value"
 		      name="ldapsearch_base"
 		      value="[% helper_cfg('cfg_ldap_crud','base', 'acc_root') %]"
-		      title="filter pattern with base People">
+		      title="base: [% c.session.ldap.base.acc_root %]">
 		<i class="[% icon_class %] fa-user"></i> people
 	      </button>
 	      <button type="submit" class="[% menu_item %][% color %]"
 		      onClick="document.getElementById('ldap_base_case').value=this.value"
 		      value="[% helper_cfg('cfg_ldap_crud','base', 'org') %]"
 		      tabindex="20"
-		      title="filter pattern with base Organizations">
+		      title="base: [% c.session.ldap.base.org %]">
 		<i class="[% icon_class %] fa-building"></i> organization
 	      </button>
 	      <button type="submit" class="[% menu_item %][% color %]"
 		      onClick="document.getElementById('ldap_base_case').value=this.value"
 		      value="[% helper_cfg('cfg_ldap_crud','base', 'dhcp') %]"
 		      tabindex="21"
-		      title="filter pattern with base DHCP">
+		      title="base: [% c.session.ldap.base.dhcp %]">
 		<i class="[% icon_class %] fa-network-wired"></i> DHCP
 	      </button>
 	      <button type="submit" class="[% menu_item %][% color %]"
 		      onClick="document.getElementById('ldap_base_case').value=this.value"
 		      tabindex="22"
-		      title="filter pattern with base Aliases">
+		      title="base: [% c.session.ldap.base.alias %]">
 		<i class="[% icon_class %] fa-file-alt"></i> alias
 	      </button>
 	      <button type="submit" class="[% menu_item %][% color %]"
 		      onClick="document.getElementById('ldap_base_case').value=this.value"
 		      value="[% helper_cfg('cfg_ldap_crud','base', 'workstations') %]"
 		      tabindex="23"
-		      title="filter pattern with base Workstations">
+		      title="base: [% c.session.ldap.base.workstations %]">
 		<i class="[% icon_class %] fa-desktop"></i> workstations
 	      </button>
 	      <button type="submit" class="[% menu_item %][% color %]"
 		      onClick="document.getElementById('ldap_base_case').value=this.value"
 		      value="[% helper_cfg('cfg_ldap_crud','base', 'machines') %]"
 		      tabindex="24"
-		      title="filter pattern with base Machines">
+		      title="base: [% c.session.ldap.base.machines %]">
 		<i class="[% icon_class %] fa-server"></i> machines
 	      </button>
 	      <button type="submit" class="[% menu_item %][% color %]"
 		      onClick="document.getElementById('ldap_base_case').value=this.value"
 		      value="[% helper_cfg('cfg_ldap_crud','base', 'inventory') %]"
 		      tabindex="24"
-		      title="filter pattern with base Inventory">
+		      title="base: [% c.session.ldap.base.inventory %]">
 		<i class="[% icon_class %] fa-pen-nib"></i> inventory
 	      </button>
 	      <button type="submit" class="[% menu_item %][% color %]"
 		      onClick="document.getElementById('ldap_base_case').value=this.value"
 		      value="[% helper_cfg('cfg_ldap_crud','base', 'mta') %]"
 		      tabindex="24"
-		      title="filter pattern with base Sendmail">
+		      title="base: [% c.session.ldap.base.mta %]">
 		<i class="[% icon_class %] fa-envelope"></i> sendmail
 	      </button>
 	      <button type="submit" class="[% menu_item %][% color %]"
 		      onClick="document.getElementById('ldap_base_case').value=this.value"
 		      value="[% helper_cfg('cfg_ldap_crud','base', 'gitacl') %]"
-		      tabindex="25">
+		      tabindex="25"
+		      title="base: [% c.session.ldap.base.gitacl %]">
 		<i class="fab fa-fw text-info fa-git"></i> GitACL
 	      </button>
 	    </div>

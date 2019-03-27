@@ -121,8 +121,9 @@ sub index :Path :Args(0) {
       $base   = $ldap_crud->cfg->{base}->{acc_root};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_ip'} ) {
-      $filter = sprintf("dhcpStatements=fixed-address %s", $filter_meta);
-      $base   = $ldap_crud->cfg->{base}->{dhcp};
+      $filter = sprintf("|(dhcpStatements=fixed-address %s)(umiOvpnCfgIfconfigPush=%s*)",
+			$filter_meta, $filter_meta);
+      $base   = $ldap_crud->cfg->{base}->{db};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_mac'} ) {
       push @{$return->{error}}, 'incorrect MAC address'
