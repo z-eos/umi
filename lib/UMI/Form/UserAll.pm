@@ -67,16 +67,37 @@ has_field 'person_sn'
        required              => 1 );
 
 has_field 'person_exp'
-  => ( type                  => 'Text',
-       label                 => 'Exp.',
-       label_attr            => { title => 'Object Expiration', },
-       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
-       element_wrapper_class => [ 'col-8', 'col-md-10' ],
-       element_class         => [ 'input-sm', ],
-       element_attr          => { placeholder => 'Expiration on',
-				  title       => 'Object Expiration', },
-       wrapper_class         => [ 'row' ],
-       required              => 0 );
+  => ( type          => 'Display',
+       html          => sprintf('
+<div class="form-group row">
+  <label class="col-2 text-right font-weight-bold control-label atleastone" title="Object Expiration">
+    Exp.
+  </label>
+  <div class="col-3">
+    <div class="">
+      <div class="input-group date" id="person_exp" data-target-input="nearest">
+        <input name="person_exp" type="text" class="form-control datetimepicker-input" data-target="#requestttl"/>
+        <div class="input-group-append" data-target="#person_exp" data-toggle="datetimepicker">
+          <div class="input-group-text"><i class="far fa-calendar-alt"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>'),
+       wrapper_class => [ 'row', ],
+     );
+
+# has_field 'person_exp'
+#   => ( type                  => 'Text',
+#        label                 => 'Exp.',
+#        label_attr            => { title => 'Object Expiration', },
+#        label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
+#        element_wrapper_class => [ 'col-8', 'col-md-10' ],
+#        element_class         => [ 'input-sm', ],
+#        element_attr          => { placeholder => 'Expiration on',
+# 				  title       => 'Object Expiration', },
+#        wrapper_class         => [ 'row' ],
+#        required              => 0 );
 
 has_field 'person_namesake'
   => ( type                  => 'Checkbox',

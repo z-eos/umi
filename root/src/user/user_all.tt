@@ -5,6 +5,9 @@
    %]
 
 <link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="/static/css/tempusdominus-bootstrap-4.css" />
+<script type="text/javascript" src="/static/js/moment-with-locales.js"></script>
+<script type="text/javascript" src="/static/js/tempusdominus-bootstrap-4.min.js"></script>
 
 <[% site.pageheading %] class="font-weight-bold p-3">
 <i class="fas fa-user fa-lg mr-3 text-muted"></i>
@@ -166,27 +169,31 @@ for: [% form.field('add_svc_acc').value %]
 <script src="/static/js/umi-user-all.js"></script>  
 <script src="/static/js/umi-multiselect.js"></script>
 
-
-[% USE date(time = date.now, format = '%Y.%m.%d', locale = 'en_US') %]
+[% USE date(time = date.now, format = '%Y-%m-%dT%H:%M:%S', locale = 'en_US') %]
 [% dds_max_ttl_years = 10 %]
-<script>
- $('#person_exp').datetimepicker({
-   lang:'en',
-   mask:true,
-   format: 'Y.m.d H:i',
-   formatTime:'H:i',
-   formatDate:'Y.m.d',
-   timepicker:true,
-   weeks:true,
-   closeOnDateSelect:true,
-   todayButton:true,
-   datepicker:true,
-   dayOfWeekStart:1,
-   yearStart:[% date.format(format = '%Y') %],
-   yearEnd:[% date.format(format = '%Y') + dds_max_ttl_years %],
-   startDate:'[% date.format %]',
-   startTime:'[% date.format(format = 'H:i') %]',
-   minDate:'[% date.format %]',
-   maxDate:[% date.format(format = '%Y') + dds_max_ttl_years %]+'.01.01'
+[% dds_max_year = date.format(format = '%Y') + dds_max_ttl_years %]
+
+<script type="text/javascript">
+ $(function () {
+   $('#person_exp').datetimepicker({
+     /* locale: 'uk', */
+     format: 'YYYY.MM.DD HH:mm',
+     minDate: '[% date.format(format = '%Y-%m-%dT%H:%M:%S') %]',
+     maxDate: '[% date.format(format = dds_max_year _ '-%m-%dT%H:%M:%S') %]',
+     stepping: 10,
+     calendarWeeks: true,
+     debug: true,
+     icons: {
+       time: 'far fa-clock',
+       date: 'far fa-calendar-alt',
+       up: 'fas fa-caret-up',
+       down: 'fas fa-caret-down',
+       previous: 'fas fa-caret-left',
+       next: 'fas fa-caret-right',
+       today: 'fas fa-calendar-check',
+       clear: 'far fa-trash-alt',
+       close: 'fas fa-times'
+     }
+   });
  });
 </script>

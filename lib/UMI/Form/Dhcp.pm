@@ -25,16 +25,16 @@ has_field 'ldap_add_dhcp' => ( type => 'Hidden', );
 has_field 'requestttl'
   => ( type          => 'Display',
        html          => sprintf('
-<div class="row">
+<div class="form-group row">
   <label class="col-2 text-right font-weight-bold control-label atleastone" title="Object Expiration">
     Expiration
   </label>
   <div class="col-3">
-    <div class="form-group">
+    <div class="">
       <div class="input-group date" id="requestttl" data-target-input="nearest">
         <input name="requestttl" type="text" class="form-control datetimepicker-input" data-target="#requestttl"/>
         <div class="input-group-append" data-target="#requestttl" data-toggle="datetimepicker">
-          <div class="input-group-text"><i class="fas fa-calendar-alt"></i></div>
+          <div class="input-group-text"><i class="far fa-calendar-alt"></i></div>
         </div>
       </div>
     </div>
@@ -44,9 +44,6 @@ has_field 'requestttl'
 			  'data-group' => 'account', },
        wrapper_class => [ 'row', ],
      );
-
-
-
 
 # has_field 'requestttl' 
 #   => ( type                  => 'Text',

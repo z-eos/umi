@@ -70,7 +70,7 @@ var handleResponce = function(html) {
 /*! 
  * AJAX to load on click-s (not submits)
  */    
-$('#sidebar,#workingfield,#header,#sidebar-modal-1').on('click', 'a:not([href^="#"],[href="/"],.ajaxless)', function(e) {
+$('#sidebar-left,#workingfield,#header,#sidebar-modal-1').on('click', 'a:not([href^="#"],[href="/"],.ajaxless)', function(e) {
     e.preventDefault();
 
     var a = this;
@@ -102,7 +102,7 @@ $('form.formajaxer').on('submit', function(e) {
     $.post($(this).attr('action'), $(this).serialize() + base, handleResponce);
 });
 
-console.log('UMI CORE AJAX: ', $('form.settings-save'));
+// console.log('UMI CORE AJAX: ', $('form.settings-save'));
 /*! 
  * AJAX to process settings saving form
  */    

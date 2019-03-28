@@ -80,7 +80,7 @@ sub index :Path :Args(0) {
 
   # if ( defined $c->session->{"auth_uid"} ) {
   if ( defined $c->user_exists ) {
-    my ( $params, $ldap_crud, $filter, $filter_meta, $filter_translitall, $base, $return );
+    my ( $params, $ldap_crud, $filter, $filter_meta, $filter_translitall, $base, $sizelimit, $return );
     my $sort_order = 'reverse';
 
     $params = $c->req->params;
@@ -96,6 +96,7 @@ sub index :Path :Args(0) {
       $base = $ldap_crud->cfg->{base}->{acc_root};
     } elsif ( defined $params->{'ldap_subtree'} && $params->{'ldap_subtree'} ne '' ) {
       $base = $params->{'ldap_subtree'};
+      $sizelimit = 0;
     } else {
       $base = $params->{ldapsearch_base};
     }
@@ -187,7 +188,7 @@ sub index :Path :Args(0) {
     my $mesg = $ldap_crud->search({
 				   base      => $base,
 				   filter    => '(' . $filter . ')',
-				   sizelimit => $ldap_crud->cfg->{sizelimit},
+				   sizelimit => $sizelimit // $ldap_crud->cfg->{sizelimit},
 				   scope     => $scope,
 				   attrs     => [ '*',
 					          'createTimestamp',

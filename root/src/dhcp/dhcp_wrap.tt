@@ -42,27 +42,3 @@ New DHCP Lease Creation Form <small><em class="text-muted">( IP address to MAC b
    });
  });
 </script>
-
-<script>
- /*
- $('#requestttl').datetimepicker({
-   lang:'en',
-   mask:true,
-   format: 'Y.m.d H:i',
-   formatTime:'H:i',
-   formatDate:'Y.m.d',
-   timepicker:true,
-   weeks:true,
-   closeOnDateSelect:true,
-   todayButton:true,
-   datepicker:true,
-   dayOfWeekStart:1,
-   yearStart:[% date.format(format = '%Y') %],
-   yearEnd:[% date.format(format = '%Y') + dds_max_ttl_years %],
-   startDate:'[% date.format %]',
-   startTime:'[% date.format(format = 'H:i') %]',
-   minDate:'[% date.format %]',
-   maxDate:[% date.format(format = '%Y') + dds_max_ttl_years %]+'.01.01'
- });
- */
-</script>

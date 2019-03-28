@@ -31,53 +31,149 @@ has_field 'pronounceable'
      );
 
 has_field 'pwd_len'
-  => (
-      type                  => 'Integer',
-      apply                 => [ NoSpaces, PositiveNum ],
-      label                 => 'Password Length',
-      label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
-      element_wrapper_class => [ 'input-sm', 'col-10', ],
-      element_class         => [ qw( disabler-input
-				     disableable
-				     disabled-if-pwdcheckonly
-				     disabled-if-pwddefault ) ],
-      element_attr => { placeholder => sprintf("min: %s; default common: %s; max common: %s; max pronouceable: %s",
-					       UMI->config->{pwd}->{len_min},
-					       UMI->config->{pwd}->{len},
-					       UMI->config->{pwd}->{len_max},
-					       UMI->config->{pwd}->{lenp} ),
-			title       => sprintf("min: %s; default common: %s; max common: %s; max pronouceable: %s",
-					       UMI->config->{pwd}->{len_min},
-					       UMI->config->{pwd}->{len},
-					       UMI->config->{pwd}->{len_max},
-					       UMI->config->{pwd}->{lenp} ), },
-      wrapper_class         => [ 'row', 'deactivate-top', ],
+  => ( type          => 'Display',
+       html          => sprintf('
+<div class="form-group row deactivate-top">
+  <label class="col-2 text-right font-weight-bold control-label" title="" for="pwd_len">
+    Pwd length: <span id="pwd_len_size" class="text-primary"></span>
+  </label>
+  <div class="col-9">
+    <input id="pwd_len" name="pwd_len" type="range" class="custom-range" min="%s" max="%s" step="1" value="%s" title="min: %s; default common: %s; max common: %s; max pronouceable: %s"/>
+  </div>
+  <div class="col-1 font-weight-bold">
+    <span>%s</span>
+  </div>
+</div>
+<script>
+ $(function () {
+  var slider = document.getElementById("pwd_len");
+  var output = document.getElementById("pwd_len_size");
+  output.innerHTML = slider.value;
+
+  slider.oninput = function() {
+    output.innerHTML = this.value;
+  }
+ });
+</script>
+',
+				UMI->config->{pwd}->{len_min},
+				UMI->config->{pwd}->{len_max},
+				UMI->config->{pwd}->{len},
+				UMI->config->{pwd}->{len_min},
+				UMI->config->{pwd}->{len},
+				UMI->config->{pwd}->{len_max},
+				UMI->config->{pwd}->{lenp},
+				UMI->config->{pwd}->{len_max}),
      );
+
+# has_field 'pwd_len'
+#   => (
+#       type                  => 'Integer',
+#       apply                 => [ NoSpaces, PositiveNum ],
+#       label                 => 'Password Length',
+#       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+#       element_wrapper_class => [ 'input-sm', 'col-10', ],
+#       element_class         => [ qw( disabler-input
+# 				     disableable
+# 				     disabled-if-pwdcheckonly
+# 				     disabled-if-pwddefault ) ],
+#       element_attr => { placeholder => sprintf("min: %s; default common: %s; max common: %s; max pronouceable: %s",
+# 					       UMI->config->{pwd}->{len_min},
+# 					       UMI->config->{pwd}->{len},
+# 					       UMI->config->{pwd}->{len_max},
+# 					       UMI->config->{pwd}->{lenp} ),
+# 			title       => sprintf("min: %s; default common: %s; max common: %s; max pronouceable: %s",
+# 					       UMI->config->{pwd}->{len_min},
+# 					       UMI->config->{pwd}->{len},
+# 					       UMI->config->{pwd}->{len_max},
+# 					       UMI->config->{pwd}->{lenp} ), },
+#       wrapper_class         => [ 'row', 'deactivate-top', ],
+#      );
 
 has_field 'pwd_cap'
-  => (
-      type                  => 'Integer',
-      apply                 => [ NoSpaces, PositiveNum ],
-      label                 => 'Capital Characters',
-      label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
-      element_wrapper_class => [ 'input-sm', 'col-10', ],
-      element_attr          => { placeholder => 'max ' . UMI->config->{pwd}->{cap},
-				 title       => 'up to this many characters will be upper case', },
-      wrapper_class         => [ 'row', 'deactivate-top', ],
+  => ( type          => 'Display',
+       html          => sprintf('
+<div class="form-group row deactivate-top">
+  <label class="col-2 text-right font-weight-bold control-label" title="" for="pwd_cap">
+    Capital Chars: <span id="pwd_cap_size" class="text-primary"></span>
+  </label>
+  <div class="col-9">
+    <input id="pwd_cap" name="pwd_cap" type="range" class="custom-range" min="0" max="%s" step="1" value="0"/>
+  </div>
+  <div class="col-1 font-weight-bold">
+    <span>%s</span>
+  </div>
+</div>
+<script>
+ $(function () {
+  var slider = document.getElementById("pwd_cap");
+  var output = document.getElementById("pwd_cap_size");
+  output.innerHTML = slider.value;
+
+  slider.oninput = function() {
+    output.innerHTML = this.value;
+  }
+ });
+</script>
+',
+			       UMI->config->{pwd}->{cap},
+			       UMI->config->{pwd}->{cap}),
      );
 
+# has_field 'pwd_cap'
+#   => (
+#       type                  => 'Integer',
+#       apply                 => [ NoSpaces, PositiveNum ],
+#       label                 => 'Capital Characters',
+#       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+#       element_wrapper_class => [ 'input-sm', 'col-10', ],
+#       element_attr          => { placeholder => 'max ' . UMI->config->{pwd}->{cap},
+# 				 title       => 'up to this many characters will be upper case', },
+#       wrapper_class         => [ 'row', 'deactivate-top', ],
+#      );
+
 has_field 'pwd_num'
-  => (
-      type                  => 'Integer',
-      apply                 => [ NoSpaces, PositiveNum ],
-      label                 => 'Numbers And Spec. Characters',
-      label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
-      element_wrapper_class => [ 'input-sm', 'col-10', ],
-      element_attr          => { placeholder => 'max ' . UMI->config->{pwd}->{num},
-				 title       => 'up to that many, numbers and special characters will occur in the password',
-				 'data-mode' => "pwdpronounceable", },
-      wrapper_class         => [ 'row', 'deactivate-top', ],
+  => ( type          => 'Display',
+       html          => sprintf('
+<div class="form-group row deactivate-top">
+  <label class="col-2 text-right font-weight-bold control-label" title="" for="pwd_num">
+    Num And Spec. Chars: <span id="pwd_num_size" class="text-primary"></span>
+  </label>
+  <div class="col-9">
+    <input id="pwd_num" name="pwd_num" type="range" class="custom-range" min="0" max="%s" step="1" value="0"/>
+  </div>
+  <div class="col-1 font-weight-bold">
+    <span>%s</span>
+  </div>
+</div>
+<script>
+ $(function () {
+  var slider = document.getElementById("pwd_num");
+  var output = document.getElementById("pwd_num_size");
+  output.innerHTML = slider.value;
+
+  slider.oninput = function() {
+    output.innerHTML = this.value;
+  }
+ });
+</script>
+',
+			       UMI->config->{pwd}->{num},
+			       UMI->config->{pwd}->{num}),
      );
+
+# has_field 'pwd_num'
+#   => (
+#       type                  => 'Integer',
+#       apply                 => [ NoSpaces, PositiveNum ],
+#       label                 => 'Numbers And Spec. Characters',
+#       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+#       element_wrapper_class => [ 'input-sm', 'col-10', ],
+#       element_attr          => { placeholder => 'max ' . UMI->config->{pwd}->{num},
+# 				 title       => 'up to that many, numbers and special characters will occur in the password',
+# 				 'data-mode' => "pwdpronounceable", },
+#       wrapper_class         => [ 'row', 'deactivate-top', ],
+#      );
 
 has_field 'aux_reset'
   => ( type          => 'Reset',
