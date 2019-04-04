@@ -139,12 +139,11 @@ sub index :Path :Args(0) {
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_name'} ) {
       $params->{'ldapsearch_base'} = $base = $ldap_crud->cfg->{base}->{acc_root};
-      $filter                      =
-	sprintf("|(givenName=%s)(sn=%s)(uid=%s)(cn=%s)", $filter_meta, $filter_meta, $filter_meta, $filter_meta);
+      $filter = sprintf("|(givenName=%s)(sn=%s)(uid=%s)(cn=%s)",
+			$filter_meta, $filter_meta, $filter_meta, $filter_meta);
     } elsif ( defined $params->{'ldapsearch_by_telephone'} ) {
       $params->{'ldapsearch_base'} = $base = $ldap_crud->cfg->{base}->{acc_root};
-      $filter                      =
-	sprintf("|(telephoneNumber=%s)(mobile=%s)(homePhone=%s)",
+      $filter = sprintf("|(telephoneNumber=%s)(mobile=%s)(homePhone=%s)",
 			$filter_meta, $filter_meta, $filter_meta);
     } elsif ( defined $params->{'ldapsearch_filter'} &&
 	      $params->{'ldapsearch_filter'} ne '' ) {
@@ -199,6 +198,7 @@ sub index :Path :Args(0) {
 					          'entryExpireTimestamp',
 					        ],
 				  });
+
     # log_debug { np($mesg->as_struct) };
     my @entries = defined $params->{order_by} &&
       $params->{order_by} ne '' ? $mesg->sorted(split(/,/,$params->{order_by})) : $mesg->sorted('dn');
@@ -220,60 +220,108 @@ sub index :Path :Args(0) {
       }
     }
 
-    my ( $ttentries, @ttentries_keys, $attr, $tmp, $dn, $dn_depth, $dn_depthes, $to_utf_decode, @root_arr, @root_dn, $root_i, $root_mesg, $root_entry, $primary_group_name, @root_groups, $root_gr, $gr_entry, $obj_item, $c_name, $m_name );
+    my ( $ttentries, @ttentries_keys, $attr, $tmp, $dn, $dn_depth, $dn_depthes, $to_utf_decode, @root_arr, @root_dn_arr, $root_dn, $root_i, $root_mesg, $root_entry, $primary_group_name, @root_groups, $root_gr, $gr_entry, $obj_item, $c_name, $m_name );
     my $blocked = 0;
     my $is_userPassword  = 0;
     my $is_dynamicObject = 0;
 
     foreach (@entries) {
       $dn = $_->dn;
-      $c_name = ldap_explode_dn( $_->get_value('creatorsName'), casefold => 'none' );
-      $m_name = ldap_explode_dn( $_->get_value('modifiersName'), casefold => 'none' );
-      $ttentries->{$dn}->{root}->{ts} =
-	{ createTimestamp => $self->ts({ ts => $_->get_value('createTimestamp'), gnrlzd => 1, gmt => 1, format => '%Y%m%d%H%M' }),
-	  creatorsName    => $c_name->[0]->{uid} // $c_name->[0]->{cn},
-	  modifyTimestamp => $self->ts({ ts => $_->get_value('modifyTimestamp'), gnrlzd => 1, gmt => 1, format => '%Y%m%d%H%M' }),
-	  modifiersName   => $m_name->[0]->{uid} // $m_name->[0]->{cn}, };
-
-      foreach $tmp ( @{$_->get_value('objectClass', asref => 1)} ) {
-	# log_debug { np( $tmp ) };
-	# log_debug { np( $c->session->{ldap}->{obj_schema}->{$tmp}->{may}->{userPassword} ) };
-	# log_debug { np( $c->session->{ldap}->{obj_schema}->{$tmp}->{must}->{userPassword} ) };
-	$is_userPassword = 1
-	  if exists $c->session->{ldap}->{obj_schema}->{$tmp}->{may}->{userPassword} ||
-	  exists $c->session->{ldap}->{obj_schema}->{$tmp}->{must}->{userPassword};
-	if ( $tmp eq 'dynamicObject' ) {
-	  $is_dynamicObject = 1;
-	  $ttentries->{$dn}->{root}->{ts}->{entryExpireTimestamp} =
-	    $self->ts({ ts => $_->get_value('entryExpireTimestamp'), gnrlzd => 1, gmt => 1 });
-	}
-      }
 
       if ( $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
 	$dn_depth = scalar split(/,/, $ldap_crud->{cfg}->{base}->{acc_root}) + 1;
 
 	@root_arr = split(',', $_->dn);
 	$root_i = $#root_arr;
-	@root_dn = splice(@root_arr, -1 * $dn_depth);
-	$ttentries->{$dn}->{root}->{dn} = join(',', @root_dn);
-
+	@root_dn_arr = splice(@root_arr, -1 * $dn_depth);
+	$root_dn = join(',', @root_dn_arr);
+	
 	# here, for each entry we are preparing data of the root object it belongs to
 	$root_i++;
-	if ( $root_i == $dn_depth ) {
+	if ( $root_i == $dn_depth ) { # the very root object
+	  # log_debug { np($self->is_org_uni($c->user->has_attribute('o'),
+	  # 				   $_->get_value('o', asref => 1))) };
 	  $ttentries->{$dn}->{root}->{givenName} = $_->get_value('givenName');
 	  $ttentries->{$dn}->{root}->{sn} = $_->get_value('sn');
+	  $ttentries->{$dn}->{root}->{o} = $_->get_value('o', asref => 1);
 	  $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
 	    $_->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
-	} else {
-	  $root_mesg = $ldap_crud->search({ dn => $ttentries->{$dn}->{root}->{dn}, });
+	} else { # branches and leaves
+	  # log_debug { np($self->is_org_uni($c->user->has_attribute('o'),
+	  # 				   $_->get_value('o', asref => 1))) };
+	  $root_mesg = $ldap_crud->search({ dn => $root_dn, });
 	  $return->{error} .= $ldap_crud->err( $root_mesg )->{html}
 	    if $root_mesg->is_error();
 	  $root_entry = $root_mesg->entry(0);
 	  $ttentries->{$dn}->{root}->{givenName} = $root_entry->get_value('givenName');
 	  $ttentries->{$dn}->{root}->{sn} = $root_entry->get_value('sn');
+	  $ttentries->{$dn}->{root}->{o} = $root_entry->get_value('o', asref => 1);
 	  $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
 	    $root_entry->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
 	}
+
+	#=============================================================
+	### START of ACCES CONTROL to ou=People,dc=... 
+
+	$ttentries->{$dn}->{root}->{associatedDomain} = $ldap_crud->org_domains( $ttentries->{$dn}->{root}->{o} );
+
+	# for root object
+	my $ccc = $ldap_crud->org_domains( $c->user->has_attribute('o'));
+	use Array::Utils qw(:all);
+	my @l = @{$ttentries->{$dn}->{root}->{associatedDomain}->{success}};
+	my @r = @{$ccc->{success}};
+	my @intersect = intersect( @l, @r );
+	
+	log_debug { sprintf("
+    %s
+CURRENT_OBJ_DN: %s
+
+CURRENT_ROOT_OBJ_DOMAINS
+    %s
+CURRENT_USR_DOMAINS
+    %s
+INTERSECTION
+    %s
+IS ADMIN :%s; intersect size: %s\n\n",
+			    '-' x 70,
+			    np( $dn ),
+			    np( $ttentries->{$dn}->{root}->{associatedDomain} ),
+			    np( $ldap_crud->org_domains( $c->user->has_attribute('o')) ),
+			    np( @intersect ),
+			    $ldap_crud->role_admin,
+			    $#intersect ) };
+
+	# for service objects
+	if ( ! $ldap_crud->role_admin && $#intersect < 0) {
+	  delete $ttentries->{$dn};
+	  next;
+	}
+
+	if ( $_->exists('associatedDomain') ) {
+	  $#intersect = -1;
+	  @l = @{[$_->get_value('associatedDomain')]};
+	  @intersect = intersect( @l, @r );
+	
+	  log_debug { sprintf("
+CURRENT_OBJ_DOMAINS
+%s
+INTERSECTION SVC
+%s
+IS ADMIN :%s; intersect svc size: %s\n\n",
+			      np( @l ),
+			      np( @intersect ),
+			      $c->check_user_roles( qw/admin/),
+			      $#intersect ) };
+	  if ( ! $ldap_crud->role_admin && $#intersect < 0) {
+	    delete $ttentries->{$dn};
+	    next;
+	  }
+	}
+
+	### STOP of ACCES CONTROL to ou=People,dc=... 
+	#=============================================================
+
+	$ttentries->{$dn}->{root}->{dn} = $root_dn;
 
 	utf8::decode($ttentries->{$dn}->{root}->{givenName});
 	utf8::decode($ttentries->{$dn}->{root}->{sn});
@@ -297,8 +345,9 @@ sub index :Path :Args(0) {
 	$return->{error} .= $ldap_crud->err( $mesg )->{html}
 	  if $mesg->is_error();
 	
-	$#root_arr = $#root_dn = -1;
+	$#root_arr = $#root_dn_arr = -1;
 
+	# does root object belong to admin
 	$mesg = $ldap_crud->search({ base   => $ldap_crud->{cfg}->{base}->{system_group},
 				     filter => sprintf('(memberUid=%s)',
 						       $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }),
@@ -333,6 +382,28 @@ sub index :Path :Args(0) {
       } else {
 	# !!! HARDCODE how deep dn could be to be considered as some type of object, `3' is for what? :( !!!
 	$dn_depth = $ldap_crud->{cfg}->{base}->{dc_num} + 1;
+      }
+
+      $c_name = ldap_explode_dn( $_->get_value('creatorsName'),  casefold => 'none' );
+      $m_name = ldap_explode_dn( $_->get_value('modifiersName'), casefold => 'none' );
+      $ttentries->{$dn}->{root}->{ts} =
+	{ createTimestamp => $self->ts({ ts => $_->get_value('createTimestamp'), gnrlzd => 1, gmt => 1, format => '%Y%m%d%H%M' }),
+	  creatorsName    => $c_name->[0]->{uid} // $c_name->[0]->{cn},
+	  modifyTimestamp => $self->ts({ ts => $_->get_value('modifyTimestamp'), gnrlzd => 1, gmt => 1, format => '%Y%m%d%H%M' }),
+	  modifiersName   => $m_name->[0]->{uid} // $m_name->[0]->{cn}, };
+
+      foreach $tmp ( @{$_->get_value('objectClass', asref => 1)} ) {
+	# log_debug { np( $tmp ) };
+	# log_debug { np( $c->session->{ldap}->{obj_schema}->{$tmp}->{may}->{userPassword} ) };
+	# log_debug { np( $c->session->{ldap}->{obj_schema}->{$tmp}->{must}->{userPassword} ) };
+	$is_userPassword = 1
+	  if exists $c->session->{ldap}->{obj_schema}->{$tmp}->{may}->{userPassword} ||
+	  exists $c->session->{ldap}->{obj_schema}->{$tmp}->{must}->{userPassword};
+	if ( $tmp eq 'dynamicObject' ) {
+	  $is_dynamicObject = 1;
+	  $ttentries->{$dn}->{root}->{ts}->{entryExpireTimestamp} =
+	    $self->ts({ ts => $_->get_value('entryExpireTimestamp'), gnrlzd => 1, gmt => 1 });
+	}
       }
 
       $ttentries->{$dn}->{'mgmnt'} =
@@ -490,7 +561,7 @@ sub proc :Path(proc) :Args(0) {
 # Modify (all fields form), here we pass data to a sub modify() bellow
 #=====================================================================
     if (defined $params->{'ldap_modify'} && $params->{'ldap_modify'} ne '') {
-      log_debug { np($params) };
+      # log_debug { np($params) };
 
       $c->stats->profile( begin => "searchby_modify" );
   
@@ -499,8 +570,8 @@ sub proc :Path(proc) :Args(0) {
       $entry_tmp = $mesg->entry(0);
 
       $c->stats->profile('search for <i class="text-light">' . $params->{ldap_modify} . '</i>');
-      log_debug { np($entry_tmp) };
-      log_debug { np($return) };
+      # log_debug { np($entry_tmp) };
+      log_debug { np($return) } if defined $return;
       foreach $attr ( $entry_tmp->attributes ) {
 	if ( $attr =~ /;binary/ or
 	   $attr eq "userPKCS12" ) { ## !!! temporary stub !!! 	  next;

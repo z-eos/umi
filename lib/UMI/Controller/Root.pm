@@ -744,14 +744,14 @@ sub settings_save :Path(settings_save) :Args(0) POST {
   my $ldap_crud = $c->model('LDAP_CRUD');
   my $replace;
 
-  # log_debug { np($c->session->{settings}->{ui}) };
-  if ( ! defined $c->session->{settings}->{ui} ) {
+  if ( ! exists $c->session->{settings}->{ui}->{debug} ) {
+    log_debug { np($c->session->{settings}->{ui}->{debug}) };
     $c->session->{settings}->{ui} = $ldap_crud->{cfg}->{ui};
     push @{$replace}, add => [ objectClass => 'umiSettings' ];
   }
-  # log_debug { np($c->session->{settings}->{ui}) };
-
+  log_debug { np($c->session->{settings}->{ui}) };
   foreach (keys ( %{$c->session->{settings}->{ui}} )) {
+    # log_debug { np($_) };
     if ( $_ eq 'debug' ) {
       $c->session->{settings}->{ui}->{$_} = $params->{$_} // 0;
     } else {
@@ -772,6 +772,8 @@ sub settings_save :Path(settings_save) :Args(0) POST {
   ###
   
   push @{$replace},  replace => [ umiSettingsJson => $json_text, ];
+
+  log_debug { np($replace) };
 
   my $return;
   my $mesg = $ldap_crud->modify( $c->user->dn, $replace );

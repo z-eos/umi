@@ -39,7 +39,7 @@ has_field 'mod'
        html          => sprintf('
 <div class="form-group row">
   <label class="col-2 text-right font-weight-bold control-label" title="" for="mod">
-    Module Size is <span id="mod_size"></span>
+    Module Size: <span id="mod_size" class="text-primary"></span>
   </label>
   <div class="col-1 text-right font-weight-bold">
     <span>1</span>

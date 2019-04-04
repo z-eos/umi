@@ -148,7 +148,7 @@ sub _build_cfg {
 					   monitor
 					) ],
 		   icon => {
-			    DHCP          => 'fas fa-sitemap',
+			    DHCP          => 'fas fa-network-wired',
 			    GitACL        => 'fab fa-git',
 			    OpenVPN       => 'fas fa-sitemap',
 			    Organizations => 'fas fa-industry',
@@ -244,6 +244,7 @@ sub _build_cfg {
 				       ) ], # umiSettings
 	   acc_svc_branch        => [ qw(
 					  account
+					  domainRelatedObject
 					  authorizedServiceObject
 				       ) ],
 	   acc_svc_dot1x         => [ qw(
@@ -388,7 +389,7 @@ sub _build_cfg {
 			       auth => 1,
 			       descr => 'Web Account',
 			       disabled => 0,
-			       icon => 'fas fa-puzzle-piece',
+			       icon => 'fas fa-globe',
 			       data_fields => 'login,logindescr,password1,password2',
 			       data_relation => 'passw',
 			      },
@@ -553,9 +554,14 @@ sub _build_cfg {
 
 has 'host'    => ( is => 'ro', isa => 'Str', required => 1,
 		   default => UMI->config->{authentication}->{realms}->{ldap}->{store}->{ldap_server});
-has 'uid'     => ( is => 'ro', isa => 'Str', required => 1 );
-has 'pwd'     => ( is => 'ro', isa => 'Str', required => 1 );
-has 'dry_run' => ( is => 'ro', isa => 'Bool', default => 0 );
+has 'dry_run'    => ( is => 'ro', isa => 'Bool', default => 0 );
+
+# these ones are declared in Model/LDAP_CRUD.pm
+has 'uid'        => ( is => 'ro', isa => 'Str', required => 1 );
+has 'pwd'        => ( is => 'ro', isa => 'Str', required => 1 );
+has 'user'       => ( is => 'ro', required => 1 );
+has 'role_admin' => ( is => 'ro', required => 1 );
+
 # has 'path_to_images' => ( is => 'ro', isa => 'Str', required => 1 );
 
 has '_ldap' => (
@@ -628,6 +634,23 @@ around 'ldap' =>
     return $ldap;
   };
 
+=head2 filter_users_org
+
+Method to get filter part to be used in searches, to restrict search
+result by organizations, logged in user belongs to
+
+=cut
+
+has 'filter_users_org' => ( is       => 'ro',
+			    isa      => 'Str',
+			    required => 0, lazy => 1,
+			    builder  => 'build_filter_users_org', );
+
+sub build_filter_users_org {
+  my $self = shift;
+  return ref($self->user->o) eq 'ARRAY' ?
+      '(|' . join('', map { '(o=*' . $_ . ')' } @{$self->user->o} ) .')' : '(o=*' . $self->user->o . ')';
+}
 
 =head2 last_uidNumber
 
@@ -2671,35 +2694,48 @@ has 'select_associateddomains' => ( traits => ['Array'],
 	     );
 
 sub _build_select_associateddomains {
-  my $self = shift;
+  my $self   = shift;
+  my $base   = [ $self->cfg->{base}->{org} ];
+  
   # bld_select has to be fixed to deal with associatedDomains # return $self->bld_select({ base => $self->cfg->{base}->{org},
   # bld_select has to be fixed to deal with associatedDomains # 			     attr => [ 'associatedDomain', 'associatedDomain', ],
   # bld_select has to be fixed to deal with associatedDomains # 			     scope => 'sub',
   # bld_select has to be fixed to deal with associatedDomains # 			     filter => '(associatedDomain=*)', });
 
   my @domains; # = ( {value => '0', label => '--- select domain ---', selected => 'selected'} );
-  my $mesg = $self->search( { base      => $self->cfg->{base}->{org},
-			      filter    => 'associatedDomain=*',
-			      sizelimit => 0,
-			      attrs     => ['associatedDomain' ],
-			    } );
+
+  log_debug { np($self->user->has_attribute('o')) };
+  if ( ! $self->role_admin ) {
+    $base = ref($self->user->has_attribute('o')) ne 'ARRAY' ? [ $self->user->has_attribute('o') ] : $self->user->has_attribute('o');
+  }
+
+  my ($org, $mesg, $entry, @i, @j);
   my $err_message = '';
-  $err_message = '<div class="alert alert-danger">' .
-    '<i class="' . $self->{cfg}->{stub}->{icon_error} . '"></i><ul>' .
-    $self->err($mesg) . '</ul></div>'
+  my $return = [];
+  foreach $org ( @{$base} ) {
+
+
+    
+    $mesg = $self->search( { base      => $org,
+			     filter    => 'associatedDomain=*',
+			     sizelimit => 0,
+			     attrs     => ['associatedDomain' ], } );
+    $err_message .= '<div class="alert alert-danger">' .
+      '<i class="' . $self->{cfg}->{stub}->{icon_error} . '"></i><ul>' .
+      $self->err($mesg) . '</ul></div>'
       if ! $mesg->count;
 
-  my @entries = $mesg->sorted('associatedDomain');
-  my (@i, @j);
-  foreach my $entry ( @entries ) {
-    @i = $entry->get_value('associatedDomain');
-    foreach (@i) {
-      push @j, $_;
+    foreach $entry ( @{[$mesg->sorted('associatedDomain')]} ) {
+      @i = $entry->get_value('associatedDomain');
+      push @j, $_ foreach (@i);
     }
+
+
+    
+    @domains = map { { value => $_, label => $_ } } sort @j;
+    $return = [ @{$return}, @domains ];
   }
-  @domains = map { { value => $_, label => $_ } } sort @j;
-  
-  return \@domains;
+  return $return;
 }
 
 =head2 select_uid
@@ -3040,6 +3076,34 @@ sub bld_select {
 }
 
 
+=head2 org_domains
+
+returns all associatedDomains of all org dn-s passed as array ref
+argument
+
+=cut
+
+sub org_domains {
+  my ($self, $org_dn) = @_;
+  $org_dn = [ $org_dn ] if ref($org_dn) ne 'ARRAY';
+  my $return;
+  $return->{success} = [];
+  my (@domain, $org);
+  # log_debug { np($org_dn) };
+  foreach my $dn ( @{$org_dn} ) {
+    $org = $self->search( { base      => $dn,
+			    scope     => 'base',
+			    sizelimit => 0,
+			    attrs     => ['associatedDomain' ], } );
+
+    return $return->{error} = $self->err($org) if ! $org->count;
+
+    $return->{success} = [ @{$return->{success}}, $_->get_value('associatedDomain') ]
+      foreach ( @{[$org->sorted('associatedDomain')]} );
+  }
+  return $return;
+}
+
 =head2 create_account_branch
 
 creates branch for service accounts like
@@ -3090,7 +3154,9 @@ sub create_account_branch {
   my ( $return, $if_exist);
   $arg->{add_attrs} =
     [ uid => sprintf('%s@%s', $arg->{$self->cfg->{rdn}->{acc_root}}, $arg->{authorizedservice}),
-      objectClass => [ @{$self->cfg->{objectClass}->{acc_svc_branch}}, @{$arg->{objectclass}} ],
+      objectClass       => [ @{$self->cfg->{objectClass}->{acc_svc_branch}},
+			     @{$arg->{objectclass}} ],
+      associatedDomain  => $arg->{associateddomain},
       authorizedService =>
       sprintf('%s@%s%s', $arg->{authorizedservice},
 	      defined $self->cfg->{authorizedService}->{$args->{authorizedservice}}
@@ -3706,7 +3772,6 @@ sub show_inventory_item {
   # p $res;
   return $return;
 }
-
 
 
 

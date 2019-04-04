@@ -1603,7 +1603,27 @@ sub nisnetgroup_host_split {
   }
 }
 
+=head2 is_org_uni
 
+number of elements in the intersection of user organization/s and
+ou=People,dc=.. root object organization/s
+
+=cut
+
+sub is_org_uni {
+  my ($self, $org_usr, $org_obj) = @_;
+  #log_debug { np($org_usr) };
+  #log_debug { np($org_obj) };
+  $org_usr = [ $org_usr ] if ref($org_usr) ne 'ARRAY';
+  $org_obj = join('', @{$org_obj});
+  #log_debug { np($org_usr) };
+  #log_debug { np($org_obj) };
+  #my %i;
+  #@i{@$org_obj} = ();
+  #my $int = grep exists $i{$_}, @$org_usr;
+  my $int = grep {$org_obj =~ /.*$_.*/} @$org_usr;
+  return $int;
+}
 
 
 =head1 AUTHOR

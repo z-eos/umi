@@ -61,7 +61,7 @@ sub index :Path :Args(0) {
       $final_message->{error} = $qr->{error};
     } else {
       $final_message->{success} = sprintf('<figure class="text-center">
-  <figcaption>QR code for input: <span class="text-monospace">%s</span></figcaption>
+  <figcaption class="h3 text-monospace text-break text-left">%s</figcaption>
   <img alt="no QR Code was generated for: %s"
        src="data:image/png;base64,%s"
        title="QR Code for user input"/>

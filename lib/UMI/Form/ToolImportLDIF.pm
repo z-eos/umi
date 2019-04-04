@@ -25,9 +25,9 @@ has '+enctype' => ( default => 'multipart/form-data');
 has_field 'file'
   => ( type                  => 'File',
        wrapper_attr          => { id => 'fieldfile', },
-       wrapper_class         => [ 'custom-file', 'mb-3', 'col-4', 'offset-md-2', ],
+       wrapper_class         => [ 'custom-file', 'ml-1', 'mb-3', 'row', ],
        label                 => 'Select LDIF File',
-       label_class           => [ 'custom-file-label', ],
+       label_class           => [ 'custom-file-label', 'col-6', 'offset-md-2', ],
        label_attr            => {  'data-browse' => 'Chose File', },
        element_class         => [ 'btn', 'btn-default', 'btn-secondary', 'custom-file-input', ],
        element_wrapper_class => [ 'input-sm', ],

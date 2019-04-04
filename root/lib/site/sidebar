@@ -96,41 +96,41 @@
 	<ul class="nav flex-column collapse m-0 p-0" id="submenuTools">
           <li class="nav-item">
 	    <a class="text-light nav-link" href="/tooltranslit">
-	      <i class="fa fa-fw fa-language"></i>
+	      <i class="fas fa-fw fa-language"></i>
 	      Translit
 	    </a>
 	  </li>
           <li class="nav-item">
 	    <a class="text-light nav-link" href="/toolpwdgen">
-	      <i class="fa fa-fw fa-fingerprint"></i>
+	      <i class="fas fa-fw fa-fingerprint"></i>
 	      Pwdgen
 	    </a>
 	  </li>
           <li class="nav-item">
 	    <a class="text-light nav-link" href="/toolsshkeygen">
-	      <i class="fa fa-fw fa-key"></i>
+	      <i class="fas fa-fw fa-key"></i>
 	      SSH keygen
 	    </a>
 	  </li>
           <li class="nav-item">
 	    <a class="text-light nav-link" href="/toolqr">
-	      <i class="fa fa-fw fa-qrcode"></i>
+	      <i class="fas fa-fw fa-qrcode"></i>
 	      QR
 	    </a>
 	  </li>
 	  [% IF c.check_user_roles('admin') %]
 	  <li class="nav-item">
 	    <a class="text-light nav-link" href="/sysinfo">
-	      <i class="fa fa-fw fa-info-circle"></i>
+	      <i class="fas fa-fw fa-info-circle"></i>
 	      System Info
 	    </a>
 	  </li>
 	  <li class="nav-item">
-	    <a class="text-light nav-link" href="test"><i class="fa fa-fw fa-code">&nbsp;</i>Test Code</a>
+	    <a class="text-light nav-link" href="test"><i class="fas fa-fw fa-code">&nbsp;</i>Test Code</a>
 	  </li>
           <li class="nav-item">
 	    <a class="text-light nav-link" href="/toolimportldif">
-	      <i class="fa fa-fw fa-download"></i>
+	      <i class="fas fa-fw fa-download"></i>
 	      LDIF Import
 	    </a>
 	  </li>
@@ -149,7 +149,7 @@
 	  [% IF c.check_any_user_role ('admin', 'coadmin', 'acl-w-people') %]
           <li class="nav-item">
 	    <a class="text-light nav-link" href="/userall" tabindex="2">
-	      <i class="fa fa-fw fa-user"></i>
+	      <i class="fas fa-fw fa-user"></i>
 	      User
 	    </a>
 	  </li>
@@ -157,7 +157,7 @@
 	  [% IF c.check_any_user_role ('admin', 'coadmin', 'dhcp') %]
           <li class="disabled">
 	    <a class="text-light nav-link" href="/dhcp" tabindex="7">
-              <i class="fa fa-fw fa-network-wired"></i>
+              <i class="fas fa-fw fa-network-wired"></i>
               DHCP
 	    </a>
 	  </li>

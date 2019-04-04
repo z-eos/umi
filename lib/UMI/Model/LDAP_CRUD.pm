@@ -28,8 +28,10 @@ sub prepare_arguments {
 
   return {
 	  %{$args},
-	  uid => $c->session->{auth_uid},
-	  pwd => $c->session->{auth_pwd},
+	  uid  => $c->session->{auth_uid},
+	  pwd  => $c->session->{auth_pwd},
+	  user => $c->user,
+	  role_admin => $c->check_user_roles( qw/admin/ ),
 	  # path_to_images => $c->path_to('root', 'static', 'images'),
 	 };
 }

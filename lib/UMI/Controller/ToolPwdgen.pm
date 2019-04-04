@@ -55,9 +55,9 @@ sub index :Path :Args(0) {
 			    cap           => $params->{'pwd_cap'}     || undef,
 			    pronounceable => $params->{pronounceable} || 0, });
 
-  my $final_message->{success} = '<table class="table table-vcenter table-borderless">' .
-    '<tr><td><h1 class="text-monospace text-center">' .
-    $pwd->{clear} . '</h1></td><td class="text-center">';
+  my $final_message->{success} = '<div class="row">' .
+    '<div class="col-12 h3 text-monospace text-break text-center">' . $pwd->{clear} .
+    '</div><div class="col-12 text-center">';
 
   my $qr;
   for( my $i = 0; $i < 41; $i++ ) {
@@ -68,7 +68,7 @@ sub index :Path :Args(0) {
   $final_message->{error} = $qr->{error} if $qr->{error};
   $final_message->{success} .= sprintf('<img alt="password QR" src="data:image/jpg;base64,%s" title="password QR"/>',
 				       $qr->{qr} );
-  $final_message->{success} .= '</td></tr></table>';
+  $final_message->{success} .= '</div></div>';
 
   $c->stash( final_message => $final_message );
 }

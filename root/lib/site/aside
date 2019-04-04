@@ -110,15 +110,26 @@
 	  
 	  <div class="aside-options">
             <div class="clearfix mt-4">
-              <small><b>Debug</b></small>
-	      <select class="form-control input-sm pull-right col custom-select" name="debug">
-		[% debug_levels = [ 0, 1, 2 ] %]
-		[% FOREACH i IN debug_levels %]
-		<option value="[% i %]" [% IF c.session.settings.ui.exists('debug') && c.session.settings.ui.debug == i %]selected[% END %]>[% i %]</option>
-		[% END %]
-	      </select>
-            </div>
+              <small><b>Debug: <span id="debug_level" class="text-primary"></span></b></small>
+	      <input type="range" id="debug" name="debug" class="custom-range" min="0" max="2"
+		     [% IF c.session.settings.ui.exists('debug') %]
+		     value="[% c.session.settings.ui.debug %]"
+		     [% ELSE %]
+		     value="0"
+		     [% END %]>
+	    </div>
 	  </div>
+	  <script>
+	   $(function () {
+	     var slider = document.getElementById("debug");
+	     var output = document.getElementById("debug_level");
+	     output.innerHTML = slider.value;
+	     
+	     slider.oninput = function() {
+	       output.innerHTML = this.value;
+	     }
+	   });
+	  </script>
 	  
 	  <hr>
 	  
