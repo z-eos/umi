@@ -118,9 +118,10 @@ sub _build_cfg {
 		   inventory      => 'ou=hw,ou=Inventory,'     . UMI->config->{ldap_crud_db},
 		   machines       => 'ou=machines,'            . UMI->config->{ldap_crud_db},
 		   mta            => 'ou=Sendmail,'            . UMI->config->{ldap_crud_db},
-		   netgroup       => 'ou=Netgroups,' . UMI->config->{ldap_crud_db},
+		   netgroup       => 'ou=Netgroups,' .         UMI->config->{ldap_crud_db},
 		   org            => 'ou=Organizations,'       . UMI->config->{ldap_crud_db},
 		   ovpn           => 'ou=OpenVPN,'             . UMI->config->{ldap_crud_db},
+		   pgp            => 'ou=Keys,ou=PGP,'         . UMI->config->{ldap_crud_db},
 		   rad_groups     => 'ou=groups,ou=RADIUS,'    . UMI->config->{ldap_crud_db},
 		   rad_profiles   => 'ou=profiles,ou=RADIUS,'  . UMI->config->{ldap_crud_db},
 		   sargon         => 'ou=sargon,'              . UMI->config->{ldap_crud_db},
@@ -129,14 +130,14 @@ sub _build_cfg {
 		   system_group   => 'ou=group,ou=system,'     . UMI->config->{ldap_crud_db},
 		   workstations   => 'ou=workstations,'        . UMI->config->{ldap_crud_db},
 		   monitor        => 'cn=Monitor',
-		   objects        => [ qw(
-					   acc_root
+		   objects        => [ qw( acc_root
 					   alias
 					   dhcp
 					   gitacl
 					   group
 					   inventory
 					   machines
+					   monitor
 					   mta
 					   netgroup
 					   org
@@ -144,23 +145,22 @@ sub _build_cfg {
 					   rad_groups
 					   rad_profiles
 					   sudo
-					   workstations
-					   monitor
-					) ],
+					   workstations	) ],
 		   icon => {
-			    DHCP          => 'fas fa-network-wired',
-			    GitACL        => 'fab fa-git',
-			    OpenVPN       => 'fas fa-sitemap',
-			    Organizations => 'fas fa-industry',
-			    People        => 'fas fa-user-tag',
-			    default       => 'fas fa-star',
-			    group         => 'fas fa-users',
-			    history       => 'fas fa-history',
-			    inventory     => 'fas fa-tag',
-			    mta           => 'fas fa-envelope',
-			    netgroup      => 'fas fa-user-friends',
-			    rad_groups    => 'fas fa-users',
-			    rad_profiles  => 'fas fa-cogs',
+			     DHCP          => 'fas fa-network-wired',
+			     GitACL        => 'fab fa-git',
+			     OpenVPN       => 'fas fa-sitemap',
+			     Organizations => 'fas fa-industry',
+			     People        => 'fas fa-user-tag',
+			     default       => 'fas fa-star',
+			     group         => 'fas fa-users',
+			     history       => 'fas fa-history',
+			     inventory     => 'fas fa-tag',
+			     mta           => 'fas fa-envelope',
+			     netgroup      => 'fas fa-user-friends',
+			     pgp           => 'fas fa-key',
+			     rad_groups    => 'fas fa-users',
+			     rad_profiles  => 'fas fa-cogs',
 			   }, },
 	  exclude_prefix => 'aux_',
 	  sizelimit      => 50,
@@ -417,7 +417,7 @@ sub _build_cfg {
 			       disabled             => 0,
 			       gidNumber            => 11102,
 			       uidNumberShift       => 10000,
-			       icon                 => 'fas fa-key',
+			       icon                 => 'fas fa-terminal',
 			       data_fields          => 'login,logindescr,password1,password2,sshkey,sshkeyfile,sshhome,sshshell,sshgid',
 			       data_relation        => 'sshacc',
 			      },

@@ -135,6 +135,11 @@ sub index :Path :Args(0) {
 			$filter_meta, $filter_meta);
       $base   = $ldap_crud->cfg->{base}->{db};
       $params->{'ldapsearch_base'} = $base;
+    } elsif ( defined $params->{'ldapsearch_pgp'} ) {
+      $filter = sprintf("|(pgpCertID=%s)(pgpKeyID=%s)(pgpUserID=%s)",
+			$filter_meta, $filter_meta, $filter_meta);
+      $base   = $ldap_crud->cfg->{base}->{pgp};
+      $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_mac'} ) {
       push @{$return->{error}}, 'incorrect MAC address'
 	if ! $self->macnorm({ mac => $filter_meta });
@@ -282,7 +287,10 @@ sub index :Path :Args(0) {
 
 	#=============================================================
 	### START of ACCES CONTROL to ou=People,dc=... 
-
+	# the main idea for this chunk is to intersect all domains of all
+	# users org-s and intersect them against all domains of root object org-s or
+	# domain of the service analyzed
+	
 	$ttentries->{$dn}->{root}->{associatedDomain} = $ldap_crud->org_domains( $ttentries->{$dn}->{root}->{o} );
 
 	use Array::Utils qw(:all);
