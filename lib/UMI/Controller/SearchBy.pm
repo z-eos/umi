@@ -82,10 +82,19 @@ sub index :Path :Args(0) {
   if ( defined $c->user_exists ) {
     my ( $params, $ldap_crud, $filter, $filter_meta, $filter_translitall, $base, $sizelimit, $return );
     my $sort_order = 'reverse';
-
+    my $filter_armor = '';
+    
     $params = $c->req->params;
     $ldap_crud = $c->model('LDAP_CRUD');
 
+    #=============================================================
+    ### ACCES CONTROL
+
+    my $c_user_d = $ldap_crud->org_domains( $c->user->has_attribute('o'));
+
+    ### ACCES CONTROL
+    #=============================================================
+    
     if ( defined $params->{'ldapsearch_global'} ) {
       $base = $ldap_crud->cfg->{base}->{db};
       $params->{'ldapsearch_base'} = $base;
@@ -145,6 +154,13 @@ sub index :Path :Args(0) {
       $params->{'ldapsearch_base'} = $base = $ldap_crud->cfg->{base}->{acc_root};
       $filter = sprintf("|(telephoneNumber=%s)(mobile=%s)(homePhone=%s)",
 			$filter_meta, $filter_meta, $filter_meta);
+    } elsif ( defined $params->{'ldapsearch_base'} &&
+	      $params->{'ldapsearch_base'} eq $ldap_crud->cfg->{base}->{org} ) {
+      # special case: we wanna each user (except admins) can see only org-s he belongs to
+      $filter = $params->{'ldapsearch_filter'} ne '' ? $params->{'ldapsearch_filter'} : 'objectClass=*';
+      $base   = $params->{'ldapsearch_base'};
+      $filter_armor = join('', @{[ map { '(associatedDomain=' . $_ . ')' } @{$c_user_d->{success}} ]} )
+	if ! $ldap_crud->role_admin;
     } elsif ( defined $params->{'ldapsearch_filter'} &&
 	      $params->{'ldapsearch_filter'} ne '' ) {
       $filter = $params->{'ldapsearch_filter'};
@@ -163,9 +179,8 @@ sub index :Path :Args(0) {
       $base   = $params->{'ldapsearch_base'};
     }
 
-    # my $scope = defined $params->{ldapsearch_scope} ? $params->{ldapsearch_scope} : 'sub';
     my $scope = $params->{ldapsearch_scope} // 'sub';
-    
+
     if ( ! $c->check_any_user_role( qw/admin coadmin/ ) &&
 	 ! $self->may_i({ base_dn => $base,
 			  filter  => $filter,
@@ -183,21 +198,26 @@ sub index :Path :Args(0) {
 
     $c->stats->profile(begin => "searchby_search");
 
+    my $filter4search = $filter_armor eq '' ? sprintf("(%s)", $filter ) : sprintf("&(%s)(|%s)",
+										  $filter,
+										  $filter_armor );
+    log_debug { np($filter4search) };
+
+    
     $params->{'filter'} = '(' . $filter . ')';
-    my $mesg = $ldap_crud->search({
-				   base      => $base,
-				   filter    => '(' . $filter . ')',
-				   sizelimit => $sizelimit // $ldap_crud->cfg->{sizelimit},
-				   scope     => $scope,
-				   attrs     => [ '*',
-					          'createTimestamp',
-					          'creatorsName',
-					          'modifiersName',
-					          'modifyTimestamp',
-					          'entryTtl',
-					          'entryExpireTimestamp',
-					        ],
-				  });
+    my $mesg =
+      $ldap_crud->search({base      => $base,
+			  filter    => $filter4search,
+			  sizelimit => $sizelimit // $ldap_crud->cfg->{sizelimit},
+			  scope     => $scope,
+			  attrs     => [ '*',
+					 'createTimestamp',
+					 'creatorsName',
+					 'modifiersName',
+					 'modifyTimestamp',
+					 'entryTtl',
+					 'entryExpireTimestamp', ],
+			 });
 
     # log_debug { np($mesg->as_struct) };
     my @entries = defined $params->{order_by} &&
@@ -265,24 +285,12 @@ sub index :Path :Args(0) {
 
 	$ttentries->{$dn}->{root}->{associatedDomain} = $ldap_crud->org_domains( $ttentries->{$dn}->{root}->{o} );
 
-	# for root object
-	my $ccc = $ldap_crud->org_domains( $c->user->has_attribute('o'));
 	use Array::Utils qw(:all);
 	my @l = @{$ttentries->{$dn}->{root}->{associatedDomain}->{success}};
-	my @r = @{$ccc->{success}};
+	my @r = @{$c_user_d->{success}};
 	my @intersect = intersect( @l, @r );
 	
-	log_debug { sprintf("
-    %s
-CURRENT_OBJ_DN: %s
-
-CURRENT_ROOT_OBJ_DOMAINS
-    %s
-CURRENT_USR_DOMAINS
-    %s
-INTERSECTION
-    %s
-IS ADMIN :%s; intersect size: %s\n\n",
+	log_debug { sprintf("\n%s\nCURRENT_OBJ_DN: %s\n\nCURRENT_ROOT_OBJ_DOMAINS\n\t%s\nCURRENT_USR_DOMAINS\n\t%s\nINTERSECTION\n\t%s\nIS ADMIN :%s; intersect size: %s\n\n",
 			    '-' x 70,
 			    np( $dn ),
 			    np( $ttentries->{$dn}->{root}->{associatedDomain} ),
@@ -302,12 +310,7 @@ IS ADMIN :%s; intersect size: %s\n\n",
 	  @l = @{[$_->get_value('associatedDomain')]};
 	  @intersect = intersect( @l, @r );
 	
-	  log_debug { sprintf("
-CURRENT_OBJ_DOMAINS
-%s
-INTERSECTION SVC
-%s
-IS ADMIN :%s; intersect svc size: %s\n\n",
+	  log_debug { sprintf("CURRENT_OBJ_DOMAINS\n\t%s\nINTERSECTION SVC\n\t%s\nIS ADMIN :%s; intersect svc size: %s\n\n",
 			      np( @l ),
 			      np( @intersect ),
 			      $c->check_user_roles( qw/admin/),
