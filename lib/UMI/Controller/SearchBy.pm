@@ -267,8 +267,8 @@ sub index :Path :Args(0) {
 	  # log_debug { np($self->is_org_uni($c->user->has_attribute('o'),
 	  # 				   $_->get_value('o', asref => 1))) };
 	  $ttentries->{$dn}->{root}->{givenName} = $_->get_value('givenName');
-	  $ttentries->{$dn}->{root}->{sn} = $_->get_value('sn');
-	  $ttentries->{$dn}->{root}->{o} = $_->get_value('o', asref => 1);
+	  $ttentries->{$dn}->{root}->{sn}        = $_->get_value('sn');
+	  $ttentries->{$dn}->{root}->{o}         = $_->get_value('o', asref => 1);
 	  $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
 	    $_->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
 	} else { # branches and leaves
@@ -279,8 +279,8 @@ sub index :Path :Args(0) {
 	    if $root_mesg->is_error();
 	  $root_entry = $root_mesg->entry(0);
 	  $ttentries->{$dn}->{root}->{givenName} = $root_entry->get_value('givenName');
-	  $ttentries->{$dn}->{root}->{sn} = $root_entry->get_value('sn');
-	  $ttentries->{$dn}->{root}->{o} = $root_entry->get_value('o', asref => 1);
+	  $ttentries->{$dn}->{root}->{sn}        = $root_entry->get_value('sn');
+	  $ttentries->{$dn}->{root}->{o}         = $root_entry->get_value('o', asref => 1);
 	  $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
 	    $root_entry->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
 	}
@@ -452,7 +452,7 @@ sub index :Path :Args(0) {
 		      $dn)
 	    : sprintf('img-thumbnail" alt="%s has empty image set" title="%s" src="holder.js/128x128" />', $dn, $dn);
 	} elsif ( $attr eq 'userCertificate;binary' ||
-		  $attr eq 'cACertificate;binary' ||
+		  $attr eq 'cACertificate;binary'   ||
 		  $attr eq 'certificateRevocationList;binary' ) {
 	  $ttentries->{$dn}->{attrs}->{$attr} = $self->cert_info({ attr => $attr, cert => $_->get_value( $attr ) });
 	#} elsif ( $attr eq 'reqMod' || $attr eq 'reqOld' ) {
@@ -468,20 +468,21 @@ sub index :Path :Args(0) {
 	    ( $attr eq 'reqMod' || $attr eq 'reqOld' ) ) {
 	  foreach $tmp ( @{ $ttentries->{$dn}->{attrs}->{$attr} } ) {
 	    $diff->{$attr} .= sprintf("%s\n", $tmp)
-	      if $tmp !~ /.*entryCSN.*/ &&
-	      $tmp !~ /.*modifiersName.*/ &&
+	      if $tmp !~ /.*entryCSN.*/     &&
+	      $tmp !~ /.*modifiersName.*/   &&
 	      $tmp !~ /.*modifyTimestamp.*/ &&
-	      $tmp !~ /.*creatorsName.*/ &&
+	      $tmp !~ /.*creatorsName.*/    &&
 	      $tmp !~ /.*createTimestamp.*/ ;
 	  }
 	}
       }
+
       $ttentries->{$dn}->{attrs}->{jpegPhoto} =
 	sprintf('img-thumbnail holder-js" alt="%s has empty image set" title="%s" data-src="holder.js/128x128?theme=stub&text=ABSENT \n \n  ATTRIBUTE" />', $dn, $dn)
 	if ( ($ttentries->{$dn}->{'mgmnt'}->{is_root} &&
 	      $dn =~ /^uid=.*,$ldap_crud->{cfg}->{base}->{acc_root}/) ||
-	$dn =~ /^uid=.*,authorizedService=(mail|xmpp).*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) &&
-	! exists $ttentries->{$dn}->{attrs}->{jpegPhoto};
+	     $dn =~ /^uid=.*,authorizedService=(mail|xmpp).*,$ldap_crud->{cfg}->{base}->{acc_root}/
+	   ) && ! exists $ttentries->{$dn}->{attrs}->{jpegPhoto};
       
       use Text::Diff;
       $tmp = diff \$diff->{reqOld}, \$diff->{reqMod}, { STYLE => 'Text::Diff::HTML' }
@@ -725,23 +726,23 @@ sub proc :Path(proc) :Args(0) {
 	# $params->{groups} = undef;
       }
 
-      $c->stash( template => 'user/user_mod_rad_group.tt',
-		 form => $self->form_mod_rad_groups,
+      $c->stash( template              => 'user/user_mod_rad_group.tt',
+		 form                  => $self->form_mod_rad_groups,
 		 ldap_modify_rad_group => $params->{'ldap_modify_rad_group'}, );
 
       return unless $self->form_mod_rad_groups
-      	->process( posted => ($c->req->method eq 'POST'),
-		   params => $params,
+      	->process( posted    => ($c->req->method eq 'POST'),
+		   params    => $params,
 		   ldap_crud => $ldap_crud );
 
       $c->stash( final_message => $self
 		 ->mod_groups( $ldap_crud,
 			       { mod_groups_dn => $params->{ldap_modify_rad_group},
-				 base => $ldap_crud->cfg->{base}->{rad_groups},
-				 groups => $groups,
-				 is_submit => defined $params->{aux_submit} &&
+				 base          => $ldap_crud->cfg->{base}->{rad_groups},
+				 groups        => $groups,
+				 is_submit     => defined $params->{aux_submit} &&
 				 $params->{aux_submit} eq 'Submit' ? 1 : 0,
-				 type => 'groupOfNames', } ), );
+				 type          => 'groupOfNames', } ), );
 
 #=====================================================================
 # Modify memberUids of the Group
@@ -750,8 +751,8 @@ sub proc :Path(proc) :Args(0) {
 	      $params->{'ldap_modify_memberUid'} ne '') {
       
       $c->stash( template => 'group/group_mod_memberUid.tt',
-		 form => $self->form_mod_memberUid,
-		 groupdn => $params->{ldap_modify_memberUid}, );
+		 form     => $self->form_mod_memberUid,
+		 groupdn  => $params->{ldap_modify_memberUid}, );
 
       my $ldap_crud = $c->model('LDAP_CRUD');
       
@@ -760,8 +761,8 @@ sub proc :Path(proc) :Args(0) {
 	my $init_obj = { ldap_modify_memberUid => $params->{ldap_modify_memberUid} };
 	my $return;
 	my $mesg = $ldap_crud
-	  ->search({ base => $params->{ldap_modify_memberUid},
-		     attrs => ['memberUid'],
+	  ->search({ base      => $params->{ldap_modify_memberUid},
+		     attrs     => ['memberUid'],
 		     sizelimit => 0,});
 
 	push @{$return->{error}}, $ldap_crud->err($mesg)->{html}
@@ -777,18 +778,18 @@ sub proc :Path(proc) :Args(0) {
 	# render it as it is (no params passed, just init_object)
 	return unless $self->form_mod_memberUid
 	  ->process( init_object => $init_obj,
-		     ldap_crud => $c->model('LDAP_CRUD'), );
+		     ldap_crud   => $c->model('LDAP_CRUD'), );
       } else {
 	# all next, after-submit runs
 	return unless $self->form_mod_memberUid
-	  ->process( posted => ($c->req->method eq 'POST'),
-		     params => $params,
+	  ->process( posted    => ($c->req->method eq 'POST'),
+		     params    => $params,
 		     ldap_crud => $c->model('LDAP_CRUD'), );
 
 	$c->stash( final_message => $self
 		   ->mod_memberUid( $c->model('LDAP_CRUD'),
 				    { mod_group_dn => $params->{ldap_modify_memberUid},
-				      memberUid => $params->{memberUid}, }), );
+				      memberUid    => $params->{memberUid}, }), );
       }
 
 #=====================================================================
@@ -812,7 +813,7 @@ sub proc :Path(proc) :Args(0) {
 	  $c->model('LDAP_CRUD');
 	my $mesg = $ldap_crud
 	  ->search( {
-		     base => $params->{ldap_modify_memberUid},
+		     base  => $params->{ldap_modify_memberUid},
 		     attrs => ['memberUid'],
 		    } );
 
@@ -830,15 +831,15 @@ sub proc :Path(proc) :Args(0) {
       p $params;
 
       $c->stash(
-		template => 'group/group_mod_memberUid.tt',
-		form => $self->form_mod_memberUid,
+		template              => 'group/group_mod_memberUid.tt',
+		form                  => $self->form_mod_memberUid,
 		ldap_modify_memberUid => $params->{'ldap_modify_memberUid'},
 	       );
 
       return unless $self->form_mod_memberUid
       	->process(
-      		  posted => ($c->req->method eq 'POST'),
-      		  params => $params,
+      		  posted    => ($c->req->method eq 'POST'),
+      		  params    => $params,
       		  ldap_crud => $c->model('LDAP_CRUD'),
       		 );
 
@@ -847,7 +848,7 @@ sub proc :Path(proc) :Args(0) {
 				 $c->model('LDAP_CRUD'),
 				 {
 				  mod_group_dn => $params->{ldap_modify_memberUid},
-				  memberUid => $params->{memberUid},
+				  memberUid    => $params->{memberUid},
 				 }
 				),
 	       );
@@ -859,25 +860,25 @@ sub proc :Path(proc) :Args(0) {
 	     $params->{'ldap_add_dhcp'} ne '') {
 
       $c->stash(
-		template => 'dhcp/dhcp_wrap.tt',
-		form => $self->form_add_dhcp,
+		template      => 'dhcp/dhcp_wrap.tt',
+		form          => $self->form_add_dhcp,
 		ldap_add_dhcp => $params->{'ldap_add_dhcp'},
 	       );
 
       return unless $self->form_add_dhcp->process(
-						  posted => ($c->req->method eq 'POST'),
-						  params => $params,
+						  posted    => ($c->req->method eq 'POST'),
+						  params    => $params,
 						  ldap_crud => $c->model('LDAP_CRUD'),
 						 );
       $c->stash(
       		final_message => $c->controller('Dhcp')
 		->create_dhcp_host ( $c->model('LDAP_CRUD'),
 				     {
-				      cn => $params->{cn},
-				      net => $params->{net},
-				      uid => substr((split(',',$params->{ldap_add_dhcp}))[0],4),
-				      dhcpComments => $params->{dhcpComments},
-				      dhcpHWAddress => $params->{dhcpHWAddress},
+				      cn             => $params->{cn},
+				      net            => $params->{net},
+				      uid            => substr((split(',', $params->{ldap_add_dhcp}))[0], 4),
+				      dhcpComments   => $params->{dhcpComments},
+				      dhcpHWAddress  => $params->{dhcpHWAddress},
 				      dhcpStatements => $params->{dhcpStatements},
 				     }
 				   ),
@@ -892,8 +893,8 @@ sub proc :Path(proc) :Args(0) {
       $params->{avatar} = $c->req->upload('avatar') if defined $params->{avatar};
 
       $c->stash(
-		template => 'user/user_modjpegphoto.tt',
-		form => $self->form_jpegphoto,
+		template              => 'user/user_modjpegphoto.tt',
+		form                  => $self->form_jpegphoto,
 		ldap_modify_jpegphoto => $params->{'ldap_modify_jpegphoto'},
 	       );
 
@@ -932,10 +933,10 @@ sub proc :Path(proc) :Args(0) {
       my $dynamic_object = defined $params->{'dynamic_object'} && $params->{'dynamic_object'} ne '' ? 1 : 0;
       
       $c->stash(
-		template => 'user/user_add_svc.tt',
-		form => $self->form_add_svc_acc,
-		add_svc_acc => $params->{'add_svc_acc'},
-		dynamic_object => $dynamic_object,
+		template        => 'user/user_add_svc.tt',
+		form            => $self->form_add_svc_acc,
+		add_svc_acc     => $params->{'add_svc_acc'},
+		dynamic_object  => $dynamic_object,
 		add_svc_acc_uid => $params->{'add_svc_acc_uid'},
 	       );
 
@@ -943,8 +944,8 @@ sub proc :Path(proc) :Args(0) {
       # p $params->{usercertificate};
 
       return unless $self->form_add_svc_acc->process(
-						     posted => ($c->req->method eq 'POST'),
-						     params => $params,
+						     posted    => ($c->req->method eq 'POST'),
+						     params    => $params,
 						     ldap_crud => $ldap_crud,
 						    ) &&
 						      defined $params->{'associateddomain'} &&
@@ -1002,7 +1003,7 @@ sub proc :Path(proc) :Args(0) {
 
 	  push @{$return->{success}}, {
 				       authorizedservice => $_,
-				       associateddomain => $params->{'associateddomain_prefix'} . $params->{'associateddomain'},
+				       associateddomain  => $params->{'associateddomain_prefix'} . $params->{'associateddomain'},
 				       service_uid => $uid,
 				       service_pwd => $pwd->{$_}->{clear},
 				      };
@@ -1013,11 +1014,11 @@ sub proc :Path(proc) :Args(0) {
 	    $c->controller('User')
 	      ->create_account_branch ( $ldap_crud,
 					{
-					 base_uid => substr($id[0], 4),
-					 service => $_,
+					 base_uid         => substr($id[0], 4),
+					 service          => $_,
 					 associatedDomain => $params->{'associateddomain_prefix'} . $params->{associateddomain},
-					 objectclass => defined $params->{dynamic_object} && $params->{dynamic_object} ne '' ? 'dynamicObject' : '',
-					 requestttl => defined $params->{person_exp} && $params->{person_exp} ne '' ? $params->{person_exp} : '',
+					 objectclass      => defined $params->{dynamic_object} && $params->{dynamic_object} ne '' ? 'dynamicObject' : '',
+					 requestttl       => defined $params->{person_exp} && $params->{person_exp} ne '' ? $params->{person_exp} : '',
 					},
 				      );
 
@@ -1044,21 +1045,21 @@ sub proc :Path(proc) :Args(0) {
 
 	  $create_account_branch_leaf_params
 	    = {
-	       basedn => $params->{'add_svc_acc'},
-	       service => $_,
+	       basedn           => $params->{'add_svc_acc'},
+	       service          => $_,
 	       associatedDomain => $params->{'associateddomain_prefix'} . $params->{associateddomain},
-	       uidNumber => $entry[0]->get_value('uidNumber'),
-	       givenName => $entry[0]->get_value('givenName'),
-	       sn => $entry[0]->get_value('sn'),
-	       login => $login,
-	       password => $pwd->{$_},
+	       uidNumber       => $entry[0]->get_value('uidNumber'),
+	       givenName       => $entry[0]->get_value('givenName'),
+	       sn              => $entry[0]->get_value('sn'),
+	       login           => $login,
+	       password        => $pwd->{$_},
 	       telephoneNumber => defined $params->{telephoneNumber} ? $params->{telephoneNumber} : undef,
-	       jpegPhoto => $file,
-	       userCertificate => $params->{usercertificate},
-	       radiusgroupname => $params->{radiusgroupname},
+	       jpegPhoto                  => $file,
+	       userCertificate            => $params->{usercertificate},
+	       radiusgroupname            => $params->{radiusgroupname},
 	       radiustunnelprivategroupid => $params->{radiustunnelprivategroupid},
-	       objectclass => defined $params->{dynamic_object} && $params->{dynamic_object} ne '' ? 'dynamicObject' : '',
-	       requestttl => defined $params->{person_exp} && $params->{person_exp} ne '' ? $params->{person_exp} : '',
+	       objectclass                => defined $params->{dynamic_object} && $params->{dynamic_object} ne '' ? 'dynamicObject' : '',
+	       requestttl                 => defined $params->{person_exp} && $params->{person_exp} ne '' ? $params->{person_exp} : '',
 	      };
 
 	  if ( defined $params->{to_sshkeygen} ) {
@@ -1066,7 +1067,7 @@ sub proc :Path(proc) :Args(0) {
 	  } elsif ( defined $params->{sshpublickey} &&
 		    $params->{sshpublickey} ne '' ) {
 	    $create_account_branch_leaf_params->{sshpublickey} = $params->{sshpublickey};
-	    $create_account_branch_leaf_params->{sshkeydescr} = $params->{sshkeydescr};
+	    $create_account_branch_leaf_params->{sshkeydescr}  = $params->{sshkeydescr};
 	  }
 
 
@@ -1165,8 +1166,8 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
   my $params = $c->req->parameters;
 
   $c->stash(
-	    template => 'user/user_modpwd.tt',
-	    form => $self->form_mod_pwd,
+	    template             => 'user/user_modpwd.tt',
+	    form                 => $self->form_mod_pwd,
 	    ldap_modify_password => $params->{ldap_modify_password},
 	   );
 
@@ -1176,10 +1177,10 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
 					    ) &&
   					      ( defined $params->{password_init} ||
   						defined $params->{password_cnfm} ||
-  						defined $params->{pwd_cap} ||
-  						defined $params->{pwd_len} ||
-  						defined $params->{pwd_num} ||
-  						defined $params->{checkonly} ||
+  						defined $params->{pwd_cap}       ||
+  						defined $params->{pwd_len}       ||
+  						defined $params->{pwd_num}       ||
+  						defined $params->{checkonly}     ||
   						defined $params->{pronounceable} );
 
   my $arg = { mod_pwd_dn    => $params->{ldap_modify_password},
@@ -2202,8 +2203,8 @@ sub dhcp_add :Path(dhcp_add) :Args(0) {
 		 ldap_crud => $c->model('LDAP_CRUD'), );
   } else {
     return unless $self->form_add_dhcp->process(
-						posted => ($c->req->method eq 'POST'),
-						params => $params,
+						posted    => ($c->req->method eq 'POST'),
+						params    => $params,
 						ldap_crud => $c->model('LDAP_CRUD'),
 					       );
 
@@ -2212,12 +2213,12 @@ sub dhcp_add :Path(dhcp_add) :Args(0) {
 	      final_message => $c->controller('Dhcp')
 	      ->create_dhcp_host ( $c->model('LDAP_CRUD'),
 				   {
-				    dhcpHWAddress => $params->{dhcpHWAddress},
-				    uid => substr((split(',',$params->{ldap_add_dhcp}))[0],4),
+				    dhcpHWAddress  => $params->{dhcpHWAddress},
+				    uid            => substr((split(',',$params->{ldap_add_dhcp}))[0],4),
 				    dhcpStatements => $params->{dhcpStatements},
-				    net => $params->{net},
-				    cn => $params->{cn},
-				    dhcpComments => $params->{dhcpComments},
+				    net            => $params->{net},
+				    cn             => $params->{cn},
+				    dhcpComments   => $params->{dhcpComments},
 				   }
 				 ),
 	     ); # if $self->form_add_dhcp->validated;

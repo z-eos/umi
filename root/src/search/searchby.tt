@@ -467,7 +467,8 @@ Search Advanced
 	    [%   NEXT IF cert.key == 'error' && ! cert.value %]
 	    [%     IF h_attr.key.match('certificateRevocationList;binary') &&
 	       cert.key.match('RevokedCertificates') %]
-	    <dt class="col-sm-3 text-right">[%   cert.key %]</dt><dd class="col-sm-9 text-monospace">
+	    <dt class="col-sm-3 text-right">[%   cert.key %]</dt>
+	    <dd class="col-sm-9 text-monospace">
 	      <div class="card">
 		<div class="card-header bg-info">
 		  <h3 class="card-title text-light">
@@ -535,9 +536,9 @@ Search Advanced
 	[%       END %]
 
 	[%       IF loop.last || v.match('form') %][% # if last element or button %]
-	[%       v.trim %]
+	[%         v.trim %]
 	[%       ELSE %][% # not last element of array %]
-	<div>[%  v.trim %]</div>
+	<div>[%  FILTER html %][% v.trim %][% END %]</div>
 	[%       END %]
 	[%     END %]
 	[%   END %]
@@ -547,7 +548,7 @@ Search Advanced
 	       buttonizer_dn=h_attr.value,
 	       buttonizer_text=h_attr.value.trim ) %]
 	[%   ELSE %]
-	[%   h_attr.value.trim %]
+	[%     FILTER html %][% h_attr.value.trim %][% END %]
 	[%   END %]
 	[% END %]
       </dd>

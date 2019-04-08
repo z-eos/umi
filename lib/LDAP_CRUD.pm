@@ -118,7 +118,7 @@ sub _build_cfg {
 		   inventory      => 'ou=hw,ou=Inventory,'     . UMI->config->{ldap_crud_db},
 		   machines       => 'ou=machines,'            . UMI->config->{ldap_crud_db},
 		   mta            => 'ou=Sendmail,'            . UMI->config->{ldap_crud_db},
-		   netgroup       => 'ou=Netgroups,' .         UMI->config->{ldap_crud_db},
+		   netgroup       => 'ou=Netgroups,'           . UMI->config->{ldap_crud_db},
 		   org            => 'ou=Organizations,'       . UMI->config->{ldap_crud_db},
 		   ovpn           => 'ou=OpenVPN,'             . UMI->config->{ldap_crud_db},
 		   pgp            => 'ou=Keys,ou=PGP,'         . UMI->config->{ldap_crud_db},
@@ -441,106 +441,106 @@ sub _build_cfg {
 	   singleboard => {
 			   dn_sfx => 'ou=SingleBoard,ou=hw,',
 			   ap => {
-				  descr => 'singleboard inventory item, Access Point',
+				  descr    => 'singleboard inventory item, Access Point',
 				  disabled => 0,
-				  icon => 'fas fa-lg fa-cog',
+				  icon     => 'fas fa-lg fa-cog',
 				 },
 			   com  => {
-				    descr => 'singleboard inventory item, commutator',
+				    descr    => 'singleboard inventory item, commutator',
 				    disabled => 0,
-				    icon => 'fas fa-lg fa-cog',
+				    icon     => 'fas fa-lg fa-cog',
 				   },
 			   wrt => {
-				   descr => 'singleboard inventory item, WRT',
+				   descr    => 'singleboard inventory item, WRT',
 				   disabled => 0,
-				   icon => 'fas fa-lg fa-cog',
+				   icon     => 'fas fa-lg fa-cog',
 				  },
 			   monitor => {
-				       descr => 'singleboard inventory item, monitor',
+				       descr    => 'singleboard inventory item, monitor',
 				       disabled => 0,
-				       icon => 'fas fa-lg fa-cog',
+				       icon     => 'fas fa-lg fa-cog',
 				      },
 			   prn => {
-				   descr => 'singleboard inventory item, printer',
+				   descr    => 'singleboard inventory item, printer',
 				   disabled => 0,
-				   icon => 'fas fa-lg fa-cog',
+				   icon     => 'fas fa-lg fa-cog',
 				  },
 			   mfu => {
-				   descr => 'singleboard inventory item, MFU',
+				   descr    => 'singleboard inventory item, MFU',
 				   disabled => 0,
-				   icon => 'fas fa-lg fa-cog',
+				   icon     => 'fas fa-lg fa-cog',
 				  },
 			  },
 	   composite => {
 			 dn_sfx => 'ou=Composite,ou=hw,',
 			 ws => {
-				descr => 'composite inventory item, workstation',
+				descr    => 'composite inventory item, workstation',
 				disabled => 0,
-				icon => 'fas fa-lg fa-desktop',
+				icon     => 'fas fa-lg fa-desktop',
 			       },
 			 srv => {
-				 descr => 'composite inventory item, server',
+				 descr    => 'composite inventory item, server',
 				 disabled => 0,
-				 icon => 'fas fa-lg fa-desktop',
+				 icon     => 'fas fa-lg fa-desktop',
 				},
 			},
 	   consumable => {
 			  dn_sfx => 'ou=Consumable,ou=hw,',
 			  kbd => {
-				  descr => 'consumable inventory item, keyboard',
+				  descr    => 'consumable inventory item, keyboard',
 				  disabled => 0,
-				  icon => 'fas fa-lg fa-recycle',
+				  icon     => 'fas fa-lg fa-recycle',
 				 },
 			  ms => {
-				 descr => 'consumable inventory item, mouse',
+				 descr    => 'consumable inventory item, mouse',
 				 disabled => 0,
-				 icon => 'fas fa-lg fa-recycle',
+				 icon     => 'fas fa-lg fa-recycle',
 				},
 			  hs => {
-				 descr => 'consumable inventory item, headset',
+				 descr    => 'consumable inventory item, headset',
 				 disabled => 0,
-				 icon => 'fas fa-lg fa-recycle',
+				 icon     => 'fas fa-lg fa-recycle',
 				},
 			 },
 	   compart => {
 		       dn_sfx => 'ou=Compart,ou=hw,',
 		       mb => {
-			      descr => 'compart inventory item, motherboard',
+			      descr    => 'compart inventory item, motherboard',
 			      disabled => 0,
-			      icon => 'fas fa-lg fa-cogs',
+			      icon     => 'fas fa-lg fa-cogs',
 			     },
 		       cpu => {
-			       descr => 'compart inventory item, CPU',
+			       descr    => 'compart inventory item, CPU',
 			       disabled => 0,
-			       icon => 'fas fa-lg fa-cogs',
+			       icon     => 'fas fa-lg fa-cogs',
 			      },
 		       ram => {
-			       descr => 'compart inventory item, RAM',
+			       descr    => 'compart inventory item, RAM',
 			       disabled => 0,
-			       icon => 'fas fa-lg fa-cogs',
+			       icon     => 'fas fa-lg fa-cogs',
 			      },
 		       disk => {
-			       descr => 'compart inventory item, disk',
+			       descr    => 'compart inventory item, disk',
 			       disabled => 0,
-			       icon => 'fas fa-lg fa-cogs',
+			       icon     => 'fas fa-lg fa-cogs',
 			      },
 		      },
 	   furniture => {
 			 dn_sfx => 'ou=Furniture,ou=hw,',
 			 tbl => {
-				 descr => 'furniture inventory item, table',
+				 descr    => 'furniture inventory item, table',
 				 disabled => 0,
-				 icon => 'fas fa-lg fa-bed',
+				 icon     => 'fas fa-lg fa-bed',
 				},
 			 chr => {
-				 descr => 'furniture inventory item, chair',
+				 descr    => 'furniture inventory item, chair',
 				 disabled => 0,
-				 icon => 'fas fa-lg fa-wheelchair',
+				 icon     => 'fas fa-lg fa-wheelchair',
 				},
 			},
 	  },
 	  err => {
-		  0 => '<div class="alert alert-success" role="alert"><i class="fas fa-info-circle fa-lg"></i>&nbsp;<b>Your request returned no result. Try to change query parameter/s.</b></div>',
+		  0  => '<div class="alert alert-success" role="alert"><i class="fas fa-info-circle fa-lg"></i>&nbsp;<b>Your request returned no result. Try to change query parameter/s.</b></div>',
 		  50 => 'Do not panic! This situation needs your security officer and system administrator attention, please contact them to solve the issue.',
 		 },
 
@@ -590,8 +590,8 @@ sub _build_ldap {
 	     UMI->config->{ldap_crud_cafile} ne '' ) {
 	  $mesg = try {
 	    $ldap->start_tls(
-			     verify => 'none',
-			     cafile => UMI->config->{ldap_crud_cafile},
+			     verify   => 'none',
+			     cafile   => UMI->config->{ldap_crud_cafile},
 			     checkcrl => 0,
 			    );
 	  } catch {
@@ -787,10 +787,10 @@ if ram-17 is the last one, then number 17 will be returned
 
 sub last_seq {
   my ($self, $args) = @_;
-  my $arg = { base => $args->{base},
-	      attr => $args->{attr}, # one single attribute sequence of we calculate
-	      scope => $args->{scope} || 'one',
-	      filter => $args->{filter} || '(objectClass=*)',
+  my $arg = { base    => $args->{base},
+	      attr    => $args->{attr}, # one single attribute sequence of we calculate
+	      scope   => $args->{scope} || 'one',
+	      filter  => $args->{filter} || '(objectClass=*)',
 	      seq_pfx => $args->{seq_pfx},
 	      seq_cnt => 0, };
 
@@ -825,13 +825,13 @@ sub err {
 
   my $caller = (caller(1))[3];
   my $err = {
-	     code => defined $mesg->code ? $mesg->code : 'NA',
-	     name => ldap_error_name($mesg),
-	     text => ldap_error_text($mesg),
-	     desc => ldap_error_desc($mesg),
-	     srv => $mesg->server_error,
-	     caller => $caller ? $caller : 'main',
-	     matchedDN => $mesg->{matchedDN},
+	     code          => defined $mesg->code ? $mesg->code : 'NA',
+	     name          => ldap_error_name($mesg),
+	     text          => ldap_error_text($mesg),
+	     desc          => ldap_error_desc($mesg),
+	     srv           => $mesg->server_error,
+	     caller        => $caller ? $caller : 'main',
+	     matchedDN     => $mesg->{matchedDN},
 	     supplementary => '',
 	    };
 
@@ -1192,7 +1192,7 @@ sub reassign {
   }
 
   $result = $self->search( { base  => $arg->{dst}->{str}, scope => 'base', } );
-  $entry = $result->entry(0);
+  $entry  = $result->entry(0);
   foreach ( $entry->attributes ) {
       $arg->{dst}->{data}->{$_} = $entry->get_value( $_, asref => 1 )
       if $_ ne 'jpegPhoto';
@@ -1233,7 +1233,7 @@ sub reassign {
     $result = $self->search( { base  => $arg->{src}->{str}, scope => 'children', } );
     foreach $entry ( $result->entries ) {
       $clone = $entry->clone;
-      $mesg = $clone->dn(sprintf('%s,%s',
+      $mesg  = $clone->dn(sprintf('%s,%s',
 				 (split(/,/, $entry->dn))[0],
 				 $arg->{dst}->{branch_dn}->{str}));
 
@@ -2023,13 +2023,13 @@ sub obj_schema {
 	$obj_schema->{$entry->dn}->{$objectClass}->{'must'}
 	  ->{ $must->{'name'} } =
 	    {
-	     'attr_value' => $entry->get_value( $must->{'name'} ) || undef,
-	     'desc' => $must->{'desc'} || undef,
+	     'attr_value'   => $entry->get_value( $must->{'name'} ) || undef,
+	     'desc'         => $must->{'desc'} || undef,
 	     'single-value' => $must->{'single-value'} || undef,
-	     'max_length' => $must->{'max_length'} || undef,
-	     'equality' => $must->{'equality'} || undef,
-	     'syntax' => { desc => $syntmp->{desc},
-			   oid =>  $syntmp->{oid}, },
+	     'max_length'   => $must->{'max_length'} || undef,
+	     'equality'     => $must->{'equality'} || undef,
+	     'syntax'       => { desc => $syntmp->{desc},
+				 oid =>  $syntmp->{oid}, },
 	     # 'syntax' => $must->{'syntax'} || undef,
 	     # 'attribute' => $self->schema->attribute($must->{'name'}) || undef,
 	    };
@@ -2042,13 +2042,13 @@ sub obj_schema {
 	$obj_schema->{$entry->dn}->{$objectClass}->{'may'}
 	  ->{$may->{'name'}} =
 	    {
-	     'attr_value' => $entry->get_value( $may->{'name'} ) || undef ,
-	     'desc' => $may->{'desc'} || undef ,
+	     'attr_value'   => $entry->get_value( $may->{'name'} ) || undef ,
+	     'desc'         => $may->{'desc'} || undef ,
 	     'single-value' => $may->{'single-value'} || undef ,
-	     'max_length' => $may->{'max_length'} || undef ,
-	     'equality' => $may->{'equality'} || undef ,
-	     'syntax' => { desc => $syntmp->{desc},
-			   oid =>  $syntmp->{oid}, },
+	     'max_length'   => $may->{'max_length'} || undef ,
+	     'equality'     => $may->{'equality'} || undef ,
+	     'syntax'       => { desc => $syntmp->{desc},
+				 oid =>  $syntmp->{oid}, },
 	     # 'syntax' => $may->{'syntax'} || undef,
 	     # 'attribute' => $self->schema->attribute($may->{'name'}) || undef,
 	    };
@@ -2124,11 +2124,11 @@ returns hash with results: either success or error
 
 sub obj_add {
   my ( $self, $args ) = @_;
-  my $type = $args->{'type'};
+  my $type   = $args->{'type'};
   my $params = $args->{'params'};
 
   my $attrs = $self->params2attrs({
-				   type => $type,
+				   type   => $type,
 				   params => $params,
 				  });
   my $mesg = $self->add( $attrs->{dn}, $attrs->{attrs} );
@@ -2158,7 +2158,7 @@ sub obj_mod {
   return '' unless %{$params};
 
   my $attrs = $self->params2attrs({
-				   type => $type,
+				   type   => $type,
 				   params => $params,
 				  });
 
@@ -3313,13 +3313,13 @@ sub create_account_branch_leaf {
 						 @{$arg->{objectclass}} ],
 			  authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
 			  associatedDomain  => $arg->{associatedDomain},
-			  uid       => $arg->{uid},
-			  cn        => $arg->{uid},
-			  givenName => $arg->{givenName},
-			  sn        => $arg->{sn},
+			  uid               => $arg->{uid},
+			  cn                => $arg->{uid},
+			  givenName         => $arg->{givenName},
+			  sn                => $arg->{sn},
 # moved to each svc	  uidNumber => $arg->{uidNumber},
 # moved to ssh-acc        loginShell => $self->cfg->{stub}->{loginShell},
-			  gecos => $self->utf2lat( sprintf('%s %s', $args->{givenName}, $args->{sn}) ),
+			  gecos             => $self->utf2lat( sprintf('%s %s', $args->{givenName}, $args->{sn}) ),
 			 ];
   }
   
