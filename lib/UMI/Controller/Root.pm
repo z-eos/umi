@@ -96,9 +96,10 @@ sub sysinfo : Local {
   my %z = %{$y->[1]};
   $x->{$y->[0]} = \%z;
 
-  $x->{calculate_initial_session_expires} = $self->ts({ ts => $c->calculate_initial_session_expires, format => "%Y%m%d%H%M%S" });
-  $x->{get_session_id} =  $self->ts({ ts => $c->get_session_id, format => "%Y%m%d%H%M%S" });
-  $x->{session_expires} = $self->ts({ ts => $c->session_expires, format => "%Y%m%d%H%M%S" });
+  $x->{calculate_initial_session_expires} =
+    $self->ts({ ts => $c->calculate_initial_session_expires, format => "%Y%m%d%H%M%S" });
+  $x->{get_session_id}  =  $c->get_session_id;
+  $x->{session_expires} = $self->ts({  ts => $c->session_expires, format => "%Y%m%d%H%M%S" });
 
   $x->{Session}->{auth_pwd} = '*****'
     if exists $x->{Session}->{auth_pwd};
@@ -416,7 +417,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	$entry = $mesg->as_struct;
 	# log_debug { np($entry) };
 	my $ttmmpp = eval '$entry->{$user_dn}->' . $ldap_crud->{cfg}->{rdn}->{acc_root};
-	log_debug { np( $ttmmpp ) };
+	# log_debug { np( $ttmmpp ) };
 	# log_debug { np($c->user->$ldap_crud->{cfg}->{rdn}->{acc_root}) };
 	$arg = {
 		dn                         => $user_dn,
@@ -492,7 +493,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
     }
 
     $mesg = $ldap_crud->search({ base   => $ldap_crud->cfg->{base}->{netgroup},
-				 filter => '(nisNetgroupTriple=*' . $arg->{uid} . '*)',
+				 filter => '(nisNetgroupTriple=*,' . $arg->{uid} . ',*)',
 				 attrs  => [ 'cn' ], });
     if ( $mesg->code ) {
       $return->{error} .= sprintf('<li>personal info %s</li>',
@@ -670,6 +671,33 @@ sub user_preferences :Path(user_prefs) :Args(0) {
     }
 
     #=================================================================
+    # user PGP stuff
+    #
+    my ( $pgp, $pgp_mail );
+    foreach $pgp_mail ( @{$arg->{mail}} ) {
+      my $pgp_filter = sprintf("|(pgpUserID=*%s*)(pgpUserID=*%s*)(pgpUserID=*%s*)",
+			       $arg->{givenname},
+			       $arg->{sn},
+			       $pgp_mail);
+      # log_debug { np($pgp_filter) };
+      $mesg = $ldap_crud->search( { base => $ldap_crud->cfg->{base}->{pgp},
+				    filter => $pgp_filter,				} );
+      if ( $mesg->code ) {
+	$return->{error} .= sprintf('<li>PGP %s</li>',
+				    $ldap_crud->err($mesg)->{html}); }
+      $entries = $mesg->as_struct;
+      # log_debug { np($entries) };
+      foreach (keys (%{$entries})) {
+	push @{$pgp}, {
+		       keyid  => $entries->{$_}->{pgpkeyid}->[0],
+		       userid => $entries->{$_}->{pgpuserid},
+		       key    => $entries->{$_}->{pgpkey}->[0],
+		      };
+      }
+    }
+    log_debug{ np($pgp) };
+
+    #=================================================================
     # Inventory assigned to user
     #
     my ( @inventory );
@@ -701,6 +729,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
     $c->stash( template      => 'user/user_preferences_neo.tt',
 	       auth_obj      => $arg,
 	       dhcp          => $dhcp,
+	       pgp           => $pgp,
 	       fqdn          => $fqdn,
 	       groups        => $groups,
 	       inventory     => \@inventory,

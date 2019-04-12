@@ -33,7 +33,7 @@ has_field 'netgroup'
        label_class           => [ 'col-1', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'input-sm', 'col-11' ],
        element_class         => [ 'input-sm', 'custom-select', ],
-       wrapper_class         => [ 'row', 'umi-hide', ],
+       wrapper_class         => [ 'row', ],
        options_method        => \&netgroup,
        # required              => 1,
      );
@@ -44,7 +44,7 @@ has_field 'cn'
        label_class           => [ 'col-1', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'input-sm', 'col-11', ],
        element_attr          => { placeholder => 'users-allowed-to-fly' },
-       wrapper_class         => [ 'row', 'umi-hide', ],
+       wrapper_class         => [ 'row', ],
        required              => 1 );
 
 
@@ -52,10 +52,13 @@ has_field 'uids'
   => ( type                  => 'Multiple',
        label                 => 'Users',
        label_class           => [ 'col-1', 'text-right', 'font-weight-bold', ],
+       element_attr          => { 'data-ico-l'       => 'fa-user',
+				  'data-ico-r'       => 'fa-user',
+				  'data-placeholder' => 'users', },
        element_wrapper_class => [ 'input-sm', 'col-11' ],
        element_class         => [ 'umi-multiselect' ],
        options_method        => \&uids,
-       wrapper_class         => [ 'row', 'umi-hide', ],
+       wrapper_class         => [ 'row', ],
        required              => 1,
      );
 
@@ -63,10 +66,13 @@ has_field 'associatedDomain'
   => ( type                  => 'Multiple',
        label                 => 'Hosts',
        label_class           => [ 'col-1', 'text-right', 'font-weight-bold', ],
+       element_attr          => { 'data-ico-l'       => 'fa-desktop',
+				  'data-ico-r'       => 'fa-desktop',
+				  'data-placeholder' => 'hosts', },
        element_wrapper_class => [ 'input-sm', 'col-11' ],
        element_class         => [ 'umi-multiselect' ],
        options_method        => \&associatedDomain,
-       wrapper_class         => [ 'row', 'umi-hide', ],
+       wrapper_class         => [ 'row', ],
        required              => 1,
      );
 

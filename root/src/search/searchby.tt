@@ -471,13 +471,13 @@ Search Advanced
 	    <dd class="col-sm-9 text-monospace">
 	      <div class="card">
 		<div class="card-header bg-info">
-		  <h3 class="card-title text-light">
+		  <b class="card-title text-light">
 		    <a class="collapsed chevron_toggleable" data-toggle="collapse"
 		       href="#collapse_personal_data" aria-expanded="true" aria-controls="collapse_personal_data">
-		      <i class="fa [% site.icons.toggle_down %] text-default"></i>
+		      <i class="fas fa-fw [% site.icons.toggle_down %] text-white"></i>
 		    </a>
 		    revoked certificates list
-		  </h3>
+		  </b>
 		</div>
 		<div id="collapse_personal_data" class="umi-collapsable collapse" aria-labelledby="heading_personal_data">
 		  <div class="card-body">
@@ -486,7 +486,7 @@ Search Advanced
 			<tr class="info">
 			  <th>S/N<sub>10</sub></th>
 			  <th>S/N<sub>hex</sub></th>
-			  <th><i class="fa fa-calendar"></i></th>
+			  <th><i class="far fa-calendar-alt"></i></th>
 			</tr>
 		      </thead>
 		      [% FOREACH key IN cert.value.keys.sort %]
@@ -535,8 +535,10 @@ Search Advanced
 	[%       v = i %]
 	[%       END %]
 
-	[%       IF loop.last || v.match('form') %][% # if last element or button %]
+	[%       IF v.match('form') %]
 	[%         v.trim %]
+	[%       ELSIF loop.last %][% # if last element or button %]
+	[%         FILTER html %][% v.trim %][% END %]
 	[%       ELSE %][% # not last element of array %]
 	<div>[%  FILTER html %][% v.trim %][% END %]</div>
 	[%       END %]

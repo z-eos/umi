@@ -173,7 +173,7 @@ sub _build_cfg {
 							       authorizedService => 1,
 							       cn                => 1,
 							       givenName         => 1,
-							       objectClass       => 1,
+							       # objectClass       => 1,
 							       sn                => 1,
 							       uid               => 1,
 							      },
@@ -389,7 +389,7 @@ sub _build_cfg {
 			       auth => 1,
 			       descr => 'Web Account',
 			       disabled => 0,
-			       icon => 'fas fa-globe',
+			       icon => 'fas fa-globe-europe',
 			       data_fields => 'login,logindescr,password1,password2',
 			       data_relation => 'passw',
 			      },
@@ -929,6 +929,7 @@ sub search {
   my $mesg = $self->ldap->search( %{$arg} );
 
   # log_debug { np($arg) };
+  # log_debug { np($mesg->count) };
 
   return $mesg;
 }

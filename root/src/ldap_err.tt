@@ -3,7 +3,7 @@
 [% # final_message.success = 'success test' %]
 
 [% IF form.errors || ( final_message.error && final_message.error != '') %]
-<div class="card-group m-0 mb-3" id="accordion">
+<div class="card-group m-0 my-3" id="accordion">
   <div class="card card-sm border-danger">
     <div class="card-header bg-danger clearfix p-0 pt-2" role="tab" id="headErr">
       <a class="chevron_toggleable btn btn-danger btn-borderless float-left"
@@ -44,7 +44,7 @@
 [% END %]
 
 [% IF final_message.warning %]
-<div class="card m-0 mb-3 border-warning">
+<div class="card m-0 my-3 border-warning">
   <div class="card-header bg-warning clearfix p-0 pt-2">
     <button type="button" class="close borderless pr-3" data-dismiss="alert" aria-label="Close"
 	    onclick="$(this).closest('.card').hide(200)"
@@ -71,7 +71,7 @@
 [% END %]
 
 [% IF final_message.success %]
-<div class="card m-0 mb-3 border-success">
+<div class="card m-0 my-3 border-success">
   <div class="card-header bg-success clearfix p-0 pt-2">
     <h4 class="text-light">
       <a class="chevron_toggleable btn btn-success btn-borderless float-left"

@@ -443,9 +443,15 @@ html,body {
 
    ------------------------------- */
 
-a, input, div, ul, li, span, select, .card, .card-group, .card-header, .btn, .input-group, .input-group-sm, .input-group-text, .form-group, .form-control, .ms-list, .ms-selection, .nav, .nav-link, .nav-item, .custom-file-input, .custom-file-label, .card-group > .card:only-child .card-img-top, .card-group > .card:only-child .card-header {
+a, input, ul, li, select, .card, .card-group, .card-header, .btn, .input-group, .input-group-sm, .input-group-text, .form-group, .form-control, .ms-list, .ms-selection, .nav, .nav-link, .nav-item, .custom-file-input, .custom-file-label, .card-group > .card:only-child .card-img-top, .card-group > .card:only-child .card-header {
   border-radius: 0 !important;
 }
+
+/*
+div, span {
+  border-radius: 0 !important;
+}
+*/
 
 .btn {
   border: none;

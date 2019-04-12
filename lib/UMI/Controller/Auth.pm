@@ -81,38 +81,38 @@ sub signin :Path Global {
       $meta_schema->{$_} += 1 foreach ( @{$value} );
     }
 
-    $meta_schema->{dhcpService} = 1;
+    $meta_schema->{dhcpClass}         = 1;
+    $meta_schema->{dhcpDnsZone}       = 1;
+    $meta_schema->{dhcpFailOverPeer}  = 1;
+    $meta_schema->{dhcpGroup}         = 1;
+    $meta_schema->{dhcpHost}          = 1;
+    $meta_schema->{dhcpLeases}        = 1;
+    $meta_schema->{dhcpLocator}       = 1;
+    $meta_schema->{dhcpLog}           = 1;
+    $meta_schema->{dhcpOptions}       = 1;
+    $meta_schema->{dhcpPool}          = 1;
+    $meta_schema->{dhcpServer}        = 1;
+    $meta_schema->{dhcpService}       = 1;
     $meta_schema->{dhcpSharedNetwork} = 1;
-    $meta_schema->{dhcpSubnet} = 1;
-    $meta_schema->{dhcpPool} = 1;
-    $meta_schema->{dhcpGroup} = 1;
-    $meta_schema->{dhcpHost} = 1;
-    $meta_schema->{dhcpClass} = 1;
-    $meta_schema->{dhcpSubClass} = 1;
-    $meta_schema->{dhcpOptions} = 1;
-    $meta_schema->{dhcpLeases} = 1;
-    $meta_schema->{dhcpLog} = 1;
-    $meta_schema->{dhcpServer} = 1;
-    $meta_schema->{dhcpTSigKey} = 1;
-    $meta_schema->{dhcpDnsZone} = 1;
-    $meta_schema->{dhcpFailOverPeer} = 1;
-    $meta_schema->{dhcpLocator} = 1;
+    $meta_schema->{dhcpSubClass}      = 1;
+    $meta_schema->{dhcpSubnet}        = 1;
+    $meta_schema->{dhcpTSigKey}       = 1;
 
     my $schema = $ldap_crud->schema; # ( dn => $ldap_crud->{base}->{db} );
     foreach $key ( sort ( keys %{$meta_schema} )) {
       next if $key eq 'top';
       # log_debug { np(@{[$schema->must ( $key )]}) } if $key eq 'umiSettings';
       foreach $must ( $schema->must ( $key ) ) {
-	next if $ldap_crud->{cfg}->{defaults}->{ldap}->{is_single}->{$must->{name}};
+	# do not remember why it is needed # next if $ldap_crud->{cfg}->{defaults}->{ldap}->{is_single}->{$must->{name}};
 	$syntmp = $schema->attribute_syntax($must->{'name'});
 	$must_meta =
 	  {
-	   'desc' => $must->{'desc'} || undef,
+	   'desc'         => $must->{'desc'} || undef,
 	   'single-value' => $must->{'single-value'} || undef,
-	   'max_length' => $must->{'max_length'} || undef,
-	   'equality' => $must->{'equality'} || undef,
-	   'syntax' => { desc => $syntmp->{desc},
-			 oid =>  $syntmp->{oid}, },
+	   'max_length'   => $must->{'max_length'} || undef,
+	   'equality'     => $must->{'equality'} || undef,
+	   'syntax'       => { desc => $syntmp->{desc},
+			       oid  =>  $syntmp->{oid}, },
 	  };
 	$c->session->{ldap}->{obj_schema}->{$key}->{must}
 	  ->{ $must->{'name'} } = $must_meta;
@@ -120,16 +120,16 @@ sub signin :Path Global {
       }
       # log_debug { np(@{[$schema->may ( $key )]}) } if $key eq 'umiSettings';
       foreach $may ( $schema->may ( $key ) ) {
-	next if $ldap_crud->{cfg}->{defaults}->{ldap}->{is_single}->{$may->{name}};
+	# do not remember why it is needed # next if $ldap_crud->{cfg}->{defaults}->{ldap}->{is_single}->{$may->{name}};
 	$syntmp = $schema->attribute_syntax($may->{'name'});
 	$may_meta =
 	  {
-	   'desc' => $may->{'desc'} || undef,
+	   'desc'         => $may->{'desc'} || undef,
 	   'single-value' => $may->{'single-value'} || undef,
-	   'max_length' => $may->{'max_length'} || undef,
-	   'equality' => $may->{'equality'} || undef,
-	   'syntax' => { desc => $syntmp->{desc},
-			 oid =>  $syntmp->{oid}, },
+	   'max_length'   => $may->{'max_length'} || undef,
+	   'equality'     => $may->{'equality'} || undef,
+	   'syntax'       => { desc => $syntmp->{desc},
+			       oid  =>  $syntmp->{oid}, },
 	  };
 	$c->session->{ldap}->{obj_schema}->{$key}->{may}
 	  ->{ $may->{'name'} } = $may_meta;

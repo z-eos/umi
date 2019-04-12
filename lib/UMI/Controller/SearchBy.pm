@@ -298,14 +298,14 @@ sub index :Path :Args(0) {
 	my @r = @{$c_user_d->{success}};
 	my @intersect = intersect( @l, @r );
 	
-	log_debug { sprintf("\n%s\nCURRENT_OBJ_DN: %s\n\nCURRENT_ROOT_OBJ_DOMAINS\n\t%s\nCURRENT_USR_DOMAINS\n\t%s\nINTERSECTION\n\t%s\nIS ADMIN :%s; intersect size: %s\n\n",
-			    '-' x 70,
-			    np( $dn ),
-			    np( $ttentries->{$dn}->{root}->{associatedDomain} ),
-			    np( $ldap_crud->org_domains( $c->user->has_attribute('o')) ),
-			    np( @intersect ),
-			    $ldap_crud->role_admin,
-			    $#intersect ) };
+	# log_debug { sprintf("\n%s\nCURRENT_OBJ_DN: %s\n\nCURRENT_ROOT_OBJ_DOMAINS\n\t%s\nCURRENT_USR_DOMAINS\n\t%s\nINTERSECTION\n\t%s\nIS ADMIN :%s; intersect size: %s\n\n",
+	# 		    '-' x 70,
+	# 		    np( $dn ),
+	# 		    np( $ttentries->{$dn}->{root}->{associatedDomain} ),
+	# 		    np( $ldap_crud->org_domains( $c->user->has_attribute('o')) ),
+	# 		    np( @intersect ),
+	# 		    $ldap_crud->role_admin,
+	# 		    $#intersect ) };
 
 	# for service objects
 	if ( ! $ldap_crud->role_admin && $#intersect < 0) {
@@ -318,11 +318,11 @@ sub index :Path :Args(0) {
 	  @l = @{[$_->get_value('associatedDomain')]};
 	  @intersect = intersect( @l, @r );
 	
-	  log_debug { sprintf("CURRENT_OBJ_DOMAINS\n\t%s\nINTERSECTION SVC\n\t%s\nIS ADMIN :%s; intersect svc size: %s\n\n",
-			      np( @l ),
-			      np( @intersect ),
-			      $c->check_user_roles( qw/admin/),
-			      $#intersect ) };
+	  # log_debug { sprintf("CURRENT_OBJ_DOMAINS\n\t%s\nINTERSECTION SVC\n\t%s\nIS ADMIN :%s; intersect svc size: %s\n\n",
+	  # 		      np( @l ),
+	  # 		      np( @intersect ),
+	  # 		      $c->check_user_roles( qw/admin/),
+	  # 		      $#intersect ) };
 	  if ( ! $ldap_crud->role_admin && $#intersect < 0) {
 	    delete $ttentries->{$dn};
 	    next;
@@ -1619,11 +1619,13 @@ sub modify :Path(modify) :Args(0) {
 
     # what to do or to not to do?
     if ( $attr eq 'jpegPhoto' && $val_params ne '' ) {
+      log_debug { '%%% ONE %%%' };
       $jpeg = $self->file2var( $val_params->{'tempname'}, $return );
       return $jpeg if ref($jpeg) eq 'HASH' && defined $jpeg->{error};
       push @{$replace}, $attr => [ $jpeg ];
 
     } elsif ( $attr eq 'userCertificate' && $val_params ne '' ) {
+      log_debug { '%%% TWO %%%' };
       $binary = $self->file2var( $val_params->{'tempname'}, $return );
       return $binary if ref($binary) eq 'HASH' && defined $binary->{error};
       push @{$replace}, $attr . ';binary' => [ $binary ];
@@ -1635,7 +1637,7 @@ sub modify :Path(modify) :Args(0) {
 	'umiUserCertificateSubject'   => '' . $cert_info->{'Subject'},
 	'umiUserCertificateIssuer'    => '' . $cert_info->{'Issuer'};
 
-      # !!! TODO: looks like kludge ...
+      # !!! TODO: looks like a kludge ...
       push @{$replace}, 'cn' => '' . $cert_info->{'CN'}, 'userPassword' => '' . $cert_info->{'CN'}
 	if $service ne 'ovpn';
 
@@ -1644,12 +1646,15 @@ sub modify :Path(modify) :Args(0) {
 		       $cert_info->{'CN'});
     } elsif ( ( $attr eq 'cACertificate' ||
 		$attr eq 'certificateRevocationList' ) && $val_params ne '' ) {
+      log_debug { '%%% THREE %%%' };
       $binary = $self->file2var( $val_params->{'tempname'}, $return );
       return $binary if ref($binary) eq 'HASH' && defined $binary->{error};
       push @{$replace}, $attr . ';binary' => [ $binary ];
     } elsif ( $val_params eq '' && defined $entry->get_value($attr) ) {
+      log_debug { '%%% FOUR %%%' };
       push @{$delete}, $attr => [];
     } elsif ( $val_params ne '' && ! defined $entry->get_value($attr) ) {
+      log_debug { '%%% FIVE %%%' };
       # !!! ??? is it necessary here? can we leave it instead of replacing by itself
       if ( $attr eq 'jpegPhoto' ) {
 	$jpeg = $self->file2var( $val_params->{'tempname'}, $return );
@@ -1657,9 +1662,11 @@ sub modify :Path(modify) :Args(0) {
 	$val_params = [ $jpeg ];
       }
       push @{$add}, $attr => $val_params;
-    } elsif ( ref($val_params) eq "ARRAY" && $#{$val_params} > -1 ) {
+    } elsif ( ref($val_params) eq "ARRAY" && $#{$val_params} >= -1 ) {
+      log_debug { '%%% SIX %%%' };
       push @{$replace}, $attr => $val_params;
     } elsif ( ref($val_params) ne "ARRAY" && $val_params ne "" ) { # && $val_params ne $val_entry ) {
+      log_debug { '%%% SEVEN %%%' };
       push @{$replace}, $attr => $val_params;
     }
   }
