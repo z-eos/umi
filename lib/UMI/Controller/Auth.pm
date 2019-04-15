@@ -75,7 +75,7 @@ sub signin :Path Global {
     
     # log_debug { np( $c->user->ldap_entry->ldif ) };
     my $ldap_crud = $c->model('LDAP_CRUD');
-    my ( $meta_schema, $key, $value, $must_meta, $may_meta, $must, $may, $syntmp );
+    my ( $meta_schema, $objectclass, $key, $value, $must_meta, $may_meta, $must, $may, $syntmp );
     
     while ( ($key, $value) = each %{$ldap_crud->{cfg}->{objectClass}}) {
       $meta_schema->{$_} += 1 foreach ( @{$value} );
@@ -101,18 +101,24 @@ sub signin :Path Global {
     my $schema = $ldap_crud->schema; # ( dn => $ldap_crud->{base}->{db} );
     foreach $key ( sort ( keys %{$meta_schema} )) {
       next if $key eq 'top';
+      $objectclass = $schema->objectclass ($key);
+      log_debug { np($objectclass) };
+      $c->session->{ldap}->{obj_schema}->{$key}->{structural} = $objectclass->{structural} // 0;
+      $c->session->{ldap}->{obj_schema}->{$key}->{auxiliary}  = $objectclass->{auxiliary}  // 0;
+      $c->session->{ldap}->{obj_schema}->{$key}->{desc}       = $objectclass->{desc} // 'NA';
       # log_debug { np(@{[$schema->must ( $key )]}) } if $key eq 'umiSettings';
       foreach $must ( $schema->must ( $key ) ) {
 	# do not remember why it is needed # next if $ldap_crud->{cfg}->{defaults}->{ldap}->{is_single}->{$must->{name}};
+	next if $must->{'name'} eq 'objectClass';
 	$syntmp = $schema->attribute_syntax($must->{'name'});
 	$must_meta =
 	  {
-	   'desc'         => $must->{'desc'} || undef,
+	   'desc'         => $must->{'desc'}         || undef,
 	   'single-value' => $must->{'single-value'} || undef,
-	   'max_length'   => $must->{'max_length'} || undef,
-	   'equality'     => $must->{'equality'} || undef,
+	   'max_length'   => $must->{'max_length'}   || undef,
+	   'equality'     => $must->{'equality'}     || undef,
 	   'syntax'       => { desc => $syntmp->{desc},
-			       oid  =>  $syntmp->{oid}, },
+			       oid  => $syntmp->{oid}, },
 	  };
 	$c->session->{ldap}->{obj_schema}->{$key}->{must}
 	  ->{ $must->{'name'} } = $must_meta;
@@ -121,15 +127,16 @@ sub signin :Path Global {
       # log_debug { np(@{[$schema->may ( $key )]}) } if $key eq 'umiSettings';
       foreach $may ( $schema->may ( $key ) ) {
 	# do not remember why it is needed # next if $ldap_crud->{cfg}->{defaults}->{ldap}->{is_single}->{$may->{name}};
+	next if $may->{'name'} eq 'objectClass';
 	$syntmp = $schema->attribute_syntax($may->{'name'});
 	$may_meta =
 	  {
-	   'desc'         => $may->{'desc'} || undef,
+	   'desc'         => $may->{'desc'}         || undef,
 	   'single-value' => $may->{'single-value'} || undef,
-	   'max_length'   => $may->{'max_length'} || undef,
-	   'equality'     => $may->{'equality'} || undef,
+	   'max_length'   => $may->{'max_length'}   || undef,
+	   'equality'     => $may->{'equality'}     || undef,
 	   'syntax'       => { desc => $syntmp->{desc},
-			       oid  =>  $syntmp->{oid}, },
+			       oid  => $syntmp->{oid}, },
 	  };
 	$c->session->{ldap}->{obj_schema}->{$key}->{may}
 	  ->{ $may->{'name'} } = $may_meta;

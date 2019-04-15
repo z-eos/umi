@@ -1618,7 +1618,10 @@ sub modify :Path(modify) :Args(0) {
     }
 
     # what to do or to not to do?
-    if ( $attr eq 'jpegPhoto' && $val_params ne '' ) {
+    if ( $attr =~ /^add_.*$/ && $val_params ne '' ) {
+      # log_debug { $attr . ';' . substr($attr,4) . ';' . $val_params };
+      push @{$add}, substr($attr,4) => $val_params;
+    } elsif ( $attr eq 'jpegPhoto' && $val_params ne '' ) {
       log_debug { '%%% ONE %%%' };
       $jpeg = $self->file2var( $val_params->{'tempname'}, $return );
       return $jpeg if ref($jpeg) eq 'HASH' && defined $jpeg->{error};
@@ -1824,7 +1827,7 @@ sub modform :Path(modform) :Args(0) {
     delete $init_obj->{uids_raw};
     delete $init_obj->{associatedDomain_raw};
 
-    log_debug { np($init_obj) };
+    # log_debug { np($init_obj) };
 
     use UMI::Form::abstrNisNetgroup;
     $form = UMI::Form::abstrNisNetgroup->new( init_object => $init_obj, );

@@ -16,7 +16,7 @@
 	<i class="fa [% site.icons.toggle_down %]"></i>
       </a>
       <h4 class="text-light">
-	<i class="fa fa-exclamation-circle mr-3"></i><strong>Error!</strong>
+	<i class="fas fa-exclamation-circle mr-3"></i><strong>Error!</strong>
       </h4>
     </div>
     <div class="collapse" id="cardBodyError">
@@ -83,7 +83,7 @@
 	 aria-controls="cardBodySuccess">
 	<i class="fa [% site.icons.toggle_down %]"></i>
       </a>
-      <i class="fa fa-check ml-1 mr-3"></i><strong>Success! [% final_message.title %]</strong>
+      <i class="fas fa-check-circle ml-1 mr-3"></i><strong>Success! [% final_message.title %]</strong>
     </h4>
   </div>
   <div class="collapse show" id="cardBodySuccess">

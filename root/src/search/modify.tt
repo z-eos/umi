@@ -58,8 +58,8 @@ Modify Fields of DN: <small><em>
 	<span class="input-group-btn">
           <button class="btn btn-secondary btn-sm btn-add element-add"
 		  id="[% id %]"
-		  type="button" title="click to add another [% attr_rest.key %] field">
-	    <i class="far fa-fw fa-copy"></i>
+		  type="button" title="click to add another [% attr_rest.key %] field value">
+	    <i class="fas fa-fw [% IF attr_rest.key == 'objectClass' %]fa-plus-circle[% ELSE %]fa-clone[% END %]"></i>
 	  </button>
 	</span>
 	[%   ELSE %]
@@ -117,10 +117,15 @@ Modify Fields of DN: <small><em>
 	[%   IF schema.${attr.key} == 0 &&
 	   ( attr.value.size == 1 || attr.value.last == val ) %]
 	<span class="input-group-btn">
-          <button class="btn btn-secondary btn-sm btn-add element-add"
+          <button [% IF attr.key == 'objectClass' %]
+                  class="btn btn-secondary btn-sm"
+		  data-toggle="modal" data-target="#modal-objectClass"
+		  [% ELSE %]
+		  class="btn btn-secondary btn-sm btn-add element-add"
+		  [% END %]
 		  id="[% id %]"
-		  type="button" title="click to add another [% attr.key %] field">
-	    <i class="far fa-fw fa-copy"></i>
+		  type="button" title="click to add another [% attr.key %] field value">
+	    <i class="fas fa-fw [% IF attr.key == 'objectClass' %]fa-plus-circle[% ELSE %]fa-clone[% END %]"></i>
 	  </button>
 	</span>
 	[%   ELSE %]
@@ -159,9 +164,101 @@ Modify Fields of DN: <small><em>
   </div>
   [% END %]
 
-  <input type="submit" value="Submit" name="aux_submit" class="btn btn-success btn-block float-right w-50">
+  <input type="submit" value="Submit"
+	 name="aux_submit"
+	 class="btn btn-success btn-block float-right font-weight-bold text-uppercase">
 
 </form>
+
+<div class="modal" id="modal-objectClass"
+     role="dialog" aria-labelledby="modal-area-is-accounts">
+  <div class="modal-dialog border border-success" role="document">
+    <div class="modal-content border-0">
+      <div class="modal-header bg-success text-light">
+	<h4 id="modal-area-is-accounts" class="modal-title">
+	  <i class="fas fa-shapes"></i>
+	  <b>Add objectClass</b>
+	</h4>
+      </div>
+      <div class="modal-body">
+	  [% options = '' ;
+	     attrs = '{' ;
+	     FOREACH key IN c.session.ldap.obj_schema.keys.sort ;
+	       IF c.session.ldap.obj_schema.$key.structural == 0 ;
+	         options = options _ '<option value="' _ key _ '">' _ key _ '</option>' ;
+	         IF c.session.ldap.obj_schema.$key.must.size > 0 ;
+	           IF attrs.length > 1 ;
+	             attrs = attrs _ ',' ;
+	           END ;
+	           attrs = attrs _ '"' _ key _ '": ["' _ c.session.ldap.obj_schema.$key.must.keys.join('","')_ '"]' ;
+	         END ;
+	       END ;
+	     END ;
+	     IF attrs.length > 0 ;
+	     attrs = attrs _ '}' ;
+	     END %]
+	<form method="POST"
+	      id="modify-tt-form"
+	      enctype="multipart/form-data"
+	      class="form-horizontal formajaxer pt-3"
+	      action="/searchby/modify">
+	  <input type="hidden" name="dn" id="dn" value="[% modify %]">
+	  <div class="form-group row">
+	    <label class="col-sm-3 text-right h5"><b>objectClass:</b></label>
+	    <div class="col-sm-9">
+	      <select class="custom-select custom-select-sm"
+		      name="add_objectClass"
+		      id="add_objectClass">
+		<option value=""> --- Choose An objectClass ---</option>[% options %]
+	      </select>
+	    </div>
+	  </div>
+	  <div id="objectClass-must"></div>
+	  <script>
+	   var attrs = [% attrs %];
+	   $('#add_objectClass').on('change', function(){
+	     var selected = $(this).val();
+	     console.log(attrs[selected]);
+	     var selectedAttrs = attrs[selected];
+	     var html = '';
+	     if ( selectedAttrs ) {
+	       html = selectedAttrs.map( function(attr){
+		 return '<div class="form-group row">'+
+			'<label class="col-sm-3 text-right text-truncate h6 font-weight-bold" title="'+attr+'">'+
+			'<b>'+attr+':</b></label>'+
+			'<div class="col-sm-9">'+
+			'<input type="text" name="add_'+attr+'" class="form-control input-sm">'+
+			'</div></div>';
+	       }).join('');
+	     }
+	     $('#objectClass-must').html(html);
+	   });
+	  </script>
+          <!-- div class="alert alert-success m-1" role="alert"><small -->[% # attrs %]<!-- /small></div -->
+	  <div class="row">
+	    <div class="form-group col-4">
+	      <div>
+		<button type="button" class="btn btn-secondary border-0 btn-block umi-btn-event font-weight-bold text-uppercase" data-dismiss="modal">Cancel</button>
+	      </div>
+	    </div>
+	    <div class="form-group col-8">
+	      <div>
+		<button type="submit"
+			class="btn btn-success btn-block font-weight-bold text-uppercase umi-btn-event umi-btn-logic"
+			onClick="$('#modal-objectClass').modal('hide')"
+			data-umiact="/searchby/modify"
+			name=""
+			value="">
+		  Add
+		</button>
+	      </div>
+	    </div>
+	  </div>
+	</form>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 
