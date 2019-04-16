@@ -81,6 +81,8 @@ sub index :Path :Args(0) {
 				  filter => '(businessCategory=corerelay)', });
   if ( $mesg->code ) {
     push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
+  } elsif ( ! $mesg->count ) {
+    push @{$return->{warning}}, $ldap_crud->err($mesg)->{html};
   } else {
     $entry = $mesg->entry(0);
     $relay = $entry->get_value('host');

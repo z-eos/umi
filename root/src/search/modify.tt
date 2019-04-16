@@ -278,7 +278,7 @@ Modify Fields of DN: <small><em>
          newEntry.find('.form-control').val('');
          controlForm.find('.entry:not(:last) .btn-add')
 		    .removeClass('btn-add').addClass('btn-erase')
-		    .html('<span class="fas fa-eraser"></span>');
+		    .html('<span class="fas fa-fw fa-eraser"></span>');
 	 return false;
        }).on('click', '.btn-erase', function(e)
        {
