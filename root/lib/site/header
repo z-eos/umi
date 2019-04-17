@@ -22,6 +22,14 @@
 	    action="/searchby">
 
 	<div class="input-group col-10">
+	  <div class="input-group-prepend">
+	    <button type="button"
+		    class="btn btn-secondary"
+		    title="clear search field"
+		    onclick="document.getElementById('ldapsearch_filter').value = ''">
+	      <i class="fas fa-eraser"></i>
+	    </button>
+	  </div>
 	  <input type="text"
 		 class="form-control text-monospace"
 		 id="ldapsearch_filter"
@@ -58,7 +66,7 @@
             </button>
 	    
 	    <div type="submit" 
-		 class="btn btn-secondary dropdown-toggle"
+		 class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
 		 data-toggle="dropdown" 
 		 aria-haspopup="true" 
 		 aria-expanded="false">

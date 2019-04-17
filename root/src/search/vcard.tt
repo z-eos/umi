@@ -1,10 +1,20 @@
 [% META title = 'Search Simple Results' %]
 
-<[% site.pageheading %]>Search Simple Results <small><em>base: [% final_message.dn %]; &nbsp;&nbsp; filter: (objectClass=*)</em></small></[% site.pageheading %]>
+<[% site.pageheading %] class="font-weight-bold p-3">
+<i class="fas fa-file-code fa-lg mr-3 text-muted"></i>
+vCard<small><em class="text-muted text-monospace">
+  base: [% final_message.dn %]; &nbsp;&nbsp; filter: (objectClass=*)
+</em></small>
+</[% site.pageheading %]>
+<hr mb-5>
 
 [% INCLUDE ldap_err.tt %]
 
-<form method="POST" role="form" action="/searchby/vcard_gen2f" id="f_vcard_gen2f">
+<form method="POST"
+      class="mt-5"
+      role="form"
+      action="/searchby/vcard_gen2f"
+      id="f_vcard_gen2f">
   <input id="vcard_type"
 	 class="form-control"
 	 type="hidden"
@@ -17,19 +27,18 @@
 	  data-umiact="/searchby/vcard_gen2f"
 	  title='save vCard bellow as file: [% final_message.outfile_name %]_vCard.txt'
 	  type="submit">
-    <span class="fa fa-download fa-lg">&nbsp;</span>&nbsp;vCard DOWNLOAD
+    <i class="fas fa-file-export fa-lg"></i>&nbsp;vCard DOWNLOAD
   </button>
 </form>
 <br>
-<div class="row">
-  <div class="col-xs-6">
-    <pre>[% final_message.vcard %]</pre>
-    <i class="help-block">please note, often vCard consumers expect only one single organization and title fields, so, here it'll appear only first of all present for the user</i>
-  </div>
-  <div class="col-xs-6">
-      [% final_message.qr %]    
-  </div>
-</div>
+
+<p>
+  <pre>[% final_message.vcard %]</pre>
+  <i class="h6">please note, often vCard consumers expect only one single organization and title fields, so, here it'll appear only first of all present for the user</i>
+</p>
+<p>
+  [% final_message.qr %]    
+</p>
 
 <script type="text/javascript">  
  $(function(){ $('form#f_vcard_gen2f').off('submit'); });

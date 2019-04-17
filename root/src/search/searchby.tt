@@ -45,9 +45,9 @@ Search Advanced
     </[% site.pageheading %]>
   </div>
   <div class="col-xs-6 col-sm-6 col-md-9 col-lg-9">
-    <dl class="row text-monospace text-info">
-      <dt class="col font-weight-bold">base:</dt>  <dd class="col-11">[% base_dn %]</dd>
-      <dt class="col font-weight-bold">filter:</dt><dd class="col-11">[% filter %]</dd>
+    <dl class="row text-monospace text-muted">
+      <dt class="col-1 text-right">base:</dt>  <dd class="col-11">[% base_dn %]</dd>
+      <dt class="col-1 text-right">filter:</dt><dd class="col-11">[% filter %]</dd>
     </dl>
   </div>
 </div>

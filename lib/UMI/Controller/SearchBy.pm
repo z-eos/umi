@@ -1229,14 +1229,14 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
 	$mesg = 0;
       }
 
-      my $qr_bg = 'bg-success';
+      my $qr_bg = 'table-success';
       if ( $mesg ne '0' ) {
 	$return->{error} = '<li>Error during password change occured: ' . $mesg->{html} . '</li>';
       } else {
 	if ( $arg->{checkonly} && $arg->{password_match} ) {
 	  $mesg = '<div class="alert alert-success text-center" role="alert"><h3><b>Supplied password matches curent one</b></h3></div>';
 	} elsif ( $arg->{checkonly} && ! $arg->{password_match} ) {
-	  $qr_bg = 'bg-warning';
+	  $qr_bg = 'table-warning';
 	  $mesg = '<div class="alert alert-warning text-center" role="alert"><h3><b>Supplied password does not match curent one</b></h3></div>';
 	} elsif ( ! $arg->{checkonly} ) {
 	  $mesg = 'Password generated:';
@@ -1244,8 +1244,9 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
 	#p $entry;
 	#p $arg->{password_gen}->{ssha};
 
-	$return->{success} = sprintf('%s<table class="table table-vcenter">' .
-				     '<tr><td width="50%"><h1 class="mono text-center">%s</h1></td><td class="text-center" width="50%">',
+	$return->{success} = sprintf('%s<table class="table table-vcenter">
+  <tr><td width="50%%"><h1 class="mono text-center">%s</h1></td>
+      <td class="text-center" width="50%%">',
 				     $mesg,
 				     $arg->{password_gen}->{clear},
 				    );
@@ -1756,7 +1757,7 @@ sub modform :Path(modform) :Args(0) {
   }
   $init_obj->{aux_dn_form_to_modify} = $params->{aux_dn_form_to_modify};
 
-  log_debug { np($init_obj) };
+  # log_debug { np($init_obj) };
 
   ####################################################################
   # TARGETS TO MODIFY
@@ -1837,6 +1838,14 @@ sub modform :Path(modform) :Args(0) {
     $init_obj->{cn}    = $init_obj->{cn};
     $init_obj->{priv}  = $init_obj->{sargonAllowPrivileged} eq 'TRUE' ? '1' : '0';
     $init_obj->{order} //= '' . $init_obj->{sargonOrder};
+    $init_obj->{'sargonUser'} = [ $init_obj->{'sargonUser'} ]
+      if ref($init_obj->{'sargonUser'}) ne 'ARRAY';
+    $init_obj->{'sargonHost'} = [ $init_obj->{'sargonHost'} ]
+      if ref($init_obj->{'sargonHost'}) ne 'ARRAY';
+    $init_obj->{'sargonMount'} = [ $init_obj->{'sargonMount'} ]
+      if ref($init_obj->{'sargonMount'}) ne 'ARRAY';
+
+    log_debug { np($init_obj) };
 
     foreach ( @{$init_obj->{'sargonUser'}} ) {
       if ( $_ =~ /^\+/ ) {

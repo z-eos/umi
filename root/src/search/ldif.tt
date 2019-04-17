@@ -37,7 +37,9 @@ LDIF<small><em class="text-muted text-monospace">
 </form>
 <br>
 <pre>
+  [% FILTER html %]
   [% final_message.ldif %]
+  [% END %]
 </pre>
 
 <script type="text/javascript">  
