@@ -517,7 +517,7 @@ Search Advanced
 	[% ELSIF h_attr.key == 'pgpKey' %]
 	<pre>[% h_attr.value.0 %]</pre>
 	[% ELSIF h_attr.key == 'jpegPhoto' %]
-	[% img = '<img class="bg-' %]
+	[% img = '<img class="table-' %]
 	[% img _ tr_color _ ' ' _ h_attr.value %]
 	[% ELSIF entry.value.is_arr.$attr_name %]
 	[%   FOREACH i IN h_attr.value %]

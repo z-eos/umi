@@ -23,16 +23,30 @@ has_field 'remove'
        element_wrapper_class => [ 'offset-md-2', 'col-10' ],
        element_attr          => { title => 'When checked, this checkbox causes avatar removal.',}, );
 
-has_field 'avatar' 
-  => ( type                  => 'Upload',
-       label                 => 'Photo User ID',
-       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
-       element_class         => [ 'btn', 'btn-default', 'btn-secondary', ],
-       element_wrapper_class => [ 'col-10', ],
-       wrapper_class         => [ 'row', ],
-       max_size              => '50000',
+# has_field 'avatar' 
+#   => ( type                  => 'Upload',
+#        label                 => 'Photo User ID',
+#        label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+#        element_class         => [ 'btn', 'btn-default', 'btn-secondary', ],
+#        element_wrapper_class => [ 'col-10', ],
+#        wrapper_class         => [ 'row', ],
+#        max_size              => '50000',
+#        # required => 1,
+#      );
+
+has_field 'avatar'
+  => ( type                  => 'File',
+       wrapper_attr          => { id => 'fieldfile', },
+       wrapper_class         => [ 'custom-file', 'ml-1', 'mb-3', 'row', ],
+       label                 => 'Select LDIF File',
+       label_class           => [ 'custom-file-label', 'col-10', 'offset-md-2', ],
+       label_attr            => {  'data-browse' => 'Chose File', },
+       element_class         => [ 'btn', 'btn-default', 'btn-secondary', 'custom-file-input', ],
+       element_wrapper_class => [ 'input-sm', ],
+       max_size              => '100000',
        # required => 1,
      );
+
 
 has_field 'aux_reset' 
   => ( type                  => 'Reset',

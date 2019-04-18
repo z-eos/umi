@@ -111,7 +111,7 @@
 	      [% END %]
 	    </dl>
 	  </div>
-	  <img width="200" class="media-object img-thumbnail bg-info" [% jpegPhoto %]
+	  <img width="200" class="media-object img-thumbnail table-info" [% jpegPhoto %]
 	</div>
       </div>
     </div>

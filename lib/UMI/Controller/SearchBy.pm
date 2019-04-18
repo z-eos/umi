@@ -1568,12 +1568,18 @@ sub modify :Path(modify) :Args(0) {
 
   # log_debug { np($params) };
 
+  my $return;
   my $dn = $params->{dn};
   my $ldap_crud = $c->model('LDAP_CRUD');
   my $mesg = $ldap_crud->search( { base => $dn, scope => 'base' } );
-  my $service = (split(/\@/, $params->{authorizedService}))[0];
-  my $return;
-  $return->{error} = $ldap_crud->err($mesg)->{html} if $mesg->code;
+  my $service;
+  if ( defined $params->{authorizedService} && $params->{authorizedService} ne '' ) {
+    $service = (split(/\@/, $params->{authorizedService}))[0];
+  } else {
+    push @{$return->{error}}, 'attribute authorizedService is absent!';
+  }
+  push @{$return->{error}}, $ldap_crud->err($mesg)->{html}
+    if $mesg->code;
 
   my $entry = $mesg->entry(0);
   # log_debug { np($mesg) };

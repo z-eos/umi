@@ -72,7 +72,8 @@ Modify Fields of DN: <small><em>
 	[%   END %]
 
 	[% IF attr_rest.key == 'jpegPhoto' %]
-	<input type="file" class="btn btn-default" id="[% id %]" name="[% attr_rest.key %]" accept="image/jpeg, image/png">      
+	<!-- input type="file" class="btn btn-default" id="[% id %]" name="[% attr_rest.key %]" accept="image/jpeg, image/png" -->
+	<input type="text" class="form-control input-sm" placeholder="to modify, use menu → image" disabled>
 	[% ELSIF attr_rest.key == 'mu-sieveOnReceive' %]
 	<textarea name="[% attr_rest.key %]" class="form-control" rows=2 placeholder="sieve script to be put here"></textarea>
 	[% ELSE %]
