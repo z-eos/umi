@@ -11,7 +11,9 @@
 	  <i class="fa fa-exclamation-circle"></i>
 	  You are about to perform deletion of DN: <b>[% entry.key.replace(',', ', ') %]</b>
 	</h4>
-	</div>
+      </div>
+      <div class="modal-body"></div>
+      <div class="modal-footer">
 	<form role="form" method="POST" action="/searchby/delete">
 	  <div class="modal-body">
 	    <div class="custom-control custom-switch">
@@ -25,14 +27,13 @@
 	      </label>
 	    </div>
 	  </div>
-	  <div class="modal-footer">
-	    <button type="button" class="btn btn-secondary umi-btn-event" data-dismiss="modal">Close</button>
-	    <button type="submit" class="btn btn-danger umi-btn-event umi-btn-ajax"  name="ldap_delete"
-		    value="[% entry.key %]" data-action="delete">
-	      Yes, I really want to delete it and yes, I understand all consequences!
-	    </button>
-	  </div>
+	  <button type="button" class="btn btn-secondary umi-btn-event" data-dismiss="modal">Close</button>
+	  <button type="submit" class="btn btn-danger umi-btn-event umi-btn-ajax"  name="ldap_delete"
+		  value="[% entry.key %]" data-action="delete">
+	    Yes, I really want to delete it and yes, I understand all consequences!
+	  </button>
 	</form>
+      </div>
     </div>
   </div>
 </div><!-- #### Modal: Delete end -->

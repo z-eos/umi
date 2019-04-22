@@ -281,25 +281,25 @@ wrapper to format message to HTML code (to wrap some text (html) with panel/aler
 sub msg2html {
   my ($self, $args) = @_;
   my $arg =
-    { type => $args->{type} || 'panel',
+    { type => $args->{type} || 'card',
       data => $args->{data},
-      element => { panel => { root => '<div class="panel panel-error text-left text-error">',
-			      heading => '<div class="panel-heading text-center">',
-			      body => '<div class="panel-body">', },
-		   alert => { root => '<div class="alert alert-danger modal-body" role="alert">', },
+      element => { card  => { root    => '<div class="card text-left">',
+			      heading => '<div class="card-header text-center text-danger">',
+			      body    => '<div class="card-body">', },
+		   alert => { root => '<div class="alert alert-danger" role="alert">', },
 		 },
       start_modal => '<b>Error! Just close the window and inform administrator.</b>',
     };
   my $return;
-  if ( $arg->{type} eq 'panel' ) {
-    $return = sprintf("%s%s%s</div>%s%s</div></div>",
-		      $arg->{element}->{panel}->{root},
-		      $arg->{element}->{panel}->{heading},
+  if ( $arg->{type} eq 'card' ) {
+    $return = sprintf("%s%s%s</div>%s%s</div></div><br>",
+		      $arg->{element}->{card}->{root},
+		      $arg->{element}->{card}->{heading},
 		      $arg->{start_modal},
-		      $arg->{element}->{panel}->{body},
+		      $arg->{element}->{card}->{body},
 		      $arg->{data});
   } elsif ( $arg->{type} eq 'alert' ) {
-    $return = sprintf("%s%s%s</div></div>",
+    $return = sprintf("%s%s%s</div></div><br>",
 		      $arg->{element}->{alert}->{root},
 		      $arg->{start_modal},
 		      $arg->{data});

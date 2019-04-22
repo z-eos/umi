@@ -1310,10 +1310,12 @@ sub del {
 
   if ( ! $self->dry_run ) {
     my $msg = $self->ldap->delete ( $dn );
+    # log_debug { np($msg) };
     if ($msg->code) {
       # $return .= $self->err( $msg );
       if ( $msg && $msg->error_name eq 'LDAP_NO_SUCH_OBJECT' ) {
-	push @{$return->{warning}}, $self->err( $msg ) if $msg;
+	log_error { $self->err($msg)->{desc} . ' while deleting DN: ' . $dn };
+	push @{$return->{error}}, $self->err( $msg ) if $msg;
       } else {
 	log_error { $self->err($msg)->{desc} . ' while deleting DN: ' . $dn };
 	push @{$return->{error}}, $self->err( $msg ) if $msg;
@@ -1377,7 +1379,7 @@ sub delr {
       if ($msg->code) {
 	# $return .= $self->err( $msg );
 	if ( $msg && $msg->error_name eq 'LDAP_NO_SUCH_OBJECT' ) {
-	  push @{$return->{warning}}, $self->err( $msg ) if $msg;
+	  push @{$return->{error}}, $self->err( $msg ) if $msg;
 	} else {
 	  log_error { $self->err($msg)->{desc} . ' while deleting DN: ' . $dn2del };
 	  push @{$return->{error}}, $self->err( $msg ) if $msg;
@@ -3086,22 +3088,31 @@ argument
 
 sub org_domains {
   my ($self, $org_dn) = @_;
+  # log_debug { np($org_dn) };
+  my $return = {};
+  push @{$return->{error}}, { html => 'org is not defined' }
+    if ! defined $org_dn;
   $org_dn = [ $org_dn ] if ref($org_dn) ne 'ARRAY';
-  my $return;
   $return->{success} = [];
   my (@domain, $org);
-  # log_debug { np($org_dn) };
   foreach my $dn ( @{$org_dn} ) {
+    # log_debug { np($dn) };
     $org = $self->search( { base      => $dn,
 			    scope     => 'base',
 			    sizelimit => 0,
-			    attrs     => ['associatedDomain' ], } );
+			    attrs     => [ 'associatedDomain' ], } );
 
-    return $return->{error} = $self->err($org) if ! $org->count;
-
-    $return->{success} = [ @{$return->{success}}, $_->get_value('associatedDomain') ]
-      foreach ( @{[$org->sorted('associatedDomain')]} );
+    if ( ! $org->count ) {
+      push @{$return->{error}},
+	{ html => sprintf("org dn: <b>%s</b> is incorrect", $dn) },
+	$self->err($org);
+    } else {
+      $return->{success} = [ @{$return->{success}},
+			     @{[$_->get_value('associatedDomain', asref => 1)]} ]
+	foreach ( @{[$org->sorted('associatedDomain')]} );
+    }
   }
+  # log_debug { np($return) };
   return $return;
 }
 

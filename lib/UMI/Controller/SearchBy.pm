@@ -275,23 +275,35 @@ sub index :Path :Args(0) {
 	  # log_debug { np($self->is_org_uni($c->user->has_attribute('o'),
 	  # 				   $_->get_value('o', asref => 1))) };
 	  $root_mesg = $ldap_crud->search({ dn => $root_dn, });
-	  $return->{error} .= $ldap_crud->err( $root_mesg )->{html}
-	    if $root_mesg->is_error();
-	  $root_entry = $root_mesg->entry(0);
-	  $ttentries->{$dn}->{root}->{givenName} = $root_entry->get_value('givenName');
-	  $ttentries->{$dn}->{root}->{sn}        = $root_entry->get_value('sn');
-	  $ttentries->{$dn}->{root}->{o}         = $root_entry->get_value('o', asref => 1);
-	  $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
-	    $root_entry->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
+	  if ( $root_mesg->is_error() ) {
+	    $return->{error} .= sprintf("for dn: <b>%s</b><br>%s",
+					$ttentries->{$_->dn}->{root}->{dn},
+					$ldap_crud->err( $root_mesg )->{html});
+	  } else {
+	    $root_entry = $root_mesg->entry(0);
+	    $ttentries->{$dn}->{root}->{givenName} = $root_entry->get_value('givenName');
+	    $ttentries->{$dn}->{root}->{sn}        = $root_entry->get_value('sn');
+	    $ttentries->{$dn}->{root}->{o}         = $root_entry->get_value('o', asref => 1);
+	    $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
+	      $root_entry->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
+	  }
 	}
 
 	#=============================================================
-	### START of ACCES CONTROL to ou=People,dc=... 
+	### START of ACCES CONTROL to ou=People,dc=...
 	# the main idea for this chunk is to intersect all domains of all
 	# users org-s and intersect them against all domains of root object org-s or
 	# domain of the service analyzed
-	
+
+	# !!!!!!!!!!
+	# to process errors when no "o" attribute exists or it is not DN
+
 	$ttentries->{$dn}->{root}->{associatedDomain} = $ldap_crud->org_domains( $ttentries->{$dn}->{root}->{o} );
+	log_debug { np( $ttentries->{$dn}->{root} ) };
+	if ( exists $ttentries->{$dn}->{root}->{associatedDomain}->{error} ) {
+	  push @{$return->{error}}, sprintf("root object of <b>%s</b> has a problem:<br>%s", $dn, $_->{html})
+	    foreach (@{$ttentries->{$dn}->{root}->{associatedDomain}->{error}});
+	}
 
 	use Array::Utils qw(:all);
 	my @l = @{$ttentries->{$dn}->{root}->{associatedDomain}->{success}};
@@ -2051,7 +2063,7 @@ sub delete :Path(delete) :Args(0) {
     if ( ref($err) ne 'HASH' ) {
       $c->stash->{message} = 'OK';
     } elsif ( ref($err) eq 'HASH' && $#{$err->{error}} > -1 ) {
-      $c->stash->{message} = $self->msg2html({ type => 'panel',
+      $c->stash->{message} = $self->msg2html({ type => 'card',
 					       data => $err->{error}->[0]->{html} });
     }
   } else {

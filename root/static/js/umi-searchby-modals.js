@@ -22,7 +22,7 @@ $(function(){
 	    // # # # return $(message);
 
 	    //return $("<div>").addClass("text-danger").html(message);
-	    return $("<div>").html(message);
+	    return $("<div id=\"modal_delete_data\">").html(message);
 	    // original // return $("<div>").addClass("text-danger").html(message);
 	},
 
@@ -30,6 +30,7 @@ $(function(){
 	    // # # # item.parents(".modal-content").html(message);
 	    // $("body").append(getErrorBlock(message));
 	    // original // item.parents().prepend(getErrorBlock(message));
+	    // item.closest('.modal-body').append(getErrorBlock(message));
 	    item.parent().prepend(getErrorBlock(message));
 	    // item.parents(".modal-content").html(message);
 	},

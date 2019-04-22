@@ -103,14 +103,14 @@ sub proc :Path(proc) :Args(0) {
       if ( defined $params->{search_history} && $params->{search_history} eq '1' ) {
 	$basedn = UMI->config->{ldap_crud_db_log};
 	push @filter_arr, '(reqAuthzID=' . $params->{reqAuthzID} . ')' if $params->{reqAuthzID} ne '';
-	push @filter_arr, '(reqDn=' . $params->{reqDn} . ')' if $params->{reqDn} ne '';
-	push @filter_arr, '(reqEnd=' . $params->{reqEnd} . ')' if $params->{reqEnd} ne '';
-	push @filter_arr, '(reqResult=' . $params->{reqResult} . ')' if $params->{reqResult} ne '';
+	push @filter_arr, '(reqDn=' . $params->{reqDn} . ')'           if $params->{reqDn}    ne '';
+	push @filter_arr, '(reqEnd=' . $params->{reqEnd} . ')'         if $params->{reqEnd}   ne '';
+	push @filter_arr, '(reqResult=' . $params->{reqResult} . ')'   if $params->{reqResult} ne '';
 	push @filter_arr, '(reqMessage=' . $params->{reqMessage} . ')' if $params->{reqMessage} ne '';
-	push @filter_arr, '(reqMod=' . $params->{reqMod} . ')' if $params->{reqMod} ne '';
-	push @filter_arr, '(reqOld=' . $params->{reqOld} . ')' if $params->{reqOld} ne '';
-	push @filter_arr, '(reqStart=' . $params->{reqStart} . ')' if $params->{reqStart} ne '';
-	push @filter_arr, '(reqType=' . $params->{reqType} . ')' if $params->{reqType} ne '';
+	push @filter_arr, '(reqMod=' . $params->{reqMod} . ')'         if $params->{reqMod}   ne '';
+	push @filter_arr, '(reqOld=' . $params->{reqOld} . ')'         if $params->{reqOld}   ne '';
+	push @filter_arr, '(reqStart=' . $params->{reqStart} . ')'     if $params->{reqStart} ne '';
+	push @filter_arr, '(reqType=' . $params->{reqType} . ')'       if $params->{reqType}  ne '';
 	if ( $#filter_arr > 0 ) {
 	  $filter = '(&' . join('', @filter_arr) . ')';
 	} elsif ( $#filter_arr == 0 ) {
@@ -217,40 +217,47 @@ sub proc :Path(proc) :Args(0) {
 	    if $mesg->is_error();
 
 	
-### 20181029 # 	  @root_arr = split(',', $_->dn);
-### 20181029 # 	  $root_i = $#root_arr;
-### 20181029 # 	  @root_dn = splice(@root_arr, -1 * $dn_depth);
-### 20181029 # 	  $ttentries->{$_->dn}->{root}->{dn} = join(',', @root_dn);
-### 20181029 # 
-### 20181029 # 	  # here, for each entry we are preparing data of the root object it belongs to
-### 20181029 # 	  $root_i++;
-### 20181029 # 	  if ( $root_i == $dn_depth ) {
-### 20181029 # 	    $ttentries->{$_->dn}->{root}->{givenName} = $_->get_value('givenName');
-### 20181029 # 	    $ttentries->{$_->dn}->{root}->{sn} = $_->get_value('sn');
-### 20181029 # 	    $ttentries->{$_->dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
-### 20181029 # 	      $_->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
-### 20181029 # 	  } else {
-### 20181029 # 	    $root_mesg = $ldap_crud->search({ dn => $ttentries->{$_->dn}->{root}->{dn}, });
-### 20181029 # 	    $return->{error} .= $ldap_crud->err( $root_mesg )->{html}
-### 20181029 # 	      if $root_mesg->is_error();
-### 20181029 # 	    $root_entry = $root_mesg->entry(0);
-### 20181029 # 	    $ttentries->{$_->dn}->{root}->{givenName} = $root_entry->get_value('givenName');
-### 20181029 # 	    $ttentries->{$_->dn}->{root}->{sn} = $root_entry->get_value('sn');
-### 20181029 # 	    $ttentries->{$_->dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
-### 20181029 # 	      $root_entry->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
-### 20181029 # 	  }
-### 20181029 # 
-### 20181029 # 	  # p $ttentries->{$_->dn}->{root};
-### 20181029 # 
-### 20181029 # 	  # $to_utf_decode = $ttentries->{$_->dn}->{root}->{givenName};
-### 20181029 # 	  # utf8::decode($to_utf_decode);
-### 20181029 # 	  # $ttentries->{$_->dn}->{root}->{givenName} = $to_utf_decode;
-### 20181029 # 	  utf8::decode($ttentries->{$_->dn}->{root}->{givenName});
-### 20181029 # 
-### 20181029 # 	  # $to_utf_decode = $ttentries->{$_->dn}->{root}->{sn};
-### 20181029 # 	  # utf8::decode($to_utf_decode);
-### 20181029 # 	  # $ttentries->{$_->dn}->{root}->{sn} = $to_utf_decode;
-### 20181029 # 	  utf8::decode($ttentries->{$_->dn}->{root}->{sn});
+ 	  @root_arr = split(',', $_->dn);
+ 	  $root_i = $#root_arr;
+ 	  @root_dn = splice(@root_arr, -1 * $dn_depth);
+ 	  $ttentries->{$_->dn}->{root}->{dn} = join(',', @root_dn);
+
+	  if ( $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
+	    # here, for each entry we are preparing data of the root object it belongs to
+	    $root_i++;
+	    if ( $root_i == $dn_depth ) {
+	      $ttentries->{$_->dn}->{root}->{givenName} = $_->get_value('givenName');
+	      $ttentries->{$_->dn}->{root}->{sn} = $_->get_value('sn');
+	      $ttentries->{$_->dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
+		$_->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
+	    } else {
+	      $root_mesg = $ldap_crud->search({ dn => $ttentries->{$_->dn}->{root}->{dn}, });
+	      if ( $root_mesg->is_error() ) {
+		$return->{error} .= sprintf("for dn: <b>%s</b><br>%s",
+					    $ttentries->{$_->dn}->{root}->{dn},
+					    $ldap_crud->err( $root_mesg )->{html});
+	      } else {
+		$root_entry = $root_mesg->entry(0);
+		# log_debug { np(@{[$root_entry->attributes]}) };
+		$ttentries->{$_->dn}->{root}->{givenName} = $root_entry->get_value('givenName');
+		$ttentries->{$_->dn}->{root}->{sn} = $root_entry->get_value('sn');
+		$ttentries->{$_->dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
+		  $root_entry->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
+	      }
+	    }
+	  }
+
+ 	  # p $ttentries->{$_->dn}->{root};
+ 
+ 	  # $to_utf_decode = $ttentries->{$_->dn}->{root}->{givenName};
+ 	  # utf8::decode($to_utf_decode);
+ 	  # $ttentries->{$_->dn}->{root}->{givenName} = $to_utf_decode;
+ 	  utf8::decode($ttentries->{$_->dn}->{root}->{givenName});
+ 
+ 	  # $to_utf_decode = $ttentries->{$_->dn}->{root}->{sn};
+ 	  # utf8::decode($to_utf_decode);
+ 	  # $ttentries->{$_->dn}->{root}->{sn} = $to_utf_decode;
+ 	  utf8::decode($ttentries->{$_->dn}->{root}->{sn});
 
 	  $#root_arr = $#root_dn = -1;
 
