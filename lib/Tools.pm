@@ -281,27 +281,33 @@ wrapper to format message to HTML code (to wrap some text (html) with panel/aler
 sub msg2html {
   my ($self, $args) = @_;
   my $arg =
-    { type => $args->{type} || 'card',
-      data => $args->{data},
-      element => { card  => { root    => '<div class="card text-left">',
-			      heading => '<div class="card-header text-center text-danger">',
-			      body    => '<div class="card-body">', },
-		   alert => { root => '<div class="alert alert-danger" role="alert">', },
-		 },
-      start_modal => '<b>Error! Just close the window and inform administrator.</b>',
+    { type  => $args->{type}  || 'card',
+      color => $args->{color} || 'danger',
+      data  => $args->{data},
+      title => '<b>Error! Just close the window and inform administrator.</b>',
     };
+  $arg->{element} = { card  =>
+		      { root   => sprintf("<div class=\"card text-left border border-%s\">",
+					   $arg->{color}),
+			header => sprintf("<div class=\"card-header text-center alert-%s\">",
+					   $arg->{color}),
+			body   => '<div class="card-body">', },
+		      alert =>
+		      { root => sprintf("<div class=\"alert alert-%s\">", $arg->{color}), },
+		 },
+
   my $return;
   if ( $arg->{type} eq 'card' ) {
-    $return = sprintf("%s%s%s</div>%s%s</div></div><br>",
+    $return = sprintf("%s%s%s</div>%s%s</div></div>",
 		      $arg->{element}->{card}->{root},
-		      $arg->{element}->{card}->{heading},
-		      $arg->{start_modal},
+		      $arg->{element}->{card}->{header},
+		      $arg->{title},
 		      $arg->{element}->{card}->{body},
 		      $arg->{data});
   } elsif ( $arg->{type} eq 'alert' ) {
-    $return = sprintf("%s%s%s</div></div><br>",
+    $return = sprintf("%s<h4>%s</h4><hr><p>%s</p></div>",
 		      $arg->{element}->{alert}->{root},
-		      $arg->{start_modal},
+		      $arg->{title},
 		      $arg->{data});
   }
   return $return;

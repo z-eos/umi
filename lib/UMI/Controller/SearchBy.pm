@@ -2063,17 +2063,16 @@ sub delete :Path(delete) :Args(0) {
     if ( ref($err) ne 'HASH' ) {
       $c->stash->{message} = 'OK';
     } elsif ( ref($err) eq 'HASH' && $#{$err->{error}} > -1 ) {
-      $c->stash->{message} = $self->msg2html({ type => 'card',
+      $c->stash->{message} = $self->msg2html({ type => 'alert',
 					       data => $err->{error}->[0]->{html} });
     }
   } else {
     $c->stash(
-	      template => 'search/delete.tt',
-	      delete => $params->{'ldap_delete'},
-	      recursive => defined $params->{'ldap_delete_recursive'} &&
-	      $params->{'ldap_delete_recursive'} eq 'on' ? '1' : '0',
-	      err => $err,
-	      type => $params->{'type'},
+	      template  => 'search/delete.tt',
+	      delete    => $params->{'ldap_delete'},
+	      recursive => defined $params->{'ldap_delete_recursive'} && $params->{'ldap_delete_recursive'} eq 'on' ? '1' : '0',
+	      err       => $err,
+	      type      => $params->{'type'},
 	     );
   }
 }
@@ -2099,13 +2098,13 @@ sub reassign :Path(reassign) :Args(0) {
       $c->stash->{message} = 'OK';
     } elsif ( (ref($err) eq 'HASH' || ref($err) eq 'ARRAY' ) && $#{$err->{error}} > -1 ) {
       $c->stash->{success} = 0;
-      $c->stash->{message} = $self->msg2html({ type => 'panel',
+      $c->stash->{message} = $self->msg2html({ type => 'alert',
 					       data => $err->{error}->[0]->{html} });
     }
   } else {
     $c->stash( template => 'stub.tt',
-	       params => $params,
-	       err => $err, );
+	       params   => $params,
+	       err      => $err, );
   }
 }
 

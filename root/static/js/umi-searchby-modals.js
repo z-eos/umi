@@ -31,8 +31,8 @@ $(function(){
 	    // $("body").append(getErrorBlock(message));
 	    // original // item.parents().prepend(getErrorBlock(message));
 	    // item.closest('.modal-body').append(getErrorBlock(message));
-	    item.parent().prepend(getErrorBlock(message));
-	    // item.parents(".modal-content").html(message);
+	    // item.parent().prepend(getErrorBlock(message));
+	    item.closest('.modal-content').find(".modal-footer").html(message);
 	},
 
 	createHiddenButton = function(item, value) {

@@ -6,14 +6,13 @@
      aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <div class="modal-header bg-danger">
-	<h4 class="modal-title text-light" id="modal_delete[% id_suffix %]_label">
-	  <i class="fa fa-exclamation-circle"></i>
-	  You are about to perform deletion of DN: <b>[% entry.key.replace(',', ', ') %]</b>
-	</h4>
+      <div class="modal-header bg-danger row m-0">
+	<h4 class="modal-title text-light col-12 mb-3" id="modal_delete[% id_suffix %]_label">
+	  <i class="fa fa-skull mr-3"></i>
+	  Object deletion</h4>
+	<b class="text-white col-12">DN: [% entry.key.replace(',', ', ') %]</b>
       </div>
-      <div class="modal-body"></div>
-      <div class="modal-footer">
+      <div class="modal-body">
 	<form role="form" method="POST" action="/searchby/delete">
 	  <div class="modal-body">
 	    <div class="custom-control custom-switch">
@@ -27,13 +26,22 @@
 	      </label>
 	    </div>
 	  </div>
-	  <button type="button" class="btn btn-secondary umi-btn-event" data-dismiss="modal">Close</button>
-	  <button type="submit" class="btn btn-danger umi-btn-event umi-btn-ajax"  name="ldap_delete"
-		  value="[% entry.key %]" data-action="delete">
-	    Yes, I really want to delete it and yes, I understand all consequences!
-	  </button>
+	  <div class="row">
+	    <div class="col-3">
+	      <button type="button" class="btn btn-block btn-secondary umi-btn-event"
+		      data-dismiss="modal">Close</button>
+	    </div>
+	    <div class="col-9">
+	      <button type="submit" class="btn btn-block btn-danger umi-btn-event umi-btn-ajax"
+		      name="ldap_delete"
+		      value="[% entry.key %]" data-action="delete">
+		Yes, I really want to delete it and yes, I understand all consequences!
+	      </button>
+	    </div>
+	  </div>
 	</form>
       </div>
+      <div class="modal-footer"></div>
     </div>
   </div>
 </div><!-- #### Modal: Delete end -->
