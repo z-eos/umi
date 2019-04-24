@@ -1223,9 +1223,9 @@ sub reassign {
 		       # right part of src branch dn authorizedService value
 		       (split(/@/, (split(/=/, $arg->{src}->{branch_dn}->{arr}->[0]))[1]))[1]
 		      ) );
-    foreach ( $clone->attributes ) {
-      push @{$attrs}, $_ => $clone->get_value( $_, asref => 1 );
-    }
+
+    push @{$attrs}, map { $_ => $clone->get_value( $_, asref => 1 ) } $clone->attributes;
+
     $mesg = $self->add( $clone->dn, $attrs );
     if ( $mesg && $mesg->{name} eq 'LDAP_ALREADY_EXISTS' ) {
       push @{$return->{warning}}, $mesg if $mesg;
@@ -1799,23 +1799,23 @@ sub vcard {
 
     # --- TELEPHONENUMBER ---------------------------------------------
     if ( $entry->{$arg->{dn}}->{telephonenumber} ) {
-      foreach ( @{$entry->{$arg->{dn}}->{telephonenumber}} ) {
-	push @{$arg->{vcard}->{telephonenumber}}, sprintf('TEL;TYPE=WORK:%s', $_);
-      }
+      push @{$arg->{vcard}->{telephonenumber}},
+	map { sprintf('TEL;TYPE=WORK:%s', $_) } @{$entry->{$arg->{dn}}->{telephonenumber}};
+
       $arg->{vcard}->{telephonenumber} = join("\n", @{$arg->{vcard}->{telephonenumber}});
       push @vcard, $arg->{vcard}->{telephonenumber};
     }
     if ( $entry->{$arg->{dn}}->{mobiletelephonenumber} ) {
-      foreach ( @{$entry->{$arg->{dn}}->{mobiletelephonenumber}} ) {
-	push @{$arg->{vcard}->{mobiletelephonenumber}}, sprintf('TEL;TYPE=CELL:%s', $_);
-      }
+      push @{$arg->{vcard}->{mobiletelephonenumber}},
+	map { sprintf('TEL;TYPE=CELL:%s', $_) } @{$entry->{$arg->{dn}}->{mobiletelephonenumber}};
+
       $arg->{vcard}->{mobiletelephonenumber} = join("\n", @{$arg->{vcard}->{mobiletelephonenumber}});
       push @vcard, $arg->{vcard}->{mobiletelephonenumber};
     }
     if ( $entry->{$arg->{dn}}->{mobile} ) {
-      foreach ( @{$entry->{$arg->{dn}}->{mobile}} ) {
-	push @{$arg->{vcard}->{mobile}}, sprintf('TEL;TYPE=CELL:%s', $_);
-      }
+      push @{$arg->{vcard}->{mobile}},
+	map { sprintf('TEL;TYPE=CELL:%s', $_) } @{$entry->{$arg->{dn}}->{mobile}};
+
       $arg->{vcard}->{mobile} = join("\n", @{$arg->{vcard}->{mobile}});
       push @vcard, $arg->{vcard}->{mobile};
     }
@@ -1825,9 +1825,9 @@ sub vcard {
     
     # --- EMAIL -------------------------------------------------------
     if ( $entry->{$arg->{dn}}->{mail} ) {
-      foreach ( @{$entry->{$arg->{dn}}->{mail}} ) {
-	push @{$arg->{vcard}->{email}}, sprintf('EMAIL;TYPE=WORK:%s', $_);
-      }
+      push @{$arg->{vcard}->{email}},
+	map { sprintf('EMAIL;TYPE=WORK:%s', $_) } @{$entry->{$arg->{dn}}->{mail}};
+
       $arg->{vcard}->{email} = join("\n", @{$arg->{vcard}->{email}});
       push @vcard, $arg->{vcard}->{email};
     }
@@ -2708,8 +2708,6 @@ sub _build_select_associateddomains {
       push @j, $_ foreach (@i);
     }
 
-
-    
     @domains = map { { value => $_, label => $_ } } sort @j;
     $return = [ @{$return}, @domains ];
   }
@@ -2846,7 +2844,7 @@ sub _build_select_dhcp_associateddomains {
   my (@i, @j);
   foreach my $entry ( @entries ) {
     @i = $entry->get_value('dhcpOption');
-    foreach (@i) { log_info { $_ };
+    foreach (@i) { # log_info { $_ };
       # to skip underlying objects dhcpOption values different from `domain-name'
       push @j, substr((split(/ /, $_))[1], 1, -1)
     	if $_ =~ /domain-name ".*"/;
