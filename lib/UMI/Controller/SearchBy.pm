@@ -290,15 +290,17 @@ sub index :Path :Args(0) {
 	}
 
 	#=============================================================
-	### START of ACCES CONTROL to ou=People,dc=...
-	# the main idea for this chunk is to intersect all domains of all
-	# users org-s and intersect them against all domains of root object org-s or
-	# domain of the service analyzed
+	### START of ACCES CONTROL to ou=People,dc=... objects
+	# the main idea for this, is to intersect user's all-domains-of-all-orgs
+	# array against:
+	# 1. all-domains-of-root-object-orgs array for each search result entry
+	# 2. current search result entry associatedDomain attribute value/s, if any
 
 	# !!!!!!!!!!
 	# to process errors when no "o" attribute exists or it is not DN
 
-	$ttentries->{$dn}->{root}->{associatedDomain} = $ldap_crud->org_domains( $ttentries->{$dn}->{root}->{o} );
+	$ttentries->{$dn}->{root}->{associatedDomain} = $ldap_crud->org_domains( $ttentries->{$dn}->{root}->{o} )
+	  if ! exists $ttentries->{$dn}->{root}->{associatedDomain};
 	# log_debug { np( $ttentries->{$dn}->{root} ) };
 	if ( exists $ttentries->{$dn}->{root}->{associatedDomain}->{error} ) {
 	  push @{$return->{error}}, sprintf("root object of <b>%s</b> has a problem:<br>%s", $dn, $_->{html})
@@ -306,25 +308,30 @@ sub index :Path :Args(0) {
 	}
 
 	use Array::Utils qw(:all);
+	# all-domains-of-root-object-orgs (current search result relates to) array
 	my @l = @{$ttentries->{$dn}->{root}->{associatedDomain}->{success}};
+	# all-domains-of-all-orgs (current user belongs to) array
 	my @r = @{$c_user_d->{success}};
 	my @intersect = intersect( @l, @r );
 	
 	# log_debug { sprintf("\n%s\nCURRENT_OBJ_DN: %s\n\nCURRENT_ROOT_OBJ_DOMAINS\n\t%s\nCURRENT_USR_DOMAINS\n\t%s\nINTERSECTION\n\t%s\nIS ADMIN :%s; intersect size: %s\n\n",
 	# 		    '-' x 70,
-	# 		    np( $dn ),
+	# 		    $dn,
 	# 		    np( $ttentries->{$dn}->{root}->{associatedDomain} ),
 	# 		    np( $ldap_crud->org_domains( $c->user->has_attribute('o')) ),
 	# 		    np( @intersect ),
 	# 		    $ldap_crud->role_admin,
 	# 		    $#intersect ) };
 
-	# for service objects
+	# skip current search result entry from the search results if current user
+	# is not admin and current user org/s domain/s doesn't intersect with
+	# current search result entry root object's org/s domain/s
 	if ( ! $ldap_crud->role_admin && $#intersect < 0) {
 	  delete $ttentries->{$dn};
 	  next;
 	}
 
+	# for objects with present associatedDomain attribute (in general services)
 	if ( $_->exists('associatedDomain') ) {
 	  $#intersect = -1;
 	  @l = @{[$_->get_value('associatedDomain')]};
@@ -335,13 +342,18 @@ sub index :Path :Args(0) {
 	  # 		      np( @intersect ),
 	  # 		      $c->check_user_roles( qw/admin/),
 	  # 		      $#intersect ) };
+
+	  # skip current search result (the one with present associatedDomain attribute)
+	  # entry from the search results if current user
+	  # is not admin and current user org/s domain/s doesn't intersect with
+	  # current search result entry domain/s
 	  if ( ! $ldap_crud->role_admin && $#intersect < 0) {
 	    delete $ttentries->{$dn};
 	    next;
 	  }
 	}
 
-	### STOP of ACCES CONTROL to ou=People,dc=... 
+	### STOP of ACCES CONTROL to ou=People,dc=... objects
 	#=============================================================
 
 	$ttentries->{$dn}->{root}->{dn} = $root_dn;

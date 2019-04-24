@@ -98,11 +98,12 @@ sub signin :Path Global {
     $meta_schema->{dhcpSubnet}        = 1;
     $meta_schema->{dhcpTSigKey}       = 1;
 
+    # log_debug { np($meta_schema) };
     my $schema = $ldap_crud->schema; # ( dn => $ldap_crud->{base}->{db} );
     foreach $key ( sort ( keys %{$meta_schema} )) {
       next if $key eq 'top';
       $objectclass = $schema->objectclass ($key);
-      log_debug { np($objectclass) };
+      # log_debug { np($objectclass) };
       $c->session->{ldap}->{obj_schema}->{$key}->{structural} = $objectclass->{structural} // 0;
       $c->session->{ldap}->{obj_schema}->{$key}->{auxiliary}  = $objectclass->{auxiliary}  // 0;
       $c->session->{ldap}->{obj_schema}->{$key}->{desc}       = $objectclass->{desc} // 'NA';
