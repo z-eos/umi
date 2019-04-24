@@ -29,7 +29,14 @@ use Net::LDAP::Control;
 use Net::LDAP::Control::Sort;
 use Net::LDAP::Control::SortResult;
 use Net::LDAP::Extension::Refresh;
-use Net::LDAP::Constant qw( LDAP_CONTROL_SORTRESULT );
+use Net::LDAP::Constant qw(
+			    LDAP_SUCCESS
+			    LDAP_PROTOCOL_ERROR
+			    LDAP_NO_SUCH_OBJECT
+			    LDAP_INVALID_DN_SYNTAX
+			    LDAP_INSUFFICIENT_ACCESS
+			    LDAP_CONTROL_SORTRESULT
+			 );
 use Net::LDAP::Util qw(
 			ldap_error_text
 			ldap_error_name
@@ -1300,32 +1307,24 @@ non recursive deletion
 
 sub del {
   my ($self, $dn) = @_;
-
-  my $callername = (caller(1))[3];
-  $callername = 'main' if ! defined $callername;
-  my $return; # = 'call to LDAP_CRUD->del from ' . $callername . ': ';
+  my $callername = (caller(1))[3] // 'main';
+  # remove after above row confirmed # $callername = 'main' if ! defined $callername;
+  my $return;
 
   my $g_mod = $self->del_from_groups($dn);
   push @{$return->{error}}, $g_mod->{error} if defined $g_mod->{error};
 
-  if ( ! $self->dry_run ) {
-    my $msg = $self->ldap->delete ( $dn );
-    # log_debug { np($msg) };
-    if ($msg->code) {
-      # $return .= $self->err( $msg );
-      if ( $msg && $msg->error_name eq 'LDAP_NO_SUCH_OBJECT' ) {
-	log_error { $self->err($msg)->{desc} . ' while deleting DN: ' . $dn };
-	push @{$return->{error}}, $self->err( $msg ) if $msg;
-      } else {
-	log_error { $self->err($msg)->{desc} . ' while deleting DN: ' . $dn };
-	push @{$return->{error}}, $self->err( $msg ) if $msg;
-      }
-    } else {
-      log_info { 'DN: ' . $dn . ' was successfully deleted.' };
-      $return = 0;
-    }
-  } else {
+  my $msg = $self->ldap->delete ( $dn );
+  # log_debug { np($msg) };
+  if ( $msg->code == LDAP_SUCCESS ) {
+    log_info { 'DN: ' . $dn . ' successfully deleted.' };
     $return = 0;
+  } elsif ( $msg->code == LDAP_NO_SUCH_OBJECT ) {
+    log_error { sprintf("%s has happened while deleting DN: %s", $self->err($msg)->{desc}, $dn) };
+    push @{$return->{error}}, $self->err( $msg );
+  } else {
+    log_error { sprintf("%s has happened while deleting DN: %s", $self->err($msg)->{desc}, $dn) };
+    push @{$return->{error}}, $self->err( $msg ) if $msg;
   }
   return $return;
 }
@@ -1341,57 +1340,33 @@ recursive deletion
 sub delr {
   my ($self, $dn) = @_;
 
-  my $callername = (caller(1))[3];
-  $callername = 'main' if ! defined $callername;
-  my $return; # = 'call to LDAP_CRUD->del from ' . $callername . ': ';
+  my $callername = (caller(1))[3] // 'main';
+  # remove after above row confirmed # $callername = 'main' if ! defined $callername;
+  my $return;
+  my $msg;
 
   my $g_mod = $self->del_from_groups($dn);
   push @{$return->{error}}, $g_mod->{error} if defined $g_mod->{error};
 
-  if ( ! $self->dry_run ) {
-    my $result = $self->ldap->search( base   => $dn,
-				      filter => "(objectclass=*)" );
-    my @dnlist;
-    foreach my $entry ( $result->all_entries ) {
-      push @dnlist, $entry->dn;
+  my $search = $self->ldap->search( base => $dn, filter => '(objectclass=*)' );
+  ## taken from perl-ldap/contrib/recursive-ldap-delete.pl
+  # delete the entries found in a sorted way:
+  # those with more "," (= more elements) in their DN, which are deeper in the DIT, first
+  # trick for the sorting: tr/,// returns number of , (see perlfaq4 for details)
+  foreach my $e (sort { $b->dn =~ tr/,// <=> $a->dn =~ tr/,// } $search->entries()) {
+    $msg = $self->ldap->delete($e);
+    if ( $msg->code == LDAP_SUCCESS ) {
+      log_info { 'DN: ' . $dn . ' successfully deleted.' };
+      $return = 0;
+    } elsif ( $msg->code == LDAP_NO_SUCH_OBJECT ) {
+      log_error { sprintf("%s has happened while deleting DN: %s", $self->err($msg)->{desc}, $e) };
+      push @{$return->{error}}, $self->err( $msg );
+    } else {
+      log_error { sprintf("%s has happened while deleting DN: %s", $self->err($msg)->{desc}, $e) };
+      push @{$return->{error}}, $self->err( $msg ) if $msg;
     }
-    # explode dn into an array and push them to indexed hash of arrays
-    my %HoL;
-    my $i = 0;
-    my $base = join('', pop @{[ split(",", $dn) ]});
-
-    for ( @dnlist ) {
-      s/,$base//;
-      $HoL{$i} = [ split(",", $_) ];
-      $i++;
-    }
-
-    # !!!
-    # here we need to clean all attributes of the different objects which
-    # could contain DN of any object to be deleted
-    # !!!
-    
-    my $msg;
-    # sorted descending by number of members (leaf nodes last)
-    foreach my $key ( sort { @{$HoL{$b}} <=> @{$HoL{$a}} } keys %HoL ) {
-      my $dn2del = join(",", @{ $HoL{$key} }).",$base";
-      $msg = $self->ldap->delete($dn2del);
-      if ($msg->code) {
-	# $return .= $self->err( $msg );
-	if ( $msg && $msg->error_name eq 'LDAP_NO_SUCH_OBJECT' ) {
-	  push @{$return->{error}}, $self->err( $msg ) if $msg;
-	} else {
-	  log_error { $self->err($msg)->{desc} . ' while deleting DN: ' . $dn2del };
-	  push @{$return->{error}}, $self->err( $msg ) if $msg;
-	}
-      } else {
-	log_info { 'DN: ' . $dn2del . ' was successfully deleted.' };
-	$return = 0;
-      }
-    }
-  } else {
-    $return = 0;
   }
+
   return $return;
 }
 

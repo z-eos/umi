@@ -182,22 +182,33 @@ Modify Fields of DN: <small><em>
 	</h4>
       </div>
       <div class="modal-body">
-	  [% options = '' ;
-	     attrs = '{' ;
-	     FOREACH key IN c.session.ldap.obj_schema.keys.sort ;
-	       IF c.session.ldap.obj_schema.$key.structural == 0 ;
-	         options = options _ '<option value="' _ key _ '">' _ key _ '</option>' ;
-	         IF c.session.ldap.obj_schema.$key.must.size > 0 ;
-	           IF attrs.length > 1 ;
-	             attrs = attrs _ ',' ;
-	           END ;
-	           attrs = attrs _ '"' _ key _ '": ["' _ c.session.ldap.obj_schema.$key.must.keys.join('","')_ '"]' ;
+	[% options = '' ;
+	   attrs = '{' ;
+	   tmp = '<dl class="row">';
+	   FOREACH key IN entries.objectClass;
+	     toNext.$key = 1;
+	   END;
+	   FOREACH key IN c.session.ldap.obj_schema.keys.sort ;
+	   
+	   # tmp = tmp _ '<dt class="col-sm-3">' _ key _ '</dt><dd class="col-sm-9">' _ entries.objectClass.grep($key).size _ '</dd>';
+	   
+	   NEXT IF key == 'top' || toNext.$key == 1;
+
+	     IF c.session.ldap.obj_schema.$key.structural == 0 ;
+	       options = options _ '<option value="' _ key _ '">' _ key _ '</option>' ;
+	       IF c.session.ldap.obj_schema.$key.must.size > 0 ;
+	         IF attrs.length > 1 ;
+	           attrs = attrs _ ',' ;
 	         END ;
+	         attrs = attrs _ '"' _ key _ '": ["' _ c.session.ldap.obj_schema.$key.must.keys.join('","')_ '"]' ;
 	       END ;
 	     END ;
-	     IF attrs.length > 0 ;
-	     attrs = attrs _ '}' ;
-	     END %]
+	   END ;
+	   # tmp = tmp _ '</dl>';
+	   # tmp;
+	   IF attrs.length > 0 ;
+	   attrs = attrs _ '}' ;
+	   END %]
 	<form method="POST"
 	      id="modify-tt-form"
 	      enctype="multipart/form-data"

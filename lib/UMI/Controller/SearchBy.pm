@@ -206,7 +206,7 @@ sub index :Path :Args(0) {
     my $filter4search = $filter_armor eq '' ? sprintf("(%s)", $filter ) : sprintf("&(%s)(|%s)",
 										  $filter,
 										  $filter_armor );
-    log_debug { np($filter4search) };
+    # log_debug { np($filter4search) };
 
     
     $params->{'filter'} = '(' . $filter . ')';
@@ -299,7 +299,7 @@ sub index :Path :Args(0) {
 	# to process errors when no "o" attribute exists or it is not DN
 
 	$ttentries->{$dn}->{root}->{associatedDomain} = $ldap_crud->org_domains( $ttentries->{$dn}->{root}->{o} );
-	log_debug { np( $ttentries->{$dn}->{root} ) };
+	# log_debug { np( $ttentries->{$dn}->{root} ) };
 	if ( exists $ttentries->{$dn}->{root}->{associatedDomain}->{error} ) {
 	  push @{$return->{error}}, sprintf("root object of <b>%s</b> has a problem:<br>%s", $dn, $_->{html})
 	    foreach (@{$ttentries->{$dn}->{root}->{associatedDomain}->{error}});
