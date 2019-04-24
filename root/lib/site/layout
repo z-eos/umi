@@ -60,7 +60,7 @@
 <script src="/static/js/jquery.multi-select.js"></script>
 <!-- <script src="/static/js/umi-multiselect.js"></script> -->
 
-
+[% IF c.check_user_roles('admin') %]
 <!-- LDAP tree related (Vue based) -->
 <script type="text/x-template" id="template-tree-item">
   <li class="tree-item" :class="{opened: opened, closed: !opened}">
@@ -129,7 +129,7 @@
     </ul>
   </div>
 </script>
-
+[% END %]
 
 <script src="/static/js/app/service/store.js"></script>
 <script src="/static/js/app/service/api.js"></script>

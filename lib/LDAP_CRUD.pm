@@ -3082,12 +3082,14 @@ sub org_domains {
 	{ html => sprintf("org dn: <b>%s</b> is incorrect", $dn) },
 	$self->err($org);
     } else {
-      $return->{success} = [ @{$return->{success}},
-			     @{[$_->get_value('associatedDomain', asref => 1)]} ]
-	foreach ( @{[$org->sorted('associatedDomain')]} );
+      push @{$return->{success}},
+	grep { defined && length }
+	map { @{$_->get_value('associatedDomain', asref => 1)}
+	      if $_->exists('associatedDomain') } $org->entries;
     }
   }
   # log_debug { np($return) };
+  @{$return->{success}} = sort @{$return->{success}};
   return $return;
 }
 
