@@ -85,7 +85,8 @@ $('#sidebar-left,#workingfield,#header,#sidebar-modal-1').on('click', 'a:not([hr
 
 
 /*! 
- * AJAX to load from header form (with element passing ldapbase_ dependent logic)
+ * AJAX to load from the search form in the nav header
+ * with element passing ldapbase_ dependent logic
  */    
 $('form.formajaxer').on('submit', function(e) {
     e.preventDefault();

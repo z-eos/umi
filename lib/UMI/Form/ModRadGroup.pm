@@ -10,8 +10,7 @@ use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printabl
 
 has '+action' => ( default => '/searchby/proc' );
 
-sub build_form_element_class { [ 'form-horizontal' ] }
-# sub build_form_element_attr { {onsubmit => q{this.is_selected.value = this.groups.value ? 'yes' : 'no'},} }
+sub build_form_element_class { [ qw(formajaxer) ] }
 
 sub html_attributes {
   my ( $self, $field, $type, $attr ) = @_;
@@ -19,21 +18,47 @@ sub html_attributes {
 }
 
 has_field 'ldap_modify_rad_group' => ( type => 'Hidden', );
+has_field 'aux_runflag'           => ( type => 'Hidden', value => '0' );
 
-has_field 'groups' => ( type => 'Multiple',
-			label => '',
-			options_method => \&radgroup, );
+has_field 'groups'
+  => ( type           => 'Multiple',
+       label          => '',
+       element_class  => [ 'umi-multiselect', ],
+       element_attr   => { 'data-ico-l'       => 'fa-users-cog',
+			   'data-ico-r'       => 'fa-users-cog',
+			   'data-placeholder' => 'rad group', },
+       options_method => \&radgroup, );
 
-has_field 'aux_reset' => ( type => 'Reset',
-			   wrapper_class => [ 'col-xs-4' ],
-			   element_class => [ 'btn', 'btn-danger', 'btn-block', ],
-			   element_wrapper_class => [ 'col-xs-12', ],
-			   value => 'Reset' );
+has_field 'aux_reset'
+  => ( type          => 'Reset',
+       element_class => [ qw( btn
+			      btn-danger
+			      btn-block
+			      font-weight-bold
+			      text-uppercase) ],
+       wrapper_class => [ 'col-4' ],
+       value         => 'Reset' );
 
-has_field 'aux_submit' => ( type => 'Submit',
-			    wrapper_class => [ 'col-xs-8' ],
-			    element_class => [ 'btn', 'btn-success', 'btn-block', ],
-			    value => 'Submit' );
+has_field 'aux_submit'
+  => ( type          => 'Submit',
+       element_class => [ qw( btn
+			      btn-success
+			      btn-block
+			      font-weight-bold
+			      text-uppercase) ],
+       wrapper_class => [ 'col-8', ],
+       value         => 'Submit' );
+
+has_block 'aux_submitit'
+  => ( tag => 'div',
+       render_list => [ 'aux_reset', 'aux_submit'],
+       class => [ 'row', ]
+     );
+
+sub build_render_list {[ qw( ldap_modify_rad_group
+			     aux_runflag
+			     groups
+			     aux_submitit ) ]}
 
 sub validate {
   my $self = shift;

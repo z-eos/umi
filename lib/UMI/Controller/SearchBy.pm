@@ -392,9 +392,7 @@ sub index :Path :Args(0) {
 	  $return->{error} .= $ldap_crud->err( $mesg )->{html};
 	} else {
 	  @root_groups = $mesg->entries;
-	  foreach ( @root_groups ) {
-	    $root_gr->{ $_->get_value('cn') } = 1;
-	  }
+	  $root_gr->{ $_->get_value('cn') } = 1 foreach ( @root_groups );
 	}
 
 	# getting name of the primary group
@@ -695,13 +693,12 @@ sub proc :Path(proc) :Args(0) {
 	push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
 	  if $mesg->code != 0;
 
-	my @groups_usr = $mesg->sorted('cn');
-	push @{$params->{groups}}, $_->dn foreach ( $mesg->sorted('cn') );
+	push @{$params->{groups}}, map { $_->dn } $mesg->sorted('cn');
       }
       log_debug { np( $params ) };
 
-      $c->stash( template => 'user/user_mod_group.tt',
-		 form => $self->form_mod_groups,
+      $c->stash( template          => 'user/user_mod_group.tt',
+		 form              => $self->form_mod_groups,
 		 ldap_modify_group => $params->{ldap_modify_group}, );
 
       log_debug { np( $self->form_mod_groups->value ) };
@@ -714,9 +711,9 @@ sub proc :Path(proc) :Args(0) {
       $c->stash( final_message => $self
       		 ->mod_groups( $ldap_crud,
       			       { mod_groups_dn => $params->{ldap_modify_group},
-      				 base => $ldap_crud->cfg->{base}->{group},
-      				 groups => $groups,
-      				 type => 'posixGroup', } ), ) if defined $params->{aux_runflag}; # !!! otherwise all groups are deleted on the initial run
+      				 base          => $ldap_crud->cfg->{base}->{group},
+      				 groups        => $groups,
+      				 type          => 'posixGroup', } ), ) if defined $params->{aux_runflag}; # !!! otherwise all groups are deleted on the initial run
 
 #=====================================================================
 # Modify RADIUS Groups
@@ -726,18 +723,14 @@ sub proc :Path(proc) :Args(0) {
 
       my $groups;
       if ( defined $params->{groups} ) {
-	if ( ref($params->{groups}) eq 'ARRAY' ) {
-	  $groups = $params->{groups};
-	} else {
-	  $groups = [ $params->{groups} ];
-	}
+	$groups = ref($params->{groups}) eq 'ARRAY' ? $params->{groups} : [ $params->{groups} ];
       } else {
-	$groups = '';
+	$groups = undef;
       }
 
       my $ldap_crud = $c->model('LDAP_CRUD');
 
-      if ( ! defined $params->{groups} && ! defined $params->{aux_submit} ) {
+      if ( ! defined $params->{groups} && ! defined $params->{aux_runflag} ) {
 	my ( $return, $base, $filter, $dn );
 	my $mesg = $ldap_crud->search( { base   => $ldap_crud->cfg->{base}->{rad_groups},
 					 filter => sprintf('member=%s', $params->{'ldap_modify_rad_group'}),
@@ -745,9 +738,7 @@ sub proc :Path(proc) :Args(0) {
 	push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
 	  if $mesg->code != 0;
 
-	my @groups_usr = $mesg->sorted('cn');
-	foreach ( @groups_usr ) { push @{$params->{groups}}, $_->dn; }
-	# $params->{groups} = undef;
+	push @{$params->{groups}}, map { $_->dn } $mesg->sorted('cn');
       }
 
       $c->stash( template              => 'user/user_mod_rad_group.tt',
@@ -764,9 +755,7 @@ sub proc :Path(proc) :Args(0) {
 			       { mod_groups_dn => $params->{ldap_modify_rad_group},
 				 base          => $ldap_crud->cfg->{base}->{rad_groups},
 				 groups        => $groups,
-				 is_submit     => defined $params->{aux_submit} &&
-				 $params->{aux_submit} eq 'Submit' ? 1 : 0,
-				 type          => 'groupOfNames', } ), );
+				 type          => 'groupOfNames', } ), ) if defined $params->{aux_runflag}; # !!! otherwise all groups are deleted on the initial run
 
 #=====================================================================
 # Modify memberUids of the Group
@@ -792,11 +781,8 @@ sub proc :Path(proc) :Args(0) {
 	push @{$return->{error}}, $ldap_crud->err($mesg)->{html}
 	  if $mesg->code ne '0';
 
-	my @group_memberUids = $mesg->sorted('memberUid');
-
-	foreach ( @group_memberUids ) {
-	  push @{$init_obj->{memberUid}}, $_->get_value('memberUid');
-	}
+	push @{$init_obj->{memberUid}},
+	  map { $_->get_value('memberUid') } $mesg->sorted('memberUid');
 
 	# first run, we just have choosen the group to manage and here we
 	# render it as it is (no params passed, just init_object)
@@ -845,14 +831,9 @@ sub proc :Path(proc) :Args(0) {
 	  push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html};
 	}
 
-	my @group_memberUids = $mesg->sorted('memberUid');
-
-	foreach ( @group_memberUids ) {
-	  push @{$params->{memberUid}}, $_->get_value('memberUid');
-	}
+	push @{$params->{memberUid}},
+	  map { $_->get_value('memberUid') } $mesg->sorted('memberUid');
       }
-
-      p $params;
 
       $c->stash(
 		template              => 'group/group_mod_memberUid.tt',
@@ -1330,7 +1311,7 @@ sub mod_groups {
 
   # hash with all selected for add/delete group/s
   if ( ref($arg->{groups}) eq 'ARRAY' ) {
-    foreach (@{$arg->{groups}}) { $arg->{groups_sel}->{$_} = 1; }
+    $arg->{groups_sel}->{$_} = 1 foreach (@{$arg->{groups}});
   }
   # $return;
   $mesg =
@@ -1425,16 +1406,15 @@ sub mod_memberUid {
   push @{$return->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
     if ! $mesg->count;
 
-  foreach ( $mesg->sorted('memberUid') ) {
-    push @memberUid_old, $_->get_value('memberUid');
-  }
+  push @memberUid_old, map { $_->get_value('memberUid') } $mesg->sorted('memberUid');
+
   my @a = sort @{$arg->{memberUid}};
   my @b = sort @memberUid_old; p \@b;
   if ( @a ~~ @b ) {
     $return->{success} = 'Nothing changed.';
   } else {
     foreach (@a) {
-      push @{$memberUid}, 'memberUid', $_ ;
+      push @{$memberUid}, 'memberUid', $_;
     }
     $mesg = $ldap_crud->modify(
 			       $arg->{mod_group_dn},
@@ -1594,14 +1574,18 @@ sub modify :Path(modify) :Args(0) {
 
   my $return;
   my $dn = $params->{dn};
+
+  my $service;
+  if ( $dn =~ /^.*authorizedService.*$/ ) {
+    if ( defined $params->{authorizedService} && $params->{authorizedService} ne '' ) {
+      $service = (split(/\@/, $params->{authorizedService}))[0];
+    } else {
+      push @{$return->{error}}, 'attribute authorizedService is absent!';
+    }
+  }
+
   my $ldap_crud = $c->model('LDAP_CRUD');
   my $mesg = $ldap_crud->search( { base => $dn, scope => 'base' } );
-  my $service;
-  if ( defined $params->{authorizedService} && $params->{authorizedService} ne '' ) {
-    $service = (split(/\@/, $params->{authorizedService}))[0];
-  } else {
-    push @{$return->{error}}, 'attribute authorizedService is absent!';
-  }
   push @{$return->{error}}, $ldap_crud->err($mesg)->{html}
     if $mesg->code;
 
@@ -1672,12 +1656,15 @@ sub modify :Path(modify) :Args(0) {
 	'umiUserCertificateIssuer'    => '' . $cert_info->{'Issuer'};
 
       # !!! TODO: looks like a kludge ...
+      # ----------------------------------
       push @{$replace}, 'cn' => '' . $cert_info->{'CN'}, 'userPassword' => '' . $cert_info->{'CN'}
-	if $service ne 'ovpn';
+	if defined $service && $service ne 'ovpn';
 
       $moddn = sprintf("%s=%s",
-		       $ldap_crud->{cfg}->{rdn}->{$service},
+		       $ldap_crud->{cfg}->{rdn}->{$service} // 'cn',
 		       $cert_info->{'CN'});
+      # ----------------------------------
+
     } elsif ( ( $attr eq 'cACertificate' ||
 		$attr eq 'certificateRevocationList' ) && $val_params ne '' ) {
       log_debug { '%%% THREE %%%' };
@@ -1711,7 +1698,7 @@ sub modify :Path(modify) :Args(0) {
   push @{$modx}, replace => $replace if defined $replace && $#{$replace} > -1;
 
   if ( defined $modx && $#{$modx} > -1 ) {
-    log_debug { np( $modx ) };
+    # log_debug { np( $modx ) };
     $mesg = $ldap_crud->modify( $params->{dn}, $modx, );
     if ( $mesg ne "0" ) {
       push @{$return->{error}}, $mesg->{html};
@@ -1723,15 +1710,12 @@ sub modify :Path(modify) :Args(0) {
 	} else {
 	  $dn =~ s/^(.+?),/$moddn,/;
 	  push @{$return->{success}},
-	    sprintf("<div class='card border border-info'>
-  <div class='card-header bg-info'>RDN changed as well</div>
-  <div class='card-body'>
-    <dl class='row'>
-      <dt class='col-2'>old DN</dt><dd class='col-10 text-monospace'>%s</dd>
-      <dt class='col-2'>new DN</dt><dd class='col-10 text-monospace'>%s</dd>
-    </dl>
-  </div>
-</div>", $params->{dn}, $dn);
+	    sprintf("<div class='alert alert-info border border-info'>
+  <b>RDN changed as well</b><hr>
+  <dl class='row'>
+    <dt class='col-2 text-right'>old DN:</dt><dd class='col-10 text-monospace'>%s</dd>
+    <dt class='col-2 text-right'>new DN:</dt><dd class='col-10 text-monospace'>%s</dd>
+  </dl></div>", $params->{dn}, $dn);
 	}
       }
       push @{$return->{success}}, 'Modification/s made:<pre class="text-monospace">' . "\n" .
@@ -1909,8 +1893,9 @@ sub modform :Path(modform) :Args(0) {
       } else {
 	push @{$init_obj->{sargonMount_arr}}, $init_obj->{sargonMount};
       }
-      push @{$init_obj->{mount}}, { mount => $_ }
-	foreach ( @{$init_obj->{sargonMount_arr}} );
+
+      push @{$init_obj->{mount}}, map { { mount => $_ } } @{$init_obj->{sargonMount_arr}};
+      
       delete $init_obj->{sargonMount_arr};
       delete $init_obj->{sargonMount};
     }
@@ -1944,8 +1929,7 @@ sub modform :Path(modform) :Args(0) {
       push @{$init_obj->{sudoCommand_arr}}, $init_obj->{sudoCommand};
     }
     
-    push @{$init_obj->{com}}, { sudoCommand => $_ }
-      foreach ( @{$init_obj->{sudoCommand_arr}} );
+    push @{$init_obj->{com}}, map { { sudoCommand => $_ } } @{$init_obj->{sudoCommand_arr}};
 
     delete $init_obj->{sudoCommand_arr};
     delete $init_obj->{sudoCommand};
@@ -1956,8 +1940,7 @@ sub modform :Path(modform) :Args(0) {
       push @{$init_obj->{sudoOption_arr}}, $init_obj->{sudoOption};
     }
     
-    push @{$init_obj->{opt}}, { sudoOption => $_ }
-      foreach ( @{$init_obj->{sudoOption_arr}} );
+    push @{$init_obj->{opt}}, map { { sudoOption => $_ } } @{$init_obj->{sudoOption_arr}};
 
     delete $init_obj->{sudoOption_arr};
     delete $init_obj->{sudoOption};

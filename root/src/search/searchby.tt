@@ -394,10 +394,10 @@ Search Advanced
 
 
 	      
-	      <div class="col-2 btn btn-sm">
+	      <div class="col-2">
 
 		<!-- small class="umi-text-xs" -->
-		  <ul class="fa-ul text-white text-left m-0 umi-text-smaller text-monospace">
+		  <ul class="fa-ul text-white text-left m-0 umi-text-tiny text-monospace">
 		    
 		    [% crtd = entry.value.root.ts.createTimestamp _ ' by ' _ entry.value.root.ts.creatorsName _ '&nbsp' %]
 		    <li title="created (YYYYmmddHHMM), GMT: [% crtd %]" class="d-none.d-lg-block.d-xl-none d-none.d-md-block.d-lg-none">

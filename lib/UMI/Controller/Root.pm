@@ -942,10 +942,12 @@ sub test : Local {
   }
 
 #  @{$return} = split(/, /, $ipa->as_string);
-  $return = [$ipa->as_address_array];
+  $return = { success => 'Lorem ipsum dolor sit amet.',
+	      error   => 'Neque porro quisquam est qui dolorem ipsum quia dolor sit amet', };
 
   $c->stash( template      => 'test.tt',
 	     final_message => $return,
+	     ipa           => [$ipa->as_address_array],
 	   );
 }
 

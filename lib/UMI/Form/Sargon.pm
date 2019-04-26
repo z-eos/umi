@@ -10,7 +10,7 @@ BEGIN { extends 'UMI::Form::LDAP';
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable' );
 
 has '+enctype' => ( default => 'multipart/form-data');
-has '+action' => ( default => '/sargon' );
+has '+action'  => ( default => '/sargon' );
 
 sub build_form_element_class { [ qw(formajaxer) ] }
 

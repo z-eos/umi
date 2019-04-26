@@ -2,7 +2,7 @@
 
 [% fa_meta = 'fas fa-fw'%]
 
-<div class="row inline-group">
+<div class="row inline-group align-items-center">
   <div class="col-10 inline-group">
     <div class="">
       <a href="#"
@@ -57,7 +57,7 @@
 	  </form>
 	</div>
 	<div class="dropdown-item">
-	  <form role="form" method="POST" class="formajaxer STUB123"
+	  <form role="form" method="POST" class="formajaxer"
 		action="/searchby/proc">
 	    <input type="hidden" name="ldap_modify_group" value="[% entry.key %]">
 	    <button type="submit" title="modify group/s user belongs to" class="btn btn-link"
@@ -241,13 +241,11 @@
 	[%   END %]
 	[%   IF entry.key.match('dot1x-') %]
 	<div class="dropdown-item">
-	  <form role="form" method="POST" 
-		action="/searchby/proc"
-		class="STUB123">
-	    <button type="submit" title="modify group members" class="btn btn-link"
-		    value="[% entry.key %]"
-		    data-order="[% site.searchby.menu.order.ldap_modify_rad_group %]"
-		    name="ldap_modify_rad_group">
+	  <form role="form" method="POST" class="formajaxer"
+		action="/searchby/proc">
+	    <input type="hidden" name="ldap_modify_rad_group" value="[% entry.key %]">
+	    <button type="submit" title="RADIUS groups" class="btn btn-link"
+		    data-order="[% site.searchby.menu.order.ldap_modify_rad_group %]">
 	      <span class="[% fa_meta %] fa-arrows-alt text-info"></span>
 	      RADIUS group
 	    </button>
@@ -257,8 +255,7 @@
 	[%   IF entry.value.mgmnt.userPassword && ! entry.key.match('^author') %]
 	<div class="dropdown-item">
 	  <form role="form" method="POST" class="formajaxer"
-		action="/searchby/modify_userpassword"
-		class="STUB123">
+		action="/searchby/modify_userpassword">
 	    <input type="hidden" name="ldap_modify_password" value="[% entry.key %]">
 	    <button type="submit" title="password change / check" class="btn btn-link"
 		    data-order="[% site.searchby.menu.order.ldap_modify_password %]">

@@ -1,60 +1,19 @@
 [% META
    title = 'RADIUS Groups Modify'
-   link = '<link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">'
 %]
+
+<link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">
+
+<[% site.pageheading %] class="font-weight-bold p-3">
+<i class="fas fa-users-cog fa-lg mr-3 text-muted"></i>
+User's RADIUS Group/s Modification Form <small><em class="text-muted text-monospace">
+  for: [% ldap_modify_rad_group %]
+</em></small>
+</[% site.pageheading %]>
+<hr>
 
 [% INCLUDE ldap_err.tt %]
 
-<div class="page-header">
-  <[% site.pageheading %]>RADIUS Groups Modification Form <small><em class="mono">for user: [% ldap_modify_rad_group %]</em></small></[% site.pageheading %]>
-</div>
-
 [% form.render %]
 
-<script>
-// http://loudev.com/
-$(function(){
-    $('#groups').multiSelect({
-	keepOrder: true,
-
-	selectableHeader: "<button type='button' class='btn btn-block btn-info'><span class='fa fa-group'>&nbsp;</span><b>Available Groups</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",
-	selectionHeader: "<button type='button' class='btn btn-block btn-success'><span class='fa fa-group'>&nbsp;</span><b>Groups Object Belongs To</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",
-
-	afterInit: function(ms){
-	    var that = this,
-            $selectableSearch = that.$selectableUl.prev(),
-            $selectionSearch = that.$selectionUl.prev(),
-            selectableSearchString = '#'+that.$container.attr('id')+' .ms-elem-selectable:not(.ms-selected)',
-            selectionSearchString = '#'+that.$container.attr('id')+' .ms-elem-selection.ms-selected';
-
-	    that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
-		.on('keydown', function(e){
-		    if (e.which === 40){
-			that.$selectableUl.focus();
-			return false;
-		    }
-		});
-
-	    that.qs2 = $selectionSearch.quicksearch(selectionSearchString)
-		.on('keydown', function(e){
-		    if (e.which == 40){
-			that.$selectionUl.focus();
-			return false;
-		    }
-		});
-	},
-	afterSelect: function(){
-	    this.qs1.cache();
-	    this.qs2.cache();
-	},
-	afterDeselect: function(){
-	    this.qs1.cache();
-	    this.qs2.cache();
-	}
-
-    });
-});
-
-</script>
-<script src="/static/js/jquery.multi-select.js" type="text/javascript"></script>
-<script src="/static/js/jquery.quicksearch.js" type="text/javascript"></script>
+<script src="/static/js/umi-multiselect.js"></script>
