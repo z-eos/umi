@@ -55,6 +55,6 @@ Test code page<em class="h6 text-muted text-monospace"> (page to show test code 
 
 <pre class="h6 text-monospace">
 
-  [% dumper.dump(final_message) %]
+  [% dumper.dump(ipa) %]
 
 </pre>

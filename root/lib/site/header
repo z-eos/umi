@@ -40,19 +40,7 @@
 &bull; for each search criteria, objectClass=* is used if empty
 &bull; use * as substring
 &bull; narrow search results for non &laquo;by ...&raquo; presets, by providing attribute in filter, like: uid=*dreii.*
-&bull; to search in access log, use base [% helper_cfg('cfg_local','ldap_crud_db_log') %]"
-		 data-animation="false"
-		 data-toggle="popover"
-		 data-trigger="hover"
-		 data-placement="bottom"
-		 data-html="true"
-		 data-content="<ul>
-		 <li>default sort criteria is <i class='text-info'>by name</i> (First/Last Name, uid and cn)</li>
-		 <li>for each search criteria, <i class='text-info'>objectClass=<i class='fa fa-asterisk'></i></i> is used if empty</li>
-		 <li>use <i class='fa fa-asterisk text-info'></i> as substring</li>
-		 <li>narrow search results for non &laquo;by ...&raquo; presets, by providing attribute in filter, like: <i class='text-info'>uid=<i class='fa fa-asterisk'></i>dreii.<i class='fa fa-asterisk'></i></i></li>
-		 <li>to search in access log, use base <i class='text-info'>[% helper_cfg('cfg_local','ldap_crud_db_log') %]</i></li>
-		 </ul>">
+&bull; to search in access log, use base [% helper_cfg('cfg_local','ldap_crud_db_log') %]">
 
 	  <input type="hidden" name="ldap_base_case" id="ldap_base_case" >
 	  

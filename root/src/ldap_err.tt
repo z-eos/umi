@@ -6,21 +6,22 @@
 <div class="card-group m-0 my-3" id="accordion">
   <div class="card card-sm border-danger">
     <div class="card-header bg-danger clearfix p-0 pt-2" role="tab" id="headErr">
-      <a class="chevron_toggleable btn btn-danger btn-borderless float-left"
-	 href="#cardBodyError"
+    <h4 class="text-light">
+      <a class="chevron_toggleable btn btn-link btn-sm pull-left"
+	 href="#"
 	 title="Collapse In/Out"
 	 data-toggle="collapse"
+	 data-target="#cardBodyError"
 	 role="button"
 	 aria-expanded="true"
 	 aria-controls="cardBodyError">
-	<i class="fa [% site.icons.toggle_down %]"></i>
+	<i id="chevron_switcher" class="text-white fas fa-fw [% site.icons.toggle_right %]"></i>
       </a>
-      <h4 class="text-light">
-	<i class="fas fa-exclamation-circle mr-3"></i><strong>Error!</strong>
-      </h4>
+      <i class="fas fa-exclamation-circle mr-3"></i><strong>Error!</strong>
+    </h4>
     </div>
-    <div class="collapse" id="cardBodyError">
-      <div class="card-body">
+    <div class="umi-collapsable collapse" id="cardBodyError">
+      <div class="card-body pb-0">
 	[% IF form.errors %]
 	<b class="text-danger">Form contains error/s! Check for fields constraints met, please!</b>
 	<ul class="list-unstyled">
@@ -49,8 +50,8 @@
     <button type="button" class="close borderless pr-3" data-dismiss="alert" aria-label="Close"
 	    onclick="$(this).closest('.card').hide(200)"
 	    title="Dismiss this card.">
-      <span class="text-white" aria-hidden="true">&times;</span>
-      <!-- span aria-hidden="true" class="fa fa-times-circle"></span -->
+      <!-- span class="text-white" aria-hidden="true">&times;</span -->
+      <span aria-hidden="true" class="text-white fas fa-times-circle"></span>
     </button>
     <h4 class="text-light">
       <i class="fas fa-exclamation-triangle pl-3"></i>
@@ -60,7 +61,7 @@
       </small></em>
     </h4>
   </div>
-  <div class="card-body">
+  <div class="card-body pb-0">
     <ul class="list-unstyled">
       [% FOREACH i IN final_message.warning %]
       <li>[% i %]</li>
@@ -74,20 +75,21 @@
 <div class="card m-0 my-3 border-success">
   <div class="card-header bg-success clearfix p-0 pt-2">
     <h4 class="text-light">
-      <a class="chevron_toggleable btn btn-success btn-borderless float-left"
-	 href="#cardBodySuccess"
+      <a class="chevron_toggleable btn btn-link btn-sm pull-left"
+	 href="#"
 	 title="Collapse In/Out"
 	 data-toggle="collapse"
+	 data-target="#cardBodySuccess"
 	 role="button"
 	 aria-expanded="true"
 	 aria-controls="cardBodySuccess">
-	<i class="fa [% site.icons.toggle_down %]"></i>
+	<i id="chevron_switcher" class="text-white fas fa-fw [% site.icons.toggle_down %]"></i>
       </a>
       <i class="fas fa-check-circle ml-1 mr-3"></i><strong>Success! [% final_message.title %]</strong>
     </h4>
   </div>
-  <div class="collapse show" id="cardBodySuccess">
-    <div class="card-body">
+  <div class="umi-collapsable collapse show" id="cardBodySuccess">
+    <div class="card-body pb-0">
       <ul class="list-unstyled">
 	[% FOREACH i IN final_message.success %]
 	<li>[% IF i == 1 %]Operation went well![% ELSE %][% i %][% END %]</li>
@@ -97,3 +99,19 @@
   </div>
 </div>
 [% END %]
+
+<script>
+
+ /*
+  * searchby result/s un/collaps-er (@ ldap_err.tt)
+  */ 
+
+ $('.chevron_toggleable').on('click', function() { 
+   if ($(this).closest('.card').find('.umi-collapsable').hasClass('show')) { 
+     $(this).find('#chevron_switcher').removeClass('[% site.icons.toggle_down %]').addClass('[% site.icons.toggle_right %]')
+   } else { 
+     $(this).find('#chevron_switcher').removeClass('[% site.icons.toggle_right %]').addClass('[% site.icons.toggle_down %]')
+   }
+ })
+
+</script>
