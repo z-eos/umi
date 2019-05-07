@@ -256,10 +256,10 @@ sub index :Path :Args(0) {
       if ( $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
 	$dn_depth = scalar split(/,/, $ldap_crud->{cfg}->{base}->{acc_root}) + 1;
 
-	@root_arr = split(',', $_->dn);
-	$root_i = $#root_arr;
+	@root_arr    = split(',', $_->dn);
+	$root_i      = $#root_arr;
 	@root_dn_arr = splice(@root_arr, -1 * $dn_depth);
-	$root_dn = join(',', @root_dn_arr);
+	$root_dn     = join(',', @root_dn_arr);
 	
 	# here, for each entry we are preparing data of the root object it belongs to
 	$root_i++;
@@ -362,20 +362,17 @@ sub index :Path :Args(0) {
 	utf8::decode($ttentries->{$dn}->{root}->{sn});
 
 	# is this user blocked?
+	my $is_blocked_filter =
+	  sprintf('(&(cn=%s)(memberUid=%s))',
+		  $ldap_crud->cfg->{stub}->{group_blocked},
+		  $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} });
+	# log_debug { np( $ldap_crud->cfg->{base}->{group} . " | " . $is_blocked_filter ) };
+	log_debug { np($ttentries->{$dn}) };
 	$c->stats->profile('is-blocked search for <i class="text-light">' . $_->dn . '</i>');
 	$mesg = $ldap_crud->search({ base   => $ldap_crud->cfg->{base}->{group},
-				     filter => sprintf('(&(cn=%s)(memberUid=%s))',
-						       $ldap_crud->cfg->{stub}->{group_blocked},
-						       $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }), });
-	
-	# $mesg = $ldap_crud->search({ base   => sprintf('cn=%s,%s',
-	# 					       $ldap_crud->cfg->{stub}->{group_blocked},
-	# 					       $ldap_crud->cfg->{base}->{group}),
-	# 			     filter => sprintf('(memberUid=%s)',
-	# 					       $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }), });
+				     filter => $is_blocked_filter, });
 
-	# log_debug { np( $ldap_crud->cfg->{base}->{group} . " | " . $ldap_crud->cfg->{stub}->{group_blocked} . " | " . $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root}} ) };
-	# log_debug { np($mesg->as_struct) };
+
 	$blocked = $mesg->count;
 	$return->{error} .= $ldap_crud->err( $mesg )->{html}
 	  if $mesg->is_error();

@@ -178,16 +178,36 @@ sub proc :Path(proc) :Args(0) {
       my $is_dynamicObject = 0;
 
       foreach (@entries) {
-	$c_name = ldap_explode_dn( $_->get_value('creatorsName'), casefold => 'none' );
-	$m_name = ldap_explode_dn( $_->get_value('modifiersName'), casefold => 'none' );
-	$ttentries->{$_->dn}->{root}->{ts} =
-	  { createTimestamp => $self->ts({ ts => $_->get_value('createTimestamp'), gnrlzd => 1, gmt => 1 }),
-	    creatorsName    => defined $c_name->[0]->{uid} ? $c_name->[0]->{uid} : $c_name->[0]->{cn},
-	    modifyTimestamp => $self->ts({ ts => $_->get_value('modifyTimestamp'), gnrlzd => 1, gmt => 1 }),
-	    modifiersName   => defined $m_name->[0]->{uid} ? $m_name->[0]->{uid} : $m_name->[0]->{cn}, };
-
 	if ( $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
 	  $dn_depth = scalar split(/,/, $ldap_crud->{cfg}->{base}->{acc_root}) + 1;
+
+ 	  @root_arr = split(',', $_->dn);
+ 	  $root_i = $#root_arr;
+ 	  @root_dn = splice(@root_arr, -1 * $dn_depth);
+ 	  $ttentries->{$_->dn}->{root}->{dn} = join(',', @root_dn);
+
+	  # here, for each entry we are preparing data of the root object it belongs to
+	  $root_i++;
+	  if ( $root_i == $dn_depth ) {
+	    $ttentries->{$_->dn}->{root}->{givenName} = $_->get_value('givenName');
+	    $ttentries->{$_->dn}->{root}->{sn} = $_->get_value('sn');
+	    $ttentries->{$_->dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
+	      $_->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
+	  } else {
+	    $root_mesg = $ldap_crud->search({ dn => $ttentries->{$_->dn}->{root}->{dn}, });
+	    if ( $root_mesg->is_error() ) {
+	      $return->{error} .= sprintf("for dn: <b>%s</b><br>%s",
+					  $ttentries->{$_->dn}->{root}->{dn},
+					  $ldap_crud->err( $root_mesg )->{html});
+	    } else {
+	      $root_entry = $root_mesg->entry(0);
+	      # log_debug { np(@{[$root_entry->attributes]}) };
+	      $ttentries->{$_->dn}->{root}->{givenName} = $root_entry->get_value('givenName');
+	      $ttentries->{$_->dn}->{root}->{sn} = $root_entry->get_value('sn');
+	      $ttentries->{$_->dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
+		$root_entry->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
+	    }
+	  }
 
 	  if ( $_->exists('objectClass') ) {
 	    foreach $tmp ( @{$_->get_value('objectClass', asref => 1)} ) {
@@ -201,59 +221,29 @@ sub proc :Path(proc) :Args(0) {
 	      }
 	    }
 	  }
-	  
+
 	  # is this user blocked?
+	  my $is_blocked_filter =
+	    sprintf('(&(cn=%s)(memberUid=%s))',
+		    $ldap_crud->cfg->{stub}->{group_blocked},
+		    $ttentries->{$_->dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} });
+	  log_debug { np( $ldap_crud->cfg->{base}->{group} . " | " . $is_blocked_filter ) };
+	  log_debug { np($ttentries->{$_->dn}) };
 	  $c->stats->profile('is-blocked search for <i class="text-light">' . $_->dn . '</i>');
-	  $mesg = $ldap_crud->search({
-				      base => $ldap_crud->cfg->{base}->{group},
-				      filter => sprintf('(&(cn=%s)(memberUid=%s))',
-							$ldap_crud->cfg->{stub}->{group_blocked},
-							$ttentries->{$_->dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }),
-				     #### !!! WARNING !!! HARDCODE
-				     ### substr( (reverse split /,/, $_->dn)[2], 4 )),
-				     });
+	  $mesg = $ldap_crud->search({ base   => $ldap_crud->cfg->{base}->{group},
+				       filter => $is_blocked_filter, });
+
 	  $blocked = $mesg->count;
 	  $return->{error} .= $ldap_crud->err( $mesg )->{html}
 	    if $mesg->is_error();
 
-	
- 	  @root_arr = split(',', $_->dn);
- 	  $root_i = $#root_arr;
- 	  @root_dn = splice(@root_arr, -1 * $dn_depth);
- 	  $ttentries->{$_->dn}->{root}->{dn} = join(',', @root_dn);
-
-	  if ( $_->dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
-	    # here, for each entry we are preparing data of the root object it belongs to
-	    $root_i++;
-	    if ( $root_i == $dn_depth ) {
-	      $ttentries->{$_->dn}->{root}->{givenName} = $_->get_value('givenName');
-	      $ttentries->{$_->dn}->{root}->{sn} = $_->get_value('sn');
-	      $ttentries->{$_->dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
-		$_->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
-	    } else {
-	      $root_mesg = $ldap_crud->search({ dn => $ttentries->{$_->dn}->{root}->{dn}, });
-	      if ( $root_mesg->is_error() ) {
-		$return->{error} .= sprintf("for dn: <b>%s</b><br>%s",
-					    $ttentries->{$_->dn}->{root}->{dn},
-					    $ldap_crud->err( $root_mesg )->{html});
-	      } else {
-		$root_entry = $root_mesg->entry(0);
-		# log_debug { np(@{[$root_entry->attributes]}) };
-		$ttentries->{$_->dn}->{root}->{givenName} = $root_entry->get_value('givenName');
-		$ttentries->{$_->dn}->{root}->{sn} = $root_entry->get_value('sn');
-		$ttentries->{$_->dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
-		  $root_entry->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
-	      }
-	    }
-	  }
-
  	  # p $ttentries->{$_->dn}->{root};
- 
+
  	  # $to_utf_decode = $ttentries->{$_->dn}->{root}->{givenName};
  	  # utf8::decode($to_utf_decode);
  	  # $ttentries->{$_->dn}->{root}->{givenName} = $to_utf_decode;
  	  utf8::decode($ttentries->{$_->dn}->{root}->{givenName});
- 
+
  	  # $to_utf_decode = $ttentries->{$_->dn}->{root}->{sn};
  	  # utf8::decode($to_utf_decode);
  	  # $ttentries->{$_->dn}->{root}->{sn} = $to_utf_decode;
@@ -298,6 +288,13 @@ sub proc :Path(proc) :Args(0) {
 	  $dn_depth = $ldap_crud->{cfg}->{base}->{dc_num} + 1;
 	}
 
+	$c_name = ldap_explode_dn( $_->get_value('creatorsName'), casefold => 'none' );
+	$m_name = ldap_explode_dn( $_->get_value('modifiersName'), casefold => 'none' );
+	$ttentries->{$_->dn}->{root}->{ts} =
+	  { createTimestamp => $self->ts({ ts => $_->get_value('createTimestamp'), gnrlzd => 1, gmt => 1 }),
+	    creatorsName    => defined $c_name->[0]->{uid} ? $c_name->[0]->{uid} : $c_name->[0]->{cn},
+	    modifyTimestamp => $self->ts({ ts => $_->get_value('modifyTimestamp'), gnrlzd => 1, gmt => 1 }),
+	    modifiersName   => defined $m_name->[0]->{uid} ? $m_name->[0]->{uid} : $m_name->[0]->{cn}, };
 
 	$ttentries->{$_->dn}->{'mgmnt'} =
 	  {

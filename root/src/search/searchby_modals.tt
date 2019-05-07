@@ -1,6 +1,5 @@
 [% # -*- mode: web; mode: follow -*- %]
 [% IF admin_owned && ! is_log_obj %]
-<!-- #### Modal: Delete start -->
 <div class="modal" id="modal_delete[% id_suffix %]"
      tabindex="-1" role="dialog" aria-labelledby="modal_delete[% id_suffix %]_label"
      aria-hidden="true">
@@ -44,11 +43,10 @@
       <div class="modal-footer"></div>
     </div>
   </div>
-</div><!-- #### Modal: Delete end -->
+</div>
 [% END %]
 
 [% IF to_rollback %]
-<!-- #### Modal: RollBack start -->
 <div class="modal" id="modal_rollback[% id_suffix %]"
      tabindex="-1" role="dialog" aria-labelledby="modal_rollback[% id_suffix %]_label"
      aria-hidden="true">
@@ -74,10 +72,9 @@
       </form>
     </div>
   </div>
-</div><!-- #### Modal: RollBack end -->
+</div>
 [% END %]
 
-<!-- #### Modal: Block start -->
 <div class="modal" id="modal_block[% id_suffix %]"
      tabindex="-1" role="dialog" aria-labelledby="modal_block[% id_suffix %]_label"
      aria-hidden="true">
@@ -90,7 +87,6 @@
 	</h4>
 	</div>
       <form role="form" method="POST" class="formajaxer" action="/searchby/block">
-	<!-- <div class="modal-body text-primary"></div> -->
 	<div class="modal-footer">
 	  <div>
 	    <button type="button" class="btn btn-secondary umi-btn-event" data-dismiss="modal">Close</button>
@@ -105,9 +101,8 @@
       </form>
     </div>
   </div>
-</div><!-- #### Modal: Block end -->
+</div>
 
-<!-- #### Modal: Reassign Root Account start -->
 <div class="modal" id="modal_reassign[% id_suffix %]"
      tabindex="-1" role="dialog" aria-labelledby="modal_reassign[% id_suffix %]_label"
      aria-hidden="true">
@@ -160,9 +155,8 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
       </form>
     </div>
   </div>
-</div><!-- #### Modal: Reassign Root Account end -->
+</div>
 
-<!-- #### Modal: Modify RDN start -->
 <div class="modal" id="modal_moddn[% id_suffix %]"
      tabindex="-1" role="dialog" aria-labelledby="modal_moddn[% id_suffix %]_label"
      aria-hidden="true">
@@ -211,9 +205,8 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
       </form>
     </div>
   </div>
-</div><!-- #### Modal: Modify RDN end -->
+</div>
 
-<!-- #### Modal: LDIF start -->
 <div class="modal" id="modal_ldif[% id_suffix %]"
      tabindex="-1" role="dialog" aria-labelledby="modal_ldif[% id_suffix %]_label"
      aria-hidden="true">
@@ -276,9 +269,8 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
       </div>
     </div>
   </div>
-</div><!-- #### Modal: LDIF end -->
+</div>
 
-<!-- #### Modal: vCard start -->
 <div class="modal" id="modal_vcard[% id_suffix %]"
      tabindex="-1" role="dialog" aria-labelledby="modal_vcard[% id_suffix %]_label"
      aria-hidden="true">
@@ -335,9 +327,8 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
       </form>
     </div>
   </div>
-</div><!-- #### Modal: vCard end -->
+</div>
 
-<!-- #### Modal: Refresh start -->
 <div class="modal" id="modal_refresh[% id_suffix %]"
      tabindex="-1" role="dialog" aria-labelledby="modal_refresh[% id_suffix %]_label"
      aria-hidden="true">
@@ -377,7 +368,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
       </form>
     </div>
   </div>
-</div><!-- #### Modal: Refresh end -->
+</div>
 
 <script>
  $('#modal_refresh_dtp[% id_suffix %]').datetimepicker({

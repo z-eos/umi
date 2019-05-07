@@ -113,7 +113,7 @@ __PACKAGE__
 			     ERROR          => 'error.tt2',
 			     TIMER          => 0,
 			     EVAL_PERL      => 1,
-			     ENCODING       => 'utf8',
+			     ENCODING       => 'UTF-8',
 			     expose_methods => [ qw{ helper_cfg } ], # provided in lib/UMI/View/Web.pm
 			     render_die     => 1,
 			   },
