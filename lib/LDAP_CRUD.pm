@@ -1429,10 +1429,9 @@ if DN to delete is DN of service or branch
 
 =cut
 
-
 sub del_from_groups {
   my ($self, $dn) = @_;
-  my ($return, $group, $mesg, $entry, $attr, $filter, $to_del);
+  my ($return, $mesg, $entry, $attr, $filter, $to_del, $del);
   # log_debug { np( $dn ) };
   # log_debug { np( $self->get_root_obj_dn($dn) ) };
   if ( $dn eq $self->get_root_obj_dn($dn) ) { # posixGroup first
@@ -1450,15 +1449,16 @@ sub del_from_groups {
     $filter = sprintf("(&(objectClass=groupOfNames)(member=%s))", $dn);
     $attr   = 'member';
   }
+  # get all groups DN belongs to
   $mesg = $self->ldap->search( base   => $self->{cfg}->{base}->{db},
 			       filter => $filter,
 			       attrs  => [ 'cn' ]);
-  foreach $group ( $mesg->entries ) {
-    my $del = $self->modify( $group->dn, [ delete => [ $attr => $to_del ]] );
+  foreach ( $mesg->entries ) {
+    $del = $self->modify( $_->dn, [ delete => [ $attr => $to_del ]] );
     if ( $del ) {
       push @{$return->{error}}, $del->{html};
     } else {
-      $return->{success} = sprintf("Group %s was modified.", $group->get_value('cn'));
+      push @{$return->{success}}, sprintf("Group %s was modified.", $_->get_value('cn'));
     }
   }
   # log_debug { np( $return ) };
