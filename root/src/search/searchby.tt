@@ -178,11 +178,12 @@ Search Advanced
 	 root_of_rec_btn = 'col-xs-12 text-truncate';
 	 END;
 
-	 # === OBJECT TYPE PANEL COLOR DEFINING ===;
-	 IF entry.value.mgmnt.is_blocked;
+	 # === OBJECT TYPE CARD COLOR DEFINING ===;
+	 IF entry.value.mgmnt.is_blocked ||
+	 (entry.value.attrs.exists('umiOvpnAddStatus') &&
+	   entry.value.attrs.umiOvpnAddStatus.0 != 'enabled');
 	 tr_color = 'danger';
-	 ELSIF (entry.value.mgmnt.is_root
-	   && entry.value.mgmnt.is_account)
+	 ELSIF (entry.value.mgmnt.is_root && entry.value.mgmnt.is_account)
 	 || ! entry.value.mgmnt.is_account;
 	 tr_color = 'info';
 	 ELSIF entry.key.match('^[uid]|[cn]=.*,author');
@@ -192,8 +193,8 @@ Search Advanced
 	 END;
 
 	 num_of_dc = 0;
-	 FOREACH pat IN entry.key.split(',');
-	 SET num_of_dc = num_of_dc + 1 IF pat.match('dc=');
+	 FOREACH pattrn IN entry.key.split(',');
+	 SET num_of_dc = num_of_dc + 1 IF pattrn.match('dc=');
 	 END %]
 
       [% # === ACLs ACLs ACLs ACLs ACLs ACLs ACLs ACLs === %]
@@ -264,9 +265,10 @@ Search Advanced
 		  [% icon_color = '';
 		     # --- DETECTION OF "ANYTHING" DISABLED, TO COLOR IT'S ICON AND TEXT ---;
 		     #     if certificate and it is not enabled then color to danger;
-		     IF entry.value.attrs.exists('umiOvpnAddStatus') && entry.value.attrs.umiOvpnAddStatus.0 != 'enabled';
-		     icon_color = 'text-danger';
-		     END %]
+		     # IF entry.value.attrs.exists('umiOvpnAddStatus') && entry.value.attrs.umiOvpnAddStatus.0 != 'enabled';
+		     # icon_color = 'text-pink';
+		     # END
+		     %]
 
 
 		  [% # --- ICON, WHICH IS AFTER CLICK-TO-OPEN-ROOT-OBJECT BUTTON --- %]
@@ -304,6 +306,7 @@ Search Advanced
 		       ph_title="DHCP Root Object";
 		       ph_class="umi-search-padding " _ base_icon.DHCP _ ' ' _ entry_icon_size;
 		       ELSIF entry.value.mgmnt.is_root && entry.key.match('reqStart');
+
 		       IF entry.value.attrs.reqType.0 == 'add';
 		       ph_title="History Object Request type: Add";
 		       ph_class="umi-search-padding " _ entry_icon_size _ " fas fa-plus";
@@ -320,6 +323,7 @@ Search Advanced
 			 'fas fa-share-alt-square' ];
 		       ph_class=ph_meta.join;
 		       END;
+		       
 		       ELSIF entry.value.mgmnt.is_root && ! entry.key.match('People');
 		       ph_title="Root Objectt";
 		       ph_class="umi-search-padding " _ base_icon.default _ ' ' _ entry_icon_size;
@@ -357,6 +361,7 @@ Search Advanced
 			 icon_color
 			 leaf_class ];
 		       ph_class=ph_meta.join;
+
 		       ELSE;
 		       ph_title="Service Account";
 		       ph_meta=[ 'umi-search-padding fas fa-leaf'
@@ -394,7 +399,7 @@ Search Advanced
 		       END;
 		       # --- ABCDE stop %]
 		    
-		    [% # dn of the select result object %]
+		    [% # dn of the select result object (the one after service icon) %]
 
 		    <form class="formajaxer" role="form" method="POST" action="/searchby">
 		      <input type="hidden"  name="ldap_subtree" value="[% entry.key %]">
@@ -416,6 +421,7 @@ Search Advanced
 			       entry.key;
 			       END %]
 			  </b>
+			  
 			</span>
 
 		      </button>
@@ -473,9 +479,11 @@ Search Advanced
 
 		     attr_name = h_attr.key; # attribute name
 		     IF h_attr.key == 'umiOvpnAddStatus' && h_attr.value.0 != 'enabled';
-		     d_class = 'bg-danger';
+		     d_class = 'bg-danger text-uppercase font-weight-bold text-white';
+		     ELSE;
+		     d_class = '';
 		     END %]
-		  <dt class="col-2 text-right text-truncate [% d_class %]">
+		  <dt class="col-2 text-right text-truncate">
 		    [% IF h_attr.key.match(';binary') %]
 		    [% bindata = '&nbsp;<abbr title="binary data"><i class="fa ' _ site.icons.binary_data _ ' text-info" title="binary data"></i></abbr>' %]
 		    [% h_attr.key.replace(';binary', bindata) %]&#58;
