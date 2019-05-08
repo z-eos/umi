@@ -39,22 +39,7 @@ Catalyst Controller.
 
 sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
-# --- #     if ( defined $c->session->{"auth_uid"} ) {
-      my $params = $c->req->params;
-# --- #       $c->stash( template => 'search/search_advanced.tt',
-# --- #       		 form => $self->form, );
-# --- # 
-# --- #       return unless
-# --- # 	$self->form->process(
-# --- # 			     posted => ($c->req->method eq 'POST'),
-# --- # 			     params => $params,
-# --- # 			     ldap_crud => $c->model('LDAP_CRUD'),
-# --- # 			    );
-# --- # 
-# --- #       # $c->stash( final_message => '' );
-# --- #     } else {
-# --- #       $c->stash( template => 'signin.tt', );
-# --- #     }
+    my $params = $c->req->params;
 
     $c->stash( template      => 'search/search_advanced.tt',
 	       form          => $self->form,
@@ -122,9 +107,9 @@ sub proc :Path(proc) :Args(0) {
 	$sort_order = 'straight';
       } else {
 	# log_debug { np($params) };
-	$basedn = $params->{'base_dn'};
-	$filter = $params->{'search_filter'};
-	$scope = $params->{'search_scope'};
+	$basedn     = $params->{'base_dn'};
+	$filter     = $params->{'search_filter'};
+	$scope      = $params->{'search_scope'};
 	$sort_order = 'reverse';
       }
 

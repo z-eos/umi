@@ -367,7 +367,7 @@ sub index :Path :Args(0) {
 		  $ldap_crud->cfg->{stub}->{group_blocked},
 		  $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} });
 	# log_debug { np( $ldap_crud->cfg->{base}->{group} . " | " . $is_blocked_filter ) };
-	log_debug { np($ttentries->{$dn}) };
+	# log_debug { np($ttentries->{$dn}) };
 	$c->stats->profile('is-blocked search for <i class="text-light">' . $_->dn . '</i>');
 	$mesg = $ldap_crud->search({ base   => $ldap_crud->cfg->{base}->{group},
 				     filter => $is_blocked_filter, });

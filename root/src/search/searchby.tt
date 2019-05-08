@@ -258,7 +258,7 @@ Search Advanced
 		  </form>
 		</div>
 
-		<div class="inline-group inline-item-fluid" role="group">
+		<div class="inline-group inline-item-fluid text-truncate" role="group">
 		  <!-- p class="visible-lg-block visible-md-block"></p>&nbsp; -->
 		  
 		  [% icon_color = '';
@@ -275,7 +275,7 @@ Search Advanced
 		    <form role="form" method="POST" class="formajaxer" action="/searchby/user_preferences">
 		      <input type="hidden" name="user_preferences" value="[% entry.key %]">
 		      <button type="submit"
-			      class="btn btn-link umi-search"
+			      class="btn btn-link text-white"
 			      title="look user object subtree data">
 			[% IF entry.value.mgmnt.dynamicObject;
 			   dynamic_object;
@@ -458,7 +458,7 @@ Search Advanced
 	  </div>
 	  [% # search result header stop %]
 	  [% # search result body start %]
-	  <div id="collapse[% loop.index %]" class="umi-collapsable collapse [% show %]">
+	  <div id="collapse[% loop.index %]" class="border border-[% tr_color %] umi-collapsable collapse [% show %]">
 	    <div class="card">
 	      <div class="card-body">
 		<dl class="row">

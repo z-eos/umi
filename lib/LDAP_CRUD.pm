@@ -215,18 +215,18 @@ sub _build_cfg {
 	  #=====================================================================
 
 	  stub => {
-		   homeDirectory     => '/usr/local/home',
-		   loginShell        => '/usr/bin/false',
+		   core_mta          => 'relay.umi',
 		   gidNumber         => UMI->config->{default}->{gidNumber},
 		   group             => UMI->config->{default}->{group},
-		   noavatar_mgmnt    => UMI->path_to('root', 'static', 'images', '/avatar-mgmnt.png'),
-		   icon              => 'fas fa-user-circle',
-		   icon_error        => 'fas fa-exclamation-circle',
-		   icon_warning      => 'fas fa-exclamation-triangle',
-		   icon_success      => 'fas fa-check-circle',
 		   group_blocked     => 'blocked',
 		   group_blocked_gid => 20001,
-		   core_mta          => 'relay.umi',
+		   homeDirectory     => '/usr/local/home',
+		   icon              => 'fas fa-user-circle',
+		   icon_error        => 'fas fa-exclamation-circle',
+		   icon_success      => 'fas fa-check-circle',
+		   icon_warning      => 'fas fa-exclamation-triangle',
+		   loginShell        => '/usr/bin/false',
+		   noavatar_mgmnt    => UMI->path_to('root', 'static', 'images', '/avatar-mgmnt.png'),
 		  },
 	  rdn => {
 		  acc_root       => UMI->config->{authentication}->{realms}->{ldap}->{store}->{user_field},
@@ -1308,7 +1308,6 @@ non recursive deletion
 sub del {
   my ($self, $dn) = @_;
   my $callername = (caller(1))[3] // 'main';
-  # remove after above row confirmed # $callername = 'main' if ! defined $callername;
   my $return;
 
   my $g_mod = $self->del_from_groups($dn);
@@ -1433,61 +1432,36 @@ if DN to delete is DN of service or branch
 
 sub del_from_groups {
   my ($self, $dn) = @_;
-
-  my $callername = (caller(1))[3];
-  $callername = 'main' if ! defined $callername;
-  my $return; # = 'call to LDAP_CRUD->del_from_groups from ' . $callername . ': ';
-
-  my ($result, $res_entry, $group, $g_dn, $g_res, @g_memb_old, @g_memb_new, $mesg);
-  # p $dn;
-  # p $self->get_root_obj_dn($dn);
+  my ($return, $group, $mesg, $entry, $attr, $filter, $to_del);
+  # log_debug { np( $dn ) };
+  # log_debug { np( $self->get_root_obj_dn($dn) ) };
   if ( $dn eq $self->get_root_obj_dn($dn) ) { # posixGroup first
     # get uid from the root object
-    $result = $self->ldap->search( base   => $dn,
-				   filter => "(objectClass=*)",
-				   scope  => 'base',
-				   attrs  => [ 'uid' ] );
-    $res_entry = $result->entry(0);
-    my $uid = $res_entry->get_value( 'uid' );
-
-    # get all posixGroup-s where this uid is member
-    $result = $self->ldap->search( base   => $self->{cfg}->{base}->{db},
-				   filter => "(&(objectClass=posixGroup)(memberUid=$uid))",
-				   attrs  => [ 'cn' ],);
-    foreach $group ( $result->all_entries ) {
-      $g_dn = $group->dn;
-      $g_res = $self->ldap->search( base   => $g_dn,
-				    filter => "(objectClass=*)",
-				    scope  => 'base' );
-      @g_memb_old = $g_res->entry(0)->get_value('memberUid');
-      @g_memb_new = grep {$_ ne $uid} @g_memb_old;
-      # &p(\"$dn is root and belongs to posixGroup group $g_dn:");
-      # p @g_memb_old; p @g_memb_new;
-      $mesg = $self->modify( $g_dn,
-			     [ replace => [ memberUid => \@g_memb_new ] ], );
-      if ( $mesg ) {
-	push @{$return->{error}}, $mesg->{html};
-      } else {
-	$return->{success} = sprintf("Group %s was modified.", $g_dn->get_value('cn'));
-      }
-    }
+    $mesg = $self->ldap->search( base   => $dn,
+				 filter => "(objectClass=*)",
+				 scope  => 'base',
+				 attrs  => [ 'uid' ] );
+    $entry  = $mesg->entry(0);
+    $to_del = $entry->get_value( 'uid' );
+    $filter = sprintf("(&(objectClass=posixGroup)(memberUid=%s))", $to_del);
+    $attr   = 'memberUid';
   } else { # groupOfNames is second
-    # get all groupOfNames where this dn is member
-    $result = $self->ldap->search( base   => $self->{cfg}->{base}->{db},
-				   filter => "(&(objectClass=groupOfNames)(member=$dn))",
-				   attrs  => [ 'cn' ],);
-    foreach $group ( $result->all_entries ) {
-      $g_dn = $group->dn;
-      $mesg = $self->modify( $g_dn,
-			     [ delete => [ member => $dn ] ], );
-      if ( $mesg ) {
-	push @{$return->{error}}, $mesg->{html};
-      } else {
-	$return->{success} = sprintf("Group %s was modified.", $group->get_value('cn'));
-      }
+    $to_del = $dn;
+    $filter = sprintf("(&(objectClass=groupOfNames)(member=%s))", $dn);
+    $attr   = 'member';
+  }
+  $mesg = $self->ldap->search( base   => $self->{cfg}->{base}->{db},
+			       filter => $filter,
+			       attrs  => [ 'cn' ]);
+  foreach $group ( $mesg->entries ) {
+    my $del = $self->modify( $group->dn, [ delete => [ $attr => $to_del ]] );
+    if ( $del ) {
+      push @{$return->{error}}, $del->{html};
+    } else {
+      $return->{success} = sprintf("Group %s was modified.", $group->get_value('cn'));
     }
   }
-  # p $return;
+  # log_debug { np( $return ) };
   return $return;
 }
 
@@ -2905,8 +2879,8 @@ uses sub bld_select()
 
 =cut
 
-has 'select_group' => ( traits => ['Array'],
-			is => 'ro', isa => 'ArrayRef', required => 0, lazy => 1,
+has 'select_group' => ( traits  => ['Array'],
+			is      => 'ro', isa => 'ArrayRef', required => 0, lazy => 1,
 			builder => '_build_select_group', );
 
 sub _build_select_group {
@@ -2924,8 +2898,8 @@ uses sub bld_select()
 =cut
 
 has 'select_radprofile' => ( traits => ['Array'],
-	       is => 'ro', isa => 'ArrayRef', required => 0, lazy => 1,
-	       builder => '_build_select_radprofile',
+	       is       => 'ro', isa => 'ArrayRef', required => 0, lazy => 1,
+	       builder  => '_build_select_radprofile',
 	     );
 
 sub _build_select_radprofile {
@@ -2941,8 +2915,8 @@ uses sub bld_select()
 
 =cut
 
-has 'select_radgroup' => ( traits => ['Array'],
-	       is => 'ro', isa => 'ArrayRef', required => 0, lazy => 1,
+has 'select_radgroup'  => ( traits => ['Array'],
+	       is      => 'ro', isa => 'ArrayRef', required => 0, lazy => 1,
 	       builder => '_build_select_radgroup',
 	     );
 
