@@ -636,6 +636,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	  $service_details->{cert}->{$_->dn}->{'ifconfig-push'} = $_->get_value('umiOvpnCfgIfconfigPush');
 	  $service_details->{cert}->{$_->dn}->{'OS'}            = $_->get_value('umiOvpnAddDevOS');
 	  $service_details->{cert}->{$_->dn}->{'device'}        = $_->get_value('umiOvpnAddDevType');
+	  $service_details->{cert}->{$_->dn}->{'status'}        = $_->get_value('umiOvpnAddStatus');
 	} elsif ( $service_details->{authorizedService} =~ /^mail\@/ ) {
 	  push @{$arg->{mail}}, $_->get_value('uid');
 	} elsif ( $service_details->{authorizedService} =~ /^dot1x.*\@/ ) {
@@ -768,7 +769,7 @@ sub settings_save :Path(settings_save) :Args(0) POST {
   my ( $self, $c ) = @_;
 
   my $params = $c->req->parameters;
-  # log_debug { np($params) };
+  log_debug { np($params) };
 
   my $ldap_crud = $c->model('LDAP_CRUD');
   my $replace;
@@ -779,7 +780,8 @@ sub settings_save :Path(settings_save) :Args(0) POST {
     push @{$replace}, add => [ objectClass => 'umiSettings' ];
   }
   log_debug { np($c->session->{settings}->{ui}) };
-  foreach (keys ( %{$c->session->{settings}->{ui}} )) {
+  # foreach (keys ( %{$c->session->{settings}->{ui}} )) {
+  foreach (keys ( %{$ldap_crud->{cfg}->{ui}} )) {
     # log_debug { np($_) };
     if ( $_ eq 'debug' ) {
       $c->session->{settings}->{ui}->{$_} = $params->{$_} // 0;
@@ -835,12 +837,13 @@ sub default :Path {
 sub auto : Private {
   my ($self, $c) = @_;
 
-  if ( defined $c->session->{"auth_uid"} &&
-       defined $c->session->{"auth_pwd"} &&
-       $c->authenticate({
-			 id       => $c->session->{"auth_uid"},
-			 password => $c->session->{"auth_pwd"},
-			})) {
+  if ( defined $c->session->{"auth_uid"}
+       && defined $c->session->{"auth_pwd"}
+       # && $c->authenticate({
+       # 			 id       => $c->session->{"auth_uid"},
+       # 			 password => $c->session->{"auth_pwd"},
+       # 			})
+     ) {
     $c->stash( template => 'welcome.tt', );
   } else {
     # p $c->error;
@@ -968,6 +971,7 @@ sub end : ActionClass('RenderView') {
     $r->{req} = $c->req->params;
     # $r->{stash} = $c->stash;
     my @a = split(/\//, UMI->config->{session}->{storage});
+    # !!! HARDCODE ... need to be rewritten
     my $b = join('/', $a[0],$a[1],$a[2]);
     use POSIX qw(strftime);
     my $now = strftime "%Y%m%d%H%M%S", localtime;
@@ -979,30 +983,30 @@ sub end : ActionClass('RenderView') {
 			 $c->user->uid,
 			 $action,
 			 $now);
-    $c->stats->profile(begin => "store_data in the end");
     $self->store_data({ data => $r, file => $file, });
 
-    use File::Find;
-    find(sub { $size += -s if -f $_ }, $b);
-    push @{$navbar_note}, { note => sprintf("session storage %.1f Mb", $size / 1024 / 1024),
-			    color => $size > UMI->config->{session_storage_size} ? 'danger' : 'info',
-			    icon => 'fa-trash' };
+    $c->stats->profile("store_data() in end()");
+
+    # EJDU # use File::Find;
+    # EJDU # find(sub { $size += -s if -f $_ }, $b);
+    # EJDU # push @{$navbar_note}, { note => sprintf("session storage %.1f Mb", $size / 1024 / 1024),
+    # EJDU # 			    color => $size > UMI->config->{session_storage_size} ? 'danger' : 'info',
+    # EJDU # 			    icon => 'fa-trash' };
   }
-  
+
+
   my @rep = $c->stats->report;
   my $stats = { debug   => $c->session->{settings}->{ui}->{debug} // UMI->config->{debug}->{level},
 		elapsed => $c->stats->elapsed,
 		report  => \@rep };
-  
+
+  # log_debug { np($stats) };
   $c->stash( stats   => $stats,
 	     is_ajax => defined $c->request->headers->header('X-Requested-With') &&
 	     lc( $c->request->headers->header('X-Requested-With') ) eq lc( 'XMLHttpRequest' ) ? 1 : 0,
-	     navbar_note => $navbar_note );
+	     # EJDU # navbar_note => $navbar_note );
+	     navbar_note => undef );
 
-  # if ( $c->error and $c->error->[-1] eq "access denied" ) {
-  #   $c->error(0); # clear the error
-  #   # access denied
-  # }
 }
 
 =head1 AUTHOR

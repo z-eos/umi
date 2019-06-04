@@ -42,13 +42,23 @@ QR version is defined dynamicaly (previous to the one spawning error)
 sub index :Path :Args(0) {
   my ( $self, $c ) = @_;
   my $params = $c->req->parameters;
-    
+
   $c->stash( template => 'tool/toolpwdgen.tt',
 	     form     => $self->form );
 
-  return unless
-    $self->form->process( posted => ($c->req->method eq 'POST'),
-			  params => $params, );
+  if ( keys %{$params} > 0 ) {
+    return unless
+      $self->form->process( posted => ($c->req->method eq 'POST'),
+			    init_object => { pwd_len       => $params->{pwd_len},
+					     pwd_num       => $params->{pwd_num},
+					     pwd_cap       => $params->{pwd_cap},
+					     pronounceable => $params->{pronounceable}, },
+			    params => $params, );
+  } else {
+    return unless
+      $self->form->process( posted      => ($c->req->method eq 'POST'),
+			    params      => $params, );
+  }
 
   my $pwd = $self->pwdgen({ len           => $params->{'pwd_len'}     || undef,
 			    num           => $params->{'pwd_num'}     || undef,

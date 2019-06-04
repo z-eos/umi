@@ -201,8 +201,6 @@ sub index :Path :Args(0) {
       return 0;
     }
 
-    $c->stats->profile(begin => "searchby_search");
-
     my $filter4search = $filter_armor eq '' ? sprintf("(%s)", $filter ) : sprintf("&(%s)(|%s)",
 										  $filter,
 										  $filter_armor );
@@ -228,7 +226,7 @@ sub index :Path :Args(0) {
     my @entries = defined $params->{order_by} &&
       $params->{order_by} ne '' ? $mesg->sorted(split(/,/,$params->{order_by})) : $mesg->sorted('dn');
 
-    $c->stats->profile("search by filter requested");
+    $c->stats->profile("LDAP search lasted");
     
     if ( ! $mesg->count ) {
       if ( $self->is_ascii($params->{'ldapsearch_filter'}) &&
@@ -362,20 +360,27 @@ sub index :Path :Args(0) {
 	utf8::decode($ttentries->{$dn}->{root}->{sn});
 
 	# is this user blocked?
-	my $is_blocked_filter =
-	  sprintf('(&(cn=%s)(memberUid=%s))',
-		  $ldap_crud->cfg->{stub}->{group_blocked},
-		  $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} });
-	# log_debug { np( $ldap_crud->cfg->{base}->{group} . " | " . $is_blocked_filter ) };
-	# log_debug { np($ttentries->{$dn}) };
-	$c->stats->profile('is-blocked search for <i class="text-light">' . $_->dn . '</i>');
-	$mesg = $ldap_crud->search({ base   => $ldap_crud->cfg->{base}->{group},
-				     filter => $is_blocked_filter, });
+	if ( defined $c->session->{settings}->{ui}->{isblock} &&
+	     $c->session->{settings}->{ui}->{isblock} == 1 ) {
+	  if ( $dn !~ /^authorizedService=.*$/ ) {
+	    my $is_blocked_filter =
+	      sprintf('(&(cn=%s)(memberUid=%s))',
+		      $ldap_crud->cfg->{stub}->{group_blocked},
+		      $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} });
+	    # log_debug { np( $ldap_crud->cfg->{base}->{group} . " | " . $is_blocked_filter ) };
+	    # log_debug { np($_->dn) };
+	    $c->stats->profile('is-blocked search for <i class="text-light">' . $_->dn . '</i>');
+	    $mesg = $ldap_crud->search({ base   => $ldap_crud->cfg->{base}->{group},
+					 filter => $is_blocked_filter, });
 
 
-	$blocked = $mesg->count;
-	$return->{error} .= $ldap_crud->err( $mesg )->{html}
-	  if $mesg->is_error();
+	    $blocked = $mesg->count;
+	    $return->{error} .= $ldap_crud->err( $mesg )->{html}
+	      if $mesg->is_error();
+	  } else {
+	    $blocked = 0;
+	  }
+	}
 	
 	$#root_arr = $#root_dn_arr = -1;
 
@@ -438,7 +443,7 @@ sub index :Path :Args(0) {
 
       $ttentries->{$dn}->{'mgmnt'} =
 	{
-		 # userPassword  => $_->exists('userPassword') ? 1 : 0,
+	 # userPassword  => $_->exists('userPassword') ? 1 : 0,
 	 dynamicObject   => $is_dynamicObject,
 	 gitAclProject   => $_->exists('gitAclProject') ? 1 : 0,
 	 is_account      => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
@@ -502,17 +507,23 @@ sub index :Path :Args(0) {
 	      $dn =~ /^uid=.*,$ldap_crud->{cfg}->{base}->{acc_root}/) ||
 	     $dn =~ /^uid=.*,authorizedService=(mail|xmpp).*,$ldap_crud->{cfg}->{base}->{acc_root}/
 	   ) && ! exists $ttentries->{$dn}->{attrs}->{jpegPhoto};
-      
+
       use Text::Diff;
       $tmp = diff \$diff->{reqOld}, \$diff->{reqMod}, { STYLE => 'Text::Diff::HTML' }
       	if defined $diff->{reqMod} &&  defined $diff->{reqMod};
       $ttentries->{$dn}->{attrs}->{reqOldModDiff} = '<pre>' . $tmp . '</pre>'
       	if defined $diff->{reqMod} &&  defined $diff->{reqMod};
       undef $diff;
-      
+
       push @ttentries_keys, $_->dn if $sort_order eq 'reverse'; # for not history searches
       $blocked = $is_dynamicObject = 0;
+
+      # $c->stats->profile('<b>DN:</b> <i class="text-light text-wrap">' . $_->dn . '</i>');
+      $c->stats->profile('dn: ' . $dn);
+
     }
+
+
 
     # suffix array of dn preparation to respect LDAP objects "inheritance"
     # http://en.wikipedia.org/wiki/Suffix_array
@@ -527,6 +538,8 @@ sub index :Path :Args(0) {
 
     @ttentries_keys = sort { lc $a cmp lc $b } keys %{$ttentries}
       if $sort_order eq 'straight'; # for history searches
+
+    # $c->stats->profile('ttentries sort');
 
     # foreach my $dn_s (keys ( %{$ttentries} )) {
     #   p $ttentries->{$dn_s}->{mgmnt};
@@ -550,8 +563,6 @@ sub index :Path :Args(0) {
   } else {
     $c->stash( template => 'signin.tt', );
   }
-
-  $c->stats->profile(end => "searchby_search");
 
 }
 

@@ -221,7 +221,7 @@
       [%     IF navbar_note.size %][% # @ Root->end %]
       <li class="nav-item dropdown">
 	<a class="nav-link text-white-50" data-toggle="dropdown" href="#">
-	  <i class="fas fa-sticky-note content-plus-circle"></i>
+	  <i class="fas fa-sticky-note text-white-50 content-plus-circle"></i>
 	  <!-- small><span class="badge badge-pill badge-danger bg-danger">[% navbar_note.size %]</span></small -->
 	</a>
 	<div class="dropdown-menu dropdown-menu-right">
@@ -238,7 +238,7 @@
       [%     ELSE %]
       <li class="nav-item">
 	<div class="nav-link">
-	  <i class="fas fa-sticky-note"></i>
+	  <i class="fas fa-sticky-note text-white-50"></i>
 	</div>
       </li>
       [%     END %]

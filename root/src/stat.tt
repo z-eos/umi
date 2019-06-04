@@ -8,7 +8,7 @@
   [% # #stat-form is relocated on ajaxCom in umi-core-ajax.js %]
   <div id="stat-from">
 
-    <table class="table table-condensed text-light">
+    <table class="table table-condensed table-sm text-light">
       <thead>
 	<tr>
 	  <th colspan="2">
@@ -19,50 +19,67 @@
 	<tr>
 	  <th colspan="2" class="text-right">
 	    <small>
-	      <em>session: [% c.sessionid %]<br>
+	      <em class="text-wrap">session: [% c.sessionid %]<br>
 	      expires: [% USE date %][% date.format(time = c.session_expires, format = '%F %T') %]</em>
 	    </small>	
 	  </th>
 	</tr>
       </thead>
       <tbody>
-	[% elapsed_bg = '' %]
-	[% IF stats.elapsed < 0.1 %]
-	[% elapsed_bg = 'success' %]
-	[% ELSIF stats.elapsed > 0.7 %]
-	[% elapsed_bg = 'danger' %]
-	[% ELSE %]
-	[% elapsed_bg = 'warning' %]
-	[% END %]
+	[% elapsed_bg = '';
+	   IF stats.elapsed < 0.1;
+	   elapsed_bg = 'success';
+	   ELSIF stats.elapsed > 0.7;
+	   elapsed_bg = 'danger';
+	   ELSE;
+	   elapsed_bg = 'warning';
+	   END %]
 	<tr>
-	  <th class="text-[% elapsed_bg %] text-right"><b>Whole request took</b></th>
-	  <th class="text-[% elapsed_bg %] text-left"><b>[% stats.elapsed %]s</b></th>
+	  <td colspan="2">
+	    <div>
+	      <div class="text-[% elapsed_bg %] text-left">
+		<b><i class="fas fa-clock"></i> Whole request took</b>
+	      </div>
+	      <div class="text-[% elapsed_bg %] text-right text-monospace">
+		<b>[% stats.elapsed %]s</b>
+	      </div>
+	    </div>
+	  </td>
 	</tr>
-	[% IF stats.debug == 1 %]
-	[%    IF stats.elapsed < 0.1 %]
-	[%    elapsed_bg = 'success' %]
-	[%    ELSIF stats.elapsed > 0.7 %]
-	[%    elapsed_bg = 'danger' %]
-	[%    ELSE %]
-	[%    elapsed_bg = 'warning' %]
-	[%    END %]
+	[% IF stats.debug == 1;
+	      IF stats.elapsed < 0.1;
+	      elapsed_bg = 'success';
+	      ELSIF stats.elapsed > 0.7;
+	      elapsed_bg = 'danger';
+	      ELSE;
+	      elapsed_bg = 'warning';
+	      END %]
 	<tr class="text-[% elapsed_bg %][% default %]">
 	  <td colspan="2">
 	    Request took [% stats.elapsed %]s
 	  </td>
 	</tr>
-	[% ELSIF stats.debug == 2 %]
-	[% FOREACH i IN stats.report %]
-	[%    IF i.2 < 0.1 %]
-	[%    tr_class = 'success' %]
-	[%    ELSIF i.2 > 0.7 %]
-	[%    tr_class= 'danger' %]
-	[%    ELSE %]
-	[%    tr_class = 'warning' %]
-	[%    END %]
-	<tr>
-	  <td class="text-[% tr_class %][% default %]"><span style="font-size:xx-small">[% i.1.replace(',', ', ') %]</span></td>
-	  <td class="text-[% tr_class %] text-right">[% i.2 %]s</td>
+	[% ELSIF stats.debug == 2;
+	   FOREACH i IN stats.report;
+	      IF i.2 < 0.1;
+	      tr_class = 'success';
+	      ELSIF i.2 > 0.7;
+	      tr_class= 'danger';
+	      ELSE;
+	      tr_class = 'warning';
+	      END %]
+	<tr style="font-size:xx-small">
+	  <td>
+	    [% IF i.1.match('dn: ') %]
+	    <span class="text-[% tr_class %][% default %]">
+	      [% i.1.replace('dn: ','<b>dn:</b> <i class="text-light text-wrap">').replace(',', ', ') %]</i></span>
+	    [% ELSE %]
+	    <span class="text-[% tr_class %][% default %]">[% i.1.replace(',', ', ') %]</span>
+	    [% END %]
+	  </td>
+	  <td>
+	    <span class="text-[% tr_class %] text-monospace">[% i.2 %]s</span></ br>
+	  </td>
 	</tr>
 	[% END %]
 	[% END %]

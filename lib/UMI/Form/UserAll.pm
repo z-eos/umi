@@ -270,6 +270,20 @@ has_field 'person_password2'
      );
 
 
+has_field 'person_mail'
+  => ( type                  => 'Email',
+       label                 => 'Email',
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', ],
+       ne_username           => 'mail',
+       apply                 => [ NoSpaces, NotAllDigits, Printable, ],
+       element_attr          => { placeholder => 'someuser@example.com',
+				  'autocomplete' => 'off', },
+       wrapper_class         => [ 'row' ],
+     );
+
+
 has_field 'person_description'
   => ( type                  => 'TextArea',
        label                 => 'Description',
@@ -294,6 +308,7 @@ has_block 'group_person'
 			'person_login',
 			'person_password1',
 			'person_password2',
+			'person_mail',
 			'person_gidnumber',
 			'person_description',
 		      ],

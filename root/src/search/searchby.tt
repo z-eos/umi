@@ -92,7 +92,7 @@ Search Advanced
 [% END %]
 
 <div class="table-responsive umi-overflow-x-vis">
-  <table class="table table-borderless table-sm">
+  <table class="table table-sm table-borderless">
     <thead>
       <tr>
 	<td colspan=2>
@@ -108,7 +108,7 @@ Search Advanced
 	    </a>
 
 	    [% IF c.check_user_roles('admin') %]
-	    <!-- ###### Search Results LDIF start -->
+	    <!-- ###### Search Results export to LDIF start -->
 	    <div class="float-right">
 	    <form method="POST" role="form" action="/searchby/ldif_gen2f" id="f_ldif_gen2f">
 	      <input type="hidden" name="ldap_ldif_base"      value="[% base_dn %]">
@@ -127,7 +127,7 @@ Search Advanced
 		<i class="fas fa-fw fa-file-export fa-lg"></i>
 	      </a>
 	    </form>
-	    <!-- ###### Search Results LDIF end -->
+	    <!-- ###### Search Results export to LDIF end -->
 	    </div>
 	    [% END %]
 	    
@@ -212,7 +212,7 @@ Search Advanced
 	 to_rollback = entry.value.mgmnt.is_log.match('modify') ? 1 : 0 %]
 
       <tr class="">
-	<td class="pt-0 pb-0">
+	<td class="py-1">
 	  [% # search result header start %]
 	  <div class="m-0" id="accordion[% loop.index %]">
 	    <div class="card">
@@ -638,9 +638,5 @@ Search Advanced
 </script>
 
 <script src="/static/js/umi-holder.js"></script>
-
-<script>
- $(function(){ $('#btnLegend').popover() });
-</script>
 
 <script src="/static/js/umi-ddmenu-sort.js"></script>

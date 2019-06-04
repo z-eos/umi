@@ -2,9 +2,9 @@
 
 [% INCLUDE ldap_err.tt %]
 
-[% chevron_toggle = 'right' %]
-[% h = site.pageheading.substr(1,1) + 2 %]
-[% card_header = 'h' _ h %]
+[% chevron_toggle = 'right';
+   h = site.pageheading.substr(1,1) + 2;
+   card_header = 'h' _ h %]
 [% MACRO buttonizer  BLOCK %]
 <form id="buttonizer_form[% buttonizer_id %]"
       method="POST"
@@ -263,8 +263,8 @@
 		</span>
 	      </th>
 	    </tr>
-	    [% FOREACH z IN y.leaf %]
-	    [% zufix = z.key.split(',').1.split('=').1.replace('[@\.]', '_') _ '_' _ loop.index %]
+	    [% FOREACH z IN y.leaf;
+	       zufix = z.key.split(',').1.split('=').1.replace('[@\.]', '_') _ '_' _ loop.index %]
 	    <tr>
 	      <td></td>
 	      <td>
@@ -297,30 +297,35 @@
 		    </div>
 		    [% END %]
 
-		    [% z.value %]
-		    [% IF y.auth && y.authorizedService.search('dot1x') %]
-		    <span class="text-muted">&nbsp;(&nbsp;[% y.rad_grp.${z.key} %]&nbsp;)</span>
-		    [% END %]		  
+		    [% z.value;
+		       IF y.auth && y.authorizedService.search('dot1x');
+		       '<span class="text-muted">&nbsp;(&nbsp;' _ y.rad_grp.${z.key} _ '&nbsp;)</span>';
+		       END %]		  
 
 		  </dt>
 		  <dd>
 		    
-		    [%   IF y.cert.${z.key} %]
-		    <h6 class="text-monospace umi-text-xs">
+		    [%   IF y.cert.${z.key};
+		           IF y.cert.${z.key}.status == 'enabled';
+		             cert_color='';
+		           ELSE;
+		             cert_color=' text-danger';
+		           END %]
+		    <h6 class="text-monospace umi-text-xs[% cert_color %]">
 		      <dl class="row">
-			[% FOREACH cert IN y.cert.${z.key} %]
-			[%   NEXT IF cert.key == "cert" %]
-			[%   NEXT IF cert.key == "error" && cert.value == "" %]
-			<dt class="col-2 text-right">[% cert.key %]</dt><dd class="col-10">[% cert.value %]</dd>
-			[% END %]
+			[% FOREACH cert IN y.cert.${z.key};
+			   NEXT IF cert.key == "cert";
+			   NEXT IF cert.key == "error" && cert.value == "";
+			   '<dt class="col-2 text-right">' _ cert.key _ '</dt><dd class="col-10">' _ cert.value _ '</dd>';
+			   END %]
 		      </dl>
 		    </h6>
-		    [%   ELSIF y.sshkey.${z.key} %]
-		    [%     FOREACH cert IN y.sshkey.${z.key} %]
-		    <h6 class="kludge-minus-700px text-monospace umi-text-xs">[% cert %]</h6>
-		    [%     END %]
-		    [%   END %]
-		    [% END %]
+		    [% ELSIF y.sshkey.${z.key};
+		         FOREACH cert IN y.sshkey.${z.key};
+		         '<h6 class="kludge-minus-700px text-monospace umi-text-xs">' _ cert _ '</h6>';
+		         END;
+		        END;
+		       END %]
 
 		  </dd>
 		</dl>

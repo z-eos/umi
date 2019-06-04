@@ -13,7 +13,7 @@ use UMI::Form::Group;
 
 has 'form' => ( isa => 'UMI::Form::Group', is => 'rw',
 		lazy => 1, default => sub { UMI::Form::Group->new },
-		documentation => q{Form to add new, nonexistent user account/s},
+		documentation => q{Form to add new, nonexistent group/s},
 	      );
 
 =head1 NAME

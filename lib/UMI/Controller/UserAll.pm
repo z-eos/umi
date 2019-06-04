@@ -213,6 +213,9 @@ sub create_account {
        objectClass                => $objectClass,
       ];
 
+    push @{$root_add_options}, mail => $args->{person_mail}
+      if exists $args->{person_mail} && $args->{person_mail} ne '';
+
     my $ldif = $ldap_crud->add( $root_add_dn, $root_add_options );
     if ( $ldif ) {
       push @{$final_message->{error}},
