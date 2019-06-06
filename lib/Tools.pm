@@ -1488,6 +1488,13 @@ sub dns_resolver {
 
 dirty hack to store user requst object to disk file
 
+to retrieve data use something like this
+
+    use Storable;
+    use Data::Printer;
+    my $h = retrieve('file');
+    p $h;
+
 =cut
 
 sub store_data {

@@ -55,10 +55,11 @@ sub index :Path :Args(0) {
     }
     my $entry = $self->attributes($ldap_crud->cfg->{objectClass}->{netgroup}, $params);
     log_debug { np($entry) };
-
+    # log_debug { np($params) };
     if ( defined $params->{aux_dn_form_to_modify} && $params->{aux_dn_form_to_modify} ne '' ) {
       $entry->{dn}                    = $params->{aux_dn_form_to_modify};
       $entry->{aux_dn_form_to_modify} = $params->{aux_dn_form_to_modify};
+      delete $entry->{netgroup}; # since no attribute `netgroup' exist
 
       my $tmp = $c->controller('SearchBy')->modify($c, $entry);
       log_debug { np($tmp) };
@@ -78,53 +79,53 @@ returns hash of the object attributes with values
 =cut
 
 sub attributes {
-    my  ( $self, $objectClass, $args ) = @_;
-    my $attributes = { cn          => $args->{cn},
-		       objectClass => $objectClass, };
-    my ($host_split, $host, $uid);
-    $attributes->{description} = $args->{description}
-      if defined $args->{description} && $args->{description} ne '';
+  my ( $self, $objectClass, $args ) = @_;
+  my $attributes = { cn          => $args->{cn},
+		     objectClass => $objectClass, };
+  my ($host_split, $host, $uid);
+  $attributes->{description} = $args->{description}
+    if defined $args->{description} && $args->{description} ne '';
 
-    $attributes->{associatedDomain} = $args->{associatedDomain};
-    $attributes->{netgroup} = $args->{netgroup};
+  $attributes->{associatedDomain} = $args->{associatedDomain};
+  $attributes->{netgroup} = $args->{netgroup};
 
-      my $nisNetgroupTriple;
-      if ( ref($args->{uids}) eq 'ARRAY' && ref($args->{associatedDomain}) eq 'ARRAY' ) {
-	foreach $uid ( @{$args->{uids}} ) {
-	  foreach $host ( @{$args->{associatedDomain}} ) {
-	    $host_split = $self->nisnetgroup_host_split($host);
-	    push @{$attributes->{nisNetgroupTriple}},
-	      sprintf("(%s,%s,%s)",
-		      $host_split->[0],
-		      $uid,
-		      $host_split->[1]);
-	  }
-	}
-      } elsif ( ref($args->{uids}) eq 'ARRAY' && ref($args->{associatedDomain}) ne 'ARRAY' ) {
-	$host_split = $self->nisnetgroup_host_split($args->{associatedDomain});
-	foreach ( @{$args->{uids}} ) {
-	  push @{$attributes->{nisNetgroupTriple}},
-	    sprintf("(%s,%s,%s)",
-		    $host_split->[0],
-		    $_,
-		    $host_split->[1]);
-	}
-      } elsif ( ref($args->{uids}) ne 'ARRAY' && ref($args->{associatedDomain}) eq 'ARRAY' ) {
-	foreach ( @{$args->{associatedDomain}} ) {
-	  $host_split = $self->nisnetgroup_host_split($_);
-	  push @{$attributes->{nisNetgroupTriple}},
-	    sprintf("(%s,%s,%s)",
-		    $host_split->[0],
-		    $args->{uids},
-		    $host_split->[1]);
-	}
-	$host_split = $self->nisnetgroup_host_split($args->{associatedDomain});
-      } else {
-	$host_split = $self->nisnetgroup_host_split($args->{associatedDomain});
-	$attributes->{nisNetgroupTriple} = sprintf("(%s,%s,%s)", $host_split->[0], $args->{uids}, $host_split->[1]);
+  my $nisNetgroupTriple;
+  if ( ref($args->{uids}) eq 'ARRAY' && ref($args->{associatedDomain}) eq 'ARRAY' ) {
+    foreach $uid ( @{$args->{uids}} ) {
+      foreach $host ( @{$args->{associatedDomain}} ) {
+	$host_split = $self->nisnetgroup_host_split($host);
+	push @{$attributes->{nisNetgroupTriple}},
+	  sprintf("(%s,%s,%s)",
+		  $host_split->[0],
+		  $uid,
+		  $host_split->[1]);
       }
+    }
+  } elsif ( ref($args->{uids}) eq 'ARRAY' && ref($args->{associatedDomain}) ne 'ARRAY' ) {
+    $host_split = $self->nisnetgroup_host_split($args->{associatedDomain});
+    foreach ( @{$args->{uids}} ) {
+      push @{$attributes->{nisNetgroupTriple}},
+	sprintf("(%s,%s,%s)",
+		$host_split->[0],
+		$_,
+		$host_split->[1]);
+    }
+  } elsif ( ref($args->{uids}) ne 'ARRAY' && ref($args->{associatedDomain}) eq 'ARRAY' ) {
+    foreach ( @{$args->{associatedDomain}} ) {
+      $host_split = $self->nisnetgroup_host_split($_);
+      push @{$attributes->{nisNetgroupTriple}},
+	sprintf("(%s,%s,%s)",
+		$host_split->[0],
+		$args->{uids},
+		$host_split->[1]);
+    }
+    $host_split = $self->nisnetgroup_host_split($args->{associatedDomain});
+  } else {
+    $host_split = $self->nisnetgroup_host_split($args->{associatedDomain});
+    $attributes->{nisNetgroupTriple} = sprintf("(%s,%s,%s)", $host_split->[0], $args->{uids}, $host_split->[1]);
+  }
 
-    return $attributes;
+  return $attributes;
 }
 
 =head2 add
@@ -136,9 +137,9 @@ add nisNetgroup object
 sub add {
   my  ( $self, $ldap_crud, $args ) = @_;
   my $netgroup = $args->{netgroup};
-  delete $args->{netgroup};
+  delete $args->{netgroup}; # since no attribute `netgroup' exist
   my @arr = map { $_ => $args->{$_} } keys(%{$args});
-  # log_debug { np( @arr ) };
+  log_debug { np( @arr ) };
 
   my $mesg =
     $ldap_crud->add( sprintf('cn=%s,%s', $args->{cn}, $netgroup),

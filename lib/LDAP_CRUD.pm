@@ -193,7 +193,7 @@ sub _build_cfg {
 	  ui => { debug     => 0,
 		  aside     => 0,
 		  sidebar   => 0,
-		  isblock   => 0,
+		  isblock   => 1,
 		  storedata => 0,
 		},
 	  translit    => "GOST 7.79 RUS",
@@ -952,8 +952,8 @@ Net::LDAP->add wrapper
 
 sub add {
   my ($self, $dn, $attrs) = @_;
-  # log_debug { $dn };
-  # log_debug { np($attrs) };
+  log_debug { $dn };
+  log_debug { np($attrs) };
   my $callername = (caller(1))[3];
   $callername = 'main' if ! defined $callername;
   my $return;

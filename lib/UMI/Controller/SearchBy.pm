@@ -21,38 +21,38 @@ use List::MoreUtils qw(uniq);
 BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 
 use UMI::Form::Dhcp;
-has 'form_add_dhcp' => ( isa => 'UMI::Form::Dhcp', is => 'rw',
-			lazy => 1, default => sub { UMI::Form::Dhcp->new },
-			documentation => q{Form to add userDhcp}, );
+has 'form_add_dhcp' => ( isa => 'UMI::Form::Dhcp', is => 'rw', lazy => 1,
+			 default => sub { UMI::Form::Dhcp->new },
+			 documentation => q{Form to add userDhcp}, );
 
 use UMI::Form::ModPwd;
-has 'form_mod_pwd' => ( isa => 'UMI::Form::ModPwd', is => 'rw',
-			lazy => 1, default => sub { UMI::Form::ModPwd->new },
+has 'form_mod_pwd' => ( isa => 'UMI::Form::ModPwd', is => 'rw', lazy => 1,
+			default => sub { UMI::Form::ModPwd->new },
 			documentation => q{Form to modify userPassword}, );
 
 use UMI::Form::ModJpegPhoto;
-has 'form_jpegphoto' => ( isa => 'UMI::Form::ModJpegPhoto', is => 'rw',
-			  lazy => 1, default => sub { UMI::Form::ModJpegPhoto->new },
+has 'form_jpegphoto' => ( isa => 'UMI::Form::ModJpegPhoto', is => 'rw', lazy => 1,
+			  default => sub { UMI::Form::ModJpegPhoto->new },
 			  documentation => q{Form to add/modify jpegPhoto}, );
 
 use UMI::Form::ModUserGroup;
-has 'form_mod_groups' => ( isa => 'UMI::Form::ModUserGroup', is => 'rw',
-			   lazy => 1, default => sub { UMI::Form::ModUserGroup->new },
+has 'form_mod_groups' => ( isa => 'UMI::Form::ModUserGroup', is => 'rw', lazy => 1,
+			   default => sub { UMI::Form::ModUserGroup->new },
 			   documentation => q{Form to add/modify group/s of the user.}, );
 
 use UMI::Form::ModRadGroup;
-has 'form_mod_rad_groups' => ( isa => 'UMI::Form::ModRadGroup', is => 'rw',
-			   lazy => 1, default => sub { UMI::Form::ModRadGroup->new },
-			   documentation => q{Form to add/modify RADIUS group/s of the object.}, );
+has 'form_mod_rad_groups' => ( isa => 'UMI::Form::ModRadGroup', is => 'rw', lazy => 1,
+			       default => sub { UMI::Form::ModRadGroup->new },
+			       documentation => q{Form to add/modify RADIUS group/s of the object.}, );
 
 use UMI::Form::ModGroupMemberUid;
-has 'form_mod_memberUid' => ( isa => 'UMI::Form::ModGroupMemberUid', is => 'rw',
-			      lazy => 1, default => sub { UMI::Form::ModGroupMemberUid->new },
+has 'form_mod_memberUid' => ( isa => 'UMI::Form::ModGroupMemberUid', is => 'rw', lazy => 1,
+			      default => sub { UMI::Form::ModGroupMemberUid->new },
 			      documentation => q{Form to add/modify memberUid/s of the group.}, );
 
 use UMI::Form::AddServiceAccount;
-has 'form_add_svc_acc' => ( isa => 'UMI::Form::AddServiceAccount', is => 'rw',
-			    lazy => 1, default => sub { UMI::Form::AddServiceAccount->new },
+has 'form_add_svc_acc' => ( isa => 'UMI::Form::AddServiceAccount', is => 'rw', lazy => 1,
+			    default => sub { UMI::Form::AddServiceAccount->new },
 			    documentation => q{Form to add service account}, );
 
 =head1 NAME
@@ -61,7 +61,7 @@ UMI::Controller::SearchBy - Catalyst Controller
 
 =head1 DESCRIPTION
 
-Catalyst Controller.
+Main search tool. In general it is ldapsearch wrapper.
 
 =head1 METHODS
 
@@ -116,9 +116,6 @@ sub index :Path :Args(0) {
     } else {
       $filter_meta = $params->{'ldapsearch_filter'};
     }
-    #   $filter_meta = $self->is_ascii($params->{'ldapsearch_filter'}) ?
-    # 	$self->utf2lat($params->{'ldapsearch_filter'}) : $params->{'ldapsearch_filter'};
-    # }
     
     if ( defined $params->{'ldapsearch_by_email'} ) {
       # $filter = sprintf("mail=%s", $filter_meta);
@@ -161,7 +158,7 @@ sub index :Path :Args(0) {
 			$filter_meta, $filter_meta, $filter_meta);
     } elsif ( defined $params->{'ldapsearch_base'} &&
 	      $params->{'ldapsearch_base'} eq $ldap_crud->cfg->{base}->{org} ) {
-      # special case: we wanna each user (except admins) can see only org-s he belongs to
+      # SPECIAL CASE: we wanna each user (except admins) be able to see only org/s he belongs to
       $filter = $params->{'ldapsearch_filter'} ne '' ? $params->{'ldapsearch_filter'} : 'objectClass=*';
       $base   = $params->{'ldapsearch_base'};
       $filter_armor = join('', @{[ map { '(associatedDomain=' . $_ . ')' } @{$c_user_d->{success}} ]} )
@@ -206,7 +203,8 @@ sub index :Path :Args(0) {
 										  $filter_armor );
     # log_debug { np($filter4search) };
 
-    
+    $c->stats->profile(begin => 'LDAP SEARCH LASTED');
+
     $params->{'filter'} = '(' . $filter . ')';
     my $mesg =
       $ldap_crud->search({base      => $base,
@@ -222,12 +220,11 @@ sub index :Path :Args(0) {
 					 'entryExpireTimestamp', ],
 			 });
 
-    # log_debug { np($mesg->as_struct) };
-    my @entries = defined $params->{order_by} &&
-      $params->{order_by} ne '' ? $mesg->sorted(split(/,/,$params->{order_by})) : $mesg->sorted('dn');
+    my @entries =
+      defined $params->{order_by} && $params->{order_by} ne '' ?
+      $mesg->sorted(split(/,/,$params->{order_by})) :
+      $mesg->sorted('dn');
 
-    $c->stats->profile("LDAP search lasted");
-    
     if ( ! $mesg->count ) {
       if ( $self->is_ascii($params->{'ldapsearch_filter'}) &&
 	   $params->{'ldapsearch_by_name'} ne 1 ) {
@@ -243,6 +240,14 @@ sub index :Path :Args(0) {
       }
     }
 
+    $c->stats->profile(end   => 'LDAP SEARCH LASTED');
+
+    # $c->stats->profile(begin => 'LDAP SEARCH as_struct LASTED');
+    # my $entries_as_struct = $mesg->as_struct;
+    # log_debug { np($entries_as_struct) };
+    # $c->stats->profile(end   => 'LDAP SEARCH as_struct LASTED');
+
+
     my ( $ttentries, @ttentries_keys, $attr, $tmp, $dn, $dn_depth, $dn_depthes, $to_utf_decode, @root_arr, @root_dn_arr, $root_dn, $root_i, $root_mesg, $root_entry, $primary_group_name, @root_groups, $root_gr, $gr_entry, $obj_item, $c_name, $m_name );
     my $blocked = 0;
     my $is_userPassword  = 0;
@@ -251,6 +256,7 @@ sub index :Path :Args(0) {
     foreach (@entries) {
       $dn = $_->dn;
 
+      $c->stats->profile(begin => 'ENTRY', comment => 'dn: ' . $dn);
       if ( $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
 	$dn_depth = scalar split(/,/, $ldap_crud->{cfg}->{base}->{acc_root}) + 1;
 
@@ -288,70 +294,76 @@ sub index :Path :Args(0) {
 	}
 
 	#=============================================================
-	### START of ACCES CONTROL to ou=People,dc=... objects
+	### ACCES CONTROL to ou=People,dc=... objects for not admins
+	### START
 	# the main idea for this, is to intersect user's all-domains-of-all-orgs
 	# array against:
 	# 1. all-domains-of-root-object-orgs array for each search result entry
 	# 2. current search result entry associatedDomain attribute value/s, if any
 
-	# !!!!!!!!!!
-	# to process errors when no "o" attribute exists or it is not DN
+	if ( ! $ldap_crud->role_admin ) {
+	  $c->stats->profile(begin => '- acl check');
 
-	$ttentries->{$dn}->{root}->{associatedDomain} = $ldap_crud->org_domains( $ttentries->{$dn}->{root}->{o} )
-	  if ! exists $ttentries->{$dn}->{root}->{associatedDomain};
-	# log_debug { np( $ttentries->{$dn}->{root} ) };
-	if ( exists $ttentries->{$dn}->{root}->{associatedDomain}->{error} ) {
-	  push @{$return->{error}}, sprintf("root object of <b>%s</b> has a problem:<br>%s", $dn, $_->{html})
-	    foreach (@{$ttentries->{$dn}->{root}->{associatedDomain}->{error}});
-	}
-
-	use Array::Utils qw(:all);
-	# all-domains-of-root-object-orgs (current search result relates to) array
-	my @l = @{$ttentries->{$dn}->{root}->{associatedDomain}->{success}};
-	# all-domains-of-all-orgs (current user belongs to) array
-	my @r = @{$c_user_d->{success}};
-	my @intersect = intersect( @l, @r );
+	  # !!! TODO !!! to process errors when no "o" attribute exists or it is not DN
+	  $ttentries->{$dn}->{root}->{associatedDomain} =
+	    $ldap_crud->org_domains( $ttentries->{$dn}->{root}->{o} )
+	    if ! exists $ttentries->{$dn}->{root}->{associatedDomain};
+	  # log_debug { np( $ttentries->{$dn}->{root} ) };
 	
-	# log_debug { sprintf("\n%s\nCURRENT_OBJ_DN: %s\n\nCURRENT_ROOT_OBJ_DOMAINS\n\t%s\nCURRENT_USR_DOMAINS\n\t%s\nINTERSECTION\n\t%s\nIS ADMIN :%s; intersect size: %s\n\n",
-	# 		    '-' x 70,
-	# 		    $dn,
-	# 		    np( $ttentries->{$dn}->{root}->{associatedDomain} ),
-	# 		    np( $ldap_crud->org_domains( $c->user->has_attribute('o')) ),
-	# 		    np( @intersect ),
-	# 		    $ldap_crud->role_admin,
-	# 		    $#intersect ) };
+	  if ( exists $ttentries->{$dn}->{root}->{associatedDomain}->{error} ) {
+	    push @{$return->{error}}, sprintf("root object of <b>%s</b> has a problem:<br>%s", $dn, $_->{html})
+	      foreach (@{$ttentries->{$dn}->{root}->{associatedDomain}->{error}});
+	  }
 
-	# skip current search result entry from the search results if current user
-	# is not admin and current user org/s domain/s doesn't intersect with
-	# current search result entry root object's org/s domain/s
-	if ( ! $ldap_crud->role_admin && $#intersect < 0) {
-	  delete $ttentries->{$dn};
-	  next;
-	}
-
-	# for objects with present associatedDomain attribute (in general services)
-	if ( $_->exists('associatedDomain') ) {
-	  $#intersect = -1;
-	  @l = @{[$_->get_value('associatedDomain')]};
-	  @intersect = intersect( @l, @r );
+	  use Array::Utils qw(:all);
+	  # all-domains-of-root-object-orgs (current search result relates to) array
+	  my @l = @{$ttentries->{$dn}->{root}->{associatedDomain}->{success}};
+	  # all-domains-of-all-orgs (current user belongs to) array
+	  my @r = @{$c_user_d->{success}};
+	  my @intersect = intersect( @l, @r );
 	
-	  # log_debug { sprintf("CURRENT_OBJ_DOMAINS\n\t%s\nINTERSECTION SVC\n\t%s\nIS ADMIN :%s; intersect svc size: %s\n\n",
-	  # 		      np( @l ),
-	  # 		      np( @intersect ),
-	  # 		      $c->check_user_roles( qw/admin/),
-	  # 		      $#intersect ) };
+	  # log_debug { sprintf("\n%s\nCURRENT_OBJ_DN: %s\n\nCURRENT_ROOT_OBJ_DOMAINS\n\t%s\nCURRENT_USR_DOMAINS\n\t%s\nINTERSECTION\n\t%s\nIS ADMIN :%s; intersect size: %s\n\n",
+	  # 		    '-' x 70,
+	  # 		    $dn,
+	  # 		    np( $ttentries->{$dn}->{root}->{associatedDomain} ),
+	  # 		    np( $ldap_crud->org_domains( $c->user->has_attribute('o')) ),
+	  # 		    np( @intersect ),
+	  # 		    $ldap_crud->role_admin,
+	  # 		    $#intersect ) };
 
-	  # skip current search result (the one with present associatedDomain attribute)
-	  # entry from the search results if current user
+	  # remove current search result entry from the search result list if current user
 	  # is not admin and current user org/s domain/s doesn't intersect with
-	  # current search result entry domain/s
+	  # current search result entry root object's org/s domain/s
 	  if ( ! $ldap_crud->role_admin && $#intersect < 0) {
 	    delete $ttentries->{$dn};
 	    next;
 	  }
-	}
 
-	### STOP of ACCES CONTROL to ou=People,dc=... objects
+	  # for objects with present associatedDomain attribute (in general services)
+	  if ( $_->exists('associatedDomain') ) {
+	    $#intersect = -1;
+	    @l = @{[$_->get_value('associatedDomain')]};
+	    @intersect = intersect( @l, @r );
+	
+	    # log_debug { sprintf("CURRENT_OBJ_DOMAINS\n\t%s\nINTERSECTION SVC\n\t%s\nIS ADMIN :%s; intersect svc size: %s\n\n",
+	    # 		      np( @l ),
+	    # 		      np( @intersect ),
+	    # 		      $c->check_user_roles( qw/admin/),
+	    # 		      $#intersect ) };
+
+	    # skip current search result (the one with present associatedDomain attribute)
+	    # entry from the search results if current user
+	    # is not admin and current user org/s domain/s doesn't intersect with
+	    # current search result entry domain/s
+	    if ( ! $ldap_crud->role_admin && $#intersect < 0) {
+	      delete $ttentries->{$dn};
+	      next;
+	    }
+	  }
+	  $c->stats->profile(end => '- acl check');
+	}
+	### STOP
+	### ACCES CONTROL to ou=People,dc=... objects
 	#=============================================================
 
 	$ttentries->{$dn}->{root}->{dn} = $root_dn;
@@ -362,6 +374,7 @@ sub index :Path :Args(0) {
 	# is this user blocked?
 	if ( defined $c->session->{settings}->{ui}->{isblock} &&
 	     $c->session->{settings}->{ui}->{isblock} == 1 ) {
+	  $c->stats->profile(begin => '- is-blocked check');
 	  if ( $dn !~ /^authorizedService=.*$/ ) {
 	    my $is_blocked_filter =
 	      sprintf('(&(cn=%s)(memberUid=%s))',
@@ -369,7 +382,6 @@ sub index :Path :Args(0) {
 		      $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} });
 	    # log_debug { np( $ldap_crud->cfg->{base}->{group} . " | " . $is_blocked_filter ) };
 	    # log_debug { np($_->dn) };
-	    $c->stats->profile('is-blocked search for <i class="text-light">' . $_->dn . '</i>');
 	    $mesg = $ldap_crud->search({ base   => $ldap_crud->cfg->{base}->{group},
 					 filter => $is_blocked_filter, });
 
@@ -380,11 +392,13 @@ sub index :Path :Args(0) {
 	  } else {
 	    $blocked = 0;
 	  }
+	  $c->stats->profile(end => '- is-blocked check');
 	}
-	
+
 	$#root_arr = $#root_dn_arr = -1;
 
 	# does root object belong to admin
+	$c->stats->profile(begin => '- obj-belongs-to-root check');
 	$mesg = $ldap_crud->search({ base   => $ldap_crud->{cfg}->{base}->{system_group},
 				     filter => sprintf('(memberUid=%s)',
 						       $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }),
@@ -399,7 +413,7 @@ sub index :Path :Args(0) {
 
 	# getting name of the primary group
 	if ( $_->exists('gidNumber') ) {
-	  $mesg = $ldap_crud->search({ base   => sprintf('ou=group,%s', $ldap_crud->cfg->{base}->{db}),
+	  $mesg = $ldap_crud->search({ base   => $ldap_crud->cfg->{base}->{group},
 				       filter => sprintf('(gidNumber=%s)',
 							 $_->get_value('gidNumber')), });
 
@@ -411,14 +425,18 @@ sub index :Path :Args(0) {
 	    $ttentries->{$dn}->{root}->{PrimaryGroupName}   = $gr_entry->get_value('cn');
 	  }
 	}
+	$c->stats->profile(end => '- obj-belongs-to-root check');
 
       } elsif ( $dn =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ) {
 	$dn_depth = scalar split(/,/, $ldap_crud->{cfg}->{base}->{inventory}) + 1;
       } else {
-	# !!! HARDCODE how deep dn could be to be considered as some type of object, `3' is for what? :( !!!
+	# !!! HARDCODE
+	# !!! TODO how deep dn could be to be considered as some type of object, `3' is for what? :( !!!
 	$dn_depth = $ldap_crud->{cfg}->{base}->{dc_num} + 1;
       }
 
+      $c->stats->profile(begin => '- obj mgmnt data');
+      
       $c_name = ldap_explode_dn( $_->get_value('creatorsName'),  casefold => 'none' );
       $m_name = ldap_explode_dn( $_->get_value('modifiersName'), casefold => 'none' );
       $ttentries->{$dn}->{root}->{ts} =
@@ -518,12 +536,12 @@ sub index :Path :Args(0) {
       push @ttentries_keys, $_->dn if $sort_order eq 'reverse'; # for not history searches
       $blocked = $is_dynamicObject = 0;
 
-      # $c->stats->profile('<b>DN:</b> <i class="text-light text-wrap">' . $_->dn . '</i>');
-      $c->stats->profile('dn: ' . $dn);
+      $c->stats->profile(end => '- obj mgmnt data');
+
+      # $c->stats->profile('whole entry');
+      $c->stats->profile(end => 'ENTRY');
 
     }
-
-
 
     # suffix array of dn preparation to respect LDAP objects "inheritance"
     # http://en.wikipedia.org/wiki/Suffix_array
@@ -538,14 +556,6 @@ sub index :Path :Args(0) {
 
     @ttentries_keys = sort { lc $a cmp lc $b } keys %{$ttentries}
       if $sort_order eq 'straight'; # for history searches
-
-    # $c->stats->profile('ttentries sort');
-
-    # foreach my $dn_s (keys ( %{$ttentries} )) {
-    #   p $ttentries->{$dn_s}->{mgmnt};
-    # }
-    
-    # p $c->request->cookies;
 
     # log_debug { np( $ttentries ) };
     $c->stash(
@@ -1605,6 +1615,7 @@ sub modify :Path(modify) :Args(0) {
   my $moddn   = undef;
   my $delete  = undef;
   my $replace = undef;
+  log_debug { np($params) };
   foreach $attr ( sort ( keys %{$params} )) {
     next if $attr =~ /$ldap_crud->{cfg}->{exclude_prefix}/ ||
       $attr eq 'dn'; # ||
@@ -1683,7 +1694,7 @@ sub modify :Path(modify) :Args(0) {
       log_debug { '%%% FOUR %%%' };
       push @{$delete}, $attr => [];
     } elsif ( $val_params ne '' && ! defined $entry->get_value($attr) ) {
-      log_debug { '%%% FIVE %%%' };
+      log_debug { "%%% FIVE %%% attr: $attr" };
       # !!! ??? is it necessary here? can we leave it instead of replacing by itself
       if ( $attr eq 'jpegPhoto' ) {
 	$jpeg = $self->file2var( $val_params->{'tempname'}, $return );
@@ -1692,7 +1703,7 @@ sub modify :Path(modify) :Args(0) {
       }
       push @{$add}, $attr => $val_params;
     } elsif ( ref($val_params) eq "ARRAY" && $#{$val_params} >= -1 ) {
-      log_debug { '%%% SIX %%%' };
+      log_debug { "%%% SIX %%% attr: $attr" };
       push @{$replace}, $attr => $val_params;
     } elsif ( ref($val_params) ne "ARRAY" && $val_params ne "" ) { # && $val_params ne $val_entry ) {
       log_debug { '%%% SEVEN %%%' };
@@ -1701,12 +1712,12 @@ sub modify :Path(modify) :Args(0) {
   }
 
   my $modx;
-  push @{$modx}, delete  => $delete  if defined $delete && $#{$delete} > -1;
-  push @{$modx}, add     => $add     if defined $add && $#{$add} > -1;
+  push @{$modx}, delete  => $delete  if defined $delete  && $#{$delete}  > -1;
   push @{$modx}, replace => $replace if defined $replace && $#{$replace} > -1;
+  push @{$modx}, add     => $add     if defined $add     && $#{$add}     > -1;
 
   if ( defined $modx && $#{$modx} > -1 ) {
-    # log_debug { np( $modx ) };
+    log_debug { np( $modx ) };
     $mesg = $ldap_crud->modify( $params->{dn}, $modx, );
     if ( $mesg ne "0" ) {
       push @{$return->{error}}, $mesg->{html};
@@ -1857,12 +1868,12 @@ sub modform :Path(modform) :Args(0) {
     $c->stash( template => 'nis/abstr_nis_netgroup.tt', );
 
   } elsif ( $params->{aux_dn_form_to_modify} =~ /$ldap_crud->{cfg}->{base}->{sargon}/ ) { ## SARGON
-    $init_obj->{cn}    = $init_obj->{cn};
-    $init_obj->{priv}  = $init_obj->{sargonAllowPrivileged} eq 'TRUE' ? '1' : '0';
-    $init_obj->{order} //= '' . $init_obj->{sargonOrder};
-    $init_obj->{'sargonUser'} = [ $init_obj->{'sargonUser'} ]
+    $init_obj->{cn}            = $init_obj->{cn};
+    $init_obj->{priv}          = $init_obj->{sargonAllowPrivileged} eq 'TRUE' ? '1' : '0';
+    $init_obj->{order}       //= '' . $init_obj->{sargonOrder};
+    $init_obj->{'sargonUser'}  = [ $init_obj->{'sargonUser'} ]
       if ref($init_obj->{'sargonUser'}) ne 'ARRAY';
-    $init_obj->{'sargonHost'} = [ $init_obj->{'sargonHost'} ]
+    $init_obj->{'sargonHost'}  = [ $init_obj->{'sargonHost'} ]
       if ref($init_obj->{'sargonHost'}) ne 'ARRAY';
     $init_obj->{'sargonMount'} = [ $init_obj->{'sargonMount'} ]
       if ref($init_obj->{'sargonMount'}) ne 'ARRAY';

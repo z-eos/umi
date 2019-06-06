@@ -103,12 +103,18 @@
 	    <div class="custom-control custom-switch">
 	      <input type="checkbox" class="custom-control-input" id="checkboxIsObjBlocked"
 		     name="isblock" [% c.session.settings.ui.isblock ? ' checked=""' : '' %]>
-	      <label class="custom-control-label" for="checkboxIsObjBlocked">Is Blocked Check</label>
+	      <label class="custom-control-label" for="checkboxIsObjBlocked"
+		     title="whether provide info regarding a blocked state of the object">
+		Is Blocked Check
+	      </label>
 	    </div>
 	    <div class="custom-control custom-switch">
 	      <input type="checkbox" class="custom-control-input" id="checkboxStoreData"
 		     name="storedata" [% c.session.settings.ui.storedata ? ' checked=""' : '' %]>
-	      <label class="custom-control-label" for="checkboxStoreData">Store Data</label>
+	      <label class="custom-control-label" for="checkboxStoreData"
+		     title="whether store raw perl data of the form query">
+		Store Data
+	      </label>
 	    </div>
 	    <div class="custom-control custom-switch">
 	      <input type="checkbox" class="custom-control-input" disabled id="rfc4515"

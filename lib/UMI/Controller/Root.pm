@@ -966,7 +966,9 @@ sub end : ActionClass('RenderView') {
 
   my $size = 0;
   my $navbar_note;
-  if ( defined $c->user ) {
+  if ( defined $c->user &&
+       exists $c->session->{settings}->{ui}->{storedata} &&
+       $c->session->{settings}->{ui}->{storedata} == 1 ) {
     my $r;
     $r->{req} = $c->req->params;
     # $r->{stash} = $c->stash;
