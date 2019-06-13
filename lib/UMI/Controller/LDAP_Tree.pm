@@ -7,6 +7,8 @@ use namespace::autoclean;
 use Data::Printer colored => 0;
 use Net::LDAP::Util qw(	ldap_explode_dn canonical_dn );
 
+use Logger;
+
 BEGIN { extends 'Catalyst::Controller'; }
 
 =head1 NAME
@@ -31,6 +33,7 @@ LDAP tree crawler
 #   my ( $self, $c, $args) = @_;
 sub index :Path :Args(0) {
   my ( $self, $c ) = @_;
+  $c->stats->profile(begin => 'LDAP tree');
 
   my $return;
   my ( $e, $l, $r, $tree, @to_stash );
@@ -40,48 +43,59 @@ sub index :Path :Args(0) {
   $c->stash->{current_view} = 'WebJSON_LDAP_Tree';
 
   my $params = $c->req->params;
-  my $arg = { base => $params->{base} || $ldap_crud->{cfg}->{base}->{db},
+  my $arg = { base   => $params->{base}   || $ldap_crud->{cfg}->{base}->{db},
 	      filter => $params->{filter} || '(objectClass=*)', };
 
   # initial, one level crawl
-  my $mesg = $ldap_crud->search({ base => $arg->{base},
-				  scope => 'one',
+  my $mesg = $ldap_crud->search({ base      => $arg->{base},
+				  scope     => 'one',
 				  sizelimit => 0,
-				  filter => $arg->{filter}, });
+				  typesonly => 1,
+				  attrs     => [ '1.1' ],
+				  filter    => $arg->{filter}, });
   if ( $mesg->code ) {
     push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
-    $c->stash( template => 'tree/tree.tt',
+    $c->stash( template      => 'tree/tree.tt',
 	       final_message => $return, );
   } elsif ( $mesg->count ) {
-    # each element fetched check whether it is branch or leaf
-    my @root = $mesg->sorted;
-    foreach $e ( @root ) {
+    $c->stats->profile('first level crawl');
+    # each entry check, whether it is branch or leaf
+    foreach $e ( $mesg->sorted ) {
+      # log_debug {np($e)};
       ( $l, $r ) = split(/,/, $e->dn);
       $tree->{id} = $l;
       $tree->{dn} = $e->dn;
-      $mesg = $ldap_crud->search({ base => $e->dn,
-				   scope => 'one',
+      $mesg = $ldap_crud->search({ base      => $e->dn,
+				   scope     => 'one',
 				   sizelimit => 0,
-				   filter => '(objectClass=*)', });
+				   typesonly => 1,
+				   attrs     => [ '1.1' ],
+				   filter    => '(objectClass=*)', });
       if ( $mesg->code ) {
 	push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
-	$c->stash( template => 'tree/tree.tt',
+	$c->stash( template      => 'tree/tree.tt',
 		   final_message => $return, );
       } else {
 	$tree->{branch} = $mesg->count > 0 ? 1 : 0;
       }
       push @to_stash, $tree;
       undef $tree;
+    # $c->stats->profile('each second level entry');
     }
+    $c->stats->profile('second level crawl');
   } else {
-    ( $l, $r ) = split(/,/, $arg->{base});
-    $tree->{id} = $l;
-    $tree->{dn} = $arg->{base};
+    ( $l, $r )      = split(/,/, $arg->{base});
+    $tree->{id}     = $l;
+    $tree->{dn}     = $arg->{base};
     $tree->{branch} = 0;
     push @to_stash, $tree;
   }
 
+  # log_debug { np(@to_stash) };
+  
   $c->stash->{tree} = \@to_stash;
+
+  $c->stats->profile(end   => 'LDAP tree');
 }
 
 

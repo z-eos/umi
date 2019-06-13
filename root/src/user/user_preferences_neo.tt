@@ -306,10 +306,11 @@
 		  <dd>
 		    
 		    [%   IF y.cert.${z.key};
-		           IF y.cert.${z.key}.status == 'enabled';
-		             cert_color='';
-		           ELSE;
+		           IF y.authorizedService.search('ovpn') &&
+		           y.cert.${z.key}.status != 'enabled';
 		             cert_color=' text-danger';
+		           ELSE;
+		             cert_color='';
 		           END %]
 		    <h6 class="text-monospace umi-text-xs[% cert_color %]">
 		      <dl class="row">

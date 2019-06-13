@@ -186,6 +186,7 @@ sub _build_cfg {
 							      },
 				       scope               => 'sub',
 				       sizelimit           => 150,
+				       typesonly           => 0,
 				       uidNumber_ssh_start => 20100,
 				       uidNumber_start     => 10000,
 				      },
@@ -913,14 +914,8 @@ sub search {
   # log_debug { np($args) };
 
   if ( defined $args->{dn} && $args->{dn} ne '' ) {
-    # my @args_arr    = split(/,/, $args->{dn});
-    # $args->{filter} = shift @args_arr;
-    # $args->{base}   = join(',', @args_arr);
-    # $args->{scope}  = 'one';
-
-    $args->{base}   = $args->{dn};
-    $args->{scope}  = 'base';
-
+    $args->{base}  = $args->{dn};
+    $args->{scope} = 'base';
   }
 
   my $arg = {
@@ -932,13 +927,11 @@ sub search {
   	     sizelimit => $args->{sizelimit} // $self->{cfg}->{defaults}->{ldap}->{sizelimit},
   	    };
 
-  $arg->{callback} = $args->{callback} if exists $args->{callback};
-  $arg->{control}  = [ $self->control_sync_req ]  if exists $args->{control};
+  $arg->{typesonly} = 1                           if defined $args->{typesonly};
+  $arg->{callback}  = $args->{callback}           if exists  $args->{callback};
+  $arg->{control}   = [ $self->control_sync_req ] if exists  $args->{control};
 
   my $mesg = $self->ldap->search( %{$arg} );
-
-  # log_debug { np($arg) };
-  # log_debug { np($mesg->count) };
 
   return $mesg;
 }
@@ -952,8 +945,8 @@ Net::LDAP->add wrapper
 
 sub add {
   my ($self, $dn, $attrs) = @_;
-  log_debug { $dn };
-  log_debug { np($attrs) };
+  # log_debug { $dn };
+  # log_debug { np($attrs) };
   my $callername = (caller(1))[3];
   $callername = 'main' if ! defined $callername;
   my $return;
@@ -997,9 +990,9 @@ sub moddn {
 			 newrdn       => $arg->{newrdn},
 			 deleteoldrdn => $arg->{deleteoldrdn},
 			 newsuperior  => $arg->{newsuperior} ) :
-    $self->ldap->moddn ( $arg->{dn},
-			 newrdn       => $arg->{newrdn},
-			 deleteoldrdn => $arg->{deleteoldrdn} );
+			   $self->ldap->moddn ( $arg->{dn},
+						newrdn       => $arg->{newrdn},
+						deleteoldrdn => $arg->{deleteoldrdn} );
 
   if ($msg->is_error()) {
     $return = $self->err( $msg );
@@ -1684,6 +1677,152 @@ on input we expect
     - non ASCII fields transliterated or not
 
 =cut
+
+sub vcard_neo {
+  my ($self, $args) = @_;
+
+  my $ts = strftime "%Y%m%dT%H%M%SZ", localtime;
+  my $arg = { dn       => $args->{vcard_dn},
+	      type     => $args->{vcard_type},
+	      translit => $args->{vcard_translit} || 0, };
+
+  my (@vcf, $msg, $branch, @branches, $branch_entry, $leaf, @leaves, $leaf_entry, $entry, @entries, @vcard, $return, $tmp);
+  $msg = $self->ldap->search ( base => $arg->{dn}, scope => 'base', filter => 'objectClass=*', );
+  if ($msg->is_error()) {
+    $return->{error} .= $self->err( $msg )->{html};
+  } else {
+    $entry = $msg->as_struct;
+
+    push @vcf, 'BEGIN:VCARD', 'VERSION:2.1';
+
+    $arg->{vcard}->{sn}        = $self->utf2lat($entry->{$arg->{dn}}->{sn}->[0]);
+    $arg->{vcard}->{givenName} = $self->utf2lat($entry->{$arg->{dn}}->{givenname}->[0]);
+    push @vcf, sprintf('N:%s;%s;;;', $arg->{vcard}->{sn}, $arg->{vcard}->{givenName});
+    $arg->{vcard}->{fn}        = sprintf('%s %s',
+					 $entry->{$arg->{dn}}->{sn}->[0],
+					 $arg->{vcard}->{givenName});
+    push @vcf, sprintf('FN:%s', $self->utf2lat($arg->{vcard}->{fn}));
+    push @vcf, sprintf('TITLE:%s', $self->utf2lat($entry->{$arg->{dn}}->{title}->[0]));
+
+    # --- ORGANIZATION ------------------------------------------------
+    if ( exists $entry->{$arg->{dn}}->{o} ) {
+      ## https://tools.ietf.org/html/rfc6350#section-6.6.4
+      ## so we take the first one
+      $tmp = $self->search ( { base => $entry->{$arg->{dn}}->{o}->[0], scope => 'base', } );
+      if ($tmp->is_error()) {
+	$return->{error} .= $self->err( $tmp )->{html};
+      } else {
+	my $org = $tmp->as_struct;
+	utf8::decode($org->{$entry->{$arg->{dn}}->{o}->[0]}->{physicaldeliveryofficename}->[0]);
+	push @vcf, sprintf('ORG:%s', $org->{$entry->{$arg->{dn}}->{o}->[0]}->{physicaldeliveryofficename}->[0]);
+      }
+    }
+
+    # --- TELEPHONENUMBER ---------------------------------------------
+    my $tel_prefix = 'TEL;WORK:';
+    if ( exists $entry->{$arg->{dn}}->{telephonenumber} ) {
+      push @vcf, sprintf('%s%s', $tel_prefix, $_)
+	foreach (@{$entry->{$arg->{dn}}->{telephonenumber}});
+    }
+    if ( exists $entry->{$arg->{dn}}->{mobiletelephonenumber} ) {
+      push @vcf, sprintf('%s%s', $tel_prefix, $_)
+	foreach (@{$entry->{$arg->{dn}}->{telephonenumber}});
+    }
+    if ( exists $entry->{$arg->{dn}}->{mobile} ) {
+      push @vcf, sprintf('%s%s', $tel_prefix, $_)
+	foreach (@{$entry->{$arg->{dn}}->{telephonenumber}});
+    }
+
+    my $scope = $arg->{dn} =~ /^.*=.*,authorizedService.*$/ ? 'sub' : 'one';
+
+    # --- EMAIL -------------------------------------------------------
+    if ( $entry->{$arg->{dn}}->{mail} ) {
+      push @vcf, sprintf('EMAIL:%s', $_)
+	foreach (@{$entry->{$arg->{dn}}->{mail}});
+    }
+
+    $branch = $self->ldap->search ( base   => $arg->{dn},
+				    scope  => $scope,
+				    filter => 'authorizedService=mail@*', );
+    if ($branch->is_error()) {
+      $return->{error} .= $self->err( $branch )->{html};
+    } elsif ( $branch->count) {
+      foreach $branch_entry ( $branch->entries ) {
+	$leaf = $self->search ( { base  => $branch_entry->dn,
+				  scope => $scope ne 'one' ? 'base' : 'one', } );
+	if ($leaf->is_error()) {
+	  $return->{error} .= $self->err( $leaf )->{html};
+	} else {
+	  if ( $leaf->count ) {
+	    push @vcf, sprintf('EMAIL:%s', $_->get_value('uid'))
+	      foreach ( $leaf->entries );
+	  }
+	}
+      }
+    }
+
+    # # --- XMPP --------------------------------------------------------
+    $branch = $self->ldap->search ( base   => $arg->{dn},
+    				    scope  => $scope,
+    				    filter => 'authorizedService=xmpp@*', );
+    if ($branch->is_error()) {
+      $return->{error} .= $self->err( $branch )->{html};
+    } elsif ( $branch->count) {
+      foreach $branch_entry ( $branch->entries ) {
+    	$leaf = $self->search ( { base  => $branch_entry->dn,
+    				  scope => $scope ne 'one' ? 'base' : 'one', } );
+    	if ($leaf->is_error()) {
+    	  $return->{error} .= $self->err( $leaf )->{html};
+    	} else {
+    	  if ( $leaf->count ) {
+    	    push @vcf, sprintf('X-JABBER;HOME:%s', $_->get_value('uid'))
+    	      foreach ( $leaf->entries );
+    	  }
+    	}
+      }
+    }
+
+    if ( $arg->{type} eq 'file' ) {
+      # push @vcf, sprintf('PHOTO:data:image/jpeg;base64,%s',
+      my $meta_photo = encode_base64( $entry->{$arg->{dn}}->{jpegphoto}->[0] );
+      $meta_photo =~ s/\n/\n /g;
+      $meta_photo = substr $meta_photo, 0, -1;
+      # log_debug { np( $meta_photo ) };
+      push @vcf, sprintf('PHOTO;ENCODING=BASE64;JPEG:%s', $meta_photo)
+	if $entry->{$arg->{dn}}->{jpegphoto};
+    }
+
+    push @vcf, 'END:VCARD';
+
+    
+    $return->{success} .= sprintf('vCard generated for object with DN: <b class="mono"><em>%s</em></b>.', $arg->{dn} );
+    
+    $return->{dn}           = $arg->{dn};
+    $return->{type}         = $arg->{type};
+    $return->{vcard}        = join("\n", @vcf);
+    $return->{outfile_name} = $entry->{$arg->{dn}}->{uid}->[0];
+  }
+
+  if ( $arg->{type} ne 'file' ) {
+    my $qr;
+    for ( my $i = 0; $i < 41; $i++ ) {
+      $qr = $self->qrcode({ txt => $return->{vcard}, ver => $i, mod => 5 });
+      last if ! exists $qr->{error};
+    }
+    
+    $return->{qr} =
+      sprintf('<img alt="QR for DN %s" src="data:image/jpg;base64,%s" class="img-responsive img-thumbnail" title="QR for DN %s"/>',
+	      $arg->{dn}, $qr->{qr}, $arg->{dn} );
+  }
+
+  # p @vcard; p $return->{vcard};
+  return $return;
+}
+
+
+
+
+
 
 sub vcard {
   my ($self, $args) = @_;

@@ -7,9 +7,16 @@ use namespace::autoclean;
 
 extends 'Catalyst::View::Download';
 
-__PACKAGE__->config({
-		     content_type => { 'text/plain' => { outfile_ext => 'ldif', },},
-		    });
+__PACKAGE__->config(
+		    {
+		     content_type => {
+				       'text/plain' => { outfile_ext => '', },
+				      # 'text/vcard' => { outfile_ext => 'vcf',  },
+				     },
+		    }
+		   );
+
+# log_debug { np($c->stash) };
 
 =head1 NAME
 

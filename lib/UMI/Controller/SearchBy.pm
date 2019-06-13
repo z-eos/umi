@@ -21,39 +21,39 @@ use List::MoreUtils qw(uniq);
 BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 
 use UMI::Form::Dhcp;
-has 'form_add_dhcp' => ( isa => 'UMI::Form::Dhcp', is => 'rw', lazy => 1,
-			 default => sub { UMI::Form::Dhcp->new },
-			 documentation => q{Form to add userDhcp}, );
+has 'form_add_dhcp' =>
+  ( isa => 'UMI::Form::Dhcp', is => 'rw', lazy => 1,
+    default => sub { UMI::Form::Dhcp->new }, );
 
 use UMI::Form::ModPwd;
-has 'form_mod_pwd' => ( isa => 'UMI::Form::ModPwd', is => 'rw', lazy => 1,
-			default => sub { UMI::Form::ModPwd->new },
-			documentation => q{Form to modify userPassword}, );
+has 'form_mod_pwd' =>
+  ( isa => 'UMI::Form::ModPwd', is => 'rw', lazy => 1,
+    default => sub { UMI::Form::ModPwd->new }, );
 
 use UMI::Form::ModJpegPhoto;
-has 'form_jpegphoto' => ( isa => 'UMI::Form::ModJpegPhoto', is => 'rw', lazy => 1,
-			  default => sub { UMI::Form::ModJpegPhoto->new },
-			  documentation => q{Form to add/modify jpegPhoto}, );
+has 'form_jpegphoto' =>
+  ( isa => 'UMI::Form::ModJpegPhoto', is => 'rw', lazy => 1,
+    default => sub { UMI::Form::ModJpegPhoto->new }, );
 
 use UMI::Form::ModUserGroup;
-has 'form_mod_groups' => ( isa => 'UMI::Form::ModUserGroup', is => 'rw', lazy => 1,
-			   default => sub { UMI::Form::ModUserGroup->new },
-			   documentation => q{Form to add/modify group/s of the user.}, );
+has 'form_mod_groups' =>
+  ( isa => 'UMI::Form::ModUserGroup', is => 'rw', lazy => 1,
+    default => sub { UMI::Form::ModUserGroup->new }, );
 
 use UMI::Form::ModRadGroup;
-has 'form_mod_rad_groups' => ( isa => 'UMI::Form::ModRadGroup', is => 'rw', lazy => 1,
-			       default => sub { UMI::Form::ModRadGroup->new },
-			       documentation => q{Form to add/modify RADIUS group/s of the object.}, );
+has 'form_mod_rad_groups' =>
+  ( isa => 'UMI::Form::ModRadGroup', is => 'rw', lazy => 1,
+    default => sub { UMI::Form::ModRadGroup->new }, );
 
 use UMI::Form::ModGroupMemberUid;
-has 'form_mod_memberUid' => ( isa => 'UMI::Form::ModGroupMemberUid', is => 'rw', lazy => 1,
-			      default => sub { UMI::Form::ModGroupMemberUid->new },
-			      documentation => q{Form to add/modify memberUid/s of the group.}, );
+has 'form_mod_memberUid' =>
+  ( isa => 'UMI::Form::ModGroupMemberUid', is => 'rw', lazy => 1,
+    default => sub { UMI::Form::ModGroupMemberUid->new }, );
 
 use UMI::Form::AddServiceAccount;
-has 'form_add_svc_acc' => ( isa => 'UMI::Form::AddServiceAccount', is => 'rw', lazy => 1,
-			    default => sub { UMI::Form::AddServiceAccount->new },
-			    documentation => q{Form to add service account}, );
+has 'form_add_svc_acc' =>
+  ( isa => 'UMI::Form::AddServiceAccount', is => 'rw', lazy => 1,
+    default => sub { UMI::Form::AddServiceAccount->new }, );
 
 =head1 NAME
 
@@ -61,7 +61,7 @@ UMI::Controller::SearchBy - Catalyst Controller
 
 =head1 DESCRIPTION
 
-Main search tool. In general it is ldapsearch wrapper.
+Main search tool. In general it is sophisticated ldapsearch wrapper.
 
 =head1 METHODS
 
@@ -80,6 +80,8 @@ sub index :Path :Args(0) {
 
   # if ( defined $c->session->{"auth_uid"} ) {
   if ( defined $c->user_exists ) {
+    $c->stats->profile(begin => 'PREPARE');
+
     my ( $params, $ldap_crud, $filter, $filter_meta, $filter_translitall, $base, $sizelimit, $return );
     my $sort_order = 'reverse';
     my $filter_armor = '';
@@ -201,9 +203,8 @@ sub index :Path :Args(0) {
     my $filter4search = $filter_armor eq '' ? sprintf("(%s)", $filter ) : sprintf("&(%s)(|%s)",
 										  $filter,
 										  $filter_armor );
-    # log_debug { np($filter4search) };
 
-    $c->stats->profile(begin => 'LDAP SEARCH LASTED');
+    $c->stats->profile(begin => '- LDAP search lasted');
 
     $params->{'filter'} = '(' . $filter . ')';
     my $mesg =
@@ -225,6 +226,8 @@ sub index :Path :Args(0) {
       $mesg->sorted(split(/,/,$params->{order_by})) :
       $mesg->sorted('dn');
 
+    my $all_entries = $mesg->as_struct;
+
     if ( ! $mesg->count ) {
       if ( $self->is_ascii($params->{'ldapsearch_filter'}) &&
 	   $params->{'ldapsearch_by_name'} ne 1 ) {
@@ -240,7 +243,7 @@ sub index :Path :Args(0) {
       }
     }
 
-    $c->stats->profile(end   => 'LDAP SEARCH LASTED');
+    $c->stats->profile(end   => '- LDAP search lasted');
 
     # $c->stats->profile(begin => 'LDAP SEARCH as_struct LASTED');
     # my $entries_as_struct = $mesg->as_struct;
@@ -253,13 +256,36 @@ sub index :Path :Args(0) {
     my $is_userPassword  = 0;
     my $is_dynamicObject = 0;
 
+    # building sys groups members hash
+    my $all_sysgroups;
+    my $sysgr_msg = $ldap_crud->search({ base   => $ldap_crud->{cfg}->{base}->{system_group},
+					 filter => '(objectClass=*)',
+					 attrs  => [ $ldap_crud->{cfg}->{rdn}->{group}, 'memberUid' ], });
+
+    my ($grhash, $grkey);
+    if ( $sysgr_msg->is_error() ) {
+      $return->{error} .= $ldap_crud->err( $sysgr_msg )->{html};
+    } else {
+      $grhash = $sysgr_msg->as_struct;
+      my %memberuids;
+      foreach $grkey (keys (%{$grhash})) {
+	%memberuids = map { $_ => 1 } @{$grhash->{$grkey}->{memberuid}};
+	%{$all_sysgroups->
+	  {$grhash->{$grkey}->{$ldap_crud->{cfg}->{rdn}->{group}}->[0]}} = %memberuids;
+	%memberuids = ();
+      }
+    }
+    # log_debug { np($all_sysgroups) };
+    
+    $c->stats->profile(end   => 'PREPARE');
+
     foreach (@entries) {
       $dn = $_->dn;
 
       $c->stats->profile(begin => 'ENTRY', comment => 'dn: ' . $dn);
       if ( $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
+	# calculating a "depth" of acc_root obj, it is branch depth + 1
 	$dn_depth = scalar split(/,/, $ldap_crud->{cfg}->{base}->{acc_root}) + 1;
-
 	@root_arr    = split(',', $_->dn);
 	$root_i      = $#root_arr;
 	@root_dn_arr = splice(@root_arr, -1 * $dn_depth);
@@ -268,29 +294,38 @@ sub index :Path :Args(0) {
 	# here, for each entry we are preparing data of the root object it belongs to
 	$root_i++;
 	if ( $root_i == $dn_depth ) { # the very root object
-	  # log_debug { np($self->is_org_uni($c->user->has_attribute('o'),
-	  # 				   $_->get_value('o', asref => 1))) };
+	  $c->stats->profile(begin => '- root obj proc');
 	  $ttentries->{$dn}->{root}->{givenName} = $_->get_value('givenName');
 	  $ttentries->{$dn}->{root}->{sn}        = $_->get_value('sn');
 	  $ttentries->{$dn}->{root}->{o}         = $_->get_value('o', asref => 1);
-	  $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
+	  $ttentries->{$dn}->{root}->
+	    {$ldap_crud->{cfg}->{rdn}->{acc_root}} =
 	    $_->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
+	  $c->stats->profile(end   => '- root obj proc');
 	} else { # branches and leaves
-	  # log_debug { np($self->is_org_uni($c->user->has_attribute('o'),
-	  # 				   $_->get_value('o', asref => 1))) };
-	  $root_mesg = $ldap_crud->search({ dn => $root_dn, });
-	  if ( $root_mesg->is_error() ) {
-	    $return->{error} .= sprintf("for dn: <b>%s</b><br>%s",
-					$ttentries->{$_->dn}->{root}->{dn},
-					$ldap_crud->err( $root_mesg )->{html});
+	  $c->stats->profile(begin => '- root of branch/leaf proc');
+	  if ( ! exists $all_entries->{$root_dn} ) {
+	    $root_mesg = $ldap_crud->search({ dn => $root_dn, });
+	    if ( $root_mesg->is_error() ) {
+	      $return->{error} .= sprintf("for dn: <b>%s</b><br>%s",
+					  $ttentries->{$_->dn}->{root}->{dn},
+					  $ldap_crud->err( $root_mesg )->{html});
+	    } else {
+	      $root_entry = $root_mesg->entry(0);
+	      $ttentries->{$dn}->{root}->{givenName} = $root_entry->get_value('givenName');
+	      $ttentries->{$dn}->{root}->{sn}        = $root_entry->get_value('sn');
+	      $ttentries->{$dn}->{root}->{o}         = $root_entry->get_value('o', asref => 1);
+	      $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
+		$root_entry->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
+	    }
 	  } else {
-	    $root_entry = $root_mesg->entry(0);
-	    $ttentries->{$dn}->{root}->{givenName} = $root_entry->get_value('givenName');
-	    $ttentries->{$dn}->{root}->{sn}        = $root_entry->get_value('sn');
-	    $ttentries->{$dn}->{root}->{o}         = $root_entry->get_value('o', asref => 1);
+	    $ttentries->{$dn}->{root}->{givenName} = $all_entries->{$root_dn}->{givenname}->[0];
+	    $ttentries->{$dn}->{root}->{sn}        = $all_entries->{$root_dn}->{sn}->[0];
+	    $ttentries->{$dn}->{root}->{o}         = $all_entries->{$root_dn}->{o};
 	    $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
-	      $root_entry->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
+	      $all_entries->{$root_dn}->{$ldap_crud->{cfg}->{rdn}->{acc_root}}->[0];
 	  }
+	  $c->stats->profile(end   => '- root of branch/leaf proc');
 	}
 
 	#=============================================================
@@ -397,20 +432,13 @@ sub index :Path :Args(0) {
 
 	$#root_arr = $#root_dn_arr = -1;
 
-	# does root object belong to admin
-	$c->stats->profile(begin => '- obj-belongs-to-root check');
-	$mesg = $ldap_crud->search({ base   => $ldap_crud->{cfg}->{base}->{system_group},
-				     filter => sprintf('(memberUid=%s)',
-						       $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} }),
-				     attrs  => [ $ldap_crud->{cfg}->{rdn}->{group} ], });
-
-	if ( $mesg->is_error() ) {
-	  $return->{error} .= $ldap_crud->err( $mesg )->{html};
-	} else {
-	  @root_groups = $mesg->entries;
-	  $root_gr->{ $_->get_value('cn') } = 1 foreach ( @root_groups );
+	$c->stats->profile(begin => '- root-obj-sys-groups check');
+	# getting root object sys groups if any
+	foreach (keys (%{$all_sysgroups})) {
+	  $root_gr->{$_} = 1
+	    if exists $all_sysgroups->{$_}->{$ttentries->{$dn}->{root}->{$ldap_crud->{cfg}->{rdn}->{acc_root}}};
 	}
-
+	
 	# getting name of the primary group
 	if ( $_->exists('gidNumber') ) {
 	  $mesg = $ldap_crud->search({ base   => $ldap_crud->cfg->{base}->{group},
@@ -425,7 +453,7 @@ sub index :Path :Args(0) {
 	    $ttentries->{$dn}->{root}->{PrimaryGroupName}   = $gr_entry->get_value('cn');
 	  }
 	}
-	$c->stats->profile(end => '- obj-belongs-to-root check');
+	$c->stats->profile(end => '- root-obj-sys-groups check');
 
       } elsif ( $dn =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ) {
 	$dn_depth = scalar split(/,/, $ldap_crud->{cfg}->{base}->{inventory}) + 1;
@@ -446,9 +474,6 @@ sub index :Path :Args(0) {
 	  modifiersName   => $m_name->[0]->{uid} // $m_name->[0]->{cn}, };
 
       foreach $tmp ( @{$_->get_value('objectClass', asref => 1)} ) {
-	# log_debug { np( $tmp ) };
-	# log_debug { np( $c->session->{ldap}->{obj_schema}->{$tmp}->{may}->{userPassword} ) };
-	# log_debug { np( $c->session->{ldap}->{obj_schema}->{$tmp}->{must}->{userPassword} ) };
 	$is_userPassword = 1
 	  if exists $c->session->{ldap}->{obj_schema}->{$tmp}->{may}->{userPassword} ||
 	  exists $c->session->{ldap}->{obj_schema}->{$tmp}->{must}->{userPassword};
@@ -543,6 +568,8 @@ sub index :Path :Args(0) {
 
     }
 
+    # log_debug { np($all_entries) };
+    
     # suffix array of dn preparation to respect LDAP objects "inheritance"
     # http://en.wikipedia.org/wiki/Suffix_array
     # this one to be used for all except history requests
@@ -1518,11 +1545,10 @@ sub ldif_gen2f :Path(ldif_gen2f) :Args(0) {
   # log_debug { np($ldif) };
   $c->stash(
 	    current_view => 'Download',
-#	    download => 'text/plain',
-	    plain => $ldif->{ldif},
-	    outfile_name => $ldif->{outfile_name},
+	    download     => 'text/plain',
+	    plain        => $ldif->{ldif},
+	    outfile_name => $ldif->{outfile_name} . '.ldif',
 	   );
-
   $c->forward('UMI::View::Download');
 }
 
@@ -1542,9 +1568,9 @@ Since it is separate action, it is poped out of action proc()
 sub vcard_gen :Path(vcard_gen) :Args(0) {
   my ( $self, $c ) = @_;
   my $params = $c->req->parameters;
-  my $vcard = $c->model('LDAP_CRUD')->vcard( $params );
+  my $vcard = $c->model('LDAP_CRUD')->vcard_neo( $params );
   $c->stash(
-	    template => 'search/vcard.tt',
+	    template      => 'search/vcard.tt',
 	    final_message => $vcard,
 	   );
 }
@@ -1553,16 +1579,17 @@ sub vcard_gen2f :Path(vcard_gen2f) :Args(0) {
   my ( $self, $c ) = @_;
   my $params = $c->req->parameters;
   $params->{vcard_type} = 'file';
-  my $vcard = $c->model('LDAP_CRUD')->vcard( $params);
-
+  my $vcard = $c->model('LDAP_CRUD')->vcard_neo( $params);
+  # log_debug { np($vcard) };
   $c->stash(
 	    current_view => 'Download',
-	    download => 'text/plain',
-	    plain => $vcard->{vcard},
-	    outfile_name => $vcard->{outfile_name} . '.vCard',
-	    outfile_ext => 'vcard',
+	    download     => 'text/plain',
+	    plain        => $vcard->{vcard},
+	    outfile_name => $vcard->{outfile_name} . '.vcf',
+	    outfile_ext  => 'vcf',
 	   );
   $c->forward('UMI::View::Download');
+  # $c->detach('UMI::View::Download');
 }
 
 
