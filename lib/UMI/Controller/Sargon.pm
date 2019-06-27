@@ -87,6 +87,10 @@ sub attributes {
   my  ( $self, $objectClass, $args ) = @_;
   my $attributes;
   my $val;
+
+  #log_debug { np($args) };
+  $self->hash_denullify($args);
+  
   $attributes->{objectClass} = $objectClass;
   $attributes->{cn}          = $args->{cn};
 

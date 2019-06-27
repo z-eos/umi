@@ -23,6 +23,41 @@
 <script src="/static/js/umi-hider.js"></script>
 [% END %]
 
+<script>
+    $(function() {
+	$('#netgroup').change(function(){
+	    // console.log($(this).val());
+	    if( -1 == $(this).val().indexOf('category')) {
+		// console.log('not category');
+		$('#uids').parent().parent().removeClass('d-none');
+		$('#ng_access').parent().parent().removeClass('d-none');
+		$('#ng_category').parent().parent().addClass('d-none');
+	    } else {
+		// console.log('category');
+		$('#uids').parent().parent().addClass('d-none');
+		$('#ng_category').parent().parent().removeClass('d-none');
+		$('#ng_access').parent().parent().addClass('d-none');
+	    }
+	});
+    });
+
+    if ( $('#aux_dn_form_to_modify').val().length ) {
+	$('#netgroup').parent().parent().addClass('d-none');
+	$('#cn').parent().parent().addClass('d-none');
+	console.log($('#netgroup').val());
+	if( -1 != $('#netgroup').val().indexOf('category')) {
+	    $('#uids').parent().parent().addClass('d-none');
+	    $('#ng_category').parent().parent().removeClass('d-none');
+	    $('#ng_access').parent().parent().addClass('d-none');
+	} else {
+	    $('#uids').parent().parent().removeClass('d-none');
+	    $('#ng_category').parent().parent().addClass('d-none');
+	    $('#ng_access').parent().parent().removeClass('d-none');
+	}
+    }
+
+    </script>
+
 <script src="/static/js/umi-multiselect.js"></script>
 <script src="/static/js/jquery.multi-select.js" type="text/javascript"></script>
 <script src="/static/js/jquery.quicksearch.js" type="text/javascript"></script>

@@ -1,30 +1,47 @@
 [% # -*- mode: web; -*- %]
 
 <aside>
-  <nav id="sidebar-right" class="text-light bg-dark float-right [% c.session.settings.ui.aside == 0 ? 'folded' : '' %]" data-url-tree="/ldap_tree">
+  <nav id="sidebar-right"
+       class="text-light bg-dark float-right [% c.session.settings.ui.aside == 0 ? 'folded' : '' %]"
+       data-url-tree="/ldap_tree">
     <ul class="nav nav-tabs nav-fill" role="tablist">
+      <li class="nav-item" title="LDAP tree (neo)">
+	<a class="nav-link text-white-50" data-toggle="tab" href="#ldap-tree-tab" role="tab">
+	  <i class="fas fa-tree"></i><sup>v.1.0</sup>
+	</a>
+      </li>
+
       <li class="nav-item" title="LDAP tree">
-	<a class="nav-link text-white-50" data-toggle="tab" href="#tree" role="tab"><i class="fas fa-tree"></i></a>
+	<a class="nav-link text-white-50" data-toggle="tab" href="#tree" role="tab">
+	  <i class="fas fa-tree"></i><sup>v.0.9</sup>
+	</a>
       </li>
+
       <li class="nav-item" title="statistics">
-	<a class="nav-link text-white-50" data-toggle="tab" href="#statistics" role="tab"><i class="fas fa-chart-pie"></i></a>
+	<a class="nav-link text-white-50" data-toggle="tab" href="#statistics" role="tab">
+	  <i class="fas fa-chart-pie"></i>
+	</a>
       </li>
       <li class="nav-item">
-	<a class="nav-link text-white-50" data-toggle="tab" href="#messages" role="tab"><i class="fas fa-globe"></i></a>
+	<a class="nav-link text-white-50" data-toggle="tab" href="#messages" role="tab">
+	  <i class="fas fa-globe"></i>
+	</a>
       </li>
       <li class="nav-item">
-	<a class="nav-link text-white-50" data-toggle="tab" href="#settings" role="tab"><i class="fas fa-cogs"></i></a>
+	<a class="nav-link text-white-50" data-toggle="tab" href="#settings" role="tab">
+	  <i class="fas fa-cogs"></i>
+	</a>
       </li>
     </ul>
 
-    <!-- Tab panes -->
+    <!-- === *** TAB PANES *** === -->
     <div class="tab-content bg-dark">
-      <div class="tab-pane active" id="tree" role="tabpanel">
+
+      <!-- === LDAP tree ===  -->
+      <div class="tab-pane" id="tree" role="tabpanel">
 	[% IF c.check_user_roles('admin') %]
 	<div class="callout m-0 py-2 text-white-50 text-center text-uppercase">
-	  <!-- <a class="nav-link" href="/ldap_tree"> -->
           <small><b>LDAP tree</b></small>
-	  <!-- </a> -->
 	</div>
 	<div id="App">
 	  <tree :tree="tree"></tree>
@@ -33,11 +50,77 @@
       </div>
 
 
+      <!-- === LDAP tree (neo) ===  -->
+      <div class="tab-pane active" id="ldap-tree-tab" role="tabpanel">
+	[% IF c.check_user_roles('admin') %]
+	<div class="callout m-0 py-2 text-white-50 text-center text-uppercase">
+	  <button class="btn border-0 text-white-50"
+		  type="button"
+		  title="CLICK FOR HELP"
+		  data-toggle="collapse"
+		  data-target="#collapseExample"
+		  aria-expanded="false"
+		  aria-controls="collapseExample">
+            <small><b>LDAP tree (neo)
+	      <sup>
+		<i class="fas fa-question-circle"></i>
+	      </sup></b></small>
+	  </button>
+	</div>
+	<div class="collapse" id="collapseExample">
+	  <dl class="row text-white-50 umi-text-tiny mx-3">
+	    <dt class="col-sm-3 text-right">Click</dt>
+	    <dd class="col-sm-9 mb-0 pb-0">
+	      <ul class="my-0 py-0 ml-0 pl-0 list-unstyled">
+		<li>on <i class="far fa-plus-square""></i>/<i class="far fa-minus-square""></i> un/folds branch</li>
+		<li>on item searches for item</li>
+	      </ul>
+	    </dd>
+	    <dt class="pt-0 mt-0 col-sm-3 text-right">Ctrl+Click</dt>
+	    <dd class="col-sm-9">on item searches for branch</dd>
+	  </dl>
+	</div>
+	<script type="text/x-template" id="item-template">
+	 <li>
+	  <div class="ldap-tree-point">
+	   <div class="umi-text-xs mr-1"
+	    @click="toggle">
+	     <i class="far fa-plus-square text-white-50" v-if="isFolder && !isOpen"></i>
+	     <i class="far fa-minus-square"              v-if="isFolder && isOpen"></i>
+	     <i class="fas fa-minus text-white-50"       v-if="!isFolder"></i>
+	   </div>
+	   <div :class="{'font-weight-bold': isFolder, 'text-white-50': !isOpen}"
+	    @click="showItem(0)"
+	    @click.ctrl="showItem(1)">
+	     {{ item.name }}
+	   </div>
+	  </div>
+	  <ul class="text-monospace ldap-tree" v-show="isOpen" v-if="isFolder">
+	   <ldap-tree-item
+	    class="ldap-tree-item"
+	    v-for="(child, index) in item.children"
+	    :key="index"
+	    :item="child">
+	   </ldap-tree-item>
+	  </ul>
+	 </li>
+	</script>
+	<ul class="text-monospace ldap-tree" id="ldap-tree">
+	  <ldap-tree-item class="ldap-tree-item"
+		     :item="treeData"
+		     @make-folder="makeFolder">
+	  </ldap-tree-item>
+	</ul>
+	[% END %]
+      </div>
+
+      
       <!-- === STATISTICS ===  -->
       <div class="tab-pane p-3" id="statistics" role="tabpanel">
 	<div id="stat-to" class="message">
 	</div>
       </div>
+
       
       <!-- === MESSAGES ===  -->
       <div class="tab-pane p-3" id="messages" role="tabpanel">

@@ -8,6 +8,9 @@ BEGIN { extends 'UMI::Form::LDAP'; with 'Tools'; }
 
 use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printable' );
 
+use Logger;
+use Data::Printer;
+
 has '+action' => ( default => '/abstrnisnetgroup' );
 
 sub build_form_element_class { [ qw(formajaxer) ] }
@@ -34,11 +37,12 @@ has_field 'netgroup'
        element_wrapper_class => [ 'input-sm', 'col-11' ],
        element_class         => [ 'input-sm', 'custom-select', ],
        wrapper_class         => [ 'row', ],
+       # empty_select          => '--- Choose an Option ---',
        options_method        => \&netgroup,
        # required              => 1,
      );
 
-has_field 'cn' 
+has_field 'cn'
   => ( apply                 => [ NoSpaces, NotAllDigits, Printable ],
        label                 => 'Name',
        label_class           => [ 'col-1', 'text-right', 'font-weight-bold', ],
@@ -48,7 +52,7 @@ has_field 'cn'
        required              => 1 );
 
 
-has_field 'uids' 
+has_field 'uids'
   => ( type                  => 'Multiple',
        label                 => 'Users',
        label_class           => [ 'col-1', 'text-right', 'font-weight-bold', ],
@@ -58,8 +62,8 @@ has_field 'uids'
        element_wrapper_class => [ 'input-sm', 'col-11' ],
        element_class         => [ 'umi-multiselect' ],
        options_method        => \&uids,
-       wrapper_class         => [ 'row', ],
-       required              => 1,
+       wrapper_class         => [ 'row', 'd-none', ],
+       required              => 0,
      );
 
 has_field 'associatedDomain'
@@ -74,6 +78,34 @@ has_field 'associatedDomain'
        options_method        => \&associatedDomain,
        wrapper_class         => [ 'row', ],
        required              => 1,
+     );
+
+has_field 'ng_access'
+  => ( type                  => 'Multiple',
+       label                 => 'NG Access',
+       label_class           => [ 'col-1', 'text-right', 'font-weight-bold', ],
+       element_attr          => { 'data-ico-l'       => 'fa-users',
+				  'data-ico-r'       => 'fa-users',
+				  'data-placeholder' => 'access netgroups', },
+       element_wrapper_class => [ 'input-sm', 'col-11' ],
+       element_class         => [ 'umi-multiselect' ],
+       options_method        => \&ng_access,
+       wrapper_class         => [ 'row', 'd-none', ],
+       required              => 0,
+     );
+
+has_field 'ng_category'
+  => ( type                  => 'Multiple',
+       label                 => 'NG Category',
+       label_class           => [ 'col-1', 'text-right', 'font-weight-bold', ],
+       element_attr          => { 'data-ico-l'       => 'fa-users',
+				  'data-ico-r'       => 'fa-users',
+				  'data-placeholder' => 'category netgroups', },
+       element_wrapper_class => [ 'input-sm', 'col-11' ],
+       element_class         => [ 'umi-multiselect' ],
+       options_method        => \&ng_category,
+       wrapper_class         => [ 'row', 'd-none', ],
+       required              => 0,
      );
 
 has_field 'description'
@@ -118,6 +150,8 @@ sub build_render_list {[ qw( aux_dn_form_to_modify
 			     description
 			     uids
 			     associatedDomain
+			     ng_access
+			     ng_category
 			     aux_submitit ) ]}
 
 # sub validate {
@@ -140,11 +174,40 @@ sub build_render_list {[ qw( aux_dn_form_to_modify
 sub netgroup {
   my $self = shift;
   return unless $self->form->ldap_crud;
-  return $self->form->ldap_crud->
+  my $s = $self->form->ldap_crud->
     bld_select({ base   => $self->form->ldap_crud->cfg->{base}->{netgroup},
 		 filter => '(ou=*)',
 		 scope  => 'one',
-		 attr   => [ 'ou', 'description', ],});
+		 attr   => [ 'ou', 'description', ],
+		 empty_row => 1, });
+  # log_debug { np($s) };
+  return $s;
+}
+
+sub ng_access {
+  my $self = shift;
+  return unless $self->form->ldap_crud;
+  my $s = $self->form->ldap_crud->
+    bld_select({ base      => 'ou=access,' . $self->form->ldap_crud->cfg->{base}->{netgroup},
+		 filter    => '(cn=*)',
+		 scope     => 'one',
+		 attr      => [ 'cn', ],
+		 empty_row => 0, });
+  # log_debug { np($s) };
+  return $s;
+}
+
+sub ng_category {
+  my $self = shift;
+  return unless $self->form->ldap_crud;
+  my $s = $self->form->ldap_crud->
+    bld_select({ base      => 'ou=category,' . $self->form->ldap_crud->cfg->{base}->{netgroup},
+		 filter    => '(cn=*)',
+		 scope     => 'one',
+		 attr      => [ 'cn', ],
+		 empty_row => 0, });
+  # log_debug { np($s) };
+  return $s;
 }
 
 sub uids {
@@ -159,7 +222,10 @@ sub associatedDomain {
   return $self->form->ldap_crud->select_associateddomains;
 }
 
-
+sub validate {
+  my $self = shift;
+  
+}
 
 no HTML::FormHandler::Moose;
 

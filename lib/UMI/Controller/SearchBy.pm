@@ -652,6 +652,13 @@ sub proc :Path(proc) :Args(0) {
       # log_debug { np($entry_tmp) };
       log_debug { np($return) } if defined $return;
       foreach $attr ( $entry_tmp->attributes ) {
+	if ( $entry_tmp->get_value($attr) eq '' ||
+	     (ref($entry_tmp->get_value($attr)) eq 'ARRAY' &&
+	      $entry_tmp->get_value($attr)->[0] eq '')) {
+	  push @{$return->{warning}},
+	    sprintf("attribute <i><b>%s</b></i> is empty, it will be deleted on submit", $attr);
+	}
+	
 	if ( $attr =~ /;binary/ or
 	   $attr eq "userPKCS12" ) { ## !!! temporary stub !!! 	  next;
 	  $entry->{$attr} = "BINARY DATA";
@@ -670,7 +677,7 @@ sub proc :Path(proc) :Args(0) {
 
       $c->stats->profile('all fields are ready');
 
-      # here we building the list ($names)of all attributes of each objectClass
+      # here we building the list @{$names} of all attributes of each objectClass
       # of the $entry, for each element we investigate, whether the attribute
       # single-value or not
       my ($is_single, $names);
@@ -1605,7 +1612,7 @@ modify whole form (all present fields except RDN)
 sub modify :Path(modify) :Args(0) {
   my ( $self, $c, $params ) = @_;
   
-  # log_debug { np($params) };
+  log_debug { np($params) };
 
   # whether we edit object as is or via creation form
   $params = $c->req->parameters if ! defined $params;
@@ -1643,6 +1650,19 @@ sub modify :Path(modify) :Args(0) {
   my $delete  = undef;
   my $replace = undef;
   log_debug { np($params) };
+  my @ea = $entry->attributes;
+  log_debug { np(@ea) };
+
+  # sanitize $entry in case it has empty attributes
+  foreach $attr ( $entry->attributes ) {
+    if ( $entry->get_value($attr) eq '' ||
+	 (ref($entry->get_value($attr)) eq 'ARRAY' && $entry->get_value($attr)->[0] eq '')) {
+      push @{$delete}, $attr => [];
+      push @{$return->{warning}},
+	sprintf("empty attribute <i><b>%s</b></i> was deleted", $attr);
+    }
+  }
+
   foreach $attr ( sort ( keys %{$params} )) {
     next if $attr =~ /$ldap_crud->{cfg}->{exclude_prefix}/ ||
       $attr eq 'dn'; # ||
@@ -1717,7 +1737,7 @@ sub modify :Path(modify) :Args(0) {
       $binary = $self->file2var( $val_params->{'tempname'}, $return );
       return $binary if ref($binary) eq 'HASH' && defined $binary->{error};
       push @{$replace}, $attr . ';binary' => [ $binary ];
-    } elsif ( $val_params eq '' && defined $entry->get_value($attr) ) {
+    } elsif ( $val_params eq '' && $entry->exists($attr) ) {
       log_debug { '%%% FOUR %%%' };
       push @{$delete}, $attr => [];
     } elsif ( $val_params ne '' && ! defined $entry->get_value($attr) ) {
@@ -1873,7 +1893,6 @@ sub modform :Path(modform) :Args(0) {
     } else {
       push @{$init_obj->{nisNetgroupTriple_arr}}, $init_obj->{nisNetgroupTriple};
     }
-
     foreach $triple ( @{$init_obj->{nisNetgroupTriple_arr}} ) {
       # according to the order used in LDAP attr "nisNetgroupTriple" value
       ( $host, $user, $domain ) = split(/,/, substr($triple,1,-1));
@@ -1881,6 +1900,23 @@ sub modform :Path(modform) :Args(0) {
       push @{$init_obj->{associatedDomain_raw}}, sprintf("%s.%s", $host, $domain)
 	if ! $associatedDomain;
     }
+
+    my @ng = split(/,/, $params->{aux_dn_form_to_modify});
+    shift @ng;
+    $init_obj->{netgroup} = join(',', @ng);
+
+    my $ngr;
+    if ( $init_obj->{netgroup} =~ /access/ ) {
+      $ngr = 'ng_access';
+    } else {
+      $ngr = 'ng_category';
+    }
+    if ( ref($init_obj->{memberNisNetgroup}) eq 'ARRAY' ) {
+      $init_obj->{$ngr} = $init_obj->{memberNisNetgroup};
+    } else {
+      push @{$init_obj->{$ngr}}, $init_obj->{memberNisNetgroup};
+    }
+    
     @{$init_obj->{uids}} = uniq( @{$init_obj->{uids_raw}} );
     @{$init_obj->{associatedDomain}} = uniq( @{$init_obj->{associatedDomain_raw}} )
       if ! $associatedDomain;

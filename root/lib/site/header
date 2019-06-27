@@ -205,7 +205,7 @@
 	    <a href="/searchadvanced"
 	       class="btn btn-secondary"
 	       title="advanced search">
-	      <i class="fa fa-search-plus"></i>
+	      <i class="fa fa-binoculars"></i>
 	    </a>
 	  </div>
 	</div>

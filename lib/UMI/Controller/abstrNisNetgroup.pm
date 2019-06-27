@@ -46,7 +46,7 @@ sub index :Path :Args(0) {
 	$self->form->process( posted      => ($c->req->method eq 'POST'),
 			      params      => $params,
 			      init_object => { aux_dn_form_to_modify => $params->{aux_dn_form_to_modify}, },
-			      ldap_crud => $ldap_crud, );
+			      ldap_crud   => $ldap_crud, );
     } else {
     
       return unless $self->form->process( posted    => ($c->req->method eq 'POST'),
@@ -54,7 +54,7 @@ sub index :Path :Args(0) {
 					  ldap_crud => $ldap_crud, );
     }
     my $entry = $self->attributes($ldap_crud->cfg->{objectClass}->{netgroup}, $params);
-    log_debug { np($entry) };
+    # log_debug { np($entry) };
     # log_debug { np($params) };
     if ( defined $params->{aux_dn_form_to_modify} && $params->{aux_dn_form_to_modify} ne '' ) {
       $entry->{dn}                    = $params->{aux_dn_form_to_modify};
@@ -80,6 +80,7 @@ returns hash of the object attributes with values
 
 sub attributes {
   my ( $self, $objectClass, $args ) = @_;
+  # log_debug { np($args) };
   my $attributes = { cn          => $args->{cn},
 		     objectClass => $objectClass, };
   my ($host_split, $host, $uid);
@@ -88,6 +89,8 @@ sub attributes {
 
   $attributes->{associatedDomain} = $args->{associatedDomain};
   $attributes->{netgroup} = $args->{netgroup};
+  $attributes->{memberNisNetgroup} = $args->{ng_access}   if exists $args->{ng_access};
+  $attributes->{memberNisNetgroup} = $args->{ng_category} if exists $args->{ng_category};
 
   my $nisNetgroupTriple;
   if ( ref($args->{uids}) eq 'ARRAY' && ref($args->{associatedDomain}) eq 'ARRAY' ) {
@@ -139,7 +142,7 @@ sub add {
   my $netgroup = $args->{netgroup};
   delete $args->{netgroup}; # since no attribute `netgroup' exist
   my @arr = map { $_ => $args->{$_} } keys(%{$args});
-  log_debug { np( @arr ) };
+  # log_debug { np( @arr ) };
 
   my $mesg =
     $ldap_crud->add( sprintf('cn=%s,%s', $args->{cn}, $netgroup),

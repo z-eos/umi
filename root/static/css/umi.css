@@ -441,6 +441,27 @@ html,body {
     margin-left: 0; 
   }
 }
+
+/* LDAP tree */
+.ldap-tree-item {
+  cursor: pointer;
+}
+.ldap-tree-point {
+  position: relative;
+  padding: 1px 0px 1px;
+  line-height: 1.05;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+}
+ul.ldap-tree {
+  font-size: .97em;
+  padding-left: 1em;
+  padding-right: 0.5em;
+  list-style-type: none;
+}
+
+
 /* -------------------------------
 
    BootStrap "amendments"

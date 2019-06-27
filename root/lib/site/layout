@@ -137,6 +137,8 @@
 <script src="/static/js/app/component/tree.component.js"></script>
 <script src="/static/js/app/app.js"></script>
 
+<script src="/static/js/ldap-tree/ldap-tree.js"></script>
+
 <script>
  $(document).ready(function () {
    var $panel = $('#sidebar-left');

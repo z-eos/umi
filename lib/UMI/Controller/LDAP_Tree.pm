@@ -6,6 +6,7 @@ use Moose;
 use namespace::autoclean;
 use Data::Printer colored => 0;
 use Net::LDAP::Util qw(	ldap_explode_dn canonical_dn );
+use LDAP_NODE;
 
 use Logger;
 
@@ -27,10 +28,50 @@ LDAP tree crawler
 
 =head2 index
 
+on input option base and filter can be present
+
+    http://umi.lan:3000//ldap_tree/ldap_tree_neo/?base=ou=People,dc=umidb&filter=uid=naf*
+
 =cut
 
-# sub index :Chained('/') :PathPart('ldap_tree') :Args(1) {
-#   my ( $self, $c, $args) = @_;
+sub index_neo :Path(ldap_tree_neo) :Args(0) {
+  my ( $self, $c ) = @_;
+  $c->stats->profile(begin => 'LDAP tree neo');
+
+  my $ldap_crud = $c->model('LDAP_CRUD');
+
+  my ( $return, $as_hash );
+  my $params = $c->req->params;
+  my $arg = { base   => $params->{base}   // $ldap_crud->{cfg}->{base}->{db},
+	      filter => $params->{filter} // '(objectClass=*)', };
+
+  my $mesg = $ldap_crud->search({ base      => $arg->{base},
+				  scope     => 'children',
+				  sizelimit => 0,
+				  typesonly => 1,
+				  attrs     => [ '1.1' ],
+				  filter    => $arg->{filter}, });
+
+  if ( $mesg->code ) {
+    push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
+
+    $c->stash( template      => 'tree/tree_neo.tt',
+	       final_message => $return, );
+  } else {
+    my $ldap_tree = LDAP_NODE->new();
+    $ldap_tree->insert($_->dn) foreach ( $mesg->entries );
+    $as_hash = $ldap_tree->as_json_vue;
+    # log_debug { np( $as_hash ) };
+    
+    $c->stats->profile('tree neo, building complete');
+
+    $c->stash( current_view => 'WebJSON_LDAP_Tree',
+	       json_tree    => $as_hash, );
+  }
+  $c->stats->profile(end   => 'LDAP tree neo');
+}
+
+# # # oldfashioned, timethirsty variant
 sub index :Path :Args(0) {
   my ( $self, $c ) = @_;
   $c->stats->profile(begin => 'LDAP tree');
@@ -92,8 +133,8 @@ sub index :Path :Args(0) {
   }
 
   # log_debug { np(@to_stash) };
-  
-  $c->stash->{tree} = \@to_stash;
+
+  $c->stash->{json_tree} = \@to_stash;
 
   $c->stats->profile(end   => 'LDAP tree');
 }

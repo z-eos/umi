@@ -865,93 +865,45 @@ sub test : Local {
   my ( $self, $c ) = @_;
   my $ldap_crud = $c->model('LDAP_CRUD');
   my $return;
+
+  # log_debug { $ldap_crud->cfg->{base}->{db} };
+
+  my ($mesg, $msg, $ldif, $uid);
+  $mesg = $ldap_crud->search({ base      => $ldap_crud->cfg->{base}->{db},
+			       scope     => 'sub',
+			       filter    => '(objectClass=*)',
+			       sizelimit => 0,
+			       attrs     => [ '1.1', ]
+			});
+
+  use LDAP_NODE;
+  my $ldap_tree = LDAP_NODE->new();
+  $ldap_tree->insert($_->dn) foreach ( $mesg->entries );
+  # log_debug { np($ldap_tree) };
+  my $lt;
+  $lt = $ldap_tree->as_json_vue;
+  # log_debug { np( $lt ) };
+  use JSON::PP;
+  my $json = JSON::PP->new; #
+  # $json->allow_nonref(1);
+  # $json->canonical(1);
+  # $json->sort_by(sub { $JSON::PP::a cmp $JSON::PP::b });
   
-# DHCP STUFF #     my $svc;
-# DHCP STUFF #     my $fqdn;
-# DHCP STUFF # 
-# DHCP STUFF #     ## DHCP
-# DHCP STUFF #     # $svc = 'dhcp';
-# DHCP STUFF #     # $fqdn = 'voyager.startrek.in';
-# DHCP STUFF #     # filter => sprintf('(&(objectClass=dhcpSubnet)(dhcpOption=domain-name "%s"))', $fqdn),
-# DHCP STUFF #     # attrs => [ 'cn', 'dhcpNetMask', 'dhcpRange' ],
-# DHCP STUFF #     ## VPN
-# DHCP STUFF #     # $svc = 'vpn';
-# DHCP STUFF #     # $fqdn = 'talax.startrek.in';
-# DHCP STUFF #     # filter => sprintf('(&(authorizedService=ovpn@%s)(cn=*))', $fqdn),
-# DHCP STUFF #     # attrs => [ 'cn', 'umiOvpnCfgServer', 'umiOvpnCfgRoute' ],
-# DHCP STUFF # 
-# DHCP STUFF # #	       final_message => $ldap_crud->ipam({ svc => 'vpn', fqdn => 'talax.startrek.in', what => 'all', })
-# DHCP STUFF # #	       testvar => $self->ipam_ip2dec('10.10.10.10')
-# DHCP STUFF # 
-# DHCP STUFF #     # $svc = 'ovpn';
-# DHCP STUFF #     # $fqdn = 'talax.startrek.in';
-# DHCP STUFF #     $svc = 'dhcp';
-# DHCP STUFF #     $fqdn = 'voyager.startrek.in';
-# DHCP STUFF # 
-# DHCP STUFF #     my $iu = $ldap_crud->ipam_used({ svc => $svc,
-# DHCP STUFF # 				     fqdn => $fqdn,
-# DHCP STUFF # 				     base => $ldap_crud->{cfg}->{base}->{$svc},
-# DHCP STUFF # 				     # filter => sprintf('(&(authorizedService=ovpn@%s)(cn=*))', $fqdn),
-# DHCP STUFF # 				     # attrs => [ 'cn', 'umiOvpnCfgServer', 'umiOvpnCfgRoute' ],
-# DHCP STUFF # 
-# DHCP STUFF # 				     filter => sprintf('(&(objectClass=dhcpSubnet)(dhcpOption=domain-name "%s"))', $fqdn),
-# DHCP STUFF # 				     attrs => [ 'cn', 'dhcpNetMask', 'dhcpRange' ],
-# DHCP STUFF # 
-# DHCP STUFF # 
-# DHCP STUFF # 				   });
-# DHCP STUFF #     
-# DHCP STUFF #     $c->stash( template => 'test.tt',
-# DHCP STUFF # 	       final_message => $ldap_crud->ipam_first_free({ ipspace => $iu->{ipspace},
-# DHCP STUFF # 	       						      ip_used => $iu->{ip_used},
-# DHCP STUFF # 							      # tgt_net => '10.146.5.0/24',
-# DHCP STUFF # 							      # req_msk => 30,
-# DHCP STUFF # 	       						    }),
-# DHCP STUFF # 	       # final_message => $iu,
-# DHCP STUFF # 
-# DHCP STUFF # 	     );
+  # $return = { success => q{Lorem ipsum dolor sit amet.},
+  # 	      error   => q{Neque porro quisquam est qui dolorem ipsum quia dolor sit amet},
+  # 	      warning => q{consectetur, adipisci velit.}, };
 
-# tree build #   use Net::LDAP::Util qw(	ldap_explode_dn canonical_dn );
-# tree build #   
-# tree build #   my $params = $c->req->params;
-# tree build #   my $arg = { base => $params->{base} || $ldap_crud->{cfg}->{base}->{db},
-# tree build # 	      filter => $params->{filter} || '(objectClass=*)', };
-# tree build # 
-# tree build #   my $mesg = $ldap_crud->search({ base => $arg->{base},
-# tree build # 				  scope => 'sub',
-# tree build # 				  sizelimit => 0,
-# tree build # 				  attrs => [ 'fakeAttr' ],
-# tree build # 				  filter => $arg->{filter}, });
-# tree build #   my $tree;
-# tree build #   foreach my $entry ( @{[$mesg->entries]} ) {
-# tree build #     $tree = $self->tree_build({ dn => $entry->dn, });
-# tree build #   }
-# tree build #   $return = $tree;
-
-  use Net::CIDR::Set;
-  use JSON;
-
-  my $ipa = Net::CIDR::Set->new;
-
-  # log_debug { np( $mesg ) };
-
-  my $dhcp_addresses = $ldap_crud->search({ base   => $ldap_crud->cfg->{base}->{dhcp},
-					    filter => '(dhcpStatements=fixed-address *)', });
+  my $j = $json
+	     ->pretty(1)
+	     ->allow_nonref(1)
+	     ->canonical(1)
+	     # ->sort_by(sub { $JSON::PP::a cmp $JSON::PP::b })
+	     ->encode( $lt );
+  # log_debug { np($j) };
   
-  foreach my $entry (@{[$dhcp_addresses->entries]}) {
-    foreach my $val (@{[$entry->get_value('dhcpStatements')]}) {
-      $ipa->add( (split(/ /, $val))[1] )
-	if $val =~ /^fixed-address /;
-    }
-  }
-
-#  @{$return} = split(/, /, $ipa->as_string);
-  $return = { success => q{Lorem ipsum dolor sit amet.},
-	      error   => q{Neque porro quisquam est qui dolorem ipsum quia dolor sit amet},
-	      warning => q{consectetur, adipisci velit.}, };
-
   $c->stash( template      => q{test.tt},
 	     final_message => $return,
-	     ipa           => [$ipa->as_address_array],
+	     data          => $j,
 	   );
 }
 

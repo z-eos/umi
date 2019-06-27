@@ -578,6 +578,21 @@ sub fnorm {
   }
 }
 
+=head2 hash_denullify
+
+deletes all attributes with empty string values from the given hash
+
+=cut
+
+sub hash_denullify {
+  my ($self, $hash) = @_;
+  log_debug { np($hash) };
+  while (my ($key, $val) = each %{$hash}) {
+    delete $hash->{$key} if $hash->{$key} eq '';
+  }
+  log_debug { np($hash) };
+  return;
+}
 
 =head2 macnorm
 
@@ -1638,6 +1653,38 @@ sub is_org_uni {
   return $int;
 }
 
+sub traverse {
+  my ($self, $args) = @_;
+  my $arg = { in => $args->{in},
+	      ou => $args->{ou}, };
+  my $arr = [];
+
+  while (my ($key,$val) = each %{$arg->{in}}) {
+
+    if ( keys %{$val} ) {
+      # first iteration
+      $arg->{ou}->{name} = $key
+	if ref($arg->{ou}) eq "HASH" && keys(%{$arg->{ou}}) == 2;
+
+      $arr = [];
+      $self->traverse ({ in => $val,
+			 ou => $arr, });
+
+      if ( ref($arg->{ou}) eq "HASH" && keys(%{$arg->{ou}}) == 2 ) {
+	# first iteration
+	@{$arg->{ou}->{children}} = sort @{$arr};
+      } else {
+	push @{$arg->{ou}}, { name     => $key,
+			      children => sort $arr };
+      }
+
+    } elsif ( ref($arg->{ou}) eq 'ARRAY') {
+      push @{$arg->{ou}}, { name => $key };
+    }
+
+  }
+  return;
+}
 
 =head1 AUTHOR
 

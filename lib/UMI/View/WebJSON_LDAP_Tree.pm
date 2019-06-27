@@ -7,9 +7,11 @@ use strict;
 use base 'Catalyst::View::JSON';
 
 __PACKAGE__->config({
-		     # allow_callback  => 1,
-		     # callback_param  => 'cb',
-		     expose_stash    => 'tree',
+		     # json_encoder_args => { utf8      => 1,
+		     # 			    pretty    => 1,
+		     # 			    canonical => 1, },
+		     expose_stash      => qr/^json_/,
+#		     expose_stash      => 'tree',
 		    });
 
 =head1 NAME

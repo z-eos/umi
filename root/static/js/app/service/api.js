@@ -33,7 +33,9 @@ window.Service.api = (function () {
                     if (typeof data === 'string') {
                         JSON.parse(data);
                     } else if (typeof data === 'object') {
-                        data = data
+			/* here we expect array of hashes */
+                        // data = data
+                        data = data.json_tree
                     } else {
                         console.warn("Data has unusable format - ", typeof data);
                         return;

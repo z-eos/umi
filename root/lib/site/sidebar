@@ -142,7 +142,7 @@
 	<a href="#submenuObjects" data-toggle="collapse" aria-expanded="false" class=" text-white-50">
 	  <i class="fas fa-lg fa-fw fa-shapes"></i>
 	  <div class="d-none d-inline-flex">
-	    <b class="text-uppercase">Objects</b>
+	    <b class="text-uppercase">New Obj</b>
 	  </div>
 	</a>
 	<ul class="nav flex-column collapse m-0 p-0" id="submenuObjects">

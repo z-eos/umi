@@ -158,7 +158,7 @@ sub _build_cfg {
 			     GitACL        => 'fab fa-git',
 			     OpenVPN       => 'fas fa-sitemap',
 			     Organizations => 'fas fa-industry',
-			     People        => 'fas fa-user-tag',
+			     People        => 'fas fa-address-card',
 			     default       => 'fas fa-star',
 			     group         => 'fas fa-users',
 			     history       => 'fas fa-history',
@@ -3115,14 +3115,16 @@ DEFAULTS:
 sub bld_select {
   my ($self, $args) = @_;
   my $arg = { base      => $args->{base},
-	      attr      => $args->{attr} || [ 'cn', 'description' ],
-	      filter    => $args->{filter} || '(objectClass=*)',
-	      scope     => $args->{scope} || 'one',
-	      sizelimit => $args->{sizelimit} || 0, };
+	      attr      => $args->{attr}      // [ 'cn', 'description' ],
+	      filter    => $args->{filter}    // '(objectClass=*)',
+	      scope     => $args->{scope}     // 'one',
+	      sizelimit => $args->{sizelimit} // 0,
+	      empty_row => $args->{empty_row} // 0,
+	      a2v       => $args->{a2v}       // 0, };
 
   my $callername = (caller(1))[3];
-  $callername = 'main' if ! defined $callername;
-  my $return = 'call to LDAP_CRUD->bld_select from ' . $callername . ': ';
+  $callername    = 'main' if ! defined $callername;
+  my $return     = 'call to LDAP_CRUD->bld_select from ' . $callername . ': ';
 
   $self->reset_ldap;
   my $mesg =
@@ -3147,11 +3149,19 @@ sub bld_select {
   # attr0_val : attr1_val
   # dn : attr0_val
   # dn : attr0_val + ... + attrX_val
-  
+
+  # my $sel_val = $arg->{a2v} ? $arg->{attr}->[0] : ;
+  push @arr, { value    => 'stub',
+	       label    => '--- select an option ---',
+	       selected => 'selected' }
+    if $arg->{empty_row};
+
+  # log_debug { np($#{$arg->{attr}}) };
   if ( $#{$arg->{attr}} == 0 ) {
     @arr_meta = map { $_->get_value( $arg->{attr}->[0] ) } @entries;
     $hash_uniq->{$_} = 1 foreach ( @arr_meta );
     @arr = map { value => $_, label => $_, }, sort keys %{$hash_uniq};
+    # log_debug { np(@arr) };
   } else {
     foreach ( @entries ) {
       $arg->{toutfy} = sprintf('%s%s',
@@ -3403,8 +3413,8 @@ sub create_account_branch_leaf {
   my ($authorizedService, $sshkey, $authorizedService_add, $jpegPhoto_file, $description );
   my $sshPublicKey = [];
   
-  if ( $arg->{service} eq 'ovpn' ||
-       $arg->{service} eq 'ssh' ||
+  if ( $arg->{service}   eq 'ovpn' ||
+       $arg->{service}   eq 'ssh'  ||
        ( $arg->{service} eq 'dot1x-eap-md5' ||
 	 $arg->{service} eq 'dot1x-eap-tls' ) ||
        $arg->{service} eq 'web' ) {
