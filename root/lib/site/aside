@@ -7,15 +7,17 @@
     <ul class="nav nav-tabs nav-fill" role="tablist">
       <li class="nav-item" title="LDAP tree (neo)">
 	<a class="nav-link text-white-50" data-toggle="tab" href="#ldap-tree-tab" role="tab">
-	  <i class="fas fa-tree"></i><sup>v.1.0</sup>
+	  <i class="fas fa-project-diagram"></i>
 	</a>
       </li>
 
+      <!-- untill tree neo tested
       <li class="nav-item" title="LDAP tree">
 	<a class="nav-link text-white-50" data-toggle="tab" href="#tree" role="tab">
 	  <i class="fas fa-tree"></i><sup>v.0.9</sup>
 	</a>
       </li>
+      -->
 
       <li class="nav-item" title="statistics">
 	<a class="nav-link text-white-50" data-toggle="tab" href="#statistics" role="tab">
@@ -38,17 +40,18 @@
     <div class="tab-content bg-dark">
 
       <!-- === LDAP tree ===  -->
+      <!-- untill tree neo tested
       <div class="tab-pane" id="tree" role="tabpanel">
-	[% IF c.check_user_roles('admin') %]
+	[% # IF c.check_user_roles('admin') %]
 	<div class="callout m-0 py-2 text-white-50 text-center text-uppercase">
           <small><b>LDAP tree</b></small>
 	</div>
 	<div id="App">
 	  <tree :tree="tree"></tree>
 	</div>
-	[% END %]
+	[% # END %]
       </div>
-
+      -->
 
       <!-- === LDAP tree (neo) ===  -->
       <div class="tab-pane active" id="ldap-tree-tab" role="tabpanel">

@@ -131,11 +131,13 @@
 </script>
 [% END %]
 
+<!-- untill tree neo tested
 <script src="/static/js/app/service/store.js"></script>
 <script src="/static/js/app/service/api.js"></script>
 <script src="/static/js/app/component/tree-item.component.js"></script>
 <script src="/static/js/app/component/tree.component.js"></script>
 <script src="/static/js/app/app.js"></script>
+-->
 
 <script src="/static/js/ldap-tree/ldap-tree.js"></script>
 
