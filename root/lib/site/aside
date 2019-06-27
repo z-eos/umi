@@ -5,7 +5,7 @@
        class="text-light bg-dark float-right [% c.session.settings.ui.aside == 0 ? 'folded' : '' %]"
        data-url-tree="/ldap_tree">
     <ul class="nav nav-tabs nav-fill" role="tablist">
-      <li class="nav-item" title="LDAP tree (neo)">
+      <li class="nav-item" title="LDAP tree">
 	<a class="nav-link text-white-50" data-toggle="tab" href="#ldap-tree-tab" role="tab">
 	  <i class="fas fa-project-diagram"></i>
 	</a>
@@ -64,10 +64,12 @@
 		  data-target="#collapseExample"
 		  aria-expanded="false"
 		  aria-controls="collapseExample">
-            <small><b>LDAP tree (neo)
+            <b>
+	      LDAP tree
 	      <sup>
 		<i class="fas fa-question-circle"></i>
-	      </sup></b></small>
+	      </sup>
+	    </b>
 	  </button>
 	</div>
 	<div class="collapse" id="collapseExample">
