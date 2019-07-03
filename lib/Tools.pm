@@ -1589,6 +1589,7 @@ sub ask_mikrotik {
 				username => $arg->{username},
 				password => $arg->{password},
 				use_ssl  => 1,
+				new_auth_method => 1,
 			       });
 
   my $ret_code;
