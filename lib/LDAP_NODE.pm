@@ -9,9 +9,53 @@ use namespace::autoclean;
 
 use Carp;
 
+=head1 NAME
+
+LDAP_NODE
+
+=head1 DESCRIPTION
+
+LDAP_NODE - class to build object (tree) of LDAP DNs list provided
+
+The resuld object structure is in accordance with DNs relations to each other
+
+=head1 METHODS
+
+=cut
+
+=head2 dn
+
+attribute to hold DN
+
+=cut
+
+has 'dn' => ( is => 'rw', isa => 'Str', lazy => 1, default => '' );
+
+=head2 has_subnodes
+
+method to define, whether obj has subnodes
+
+=cut
+
 sub has_subnodes { exists(shift->{subnode}) }
 
+=head2 is_leaf
+
+method to define, whether obj is leaf
+
+=cut
+
 sub is_leaf { !shift->has_subnodes() }
+
+=head2 locate_nearest
+
+traverses DN, splitted by ',' and returns triplet:
+
+    - last existent subnode
+    - DN, splitted by ',' array rest (parts for which there is no subnode yet)
+    - first chunk of DN, splitted by ',' for which there is no subnode
+
+=cut
 
 sub locate_nearest {
   my $self = shift;
@@ -26,27 +70,11 @@ sub locate_nearest {
   return ($self, @_, $arg);
 }
 
-sub locate {
-  my ($found, @rest) = shift->locate_nearest(@_);
-  if (@rest == 0) {
-    return $found;
-  }
-}
+=head2 insert
 
-sub subnode {
-  my $self = shift;
-  my $arg;
-  while ($arg = shift) {
-    if (exists($self->{subnode}) && exists($self->{subnode}{$arg})) {
-      $self = $self->{subnode}{$arg};
-    } else {
-      return;
-    }
-  }
-  return $self;
-}
+method to create object branch of subnode/s according to DN, splitted by ','
 
-has 'dn'       => ( is => 'rw', isa => 'Str', lazy => 1, default => '' );
+=cut
 
 sub insert {
   my ($self, $dn) = @_;
@@ -55,9 +83,9 @@ sub insert {
   my $dn_cur;
   if (@rest) {
     while (my $arg = pop @rest) {
-      $dn_cur = $found->dn;
+      $dn_cur                 = $found->dn;
       $found->{subnode}{$arg} = LDAP_NODE->new();
-      $found = $found->{subnode}{$arg};
+      $found                  = $found->{subnode}{$arg};
       $dn_cur eq '' ? $found->dn($arg) : $found->dn( $arg . ',' . $dn_cur );
     }
   }
@@ -66,10 +94,44 @@ sub insert {
   return $found
 }
 
+=head2 nodenames
+
+method to return all names of all nodes
+
+=cut
+
 sub nodenames {
   my $self = shift;
   keys(%{$self->{subnode}}) if $self->has_subnodes;
 }
+
+=head2 as_string
+
+method to print the object as string
+
+    'dc=umidb:
+      ou=People:
+       uid=naf.nafus:
+        authorizedService=dot1x-eap-md5@ferengi.ears.com:
+         uid=f8de1da313b8 (leaf)
+        authorizedService=dot1x-eap-tls@borg.startrek.in:
+         uid=rad-nostromo-test (leaf)
+        authorizedService=mail@starfleet.startrek.in:
+         uid=naf.nafus@starfleet.startrek.in (leaf)
+        authorizedService=ovpn@borg.startrek.in:
+         cn=dev-sk-notebook (leaf)
+        authorizedService=ssh-acc@borg.startrek.in:
+         uid=naf.nafus_borg.startrek.in (leaf)
+        authorizedService=ssh-acc@ferengi.ears.com (leaf)
+        authorizedService=web@borg.startrek.in:
+         uid=naf.nafus6@borg.startrek.in (leaf)
+         uid=qqqqqqqqq@borg.startrek.in (leaf)
+        authorizedService=xmpp@borg.startrek.in:
+         uid=naf.nafus1@starfleet.startrek.in (leaf)
+         uid=naffafus@starfleet.startrek.in (leaf)
+    ...'
+
+=cut
 
 sub as_string {
   my $self = shift;
@@ -91,6 +153,34 @@ sub as_string {
   }
   return $s
 }
+
+=head2 as_hash
+
+method to print the object as hash
+
+    dc=umidb {
+        ou=DHCP {
+            ou=borg-cube01 {
+                'cn=borg-cube01 DHCP Config' {
+                    cn=GUEST {
+                        cn=192.168.253.0 {
+                            cn=host01 {},
+                                 cn=pool1        {},
+                                 cn=test24nafus1 {}
+                        }
+                    },
+                    cn=KINDERGARTEN {
+                        cn=192.168.254.0 {
+                            cn=pool1       {},
+                            cn=tst4-4-naf1 {}
+                        }
+                    },
+                },
+            },
+        },
+    }
+
+=cut
 
 sub as_hash {
   my $self  = shift;
@@ -184,6 +274,13 @@ sub as_hash_vue {
   return %{$hroot->{''}{branch}};
 }
 
+=head2 as_json
+
+method to print the object as array, ready to be processed to JSON used
+in oldstyle ldap tree 
+
+=cut
+
 sub as_json {
   my $self  = shift;
   my $map   = shift // sub { shift; @_ };
@@ -209,18 +306,26 @@ sub as_json {
   return @vue;
 }
 
+=head2 as_json_vue
+
+method to print the object as hash, ready to be processed to JSON used
+in Vuejs tree example
+
+=cut
+
 sub as_json_vue {
   my $self  = shift;
   my $map   = shift // sub { shift; @_ };
   my $hroot = [];
   my @ar;
-  
+
   push @ar, [ '', $self, $hroot ];
   while (my $e = shift @ar) {
     if ($e->[1]->has_subnodes) {
       my $ch = [];
       push @{$e->[2]}, { name     => $e->[0],
 			 dn       => $e->[1]->dn,
+			 isOpen   => \0,
 			 children => $ch };
       while (my ($k, $v) = each %{$e->[1]->{subnode}}) {
 	push @ar, [ $k, $v, $ch ];

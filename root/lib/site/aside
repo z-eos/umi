@@ -77,32 +77,39 @@
 	    <dt class="col-sm-3 text-right">Click</dt>
 	    <dd class="col-sm-9 mb-0 pb-0">
 	      <ul class="my-0 py-0 ml-0 pl-0 list-unstyled">
-		<li>on <i class="far fa-plus-square""></i>/<i class="far fa-minus-square""></i> to expand/collapse branch</li>
-		<li>on item searches for item</li>
+		<li>on <i class="fas fa-plus-square""></i>/<i class="fas fa-minus-square""></i> to expand/collapse item</li>
+		<li>on item to search it</li>
 	      </ul>
 	    </dd>
 	    <dt class="pt-0 mt-0 col-sm-3 text-right">Ctrl+Click</dt>
-	    <dd class="col-sm-9">on item searches for branch</dd>
+	    <dd class="col-sm-9">
+	      <ul class="my-0 py-0 ml-0 pl-0 list-unstyled">
+		<li>on <i class="fas fa-plus-square""></i>/<i class="fas fa-minus-square""></i> to expand/collapse whole branch</li>
+		<li>on item searches whole branch</li>
+	      </ul>
 	  </dl>
 	</div>
+	
 	<script type="text/x-template" id="item-template">
 	 <li>
 	  <div class="ldap-tree-point">
-	   <div class="umi-text-xs mr-1"
-	    @click="toggle">
-	     <i class="far fa-plus-square text-white-50" v-if="isFolder && !isOpen"></i>
-	     <i class="far fa-minus-square"              v-if="isFolder && isOpen"></i>
-	     <i class="fas fa-minus text-white-50"       v-if="!isFolder"></i>
+	   <div class="umi-text-xs mr-1" v-if="isFolder""
+	    @click.exact="toggleItem"
+	    @click.ctrl.exact="toggleTree"> 
+	     <i class="fas fa-plus-square text-white-50" v-if="!item.isOpen"></i>
+	     <i class="fas fa-minus-square"              v-if="item.isOpen"></i>
 	   </div>
-	   <div :class="{'font-weight-bold': isFolder, 'text-white-50': !isOpen}"
-	    @click="showItem(0)"
-	    @click.ctrl="showItem(1)">
+	   <div class="umi-text-xs mr-1" v-if="!isFolder""> 
+	     <i class="fas fa-minus text-white-50"></i>
+	   </div>
+	   <div :class="{'font-weight-bold': isFolder, 'text-white-50': !item.isOpen}"
+	    @click.exact="showItem(0)"
+	    @click.ctrl.exact="showItem(1)">
 	     {{ item.name }}
 	   </div>
-	  </div>
-	  <ul class="text-monospace ldap-tree" v-show="isOpen" v-if="isFolder">
-	   <ldap-tree-item
-	    class="ldap-tree-item"
+	  </div>	 
+	  <ul class="text-monospace ldap-tree" v-show="item.isOpen" v-if="isFolder">
+	   <ldap-tree-item class="ldap-tree-item"
 	    v-for="(child, index) in item.children"
 	    :key="index"
 	    :item="child">
@@ -110,10 +117,11 @@
 	  </ul>
 	 </li>
 	</script>
+
 	<ul class="text-monospace ldap-tree" id="ldap-tree">
 	  <ldap-tree-item class="ldap-tree-item"
-		     :item="treeData"
-		     @make-folder="makeFolder">
+			  :item="tree"
+			  @make-folder="makeFolder">
 	  </ldap-tree-item>
 	</ul>
 	[% END %]

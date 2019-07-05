@@ -48,7 +48,7 @@
 
 [% # PROCESS site/footer %]
 
-<script src="/static/js/vue.js"></script>
+<script src="/static/js/vue.min.js"></script>
 
 <script src="/static/js/umi-core-ajax.js"></script>   
 <script src="/static/js/umi-header.js"></script>
@@ -62,6 +62,7 @@
 
 [% IF c.check_user_roles('admin') %]
 <!-- LDAP tree related (Vue based) -->
+<!--
 <script type="text/x-template" id="template-tree-item">
   <li class="tree-item" :class="{opened: opened, closed: !opened}">
  <div class="tree-point"
@@ -129,7 +130,7 @@
     </ul>
   </div>
 </script>
-[% END %]
+-->
 
 <!-- untill tree neo tested
 <script src="/static/js/app/service/store.js"></script>
@@ -140,6 +141,8 @@
 -->
 
 <script src="/static/js/ldap-tree/ldap-tree.js"></script>
+
+[% END %]
 
 <script>
  $(document).ready(function () {

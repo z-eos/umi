@@ -137,9 +137,9 @@ sub sysinfo : Local {
 				     data  => $x, },
 	       'LDAP_CRUD->cfg' => { title => 'LDAP_CRUD configuration ( internal UMI $c->model(LDAP_CRUD)->cfg )',
 				     data  => $c->model('LDAP_CRUD')->cfg, },
-	      'LDAP monitor'    => { title => 'OpenLDAP daemon monitor',
+	       'LDAP monitor'   => { title => 'OpenLDAP daemon monitor',
 				     data  => $monitor, },
-	      'LDAP syntaxes'   => { title => 'LDAP syntaxes',
+	       'LDAP syntaxes'  => { title => 'LDAP syntaxes',
 				     data  => $syntaxes, },
 	     };
 
