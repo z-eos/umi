@@ -40,7 +40,7 @@
 	      <div class="text-[% elapsed_bg %] text-left">
 		<b><i class="fas fa-clock"></i> Whole request took</b>
 	      </div>
-	      <div class="text-[% elapsed_bg %] text-right text-monospace">
+	      <div class="text-[% elapsed_bg %] text-right font-monospace">
 		<b>[% stats.elapsed %]s</b>
 	      </div>
 	    </div>
@@ -78,7 +78,7 @@
 	    [% END %]
 	  </td>
 	  <td>
-	    <span class="text-[% tr_class %] text-monospace">[% i.2 %]s</span></ br>
+	    <span class="text-[% tr_class %] font-monospace">[% i.2 %]s</span></ br>
 	  </td>
 	</tr>
 	[% END %]

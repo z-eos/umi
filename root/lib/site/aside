@@ -108,7 +108,7 @@
 	     {{ item.name }}
 	   </div>
 	  </div>	 
-	  <ul class="text-monospace ldap-tree" v-show="item.isOpen" v-if="isFolder">
+	  <ul class="font-monospace ldap-tree" v-show="item.isOpen" v-if="isFolder">
 	   <ldap-tree-item class="ldap-tree-item"
 	    v-for="(child, index) in item.children"
 	    :key="index"
@@ -117,8 +117,8 @@
 	  </ul>
 	 </li>
 	</script>
-
-	<ul class="text-monospace ldap-tree" id="ldap-tree">
+	
+	<ul class="font-monospace ldap-tree" id="ldap-tree">
 	  <ldap-tree-item class="ldap-tree-item"
 			  :item="tree"
 			  @make-folder="makeFolder">

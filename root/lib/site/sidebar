@@ -29,19 +29,19 @@
 
 <nav id="sidebar-left" class="bg-dark [% c.session.settings.ui.sidebar == 0 ? 'folded' : '' %]">
 
-    <ul id="sidebar-left-menu" class="nav nav-pills">
+    <ul id="sidebar-left-menu" class="nav flex-column">
 
       [% IF c.check_any_user_role ('admin', 'coadmin', 'operator') %]
-      <li class="nav-link">
+      <li class="nav-item">
 	<a href="#submenuAnalyze"
 	   data-toggle="collapse"
 	   aria-expanded="false"
 	   aria-controls="submenuAnalyze"
-	   class="text-white-50">
+	   class="nav-link text-white-50">
 	  <i class="fas fa-lg fa-fw fa-microscope"></i>
 	  <b class="text-uppercase">Analyze</b>
 	</a>
-	<ul class="nav flex-column collapse m-0 p-0" id="submenuAnalyze">
+	<ul class="nav flex-column collapse ml-3 p-0" id="submenuAnalyze">
           <li class="nav-item">
 	    <a class="text-light nav-link" href="#modal-is-accounts" data-toggle="modal">
 	      <i class="fas fa-id-card"></i>
@@ -86,14 +86,15 @@
       </li>
       [% END %]
       
-      <li class="nav-link">
-	<a href="#submenuTools" data-toggle="collapse" aria-expanded="false" class=" text-white-50">
+      <li class="nav-item">
+	<a href="#submenuTools" data-toggle="collapse" aria-expanded="false"
+	   class="nav-link text-white-50">
 	  <i class="fas fa-lg fa-fw fa-toolbox"></i>
 	  <div class="d-none d-inline-flex">
 	    <b class="text-uppercase">Tools</b>
 	  </div>
 	</a>
-	<ul class="nav flex-column collapse m-0 p-0" id="submenuTools">
+	<ul class="nav flex-column collapse m-3 p-0" id="submenuTools">
           <li class="nav-item">
 	    <a class="text-light nav-link" href="/tooltranslit">
 	      <i class="fas fa-fw fa-language"></i>
@@ -138,14 +139,15 @@
 	</ul>
       </li>
 
-      <li class="nav-link">
-	<a href="#submenuObjects" data-toggle="collapse" aria-expanded="false" class=" text-white-50">
+      <li class="nav-item">
+	<a href="#submenuObjects" data-toggle="collapse" aria-expanded="false"
+	   class="nav-link text-white-50">
 	  <i class="fas fa-lg fa-fw fa-shapes"></i>
 	  <div class="d-none d-inline-flex">
 	    <b class="text-uppercase">New Obj</b>
 	  </div>
 	</a>
-	<ul class="nav flex-column collapse m-0 p-0" id="submenuObjects">
+	<ul class="nav flex-column collapse m-3 p-0" id="submenuObjects">
 	  [% IF c.check_any_user_role ('admin', 'coadmin', 'acl-w-people') %]
           <li class="nav-item">
 	    <a class="text-light nav-link" href="/userall" tabindex="2">
@@ -155,7 +157,7 @@
 	  </li>
 	  [% END %]
 	  [% IF c.check_any_user_role ('admin', 'coadmin', 'dhcp') %]
-          <li class="disabled">
+          <li class="nav-item disabled">
 	    <a class="text-light nav-link" href="/dhcp" tabindex="7">
               <i class="fas fa-fw fa-network-wired"></i>
               DHCP
@@ -199,7 +201,7 @@
               GitACL
 	    </a>
 	  </li>
-          <li class="disabled">
+          <li class="nav-item disabled">
 	    <a class="text-light nav-link" href="#" tabindex="6">
               <del><i class="fas fa-fw fa-globe"></i>
 		DNS</del>
@@ -226,16 +228,17 @@
 	</ul>
       </li>
 
-      <li class="divider"></li>
+      <li class="nav-item divider"></li>
       
-      <li class="nav-link">
-	<a href="#submenuInfo" data-toggle="collapse" aria-expanded="false" class="text-white-50">
+      <li class="nav-item">
+	<a href="#submenuInfo" data-toggle="collapse" aria-expanded="false"
+	   class="nav-link text-white-50">
 	  <i class="fas fa-lg fa-fw fa-info"></i>
 	  <div class="d-none d-inline-flex">
 	    <b class="text-uppercase">Info</b>
 	  </div>
 	</a>
-	<ul class="nav flex-column collapse m-0 p-0" id="submenuInfo">
+	<ul class="nav flex-column collapse m-3 p-0" id="submenuInfo">
 	  <li class="nav-item">
 	    <a class="text-light nav-link" href="/motto"><i class="fas fa-hand-spock"></i> user's motto</a>
 	  </li>

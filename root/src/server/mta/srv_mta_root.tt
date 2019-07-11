@@ -10,7 +10,7 @@ MTA
 	  <i class="fa fa-info-circle text-info"></i>
 	</abbr>
       </sup>
-      related <small><em class="text-muted text-monospace">manipulations</em></small>
+      related <small><em class="text-muted font-monospace">manipulations</em></small>
 </[% site.pageheading %]>
 <hr>
 

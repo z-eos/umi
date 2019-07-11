@@ -2,7 +2,7 @@
 
 <[% site.pageheading %] class="font-weight-bold p-3">
 <i class="fas fa-vial fa-lg mr-3 text-muted"></i>
-Test code page<em class="h6 text-muted text-monospace"> (page to show test code results)</em>
+Test code page<em class="h6 text-muted font-monospace"> (page to show test code results)</em>
 </[% site.pageheading %]>
 <hr>
 
@@ -14,339 +14,51 @@ Test code page<em class="h6 text-muted text-monospace"> (page to show test code 
 <script type="text/javascript" src="/static/js/moment-with-locales.js"></script>
 <script type="text/javascript" src="/static/js/tempusdominus-bootstrap-4.min.js"></script>
 
-[% # <!-- div class="container" -->
-   #   <div class="row">
-   #     <div class="col-10 offset-md-2">
-   #       <div class="form-group">
-   #         <div class="input-group date" id="datetimepicker1" data-target-input="nearest">
-   #           <input type="text" class="form-control datetimepicker-input" data-target="#datetimepicker1"/>
-   #           <div class="input-group-append" data-target="#datetimepicker1" data-toggle="datetimepicker">
-   #             <div class="input-group-text"><i class="fas fa-calendar"></i></div>
-   #           </div>
-   #         </div>
-   #       </div>
-   #     </div>
-   #     <script type="text/javascript">
-   #      $(function () {
-   #        $('#datetimepicker1').datetimepicker({
-   #          /* locale: 'uk', */
-   # 	 format: "dddd, MMMM Do YYYY, HH:mm:ss Z",
-   # 	 icons: {
-   #            time: 'fas fa-clock',
-   #            date: 'fas fa-calendar',
-   #            up: 'fas fa-arrow-up',
-   #            down: 'fas fa-arrow-down',
-   #            previous: 'fas fa-chevron-left',
-   #            next: 'fas fa-chevron-right',
-   #            today: 'fas fa-calendar-check',
-   #            clear: 'fas fa-trash',
-   #            close: 'fas fa-times'
-   #          }
-   #        });
-   #      });
-   #     </script>
-   #   </div>
-   # <!-- /div -->
-   # 
-   # <div class="custom-file">
-   #   <label class="custom-file-label" for="customFile">Choose file</label>
-   #   <input type="file" class="custom-file-input" id="customFile">
-   # </div>
-   # 
-   # <pre class="h6 text-monospace">
-   # %]
-      [% # dumper.dump(ipa) %]
-   
-   [% # </pre> %]
-
-<style>
- .item {
-   cursor: pointer;
- }
- ul {
-   padding-left: 1em;
-   list-style-type: none;
- }
-</style>
-
-
-<script type="text/x-template" id="item-template">
-  <li>
-    <div class="tree-point">
-    <div
-      :class="{'font-weight-bold': isFolder}"
-      @click="toggle"
-      @dblclick="makeFolder">
-     <i class="fas fa-folder mr-1"      v-if="isFolder && !isOpen"></i>
-     <i class="fas fa-folder-open mr-1" v-if="isFolder && isOpen"></i>
-     <i class="fas fa-ellipsis-h  mr-1 text-cyan"  v-if="!isFolder"></i>
+<!-- <div class="container"> 
+  <div class="row">
+    <div class="col-10 offset-md-2">
+      <div class="form-group">
+        <div class="input-group date" id="datetimepicker1" data-target-input="nearest">
+          <input type="text" class="form-control datetimepicker-input" data-target="#datetimepicker1"/>
+          <div class="input-group-append" data-target="#datetimepicker1" data-toggle="datetimepicker">
+            <div class="input-group-text"><i class="fas fa-calendar"></i></div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div
-      :class="{'font-weight-bold': isFolder}"
-      @click="showItem">
-     {{ item.name }}
-    </div>
-    </div>
-    <ul v-show="isOpen" v-if="isFolder">
-      <tree-item
-        class="item"
-	v-for="(child, index) in item.children"
-        :key="index"
-        :item="child"
-	></tree-item>
-    </ul>
-  </li>
-</script>
-
-
-<script type="text/javascript">
-
- var treeData = $.ajax({
-   type: "GET",
-   url: '/ldap_tree/ldap_tree_neo',
-   success: function (data) {
-
-     if (typeof data === 'string') {
-       // console.log('data is string');
-       JSON.parse(data);
-     } else if (typeof data === 'object') {
-       // console.log('data is object');
-       data = data.json_tree
-       // console.log(data);
-     } else {
-       console.warn("Data has unusable format - ", typeof data);
-       return;
-     }
-
-     // should be here, othervise data returns after Vue init
-     bootUpDemo(data);
-     
-   },
-   error: function (error) {
-     console.warn('Request faild - ', error);
-   }
- });
-
-// define the tree-item component
-Vue.component('tree-item', {
-  template: '#item-template',
-  props: {
-    item: Object
-  },
-  data: function () {
-    return {
-      isOpen: false
-    }
-  },
-  computed: {
-    isFolder: function () {
-      return this.item.children && this.item.children.length
-    }
-  },
-  methods: {
-    toggle: function () {
-      if (this.isFolder) {
-        this.isOpen = !this.isOpen
-      }
-    },
-    makeFolder: function () {
-      if (!this.isFolder) {
-      	this.$emit('make-folder', this.item)
-        this.isOpen = true
-      }
-    },
-    showItem: function () {
-      console.log(this.item.dn);
-      var url = this.isFolder ?
-		'/searchby?ldapsearch_scope=sub&ldapsearch_base='  + this.item.dn :
-		'/searchby?ldapsearch_scope=base&ldapsearch_base=' + this.item.dn;
-
-      $.ajax({
-	url: url,
-	success: function (html) {
-	  $('#workingfield').html(html);
-	  handleResponce();
-	}
-      });
-    }
-  }
-});
-
- 
- // boot up the demo
- bootUpDemo = function (data){
-   // console.log(data);
-   var demo = new Vue({
-     el: '#ldap-tree',
-     data: {
-       treeData: data
-     },
-     methods: {
-       makeFolder: function (item) {
-    	 Vue.set(item, 'children', [])
-	   this.addItem(item)
-       },
-       addItem: function (item) {
-    	 item.children.push({
-           name: 'new stuff'
-	 })
-       }
-     }
-   })
- };
- 
-</script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!-- item template -->
-<!-- 
-<script type="text/x-template" id="item-template">
-  <li>
-    <div class="tree-point">
-    <div
-      :class="{'font-weight-bold': isFolder}"
-      @click="toggle"
-      @dblclick="makeFolder">
-     <i class="fas fa-folder mr-1"      v-if="isFolder && !isOpen"></i>
-     <i class="fas fa-folder-open mr-1" v-if="isFolder && isOpen"></i>
-     <i class="fas fa-ellipsis-h  mr-1 text-cyan"  v-if="!isFolder"></i>
-    </div>
-    <div
-      :class="{'font-weight-bold': isFolder}"
-      @click="clickItem">
-     {{ item.name }}
-    </div>
-    </div>
-    <ul v-show="isOpen" v-if="isFolder">
-      <tree-item
-        class="item"
-	v-for="(child, index) in item.children"
-        :key="index"
-        :item="child"
-        @make-folder="$emit('make-folder', $event)"
-        @add-item="$emit('add-item', $event)"
-	></tree-item>
-    </ul>
-  </li>
-</script>
--->
-
-<!-- the v-for-json root element -->
-<!-- 
-<ul class="text-monospace umi-text-sm" id="v-for-json">
-  <tree-item
-    class="item"
-    :item="treeData"
-    @make-folder="makeFolder"
-  ></tree-item>
-</ul>
--->
-
-<!-- 
-<script type="text/javascript">
- // var treeData = [% # data %]
-
- var treeData = $.ajax({
-   type: "GET",
-   url: '/ldap_tree/ldap_tree_neo',
-   success: function (data) {
-
-     if (typeof data === 'string') {
-       // console.log('data is string');
-       JSON.parse(data);
-     } else if (typeof data === 'object') {
-       // console.log('data is object');
-       data = data.json_tree
-     } else {
-       console.warn("Data has unusable format - ", typeof data);
-       return;
-     }
-   },
-   error: function (error) {
-     console.warn('Request faild - ', error);
-   }
- });
-
- // define the tree-item component
- Vue.component('tree-item', {
-   template: '#item-template',
-   props: {
-     item: Object
-   },
-   data: function () {
-     return {
-       isOpen: false
-     }
-   },
-   computed: {
-     isFolder: function () {
-       return this.item.children && this.item.children.length
-     }
-   },
-   methods: {
-     toggle: function () {
-       if (this.isFolder) {
-         this.isOpen = !this.isOpen
-       }
-     },
-     makeFolder: function () {
-       if (!this.isFolder) {
-      	 this.$emit('make-folder', this.item)
-           this.isOpen = true
-       }
-     },
-     clickItem: function (id, isFolder) {
-       var _this = this;
-
-       var url = isFolder ?
-                 '/searchby?ldapsearch_scope=sub&ldapsearch_base='  + id :
-                 '/searchby?ldapsearch_scope=base&ldapsearch_base=' + id;
-
-       $.ajax({
-         url: url,
-         success: function (html) {
-           _this.config.treeViewElement.html(html);
-           handleResponce();
+    <script type="text/javascript">
+     /*
+     $(function () {
+       $('#datetimepicker1').datetimepicker({
+	 format: "dddd, MMMM Do YYYY, HH:mm:ss Z",
+	 icons: {
+           time: 'fas fa-clock',
+           date: 'fas fa-calendar',
+           up: 'fas fa-arrow-up',
+           down: 'fas fa-arrow-down',
+           previous: 'fas fa-chevron-left',
+           next: 'fas fa-chevron-right',
+           today: 'fas fa-calendar-check',
+           clear: 'fas fa-trash',
+           close: 'fas fa-times'
          }
        });
-     }
-   }
- })
-   
-   
-// boot up the demo
-var vForJson = new Vue({
-  el: '#v-for-json',
-  data: {
-    treeData: treeData
-  },
-  methods: {
-    makeFolder: function (item) {
- 	 Vue.set(item, 'children', [])
-	   this.addItem(item)
-    },
-    addItem: function (item) {
- 	 item.children.push({
-        name: 'new stuff'
-	 })
-    }
-  }
-})
+     });
+     */
+    </script>
+  </div>
+</div>
 
-</script>
+<div class="custom-file">
+  <label class="custom-file-label" for="customFile">Choose file</label>
+  <input type="file" class="custom-file-input" id="customFile">
+</div>
 -->
+
+<pre class="h6 font-monospace">
+
+  [% dumper.dump(ipa) %]
+   
+</pre>
+
+

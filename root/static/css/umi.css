@@ -468,35 +468,6 @@ ul.ldap-tree {
 
    ------------------------------- */
 
-a, input, ul, li, select, .card, .card-group, .card-header, .btn, .input-group, .input-group-sm, .input-group-text, .form-group, .form-control, .ms-list, .ms-selection, .nav, .nav-link, .nav-item, .custom-file-input, .custom-file-label, .card-group > .card:only-child .card-img-top, .card-group > .card:only-child .card-header {
-  border-radius: 0 !important;
-}
-
-/*
-div, span {
-  border-radius: 0 !important;
-}
-*/
-
-.btn {
-/*  border: none; */
-  border-radius: 0;
-}
-
-.btn-borderless {
-  border-color: transparent;
-}
-
-/* .btn:not(.btn-secondary) {
-  border: none;
-  border-radius: 0;
-} */
-
-td .card, td .card-header, td .card-footer, .navbar-toggler {
-  border-color: transparent;
-  border: none;
-}
-
 .bg-blue      { background-color: var(--blue)      !important; }
 .bg-indigo    { background-color: var(--indigo)    !important; }
 .bg-purple    { background-color: var(--purple)    !important; }

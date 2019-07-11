@@ -46,3 +46,7 @@ what we done:
   font-weight: 700;
   src: local('Open Sans Bold Italic'), local('OpenSans-BoldItalic'), url(/static/fonts/OpenSans-BoldItalic.ttf) format('truetype');
 }
+
+* {
+ font-family: 'Open Sans';
+}

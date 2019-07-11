@@ -69,14 +69,14 @@ var ldapTree = new Vue({
 	$.ajax({
 	    type: "GET",
 	    url: '/ldap_tree/ldap_tree_neo',
-	    success: function (data) {		
+	    success: function (data) {
 		if (typeof data === 'string') {
 		    // console.log('data is string')
-		    JSON.parse(data)
+		    data = JSON.parse(data)
 		} else if (typeof data === 'object') {
 		    // console.log('data is object')
 		    data = data.json_tree
-		    // console.log(data)
+		    // console.log(_this.names)
 		} else {
 		    console.warn("Data has unusable format - ", typeof data)
 		    return

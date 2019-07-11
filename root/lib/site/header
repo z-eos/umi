@@ -3,7 +3,7 @@
 <header>
   <nav class="navbar navbar-dark bg-dark" id="header">
     [% IF c.user_exists && c.session.auth_uid # !!! to fix, looks like a stub %]
-    <a id="sidebarLeftCollapse" class="navbar-toggler btn btn-link p-0 pr-3" href="#" title="show/hide left panel">
+    <a id="sidebarLeftCollapse" class="navbar-toggler btn btn-link p-0 pr-3 border-0" href="#" title="show/hide left panel">
       <i id="sidebarLeftToggler" class="fas fa-fw [% toggle_a %][% # defined in layout %]"></i>
     </a>
     [% END %]
@@ -31,7 +31,7 @@
 	    </button>
 	  </div>
 	  <input type="text"
-		 class="form-control text-monospace"
+		 class="form-control font-monospace"
 		 id="ldapsearch_filter"
 		 name="ldapsearch_filter"
 		 placeholder='attributeName=*value*'
@@ -260,7 +260,7 @@
       </li>
       [% END %]
     </ul>
-    <a id="sidebarRightCollapse" class="navbar-toggler btn btn-link p-0" href="#" title="show/hide right panel">
+    <a id="sidebarRightCollapse" class="navbar-toggler btn btn-link p-0 border-0" href="#" title="show/hide right panel">
       <i id="sidebarRightToggler" class="fas fa-fw [% toggle_a %][% # defined in layout %]"></i>
     </a>
   </nav>

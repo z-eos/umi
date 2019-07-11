@@ -21,7 +21,7 @@
 
 <div class="w-100 pt-2 pb-2">
   <[% site.pageheading %]>
-  <b>[% auth_obj.givenname %]&nbsp;[% auth_obj.sn %]</b> <small class="text-monospace text-muted">(<i>UID: &laquo;[% auth_obj.uid %]&raquo; preferences)</i></small>
+  <b>[% auth_obj.givenname %]&nbsp;[% auth_obj.sn %]</b> <small class="font-monospace text-muted">(<i>UID: &laquo;[% auth_obj.uid %]&raquo; preferences)</i></small>
   </[% site.pageheading %]>
   <hr>
 </div>
@@ -186,7 +186,7 @@
 	    <thead><tr class="active"><th>Hostname</th><th>DDNS</th><th>IP</th><th>MAC</th><th>Description</th></tr></thead>
 	    <tbody>
 	      [% FOREACH x IN dhcp %]
-	      <tr class="text-monospace">
+	      <tr class="font-monospace">
 		<td>
 		  [% x.cn %]
 		</td>
@@ -220,7 +220,7 @@
       <table id="tbl_pgp" class="table table-striped table-condensed table-hover">
 	<tbody>
 	  [% FOREACH x IN pgp %]
-	  <tr class="text-monospace">
+	  <tr class="font-monospace">
 	    <td>
 	      <dl class="row">
 		<dt class="col-3 text-right">UserID:</dt>
@@ -255,7 +255,7 @@
 	<table class="table table-condenced table-stripped table-hover">
 	  <tbody>
 	    [% FOREACH y IN service %]
-	    <tr class="active text-monospace">
+	    <tr class="active font-monospace">
 	      <th colspan="2">
 		<span class="text-success">
 		  <span class="[% y.icon %] fa-lg"></span>
@@ -312,7 +312,7 @@
 		           ELSE;
 		             cert_color='';
 		           END %]
-		    <h6 class="text-monospace umi-text-xs[% cert_color %]">
+		    <h6 class="font-monospace umi-text-xs[% cert_color %]">
 		      <dl class="row">
 			[% FOREACH cert IN y.cert.${z.key};
 			   NEXT IF cert.key == "cert";
@@ -323,7 +323,7 @@
 		    </h6>
 		    [% ELSIF y.sshkey.${z.key};
 		         FOREACH cert IN y.sshkey.${z.key};
-		         '<h6 class="kludge-minus-700px text-monospace umi-text-xs">' _ cert _ '</h6>';
+		         '<h6 class="kludge-minus-700px font-monospace umi-text-xs">' _ cert _ '</h6>';
 		         END;
 		        END;
 		       END %]

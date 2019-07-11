@@ -2,7 +2,7 @@
 
 <[% site.pageheading %] class="font-weight-bold p-3">
 <i class="fas fa-file-code fa-lg mr-3 text-muted"></i>
-LDIF<small><em class="text-muted text-monospace">
+LDIF<small><em class="text-muted font-monospace">
   base: [% final_message.dn %]; &nbsp;&nbsp; filter: (objectClass=*)
 </em></small>
 </[% site.pageheading %]>
