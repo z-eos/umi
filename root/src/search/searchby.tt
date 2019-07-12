@@ -413,7 +413,7 @@ Search Advanced
 			  <i class="[% ph_class %]" title="[% ph_title %]"></i>
 			  [% END %]
 			  
-			  <b class="[% icon_color _ ' ' _ entry_text_size %]">
+			  <b class="font-monospace [% icon_color _ ' ' _ entry_text_size %]">
 			    [% IF entry.key.match('People');
 			       entry.key.replace('uid=','').replace('authorizedService=','').split(',').slice(0,-3).join('<i class="fa fa-ellipsis-h ml-1 mr-1"></i>');
 			       entry.value.attrs.reqStart.0;
@@ -469,7 +469,7 @@ Search Advanced
 	      <div class="card-body">
 		<dl class="row">
 		  <dt class="card-title col-2 text-right text-truncate">dn:</dt>
-		  <dd class="card-title col-10 font-weight-bolder">[% entry.key %]</dd>
+		  <dd class="card-title col-10 font-weight-bolder font-monospace">[% entry.key %]</dd>
 
 		  [% FOREACH h_attr IN entry.value.attrs # h_attr is for each attr/value pair hash;
 		     d_class = '';
