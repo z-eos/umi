@@ -3,7 +3,7 @@
 ## idea and main code is provided by Sergey Poznyakoff
 #
 
-package LDAP_NODE;
+package Noder;
 use Moose;
 use namespace::autoclean;
 
@@ -12,11 +12,11 @@ use Data::Printer;
 
 =head1 NAME
 
-LDAP_NODE
+Noder
 
 =head1 DESCRIPTION
 
-LDAP_NODE - class to build object (tree) of LDAP DNs list provided
+Noder - class to build object (tree) of LDAP DNs list provided
 
 The resuld object structure is in accordance with DNs relations to each other
 
@@ -80,16 +80,16 @@ method to create object branch of subnode/s according to DN, splitted by ','
 sub insert {
   my ($self, $dn) = @_;
 
-  # p 'LDAP_NODE->insert(): dn: ' . $dn;
+  # p 'Noder->insert(): dn: ' . $dn;
   my ($found, @rest) = $self->locate_nearest(split /,/, $dn);
-  # p 'LDAP_NODE->insert(): dn: ' . $dn . '; rest: ' . join(' --- ', @rest);
+  # p 'Noder->insert(): dn: ' . $dn . '; rest: ' . join(' --- ', @rest);
   my $dn_cur;
   my $arg;
   if ($#rest >= 0) {
     while (defined($arg = pop @rest)) {
       # p $arg;
       $dn_cur                   = $found->dn;
-      $found->{subnode}{$arg} = LDAP_NODE->new();
+      $found->{subnode}{$arg} = Noder->new();
       $found                    = $found->{subnode}{$arg};
       $dn_cur eq '' ? $found->dn($arg) : $found->dn( $arg . ',' . $dn_cur );
     }
@@ -347,7 +347,8 @@ sub as_json_vue {
   # my $return = { name     => $hroot->[0]->{children}->[0]->{name},
   # 		 children => \@sorted };
   # return $return;
-  
+
+  $hroot->[0]{children}[0]{isOpen} = \1;
   return $hroot->[0]{children}[0];
 }
 

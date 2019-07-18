@@ -14,6 +14,7 @@ use MIME::QuotedPrint;
 
 BEGIN { with 'Tools'; }
 
+use Noder;
 use Logger;
 
 if ( UMI->config->{authentication}->{realms}->{ldap}->{store}->{ldap_server_options}->{debug} ) {
@@ -2751,8 +2752,7 @@ sub ipa {
   }
 
   # log_debug { np(@{[$ipa->as_address_array]}) };
-  use LDAP_NODE;
-  my $ipa_tree = LDAP_NODE->new();
+  my $ipa_tree = Noder->new();
   foreach ( @{[ $ipa->as_address_array ]} ) {
     $tmp = join(',', reverse split(/\./, $_));
     # log_debug{ np($tmp) };
