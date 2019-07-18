@@ -63,7 +63,7 @@ sub index_neo :Path(ldap_tree_neo) :Args(0) {
     $as_hash = $ldap_tree->as_json_vue;
     my $tmp;
     %{$tmp} = $ldap_tree->as_string;
-    log_debug { np( $tmp ) };
+    # log_debug { np( $tmp ) };
     
     $c->stats->profile('tree neo, building complete');
 
@@ -71,6 +71,17 @@ sub index_neo :Path(ldap_tree_neo) :Args(0) {
 	       json_tree    => $as_hash, );
   }
   $c->stats->profile(end   => 'LDAP tree neo');
+}
+
+sub ipa :Path(ipa) :Args(0) {
+  my ( $self, $c ) = @_;
+  $c->stats->profile(begin => 'IPA tree');
+  $c->stats->profile('IPA tree building complete');
+
+  $c->stash( current_view => 'WebJSON_LDAP_Tree',
+	     json_tree    => $c->model('LDAP_CRUD')->ipa, );
+
+  $c->stats->profile(end  => 'IPA tree');
 }
 
 # # # oldfashioned, timethirsty variant

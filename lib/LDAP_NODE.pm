@@ -8,6 +8,7 @@ use Moose;
 use namespace::autoclean;
 
 use Carp;
+use Data::Printer;
 
 =head1 NAME
 
@@ -60,7 +61,7 @@ traverses DN, splitted by ',' and returns triplet:
 sub locate_nearest {
   my $self = shift;
   my $arg;
-  while ($arg = pop) {
+  while (defined($arg = pop)) {
     if (exists($self->{subnode}) && exists($self->{subnode}{$arg})) {
       $self = $self->{subnode}{$arg};
     } else {
@@ -79,18 +80,21 @@ method to create object branch of subnode/s according to DN, splitted by ','
 sub insert {
   my ($self, $dn) = @_;
 
+  # p 'LDAP_NODE->insert(): dn: ' . $dn;
   my ($found, @rest) = $self->locate_nearest(split /,/, $dn);
+  # p 'LDAP_NODE->insert(): dn: ' . $dn . '; rest: ' . join(' --- ', @rest);
   my $dn_cur;
-  if (@rest) {
-    while (my $arg = pop @rest) {
-      $dn_cur                 = $found->dn;
+  my $arg;
+  if ($#rest >= 0) {
+    while (defined($arg = pop @rest)) {
+      # p $arg;
+      $dn_cur                   = $found->dn;
       $found->{subnode}{$arg} = LDAP_NODE->new();
-      $found                  = $found->{subnode}{$arg};
+      $found                    = $found->{subnode}{$arg};
       $dn_cur eq '' ? $found->dn($arg) : $found->dn( $arg . ',' . $dn_cur );
     }
   }
-  # use Data::Printer;
-  # p $self->dn;
+  # p $found->dn;
   return $found
 }
 
@@ -345,6 +349,40 @@ sub as_json_vue {
   # return $return;
   
   return $hroot->[0]{children}[0];
+}
+
+sub as_json_ipa {
+  my $self  = shift;
+  my $map   = shift // sub { shift; @_ };
+  my $hroot = [];
+  my @ar;
+
+  push @ar, [ '', $self, $hroot ];
+  while (my $e = shift @ar) {
+    if ($e->[1]->has_subnodes) {
+      my $ch = [];
+      push @{$e->[2]}, { name     => $e->[0],
+			 dn       => join('.', reverse split(/,/, $e->[1]->dn)),
+			 isOpen   => \0,
+			 children => $ch };
+      while (my ($k, $v) = each %{$e->[1]->{subnode}}) {
+	push @ar, [ $k, $v, $ch ];
+      }
+    } else {
+      push @{$e->[2]}, { name => $e->[0],
+			 free => \0,
+			 dn => join('.', reverse split(/,/, $e->[1]->dn)) };
+    }
+  }
+
+  # use Data::Printer;
+  # p $hroot;
+
+  # return $hroot->[0]{children}[0];
+  $hroot->[0]{dn} = '0.0.0.0';
+  $hroot->[0]{name} = '0.0.0.0';
+  $hroot->[0]{isOpen} = \1;
+  return $hroot->[0];
 }
 
 use overload

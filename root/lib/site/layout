@@ -141,6 +141,7 @@
 -->
 
 <script src="/static/js/ldap-tree/ldap-tree.js"></script>
+<script src="/static/js/ldap-tree/ipam-tree.js"></script>
 
 [% END %]
 

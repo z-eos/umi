@@ -110,4 +110,4 @@ const sortRecursively = arr => {
       arr.children = arr.children.map(sortRecursively).sort(compareFunc);
     }
     return arr;
-  };
+};

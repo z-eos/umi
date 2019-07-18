@@ -55,7 +55,7 @@ Test code page<em class="h6 text-muted font-monospace"> (page to show test code 
 </div>
 -->
 
-<pre class="h6 font-monospace">
+<pre class="umi-text-xs font-monospace">
 
   [% dumper.dump(ipa) %]
    

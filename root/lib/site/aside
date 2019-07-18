@@ -5,6 +5,7 @@
        class="text-light bg-dark float-right [% c.session.settings.ui.aside == 0 ? 'folded' : '' %]"
        data-url-tree="/ldap_tree">
     <ul class="nav nav-tabs nav-fill" role="tablist">
+      [% IF c.check_user_roles('admin') %]
       <li class="nav-item" title="LDAP tree">
 	<a class="nav-link text-white-50" data-toggle="tab" href="#ldap-tree-tab" role="tab">
 	  <i class="fas fa-project-diagram"></i>
@@ -19,6 +20,13 @@
       </li>
       -->
 
+      <li class="nav-item" title="IPAM">
+	<a class="nav-link text-white-50" data-toggle="tab" href="#ipam-tab" role="tab">
+	  <i class="fas fa-network-wired"></i>
+	</a>
+      </li>
+      [% END %]
+      
       <li class="nav-item" title="statistics">
 	<a class="nav-link text-white-50" data-toggle="tab" href="#statistics" role="tab">
 	  <i class="fas fa-chart-pie"></i>
@@ -53,9 +61,9 @@
       </div>
       -->
 
+      [% IF c.check_user_roles('admin') %]
       <!-- === LDAP tree (neo) ===  -->
       <div class="tab-pane active" id="ldap-tree-tab" role="tabpanel">
-	[% IF c.check_user_roles('admin') %]
 	<div class="callout m-0 py-2 text-white-50 text-center text-uppercase">
 	  <button class="btn border-0 text-white-50"
 		  type="button"
@@ -124,9 +132,53 @@
 			  @make-folder="makeFolder">
 	  </ldap-tree-item>
 	</ul>
-	[% END %]
       </div>
 
+      
+      <!-- === IPAM ===  -->
+      <div class="tab-pane p-3" id="ipam-tab" role="tabpanel">
+	<div class="callout m-0 py-2 text-white-50 text-center text-uppercase">
+	  <b>IPAM</b>
+	</div>
+	<div id="ipam" class="">
+	<script type="text/x-template" id="ipam-template">
+	 <li>
+	  <div class="ldap-tree-point">
+	   <div class="umi-text-xs mr-1" v-if="isIpaFolder""
+	    @click.exact="toggleIpaItem"
+	    @click.ctrl.exact="toggleIpaTree"> 
+	     <i class="fas fa-plus-square text-white-50" v-if="!ipaitem.isOpen"></i>
+	     <i class="fas fa-minus-square"              v-if="ipaitem.isOpen"></i>
+	   </div>
+	   <div class="umi-text-xs mr-1" v-if="!isIpaFolder""> 
+	     <i class="fas fa-minus text-white-50"></i>
+	   </div>
+	   <div :class="{'font-weight-bold': isIpaFolder, 'text-white-50': !ipaitem.isOpen}"
+	    @click.exact="showIpaItem(0)"
+	    @click.ctrl.exact="showIpaItem(1)">
+	     {{ ipaitem.dn }}
+	   </div>
+	  </div>	 
+	  <ul class="font-monospace ldap-tree" v-show="ipaitem.isOpen" v-if="isIpaFolder">
+	   <ipam-tree-item class="ldap-tree-item"
+	                   v-for="(child, index) in ipaitem.children"
+	                   :key="index"
+	                   :ipaitem="child">
+	   </ipam-tree-item>
+	  </ul>
+	 </li>
+	</script>
+	
+	<ul class="font-monospace ldap-tree" id="ipam-tree">
+	  <ipam-tree-item class="ipam-tree-item"
+			  :ipaitem="ipamtree"
+			  @make-folder="makeIpaFolder">
+	  </ipam-tree-item>
+	</ul>
+	</div>
+      </div>
+      [% END %]
+      
       
       <!-- === STATISTICS ===  -->
       <div class="tab-pane p-3" id="statistics" role="tabpanel">
@@ -183,7 +235,9 @@
       
       <!-- === SETTINGS ===  -->
       <div class="tab-pane p-3 text-light" id="settings" role="tabpanel">
-	<h6>Settings</h6>
+	<div class="callout m-0 py-2 text-white-50 text-center text-uppercase">
+	  <b>Settings</b>
+	</div>
 	<form role="form" id="settings-save" class="settings-save" method="POST" action="/settings_save">
 	  <div class="aside-options">
 	    <div class="custom-control custom-switch">

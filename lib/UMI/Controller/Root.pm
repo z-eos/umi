@@ -865,96 +865,86 @@ sub test : Local {
   my ( $self, $c ) = @_;
   my $ldap_crud = $c->model('LDAP_CRUD');
   my $return;
+
+    my $svc;
+    my $fqdn;
+
+    ## DHCP
+    # $svc = 'dhcp';
+    # $fqdn = 'voyager.startrek.in';
+    # filter => sprintf('(&(objectClass=dhcpSubnet)(dhcpOption=domain-name "%s"))', $fqdn),
+    # attrs => [ 'cn', 'dhcpNetMask', 'dhcpRange' ],
+    ## VPN
+    # $svc = 'vpn';
+    # $fqdn = 'talax.startrek.in';
+    # filter => sprintf('(&(authorizedService=ovpn@%s)(cn=*))', $fqdn),
+    # attrs => [ 'cn', 'umiOvpnCfgServer', 'umiOvpnCfgRoute' ],
+
+#	       final_message => $ldap_crud->ipam({ svc => 'vpn', fqdn => 'talax.startrek.in', what => 'all', })
+#	       testvar => $self->ipam_ip2dec('10.10.10.10')
+
+    $svc = 'ovpn';
+    $fqdn = '*';
+    # $fqdn = 'talax.startrek.in';
+    # $svc = 'dhcp';
+    # $fqdn = '*';
+
+    # my $iu = $ldap_crud->ipam_used({ svc => $svc,
+    # 				     fqdn => $fqdn,
+    # 				     base => $ldap_crud->{cfg}->{base}->{acc_root},
+    # 				     filter => '(&(objectClass=umiOvpnCfg)(cn=*))',
+    # 				     attrs => [ 'cn', 'umiOvpnCfgServer', 'umiOvpnCfgRoute' ],
+
+    # 				     # filter => sprintf('(&(objectClass=dhcpSubnet)(dhcpOption=domain-name "%s"))', $fqdn),
+    # 				     # attrs => [ 'cn', 'dhcpNetMask', 'dhcpRange' ],
+
+
+    # 				   });
+
+  my $ipa = $ldap_crud->ipam_ovpn;
   
-# DHCP STUFF #     my $svc;
-# DHCP STUFF #     my $fqdn;
-# DHCP STUFF # 
-# DHCP STUFF #     ## DHCP
-# DHCP STUFF #     # $svc = 'dhcp';
-# DHCP STUFF #     # $fqdn = 'voyager.startrek.in';
-# DHCP STUFF #     # filter => sprintf('(&(objectClass=dhcpSubnet)(dhcpOption=domain-name "%s"))', $fqdn),
-# DHCP STUFF #     # attrs => [ 'cn', 'dhcpNetMask', 'dhcpRange' ],
-# DHCP STUFF #     ## VPN
-# DHCP STUFF #     # $svc = 'vpn';
-# DHCP STUFF #     # $fqdn = 'talax.startrek.in';
-# DHCP STUFF #     # filter => sprintf('(&(authorizedService=ovpn@%s)(cn=*))', $fqdn),
-# DHCP STUFF #     # attrs => [ 'cn', 'umiOvpnCfgServer', 'umiOvpnCfgRoute' ],
-# DHCP STUFF # 
-# DHCP STUFF # #	       final_message => $ldap_crud->ipam({ svc => 'vpn', fqdn => 'talax.startrek.in', what => 'all', })
-# DHCP STUFF # #	       testvar => $self->ipam_ip2dec('10.10.10.10')
-# DHCP STUFF # 
-# DHCP STUFF #     # $svc = 'ovpn';
-# DHCP STUFF #     # $fqdn = 'talax.startrek.in';
-# DHCP STUFF #     $svc = 'dhcp';
-# DHCP STUFF #     $fqdn = 'voyager.startrek.in';
-# DHCP STUFF # 
-# DHCP STUFF #     my $iu = $ldap_crud->ipam_used({ svc => $svc,
-# DHCP STUFF # 				     fqdn => $fqdn,
-# DHCP STUFF # 				     base => $ldap_crud->{cfg}->{base}->{$svc},
-# DHCP STUFF # 				     # filter => sprintf('(&(authorizedService=ovpn@%s)(cn=*))', $fqdn),
-# DHCP STUFF # 				     # attrs => [ 'cn', 'umiOvpnCfgServer', 'umiOvpnCfgRoute' ],
-# DHCP STUFF # 
-# DHCP STUFF # 				     filter => sprintf('(&(objectClass=dhcpSubnet)(dhcpOption=domain-name "%s"))', $fqdn),
-# DHCP STUFF # 				     attrs => [ 'cn', 'dhcpNetMask', 'dhcpRange' ],
-# DHCP STUFF # 
-# DHCP STUFF # 
-# DHCP STUFF # 				   });
-# DHCP STUFF #     
-# DHCP STUFF #     $c->stash( template => 'test.tt',
-# DHCP STUFF # 	       final_message => $ldap_crud->ipam_first_free({ ipspace => $iu->{ipspace},
-# DHCP STUFF # 	       						      ip_used => $iu->{ip_used},
-# DHCP STUFF # 							      # tgt_net => '10.146.5.0/24',
-# DHCP STUFF # 							      # req_msk => 30,
-# DHCP STUFF # 	       						    }),
-# DHCP STUFF # 	       # final_message => $iu,
-# DHCP STUFF # 
-# DHCP STUFF # 	     );
+    # log_debug { np( $iu ) };
 
-# tree build #   use Net::LDAP::Util qw(	ldap_explode_dn canonical_dn );
-# tree build #   
-# tree build #   my $params = $c->req->params;
-# tree build #   my $arg = { base => $params->{base} || $ldap_crud->{cfg}->{base}->{db},
-# tree build # 	      filter => $params->{filter} || '(objectClass=*)', };
-# tree build # 
-# tree build #   my $mesg = $ldap_crud->search({ base => $arg->{base},
-# tree build # 				  scope => 'sub',
-# tree build # 				  sizelimit => 0,
-# tree build # 				  attrs => [ 'fakeAttr' ],
-# tree build # 				  filter => $arg->{filter}, });
-# tree build #   my $tree;
-# tree build #   foreach my $entry ( @{[$mesg->entries]} ) {
-# tree build #     $tree = $self->tree_build({ dn => $entry->dn, });
-# tree build #   }
-# tree build #   $return = $tree;
+    # $c->stash( template => 'test.tt',
+    # 	       final_message => $ldap_crud->ipam_first_free({ ipspace => $iu->{ipspace},
+    # 	       						      ip_used => $iu->{ip_used},
+    # 	       						      # tgt_net => '10.146.5.0/24',
+    # 	       						      # req_msk => 30,
+    # 	       						    }),
+    # 	       final_message => $iu,
 
-  use Net::CIDR::Set;
-  use JSON;
+    # 	     );
 
-  my $ipa = Net::CIDR::Set->new;
 
-  # log_debug { np( $mesg ) };
+  # use Net::CIDR::Set;
 
-  my $dhcp_addresses = $ldap_crud->search({ base   => $ldap_crud->cfg->{base}->{dhcp},
-					    filter => '(dhcpStatements=fixed-address *)', });
+  # my $ipa = Net::CIDR::Set->new;
+
+  # # log_debug { np( $mesg ) };
+
+  # my $dhcp_addresses = $ldap_crud->search({ base   => $ldap_crud->cfg->{base}->{dhcp},
+  # 					    filter => '(dhcpStatements=fixed-address *)', });
   
-  foreach my $entry (@{[$dhcp_addresses->entries]}) {
-    foreach my $val (@{[$entry->get_value('dhcpStatements')]}) {
-      $ipa->add( (split(/ /, $val))[1] )
-	if $val =~ /^fixed-address /;
-    }
-  }
+  # foreach my $entry (@{[$dhcp_addresses->entries]}) {
+  #   foreach my $val (@{[$entry->get_value('dhcpStatements')]}) {
+  #     $ipa->add( (split(/ /, $val))[1] )
+  # 	if $val =~ /^fixed-address /;
+  #   }
+  # }
 
   # log_debug { $ldap_crud->cfg->{base}->{db} };
   
 #  @{$return} = split(/, /, $ipa->as_string);
   $return = { success => q{Lorem ipsum dolor sit amet.},
-	      error   => q{Neque porro quisquam est qui dolorem ipsum quia dolor sit amet},
-	      warning => q{consectetur, adipisci velit.}, };
+  	      error   => q{Neque porro quisquam est qui dolorem ipsum quia dolor sit amet},
+  	      warning => q{consectetur, adipisci velit.}, };
 
   $c->stash( template      => q{test.tt},
-	     final_message => $return,
-	     ipa           => [$ipa->as_address_array],
-	   );
+  	     final_message => $return,
+	     ipa           => $ipa, # $iu,
+  	     # ipa           => [$ipa->as_address_array],
+  	   );
+
 }
 
 =head2 end

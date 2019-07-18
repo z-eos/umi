@@ -1523,56 +1523,47 @@ sub store_data {
 }
 
 
-sub tree_buid {
-  my ($self, $args) = @_;
-  my $arg = { dn => $args->{dn}, };
-  my $tree;
-  use List::Util qw( pairs );
+=head2 ask_mikrotik
 
-  my $explodn = ldap_explode_dn( $arg->{dn}, casefold => 'none', reverse => 1 );
+wrapper to get output from MikroTik devices
 
-  foreach ( pairs @{$explodn} ) {
-    push @{$tree}, { dn => $_->key . '=' . $_->value };
-  }
+    'DC:4F:22:10:33:2C' => {
+                             'eap-identity' => '',
+                             'rx-rate' => '54Mbps',
+                             'uptime' => '1h18m8s210ms',
+                             'interface' => 'cap-402-h-2-1',
+                             'tx-rate' => '72.2Mbps-20MHz/1S/SGI',
+                             'tx-rate-set' => 'CCK:1-11 OFDM:6-54 BW:1x-2x SGI:1x HT:0-7',
+                             'rx-signal' => '-50',
+                             'packets' => '216,226',
+                             'ssid' => 'NXC',
+                             'mac-address' => 'DC:4F:22:10:33:2C',
+                             '.id' => '*44507',
+                             'bytes' => '47591,22659'
+                           },
+    'cap-402-h-2-3' => {
+                         'disabled' => 'false',
+                         'dynamic' => 'true',
+                         'running' => 'false',
+                         'bound' => 'true',
+                         'master-interface' => 'cap-402-h-2',
+                         'current-basic-rate-set' => 'CCK:1-11',
+                         'current-state' => 'running-ap',
+                         'l2mtu' => '1600',
+                         'master' => 'false',
+                         '.id' => '*F4',
+                         'current-rate-set' => 'CCK:1-11 OFDM:6-54 BW:1x-2x SGI:1x-2x HT:0-15',
+                         'mac-address' => '66:D1:54:3C:83:E1',
+                         'current-registered-clients' => '0',
+                         'configuration' => 'cfg_2_VLAN2101_psk',
+                         'name' => 'cap-402-h-2-3',
+                         'inactive' => 'false',
+                         'radio-mac' => '00:00:00:00:00:00',
+                         'arp-timeout' => 'auto',
+                         'current-authorized-clients' => '0'
+                       },
 
-
-}
-
-# 'DC:4F:22:10:33:2C' => {
-#                          'eap-identity' => '',
-#                          'rx-rate' => '54Mbps',
-#                          'uptime' => '1h18m8s210ms',
-#                          'interface' => 'cap-402-h-2-1',
-#                          'tx-rate' => '72.2Mbps-20MHz/1S/SGI',
-#                          'tx-rate-set' => 'CCK:1-11 OFDM:6-54 BW:1x-2x SGI:1x HT:0-7',
-#                          'rx-signal' => '-50',
-#                          'packets' => '216,226',
-#                          'ssid' => 'NXC',
-#                          'mac-address' => 'DC:4F:22:10:33:2C',
-#                          '.id' => '*44507',
-#                          'bytes' => '47591,22659'
-#                        }
-# 'cap-402-h-2-3' => {
-#                      'disabled' => 'false',
-#                      'dynamic' => 'true',
-#                      'running' => 'false',
-#                      'bound' => 'true',
-#                      'master-interface' => 'cap-402-h-2',
-#                      'current-basic-rate-set' => 'CCK:1-11',
-#                      'current-state' => 'running-ap',
-#                      'l2mtu' => '1600',
-#                      'master' => 'false',
-#                      '.id' => '*F4',
-#                      'current-rate-set' => 'CCK:1-11 OFDM:6-54 BW:1x-2x SGI:1x-2x HT:0-15',
-#                      'mac-address' => '66:D1:54:3C:83:E1',
-#                      'current-registered-clients' => '0',
-#                      'configuration' => 'cfg_2_VLAN2101_psk',
-#                      'name' => 'cap-402-h-2-3',
-#                      'inactive' => 'false',
-#                      'radio-mac' => '00:00:00:00:00:00',
-#                      'arp-timeout' => 'auto',
-#                      'current-authorized-clients' => '0'
-#                    },
+=cut
 
 sub ask_mikrotik {
   my ($self, $args) = @_;

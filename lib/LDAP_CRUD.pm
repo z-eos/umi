@@ -919,7 +919,7 @@ sub search {
   }
 
   my $arg = {
-  	     base      => $args->{base},
+  	     base      => $args->{base}      // $self->{cfg}->{base}->{db},
   	     scope     => $args->{scope}     // $self->{cfg}->{defaults}->{ldap}->{scope},
   	     filter    => $args->{filter}    // $self->{cfg}->{defaults}->{ldap}->{filter},
   	     deref     => $args->{deref}     // $self->{cfg}->{defaults}->{ldap}->{deref},
@@ -2545,14 +2545,15 @@ the method returns hash like this:
 
 sub ipam_used {
   my ( $self, $args ) = @_;
-  my $arg = { svc    => $args->{svc} || 'ovpn',
+  my $arg = { svc    => $args->{svc}   // 'ovpn',
 	      netdn  => $args->{netdn},
-	      fqdn   => $args->{fqdn} || '',
+	      fqdn   => $args->{fqdn}  // '',
 	      base   => $args->{base},
 	      filter => $args->{filter},
+	      scope  => $args->{scope} // 'base',
 	      attrs  => $args->{attrs},
 	    };
-  # log_debug { np($arg) };
+  log_debug { np($arg) };
   my $return;
   $return->{arg} = $arg;
 
@@ -2565,7 +2566,7 @@ sub ipam_used {
 
   my $mesg_svc = $self->search({ base   => $arg->{base},
 				 filter => $arg->{filter},
-				 scope  => 'base',
+				 scope  => $arg->{scope},
 				 attrs  => $arg->{attrs}, });
   if ( $mesg_svc->code ) {
     #    $return->{error} = sprintf("ipam_used(): No %s configuration for %s found .", uc( $arg->{svc} ), $arg->{netdn});
@@ -2580,7 +2581,7 @@ sub ipam_used {
       # log_debug { np($entry_svc) };
       while ( ($key, $val) = each %{$entry_svc} ) {
 
-	#--- SERVICE: DHCP ----------------------------------------------------------------------------------------------
+	#--- SERVICE: DHCP -------------------------------------------------------------------------
 	if ( $arg->{svc} eq 'dhcp' ) {
 	  push @{$return->{ipspace}}, $val->{cn}->[0] . '/'. $val->{dhcpnetmask}->[0];
 
@@ -2629,7 +2630,7 @@ sub ipam_used {
 	  }
 	}
 
-	# SERVICE: OpenVPN -------------------------------------------------------------------------------------------
+	# SERVICE: OpenVPN -------------------------------------------------------------------------
 	elsif ( $arg->{svc} eq 'ovpn' ) {
 	  ($l, $r) = split(/ /, $val->{umiovpncfgserver}->[0]);
 
@@ -2641,13 +2642,15 @@ sub ipam_used {
 	  }
 
 	  my $mesg_ovpn = $self->search({ base   => $self->{cfg}->{base}->{acc_root},
-					  filter => $arg->{filter},
+					  filter => sprintf('(&(authorizedService=ovpn@%s)(cn=*))',
+							    $arg->{fqdn}),
 					  attrs  => [ 'umiOvpnCfgIfconfigPush', 'umiOvpnCfgIroute' ], });
 	  if (! $mesg_ovpn->count) {
 	    $return->{error} = sprintf("ipam_used(): Some %s dn: %s configuration missed or incorrect.", uc( $arg->{svc} ), $key);
 	    return $return;
 	  } else {
 	    foreach $entry_ovpn (@{[ $mesg_ovpn->as_struct ]}) {
+	      log_debug { np($entry_ovpn) };
 	      while ( ($k, $v) = each %{$entry_ovpn} ) {
 		($l, $r) = split(/ /, $v->{umiovpncfgifconfigpush}->[0]);
 
@@ -2670,6 +2673,98 @@ sub ipam_used {
     } # foreach end
   }
   return $return;
+}
+
+=head2 ipa
+
+method to retieve IP addresses used
+
+=cut
+
+sub ipa {
+  my ( $self, $args ) = @_;
+  my $arg = { svc    => $args->{svc}    // 'ovpn',
+	      netdn  => $args->{netdn}  // '',
+	      fqdn   => $args->{fqdn}   // '*',
+	      base   => $args->{base}   // $self->{cfg}->{base}->{ovpn},,
+	      filter => $args->{filter} // '(&(objectClass=umiOvpnCfg)(cn=*))',
+	      scope  => $args->{scope}  // 'base',
+	      attrs  => $args->{attrs}  // [ 'cn', 'umiOvpnCfgServer', 'umiOvpnCfgRoute' ],
+	    };
+  # log_debug { np($arg) };
+  my $return;
+  $return->{arg} = $arg;
+
+  my ( $key, $val, $k, $v, $l, $r, $tmp, $entry_svc, $entry_dhcp, $entry_ovpn, $ipspace, $ip_used );
+
+  use Net::CIDR::Set;
+  my $ipa = Net::CIDR::Set->new;
+
+  my $mesg_ovpn = $self->search({ base      => $self->{cfg}->{base}->{db},
+				  sizelimit => 0,
+  				  filter    => sprintf('(|(&(authorizedService=ovpn@%s)(cn=*))(dhcpStatements=fixed-address *))',
+						       $arg->{fqdn}),
+  				  attrs     => [ qw( umiOvpnCfgIfconfigPush
+						     umiOvpnCfgIroute
+						     dhcpStatements ) ], });
+  if (! $mesg_ovpn->count) {
+    $return->{error} = sprintf("ipa(): Some %s dn: %s configuration missed or incorrect.",
+			       uc( $arg->{svc} ), $key);
+    # log_debug { np($return) };
+    return $return;
+  } else {
+    $val = $mesg_ovpn->as_struct;
+    # log_debug { np($val) };
+    foreach $key (keys ( %{$val} )) {
+      # log_debug { np($key) };
+      # log_debug { np($val->{$key}) };
+
+      if ( exists $val->{$key}->{umiovpncfgifconfigpush} ) {
+	foreach ( @{$val->{$key}->{umiovpncfgifconfigpush}} ) {
+	  # log_debug { np($_) };
+	  ($l, $r) = split(/ /, $_);
+	  $r = $self->ipam_ip2dec($r) - $self->ipam_ip2dec($l) == 1 ? $l . '/30' : $l;
+	  $ipa->add($r);
+	}
+      }
+
+      if ( exists $val->{$key}->{umiovpncfgiroute} ) {
+	foreach ( @{$val->{$key}->{umiovpncfgiroute}} ) {
+	  next if $_ eq 'NA';
+	  # log_debug { np($_) };
+	  ($l, $r) = split(/ /, $_);
+	  $ipa->add($l . '/' . $self->ipam_msk_ip2dec($r));
+	  # $ipa->add($_ . '/32');
+	}
+      }
+
+      if ( exists $val->{$key}->{dhcpstatements} ) {
+      	foreach ( @{$val->{$key}->{dhcpstatements}} ) {
+      	  next if $_ !~ /^fixed-address/;
+	  # log_debug { np($_) };
+      	  ($l, $r) = split(/ /, $_);
+      	  $ipa->add($r);
+      	}
+      }
+
+    }
+  }
+
+  # log_debug { np(@{[$ipa->as_address_array]}) };
+  use LDAP_NODE;
+  my $ipa_tree = LDAP_NODE->new();
+  foreach ( @{[ $ipa->as_address_array ]} ) {
+    $tmp = join(',', reverse split(/\./, $_));
+    # log_debug{ np($tmp) };
+    $key = $ipa_tree->insert($tmp);
+    # log_debug{ np($key->dn) };
+  }
+  # my $as_str = $ipa_tree->as_string;
+  # log_debug { np($as_str) };
+  my $as_hash = $ipa_tree->as_json_ipa;
+  # log_debug { np($as_hash) };
+  $return->{ipa} = $as_hash;
+  return $as_hash;
 }
 
 
