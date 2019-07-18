@@ -138,8 +138,39 @@
       <!-- === IPAM ===  -->
       <div class="tab-pane p-3" id="ipam-tab" role="tabpanel">
 	<div class="callout m-0 py-2 text-white-50 text-center text-uppercase">
-	  <b>IPAM</b>
+	  <button class="btn border-0 text-white-50"
+		  type="button"
+		  title="CLICK FOR HELP"
+		  data-toggle="collapse"
+		  data-target="#collapseExample"
+		  aria-expanded="false"
+		  aria-controls="collapseExample">
+            <b>
+	      IPAM
+	      <sup>
+		<i class="fas fa-question-circle"></i>
+	      </sup>
+	    </b>
+	  </button>
 	</div>
+	<div class="collapse" id="collapseExample">
+	  <dl class="row text-white-50 umi-text-tiny mx-3">
+	    <dt class="col-sm-3 text-right">Click</dt>
+	    <dd class="col-sm-9 mb-0 pb-0">
+	      <ul class="my-0 py-0 ml-0 pl-0 list-unstyled">
+		<li>on <i class="fas fa-plus-square""></i>/<i class="fas fa-minus-square""></i> to expand/collapse item</li>
+		<li>on item to search it</li>
+	      </ul>
+	    </dd>
+	    <dt class="pt-0 mt-0 col-sm-3 text-right">Ctrl+Click</dt>
+	    <dd class="col-sm-9">
+	      <ul class="my-0 py-0 ml-0 pl-0 list-unstyled">
+		<li>on <i class="fas fa-plus-square""></i>/<i class="fas fa-minus-square""></i> to expand/collapse whole branch</li>
+		<li>on item searches whole branch</li>
+	      </ul>
+	  </dl>
+	</div>
+
 	<div id="ipam" class="">
 	<script type="text/x-template" id="ipam-template">
 	 <li>
