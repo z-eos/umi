@@ -901,7 +901,7 @@ sub test : Local {
 
     # 				   });
 
-  my $ipa = $ldap_crud->ipam_ovpn;
+  my $ipa = $ldap_crud->ipa;
   
     # log_debug { np( $iu ) };
 
@@ -933,11 +933,14 @@ sub test : Local {
   # }
 
   # log_debug { $ldap_crud->cfg->{base}->{db} };
+
+  # ---------------------------------------------------------------------
   
-#  @{$return} = split(/, /, $ipa->as_string);
-  $return = { success => q{Lorem ipsum dolor sit amet.},
-  	      error   => q{Neque porro quisquam est qui dolorem ipsum quia dolor sit amet},
-  	      warning => q{consectetur, adipisci velit.}, };
+  ### --- NOTOFICATION TEST ---
+  # $return = { success => q{Lorem ipsum dolor sit amet.},
+  # 	        error   => q{Neque porro quisquam est qui dolorem ipsum quia dolor sit amet},
+  # 	        warning => q{consectetur, adipisci velit.}, };
+  ### --- NOTOFICATION TEST ---
 
   $c->stash( template      => q{test.tt},
   	     final_message => $return,

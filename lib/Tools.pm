@@ -59,6 +59,23 @@ sub is_ascii {
   }
 }
 
+=head2 is_ip
+
+checks whether the argument is ASCII
+
+returns 0 if it is and 1 if not
+
+=cut
+
+sub is_ip {
+  my ($self, $arg) = @_;
+  if ( defined $arg && $arg ne '' && $arg =~ /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-5][0-9])$/ ) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
 =head2 ipam_dec2ip
 
 decimal IP to a dotted IP converter

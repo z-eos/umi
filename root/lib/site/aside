@@ -4,10 +4,10 @@
   <nav id="sidebar-right"
        class="text-light bg-dark float-right [% c.session.settings.ui.aside == 0 ? 'folded' : '' %]"
        data-url-tree="/ldap_tree">
-    <ul class="nav nav-tabs nav-fill" role="tablist">
+    <ul class="nav nav-pills nav-fill" role="tablist">
       [% IF c.check_user_roles('admin') %]
       <li class="nav-item" title="LDAP tree">
-	<a class="nav-link text-white-50" data-toggle="tab" href="#ldap-tree-tab" role="tab">
+	<a class="nav-link text-white-50 active" data-toggle="tab" href="#ldap-tree-tab" role="tab">
 	  <i class="fas fa-project-diagram"></i>
 	</a>
       </li>
@@ -110,7 +110,7 @@
 	   <div class="umi-text-xs mr-1" v-if="!isFolder""> 
 	     <i class="fas fa-minus text-white-50"></i>
 	   </div>
-	   <div :class="{'font-weight-bold': isFolder, 'text-white-50': !item.isOpen}"
+	   <div :class="{'font-weight-bold': item.isOpen, 'text-white-50': !item.isOpen}"
 	    @click.exact="showItem(0)"
 	    @click.ctrl.exact="showItem(1)">
 	     {{ item.name }}
@@ -184,7 +184,8 @@
 	   <div class="umi-text-xs mr-1" v-if="!isIpaFolder""> 
 	     <i class="fas fa-minus text-white-50"></i>
 	   </div>
-	   <div :class="{'font-weight-bold': isIpaFolder, 'text-white-50': !ipaitem.isOpen}"
+	 <div v-bind:title="ipaitem.host"
+	    :class="{'font-weight-bold': ipaitem.isOpen, 'text-white-50': !ipaitem.isOpen}"
 	    @click.exact="showIpaItem(0)"
 	    @click.ctrl.exact="showIpaItem(1)">
 	     {{ ipaitem.dn }}

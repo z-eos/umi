@@ -97,7 +97,7 @@ sub index :Path :Args(0) {
     ### ACCES CONTROL
     #=============================================================
     
-    if ( defined $params->{'ldapsearch_global'} ) {
+    if ( defined $params->{'ldapsearch_global'} || ! exists $params->{'ldapsearch_base'}) {
       $base = $ldap_crud->cfg->{base}->{db};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_name'}  ||

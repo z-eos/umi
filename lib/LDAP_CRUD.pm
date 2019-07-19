@@ -2703,10 +2703,11 @@ sub ipa {
 
   my $mesg_ovpn = $self->search({ base      => $self->{cfg}->{base}->{db},
 				  sizelimit => 0,
-  				  filter    => sprintf('(|(&(authorizedService=ovpn@%s)(cn=*))(dhcpStatements=fixed-address *))',
+  				  filter    => sprintf('(|(&(authorizedService=ovpn@%s)(cn=*))(dhcpStatements=fixed-address *)(ipHostNumber=*))',
 						       $arg->{fqdn}),
   				  attrs     => [ qw( umiOvpnCfgIfconfigPush
 						     umiOvpnCfgIroute
+						     ipHostNumber
 						     dhcpStatements ) ], });
   if (! $mesg_ovpn->count) {
     $return->{error} = sprintf("ipa(): Some %s dn: %s configuration missed or incorrect.",
@@ -2746,6 +2747,15 @@ sub ipa {
       	  ($l, $r) = split(/ /, $_);
       	  $ipa->add($r);
       	}
+      }
+
+      if ( exists $val->{$key}->{iphostnumber} ) {
+	foreach ( @{$val->{$key}->{iphostnumber}} ) {
+	  next if $_ eq 'NA' || ! $self->is_ip($_);
+	  # log_debug { np($_) };
+	  $ipa->add($_);
+	  # $ipa->add($_ . '/32');
+	}
       }
 
     }

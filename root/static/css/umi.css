@@ -404,8 +404,13 @@ html,body {
    ------------------------------- */
 
 #sidebar-right .nav-tabs .nav-link.active, #sidebar-right .nav-tabs .nav-item.show .nav-link {
-  background-color: transparent;
+  background-color: #6b6b6b;
 }
+
+#sidebar-right .nav-pills .nav-link.active, #sidebar-right .nav-pills .show > .nav-link {
+  background-color: #6b6b6b;
+}
+
 
 #sidebar-right {
   width: 370px;

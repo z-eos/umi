@@ -22,30 +22,39 @@ sub html_attributes {
 
 has '+enctype' => ( default => 'multipart/form-data');
 
-has_field 'file'
-  => ( type                  => 'File',
-       wrapper_attr          => { id => 'fieldfile', },
-       wrapper_class         => [ 'custom-file', 'ml-1', 'mb-3', 'row', ],
-       label                 => 'Select LDIF File',
-       label_class           => [ 'custom-file-label', 'col-6', 'offset-md-2', ],
-       label_attr            => {  'data-browse' => 'Chose File', },
-       element_class         => [ 'btn', 'btn-default', 'btn-secondary', 'custom-file-input', ],
-       element_wrapper_class => [ 'input-sm', ],
-       max_size              => '100000',
-       # required => 1,
-     );
+# has_field 'file'
+#   => ( type          => 'Display',
+#        html          => '<div class="custom-file">
+#   <input type="file"
+#          class="custom-file-input btn btn-sm btn-secondary"
+#          id="file">
+#   <label class="custom-file-label col-6 offset-md-2" for="file">Select LDIF File</label>
+# </div>');
 
 # has_field 'file'
-#   => ( type                  => 'Upload',
+#   => ( type                  => 'File',
 #        wrapper_attr          => { id => 'fieldfile', },
-#        wrapper_class         => [ 'row', ],
-#        label                 => 'LDIF File',
-#        label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
-#        element_class         => [ 'btn', 'btn-default', 'btn-secondary', ],
-#        element_wrapper_class => [ 'input-sm', 'col-10', ],
+#        wrapper_class         => [ 'custom-file', 'ml-1', 'mb-3', 'row', ],
+#        label                 => 'Select LDIF File',
+#        label_class           => [ 'custom-file-label', 'col-6', 'offset-md-2', ],
+#        label_attr            => {  'data-browse' => 'Chose File', },
+#        element_class         => [ 'btn', 'btn-default', 'btn-secondary', 'custom-file-input', ],
+#        element_wrapper_class => [ 'input-sm', ],
 #        max_size              => '100000',
 #        # required => 1,
 #      );
+
+has_field 'file'
+  => ( type                  => 'Upload',
+       wrapper_attr          => { id => 'fieldfile', },
+       wrapper_class         => [ 'row', ],
+       label                 => 'LDIF File',
+       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       element_class         => [ 'btn', 'btn-default', ],
+       element_wrapper_class => [ 'input-sm', 'col-10', ],
+       max_size              => undef, # '1000000',
+       # required => 1,
+     );
 
 has_field 'ldif'
   => ( type                  => 'TextArea',

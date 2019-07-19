@@ -10,3 +10,36 @@ Text to QR-code<small><em class="text-muted font-monospace"></em></small>
 
 [% form.render %]
 
+<script src="/static/js/qrious.min.js"></script>
+
+<div>
+  <div id="qrcode" class="img-thumbnail"></div>
+</div>
+
+<script type="text/javascript">
+ // https://davidshimjs.github.io/qrcodejs/
+ 
+ var qrcode = new QRCode("qrcode", {
+   // width: 256,
+   // height: 256,
+   colorDark : "#000000",
+   colorLight : "#ffffff",
+   correctLevel : QRCode.CorrectLevel.L
+ });
+
+ function makeCode () {      
+   var elText = document.getElementById("toqr");     
+   qrcode.makeCode(elText.value);
+ }
+
+ $("#toqr").
+	    on("blur", function () {
+              makeCode();
+	    }).
+	    on("keydown", function (e) {
+              if (e.keyCode == 13) {
+		makeCode();
+              }
+	    });
+ 
+</script>

@@ -26,7 +26,7 @@ has_field 'toqr'
        label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'input-sm', 'col-10', ],
        element_class         => [ 'input-sm', 'text-monospace', ],
-       element_attr          => { placeholder => 'Варкалось. Хливкие шорьки, Пырялись по наве, И хрюкотали зелюки, Как мюмзики в мове.' },
+       element_attr          => { placeholder => 'Twas bryllyg, and ye slythy toves; Did gyre and gymble in ye wabe: All mimsy were ye borogoves; And ye mome raths outgrabe. - /Jabberwocky/' },
        maxlength             => 1660,
        # cols => 30,
        rows                  => 4,

@@ -9,6 +9,7 @@ use namespace::autoclean;
 
 use Carp;
 use Data::Printer;
+use Socket;
 
 =head1 NAME
 
@@ -357,6 +358,8 @@ sub as_json_ipa {
   my $map   = shift // sub { shift; @_ };
   my $hroot = [];
   my @ar;
+  my $ip;
+  my $ptr;
 
   push @ar, [ '', $self, $hroot ];
   while (my $e = shift @ar) {
@@ -370,9 +373,13 @@ sub as_json_ipa {
 	push @ar, [ $k, $v, $ch ];
       }
     } else {
+      $ip = join('.', reverse split(/,/, $e->[1]->dn));
+      $ptr = $e->[1]->dn;
+      $ptr =~ tr/,/./;
       push @{$e->[2]}, { name => $e->[0],
 			 free => \0,
-			 dn => join('.', reverse split(/,/, $e->[1]->dn)) };
+			 host => gethostbyaddr(inet_aton($ip), AF_INET) || sprintf("Host %s.in-addr.arpa not found: 3(NXDOMAIN)", $ptr),
+			 dn => $ip };
     }
   }
 
