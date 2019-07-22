@@ -7,9 +7,11 @@ package Noder;
 use Moose;
 use namespace::autoclean;
 
+BEGIN { with 'Tools'; }
+
 use Carp;
 use Data::Printer;
-use Socket;
+use Net::DNS;
 
 =head1 NAME
 
@@ -90,7 +92,7 @@ sub insert {
     while (defined($arg = pop @rest)) {
       # p $arg;
       $dn_cur                   = $found->dn;
-      $found->{subnode}{$arg} = Noder->new();
+      $found->{subnode}{$arg}   = Noder->new();
       $found                    = $found->{subnode}{$arg};
       $dn_cur eq '' ? $found->dn($arg) : $found->dn( $arg . ',' . $dn_cur );
     }
@@ -376,9 +378,17 @@ sub as_json_ipa {
       $ip = join('.', reverse split(/,/, $e->[1]->dn));
       $ptr = $e->[1]->dn;
       $ptr =~ tr/,/./;
+      my $host = $self->dns_resolver({fqdn   => $ip,
+				      type   => 'PTR',
+				      name   => $ip,
+				      legend => ''});
+
       push @{$e->[2]}, { name => $e->[0],
 			 free => \0,
-			 host => gethostbyaddr(inet_aton($ip), AF_INET) || sprintf("Host %s.in-addr.arpa not found: 3(NXDOMAIN)", $ptr),
+			 host => $host->{success} // sprintf("%s ( %s )",
+							     $host->{errcode},
+							     $host->{errstr}),
+			 # sprintf("Host %s.in-addr.arpa not found: 3(NXDOMAIN)", $ptr),
 			 dn => $ip };
     }
   }
@@ -387,9 +397,10 @@ sub as_json_ipa {
   # p $hroot;
 
   # return $hroot->[0]{children}[0];
-  $hroot->[0]{dn} = '0.0.0.0';
-  $hroot->[0]{name} = '0.0.0.0';
+  $hroot->[0]{dn}     = '0.0.0.0';
+  $hroot->[0]{name}   = '0.0.0.0';
   $hroot->[0]{isOpen} = \1;
+  
   return $hroot->[0];
 }
 

@@ -935,7 +935,7 @@ sub test : Local {
   # log_debug { $ldap_crud->cfg->{base}->{db} };
 
   # ---------------------------------------------------------------------
-  
+
   ### --- NOTOFICATION TEST ---
   # $return = { success => q{Lorem ipsum dolor sit amet.},
   # 	        error   => q{Neque porro quisquam est qui dolorem ipsum quia dolor sit amet},

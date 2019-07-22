@@ -116,7 +116,7 @@ sub index :Path :Args(0) {
 	$fqdn = substr $entry->get_value('sendmailMTAKey'), 1;
 
 	# first MX of the node
-	$tmp = $self->dns_resolver({fqdn => $fqdn,
+	$tmp = $self->dns_resolver({fqdn   => $fqdn,
 				    type   => 'MX',
 				    name   => $fqdn,
 				    legend => 'MX'});
@@ -128,7 +128,7 @@ sub index :Path :Args(0) {
 	}
 
 	# node IP address
-	$tmp = $self->dns_resolver({fqdn => $fqdn,
+	$tmp = $self->dns_resolver({fqdn   => $fqdn,
 				    type   => 'A',
 				    name   => $node,
 				    legend => 'IP'});
@@ -140,7 +140,7 @@ sub index :Path :Args(0) {
 	}
 
 	# A record (IP address) of MX
-	$tmp = $self->dns_resolver({fqdn => $fqdn,
+	$tmp = $self->dns_resolver({fqdn   => $fqdn,
 				    type   => 'A',
 				    name   => $mx,
 				    legend => 'MX A'});
@@ -152,7 +152,7 @@ sub index :Path :Args(0) {
 	}
 	  
 	# PTR of MX
-	$tmp = $self->dns_resolver({fqdn => $fqdn,
+	$tmp = $self->dns_resolver({fqdn   => $fqdn,
 				    type   => 'PTR',
 				    name   => $mx_a,
 				    legend => 'MX IP'});

@@ -11,20 +11,16 @@ use POSIX qw(strftime);
 use Time::Piece;
 use IO::File;
 
-use Scalar::Util;
-use List::Util;
 use List::MoreUtils;
-
-use Net::CIDR::Set;
-
-# # use Crypt::Misc qw( encode_b64 );
-# # use Crypt::PK::RSA;
-
-use Net::SSH::Perl::Key;
+use List::Util;
+use Scalar::Util;
 
 use Crypt::X509;
 use Crypt::X509::CRL;
 
+use Net::DNS;
+use Net::CIDR::Set;
+use Net::SSH::Perl::Key;
 use Net::LDAP::Util qw(	generalizedTime_to_time ldap_explode_dn );
 
 use Logger;
@@ -1468,18 +1464,33 @@ sub _build_dns_rcode {
 =head2 dns_resolver
 
 Net::DNS wrapper to resolve A, MX and PTR mainly
+on input:
+
+    fqdn   - FQDN to resolve (types A, MX)
+    type   - DNS query type (A, MX, PTR)
+    name   - IP address to resolve
+    legend - part of legend for debug
 
 =cut
 
 sub dns_resolver {
   my ($self, $args) = @_;
   my $arg = { fqdn   => $args->{fqdn},
-	      type   => $args->{type},
-	      name   => $args->{name},
-	      legend => $args->{legend},
-	      rcode  => $args->{rcode}, };
-  use Net::DNS;
+	      type   => $args->{type}   // 'PTR',
+	      name   => $args->{name}   // $args->{fqdn},
+	      legend => $args->{legend} // '', };
+
   my $r = Net::DNS::Resolver->new;
+  if ( defined UMI->config->{network}->{nameservers} ) {
+    $r->nameservers( $_ ) foreach ( @{UMI->config->{network}->{nameservers}} );
+  }
+  $r->recurse(0);
+  $r->persistent_tcp(1);
+  $r->persistent_udp(1);
+  $r->tcp_timeout(1);
+  $r->udp_timeout(1);
+  $r->force_v4(1);
+
   my $rr = $r->search($arg->{name});
   my $return;
   if ( defined $rr) {
@@ -1504,12 +1515,18 @@ sub dns_resolver {
   } else {
     if ( $r->errorstring eq 'NOERROR') {
     }
-    $return->{error} = sprintf("<i class='h6'>dns_resolver()</i>: %s %s: %s ( %s )",
-			       $arg->{fqdn},
-			       $arg->{legend},
-			       $self->dns_rcode->{ $r->errorstring }->{descr},
-			       $r->errorstring );
+    $return->{error}   = sprintf("<i class='h6'>dns_resolver()</i>: %s %s: %s ( %s )",
+				 $arg->{fqdn},
+				 $arg->{legend},
+				 $self->dns_rcode->{ $r->errorstring }->{descr},
+				 $r->errorstring );
   }
+  
+  if ( exists $return->{error} ) {
+    $return->{errcode} = $self->dns_rcode->{ $r->errorstring }->{descr};
+    $return->{errstr}  = $r->errorstring;
+  }
+
   # p $arg->{fqdn}; p $r;
   # p $return;
   return $return;
