@@ -1518,8 +1518,8 @@ sub dns_resolver {
     $return->{error}   = sprintf("<i class='h6'>dns_resolver()</i>: %s %s: %s ( %s )",
 				 $arg->{fqdn},
 				 $arg->{legend},
-				 $self->dns_rcode->{ $r->errorstring }->{descr},
-				 $r->errorstring );
+				 $self->dns_rcode->{ $r->errorstring }->{descr} // 'NA',
+				 $r->errorstring // 'NA' );
   }
   
   if ( exists $return->{error} ) {
