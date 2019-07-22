@@ -1475,9 +1475,9 @@ on input:
 
 sub dns_resolver {
   my ($self, $args) = @_;
-  my $arg = { fqdn   => $args->{fqdn},
+  my $arg = { name   => $args->{name},
+	      fqdn   => $args->{fqdn}   // $args->{name},
 	      type   => $args->{type}   // 'PTR',
-	      name   => $args->{name}   // $args->{fqdn},
 	      legend => $args->{legend} // '', };
 
   my $r = Net::DNS::Resolver->new;
