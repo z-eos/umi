@@ -20,8 +20,8 @@ Vue.component('ipam-tree-item', {
 	},
 	setIpaState: function (branch, isOpen) {
 	    var self = this;
-	    branch.isOpen = isOpen;
 	    if ( branch.children ) {
+		branch.isOpen = isOpen;
 		branch.children.forEach( function(ipaitem) {self.setIpaState(ipaitem, isOpen)} )
 	    }
 	},
@@ -42,14 +42,35 @@ Vue.component('ipam-tree-item', {
 	    var url = '/searchby?ldapsearch_filter=|(dhcpStatements=fixed-address ' + this.ipaitem.dn + '*)(umiOvpnCfgIfconfigPush=' + this.ipaitem.dn + '*)(umiOvpnCfgIroute=' + this.ipaitem.dn + '*)&ldapsearch_scope=';
 	    url = scope ? url + 'base' : url + 'sub';
 
-	    console.log(url)
-	    console.log(encodeURIComponent(url))
+	    // console.log(url)
+	    // console.log(encodeURIComponent(url))
 	    
 	    $.ajax({
 		url: url,
 		success: function (html) {
 		    $('#workingfield').html(html);
 		    handleResponce();
+		}
+	    });
+	    // console.log('showItem scope:', scope);
+	},
+	resolveThis: function () {
+	    var item = this.ipaitem;
+	    // console.log(item.isOpen);
+	    if ( item.host || item.dn.split(".").length < 4 ) {
+		return;
+	    }
+	    var url = '/resolve_this?ptr=' + item.dn;
+	    $.ajax({
+		url: url,
+		success: function (host) {
+		    // if ( host.indexOf('<') == -1) {
+		    // 	item.host = host;
+		    // } else {
+		    // 	item.host = 'NXDOMAIN';
+		    // }
+		    item.host = host;
+		    console.log(host);
 		}
 	    });
 	    // console.log('showItem scope:', scope);
@@ -84,6 +105,7 @@ var ipamTree = new Vue({
 		}
 		sortIpaRecursively(data);	
 		_this.ipamtree = data;
+		_this.hover = false;
 		// console.log(_this.ipamtree)
 	    },
 	    error: function (error) {

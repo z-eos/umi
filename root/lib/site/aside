@@ -175,17 +175,31 @@
 	<script type="text/x-template" id="ipam-template">
 	 <li>
 	  <div class="ldap-tree-point">
-	   <div class="umi-text-xs mr-1" v-if="isIpaFolder""
+	   <div class="umi-text-xs mr-1" v-if="isIpaFolder"
 	    @click.exact="toggleIpaItem"
 	    @click.ctrl.exact="toggleIpaTree"> 
 	     <i class="fas fa-plus-square text-white-50" v-if="!ipaitem.isOpen"></i>
 	     <i class="fas fa-minus-square"              v-if="ipaitem.isOpen"></i>
 	   </div>
-	   <div class="umi-text-xs mr-1" v-if="!isIpaFolder""> 
-	     <i class="fas fa-minus text-white-50"></i>
+	 
+	   <div class="umi-text-xs mr-1" v-if="!isIpaFolder"> 
+	    <i class="fas text-white-50"
+	     :class="{ 'font-weight-bold': ipaitem.isOpen,
+                       'text-white-50': !ipaitem.isOpen,
+                       'fa-minus': !ipaitem.host,
+                       'text-success fa-check-circle': ipaitem.host && ipaitem.host.length > 8 && ipaitem.host.indexOf('.') !== -1,
+                       'text-danger fa-exclamation-circle':  ipaitem.host && ipaitem.host === 'NXDOMAIN',
+                       'text-warning fa-exclamation-triangle': ipaitem.host && ipaitem.host !== 'NXDOMAIN' && ipaitem.host !== 'NOERROR' && ipaitem.host.length < 9 && ipaitem.host.indexOf('.') === -1 }"
+	    ></i>
 	   </div>
-	 <div v-bind:title="ipaitem.host"
-	    :class="{'font-weight-bold': ipaitem.isOpen, 'text-white-50': !ipaitem.isOpen}"
+
+	   <div v-bind:title="ipaitem.host"
+	    :class="{ 'font-weight-bold': ipaitem.isOpen,
+                      'text-white-50': !ipaitem.isOpen,
+                      'text-success': ipaitem.host && ipaitem.host.length > 8 && ipaitem.host.indexOf('.') !== -1,
+                      'text-danger':  ipaitem.host && ipaitem.host === 'NXDOMAIN',
+                      'text-warning': ipaitem.host && ipaitem.host !== 'NXDOMAIN' && ipaitem.host !== 'NOERROR' && ipaitem.host.length < 9 && ipaitem.host.indexOf('.') === -1 }"
+	    @mouseover="resolveThis"
 	    @click.exact="showIpaItem(0)"
 	    @click.ctrl.exact="showIpaItem(1)">
 	     {{ ipaitem.dn }}
@@ -194,7 +208,7 @@
 	  <ul class="font-monospace ldap-tree" v-show="ipaitem.isOpen" v-if="isIpaFolder">
 	   <ipam-tree-item class="ldap-tree-item"
 	                   v-for="(child, index) in ipaitem.children"
-	                   :key="index"
+	   		   :key="index"
 	                   :ipaitem="child">
 	   </ipam-tree-item>
 	  </ul>
@@ -296,6 +310,14 @@
 	      <label class="custom-control-label" for="checkboxStoreData"
 		     title="whether store raw perl data of the form query">
 		Store Data
+	      </label>
+	    </div>
+	    <div class="custom-control custom-switch">
+	      <input type="checkbox" class="custom-control-input" id="checkboxIpamDns"
+		     name="ipamdns" [% c.session.settings.ui.ipamdns ? ' checked=""' : '' %]>
+	      <label class="custom-control-label" for="checkboxIpamDns"
+		     title="whether to resolve PTR for IPA tree">
+		DNS resolve
 	      </label>
 	    </div>
 	    <div class="custom-control custom-switch">

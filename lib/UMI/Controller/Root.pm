@@ -855,6 +855,40 @@ sub auto : Private {
   }
 }
 
+sub resolve_this : Local {
+  my ( $self, $c ) = @_;
+  my $params = $c->request->params;
+  my $arg = {
+	     query                => { A   => $params->{a}   // '',
+				       PTR => $params->{ptr} // '',
+				       MX  => $params->{mx}  // '', },
+	     content_type         => 'text/plain',
+	     content_type_charset => 'utf-8',
+	    };
+
+  my $res;
+  while ( my($k, $v) = each %{$arg->{query}} ) {
+    next if $v eq '';
+    $res = ref($v) eq 'ARRAY' ? $v : [ $v ];
+
+    push @{$arg->{reply}}, $self->dns_resolver({ type  => $k,
+						 debug => $c->session->{settings}->{ui}->{ipamdns},
+						 name  => $_ })
+      foreach (@{$res});
+  }
+
+  foreach (@{$arg->{reply}}) {
+    push @{$arg->{body}}, $_->{success}         if exists $_->{success};
+    push @{$arg->{body}}, $_->{error}->{errstr} if exists $_->{error};
+  }
+
+  # log_debug { np( $c->session->{settings}->{ui}->{ipamdns} ) };
+
+  $c->response->body(join("\n", @{$arg->{body}}));
+  $c->response->headers->content_type($arg->{content_type});
+  $c->response->headers->content_type_charset($arg->{content_type_charset});
+}
+
 =head2 test
 
 page to test code snipets

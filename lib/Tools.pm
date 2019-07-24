@@ -1471,28 +1471,56 @@ on input:
     name   - IP address to resolve
     legend - part of legend for debug
 
+    Net::DNS::Resolver options
+    debug          - default: 0
+    force_v4       - default: 1
+    persistent_tcp - default: 1
+    persistent_udp - default: 1
+    recurse        - default: 1
+    retry          - default: 1
+    tcp_timeout    - default: 1
+    udp_timeout    - default: 1
+
 =cut
 
 sub dns_resolver {
   my ($self, $args) = @_;
-  my $arg = { name   => $args->{name},
-	      fqdn   => $args->{fqdn}   // $args->{name},
-	      type   => $args->{type}   // 'PTR',
-	      legend => $args->{legend} // '', };
+  my $arg = { name           => $args->{name},
+	      fqdn           => $args->{fqdn}           // $args->{name},
+	      type           => $args->{type}           // 'PTR',
+	      legend         => $args->{legend}         // '',
+	      debug          => $args->{debug}          // 0,
+	      force_v4       => $args->{force_v4}       // 1,
+	      persistent_tcp => $args->{persistent_tcp} // 1,
+	      persistent_udp => $args->{persistent_udp} // 1,
+	      recurse        => $args->{recurse}        // 1,
+	      retry          => $args->{retry}          // 1,
+	      tcp_timeout    => $args->{tcp_timeout}    // 1,
+	      udp_timeout    => $args->{udp_timeout}    // 1,
+	    };
 
-  my $r = Net::DNS::Resolver->new;
+  # log_debug { np( $arg ) };
+  
+  my $return;
+
+  my $r = new Net::DNS::Resolver(
+				  debug          => $arg->{debug},
+				  force_v4       => $arg->{force_v4},
+				  persistent_tcp => $arg->{persistent_tcp},
+				  persistent_udp => $arg->{persistent_udp},
+				  recurse        => $arg->{recurse},
+				  retry          => $arg->{retry},
+				  tcp_timeout    => $arg->{tcp_timeout},
+				  udp_timeout    => $arg->{udp_timeout},
+				);
+  
   if ( defined UMI->config->{network}->{nameservers} ) {
     $r->nameservers( $_ ) foreach ( @{UMI->config->{network}->{nameservers}} );
   }
-  $r->recurse(0);
-  $r->persistent_tcp(1);
-  $r->persistent_udp(1);
-  $r->tcp_timeout(1);
-  $r->udp_timeout(1);
-  $r->force_v4(1);
 
   my $rr = $r->search($arg->{name});
-  my $return;
+  $return->{errstr}  = $r->errorstring;
+
   if ( defined $rr) {
     foreach ($rr->answer) {
       if ( $arg->{type} eq 'PTR' ) {
@@ -1503,32 +1531,37 @@ sub dns_resolver {
 	my @mx_arr = mx( $r, $arg->{fqdn} );
 	if (@mx_arr) {
 	  $return->{success} = $mx_arr[0]->exchange;
-	} else {
-	  $return->{error} = sprintf("<i class='h6'>dns_resolver()</i>: %s %s: %s ( %s )",
-				     $arg->{fqdn},
-				     $arg->{legend},
-				     $self->dns_rcode->{ $r->errorstring }->{descr},
-				     $r->errorstring );
 	}
       }
+
+      if ( $return->{errstr} ne 'NOERROR' ) {
+	$return->{error}->{html} = sprintf("<i class='h6'>dns_resolver()</i>: %s %s: %s ( %s )",
+					   $arg->{fqdn},
+					   $arg->{legend},
+					   $self->dns_rcode->{ $r->errorstring }->{descr},
+					   $r->errorstring );
+	$return->{error}->{errdescr} = $self->dns_rcode->{ $r->errorstring }->{descr};
+	$return->{error}->{errstr}   = $r->errorstring;
+      }
+
     }
   } else {
-    if ( $r->errorstring eq 'NOERROR') {
+    if ( $return->{errstr} ne 'NOERROR') {
+      $return->{error}->{html} = sprintf("<i class='h6'>dns_resolver()</i>: %s %s: %s ( %s )",
+					 $arg->{fqdn},
+					 $arg->{legend},
+					 $self->dns_rcode->{ $r->errorstring }->{descr} // 'NA',
+					 $r->errorstring // 'NA' );
+      $return->{error}->{errdescr} = $self->dns_rcode->{ $r->errorstring }->{descr};
+      $return->{error}->{errstr}   = $r->errorstring;
     }
-    $return->{error}   = sprintf("<i class='h6'>dns_resolver()</i>: %s %s: %s ( %s )",
-				 $arg->{fqdn},
-				 $arg->{legend},
-				 $self->dns_rcode->{ $r->errorstring }->{descr} // 'NA',
-				 $r->errorstring // 'NA' );
-  }
-  
-  if ( exists $return->{error} ) {
-    $return->{errcode} = $self->dns_rcode->{ $r->errorstring }->{descr};
-    $return->{errstr}  = $r->errorstring;
   }
 
+  $return->{errcode} = $self->dns_rcode->{ $r->errorstring }->{descr}
+    if exists $return->{errstr};
+
   # p $arg->{fqdn}; p $r;
-  # p $return;
+  # log_debug { np( $return ) };
   return $return;
 }
 

@@ -196,6 +196,7 @@ sub _build_cfg {
 		  aside     => 0,
 		  sidebar   => 0,
 		  isblock   => 1,
+		  ipamdns   => 0,
 		  storedata => 0,
 		},
 	  translit    => "GOST 7.79 RUS",
@@ -2296,7 +2297,7 @@ sub params2attrs {
   my ( $self, $args ) = @_;
 
   my $arg = {
-	     type => $args->{'type'},
+	     type   => $args->{'type'},
 	     params => $args->{'params'},
 	    };
 
@@ -2331,7 +2332,7 @@ sub params2attrs {
     push @{$attrs}, $key => $val;
   }
   # warn 'attributes prepared, dn: ' . $dn . '; $attrs:' . Dumper($attrs);
-  return { dn => $dn,
+  return { dn    => $dn,
 	   attrs => $attrs };
 }
 
@@ -2771,7 +2772,7 @@ sub ipa {
   }
   # my $as_str = $ipa_tree->as_string;
   # log_debug { np($as_str) };
-  my $as_hash = $ipa_tree->as_json_ipa;
+  my $as_hash = $ipa_tree->as_json_ipa(1);
   # log_debug { np($as_hash) };
   $return->{ipa} = $as_hash;
   return $as_hash;

@@ -356,12 +356,14 @@ sub as_json_vue {
 }
 
 sub as_json_ipa {
-  my $self  = shift;
-  my $map   = shift // sub { shift; @_ };
-  my $hroot = [];
+  my $self   = shift;
+  my $resolv = shift // 0;
+  my $map    = shift // sub { shift; @_ };
+  my $hroot  = [];
   my @ar;
   my $ip;
   my $ptr;
+  my $host;
 
   push @ar, [ '', $self, $hroot ];
   while (my $e = shift @ar) {
@@ -378,16 +380,22 @@ sub as_json_ipa {
       $ip = join('.', reverse split(/,/, $e->[1]->dn));
       $ptr = $e->[1]->dn;
       $ptr =~ tr/,/./;
-      my $host = $self->dns_resolver({fqdn   => $ip,
-				      type   => 'PTR',
-				      name   => $ip,
-				      legend => ''});
+      if ( $resolv == 1) {
+	$host = $self->dns_resolver({fqdn   => $ip,
+				     type   => 'PTR',
+				     name   => $ip,
+				     legend => ''});
+      } else {
+	$host->{success} = $ip;
+      }
 
       push @{$e->[2]}, { name => $e->[0],
 			 free => \0,
-			 host => $host->{success} // sprintf("%s ( %s )",
-							     $host->{errcode},
-							     $host->{errstr}),
+			 host => '',
+			 # host => exists $host->{success} ? $host->{success} :
+			 # sprintf("%s ( %s )",
+			 # 	 $host->{errcode},
+			 # 	 $host->{errstr}),
 			 # sprintf("Host %s.in-addr.arpa not found: 3(NXDOMAIN)", $ptr),
 			 dn => $ip };
     }
