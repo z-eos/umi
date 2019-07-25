@@ -61,39 +61,47 @@ var ldapTree = new Vue({
     el: '#ldap-tree',
 
     data: function () {
-        return { tree: {} }
+        return { tree: {},
+		 loading: true }
     },
     
     mounted: function () {
-	var _this = this;
-	$.ajax({
-	    type: "GET",
-	    url: '/ldap_tree/ldap_tree_neo',
-	    success: function (data) {
-		if (typeof data === 'string') {
-		    // console.log('data is string')
-		    data = JSON.parse(data)
-		} else if (typeof data === 'object') {
-		    // console.log('data is object')
-		    data = data.json_tree
-		    // console.log(_this.names)
-		} else {
-		    console.warn("Data has unusable format - ", typeof data)
-		    return
-		}
-		sortRecursively(data);	
-		_this.tree = data;
-	    },
-	    error: function (error) {
-		console.warn('Request faild - ', error)
-	    }
-	});	
+        this.getTreeData();
     },
     
     methods: {
 	makeFolder: function (item) {
     	    Vue.set(item, 'children', [])
-	}
+	},
+
+	getTreeData: function () {
+	    var _this = this;
+	    _this.loading = true;
+	    $.ajax({
+		type: "GET",
+		url: '/ldap_tree/ldap_tree_neo',
+		success: function (data) {
+		    if (typeof data === 'string') {
+			// console.log('data is string')
+			data = JSON.parse(data)
+		    } else if (typeof data === 'object') {
+			// console.log('data is object')
+			data = data.json_tree
+			// console.log(_this.names)
+		    } else {
+			console.warn("Data has unusable format - ", typeof data)
+			return
+		    }
+		    sortRecursively(data);	
+		    _this.tree = data;
+		    _this.loading = false;
+		},
+		error: function (error) {
+		    console.warn('Request faild - ', error)
+		}
+	    });	
+	},
+
     }
 });
 

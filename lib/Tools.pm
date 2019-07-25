@@ -1541,6 +1541,7 @@ sub dns_resolver {
 					   $self->dns_rcode->{ $r->errorstring }->{descr},
 					   $r->errorstring );
 	$return->{error}->{errdescr} = $self->dns_rcode->{ $r->errorstring }->{descr};
+	$return->{error}->{errcode}  = $self->dns_rcode->{ $r->errorstring }->{dec};
 	$return->{error}->{errstr}   = $r->errorstring;
       }
 

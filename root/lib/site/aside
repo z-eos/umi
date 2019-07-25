@@ -63,10 +63,10 @@
 
       [% IF c.check_user_roles('admin') %]
       <!-- === LDAP tree (neo) ===  -->
-      <div class="tab-pane active" id="ldap-tree-tab" role="tabpanel">
+      <div class="tab-pane p-3 active" id="ldap-tree-tab" role="tabpanel">
 	<div class="callout m-0 py-2 text-white-50 text-center text-uppercase">
-	  <button class="btn border-0 text-white-50"
-		  type="button"
+	  <button type="button"
+		  class="btn border-0 text-white-50"
 		  title="CLICK FOR HELP"
 		  data-toggle="collapse"
 		  data-target="#collapseExample"
@@ -81,6 +81,9 @@
 	  </button>
 	</div>
 	<div class="collapse" id="collapseExample">
+	  <div class="text-white-50 umi-text-tiny pb-3">
+	    <b>NOTE:</b> search result is in accordance with the filter shown on the top of the result page.
+	  </div>
 	  <dl class="row text-white-50 umi-text-tiny mx-3">
 	    <dt class="col-sm-3 text-right">Click</dt>
 	    <dd class="col-sm-9 mb-0 pb-0">
@@ -127,6 +130,13 @@
 	</script>
 	
 	<ul class="font-monospace ldap-tree" id="ldap-tree">
+	  <li class="border-bottom border-secondary mb-2">
+	    <i class="fas fa-sync-alt text-white-50"
+	       :class="{ 'fa-spin': loading }"
+	       @click.exact="getTreeData()"
+	       title="reload the tree">
+	    </i>
+	  </li>
 	  <ldap-tree-item class="ldap-tree-item"
 			  :item="tree"
 			  @make-folder="makeFolder">
@@ -142,32 +152,43 @@
 		  type="button"
 		  title="CLICK FOR HELP"
 		  data-toggle="collapse"
-		  data-target="#collapseExample"
+		  data-target="#collapseIpaHelp"
 		  aria-expanded="false"
-		  aria-controls="collapseExample">
-            <b>
-	      IPAM
-	      <sup>
-		<i class="fas fa-question-circle"></i>
-	      </sup>
-	    </b>
+		  aria-controls="collapseIpaHelp">
+            <b>IPAM<sup><i class="fas fa-question-circle"></i></sup></b>
 	  </button>
 	</div>
-	<div class="collapse" id="collapseExample">
+	<div class="collapse" id="collapseIpaHelp">
+	  <div class="text-white-50 umi-text-tiny pb-3">
+	    <b>NOTE:</b> search result is in accordance with the filter shown on the top of the result page.
+	  </div>
 	  <dl class="row text-white-50 umi-text-tiny mx-3">
 	    <dt class="col-sm-3 text-right">Click</dt>
 	    <dd class="col-sm-9 mb-0 pb-0">
 	      <ul class="my-0 py-0 ml-0 pl-0 list-unstyled">
 		<li>on <i class="fas fa-plus-square""></i>/<i class="fas fa-minus-square""></i> to expand/collapse item</li>
-		<li>on item to search it</li>
+		<li>on <b>item</b> to search it</li>
 	      </ul>
 	    </dd>
 	    <dt class="pt-0 mt-0 col-sm-3 text-right">Ctrl+Click</dt>
 	    <dd class="col-sm-9">
 	      <ul class="my-0 py-0 ml-0 pl-0 list-unstyled">
 		<li>on <i class="fas fa-plus-square""></i>/<i class="fas fa-minus-square""></i> to expand/collapse whole branch</li>
-		<li>on item searches whole branch</li>
+		<li>on <b>item</b> searches whole branch</li>
 	      </ul>
+	    </dd>
+	    <dt class="col-sm-3 text-right">MouseOver</dt>
+	    <dd class="col-sm-9 mb-0 pb-0">
+	      <ul class="my-0 py-0 ml-0 pl-0 list-unstyled">
+		<li>on <b>item</b> launching DNS resolve of IP address,
+		  after that the item is colored and marked with
+		  <i class="fas fa-check-circle text-success"></i>,
+		  <i class="fas fa-exclamation-triangle text-warning"></i> or
+		  <i class="fas fa-exclamation-circle text-danger"></i>
+		  according to the results of the resolve
+		</li>
+	      </ul>
+	    </dd>
 	  </dl>
 	</div>
 
@@ -204,7 +225,7 @@
 	    @click.ctrl.exact="showIpaItem(1)">
 	     {{ ipaitem.dn }}
 	   </div>
-	  </div>	 
+	  </div>
 	  <ul class="font-monospace ldap-tree" v-show="ipaitem.isOpen" v-if="isIpaFolder">
 	   <ipam-tree-item class="ldap-tree-item"
 	                   v-for="(child, index) in ipaitem.children"
@@ -216,6 +237,13 @@
 	</script>
 	
 	<ul class="font-monospace ldap-tree" id="ipam-tree">
+	  <li class="border-bottom border-secondary mb-2">
+	    <i class="fas fa-sync-alt text-white-50"
+	       :class="{ 'fa-spin': loading }"
+	       @click.exact="getIpaTreeData()"
+	       title="reload the tree">
+	    </i>
+	  </li>
 	  <ipam-tree-item class="ipam-tree-item"
 			  :ipaitem="ipamtree"
 			  @make-folder="makeIpaFolder">

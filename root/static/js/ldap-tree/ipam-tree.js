@@ -39,7 +39,12 @@ Vue.component('ipam-tree-item', {
 	},
 	showIpaItem: function (scope) {
 	    // console.log(this.ipaitem.dn);
-	    var url = '/searchby?ldapsearch_filter=|(dhcpStatements=fixed-address ' + this.ipaitem.dn + '*)(umiOvpnCfgIfconfigPush=' + this.ipaitem.dn + '*)(umiOvpnCfgIroute=' + this.ipaitem.dn + '*)&ldapsearch_scope=';
+	    var url =
+		'/searchby?ldapsearch_filter=|(dhcpStatements=fixed-address ' + this.ipaitem.dn
+		+ '*)(umiOvpnCfgIfconfigPush=' + this.ipaitem.dn
+		+ '*)(umiOvpnCfgIroute=' + this.ipaitem.dn
+		+ '*)(ipHostNumber=' + this.ipaitem.dn + ')&ldapsearch_scope=';
+	    
 	    url = scope ? url + 'base' : url + 'sub';
 
 	    // console.log(url)
@@ -70,7 +75,7 @@ Vue.component('ipam-tree-item', {
 		    // 	item.host = 'NXDOMAIN';
 		    // }
 		    item.host = host;
-		    console.log(host);
+		    // console.log(host);
 		}
 	    });
 	    // console.log('showItem scope:', scope);
@@ -84,40 +89,48 @@ var ipamTree = new Vue({
     el: '#ipam-tree',
 
     data: function () {
-        return { ipamtree: {} }
+        return { ipamtree: {},
+		 loading: true }
     },
     
     mounted: function () {
-	var _this = this;
-	$.ajax({
-	    type: "GET",
-	    url: '/ldap_tree/ipa',
-	    success: function (data) {
-		if (typeof data === 'string') {
-		    // console.log('data is string')
-		    data = JSON.parse(data)
-		} else if (typeof data === 'object') {
-		    // console.log('data is object')
-		    data = data.json_tree
-		} else {
-		    console.warn("Data has unusable format - ", typeof data)
-		    return
-		}
-		sortIpaRecursively(data);	
-		_this.ipamtree = data;
-		_this.hover = false;
-		// console.log(_this.ipamtree)
-	    },
-	    error: function (error) {
-		console.warn('Request faild - ', error)
-	    }
-	});	
+        this.getIpaTreeData();
     },
-    
+
     methods: {
 	makeIpaFolder: function (ipaitem) {
     	    Vue.set(ipaitem, 'children', [])
-	}
+	},
+	
+	getIpaTreeData:  function () {
+	    var _this = this;
+	    _this.loading = true;
+	    $.ajax({
+		type: "GET",
+		url: '/ldap_tree/ipa',
+		success: function (data) {
+		    if (typeof data === 'string') {
+			// console.log('data is string')
+			data = JSON.parse(data)
+		    } else if (typeof data === 'object') {
+			// console.log('data is object')
+			data = data.json_tree
+		    } else {
+			console.warn("Data has unusable format - ", typeof data)
+			return
+		    }
+		    sortIpaRecursively(data);	
+		    _this.ipamtree = data;
+		    _this.hover = false;
+		    _this.loading = false;
+		    // console.log(_this.ipamtree)
+		},
+		error: function (error) {
+		    console.warn('Request faild - ', error)
+		}
+	    });	
+	},
+
     }
 });
 
