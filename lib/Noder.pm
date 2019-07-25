@@ -378,25 +378,10 @@ sub as_json_ipa {
       }
     } else {
       $ip = join('.', reverse split(/,/, $e->[1]->dn));
-      $ptr = $e->[1]->dn;
-      $ptr =~ tr/,/./;
-      if ( $resolv == 1) {
-	$host = $self->dns_resolver({fqdn   => $ip,
-				     type   => 'PTR',
-				     name   => $ip,
-				     legend => ''});
-      } else {
-	$host->{success} = $ip;
-      }
 
       push @{$e->[2]}, { name => $e->[0],
 			 free => \0,
 			 host => '',
-			 # host => exists $host->{success} ? $host->{success} :
-			 # sprintf("%s ( %s )",
-			 # 	 $host->{errcode},
-			 # 	 $host->{errstr}),
-			 # sprintf("Host %s.in-addr.arpa not found: 3(NXDOMAIN)", $ptr),
 			 dn => $ip };
     }
   }
