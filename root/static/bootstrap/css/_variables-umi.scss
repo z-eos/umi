@@ -1,0 +1,102 @@
+/*
+ * 1. cp _variables-umi.scss git/bootstrap/scss/
+ * 2. emacs git/bootstrap/scss/bootstrap.scss
+ *    add `@import "variables-umi";` before `@import "variables";`
+ * 3. npm run dist
+ * 4. cp -iv scss dist/css/bootstrap.css /storage/work-stuff/Catalyst/UMI/root/static/bootstrap/css
+ * 5. cp -iv scss dist/css/bootstrap.css.map /storage/work-stuff/Catalyst/UMI/root/static/bootstrap/css
+ */
+
+// Color system
+
+$gray-base:              #050505 !default;
+$gray-darker:            lighten($gray-base, 13.5%) !default; // #222
+$gray-dark:              lighten($gray-base, 20%) !default;   // #333
+$gray:                   lighten($gray-base, 33.5%) !default; // #555
+$gray-light:             #4E5D6C !default;   // #999
+$gray-lighter:           #EBEBEB !default; // #eee
+
+$gray-100: lighten($gray-base, 90%) !default;
+$gray-200: lighten($gray-base, 80%) !default;
+$gray-300: lighten($gray-base, 70%) !default;
+$gray-400: lighten($gray-base, 60%) !default;
+$gray-500: lighten($gray-base, 50%) !default;
+$gray-600: lighten($gray-base, 40%) !default;
+$gray-700: lighten($gray-base, 30%) !default;
+$gray-800: lighten($gray-base, 20%) !default;
+$gray-900: lighten($gray-base, 10%) !default;
+
+// primary:   blue
+// secondary: gray-600
+// success:   green
+// info:      cyan
+// warning:   yellow
+// danger:    red
+// light:     gray-100
+// dark:      gray-800
+
+$blue:     #325d88 !default;
+$green:    #5cb85c !default;
+$red:      #d9534f !default;
+$cyan:     #5bc0de !default;
+$yellow:   #f0ad4e !default;
+// $gray-600: #889396 !default;
+// $gray-100: #eef0f2 !default;
+// $gray-800: #3c3e4c !default;
+
+// $gray-600: #98978B !default;
+// $gray-100: #F8F5F0 !default;
+// $gray-800: #3E3F3A !default;
+// $gray-700: #8E8C84 !default;
+
+$enable-gradients:  false !default;
+
+$spacer:            .5rem !default;
+// $line-height-base:  .8 !default;
+// $line-height-lg:    .9 !default;
+// $line-height-sm:    .5 !default;
+
+$font-size-base:    0.85rem !default;
+
+$border-width:      1px !default;
+$card-border-width: 0 !default;
+
+$btn-border-width:  0 !default;
+
+$border-radius:            0 !default;
+$border-radius-lg:         0 !default;
+$border-radius-sm:         0 !default;
+
+$btn-border-radius:        $border-radius !default;
+$btn-border-radius-lg:     $border-radius-lg !default;
+$btn-border-radius-sm:     $border-radius-sm !default;
+
+$input-border-radius:      $border-radius !default;
+$input-border-radius-lg:   $border-radius-lg !default;
+$input-border-radius-sm:   $border-radius-sm !default;
+
+$navbar-border-radius:     $border-radius !default;
+$nav-pills-border-radius:  $border-radius !default;
+$panel-border-radius:      $border-radius !default;
+$alert-border-radius:      $border-radius !default;
+$progress-border-radius:   $border-radius !default;
+$thumbnail-border-radius:  $border-radius !default;
+$list-group-border-radius: $border-radius !default;
+
+// Typography
+$font-family-monospace:    "Input Mono", consolas, sfmono-regular, menlo, monaco, "Liberation Mono", "Courier New", monospace !default;
+
+//== Code
+//
+//##
+
+$code-color:                  #c7254e !default;
+$code-bg:                     #f9f2f4 !default;
+
+$kbd-color:                   #fff !default;
+$kbd-bg:                      #333 !default;
+
+$pre-bg:                      #d5d5d5 !default;
+$pre-color:                   $gray-dark !default;
+$pre-border-color:            #ccc !default;
+$pre-scrollable-max-height:   340px !default;

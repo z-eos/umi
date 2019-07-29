@@ -382,7 +382,7 @@ sub as_json_ipa {
       push @{$e->[2]}, { name => $e->[0],
 			 free => \0,
 			 host => '',
-			 dn => $ip };
+			 dn   => $ip };
     }
   }
 
@@ -390,8 +390,8 @@ sub as_json_ipa {
   # p $hroot;
 
   # return $hroot->[0]{children}[0];
-  $hroot->[0]{dn}     = '0.0.0.0';
-  $hroot->[0]{name}   = '0.0.0.0';
+  $hroot->[0]{dn}     = 'networks';
+  $hroot->[0]{name}   = 'networks';
   $hroot->[0]{isOpen} = \1;
   
   return $hroot->[0];

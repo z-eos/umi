@@ -1441,24 +1441,25 @@ has 'dns_rcode' => ( traits => ['Hash'], is => 'ro', isa => 'HashRef', builder =
 
 sub _build_dns_rcode {
   my $self = shift;
-  return { NOERROR  => { dec =>  0, RFC => 1035, descr => 'No Error', },
-	   FORMERR  => { dec =>  1, RFC => 1035, descr => 'Format Error', },
-	   SERVFAIL => { dec =>  2, RFC => 1035, descr => 'Server Failure', },
-	   NXDOMAIN => { dec =>  3, RFC => 1035, descr => 'Non-Existent Domain', },
-	   NOTIMP   => { dec =>  4, RFC => 1035, descr => 'Not Implemented', },
-	   REFUSED  => { dec =>  5, RFC => 1035, descr => 'Query Refused', },
-	   YXDOMAIN => { dec =>  6, RFC => 2136, descr => 'Name Exists when it should not',},
-	   YXRRSET  => { dec =>  7, RFC => 2136, descr => 'RR Set Exists when it should not',},
-	   NXRRSET  => { dec =>  8, RFC => 2136, descr => 'RR Set that should exist does not', },
-	   NOTAUTH  => { dec =>  9, RFC => 2136, descr => 'Server Not Authoritative for zone', },
-	   NOTZONE  => { dec => 10, RFC => 2136, descr => 'Name not contained in zone', },
-	   BADVERS  => { dec => 16, RFC => 2671, descr => 'Bad OPT Version', },
-	   BADSIG   => { dec => 16, RFC => 2845, descr => 'TSIG Signature Failure', },
-	   BADKEY   => { dec => 17, RFC => 2845, descr => 'Key not recognized', },
-	   BADTIME  => { dec => 18, RFC => 2845, descr => 'Signature out of time window', },
-	   BADMODE  => { dec => 19, RFC => 2930, descr => 'Bad TKEY Mode', },
-	   BADNAME  => { dec => 20, RFC => 2930, descr => 'Duplicate key name', },
-	   BADALG   => { dec => 21, RFC => 2930, descr => 'Algorithm not supported', }, };
+  return { NOERROR           => { dec =>  0, RFC => 1035, descr => 'No Error', },
+	   FORMERR           => { dec =>  1, RFC => 1035, descr => 'Format Error', },
+	   SERVFAIL          => { dec =>  2, RFC => 1035, descr => 'Server Failure', },
+	   NXDOMAIN          => { dec =>  3, RFC => 1035, descr => 'Non-Existent Domain', },
+	   NOTIMP            => { dec =>  4, RFC => 1035, descr => 'Not Implemented', },
+	   REFUSED           => { dec =>  5, RFC => 1035, descr => 'Query Refused', },
+	   YXDOMAIN          => { dec =>  6, RFC => 2136, descr => 'Name Exists when it should not',},
+	   YXRRSET           => { dec =>  7, RFC => 2136, descr => 'RR Set Exists when it should not',},
+	   NXRRSET           => { dec =>  8, RFC => 2136, descr => 'RR Set that should exist does not', },
+	   NOTAUTH           => { dec =>  9, RFC => 2136, descr => 'Server Not Authoritative for zone', },
+	   NOTZONE           => { dec => 10, RFC => 2136, descr => 'Name not contained in zone', },
+	   BADVERS           => { dec => 16, RFC => 2671, descr => 'Bad OPT Version', },
+	   BADSIG            => { dec => 16, RFC => 2845, descr => 'TSIG Signature Failure', },
+	   BADKEY            => { dec => 17, RFC => 2845, descr => 'Key not recognized', },
+	   BADTIME           => { dec => 18, RFC => 2845, descr => 'Signature out of time window', },
+	   BADMODE           => { dec => 19, RFC => 2930, descr => 'Bad TKEY Mode', },
+	   BADNAME           => { dec => 20, RFC => 2930, descr => 'Duplicate key name', },
+	   BADALG            => { dec => 21, RFC => 2930, descr => 'Algorithm not supported', },
+	   'query timed out' => { dec => '', RFC => '',   descr => 'query timed out'}, };
 }
 
 =head2 dns_resolver

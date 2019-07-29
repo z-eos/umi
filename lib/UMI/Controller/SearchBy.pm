@@ -410,13 +410,13 @@ sub index :Path :Args(0) {
 	if ( defined $c->session->{settings}->{ui}->{isblock} &&
 	     $c->session->{settings}->{ui}->{isblock} == 1 ) {
 	  $c->stats->profile(begin => '- is-blocked check');
-	  if ( $dn !~ /^authorizedService=.*$/ ) {
+	  if ( $dn !~ /^STUBauthorizedService=.*$/ ) {
 	    my $is_blocked_filter =
 	      sprintf('(&(cn=%s)(memberUid=%s))',
 		      $ldap_crud->cfg->{stub}->{group_blocked},
 		      $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} });
-	    # log_debug { np( $ldap_crud->cfg->{base}->{group} . " | " . $is_blocked_filter ) };
-	    # log_debug { np($_->dn) };
+	    log_debug { np( $ldap_crud->cfg->{base}->{group} . " | " . $is_blocked_filter ) };
+	    log_debug { np($_->dn) };
 	    $mesg = $ldap_crud->search({ base   => $ldap_crud->cfg->{base}->{group},
 					 filter => $is_blocked_filter, });
 
@@ -585,6 +585,7 @@ sub index :Path :Args(0) {
       if $sort_order eq 'straight'; # for history searches
 
     # log_debug { np( $ttentries ) };
+    
     $c->stash(
 	      base_dn       => $base,
 	      base_icon     => $ldap_crud->cfg->{base}->{icon},

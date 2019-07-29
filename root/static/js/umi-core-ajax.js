@@ -2,19 +2,23 @@
  * NProgress indicator
  */
 
-$(document).bind("ajaxSend", function(){
+var sec = new Date().getTime() / 1000;
 
-    console.log('UMI CORE AJAX: START');    
+$(document).bind("ajaxSend", function(){
+    
+    console.log('UMI CORE AJAX: START ' + sec + ' ms');
+    // console.time('UMI CORE AJAX: FINISH [' + sec + ']');
     NProgress.start();
 
 }).bind("ajaxComplete", function(){
 
     NProgress.done();
-    console.log('UMI CORE AJAX: FINISH ');    
 
     $("#stat-to").html('');
     $("#stat-from").appendTo("#stat-to");
 
+    // console.timeEnd('UMI CORE AJAX: FINISH [' + sec + ']');
+    console.log('UMI CORE AJAX: FINISH ' + sec + ' ms');
 });
 
 /*! 
@@ -26,7 +30,7 @@ $(document).bind("ajaxSend", function(){
 
 var handleResponce = function(html) {
 
-    console.log('UMI CORE AJAX: RESPONSE handleResponce');
+    console.log('UMI CORE AJAX: RESPONSE handleResponce()');
 
     if( $(html).find("#form-signin").length ) {
 	console.log('UMI CORE AJAX: is signin? '+$(html).find("#form-signin").length);

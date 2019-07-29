@@ -30,7 +30,7 @@
 	
 	[% # DATA-ORDER VALUES ARE DEFINED IN root/lib/config/searchby_menu %]
 
-	[% IF entry.value.mgmnt.is_root && entry.value.mgmnt.is_account %]
+	[% IF entry.val.mgmnt.is_root && entry.val.mgmnt.is_account %]
 	<div class="dropdown-item">
 	  <form role="form" method="POST" class="formajaxer STUB123"
 		action="/searchby/user_preferences">
@@ -48,7 +48,7 @@
 	  <form role="form" method="POST" class="formajaxer STUB123"
 		action="/userall">
 	    <input type="hidden" name="add_svc_acc" value="[% entry.key %]">
-	    <input type="hidden" name="dynamic_object" value="[% entry.value.mgmnt.dynamicObject %]">
+	    <input type="hidden" name="dynamic_object" value="[% entry.val.mgmnt.dynamicObject %]">
 	    <button type="submit" title="add new service account" class="btn btn-link"
 		    data-order="[% site.searchby.menu.order.add_svc_acc %]">
 	      <span class="[% fa_meta %] fa-user-cog text-success"></span>
@@ -68,7 +68,7 @@
 	  </form>
 	</div>
 	[%   END %]
-	[%   IF ! entry.value.mgmnt.is_blocked %]
+	[%   IF ! entry.val.mgmnt.is_blocked %]
 	<div class="dropdown-item">
 	  <button type="button" title="block all accounts (password changed to random ones, ssh key bound to localhost only) of the user with DN: [% entry.key %]" class="btn btn-link STUB123"
 		  value="[% entry.key %]"
@@ -106,7 +106,7 @@
 	    moddn
 	  </button>
 	</div>
-	[%   IF ! entry.value.mgmnt.is_root && entry.key.match(',authorizedService=') %]
+	[%   IF ! entry.val.mgmnt.is_root && entry.key.match(',authorizedService=') %]
 	<div class="dropdown-item">
 	  <form role="form" method="POST"
 		action="/searchby/proc"
@@ -125,7 +125,7 @@
 	[%   END %]
 	[% END %][% # admin_owned AAA stop %]
 
-	[% IF entry.value.mgmnt.dynamicObject %]
+	[% IF entry.val.mgmnt.dynamicObject %]
 	<div class="dropdown-item">
 	  <form role="form" method="POST"
 		action="/searchby/proc"
@@ -143,7 +143,7 @@
 	</div>
 	[% END %]
 	
-	[% IF entry.key.match('mail') || entry.key.match('xmpp') || (entry.value.mgmnt.is_root && entry.value.mgmnt.is_account) %]
+	[% IF entry.key.match('mail') || entry.key.match('xmpp') || (entry.val.mgmnt.is_root && entry.val.mgmnt.is_account) %]
 	<div class="dropdown-item">
 	  <button type="button" title="export as vCard"
 		  class="btn btn-link STUB123"
@@ -224,7 +224,7 @@
 	  </button>
 	</div>
 	[%   END %]
-	[%   IF entry.value.mgmnt.is_group %]
+	[%   IF entry.val.mgmnt.is_group %]
 	<div class="dropdown-item">
 	  <form role="form" method="POST"
 		action="/searchby/proc"
@@ -252,7 +252,7 @@
 	  </form>
 	</div>
 	[%   END %]
-	[%   IF entry.value.mgmnt.userPassword && ! entry.key.match('^author') %]
+	[%   IF entry.val.mgmnt.userPassword && ! entry.key.match('^author') %]
 	<div class="dropdown-item">
 	  <form role="form" method="POST" class="formajaxer"
 		action="/searchby/modify_userpassword">
@@ -265,7 +265,7 @@
 	  </form>
 	</div>
 	[%   END %]
-	[%   IF entry.value.mgmnt.userDhcp %]
+	[%   IF entry.val.mgmnt.userDhcp %]
 	<div class="dropdown-item">
 	  <form role="form" method="POST" class="formajaxer"
 		action="/searchby/dhcp_add"
@@ -279,7 +279,7 @@
 	  </form>
 	</div>
 	[%   END %]
-	[%   IF entry.value.mgmnt.jpegPhoto %]
+	[%   IF entry.val.mgmnt.jpegPhoto %]
 	<div class="dropdown-item">
 	  <form role="form" method="POST" class="formajaxer"
 		action="/searchby/proc"
@@ -294,7 +294,7 @@
 	</div>
 	[%   END %]
 
-	[%   IF entry.value.mgmnt.gitAclProject %]
+	[%   IF entry.val.mgmnt.gitAclProject %]
 	<div class="dropdown-item">
 	  <form role="form" method="POST"
 		action="/searchby/proc"

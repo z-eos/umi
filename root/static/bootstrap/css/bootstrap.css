@@ -10,6 +10,7 @@
  *    add `@import "variables-umi";` before `@import "variables";`
  * 3. npm run dist
  * 4. cp -iv scss dist/css/bootstrap.css /storage/work-stuff/Catalyst/UMI/root/static/bootstrap/css
+ * 5. cp -iv scss dist/css/bootstrap.css.map /storage/work-stuff/Catalyst/UMI/root/static/bootstrap/css
  */
 :root {
   --blue: #325d88;
@@ -236,8 +237,8 @@ table {
 }
 
 caption {
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
+  padding-top: 6px;
+  padding-bottom: 6px;
   color: #6b6b6b;
   text-align: left;
   caption-side: bottom;
@@ -1104,22 +1105,23 @@ pre code {
   width: 100%;
   margin-bottom: 0.5rem;
   color: #1f1f1f;
+  background-color: transparent;
 }
 
 .table th,
 .table td {
-  padding: 0.75rem;
+  padding: 6px;
   vertical-align: top;
-  border-top: 1px solid #b8b8b8;
+  border-top: 1px solid #4E5D6C;
 }
 
 .table thead th {
   vertical-align: bottom;
-  border-bottom: 2px solid #b8b8b8;
+  border-bottom: 2px solid #4E5D6C;
 }
 
 .table tbody + tbody {
-  border-top: 2px solid #b8b8b8;
+  border-top: 2px solid #4E5D6C;
 }
 
 .table-sm th,
@@ -1128,12 +1130,12 @@ pre code {
 }
 
 .table-bordered {
-  border: 1px solid #b8b8b8;
+  border: 1px solid #4E5D6C;
 }
 
 .table-bordered th,
 .table-bordered td {
-  border: 1px solid #b8b8b8;
+  border: 1px solid #4E5D6C;
 }
 
 .table-bordered thead th,
@@ -1357,7 +1359,7 @@ pre code {
 .table .thead-light th {
   color: #525252;
   background-color: #d1d1d1;
-  border-color: #b8b8b8;
+  border-color: #4E5D6C;
 }
 
 .table-dark {

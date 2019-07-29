@@ -209,8 +209,9 @@
                        'text-white-50': !ipaitem.isOpen,
                        'fa-minus': !ipaitem.host,
                        'text-success fa-check-circle': ipaitem.host && ipaitem.host.indexOf('.') !== -1,
-                       'text-danger fa-exclamation-circle':  ipaitem.host && ipaitem.host === 'NXDOMAIN',
-                       'text-warning fa-exclamation-triangle': ipaitem.host && ipaitem.host !== 'NXDOMAIN' && ipaitem.host !== 'NOERROR' && ipaitem.host.length < 9 && ipaitem.host.indexOf('.') === -1 }"
+                       'text-danger  fa-exclamation-triangle': ipaitem.host === 'query timed out',
+                       'text-warning fa-exclamation-triangle':  ipaitem.host && ipaitem.host === 'NXDOMAIN',
+                       'text-danger fa-exclamation-circle': ipaitem.host && ipaitem.host !== 'NXDOMAIN' && ipaitem.host !== 'NOERROR' && ipaitem.host.indexOf('.') === -1 }"
 	    ></i>
 	   </div>
 
@@ -218,8 +219,9 @@
 	    :class="{ 'font-weight-bold': ipaitem.isOpen,
                       'text-white-50': !ipaitem.isOpen,
                       'text-success': ipaitem.host && ipaitem.host.indexOf('.') !== -1,
-                      'text-danger':  ipaitem.host && ipaitem.host === 'NXDOMAIN',
-                      'text-warning': ipaitem.host && ipaitem.host !== 'NXDOMAIN' && ipaitem.host !== 'NOERROR' && ipaitem.host.length < 9 && ipaitem.host.indexOf('.') === -1 }"
+                      'text-danger': ipaitem.host === 'query timed out',
+                      'text-warning': ipaitem.host && ipaitem.host === 'NXDOMAIN',
+                      'text-danger': ipaitem.host && ipaitem.host !== 'NXDOMAIN' && ipaitem.host !== 'NOERROR' && ipaitem.host.indexOf('.') === -1 }"
 	    @mouseover="resolveThis"
 	    @click.exact="showIpaItem(0)"
 	    @click.ctrl.exact="showIpaItem(1)">
@@ -344,8 +346,8 @@
 	      <input type="checkbox" class="custom-control-input" id="checkboxIpamDns"
 		     name="ipamdns" [% c.session.settings.ui.ipamdns ? ' checked=""' : '' %]>
 	      <label class="custom-control-label" for="checkboxIpamDns"
-		     title="whether to resolve PTR for IPA tree">
-		DNS resolve
+		     title="show DNS resolve debug in CAT output">
+		DNS resolve debug
 	      </label>
 	    </div>
 	    <div class="custom-control custom-switch">
