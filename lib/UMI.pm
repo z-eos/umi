@@ -42,29 +42,28 @@ our $VERSION = '0.91';
 __PACKAGE__
   ->config({
 	    'Plugin::Cache' => { backend => { class => "Cache::Memory", }, },
-	    name => 'UMI',
+	    name            => 'UMI',
 	    # Disable deprecated behavior needed by old applications
 	    disable_component_resolution_regex_fallback => 1,
-	    enable_catalyst_header => 1, # Send X-Catalyst header
-	    default_view => "Web",
-	   
-	    session => {	# cookie_name => "umi_cookie",
+	    enable_catalyst_header                      => 1, # Send X-Catalyst header
+	    default_view                                => "Web",
+
+	    session => {# cookie_name => "umi_cookie",
 			cookie_expires => 0,
-			cookie_secure => 0,
-		        storage => "/tmp/umi/umi-session-t$^T-p$>",
-			## Cache::FastMmap section PAGE SIZE AND KEY/VALUE LIMITS
-			# cache_size => '10m',
-			page_size => '512k',
-			num_pages => '1000',
-			compressor => 'lz4',
+			cookie_secure  => 0,
+		        storage        => "/tmp/umi/umi-session-t$^T-p$>",
+			# cache_size     => '10m', # Cache::FastMmap sec. PAGE SIZE AND KEY/VALUE LIMITS
+			page_size      => '512k',
+			num_pages      => '1000',
+			compressor     => 'lz4',
 			flash_to_stash => 1,
-			# expire_time => '1d',
-			expires => 86400, # 24 hours
+			# expire_time    => '1d',
+			expires        => 86400, # 24 hours
 			verify_address => 1,
 			unlink_on_exit => 1,
-			## init_file => 1, # causes need for re-login if PSGI reloaded during the form filling
+			# init_file => 1, # causes need for re-login if PSGI reloaded during the form filling
 		       },
-	   
+
 	    authentication =>
 	    {
 	     default_realm => "ldap",
@@ -76,7 +75,10 @@ __PACKAGE__
 				      bindpw              => 'secret password',
 				      class               => 'LDAP',
 				      ldap_server         => 'ldap.host.org',
-				      ldap_server_options => { timeout => 30 },
+				      ldap_server_options => { timeout => 120,
+							       async   => 1,
+							       onerror => 'warn',
+							       debug   => 0, },
 				      use_roles           => 1,
 				      role_basedn         => "ou=group,ou=system,dc=foo,dc=bar",
 				      role_field          => "cn",
@@ -93,7 +95,7 @@ __PACKAGE__
 				      user_filter         => "(uid=%s)",
 				      user_scope          => "one", # or "sub" for Active Directory
 				      # user_search_options => { deref => "never" },
-				      user_results_filter => sub { return shift->pop_entry },
+				      # user_results_filter => sub { return shift->pop_entry },
 				    },
 			 },
 		       },

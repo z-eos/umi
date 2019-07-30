@@ -1685,11 +1685,9 @@ memberNisNetgroup attribute
 
 sub nisnetgroup_host_split {
   my  ( $self, $host ) = @_;
-  if ( $host =~ /^\..*$/ ) {
-    return [ '', substr($host, 1) ];
-  } else {
-    return [ split(/\./, $host, 2) ];
-  }
+  my $split = $host =~ /^\..*$/ ? [ '', substr($host, 1) ] : [ split(/\./, $host, 2) ];
+  log_debug { np($split) };
+  return $split;
 }
 
 =head2 is_org_uni

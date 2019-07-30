@@ -53,9 +53,9 @@ sub index :Path :Args(0) {
 					  params    => $params,
 					  ldap_crud => $ldap_crud, );
     }
+    log_debug { np($params) };
     my $entry = $self->attributes($ldap_crud->cfg->{objectClass}->{netgroup}, $params);
     # log_debug { np($entry) };
-    log_debug { np($params) };
     if ( defined $params->{aux_dn_form_to_modify} && $params->{aux_dn_form_to_modify} ne '' ) {
       $entry->{dn}                    = $params->{aux_dn_form_to_modify};
       $entry->{aux_dn_form_to_modify} = $params->{aux_dn_form_to_modify};

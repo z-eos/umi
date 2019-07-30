@@ -297,6 +297,7 @@ sub index :Path :Args(0) {
 	  $c->stats->profile(begin => '- root obj proc');
 	  $ttentries->{$dn}->{root}->{givenName} = $_->get_value('givenName');
 	  $ttentries->{$dn}->{root}->{sn}        = $_->get_value('sn');
+	  $ttentries->{$dn}->{root}->{gidNumber} = $_->get_value('gidNumber');
 	  $ttentries->{$dn}->{root}->{o}         = $_->get_value('o', asref => 1);
 	  $ttentries->{$dn}->{root}->
 	    {$ldap_crud->{cfg}->{rdn}->{acc_root}} =
@@ -314,6 +315,7 @@ sub index :Path :Args(0) {
 	      $root_entry = $root_mesg->entry(0);
 	      $ttentries->{$dn}->{root}->{givenName} = $root_entry->get_value('givenName');
 	      $ttentries->{$dn}->{root}->{sn}        = $root_entry->get_value('sn');
+	      $ttentries->{$dn}->{root}->{gidNumber} = $root_entry->get_value('gidNumber');
 	      $ttentries->{$dn}->{root}->{o}         = $root_entry->get_value('o', asref => 1);
 	      $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
 		$root_entry->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
@@ -321,6 +323,7 @@ sub index :Path :Args(0) {
 	  } else {
 	    $ttentries->{$dn}->{root}->{givenName} = $all_entries->{$root_dn}->{givenname}->[0];
 	    $ttentries->{$dn}->{root}->{sn}        = $all_entries->{$root_dn}->{sn}->[0];
+	    $ttentries->{$dn}->{root}->{gidNumber} = $all_entries->{$root_dn}->{gidnumber}->[0];
 	    $ttentries->{$dn}->{root}->{o}         = $all_entries->{$root_dn}->{o};
 	    $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
 	      $all_entries->{$root_dn}->{$ldap_crud->{cfg}->{rdn}->{acc_root}}->[0];
@@ -410,7 +413,10 @@ sub index :Path :Args(0) {
 	if ( defined $c->session->{settings}->{ui}->{isblock} &&
 	     $c->session->{settings}->{ui}->{isblock} == 1 ) {
 	  $c->stats->profile(begin => '- is-blocked check');
-	  if ( $dn !~ /^STUBauthorizedService=.*$/ ) {
+
+	  if ( $ttentries->{$dn}->{root}->{gidNumber} eq $ldap_crud->{cfg}->{stub}->{group_blocked_gid} ) {
+	    $blocked = 1;
+	  } elsif ( $dn =~ /^.*authorizedService=.*$/ ) {
 	    my $is_blocked_filter =
 	      sprintf('(&(cn=%s)(memberUid=%s))',
 		      $ldap_crud->cfg->{stub}->{group_blocked},
@@ -427,6 +433,7 @@ sub index :Path :Args(0) {
 	  } else {
 	    $blocked = 0;
 	  }
+	  
 	  $c->stats->profile(end => '- is-blocked check');
 	}
 

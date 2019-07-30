@@ -1723,18 +1723,28 @@ sub vcard_neo {
     # --- TELEPHONENUMBER ---------------------------------------------
     my $tel_prefix = 'TEL;WORK:';
     if ( exists $entry->{$arg->{dn}}->{telephonenumber} ) {
+      log_debug { np( $entry->{$arg->{dn}}->{telephonenumber} ) };
       push @vcf, sprintf('%s%s', $tel_prefix, $_)
 	foreach (@{$entry->{$arg->{dn}}->{telephonenumber}});
     }
     if ( exists $entry->{$arg->{dn}}->{mobiletelephonenumber} ) {
+      log_debug { np( $entry->{$arg->{dn}}->{mobiletelephonenumber} ) };
       push @vcf, sprintf('%s%s', $tel_prefix, $_)
-	foreach (@{$entry->{$arg->{dn}}->{telephonenumber}});
+	foreach (@{$entry->{$arg->{dn}}->{mobiletelephonenumber}});
     }
     if ( exists $entry->{$arg->{dn}}->{mobile} ) {
+      log_debug { np( $entry->{$arg->{dn}}->{mobile} ) };
       push @vcf, sprintf('%s%s', $tel_prefix, $_)
-	foreach (@{$entry->{$arg->{dn}}->{telephonenumber}});
+	foreach (@{$entry->{$arg->{dn}}->{mobile}});
+    }
+    if ( exists $entry->{$arg->{dn}}->{facsimiletelephonenumber} ) {
+      log_debug { np( $entry->{$arg->{dn}}->{facsimiletelephonenumber} ) };
+      push @vcf, sprintf('%s%s', $tel_prefix, $_)
+	foreach (@{$entry->{$arg->{dn}}->{facsimiletelephonenumber}});
     }
 
+    log_debug { np(@vcf) };
+    
     my $scope = $arg->{dn} =~ /^.*=.*,authorizedService.*$/ ? 'sub' : 'one';
 
     # --- EMAIL -------------------------------------------------------
@@ -1763,7 +1773,7 @@ sub vcard_neo {
       }
     }
 
-    # # --- XMPP --------------------------------------------------------
+    # --- XMPP --------------------------------------------------------
     $branch = $self->ldap->search ( base   => $arg->{dn},
     				    scope  => $scope,
     				    filter => 'authorizedService=xmpp@*', );
