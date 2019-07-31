@@ -234,14 +234,13 @@ sub _build_cfg {
 		   noavatar_mgmnt    => UMI->path_to('root', 'static', 'images', '/avatar-mgmnt.png'),
 		  },
 	  rdn => {
-		  acc_root       => UMI->config->{authentication}->{realms}->{ldap}->{store}->{user_field},
-		  acc_svc_branch => 'authorizedService',
-		  acc_svc_common => 'uid',
-		  'dot1x-eap-tls'=> 'uid',
-		  gitacl         => 'cn',
-		  group          => 'cn',
-		  org            => 'ou',
-		  ovpn           => 'cn',
+		  acc_root        => UMI->config->{authentication}->{realms}->{ldap}->{store}->{user_field},
+		  acc_svc_branch  => 'authorizedService',
+		  acc_svc_common  => 'uid',
+		  gitacl          => 'cn',
+		  group           => 'cn',
+		  org             => 'ou',
+		  ovpn            => 'cn',
 		 },
 	  objectClass =>
 	  {
@@ -2913,7 +2912,7 @@ sub _build_select_associateddomains {
 
   my @domains; # = ( {value => '0', label => '--- select domain ---', selected => 'selected'} );
 
-  log_debug { np($self->user->has_attribute('o')) };
+  # log_debug { np($self->user->has_attribute('o')) };
   if ( ! $self->role_admin ) {
     $base = ref($self->user->has_attribute('o')) ne 'ARRAY' ? [ $self->user->has_attribute('o') ] : $self->user->has_attribute('o');
   }

@@ -160,6 +160,82 @@ sub stat_acc : Local {
   my ( $self, $c ) = @_;
 
   if ( $c->user_exists() ) {
+    my $ldap_crud = $c->model('LDAP_CRUD');
+    my ( $return, $acc, $root_dn, $rest, @dn_arr, $re_dn, $re_svc, $entry, $gr_block, $l, $r, $rdn );
+
+    my $mesg = $ldap_crud->search({ base   => sprintf('cn=%s,%s',
+						      $ldap_crud->cfg->{stub}->{group_blocked},
+						      $ldap_crud->{cfg}->{base}->{group}),
+				    filter => '(objectClass=*)',
+				    attrs  => [ 'memberUid' ], });
+    if ( $mesg->code ) {
+      push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
+    } else {
+      $entry = $mesg->entry(0);
+      $gr_block->{$_} = 1 foreach ( @{$entry->get_value('memberuid', asref => 1)} );
+    }
+
+    $mesg = $ldap_crud->search({ base      => $ldap_crud->{cfg}->{base}->{acc_root},
+				 scope     => 'sub',
+				 sizelimit => 0,
+				 attrs     => [ qw( authorizedService
+						    cn
+						    gidNumber
+						    givenName
+						    sn
+						    uid ) ],
+				 filter    => '(objectClass=*)', });
+    if ( $mesg->code ) {
+      push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
+    } else {
+      $entry = $mesg->as_struct;
+      $re_dn  = sprintf("^%s=.*,%s\$",
+			lc($ldap_crud->{cfg}->{rdn}->{acc_root}),
+			lc($ldap_crud->{cfg}->{base}->{acc_root}) );
+      $re_svc = sprintf("^.*,authorizedservice=.*,%s=.*,%s\$",
+			lc($ldap_crud->{cfg}->{rdn}->{acc_root}),
+			lc($ldap_crud->{cfg}->{base}->{acc_root}) );
+      while (my ($key, $val) = each %{$entry} ) {
+	next if $key =~ /^authorized.*/;
+	if ( lc($key) =~ /$re_dn/ && lc($key) !~ /$re_svc/) {
+	  $acc->{$key}->{givenName}         = $val->{givenname}->[0];
+	  $acc->{$key}->{sn}                = $val->{sn}->[0];
+	  $acc->{$key}->{uid}               = $val->{uid}->[0];
+	  $acc->{$key}->{authorizedService} = {};
+	  $acc->{$key}->{blocked}           = exists $gr_block->{$val->{uid}->[0]} ||
+	    $val->{gidnumber}->[0] == $ldap_crud->{cfg}->{stub}->{group_blocked_gid} ? 1 : 0;
+	  log_debug { "\n$key\n" . '######## ' . $val->{gidnumber}->[0] . ' ######### ' . $ldap_crud->{cfg}->{stub}->{group_blocked_gid} . "\n" };
+	} elsif ( lc($key) =~ /$re_svc/ ) {
+	  @dn_arr = split(/,/, $key);
+	  shift @dn_arr;
+	  shift @dn_arr;
+	  $root_dn = join ',', @dn_arr;
+	  ( $l, $r) = split /\@/, $val->{authorizedservice}->[0];
+	  $rdn = exists $ldap_crud->{cfg}->{rdn}->{"$l"} ? $ldap_crud->{cfg}->{rdn}->{"$l"} : $ldap_crud->{cfg}->{rdn}->{acc_svc_common};
+	  # log_debug { np($key) };
+	  # log_debug { np($val) };
+	  # log_debug { np($val->{ $ldap_crud->{cfg}->{rdn}->{"$l"} }->[0]) };
+	  push @{$acc->{$root_dn}->{authorizedService}->{"$l"}->{$r}},
+	     { $rdn => $val->{$rdn}->[0] };
+	}
+      }
+    }
+     log_debug { np($acc) };
+    # log_debug { np($return) };
+    $c->stash( template      => 'stat_acc.tt',
+    	       accounts      => $acc,
+    	       final_message => $return,);
+  } else {
+    $c->stash( template => 'signin.tt', );
+  }
+
+
+}
+
+sub stat_acc_old : Local {
+  my ( $self, $c ) = @_;
+
+  if ( $c->user_exists() ) {
     my ( $account, $accounts, $utf_givenName, $utf_sn, $gidNumber,
 	 $svc, @services, $service,
 	 $mesg_blk, @mesg_blk_entries,
@@ -258,9 +334,9 @@ sub stat_acc : Local {
 	# log_debug { np( $accounts->{$account->dn} ) };
       }
     }
-    # log_debug { np($accounts) };
-    $c->stash( template => 'stat_acc.tt',
-	       accounts => $accounts,
+    log_debug { np($accounts) };
+    $c->stash( template      => 'stat_acc.tt',
+	       accounts      => $accounts,
 	       final_message => $return,);
   } else {
     $c->stash( template => 'signin.tt', );

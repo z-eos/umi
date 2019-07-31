@@ -26,7 +26,7 @@ Users Accounts Statistics
 [% END %]
 
 <div class="table-responsive">
-  <table id="dataTableToDraw" class="table table-sm table-hover table-sm">
+  <table id="dataTableToDraw" class="table table-sm table-hover">
     <thead class="bg-dark text-light">
       <tr class="text-uppercase info">
 	<th>LName</th>
@@ -53,10 +53,11 @@ Users Accounts Statistics
     </tfoot>
     <tbody>
       [% FOREACH dn IN accounts.keys %]
+      [% IF accounts.$dn.authorizedService.size > 0 %]
       [% FOREACH svc IN accounts.$dn.authorizedService.keys %]
       [% FOREACH fqdn IN accounts.$dn.authorizedService.$svc.keys %]
       [% FOREACH svcacc IN accounts.$dn.authorizedService.$svc.$fqdn %]
-      <tr>
+      <tr[% IF accounts.$dn.blocked %] class="table-danger"[% END %]>
 	<th>[% accounts.$dn.sn %]</th>
 	<th>[% accounts.$dn.givenName %]</th>
 	<td>[% accounts.$dn.blocked %]</td>
@@ -70,6 +71,20 @@ Users Accounts Statistics
       </tr>
       [% END %]
       [% END %]
+      [% END %]
+      [% ELSE %]
+      <tr[% IF accounts.$dn.blocked %] class="table-danger"[% END %]>
+	<th>[% accounts.$dn.sn %]</th>
+	<th>[% accounts.$dn.givenName %]</th>
+	<td>[% accounts.$dn.blocked %]</td>
+	<td>[% buttonizer( buttonizer_id='',
+	       buttonizer_dn=dn,
+	       buttonizer_text=accounts.$dn.uid ) %]</td>
+	<td></td>
+	<td></td>
+	<td></td>
+	<td></td>
+      </tr>
       [% END %]
       [% END %]
     </tbody>

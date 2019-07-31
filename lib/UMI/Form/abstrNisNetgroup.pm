@@ -175,10 +175,10 @@ sub netgroup {
   my $self = shift;
   return unless $self->form->ldap_crud;
   my $s = $self->form->ldap_crud->
-    bld_select({ base   => $self->form->ldap_crud->cfg->{base}->{netgroup},
-		 filter => '(ou=*)',
-		 scope  => 'one',
-		 attr   => [ 'ou', 'description', ],
+    bld_select({ base      => $self->form->ldap_crud->cfg->{base}->{netgroup},
+		 filter    => '(ou=*)',
+		 scope     => 'one',
+		 attr      => [ 'ou', 'description', ],
 		 empty_row => 1, });
   # log_debug { np($s) };
   return $s;
