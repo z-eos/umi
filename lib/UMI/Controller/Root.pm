@@ -161,7 +161,7 @@ sub stat_acc : Local {
 
   if ( $c->user_exists() ) {
     my $ldap_crud = $c->model('LDAP_CRUD');
-    my ( $return, $acc, $root_dn, $rest, @dn_arr, $re_dn, $re_svc, $entry, $gr_block, $l, $r, $rdn );
+    my ( $return, $acc, $root_dn, $rest, @dn_arr, $re_dn, $re_svc, $entry, $gr_block, $l, $r, $rdn, $to_utf );
 
     my $mesg = $ldap_crud->search({ base   => sprintf('cn=%s,%s',
 						      $ldap_crud->cfg->{stub}->{group_blocked},
@@ -198,7 +198,9 @@ sub stat_acc : Local {
       while (my ($key, $val) = each %{$entry} ) {
 	next if $key =~ /^authorized.*/;
 	if ( lc($key) =~ /$re_dn/ && lc($key) !~ /$re_svc/) {
+	  utf8::decode($val->{givenname}->[0]);
 	  $acc->{$key}->{givenName}         = $val->{givenname}->[0];
+	  utf8::decode($val->{sn}->[0]);
 	  $acc->{$key}->{sn}                = $val->{sn}->[0];
 	  $acc->{$key}->{uid}               = $val->{uid}->[0];
 	  $acc->{$key}->{authorizedService} = {};

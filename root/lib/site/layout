@@ -60,6 +60,11 @@
 <script src="/static/js/jquery.multi-select.js"></script>
 <!-- <script src="/static/js/umi-multiselect.js"></script> -->
 
+<link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="/static/css/tempusdominus-bootstrap-4.css" />
+<script type="text/javascript" src="/static/js/moment-with-locales.js"></script>
+<script type="text/javascript" src="/static/js/tempusdominus-bootstrap-4.min.js"></script>
+
 [% IF c.check_user_roles('admin') %]
 <!-- LDAP tree related (Vue based) -->
 <!--
@@ -219,6 +224,30 @@
    
  });
 */
+
+ function initDateTimePicker(selector) {
+      $(selector).datetimepicker({
+     /* locale: 'uk', */
+     format: 'YYYY.MM.DD HH:mm',
+     minDate: moment(),
+     maxDate: moment().add(10, 'years'),
+     stepping: 10,
+     calendarWeeks: true,
+     debug: true,
+     icons: {
+       time:     'far fa-clock',
+       date:     'far fa-calendar-alt',
+       up:       'fas fa-caret-up',
+       down:     'fas fa-caret-down',
+       previous: 'fas fa-caret-left',
+       next:     'fas fa-caret-right',
+       today:    'fas fa-calendar-check',
+       clear:    'far fa-trash-alt',
+       close:    'fas fa-times'
+     }
+   });
+ }
+
 </script>
 
 

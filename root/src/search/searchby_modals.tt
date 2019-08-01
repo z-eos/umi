@@ -370,27 +370,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
   </div>
 </div>
 
-<script>
- $('#modal_refresh_dtp[% id_suffix %]').datetimepicker({
-   lang:'en',
-   mask:true,
-   format: 'Y.m.d H:i',
-   formatTime:'H:i',
-   formatDate:'Y.m.d',
-   step:20,
-   inline:true,
-   timepicker:true,
-   weeks:true,
-   closeOnDateSelect:true,
-   todayButton:true,
-   datepicker:true,
-   dayOfWeekStart:1,
-   yearStart:[% date.format(format = '%Y') %],
-   yearEnd:[% date.format(format = '%Y') + dds_max_ttl_years %],
-   startDate:'[% date.format %]',
-   startTime:'[% date.format(format = 'H:i') %]',
-   minDate:'[% date.format %]',
-   maxDate:[% date.format(format = '%Y') + dds_max_ttl_years %]+'.01.01'
- });
+<script type="text/javascript">
+ initDateTimePicker('#modal_refresh_dtp[% id_suffix %]');
 </script>
 

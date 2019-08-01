@@ -57,27 +57,27 @@ Users Accounts Statistics
       [% FOREACH svc IN accounts.$dn.authorizedService.keys %]
       [% FOREACH fqdn IN accounts.$dn.authorizedService.$svc.keys %]
       [% FOREACH svcacc IN accounts.$dn.authorizedService.$svc.$fqdn %]
-      <tr[% IF accounts.$dn.blocked %] class="table-danger"[% END %]>
+      <tr class="umi-text-xs [% 'table-danger' IF accounts.$dn.blocked %]">
 	<th>[% accounts.$dn.sn %]</th>
 	<th>[% accounts.$dn.givenName %]</th>
-	<td>[% accounts.$dn.blocked %]</td>
-	<td>[% buttonizer( buttonizer_id='',
+	<td class="mono">[% accounts.$dn.blocked %]</td>
+	<td class="mono">[% buttonizer( buttonizer_id='',
 	       buttonizer_dn=dn,
 	       buttonizer_text=accounts.$dn.uid ) %]</td>
-	<td>[% svc %]</td>
-	<td>[% fqdn %]</td>
-	<td>[% svcacc.cn %]</td>
-	<td>[% svcacc.uid %]</td>
+	<td class="mono">[% svc %]</td>
+	<td class="mono">[% fqdn %]</td>
+	<td class="mono">[% svcacc.cn %]</td>
+	<td class="mono">[% svcacc.uid %]</td>
       </tr>
       [% END %]
       [% END %]
       [% END %]
       [% ELSE %]
-      <tr[% IF accounts.$dn.blocked %] class="table-danger"[% END %]>
+      <tr class="umi-text-xs [% 'table-danger' IF accounts.$dn.blocked %]">
 	<th>[% accounts.$dn.sn %]</th>
 	<th>[% accounts.$dn.givenName %]</th>
-	<td>[% accounts.$dn.blocked %]</td>
-	<td>[% buttonizer( buttonizer_id='',
+	<td class="mono">[% accounts.$dn.blocked %]</td>
+	<td class="mono">[% buttonizer( buttonizer_id='',
 	       buttonizer_dn=dn,
 	       buttonizer_text=accounts.$dn.uid ) %]</td>
 	<td></td>
