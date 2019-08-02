@@ -342,6 +342,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
       </div>
       <form role="form" method="POST" action="/searchby/refresh" class="formajaxer">
 	<div class="modal-body clearfix form-group text-primary text-center">
+	  
 	  <blockquote>
 	    <p>
 	      ... the lifetime of dynamic objects with subordinates is
@@ -349,11 +350,30 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	    </p>
 	    <footer>slapo-dds(5)</footer>
 	  </blockquote>
-	  <input type="text" class="input-sm form-control"
-		 id="modal_refresh_dtp[% id_suffix %]"
-		 title="Refresh TTL of this object (extended LDAPv3 operation as described in RFC2589)"
-		 name="requestTtl">
-	</div>
+	  
+	  <div class="form-group row">
+	    <label class="col-3 text-right font-weight-bold control-label atleastone"
+		   title="Object Expiration">
+	      Exp.
+	    </label>
+	    <div class="col-9">
+	      <div class="input-group date"
+		   id="modal_refresh_dtp[% id_suffix %]"
+		   data-target-input="nearest">
+		<input name="requestTtl" type="text"
+		       title="Refresh TTL of this object (extended LDAPv3 operation as described in RFC2589)"
+		       class="form-control datetimepicker-input"
+		       data-target="#modal_refresh_dtp[% id_suffix %]"/>
+		<div class="input-group-append"
+		     data-target="#modal_refresh_dtp[% id_suffix %]"
+		     data-toggle="datetimepicker">
+		  <div class="input-group-text"><i class="far fa-calendar-alt"></i></div>
+		</div>
+	      </div>
+	    </div>
+	  </div>
+
+	</div>  
 	<div class="modal-footer">
 	  <div>
 	    <button type="button" class="btn btn-secondary umi-btn-event" data-dismiss="modal">Close</button>
@@ -366,11 +386,10 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	  </div>
 	</div>
       </form>
-    </div>
-  </div>
-</div>
-
 <script type="text/javascript">
  initDateTimePicker('#modal_refresh_dtp[% id_suffix %]');
 </script>
+    </div>
+  </div>
+</div>
 
