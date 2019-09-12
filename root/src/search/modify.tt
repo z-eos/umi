@@ -139,10 +139,10 @@ Modify Fields of DN: <small><em>
 	[%   END %]
 	
 	[%   IF attr.key == rdn %]
-	<input type="text" value="[% val %]" name="[% attr.key %]" id="[% 'val_' _ id %]" disabled="" class="form-control" title="this field is RDN, to modify it, use menu &rarr; moddn">
+	<input type="text" value="[% val %]" name="[% attr.key %]" id="[% 'val_' _ id %]" disabled class="form-control" title="this field is RDN, to modify it, use menu &rarr; moddn">
 	
 	[%   ELSIF attr.key.match('umiUserCertificate') %]
-	<input type=text value="[% val %]" name="[% attr.key %]" id="[% 'val_' _ id %]" disabled="" class="form-control"
+	<input type=text value="[% val %]" name="[% attr.key %]" id="[% 'val_' _ id %]" disabled class="form-control"
 	       title="auto changed by new, .der format certificate (see the field &laquo;userCertificate&raquo;) upload">
 	
 	[%   ELSIF attr.key == 'sshPublicKey' %]
@@ -155,7 +155,11 @@ Modify Fields of DN: <small><em>
 	<textarea name="[% attr.key %]" id="[% 'val_' _ id %]" class="form-control" rows=2>[% val %]</textarea>
 
 	[%   ELSE %]
-	<input type="text" value='[% val %]' id="[% 'val_' _ id %]" name="[% attr.key %]" class="form-control">
+	[%   disabled = '';
+             IF ! c.check_user_roles('admin') && attr.key == 'o';
+	      disabled = 'disabled';
+	     END %]
+	<input type="text" value='[% val %]' id="[% 'val_' _ id %]" name="[% attr.key %]" class="form-control" [% disabled %]>
 	[%   END %]
       </div>
       [%   END %]
