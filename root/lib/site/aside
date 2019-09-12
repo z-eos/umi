@@ -228,7 +228,7 @@
 	     {{ ipaitem.dn }}
 	   </div>
 	  </div>
-	  <ul class="font-monospace ldap-tree" v-show="ipaitem.isOpen" v-if="isIpaFolder">
+	  <ul class="font-monospace ldap-tree" v-if="isIpaFolder && ipaitem.isOpen">
 	   <ipam-tree-item class="ldap-tree-item"
 	                   v-for="(child, index) in ipaitem.children"
 	   		   :key="index"

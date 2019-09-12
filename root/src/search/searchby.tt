@@ -247,7 +247,7 @@ Search Advanced
 		  <form class="formajaxer inline-group" role="form" method="POST" action="/searchby">
 		    <input type="hidden"  name="ldap_subtree" value="[% root_obj_dn %]">
 		    <button class="[% root_of_rec_btn %] btn umi-search d-none d-md-block"
-			    title="[% user_name %] click to open root object [% blocked_title %]"
+			    title="[% user_name %] click to open object full tree [% blocked_title %]"
 			    type="submit">
 		      <span class="to-root-object [% entry_text_size %]"><b>[% root_of_rec %]</b></span>
 		    </button>
