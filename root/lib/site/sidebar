@@ -38,7 +38,7 @@
 	   aria-expanded="false"
 	   aria-controls="submenuAnalyze"
 	   class="nav-link text-white-50">
-	  <i class="fas fa-lg fa-fw fa-microscope"></i>
+	  <i class="fas fa-lg fa-fw fa-flask"></i>
 	  <b class="text-uppercase">Analyze</b>
 	</a>
 	<ul class="nav flex-column collapse ml-3 p-0" id="submenuAnalyze">

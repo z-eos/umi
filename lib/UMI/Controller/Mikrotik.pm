@@ -7,6 +7,9 @@ use Logger;
 
 BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 
+use DateTime::Format::Duration;
+use POSIX;
+
 =head1 NAME
 
 UMI::Controller::Mikrotik - Catalyst Controller
@@ -27,7 +30,10 @@ Catalyst Controller.
 sub index :Path :Args(0) {
   my ( $self, $c ) = @_;
   my $registrations;
-  
+
+  my ($d, $fmt, $to_split, $splitted, $to_join, $joined);
+  $d = DateTime::Format::Duration->new();
+
   if ( exists UMI->config->{mikrotik}->{caps_host} ) {
     $registrations = $self->ask_mikrotik({ type     => 'registrations',
 					   host     => UMI->config->{mikrotik}->{caps_host},
@@ -38,6 +44,22 @@ sub index :Path :Args(0) {
     my ( $mesg, $entry, $key, $val );
     
     foreach my $mac (keys (%{$registrations->{registrats}})) {
+      if ( $registrations->{registrats}->{$mac}->{uptime} =~ /^\d+ms$/ ) {
+	$fmt = '%Nms';
+      } elsif ( $registrations->{registrats}->{$mac}->{uptime} =~ /^\d+s\d+ms$/ ) {
+	$fmt = '%Ss%Nms';
+      } elsif ( $registrations->{registrats}->{$mac}->{uptime} =~ /^\d+m\d+s\d+ms$/ ) {
+	$fmt = '%Mm%Ss%Nms';
+      } elsif ( $registrations->{registrats}->{$mac}->{uptime} =~ /^\d+h\d+m\d+s\d+ms$/ ) {
+	$fmt = '%Hh%Mm%Ss%Nms';
+      } elsif ( $registrations->{registrats}->{$mac}->{uptime} =~ /^\d+d\d+h\d+m\d+s\d+ms$/ ) {
+	$fmt = '%ed%Hh%Mm%Ss%Nms';
+      }
+
+      $d->set_pattern( $fmt );
+      $registrations->{registrats}->{$mac}->{sec} =
+	floor $d->format_duration( duration => $d->parse_duration($registrations->{registrats}->{$mac}->{uptime}), pattern => '%s');
+
       $mesg = $ldap_crud->search({ base   => $ldap_crud->{cfg}->{base}->{dhcp},
 				   filter => sprintf("(dhcpHWAddress=ethernet %s)", lc($mac)), });
       next if $mesg->count < 1;

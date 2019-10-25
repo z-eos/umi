@@ -87,15 +87,26 @@ sub proc :Path(proc) :Args(0) {
 
       if ( defined $params->{search_history} && $params->{search_history} eq '1' ) {
 	$basedn = UMI->config->{ldap_crud_db_log};
-	push @filter_arr, '(reqAuthzID=' . $params->{reqAuthzID} . ')' if $params->{reqAuthzID} ne '';
-	push @filter_arr, '(reqDn=' . $params->{reqDn} . ')'           if $params->{reqDn}    ne '';
-	push @filter_arr, '(reqEnd=' . $params->{reqEnd} . ')'         if $params->{reqEnd}   ne '';
-	push @filter_arr, '(reqResult=' . $params->{reqResult} . ')'   if $params->{reqResult} ne '';
-	push @filter_arr, '(reqMessage=' . $params->{reqMessage} . ')' if $params->{reqMessage} ne '';
-	push @filter_arr, '(reqMod=' . $params->{reqMod} . ')'         if $params->{reqMod}   ne '';
-	push @filter_arr, '(reqOld=' . $params->{reqOld} . ')'         if $params->{reqOld}   ne '';
-	push @filter_arr, '(reqStart=' . $params->{reqStart} . ')'     if $params->{reqStart} ne '';
-	push @filter_arr, '(reqType=' . $params->{reqType} . ')'       if $params->{reqType}  ne '';
+	push @filter_arr, '(reqAuthzID=' . $params->{reqAuthzID} . ')'
+	  if $params->{reqAuthzID} ne '';
+	push @filter_arr, '(reqDn=' . $params->{reqDn} . ')'
+	  if $params->{reqDn}    ne '';
+	push @filter_arr, '(reqEntryUUID=' . $params->{reqEntryUUID} . ')'
+	  if $params->{reqEntryUUID}    ne '';
+	push @filter_arr, '(reqEnd=' . $params->{reqEnd} . ')'
+	  if $params->{reqEnd}   ne '';
+	push @filter_arr, '(reqResult=' . $params->{reqResult} . ')'
+	  if $params->{reqResult} ne '';
+	push @filter_arr, '(reqMessage=' . $params->{reqMessage} . ')'
+	  if $params->{reqMessage} ne '';
+	push @filter_arr, '(reqMod=' . $params->{reqMod} . ')'
+	  if $params->{reqMod}   ne '';
+	push @filter_arr, '(reqOld=' . $params->{reqOld} . ')'
+	  if $params->{reqOld}   ne '';
+	push @filter_arr, '(reqStart=' . $params->{reqStart} . ')'
+	  if $params->{reqStart} ne '';
+	push @filter_arr, '(reqType=' . $params->{reqType} . ')'
+	  if $params->{reqType}  ne '';
 	if ( $#filter_arr > 0 ) {
 	  $filter = '(&' . join('', @filter_arr) . ')';
 	} elsif ( $#filter_arr == 0 ) {

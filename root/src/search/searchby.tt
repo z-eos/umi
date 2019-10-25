@@ -100,6 +100,7 @@ Search Advanced
 	    <a href="#"
 	       class="collapse_in_out btn btn-secondary text-light" role="button"
 	       title="Collapse In/Out Each Element On This Page"
+	       accesskey="f"
 	       data-target="#collapse"
 	       data-toggle="collapse"
 	       data-parent="#accordion"
@@ -554,8 +555,8 @@ Search Advanced
 			 buttonizer_text= h_attr.value.0 _ ' ( <em>' _ entry.val.root.PrimaryGroupName _ '</em> )' );
 		       ELSIF h_attr.key == 'userPKCS12' %]
 		    <kbd class="fa fa-file-o">&nbsp;Binary Data</kbd>
-		    [% ELSIF h_attr.key == 'pgpKey' %]
-		    <pre>[% h_attr.value.0 %]</pre>
+		    [% ELSIF h_attr.key == 'pgpKey' || h_attr.key == 'mu-sieveOnReceive' %]
+		    <small><pre>[% h_attr.value.0 %]</pre></small>
 		    [% ELSIF h_attr.key == 'jpegPhoto';
 		       img = '<img class="table-';
 		       img _ tr_color _ ' ' _ h_attr.value;

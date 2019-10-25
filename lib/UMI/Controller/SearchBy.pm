@@ -1659,7 +1659,7 @@ sub modify :Path(modify) :Args(0) {
   my $replace = undef;
   log_debug { np($params) };
   my @ea = $entry->attributes;
-  log_debug { np(@ea) };
+  # log_debug { np(@ea) };
 
   # sanitize $entry in case it has empty attributes
   foreach $attr ( $entry->attributes ) {

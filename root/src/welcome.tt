@@ -1,26 +1,67 @@
 [% META title = 'UMI' %] 
 
-[% USE date %]
-[% color = [ 'blue', 'indigo', 'purple', 'pink', 'red', 'orange', 'yellow', 'green', 'teal', 'cyan', 'white', 'gray', 'gray-dark', 'info', 'danger', 'warning', 'success', 'primary' ] %]
-
-[% idx1 =  date.format(format = '%s').substr(-2, 1) %]
-[% idx2 =  date.format(format = '%s').substr(-1, 1) %]
-
-[% IF idx1 > 9 %]
-[% idx1 = 1 %]
-[% ELSE %]
-[% idx1 = '' %]
-[% END %]
-
-[% IF idx2 == 9 %]
-[% idx2 = 7 %]
-[% END %]
-
-[% idx = idx1 _ idx2 %]
-
 <br>
 
-<div class="card text-white bg-[% color.$idx %] mb-3" style="max-width: 40rem;">
+<div id="keys" class="card text-white mb-3" style="max-width: 25rem;">
+  <div class="card-header"><h3><b>Access Keys</b></h3>
+    <small>
+      <table class="table table-sm table-hover text-white" id="table2">
+	<thead>
+	  <tr class="h3">
+	    <th scope="col"></th>
+	    <th scope="col"><i class="fab fa-windows"></i></th>
+	    <th scope="col"><i class="fab fa-linux"></i></th>
+	    <th scope="col"><i class="fab fa-apple"></i></th>
+	  </tr>
+	</thead>
+	<tbody>
+	  <tr>
+	    <td class="h3" scope="row"><i class="fab fa-chrome"></i></td>
+	    <td class="align-middle">Alt + <em>key</em></td>
+	    <td class="align-middle">Alt + <em>key</em></td>
+	    <td class="align-middle">Ctrl + Alt + <em>key</em></td>
+	  </tr>
+	  <tr>
+	    <td class="h3" scope="row"><i class="fab fa-firefox"></i></td>
+	    <td class="align-middle">Alt + Shift + <em>key</em></td>
+	    <td class="align-middle">Alt + Shift + <em>key</em></td>
+	    <td class="align-middle">Ctrl + Alt + <em>key</em></td>
+	  </tr>
+	  <tr>
+	    <td class="h3" scope="row"><i class="fab fa-safari"></i></td>
+	    <td class="align-middle">Alt + <em>key</em></td>
+	    <td class="align-middle">N/A</td>
+	    <td class="align-middle">Ctrl + Alt + <em>key</em></td>
+	  </tr>
+	  <tr>
+	    <td class="h3" scope="row"><i class="fab fa-opera"></i></td>
+	    <td class="align-middle" colspan="3">v &ge;15: [Alt] + <em>key</em>; v &le;12.1: [Shift] [Esc] + <em>key</em>
+	    </td>
+	  </tr>
+	</tbody>
+      </table>
+    </small>
+  </div>
+  <div id="keys-body" class="card-body">
+
+    <table class="table table-hover text-white" id="table2">
+      <thead>
+	<tr>
+	  <th scope="col">Key</th>
+	  <th scope="col">Action</th>
+	</tr>
+      </thead>
+      <tbody>
+	<tr>
+	  <td scope="row">s</td>
+	  <td>Focus to Search Field</td>
+	</tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div id="motto" class="card text-white mb-3" style="max-width: 25rem;">
   <div class="card-header">Do chant</div>
   <div class="card-body">
     <h3 class="card-title"><b>Do chant user's <a href="/motto" class="text-dark">motto</a>!</b></h3>
@@ -28,3 +69,17 @@
     <a href="/motto" class="card-link text-dark">the motto</a>
   </div>
 </div>
+
+<script>
+ 
+  var colors = [
+  "blue", "indigo", "purple", "pink", "red", "orange", "yellow", "green", "teal", "cyan", "gray", "gray-dark", "info", "danger", "warning", "success", "primary"
+  ];
+
+  var color = colors[Math.floor(Math.random()*(colors.length)+1)];
+  $("#keys").addClass("bg-"+color);
+
+  color = colors[Math.floor(Math.random()*colors.length)];
+  $("#motto").addClass("bg-"+color);
+  
+</script>

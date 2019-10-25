@@ -63,6 +63,14 @@ has_field 'reqDn'
       element_attr          => { placeholder => 'uid=ACTION-REQUESTED-ON,ou=People,dc=' . UMI->config->{ldap_crud_db},
 				 title => 'The reqDN attribute is the distinguishedName of the target of the operation. E.g., for a Bind request, this is the Bind DN. For an Add request, this is the DN of the entry being added. For a Search request, this is the base DN of the search.',}, );
 
+has_field 'reqEntryUUID'
+ => ( label                 => 'reqEntryUUID',
+      label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+      wrapper_class         => [ 'row', 'searchhistory', ],
+      element_wrapper_class => [ 'input-sm', 'col-10', ],
+      element_attr          => { placeholder => 'reqEntryUUID=a14f0795-6ab6-4b73-8510-40a6c6baa49e',
+				 title => 'reqEntryUUID',}, );
+
 has_field 'reqMod'
  => ( type                  => 'TextArea',
       label                 => 'Request Mod',
@@ -287,6 +295,7 @@ sub build_render_list {[ qw( search_history
 			     reqType
 			     reqAuthzID
 			     reqDn
+			     reqEntryUUID
 			     reqMod
 			     reqMessage
 			     reqResult
@@ -315,6 +324,7 @@ sub validate {
   if ( $self->field('search_history')->value eq '1' &&
        $self->field('reqAuthzID')->value     eq '' &&
        $self->field('reqDn')->value          eq '' &&
+       $self->field('reqEntryUUID')->value   eq '' &&
        $self->field('reqEnd')->value         eq '' &&
        $self->field('reqMessage')->value     eq '' &&
        $self->field('reqMod')->value         eq '' &&

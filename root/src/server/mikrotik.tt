@@ -13,29 +13,31 @@ MikroTik CAPsMAN registrations <small><em class="text-muted font-monospace">WiFi
 [% INCLUDE ldap_err.tt %]
 
 <!-- div class="table-responsive" -->
-  <table id="dataTableToDraw" class="table table-sm table-hover my-3 font-monospace">
+  <table id="dataTableToDraw" class="table table-sm table-hover my-3 font-monospace umi-text-smaller">
     <thead class="bg-dark text-light">
       <tr class="text-uppercase active">
 	<th>MAC</th>
 	<th>uid</th>
+	<th>EAP ID</th>
 	<th>IP</th>
 	<th>SSID</th>
-	<th>EAP ID</th>
 	<th>interface</th>
-	<th>uptime</th>
 	<th>config</th>
+	<th>uptime</th>
+	<th>sec</th>
       </tr>
     </thead>
     <tfoot class="bg-dark text-light">
       <tr class="text-uppercase active">
 	<th>MAC</th>
 	<th>uid</th>
+	<th>EAP ID</th>
 	<th>IP</th>
 	<th>SSID</th>
-	<th>EAP ID</th>
 	<th>interface</th>
-	<th>uptime</th>
 	<th>config</th>
+	<th>uptime</th>
+	<th>sec</th>
       </tr>
     </tfoot>
     <tbody>
@@ -44,18 +46,23 @@ MikroTik CAPsMAN registrations <small><em class="text-muted font-monospace">WiFi
       [% id = 'collapse' _ loop.index %]
       [% hd = 'heading' _ loop.index %]
 
-      [% ifreg = final_message.registrats.$reg.interface %]
-
-	<tr class="[% mta.custom.$domain.smarthost.mx.html_class %]">
+      [% ifreg = final_message.registrats.$reg.interface;
+	 nouid = '';
+	 IF final_message.registrats.$reg.uid == '';
+	 nouid = 'table-warning';
+	 END %]
+	
+	<tr class="[% mta.custom.$domain.smarthost.mx.html_class %][% nouid %]">
 	  <th>[% reg %]</th>
 	  <td>[% final_message.registrats.$reg.uid %]</td>
+	  <td>[% final_message.registrats.$reg.$eap %]</td>
 	  <td>[% final_message.registrats.$reg.ip %]</td>
 	  <td>[% final_message.registrats.$reg.ssid %]</td>
-	  <td>[% final_message.registrats.$reg.$eap %]</td>
 	  <td>[% ifreg %]</td>
-	  <td>[% final_message.registrats.$reg.uptime %]</td>
 	  <td>[% final_message.interfaces.$ifreg.configuration %]</td>
-      </tr>
+	  <td>[% final_message.registrats.$reg.uptime %]</td>
+	  <td>[% final_message.registrats.$reg.sec %]</td>
+	</tr>
       [% END %]
     </tbody>
   </table>
