@@ -56,6 +56,10 @@
 	  <td scope="row">s</td>
 	  <td>Focus to Search Field</td>
 	</tr>
+	<tr>
+	  <td scope="row">f</td>
+	  <td>collase/uncollapse all search result records</td>
+	</tr>
       </tbody>
     </table>
   </div>
