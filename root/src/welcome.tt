@@ -88,6 +88,11 @@
 	  <td>global</td>
 	  <td>un/collapse right panel</td>
 	</tr>
+	<tr>
+	  <td scope="row"><kbd>h</kbd></td>
+	  <td>global</td>
+	  <td>go to the root of the site</td>
+	</tr>
       </tbody>
     </table>
   </div>
