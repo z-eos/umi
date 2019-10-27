@@ -3,7 +3,9 @@
 <header>
   <nav class="navbar navbar-dark bg-dark" id="header">
     [% IF c.user_exists && c.session.auth_uid # !!! to fix, looks like a stub %]
-    <a id="sidebarLeftCollapse" class="navbar-toggler btn btn-link p-0 pr-3 border-0" href="#" title="show/hide left panel">
+    <a id="sidebarLeftCollapse" class="navbar-toggler btn btn-link p-0 pr-3 border-0"
+       href="#" accesskey="l"
+       title="show/hide left panel">
       <i id="sidebarLeftToggler" class="fas fa-fw [% toggle_a %][% # defined in layout %]"></i>
     </a>
     [% END %]
@@ -261,7 +263,9 @@
       </li>
       [% END %]
     </ul>
-    <a id="sidebarRightCollapse" class="navbar-toggler btn btn-link p-0 border-0" href="#" title="show/hide right panel">
+    <a id="sidebarRightCollapse" class="navbar-toggler btn btn-link p-0 border-0"
+       href="#" accesskey="r"
+       title="show/hide right panel">
       <i id="sidebarRightToggler" class="fas fa-fw [% toggle_a %][% # defined in layout %]"></i>
     </a>
   </nav>

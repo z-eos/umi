@@ -6,7 +6,8 @@
   <div class="col-10 inline-group">
     <div class="">
       <a href="#"
-	 class="chevron_toggleable btn btn-link pull-left"
+	 accesskey="[% accesskey %]"
+	 class="chevron_toggleable btn btn-transparent pull-left"
 	 title="Collapse In/Out This Panel"
 	 data-target="#collapse[% loop.index %]"
 	 data-toggle="collapse"

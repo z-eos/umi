@@ -187,10 +187,13 @@ Search Advanced
 	 ELSIF (entry.val.mgmnt.is_root && entry.val.mgmnt.is_account)
 	 || ! entry.val.mgmnt.is_account;
 	 tr_color = 'info';
+	 accesskey = '1';
 	 ELSIF entry.key.match('^[uid]|[cn]=.*,author');
 	 tr_color = 'success';
+	 accesskey = '3';
 	 ELSE;
 	 tr_color = 'warning';
+	 accesskey = '2';
 	 END;
 
 	 num_of_dc = 0;
