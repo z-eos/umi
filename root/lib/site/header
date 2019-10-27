@@ -10,7 +10,7 @@
     </a>
     [% END %]
 
-    <a id="navbarbrand" class="navbar-brand" href="/">
+    <a id="navbarbrand" class="navbar-brand" href="/" accesskey="h">
       <img src="/static/images/umi-logo.50x50.png" width="30" height="30" alt="logo">
     </a>
 
