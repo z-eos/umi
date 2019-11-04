@@ -3,7 +3,7 @@
 <br>
 
 <div id="keys" class="card text-white mb-3" style="max-width: 45rem;">
-  <div class="card-header"><h3><b>Access Keys</b></h3>
+  <div class="card-header"><h3><b>Access Keys Combinations</b></h3>
     <small>
       <table class="table table-sm table-hover text-white" id="table2">
 	<thead>
@@ -15,29 +15,34 @@
 	  </tr>
 	</thead>
 	<tbody>
+	  [% IF c.request.headers.header('User-Agent').search('irefox|ozilla') %]
 	  <tr>
 	    <td class="h3" scope="row"><i class="fab fa-firefox"></i></td>
-	    <td class="align-middle"><kbd>Alt + Shift + <em>key</em></kbd></td>
-	    <td class="align-middle"><kbd>Alt + Shift + <em>key</em></kbd></td>
-	    <td class="align-middle"><kbd>Ctrl + Alt + <em>key</em></kbd></td>
+	    <td class="align-middle">Alt + Shift + <kbd><em>key</em></kbd></td>
+	    <td class="align-middle">Alt + Shift + <kbd><em>key</em></kbd></td>
+	    <td class="align-middle">Ctrl + Alt + <kbd><em>key</em></kbd></td>
 	  </tr>
+	  [% ELSIF c.request.headers.header('User-Agent').search('hrom') %]
 	  <tr>
 	    <td class="h3" scope="row"><i class="fab fa-chrome"></i></td>
-	    <td class="align-middle"><kbd>Alt + <em>key</em></kbd></td>
-	    <td class="align-middle"><kbd>Alt + <em>key</em></kbd></td>
-	    <td class="align-middle"><kbd>Ctrl + Alt + <em>key</em></kbd></td>
+	    <td class="align-middle">Alt + <kbd><em>key</em></kbd></td>
+	    <td class="align-middle">Alt + <kbd><em>key</em></kbd></td>
+	    <td class="align-middle">Ctrl + Alt + <kbd><em>key</em></kbd></td>
 	  </tr>
+	  [% ELSIF c.request.headers.header('User-Agent').search('afar') %]
 	  <tr>
 	    <td class="h3" scope="row"><i class="fab fa-safari"></i></td>
-	    <td class="align-middle"><kbd>Alt + <em>key</em></kbd></td>
+	    <td class="align-middle">Alt + <kbd><em>key</em></kbd></td>
 	    <td class="align-middle">N/A</td>
-	    <td class="align-middle"><kbd>Ctrl + Alt + <em>key</em></kbd></td>
+	    <td class="align-middle">Ctrl + Alt + <kbd><em>key</em></kbd></td>
 	  </tr>
+	  [% ELSIF c.request.headers.header('User-Agent').search('pera') %]
 	  <tr>
 	    <td class="h3" scope="row"><i class="fab fa-opera"></i></td>
-	    <td class="align-middle" colspan="3">v &ge;15: <kbd>[Alt] + <em>key</em></kbd>; v &le;12.1: <kbd>[Shift] [Esc] + <em>key</em></kbd>
+	    <td class="align-middle" colspan="3">v &ge;15: [Alt] + <kbd><em>key</em></kbd>; v &le;12.1: [Shift] [Esc] + <kbd><em>key</em></kbd>
 	    </td>
 	  </tr>
+	  [% END %]
 	</tbody>
       </table>
     </small>
@@ -64,19 +69,24 @@
 	  <td>un/collapse all search result records</td>
 	</tr>
 	<tr>
+	  <td scope="row"><kbd>0</kbd></td>
+	  <td>search results</td>
+	  <td>focus each next root object button ( Enter key to un/collapse )</td>
+	</tr>
+	<tr>
 	  <td scope="row"><kbd>1</kbd></td>
 	  <td>search results</td>
-	  <td>focus each next root object ( Enter key to un/collapse )</td>
+	  <td>focus each next root object menu ( Enter key to un/collapse )</td>
 	</tr>
 	<tr>
 	  <td scope="row"><kbd>2</kbd></td>
 	  <td>search results</td>
-	  <td>focus each next branch object ( Enter key to un/collapse )</td>
+	  <td>focus each next branch object menu ( Enter key to un/collapse )</td>
 	</tr>
 	<tr>
 	  <td scope="row"><kbd>3</kbd></td>
 	  <td>search results</td>
-	  <td>focus each next leaf object ( Enter key to un/collapse )</td>
+	  <td>focus each next leaf object menu ( Enter key to un/collapse )</td>
 	</tr>
 	<tr>
 	  <td scope="row"><kbd>l</kbd></td>

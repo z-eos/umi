@@ -142,7 +142,7 @@
       <li class="nav-item">
 	<a href="#submenuObjects" data-toggle="collapse" aria-expanded="false"
 	   class="nav-link text-white-50">
-	  <i class="fas fa-lg fa-fw fa-shapes"></i>
+	  <i class="fas fa-lg fa-fw fa-magic"></i>
 	  <div class="d-none d-inline-flex">
 	    <b class="text-uppercase">New Obj</b>
 	  </div>
