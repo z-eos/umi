@@ -52,7 +52,7 @@
     <table class="table table-hover text-white" id="table2">
       <thead>
 	<tr>
-	  <th scope="col">Key</th>
+	  <th scope="col"><kbd><em>key</em></kbd></th>
 	  <th scope="col">Location</th>
 	  <th scope="col">Action</th>
 	</tr>

@@ -34,7 +34,7 @@ has_field 'requestttl'
       <div class="input-group date" id="requestttl" data-target-input="nearest">
         <input name="requestttl" type="text" class="form-control datetimepicker-input" data-target="#requestttl"/>
         <div class="input-group-append" data-target="#requestttl" data-toggle="datetimepicker">
-          <div class="input-group-text"><i class="far fa-calendar-alt"></i></div>
+          <div class="input-group-text"><i class="far fa-lg fa-calendar-alt"></i></div>
         </div>
       </div>
     </div>

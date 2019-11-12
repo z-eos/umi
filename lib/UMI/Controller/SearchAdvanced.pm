@@ -26,11 +26,7 @@ UMI::Controller::SearchAdvanced - Catalyst Controller
 
 =head1 DESCRIPTION
 
-Catalyst Controller.
-
-=head1 METHODS
-
-=cut
+Advanced (low level) Search
 
 
 =head2 index
@@ -38,33 +34,32 @@ Catalyst Controller.
 =cut
 
 sub index :Path :Args(0) {
-    my ( $self, $c ) = @_;
-    my $params = $c->req->params;
+  my ( $self, $c ) = @_;
+  my $params = $c->req->params;
 
-    $c->stash( template      => 'search/search_advanced.tt',
-	       form          => $self->form,
-	       final_message => '', );
+  $c->stash( template      => 'search/search_advanced.tt',
+	     form          => $self->form,
+	     final_message => '', );
 
-    if ( keys %{$params} > 0 ) {
-      my $init_obj = { base_dn       => $params->{base_dn},
-		       search_filter => $params->{search_filter},
-		       search_scope  => $params->{search_scope}, };
-      return unless $self->form
-	->process( init_object => $init_obj,
-		   ldap_crud   => $c->model('LDAP_CRUD'), );
-    } else {
-      # log_debug { np( $params ) };
-      return unless $self->form
-	->process( posted    => ($c->req->method eq 'POST'),
-		   params    => $params,
-		   ldap_crud => $c->model('LDAP_CRUD'), );
+  if ( keys %{$params} > 0 ) {
+    my $init_obj = { base_dn       => $params->{base_dn},
+		     search_filter => $params->{search_filter},
+		     search_scope  => $params->{search_scope}, };
+    return unless $self->form
+      ->process( init_object => $init_obj,
+		 ldap_crud   => $c->model('LDAP_CRUD'), );
+  } else {
+    # log_debug { np( $params ) };
+    return unless $self->form
+      ->process( posted    => ($c->req->method eq 'POST'),
+		 params    => $params,
+		 ldap_crud => $c->model('LDAP_CRUD'), );
 
-      $self->form->base_dn( $params->{base_dn} );
-      $self->form->search_filter( $params->{search_filter} );
-      # $params->{action_searchby} = $c->uri_for_action('searchby/index');
-    }
-
+    $self->form->base_dn( $params->{base_dn} );
+    $self->form->search_filter( $params->{search_filter} );
+    # $params->{action_searchby} = $c->uri_for_action('searchby/index');
   }
+}
 
 sub proc :Path(proc) :Args(0) {
     my ( $self, $c ) = @_;
@@ -284,13 +279,24 @@ sub proc :Path(proc) :Args(0) {
 	  $dn_depth = $ldap_crud->{cfg}->{base}->{dc_num} + 1;
 	}
 
-	$c_name = ldap_explode_dn( $_->get_value('creatorsName'), casefold => 'none' );
+	$c_name = ldap_explode_dn( $_->get_value('creatorsName'),  casefold => 'none' );
 	$m_name = ldap_explode_dn( $_->get_value('modifiersName'), casefold => 'none' );
 	$ttentries->{$_->dn}->{root}->{ts} =
-	  { createTimestamp => $self->ts({ ts => $_->get_value('createTimestamp'), gnrlzd => 1, gmt => 1 }),
-	    creatorsName    => defined $c_name->[0]->{uid} ? $c_name->[0]->{uid} : $c_name->[0]->{cn},
-	    modifyTimestamp => $self->ts({ ts => $_->get_value('modifyTimestamp'), gnrlzd => 1, gmt => 1 }),
-	    modifiersName   => defined $m_name->[0]->{uid} ? $m_name->[0]->{uid} : $m_name->[0]->{cn}, };
+	  { createTimestamp => $self->ts({ ts => $_->get_value('createTimestamp'), gnrlzd => 1, gmt => 1, format => '%Y%m%d%H%M' }),
+	    creatorsName    => $c_name->[0]->{uid} // $c_name->[0]->{cn},
+	    modifyTimestamp => $self->ts({ ts => $_->get_value('modifyTimestamp'), gnrlzd => 1, gmt => 1, format => '%Y%m%d%H%M' }),
+	    modifiersName   => $m_name->[0]->{uid} // $m_name->[0]->{cn}, };
+
+	foreach $tmp ( @{$_->get_value('objectClass', asref => 1)} ) {
+	  $is_userPassword = 1
+	    if exists $c->session->{ldap}->{obj_schema}->{$tmp}->{may}->{userPassword} ||
+	    exists $c->session->{ldap}->{obj_schema}->{$tmp}->{must}->{userPassword};
+	  if ( $tmp eq 'dynamicObject' ) {
+	    $is_dynamicObject = 1;
+	    $ttentries->{$_->dn}->{root}->{ts}->{entryExpireTimestamp} =
+	      $self->ts({ ts => $_->get_value('entryExpireTimestamp'), gnrlzd => 1, gmt => 1 });
+	  }
+	}
 
 	$ttentries->{$_->dn}->{'mgmnt'} =
 	  {

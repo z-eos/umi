@@ -1610,7 +1610,7 @@ sub ldif {
 	     # scope  => $args->{recursive}  ? 'sub' : 'base',
 	    };
 
-  if ( defined $args->{sysinfo} && $args->{sysinfo} ne '' ) {
+  if ( defined $args->{sysinfo} && $args->{sysinfo} ne '0' ) {
     push @{$arg->{attrs}}, 'createTimestamp',
       'creatorsName',
       'entryCSN',
@@ -1655,7 +1655,7 @@ sub ldif {
     $return->{success} .= sprintf('LDIF for object with DN:<blockquote class="mono">%s</blockquote> generated including%s recursion and including%s system data.',
 				  $arg->{dn},
 				  ! $args->{recursive} ? ' no' : '',
-				  ! $args->{sysinfo} ? ' no' : '' );
+				  ! $args->{sysinfo}   ? ' no' : '' );
   }
   $return->{outfile_name} = defined $arg->{dn} ?
     join('_', split(/,/,canonical_dn( $arg->{dn},casefold => 'none', reverse => 1, ))) :

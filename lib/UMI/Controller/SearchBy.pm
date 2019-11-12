@@ -63,13 +63,9 @@ UMI::Controller::SearchBy - Catalyst Controller
 
 Main search tool. In general it is sophisticated ldapsearch wrapper.
 
-=head1 METHODS
-
 =cut
 
-
 ######################################################################
-
 
 =head2 index
 
@@ -517,7 +513,6 @@ sub index :Path :Args(0) {
 	$ttentries->{$dn}->{attrs}->{$attr} = $to_utf_decode;
 	# log_debug { np($ttentries->{$dn}->{attrs}) };
 	if ( $attr eq 'jpegPhoto' ) {
-	  # if 
 	  $ttentries->{$dn}->{attrs}->{$attr} =
 	    ref($ttentries->{$dn}->{attrs}->{$attr}) eq 'ARRAY'
 	    ? sprintf('img-thumbnail" alt="jpegPhoto of %s" src="data:image/jpg;base64,%s" title="%s" />',
