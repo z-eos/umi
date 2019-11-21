@@ -81,7 +81,7 @@ sub index :Path :Args(0) {
     my ( $params, $ldap_crud, $filter, $filter_meta, $filter_translitall, $base, $sizelimit, $return );
     my $sort_order = 'reverse';
     my $filter_armor = '';
-    
+
     $params = $c->req->params;
     $ldap_crud = $c->model('LDAP_CRUD');
 
@@ -92,14 +92,14 @@ sub index :Path :Args(0) {
 
     ### ACCES CONTROL
     #=============================================================
-    
-    if ( defined $params->{'ldapsearch_global'} || ! exists $params->{'ldapsearch_base'}) {
+
+    if ( $params->{'ldapsearch_global'} // ! exists $params->{'ldapsearch_base'}) {
       $base = $ldap_crud->cfg->{base}->{db};
       $params->{'ldapsearch_base'} = $base;
-    } elsif ( defined $params->{'ldapsearch_by_name'}  ||
-	      defined $params->{'ldapsearch_by_email'} ||
-	      defined $params->{'ldapsearch_by_jid'}   ||
-	      defined $params->{'ldapsearch_by_telephone'} ) {
+    } elsif ( $params->{'ldapsearch_by_name'}  //
+	      $params->{'ldapsearch_by_email'} //
+	      $params->{'ldapsearch_by_jid'}   //
+	      $params->{'ldapsearch_by_telephone'} ) {
       $base = $ldap_crud->cfg->{base}->{acc_root};
     } elsif ( defined $params->{'ldap_subtree'} && $params->{'ldap_subtree'} ne '' ) {
       $base = $params->{'ldap_subtree'};
@@ -114,7 +114,7 @@ sub index :Path :Args(0) {
     } else {
       $filter_meta = $params->{'ldapsearch_filter'};
     }
-    
+
     if ( defined $params->{'ldapsearch_by_email'} ) {
       # $filter = sprintf("mail=%s", $filter_meta);
       $filter = sprintf("|(mail=%s)(&(uid=%s)(authorizedService=mail@*))",
@@ -223,6 +223,7 @@ sub index :Path :Args(0) {
       $mesg->sorted('dn');
 
     my $all_entries = $mesg->as_struct;
+    # log_debug { np( $all_entries ) };
 
     if ( ! $mesg->count ) {
       if ( $self->is_ascii($params->{'ldapsearch_filter'}) &&
@@ -241,16 +242,7 @@ sub index :Path :Args(0) {
 
     $c->stats->profile(end   => '- LDAP search lasted');
 
-    # $c->stats->profile(begin => 'LDAP SEARCH as_struct LASTED');
-    # my $entries_as_struct = $mesg->as_struct;
-    # log_debug { np($entries_as_struct) };
-    # $c->stats->profile(end   => 'LDAP SEARCH as_struct LASTED');
-
-
-    my ( $ttentries, @ttentries_keys, $attr, $tmp, $dn, $dn_depth, $dn_depthes, $to_utf_decode, @root_arr, @root_dn_arr, $root_dn, $root_i, $root_mesg, $root_entry, $primary_group_name, @root_groups, $root_gr, $gr_entry, $obj_item, $c_name, $m_name );
-    my $blocked = 0;
-    my $is_userPassword  = 0;
-    my $is_dynamicObject = 0;
+    my ( $foffs, $ttentries, @ttentries_keys, $attr, $tmp, $dn, $dn_depth, $dn_depthes, $to_utf_decode, @root_arr, @root_dn_arr, $root_dn, $root_i, $root_mesg, $root_entry, $primary_group_name, @root_groups, $root_gr, $gr_entry, $obj_item, $c_name, $m_name );
 
     # building sys groups members hash
     my $all_sysgroups;
@@ -271,62 +263,32 @@ sub index :Path :Args(0) {
 	%memberuids = ();
       }
     }
-    # log_debug { np($all_sysgroups) };
-    
+
     $c->stats->profile(end   => 'PREPARE');
 
     foreach (@entries) {
       $dn = $_->dn;
 
       $c->stats->profile(begin => 'ENTRY', comment => 'dn: ' . $dn);
-      if ( $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
-	# calculating a "depth" of acc_root obj, it is branch depth + 1
-	$dn_depth = scalar split(/,/, $ldap_crud->{cfg}->{base}->{acc_root}) + 1;
-	@root_arr    = split(',', $_->dn);
-	$root_i      = $#root_arr;
-	@root_dn_arr = splice(@root_arr, -1 * $dn_depth);
-	$root_dn     = join(',', @root_dn_arr);
-	
-	# here, for each entry we are preparing data of the root object it belongs to
-	$root_i++;
-	if ( $root_i == $dn_depth ) { # the very root object
-	  $c->stats->profile(begin => '- root obj proc');
-	  $ttentries->{$dn}->{root}->{givenName} = $_->get_value('givenName');
-	  $ttentries->{$dn}->{root}->{sn}        = $_->get_value('sn');
-	  $ttentries->{$dn}->{root}->{gidNumber} = $_->get_value('gidNumber');
-	  $ttentries->{$dn}->{root}->{o}         = $_->get_value('o', asref => 1);
-	  $ttentries->{$dn}->{root}->
-	    {$ldap_crud->{cfg}->{rdn}->{acc_root}} =
-	    $_->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
-	  $c->stats->profile(end   => '- root obj proc');
-	} else { # branches and leaves
-	  $c->stats->profile(begin => '- root of branch/leaf proc');
-	  if ( ! exists $all_entries->{$root_dn} ) {
-	    $root_mesg = $ldap_crud->search({ dn => $root_dn, });
-	    if ( $root_mesg->is_error() ) {
-	      $return->{error} .= sprintf("for dn: <b>%s</b><br>%s",
-					  $ttentries->{$_->dn}->{root}->{dn},
-					  $ldap_crud->err( $root_mesg )->{html});
-	    } else {
-	      $root_entry = $root_mesg->entry(0);
-	      $ttentries->{$dn}->{root}->{givenName} = $root_entry->get_value('givenName');
-	      $ttentries->{$dn}->{root}->{sn}        = $root_entry->get_value('sn');
-	      $ttentries->{$dn}->{root}->{gidNumber} = $root_entry->get_value('gidNumber');
-	      $ttentries->{$dn}->{root}->{o}         = $root_entry->get_value('o', asref => 1);
-	      $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
-		$root_entry->get_value($ldap_crud->{cfg}->{rdn}->{acc_root});
-	    }
-	  } else {
-	    $ttentries->{$dn}->{root}->{givenName} = $all_entries->{$root_dn}->{givenname}->[0];
-	    $ttentries->{$dn}->{root}->{sn}        = $all_entries->{$root_dn}->{sn}->[0];
-	    $ttentries->{$dn}->{root}->{gidNumber} = $all_entries->{$root_dn}->{gidnumber}->[0];
-	    $ttentries->{$dn}->{root}->{o}         = $all_entries->{$root_dn}->{o};
-	    $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} } =
-	      $all_entries->{$root_dn}->{$ldap_crud->{cfg}->{rdn}->{acc_root}}->[0];
-	  }
-	  $c->stats->profile(end   => '- root of branch/leaf proc');
-	}
 
+      $foffs = $self->factoroff_searchby({
+					  all_entries   => $all_entries,
+					  all_sysgroups => $all_sysgroups,
+					  c_stats       => $c->stats,
+					  entry         => $_,
+					  ldap_crud     => $ldap_crud,
+					  session       => $c->session,
+					 });
+
+      $return->{error} .= $foffs->{return}->{error} if exists $foffs->{return}->{error};
+
+      $ttentries->{$dn}->{root}   = $foffs->{root};
+      $ttentries->{$dn}->{mgmnt}  = $foffs->{mgmnt};
+      $ttentries->{$dn}->{attrs}  = $foffs->{attrs};
+      $ttentries->{$dn}->{is_arr} = $foffs->{is_arr};
+
+
+      if ( $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
 	#=============================================================
 	### ACCES CONTROL to ou=People,dc=... objects for not admins
 	### START
@@ -399,174 +361,16 @@ sub index :Path :Args(0) {
 	### STOP
 	### ACCES CONTROL to ou=People,dc=... objects
 	#=============================================================
-
-	$ttentries->{$dn}->{root}->{dn} = $root_dn;
-
-	utf8::decode($ttentries->{$dn}->{root}->{givenName});
-	utf8::decode($ttentries->{$dn}->{root}->{sn});
-
-	# is this user blocked?
-	if ( defined $c->session->{settings}->{ui}->{isblock} &&
-	     $c->session->{settings}->{ui}->{isblock} == 1 ) {
-	  $c->stats->profile(begin => '- is-blocked check');
-
-	  if ( $ttentries->{$dn}->{root}->{gidNumber} eq $ldap_crud->{cfg}->{stub}->{group_blocked_gid} ) {
-	    $blocked = 1;
-	  } elsif ( $dn =~ /^.*authorizedService=.*$/ ) {
-	    my $is_blocked_filter =
-	      sprintf('(&(cn=%s)(memberUid=%s))',
-		      $ldap_crud->cfg->{stub}->{group_blocked},
-		      $ttentries->{$dn}->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} });
-	    # log_debug { np( $ldap_crud->cfg->{base}->{group} . " | " . $is_blocked_filter ) };
-	    # log_debug { np($_->dn) };
-	    $mesg = $ldap_crud->search({ base   => $ldap_crud->cfg->{base}->{group},
-					 filter => $is_blocked_filter, });
-
-
-	    $blocked = $mesg->count;
-	    $return->{error} .= $ldap_crud->err( $mesg )->{html}
-	      if $mesg->is_error();
-	  } else {
-	    $blocked = 0;
-	  }
-	  
-	  $c->stats->profile(end => '- is-blocked check');
-	}
-
-	$#root_arr = $#root_dn_arr = -1;
-
-	$c->stats->profile(begin => '- root-obj-sys-groups check');
-	# getting root object sys groups if any
-	foreach (keys (%{$all_sysgroups})) {
-	  $root_gr->{$_} = 1
-	    if exists $all_sysgroups->{$_}->{$ttentries->{$dn}->{root}->{$ldap_crud->{cfg}->{rdn}->{acc_root}}};
-	}
-	
-	# getting name of the primary group
-	if ( $_->exists('gidNumber') ) {
-	  $mesg = $ldap_crud->search({ base   => $ldap_crud->cfg->{base}->{group},
-				       filter => sprintf('(gidNumber=%s)',
-							 $_->get_value('gidNumber')), });
-
-	  if ( $mesg->is_error() ) {
-	    $return->{error} .= $ldap_crud->err( $mesg )->{html};
-	  } elsif ( $mesg->count ) {
-	    $gr_entry = $mesg->entry(0);
-	    $ttentries->{$dn}->{root}->{PrimaryGroupNameDn} = $gr_entry->dn;
-	    $ttentries->{$dn}->{root}->{PrimaryGroupName}   = $gr_entry->get_value('cn');
-	  }
-	}
-	$c->stats->profile(end => '- root-obj-sys-groups check');
-
-      } elsif ( $dn =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ) {
-	$dn_depth = scalar split(/,/, $ldap_crud->{cfg}->{base}->{inventory}) + 1;
-      } else {
-	# !!! HARDCODE
-	# !!! TODO how deep dn could be to be considered as some type of object, `3' is for what? :( !!!
-	$dn_depth = $ldap_crud->{cfg}->{base}->{dc_num} + 1;
       }
 
-      $c->stats->profile(begin => '- obj mgmnt data');
-      
-      $c_name = ldap_explode_dn( $_->get_value('creatorsName'),  casefold => 'none' );
-      $m_name = ldap_explode_dn( $_->get_value('modifiersName'), casefold => 'none' );
-      $ttentries->{$dn}->{root}->{ts} =
-	{ createTimestamp => $self->ts({ ts => $_->get_value('createTimestamp'), gnrlzd => 1, gmt => 1, format => '%Y%m%d%H%M' }),
-	  creatorsName    => $c_name->[0]->{uid} // $c_name->[0]->{cn},
-	  modifyTimestamp => $self->ts({ ts => $_->get_value('modifyTimestamp'), gnrlzd => 1, gmt => 1, format => '%Y%m%d%H%M' }),
-	  modifiersName   => $m_name->[0]->{uid} // $m_name->[0]->{cn}, };
-
-      foreach $tmp ( @{$_->get_value('objectClass', asref => 1)} ) {
-	$is_userPassword = 1
-	  if exists $c->session->{ldap}->{obj_schema}->{$tmp}->{may}->{userPassword} ||
-	  exists $c->session->{ldap}->{obj_schema}->{$tmp}->{must}->{userPassword};
-	if ( $tmp eq 'dynamicObject' ) {
-	  $is_dynamicObject = 1;
-	  $ttentries->{$dn}->{root}->{ts}->{entryExpireTimestamp} =
-	    $self->ts({ ts => $_->get_value('entryExpireTimestamp'), gnrlzd => 1, gmt => 1 });
-	}
-      }
-
-      $ttentries->{$dn}->{'mgmnt'} =
-	{
-	 # userPassword  => $_->exists('userPassword') ? 1 : 0,
-	 dynamicObject   => $is_dynamicObject,
-	 gitAclProject   => $_->exists('gitAclProject') ? 1 : 0,
-	 is_account      => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
-	 is_blocked      => $blocked,
-	 is_group        => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{group}/ ? 1 : 0,
-	 is_inventory    => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ? 1 : 0,
-	 is_log          => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{db_log}/ ? $_->get_value( 'reqType' ) : 'no',
-	 is_root         => scalar split(',', $dn) <= $dn_depth ? 1 : 0,
-	 jpegPhoto       => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
-	 root_obj_groups => defined $root_gr ? $root_gr : undef,
-	 userDhcp        => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ &&
-	 scalar split(',', $dn) <= $dn_depth ? 1 : 0,
-	 userPassword    => $is_userPassword,
-	};
-
-      my $diff = undef;
-      foreach $attr (sort $_->attributes) {
-	$to_utf_decode = $_->get_value( $attr, asref => 1 );
-	map { utf8::decode($_); $_} @{$to_utf_decode};
-	@{$to_utf_decode} = sort @{$to_utf_decode};
-	$ttentries->{$dn}->{attrs}->{$attr} = $to_utf_decode;
-	# log_debug { np($ttentries->{$dn}->{attrs}) };
-	if ( $attr eq 'jpegPhoto' ) {
-	  $ttentries->{$dn}->{attrs}->{$attr} =
-	    ref($ttentries->{$dn}->{attrs}->{$attr}) eq 'ARRAY'
-	    ? sprintf('img-thumbnail" alt="jpegPhoto of %s" src="data:image/jpg;base64,%s" title="%s" />',
-		      $dn,
-		      encode_base64(join('',@{$ttentries->{$dn}->{attrs}->{$attr}})),
-		      $dn)
-	    : sprintf('img-thumbnail" alt="%s has empty image set" title="%s" src="holder.js/128x128" />', $dn, $dn);
-	} elsif ( $attr eq 'userCertificate;binary' ||
-		  $attr eq 'cACertificate;binary'   ||
-		  $attr eq 'certificateRevocationList;binary' ) {
-	  $ttentries->{$dn}->{attrs}->{$attr} = $self->cert_info({ attr => $attr, cert => $_->get_value( $attr ) });
-	#} elsif ( $attr eq 'reqMod' || $attr eq 'reqOld' ) {
-	  #my $ta = $_->get_value( $attr, asref => 1 );
-	  #my @te = sort @{$ta};
-	  #p \@te;
-	  # $ttentries->{$dn}->{attrs}->{$attr} = $_->get_value( $attr, asref => 1 );
-	} elsif (ref $ttentries->{$dn}->{attrs}->{$attr} eq 'ARRAY') {
-	  $ttentries->{$dn}->{is_arr}->{$attr} = 1;
-	}
-
-	if ( $_->get_value( 'objectClass' ) eq 'auditModify' &&
-	    ( $attr eq 'reqMod' || $attr eq 'reqOld' ) ) {
-	  foreach $tmp ( @{ $ttentries->{$dn}->{attrs}->{$attr} } ) {
-	    $diff->{$attr} .= sprintf("%s\n", $tmp)
-	      if $tmp !~ /.*entryCSN.*/     &&
-	      $tmp !~ /.*modifiersName.*/   &&
-	      $tmp !~ /.*modifyTimestamp.*/ &&
-	      $tmp !~ /.*creatorsName.*/    &&
-	      $tmp !~ /.*createTimestamp.*/ ;
-	  }
-	}
-      }
-
-      $ttentries->{$dn}->{attrs}->{jpegPhoto} =
-	sprintf('img-thumbnail holder-js" alt="%s has empty image set" title="%s" data-src="holder.js/128x128?theme=stub&text=ABSENT \n \n  ATTRIBUTE" />', $dn, $dn)
-	if ( ($ttentries->{$dn}->{'mgmnt'}->{is_root} &&
-	      $dn =~ /^uid=.*,$ldap_crud->{cfg}->{base}->{acc_root}/) ||
-	     $dn =~ /^uid=.*,authorizedService=(mail|xmpp).*,$ldap_crud->{cfg}->{base}->{acc_root}/
-	   ) && ! exists $ttentries->{$dn}->{attrs}->{jpegPhoto};
-
-      use Text::Diff;
-      $tmp = diff \$diff->{reqOld}, \$diff->{reqMod}, { STYLE => 'Text::Diff::HTML' }
-      	if defined $diff->{reqMod} &&  defined $diff->{reqMod};
-      $ttentries->{$dn}->{attrs}->{reqOldModDiff} = '<pre>' . $tmp . '</pre>'
-      	if defined $diff->{reqMod} &&  defined $diff->{reqMod};
-      undef $diff;
-
-      push @ttentries_keys, $_->dn if $sort_order eq 'reverse'; # for not history searches
-      $blocked = $is_dynamicObject = 0;
+      push @ttentries_keys, $dn if $sort_order eq 'reverse'; # for not history searches
 
       $c->stats->profile(end => '- obj mgmnt data');
 
       # $c->stats->profile('whole entry');
       $c->stats->profile(end => 'ENTRY');
+
+      # log_debug { np( $ttentries->{$dn} ) };
 
     }
 
@@ -586,8 +390,6 @@ sub index :Path :Args(0) {
     @ttentries_keys = sort { lc $a cmp lc $b } keys %{$ttentries}
       if $sort_order eq 'straight'; # for history searches
 
-    # log_debug { np( $ttentries ) };
-    
     $c->stash(
 	      base_dn       => $base,
 	      base_icon     => $ldap_crud->cfg->{base}->{icon},

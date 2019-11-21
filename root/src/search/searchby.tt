@@ -32,7 +32,7 @@ Search Advanced
  })();
 </script>
 [% ELSE %]
-<div class="row w-100 py-3">
+<div class="row w-100 py-5">
   <div class="col-xs-6 col-sm-6 col-md-3 col-lg-3">
     <[% site.pageheading %] class="font-weight-bold">
     <i class="fas fa-search fa-lg text-muted"></i>
@@ -150,6 +150,7 @@ Search Advanced
 	 FOREACH entrykey IN entrieskeys;
 	 entry.key = entrykey # dn of the current entry;
 	 entry.val = entries.$entrykey;
+
 	 dn = entry.key.split(',|=').hash    # here we preparing hash of each dn;
 	 # here we preparing uniqe suffix to be added to objects id (like modals e.t.c.);
 	 id_suffix = '_' _ entry.key.split(',').0.split('=').1.replace('[-@:\. ]', '_') _ '_' _ loop.index;
@@ -559,9 +560,9 @@ Search Advanced
 			 buttonizer_text= h_attr.value.0 _ ' ( <em>' _ entry.val.root.PrimaryGroupName _ '</em> )' );
 		       ELSIF h_attr.key == 'userPKCS12' %]
 		    <kbd class="fa fa-file-o">&nbsp;Binary Data</kbd>
-		    [% ELSIF h_attr.key == 'pgpKey' || h_attr.key == 'mu-sieveOnReceive' %]
-		    <small><pre>[% h_attr.value.0 %]</pre></small>
-		    [% ELSIF h_attr.key == 'jpegPhoto';
+		    [% ELSIF h_attr.key == 'pgpKey' || h_attr.key == 'mu-sieveOnReceive' ||	 h_attr.key == 'reqOldModDiff' %]
+		    <small><pre>[% h_attr.value.list.join %]</pre></small>		 
+		    [% ELSIF h_attr.key == 'jpegPhoto';	  
 		       img = '<img class="table-';
 		       img _ tr_color _ ' ' _ h_attr.value;
 		       ELSIF entry.val.is_arr.$attr_name;
@@ -571,7 +572,6 @@ Search Advanced
 		      <small class="font-monospace">[% i %]</small>
 		    </div>
 		    [% ELSE;
-		       
 		       IF schema.${h_attr.key} == 'distinguishedNameMatch' ||
 	               schema.${h_attr.key} == 'distinguishedName' ||
 	               i.match('^.*ou=.*,dc=.*');

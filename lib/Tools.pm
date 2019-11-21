@@ -1745,6 +1745,262 @@ sub traverse {
   return;
 }
 
+=head2 factoroff_searchby
+
+factor off of search and advanced search
+
+the main place for search result preparation and processing
+
+=cut
+
+sub factoroff_searchby {
+  my ($self, $args) = @_;
+
+  my $all_e     = $args->{all_entries};
+  my $all_s     = $args->{all_sysgroups};
+  my $c_stats   = $args->{c_stats};
+  my $e         = $args->{entry};
+  my $ldap_crud = $args->{ldap_crud};
+  my $sess      = $args->{session};
+
+  my ( $return, $tt_e );
+
+  my $dn          = $e->dn;
+  my @dn_as_arr    = split(',', $dn);
+  my $current_dn_depth      = $#dn_as_arr + 1;
+
+  my ( $dn_depth, @root_dn_arr, $root_dn, $mesg, @root_attrs_noref, @root_attrs_asref );
+
+  # here, for each entry we are preparing data of the root object it belongs to
+  if ( $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
+    $dn_depth = scalar split(/,/, $ldap_crud->{cfg}->{base}->{acc_root}) + 1;
+    my @root_dn_arr = splice(@dn_as_arr, -1 * $dn_depth);
+    my $root_dn     = join(',', @root_dn_arr);
+    my $mesg;
+    my @root_attrs_noref = ( 'sn', 'givenName', 'gidNumber', $ldap_crud->{cfg}->{rdn}->{acc_root} );
+    my @root_attrs_asref = ( 'o' );
+
+    $tt_e->{root}->{dn} = $root_dn;
+
+    if ( $current_dn_depth == $dn_depth ) { # the very root object
+      $c_stats->profile(begin => '- root obj proc');
+
+      $tt_e->{root}->{$_} = $e->get_value($_)             foreach ( @root_attrs_noref );
+      $tt_e->{root}->{$_} = $e->get_value($_, asref => 1) foreach ( @root_attrs_asref );
+
+      $c_stats->profile(end   => '- root obj proc');
+    } else {			# branches and leaves
+      $c_stats->profile(begin => '- root of branch/leaf proc');
+
+      if ( exists $all_e->{$root_dn} ) {
+	$tt_e->{root}->{$_} = $all_e->{$root_dn}->{lc($_)}->[0] foreach ( @root_attrs_noref );
+	$tt_e->{root}->{$_} = $all_e->{$root_dn}->{lc($_)}      foreach ( @root_attrs_asref );
+      } else {
+	my $root_mesg = $ldap_crud->search({ dn => $root_dn, scope => 'base', });
+	if ( $root_mesg->is_error() ) {
+	  $return->{error} .= sprintf("for dn: <b>%s</b><br>%s",
+				      $tt_e->{root}->{dn},
+				      $ldap_crud->err( $root_mesg )->{html});
+	} else {
+	  my $root_entry = $root_mesg->entry(0);
+	  $tt_e->{root}->{$_} = $root_entry->get_value($_)             foreach ( @root_attrs_noref );
+	  $tt_e->{root}->{$_} = $root_entry->get_value($_, asref => 1) foreach ( @root_attrs_asref );
+	}
+      }
+
+      $c_stats->profile(end   => '- root of branch/leaf proc');
+    }
+
+    my @to_utf8ize = ( 'givenName', 'sn' );
+    foreach (@to_utf8ize) {
+      utf8::decode($tt_e->{root}->{$_}) if exists $tt_e->{root}->{$_};
+    }
+  } elsif ( $dn =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ) {
+    $dn_depth = scalar split(/,/, $ldap_crud->{cfg}->{base}->{inventory}) + 1;
+  } else {
+    # !!! HARDCODE
+    # !!! TODO how deep dn could be to identify the object type, `3' is for what? :( !!!
+    $dn_depth = $ldap_crud->{cfg}->{base}->{dc_num} + 1;
+  }
+
+
+  $c_stats->profile(begin => '- obj mgmnt data');
+
+  $tt_e->{mgmnt} =
+    {
+     gitAclProject   => $_->exists('gitAclProject') ? 1 : 0,
+     is_account      => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
+     is_group        => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{group}/ ? 1 : 0,
+     is_inventory    => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{inventory}/ ? 1 : 0,
+     is_log          => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{db_log}/ ? $_->get_value( 'reqType' ) : 'no',
+     is_root         => scalar split(',', $dn) <= $dn_depth ? 1 : 0,
+     jpegPhoto       => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ? 1 : 0,
+     userDhcp        => $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ &&
+     scalar split(',', $dn) <= $dn_depth ? 1 : 0,
+    };
+
+  # is this user blocked?
+  if ( defined $sess->{settings}->{ui}->{isblock} && $sess->{settings}->{ui}->{isblock} == 1 ) {
+    $c_stats->profile(begin => '- is-blocked check');
+
+    if ( $tt_e->{root}->{gidNumber} eq $ldap_crud->{cfg}->{stub}->{group_blocked_gid} ) {
+      $tt_e->{mgmnt}->{is_blocked} = 1;
+    } elsif ( $dn =~ /^.*authorizedService=.*$/ ) {
+      my $is_blocked_filter =
+	sprintf('(&(cn=%s)(memberUid=%s))',
+		$ldap_crud->{cfg}->{stub}->{group_blocked},
+		$tt_e->{root}->{ $ldap_crud->{cfg}->{rdn}->{acc_root} });
+      # log_debug { np( $ldap_crud->cfg->{base}->{group} . " | " . $is_blocked_filter ) };
+      # log_debug { np($_->dn) };
+      $mesg = $ldap_crud->search({ base   => $ldap_crud->cfg->{base}->{group},
+				   filter => $is_blocked_filter, });
+
+      $tt_e->{mgmnt}->{is_blocked} = $mesg->count;
+      $return->{error} .= $ldap_crud->err( $mesg )->{html}
+	if $mesg->is_error();
+    } else {
+      $tt_e->{mgmnt}->{is_blocked} = 0;
+    }
+
+    $c_stats->profile(end => '- is-blocked check');
+  }
+
+  $c_stats->profile(begin => '- root-obj-sys-groups check');
+  # getting root object sys groups if any
+  my $root_gr;
+  my $k;
+  foreach $k (keys (%{$all_s})) {
+    $root_gr->{$k} = 1
+      if exists $all_s->{$k}->{$tt_e->{root}->{$ldap_crud->{cfg}->{rdn}->{acc_root}}};
+    # log_debug { "\n\nkey: $k\n" . np($ldap_crud->{cfg}->{rdn}->{acc_root}) };
+  }
+
+  # log_debug { np($tt_e->{root}) };
+
+  $tt_e->{mgmnt}->{root_obj_groups} = defined $root_gr ? $root_gr : undef;
+
+  my $gr_entry;
+  # getting name of the primary group
+  if ( $e->exists('gidNumber') ) {
+    $mesg = $ldap_crud->search({ base   => $ldap_crud->cfg->{base}->{group},
+				 filter => sprintf('(gidNumber=%s)',
+						   $e->get_value('gidNumber')), });
+
+    if ( $mesg->is_error() ) {
+      $return->{error} .= $ldap_crud->err( $mesg )->{html};
+    } elsif ( $mesg->count ) {
+      $gr_entry = $mesg->entry(0);
+      $tt_e->{root}->{PrimaryGroupNameDn} = $gr_entry->dn;
+      $tt_e->{root}->{PrimaryGroupName}   = $gr_entry->get_value('cn');
+    }
+  }
+  $c_stats->profile(end => '- root-obj-sys-groups check');
+
+  my $c_name = ldap_explode_dn( $e->get_value('creatorsName'),  casefold => 'none' );
+  my $m_name = ldap_explode_dn( $e->get_value('modifiersName'), casefold => 'none' );
+  $tt_e->{root}->{ts} =
+    {
+     createTimestamp => $self->ts({ ts => $e->get_value('createTimestamp'),
+				    gnrlzd => 1,
+				    gmt => 1,
+				    format => '%Y%m%d%H%M' }),
+     creatorsName    => $c_name->[0]->{uid} // $c_name->[0]->{cn},
+     modifyTimestamp => $self->ts({ ts => $e->get_value('modifyTimestamp'),
+				    gnrlzd => 1,
+				    gmt => 1,
+				    format => '%Y%m%d%H%M' }),
+     modifiersName   => $m_name->[0]->{uid} // $m_name->[0]->{cn}, };
+
+  $tt_e->{mgmnt}->{userPassword}  = 0;
+  $tt_e->{mgmnt}->{dynamicObject} = 0;
+  foreach $k ( @{$e->get_value('objectClass', asref => 1)} ) {
+    $tt_e->{mgmnt}->{userPassword} = 1
+      if exists $sess->{ldap}->{obj_schema}->{$k}->{may}->{userPassword} ||
+      exists $sess->{ldap}->{obj_schema}->{$k}->{must}->{userPassword};
+    if ( $k eq 'dynamicObject' ) {
+      $tt_e->{mgmnt}->{dynamicObject} = 1;
+      $tt_e->{root}->{ts}->{entryExpireTimestamp} =
+	$self->ts({ ts => $e->get_value('entryExpireTimestamp'),
+		    gnrlzd => 1,
+		    gmt => 1 });
+    }
+  }
+
+  my $diff = undef;
+  my $tmp;
+  my $to_utf_decode;
+  foreach my $attr (sort $e->attributes) {
+
+    # $to_utf_decode = $e->get_value( $attr, asref => 1 );
+    # map { utf8::decode($_); $_} @{$to_utf_decode};
+    # @{$to_utf_decode} = sort @{$to_utf_decode};
+    # $tt_e->{attrs}->{$attr} = $to_utf_decode;
+
+    @{$to_utf_decode} = map { utf8::decode($_); $_} @{$e->get_value( $attr, asref => 1 )};
+    @{$tt_e->{attrs}->{$attr}} = sort @{$to_utf_decode};
+
+    if ( $attr eq 'jpegPhoto' ) {
+      $tt_e->{attrs}->{$attr} =
+	ref($tt_e->{attrs}->{$attr}) eq 'ARRAY'
+	? sprintf('img-thumbnail" alt="jpegPhoto of %s" src="data:image/jpg;base64,%s" title="%s" />',
+		  $dn,
+		  encode_base64(join('',@{$tt_e->{attrs}->{$attr}})),
+		  $dn)
+	: sprintf('img-thumbnail" alt="%s has empty image set" title="%s" src="holder.js/128x128" />', $dn, $dn);
+    } elsif ( $attr eq 'userCertificate;binary' ||
+	      $attr eq 'cACertificate;binary'   ||
+	      $attr eq 'certificateRevocationList;binary' ) {
+      $tt_e->{attrs}->{$attr} = $self->cert_info({ attr => $attr, cert => $e->get_value( $attr ) });
+      #} elsif ( $attr eq 'reqMod' || $attr eq 'reqOld' ) {
+      #my $ta = $e->get_value( $attr, asref => 1 );
+      #my @te = sort @{$ta};
+      #p \@te;
+      # $tt_e->{attrs}->{$attr} = $e->get_value( $attr, asref => 1 );
+    } elsif ( ref( $tt_e->{attrs}->{$attr} ) eq 'ARRAY') {
+      $tt_e->{is_arr}->{$attr} = 1;
+    }
+
+    if ( $e->get_value( 'objectClass' ) eq 'auditModify' &&
+	 ( $attr eq 'reqMod' || $attr eq 'reqOld' ) ) {
+      foreach $tmp ( @{ $tt_e->{attrs}->{$attr} } ) {
+	$diff->{$attr} .= sprintf("%s\n", $tmp)
+	  if $tmp !~ /.*entryCSN.*/     &&
+	  $tmp !~ /.*modifiersName.*/   &&
+	  $tmp !~ /.*modifyTimestamp.*/ &&
+	  $tmp !~ /.*creatorsName.*/    &&
+	  $tmp !~ /.*createTimestamp.*/ ;
+      }
+    }
+  }
+
+  # log_debug { np($tt_e->{attrs}) };
+
+  $tt_e->{attrs}->{jpegPhoto} =
+    sprintf('img-thumbnail holder-js" alt="%s has empty image set" title="%s" data-src="holder.js/128x128?theme=stub&text=ABSENT \n \n  ATTRIBUTE" />',
+	    $dn, $dn)
+    if ! exists $tt_e->{attrs}->{jpegPhoto} &&
+    (
+     ( $tt_e->{'mgmnt'}->{is_root} &&
+       $dn =~ /^uid=.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) ||
+     $dn =~ /^uid=.*,authorizedService=(mail|xmpp).*,$ldap_crud->{cfg}->{base}->{acc_root}/
+    );
+
+  use Text::Diff;
+  $tmp = diff \$diff->{reqOld}, \$diff->{reqMod}, { STYLE => 'Text::Diff::HTML' }
+    if defined $diff->{reqMod} &&  defined $diff->{reqMod};
+  $tt_e->{attrs}->{reqOldModDiff} = $tmp
+    if defined $diff->{reqMod} &&  defined $diff->{reqMod};
+  undef $diff;
+
+  # log_debug { np($tt_e) };
+  
+  return { root   => $tt_e->{root},
+	   attrs  => $tt_e->{attrs},
+	   is_arr => $tt_e->{is_arr},
+	   mgmnt  => $tt_e->{mgmnt},
+	   return => $return, };
+}
+
 =head1 AUTHOR
 
 Zeus
