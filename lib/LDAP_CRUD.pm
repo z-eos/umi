@@ -349,73 +349,76 @@ sub _build_cfg {
 	  {
 	   'mail'          => {
 			       auth                 => 1,
+			       delim_mandatory      => 1,
 			       descr                => 'Email',
 			       disabled             => 0,
 			       login_delim          => '@',
 			       homeDirectory_prefix => '/mail/fast/imap/',
 			       gidNumber            => 26,
 			       icon                 => 'fas fa-envelope',
-			       data_fields          => 'login,logindescr,password1,password2',
+			       data_fields          => 'login,login_complex,password1,password2',
 			       data_relation        => 'passw',
 			      },
 	   'xmpp'          => {
 			       auth                    => 1,
+			       delim_mandatory      => 1,
 			       descr                   => 'XMPP (Jabber)',
 			       disabled                => 0,
 			       login_delim             => '@',
 			       gidNumber               => 10106,
 			       jpegPhoto_noavatar      => UMI->path_to('root', 'static', 'images', '/avatar-xmpp.png'),
 			       icon                    => 'fas fa-lightbulb',
-			       data_fields             => 'login,logindescr,password1,password2',
+			       data_fields             => 'login,login_complex,password1,password2',
 			       data_relation           => 'passw',
 			       associateddomain_prefix => {
 							   'talax.startrek.in' => 'im.',
 							  },
 			      },
 	   'dot1x-eap-md5' => {
-			       auth => 1,
-			       descr => 'auth 802.1x EAP-MD5 (MAC)',
-			       disabled => 0,
-			       icon => 'fas fa-shield-alt',
-			       data_fields => 'login,radiusgroupname,radiusprofile',
+			       auth          => 1,
+			       descr         => 'auth 802.1x EAP-MD5 (MAC)',
+			       disabled      => 0,
+			       icon          => 'fas fa-shield-alt',
+			       data_fields   => 'login,radiusgroupname,radiusprofile',
 			       data_relation => 'dot1x',
 			      },
 	   'dot1x-eap-tls' => {
-			       auth => 1,
-			       descr => 'auth 802.1x EAP-TLS',
-			       disabled => 0,
-			       icon => 'fas fa-shield-alt',
-			       data_fields => 'login,password1,password2,radiusgroupname,radiusprofile,userCertificate',
+			       auth          => 1,
+			       descr         => 'auth 802.1x EAP-TLS',
+			       disabled      => 0,
+			       icon          => 'fas fa-shield-alt',
+			       data_fields   => 'login,password1,password2,radiusgroupname,radiusprofile,userCertificate',
 			       data_relation => 'dot1x-eap-tls',
-			       login_prefix => 'rad-',
+			       login_prefix  => 'rad-',
 			      },
 	   'otrs'          => {
-			       auth => 1,
-			       descr => 'OTRS',
-			       disabled => 1,
-			       icon => 'fas fa-ticket-alt',
-			       data_fields => 'login,password1,password2',
+			       auth          => 1,
+			       descr         => 'OTRS',
+			       disabled      => 1,
+			       icon          => 'fas fa-ticket-alt',
+			       data_fields   => 'login,password1,password2',
 			      },
 	   'web'           => {
-			       auth => 1,
-			       descr => 'Web Account',
-			       disabled => 0,
-			       icon => 'fas fa-globe-europe',
-			       data_fields => 'login,logindescr,password1,password2',
+			       auth          => 1,
+			       descr         => 'Web Account',
+			       disabled      => 0,
+			       icon          => 'fas fa-globe-europe',
+			       login_delim   => '@',
+			       data_fields   => 'login,login_complex,password1,password2',
 			       data_relation => 'passw',
 			      },
 	   'sms'           => {
-			       auth => 1,
-			       descr => 'SMSter',
-			       disabled => 1,
-			       data_fields => 'login,password1,password2',
+			       auth          => 1,
+			       descr         => 'SMSter',
+			       disabled      => 1,
+			       data_fields   => 'login,password1,password2',
 			      },
 	   'comm-acc'      => {
-			       auth => 1,
-			       descr => 'CISCO Commutators',
-			       disabled => 0,
-			       icon => 'fas fa-terminal',
-			       data_fields => 'login,logindescr,password1,password2',
+			       auth          => 1,
+			       descr         => 'CISCO Commutators',
+			       disabled      => 0,
+			       icon          => 'fas fa-terminal',
+			       data_fields   => 'login,login_complex,password1,password2',
 			       data_relation => 'passw',
 			      },
 	   'ssh-acc'       => {
@@ -429,20 +432,20 @@ sub _build_cfg {
 			       gidNumber            => 11102,
 			       uidNumberShift       => 10000,
 			       icon                 => 'fas fa-terminal',
-			       data_fields          => 'login,logindescr,password1,password2,sshkey,sshkeyfile,sshhome,sshshell,sshgid',
+			       data_fields          => 'login,login_complex,password1,password2,sshkey,sshkeyfile,sshhome,sshshell,sshgid',
 			       data_relation        => 'sshacc',
 			      },
 	   'gpg'           => {
-			       auth => 0,
-			       descr => 'GPG key',
+			       auth     => 0,
+			       descr    => 'GPG key',
 			       disabled => 1,
-			       icon => 'fas fa-key',
+			       icon     => 'fas fa-key',
 			      },
 	   'ovpn'          => {
-			       auth => 0,
-			       descr => 'OpenVPN client',
+			       auth     => 0,
+			       descr    => 'OpenVPN client',
 			       disabled => 0,
-			       icon => 'fas fa-certificate',
+			       icon     => 'fas fa-certificate',
 			       # data_fields => 'block_crt',
 			      },
 	  },
@@ -832,44 +835,50 @@ returns hash with formatted details
 =cut
 
 sub err {
-  my ($self, $mesg, $debug) = @_;
+  my ($self, $mesg, $debug, $dn) = @_;
 
   my $caller = (caller(1))[3];
   my $err = {
-	     code          => defined $mesg->code ? $mesg->code : 'NA',
+	     code          => $mesg->code // 'NA',
 	     name          => ldap_error_name($mesg),
 	     text          => ldap_error_text($mesg),
 	     desc          => ldap_error_desc($mesg),
 	     srv           => $mesg->server_error,
-	     caller        => $caller ? $caller : 'main',
+	     caller        => $caller // 'main',
 	     matchedDN     => $mesg->{matchedDN},
+	     dn            => $dn // '',
 	     supplementary => '',
 	    };
 
   $err->{supplementary} .= sprintf('<li><h6><b>matchedDN:</b><small> %s</small><h6></li>', $err->{matchedDN})
     if $err->{matchedDN} ne '';
 
-  $err->{supplementary} = '<div class="well well-sm"><ul class="list-unstyled">' . $err->{supplementary} . '</ul></div>'
+  $err->{supplementary} = '<div class=""><ul class="list-unstyled">' . $err->{supplementary} . '</ul></div>'
     if $err->{supplementary} ne '';
   
-  $err->{html} = sprintf( 'call from <em>%s</em>: <dl class="row">
-  <dt class="col-2 text-right">admin note</dt><dd class="col-10 text-monospace">%s</dd>
+  $err->{html} = sprintf( 'call from <b><em>%s</em></b>: <dl class="row">
+  <dt class="col-2 text-right">DN</dt>                <dd class="col-10 text-monospace">%s</dd>
+  <dt class="col-2 text-right">admin note</dt>        <dd class="col-10 text-monospace">%s</dd>
   <dt class="col-2 text-right">supplementary data</dt><dd class="col-10 text-monospace">%s</dd>
-  <dt class="col-2 text-right">code</dt><dd class="col-10 text-monospace">%s</dd>
-  <dt class="col-2 text-right">error name</dt><dd class="col-10 text-monospace">%s</dd>
-  <dt class="col-2 text-right">error text</dt><dd class="col-10 text-monospace"><em><small><pre><samp>%s</samp></pre></small></em></dd>
-  <dt class="col-2 text-right">error description</dt><dd class="col-10 text-monospace">%s</dd>
-  <dt class="col-2 text-right">server_error</dt><dd class="col-10 text-monospace">%s</dd>
+  <dt class="col-2 text-right">code</dt>              <dd class="col-10 text-monospace">%s</dd>
+  <dt class="col-2 text-right">error name</dt>        <dd class="col-10 text-monospace">%s</dd>
+  <dt class="col-2 text-right">error text</dt>        <dd class="col-10 text-monospace"><em><small><pre><samp>%s</samp></pre></small></em></dd>
+  <dt class="col-2 text-right">error description</dt> <dd class="col-10 text-monospace">%s</dd>
+  <dt class="col-2 text-right">server_error</dt>      <dd class="col-10 text-monospace">%s</dd>
 </dl>',
-			   $caller,
-			   defined $self->cfg->{err}->{$mesg->code} && $self->cfg->{err}->{$mesg->code} ne '' ?
-			   $self->cfg->{err}->{$mesg->code} : '',
-			   $err->{supplementary},
-			   $mesg->code,
-			   ldap_error_name($mesg),
-			   ldap_error_text($mesg),
-			   ldap_error_desc($mesg),
-			   $mesg->server_error
+			  $caller,
+			  $err->{dn},
+
+			  defined $self->{cfg}->{err}->{$mesg->code} &&
+			  $self->{cfg}->{err}->{$mesg->code} ne '' ?
+			  $self->{cfg}->{err}->{$mesg->code} : '',
+
+			  $err->{supplementary},
+			  $mesg->code,
+			  ldap_error_name($mesg),
+			  ldap_error_text($mesg),
+			  ldap_error_desc($mesg),
+			  $mesg->server_error
 			 );
 
   log_error { np($err) } if defined $debug && $debug > 0;
@@ -955,7 +964,7 @@ sub add {
   if ( ! $self->dry_run ) {
     $msg = $self->ldap->add ( $dn, attrs => $attrs, );
     if ($msg->is_error()) {
-      $return = $self->err( $msg );
+      $return = $self->err( $msg, 0, $dn );
       $return->{caller} = 'call to LDAP_CRUD->add from ' . $callername . ': ';
     } else {
       log_info { 'DN: ' . $dn . ' was successfully added.' };
@@ -3471,6 +3480,7 @@ sub create_account_branch_leaf {
       givenName              => $args->{givenName},
       sn                     => $args->{sn},
       login                  => $args->{login},
+      login_complex          => $args->{login_complex},
       password               => $args->{password},
       gecos                  => $self->utf2lat( sprintf('%s %s', $args->{givenName}, $args->{sn}) ),
 
@@ -3516,14 +3526,21 @@ sub create_account_branch_leaf {
     sprintf('%s%s',
 	    $self->cfg->{authorizedService}->{$arg->{service}}->{login_prefix} // '',
 	    $arg->{login});
-  
+
   $arg->{uid} = sprintf('%s%s%s',
 			$arg->{prefixed_uid},
-			$self->cfg->{authorizedService}->{$arg->{service}}->{login_delim} // '@',
-			$arg->{associatedDomain});
+
+			$self->cfg->{authorizedService}->{$arg->{service}}->{delim_mandatory} ||
+			$arg->{login_complex} == 1 ?
+			$self->cfg->{authorizedService}->{$arg->{service}}->{login_delim} : '',
+
+			$self->cfg->{authorizedService}->{$arg->{service}}->{delim_mandatory} ||
+			$arg->{login_complex} == 1 ? $arg->{associatedDomain} : ''
+		       );
+
   $arg->{dn} = sprintf('uid=%s,%s', $arg->{uid}, $arg->{basedn});
 
-  # log_debug { np($arg) };
+  log_debug { np($arg) };
   
   my ($authorizedService, $sshkey, $authorizedService_add, $jpegPhoto_file, $description );
   my $sshPublicKey = [];

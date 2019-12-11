@@ -14,6 +14,9 @@ $(document).bind("ajaxSend", function(){
 
     NProgress.done();
 
+    $('.has-error').addClass('is-invalid');
+    $('.has-error').next('.help-block').addClass('text-danger');
+
     $("#stat-to").html('');
     $("#stat-from").appendTo("#stat-to");
 

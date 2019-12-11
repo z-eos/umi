@@ -1454,7 +1454,7 @@ sub modify :Path(modify) :Args(0) {
   my $moddn   = undef;
   my $delete  = undef;
   my $replace = undef;
-  log_debug { np($params) };
+  # log_debug { np($params) };
   my @ea = $entry->attributes;
   # log_debug { np(@ea) };
 
@@ -1507,14 +1507,19 @@ sub modify :Path(modify) :Args(0) {
     if ( $attr =~ /^add_.*$/ && $val_params ne '' ) {
       # log_debug { $attr . ';' . substr($attr,4) . ';' . $val_params };
       push @{$add}, substr($attr,4) => $val_params;
-    } elsif ( $attr eq 'jpegPhoto' && $val_params ne '' ) {
+    } elsif ( $val_params ne '' && ( $attr eq 'sshPublicKey' || $attr eq 'grayPublicKey') ) {
       log_debug { '%%% ONE %%%' };
+      # log_debug { np($val_params) };
+      $val_params =~ tr/\r\n//d;
+      # log_debug { np($val_params) };
+      push @{$replace}, $attr => $val_params;
+    } elsif ( $attr eq 'jpegPhoto' && $val_params ne '' ) {
+      log_debug { '%%% TWO %%%' };
       $jpeg = $self->file2var( $val_params->{'tempname'}, $return );
       return $jpeg if ref($jpeg) eq 'HASH' && defined $jpeg->{error};
       push @{$replace}, $attr => [ $jpeg ];
-
     } elsif ( $attr eq 'userCertificate' && $val_params ne '' ) {
-      log_debug { '%%% TWO %%%' };
+      log_debug { '%%% THREE %%%' };
       $binary = $self->file2var( $val_params->{'tempname'}, $return );
       return $binary if ref($binary) eq 'HASH' && defined $binary->{error};
       push @{$replace}, $attr . ';binary' => [ $binary ];
@@ -1538,15 +1543,15 @@ sub modify :Path(modify) :Args(0) {
 
     } elsif ( ( $attr eq 'cACertificate' ||
 		$attr eq 'certificateRevocationList' ) && $val_params ne '' ) {
-      log_debug { '%%% THREE %%%' };
+      log_debug { '%%% FOUR %%%' };
       $binary = $self->file2var( $val_params->{'tempname'}, $return );
       return $binary if ref($binary) eq 'HASH' && defined $binary->{error};
       push @{$replace}, $attr . ';binary' => [ $binary ];
     } elsif ( $val_params eq '' && $entry->exists($attr) ) {
-      log_debug { '%%% FOUR %%%' };
+      log_debug { '%%% FIVE %%%' };
       push @{$delete}, $attr => [];
     } elsif ( $val_params ne '' && ! defined $entry->get_value($attr) ) {
-      log_debug { "%%% FIVE %%% attr: $attr" };
+      log_debug { "%%% SIX %%% attr: $attr" };
       # !!! ??? is it necessary here? can we leave it instead of replacing by itself
       if ( $attr eq 'jpegPhoto' ) {
 	$jpeg = $self->file2var( $val_params->{'tempname'}, $return );
@@ -1555,10 +1560,10 @@ sub modify :Path(modify) :Args(0) {
       }
       push @{$add}, $attr => $val_params;
     } elsif ( ref($val_params) eq "ARRAY" && $#{$val_params} >= -1 ) {
-      log_debug { "%%% SIX %%% attr: $attr" };
+      log_debug { "%%% SEVEN %%% attr: $attr" };
       push @{$replace}, $attr => $val_params;
     } elsif ( ref($val_params) ne "ARRAY" && $val_params ne "" ) { # && $val_params ne $val_entry ) {
-      log_debug { '%%% SEVEN %%%' };
+      log_debug { '%%% EIGHT %%%' };
       push @{$replace}, $attr => $val_params;
     }
   }
@@ -1568,6 +1573,8 @@ sub modify :Path(modify) :Args(0) {
   push @{$modx}, replace => $replace if defined $replace && $#{$replace} > -1;
   push @{$modx}, add     => $add     if defined $add     && $#{$add}     > -1;
 
+  # log_debug { np($modx) };
+  
   if ( defined $modx && $#{$modx} > -1 ) {
     log_debug { np( $modx ) };
     $mesg = $ldap_crud->modify( $params->{dn}, $modx, );

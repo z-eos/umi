@@ -2,7 +2,7 @@
 
 <link href="/static/datatables/datatables.min.css" rel="stylesheet" type="text/css">
 
-<[% site.pageheading %] class="font-weight-bold p-3">
+<[% site.pageheading %] class="[% site.pageheadingclass %]">
 <i class="fas fa-user fa-lg mr-3 text-muted"></i>
 <i class="fas fa-exchange-alt fa-lg mr-3 text-muted"></i>
 <i class="fas fa-users fa-lg mr-3 text-muted"></i>

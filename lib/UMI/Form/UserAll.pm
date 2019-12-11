@@ -16,11 +16,11 @@ use HTML::FormHandler::Types (':all');
 use Data::Printer caller_info => 1, colored => 1;
 
 # has '+error_message' => ( default => 'There were errors in your form.' );has '+item_class' => ( default =>'UserAll' );
-has '+enctype' => ( default => 'multipart/form-data');
-has '+action' => ( default => '/userall');
-has 'namesake' => ( is => 'rw', );
-has 'autologin' => ( is => 'rw', );
-has 'add_svc_acc' => ( is => 'rw', ); # set if we add service account rather than new user
+has '+enctype'       => ( default => 'multipart/form-data');
+has '+action'        => ( default => '/userall');
+has 'namesake'       => ( is => 'rw', );
+has 'autologin'      => ( is => 'rw', );
+has 'add_svc_acc'    => ( is => 'rw', ); # set if we add service account rather than new user
 has 'dynamic_object' => ( is => 'rw', );
 
 sub build_form_element_class { [ qw(form-horizontal tab-content formajaxer) ] }
@@ -400,17 +400,16 @@ has_field 'account.login'
        wrapper_class         => [ 'row' ],
      );
 
-has_field 'account.logindescr'
-  => ( type          => 'Display',
-       html          => '<div class="form-group d-none relation passw row">' .
-       '<label class="col"></label>' .
-       '<div class="col-8 col-md-10">' .
-       '<small class="text-muted"><em>' .
-       'login will be added with @domain' .
-       '</em></small></div></div>',
-       element_attr  => { 'data-name' => 'logindescr',
-			  'data-group' => 'account', },
-       wrapper_class => [ 'row', ],
+has_field 'account.login_complex'
+  => ( type                  => 'Checkbox',
+       label                 => 'complex login (example: login @ domain)',
+       element_attr          => { title               => 'login will be added with @domain',
+				  'data-name'         => 'login_complex',
+				  'data-group'        => 'account',},
+       element_class         => [ 'form-check-input', ],
+       element_wrapper_class => [ 'offset-2 col-8', 'col-md-10' ],
+       wrapper_class         => [  qw{ form-check d-none passw sshacc relation row}, ],
+       checkbox_value        => '1',
      );
 
 has_field 'account.password1'
@@ -503,7 +502,7 @@ has_field 'account.userCertificate'
      );
 
 has_field 'account.sshgid'
-  => ( apply                 => [ NoSpaces, NotAllDigits, Printable ],
+  => ( apply                 => [ PositiveInt ],
        label                 => 'gidNumber',
        do_id                 => 'no',
        label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
@@ -932,8 +931,11 @@ sub validate {
       $login_error_pfx,
       $logintmp,
       $passwd_acc_filter,
-      $a1, $b1, $c1
+      $a1, $b1, $c1, $k, $filter
      );
+
+  $self->add_svc_acc( $self->field('add_svc_acc')->value )
+    if defined $self->field('add_svc_acc')->value;
 
   $ldap_crud = $self->ldap_crud;
 
@@ -941,44 +943,58 @@ sub validate {
     $self->autologin( lc($self->utf2lat( $self->field('person_givenname')->value ) . '.' .
 			 $self->utf2lat( $self->field('person_sn')->value )));
   } else {
+    # log_debug { 'add_svc_acc: ' . np($self->add_svc_acc) };
     my $autologin_mesg =
       $ldap_crud->search({ scope => 'base',
 			   base  => $self->add_svc_acc,
-			   attrs => [ 'givenName', 'sn' ], });
+			   attrs => [ 'givenName', 'sn', 'uid' ], });
     my $autologin_entry = $autologin_mesg->entry(0);
-    log_debug { np($self->add_svc_acc) };
-    $self->autologin( lc($autologin_entry->get_value('givenName') . '.' .
-			 $autologin_entry->get_value('sn') ));
+    $self->autologin( lc( $autologin_entry->get_value('givenName') . '.' .
+			  $autologin_entry->get_value('sn') ) );
   }
 
-  if ( $self->add_svc_acc eq '' ) {
+  # log_debug { 'add_svc_acc: ' . np($self->add_svc_acc) };
+  if ( ! defined $self->add_svc_acc || $self->add_svc_acc eq '' ) {
     $mesg =
       $ldap_crud->search({ scope  => 'one',
 			   filter => '(uid=' . $self->autologin . '*)',
 			   base   => $ldap_crud->cfg->{base}->{acc_root},
 			   attrs  => [ 'uid' ], });
+
+    log_debug { "\n" . '+' x 70 . "\nnamesake checkbox: " .
+		  np($self->field('person_namesake')->value) . "\n" .
+    		  np($mesg->count) . "\n" .
+    		  'base: ' . np($ldap_crud->cfg->{base}->{acc_root}) . "\n" .
+    		  'filter: (uid=' . $self->autologin . "*)\n"
+    		};
+
     my $uid_namesake;
     if ( $mesg->count == 1 &&
 	 defined $self->field('person_namesake')->value &&
 	 $self->field('person_namesake')->value == 1 ) {
+      ### 1. namesake is checked, one single account with same givenName, sn exists
       $self->namesake( 1+substr( $mesg->entry(0)->get_value('uid'), length($self->autologin)) );
     } elsif ( $mesg->count &&
 	      defined $self->field('person_namesake')->value &&
-	      $self->field('person_namesake')->value eq '1' ) {
+	      $self->field('person_namesake')->value == 1 ) {
+      ### 2. namesake is checked, several accounts with same givenName, sn exist
       my @uids_namesake_suffixes;
       foreach $uid_namesake ( $mesg->entries ) {
-	push @uids_namesake_suffixes, 0+substr( $uid_namesake->get_value('uid'), length($self->autologin));
+	push @uids_namesake_suffixes, 0+substr( $uid_namesake->get_value('uid'),
+						length($self->autologin));
       }
       my @uids_namesake_suffixes_desc = sort {$b <=> $a} @uids_namesake_suffixes;
-      # p @uids_namesake_suffixes_desc;
       $self->namesake(++$uids_namesake_suffixes_desc[0]);
     } elsif ( $mesg->count ) {
+      ### 3. namesake isn't checked, several accounts with same givenName, sn exist
       $entry = $mesg->entry(0);
-      $self->field('person_login')->add_error('Auto-generaged login exists, object DN: <em class="text-danger">' . $entry->dn . '</em> (consider to use &laquo;namesake&raquo; checkbox)');
+      $self->field('person_login')->add_error('Auto-generaged login exists, DN: <em class="text-danger">' . $entry->dn . '</em> (consider to use &laquo;namesake&raquo; checkbox)');
     } else {
+      ### 4. namesake isn't checked, none accounts with same givenName, sn exists
       $self->namesake('');
     }
   } else {
+    ### 5. additional service to existent account is been processed
     $self->namesake('');
   }
 
@@ -1012,9 +1028,6 @@ sub validate {
 		  $element->field('authorizedservice')->value eq '' )) { # no svc
 	$element->field('authorizedservice')->add_error('Service is mandatory!');
       }
-      # elsif ( ! defined $element->field('authorizedservice')->value ) {
-      # 	$element->field('authorizedservice')->add_error('Service is mandatory!');
-      # }
 
       if ( ( defined $element->field('password1')->value &&
 	     ! defined $element->field('password2')->value ) ||
@@ -1024,45 +1037,51 @@ sub validate {
 	$element->field('password2')->add_error('Both or none passwords have to be defined!');
       }
 
-      #---[ login preparation for check ]------------------------------------------------
+      #---[ login preparation for check + ]------------------------------------------------
+      log_debug { 'namesake: ' . np($self->namesake) };
+      $k = $ldap_crud->{cfg}->{authorizedService}
+	->{$element->field('authorizedservice')->value}->{login_prefix} // '';
 
-      if ( ! defined $element->field('login')->value ||
-	   $element->field('login')->value eq '' ) {
-	$logintmp = sprintf('%s%s%s',
-			    $ldap_crud->cfg->{authorizedService}->{$element->field('authorizedservice')->value}->{login_prefix} // '',
-			    $self->autologin,
-			    $self->namesake);
-	$login_error_pfx = 'Login (autogenerated, since empty)';
+      if ( ! defined $element->field('login')->value || $element->field('login')->value eq '' ) {
+	$logintmp = sprintf('%s%s%s', $k, $self->autologin, $self->namesake);
+	$login_error_pfx = 'Login (autogenerated, since field is empty)';
       } else {
-	$logintmp = sprintf('%s%s',
-			    $ldap_crud->cfg->{authorizedService}->{$element->field('authorizedservice')->value}->{login_prefix} // '',
-			    $element->field('login')->value);
+	$logintmp = sprintf('%s%s', $k, $element->field('login')->value);
 	$login_error_pfx = 'Login';
       }
 
-      $passwd_acc_filter = sprintf("(uid=%s%s%s)",
-				   $logintmp,
-				   $ldap_crud->cfg->{authorizedService}->{
-									  $element->field('authorizedservice')->value
-									 }->{login_delim} // '@',
-				   $element->field('associateddomain')->value)
-	if defined $element->field('associateddomain')->value && $element->field('associateddomain')->value ne '';
+      log_debug { "\n+++ 1 " . '+' x 70 . "\nlogin_complex checkbox No.$i exists" }
+	if exists $self->params->{account}->[$i]->{login_complex};
       
-      #---[ login preparation for check ]------------------------------------------------
+      $passwd_acc_filter =
+	sprintf("(uid=%s%s%s)",
+		$logintmp,
+		exists $self->params->{account}->[$i]->{login_complex} ?
+		$ldap_crud->cfg->{authorizedService}
+		->{$element->field('authorizedservice')->value}->{login_delim} : '',
+		exists $self->params->{account}->[$i]->{login_complex} ?
+		$element->field('associateddomain')->value : '')
+	if defined $element->field('associateddomain')->value &&
+	$element->field('associateddomain')->value ne '';
 
-      #---[ ssh-acc ]--------------------------------------------------------------------
+      #---[ login preparation for check - ]------------------------------------------------
+
+      #---[ ssh-acc + ]--------------------------------------------------------------------
       if ( defined $element->field('authorizedservice')->value &&
 	   $element->field('authorizedservice')->value =~ /^ssh-acc.*$/ ) {
 
 	if ( defined $element->field('associateddomain')->value &&
 	     ! defined $element->field('sshkey')->value &&
 	     ! defined $element->field('sshkeyfile')->value ) { # fqdn but no key
-	  $element->field('sshkey')->add_error('Either Key, KeyFile or both field/s have to be defined!');
-	  $element->field('sshkeyfile')->add_error('Either KeyFile, Key or both field/s have to be defined!');
+	  $element->field('sshkey')->add_error('Either Key or KeyFile, or both field/s have to be defined!');
+	  $element->field('sshkeyfile')->add_error('Either KeyFile or Key, or both field/s have to be defined!');
 	} elsif ( ( defined $element->field('sshkey')->value ||
 		    defined $element->field('sshkeyfile')->value ) &&
 		  ! defined $element->field('associateddomain')->value ) { # key but no fqdn
 	  $element->field('associateddomain')->add_error('Domain field have to be defined!');
+	} elsif ( defined $element->field('sshkey')->value &&
+		  $element->field('sshkey')->value =~ /.*\n.*/g ) { # new line chars
+	  $element->field('sshkey')->add_error('Remove all new line characters ...');
 	} elsif ( ! defined $element->field('sshkey')->value &&
 		  ! defined $element->field('sshkeyfile')->value &&
 		  ! defined $element->field('associateddomain')->value ) { # empty duplicatee
@@ -1076,9 +1095,9 @@ sub validate {
 
 	  
       }
-      #---[ ssh-acc ]--------------------------------------------------------------------
+      #---[ ssh-acc - ]--------------------------------------------------------------------
 
-      #---[ 802.1x ]---------------------------------------------------------------------
+      #---[ 802.1x + ]---------------------------------------------------------------------
       if ( defined $element->field('authorizedservice')->value &&
 	   $element->field('authorizedservice')->value =~ /^dot1x-.*$/ ) {
 
@@ -1157,35 +1176,48 @@ sub validate {
 	    if $mesg->count;
 	}
       }
-      #---[ 802.1x ]---------------------------------------------------------------------
+      #---[ 802.1x - ]---------------------------------------------------------------------
 
-      # prepare to know if login+service+fqdn is uniq?
-      if ( ! $i ) {   # && defined $element->field('login')->value ) {
-	$elementcmp
-	  ->{$logintmp .
-	     $element->field('authorizedservice')->value .
-	     $element->field('associateddomain')->value} = 1;
-      } else { #if ( $i && defined $element->field('login')->value ) {
-	$elementcmp
-	  ->{$logintmp .
-	     $element->field('authorizedservice')->value .
-	     $element->field('associateddomain')->value}++;
-      }
+      # prepare to know if login+service+fqdn is unique?
+      $k = sprintf("%s-%s-%s",
+		   $logintmp,
+		   $element->field('authorizedservice')->value,
+		   exists $self->params->{account}->[$i]->{login_complex} ?
+		   $element->field('associateddomain')->value : '');
+      # log_debug { "\n" . '+' x 70 . "\nlogin_complex: " . np($element->field('login_complex')->value) };
+      ### !!! on submit account.1.login_complex is undefined while it is == 1
+      $elementcmp->{$k}++;
 
-      if ( defined $element->field('authorizedservice')->value && $element->field('authorizedservice')->value ne '' &&
-	   defined $element->field('associateddomain')->value && $element->field('associateddomain')->value ne '' ) {
+      if ( defined $element->field('authorizedservice')->value &&
+	   $element->field('authorizedservice')->value ne '' &&
+	   defined $element->field('associateddomain')->value
+	   && $element->field('associateddomain')->value ne '' ) {
+
+	$filter = sprintf("(&(authorizedService=%s%s%s)%s)",
+			  $element->field('authorizedservice')->value,
+
+			  $ldap_crud->{cfg}->{authorizedService}
+			  ->{$element->field('authorizedservice')->value}
+			  ->{login_delim} // '',
+
+			  $element->field('associateddomain')->value,
+			  $passwd_acc_filter);
 	$mesg =
 	  $ldap_crud->search({
-			      filter => sprintf("(&(authorizedService=%s%s%s)%s)",
-						$element->field('authorizedservice')->value,
-						$ldap_crud->cfg->{authorizedService}->{
-										       $element->field('authorizedservice')->value
-										      }->{login_delim} // '@',
-						$element->field('associateddomain')->value,
-						$passwd_acc_filter),
+			      filter => $filter,
+
 			      base => $ldap_crud->cfg->{base}->{acc_root},
 			      attrs => [ 'uid' ],
 			     });
+
+	log_debug { "\n" . '+' x 70 . "\niteration: " . $i . "\n" . np($logintmp) };
+	log_debug { "\n" . '+' x 70 . "\n" .
+		      "iteration: " . $i . "\n" .
+		      np($mesg->count) . "\n" .
+		      'base: ' . np($ldap_crud->cfg->{base}->{acc_root}) . "\n" .
+		      'filter: ' . np($filter) . "\n"
+		    };
+
 	$element->field('login')->add_error($login_error_pfx . ' <mark>' . $logintmp . '</mark> is not available!')
 	  if ($mesg->count);
       }
@@ -1199,8 +1231,10 @@ sub validate {
 
       $i++;
     }
+
+    log_debug { "\n" . '+' x 70 . "\n" . np($elementcmp) };
+
     # error rising if login+service+fqdn not uniq
-    $i = 0;
     foreach $element ( $self->field('account')->fields ) {
       if ( defined $element->field('authorizedservice')->value &&
 	   $element->field('authorizedservice')->value ne '' &&
@@ -1209,17 +1243,11 @@ sub validate {
 	$element->field('login')
 	  ->add_error(sprintf('%s <mark>%s</mark> defined more than once for the same service and FQDN',
 			      $login_error_pfx, $logintmp))
-	  if defined $elementcmp->{$logintmp .
-				   $element->field('authorizedservice')->value .
-				   $element->field('associateddomain')->value} &&
-				     $elementcmp->{ $logintmp .
-						    $element->field('authorizedservice')->value .
-						    $element->field('associateddomain')->value
-						  } > 1;
+	  if exists $elementcmp->{$k} && $elementcmp->{$k} > 1;
       }
-      $i++;
     }
-  
+
+
     # to rewrite due to loginless_ssh removal #     #---[ ssh + ]------------------------------------------------
     # to rewrite due to loginless_ssh removal #     my $sshpubkeyuniq;
     # to rewrite due to loginless_ssh removal #     $i = 0;

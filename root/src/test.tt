@@ -1,6 +1,6 @@
 [% META title = 'page to test code' %] 
 
-<[% site.pageheading %] class="font-weight-bold p-3">
+<[% site.pageheading %] class="[% site.pageheadingclass %]">
 <i class="fas fa-vial fa-lg mr-3 text-muted"></i>
 Test code page<em class="h6 text-muted font-monospace"> (page to show test code results)</em>
 </[% site.pageheading %]>

@@ -1,6 +1,6 @@
 [% META title = 'To QR Code' %]
 
-<[% site.pageheading %] class="font-weight-bold p-3">
+<[% site.pageheading %] class="[% site.pageheadingclass %]">
 <i class="fas fa-qrcode fa-lg mr-3 text-muted"></i>
 Text to QR-code<small><em class="text-muted font-monospace"></em></small>
 </[% site.pageheading %]>

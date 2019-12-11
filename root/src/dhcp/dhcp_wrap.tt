@@ -4,7 +4,7 @@
 <script type="text/javascript" src="/static/js/moment-with-locales.js"></script>
 <script type="text/javascript" src="/static/js/tempusdominus-bootstrap-4.min.js"></script>
 
-<[% site.pageheading %] class="font-weight-bold p-3">
+<[% site.pageheading %] class="[% site.pageheadingclass %]">
 <i class="fas fa-network-wired fa-lg mr-3 text-muted"></i>
 New DHCP Lease Creation Form <small><em class="text-muted">( IP address to MAC binding )</em></small>
 </[% site.pageheading %]>

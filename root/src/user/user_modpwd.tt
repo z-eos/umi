@@ -1,6 +1,6 @@
 [% META title = 'Password Modify' %]
 
-<[% site.pageheading %] class="font-weight-bold p-3">
+<[% site.pageheading %] class="[% site.pageheadingclass %]">
 <i class="fas fa-fingerprint fa-lg mr-3 text-muted"></i>
 Password Check or Modification Form <small><em class="font-monospace text-muted"> for user: [% ldap_modify_password %]</em></small>
 </[% site.pageheading %]>

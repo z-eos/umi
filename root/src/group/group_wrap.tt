@@ -5,7 +5,7 @@
 
 <link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">
 
-<[% site.pageheading %] class="font-weight-bold p-3">
+<[% site.pageheading %] class="[% site.pageheadingclass %]">
 <i class="fas fa-users fa-lg mr-3 text-muted"></i>
 New Group<small><em class="text-muted font-monospace"></em></small>
 </[% site.pageheading %]>

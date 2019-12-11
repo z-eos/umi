@@ -5,7 +5,7 @@
 
 <link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">
 
-<[% site.pageheading %] class="font-weight-bold p-3">
+<[% site.pageheading %] class="[% site.pageheadingclass %]">
 <i class="fas fa-user-friends fa-lg mr-3 text-muted"></i>
 [% IF form.init_object.aux_dn_form_to_modify %]
   Nis NetGroup Update Form <small><em class="text-muted font-monospace">[% form.init_object.aux_dn_form_to_modify %]</em></small>

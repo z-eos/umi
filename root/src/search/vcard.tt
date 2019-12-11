@@ -1,6 +1,6 @@
 [% META title = 'Search Simple Results' %]
 
-<[% site.pageheading %] class="font-weight-bold p-3">
+<[% site.pageheading %] class="[% site.pageheadingclass %]">
 <i class="fas fa-file-code fa-lg mr-3 text-muted"></i>
 vCard<small><em class="text-muted font-monospace">
   base: [% final_message.dn %]; &nbsp;&nbsp; filter: (objectClass=*)

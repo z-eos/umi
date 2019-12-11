@@ -123,6 +123,8 @@ sub create_account {
        $warning_message,
        $error_message );
 
+  log_debug { np($args) };
+  
   my $is_person_exp = defined $args->{person_exp} && $args->{person_exp} ne '' && $args->{person_exp} ne '____.__.__ __:__' ? 1 : 0;
   
   ###################################################################################
@@ -219,10 +221,8 @@ sub create_account {
     my $ldif = $ldap_crud->add( $root_add_dn, $root_add_options );
     if ( $ldif ) {
       push @{$final_message->{error}},
-	sprintf('Error during management account creation occured: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s' .
-		$ldif->{html},
-		$ldif->{srv},
-		$ldif->{text});
+	'Error during management account creation occured',
+	$ldif->{html};
     } else {
       if ( $is_person_exp ) {
 	my $t = localtime;
@@ -284,7 +284,7 @@ sub create_account {
     #---------------------------------------------------------------------
     # Simplified Account mail branch of ROOT Object Creation
     #---------------------------------------------------------------------
-    $attr_hash = { uid => $uid,
+    $attr_hash = { uid               => $uid,
 		   authorizedservice => 'mail',
 		   associateddomain  => $args->{person_associateddomain},
 		   objectclass       => $args->{dynamic_object} || $is_person_exp ? [ 'dynamicObject' ] : [],
@@ -363,9 +363,11 @@ sub create_account {
     # person_simplified checkbox is *not* checked, we continue with GENERAL form
     #===========================================================================
   } else {
+    my $repeatable_idx;
     @form_fields = qw{ account loginless_ovpn groups };
     foreach my $form_field ( @form_fields ) {
       next if $form_field eq 'groups'; # groups we are skiping for now
+      $repeatable_idx = 0;
       foreach $element ( $self->form->field($form_field)->fields ) {
 
 =pod
@@ -462,7 +464,8 @@ we skip empty (criteria of emptiness is a concatenation of each field value) rep
 	  } elsif ( $element->field('authorizedservice')->value eq 'ssh-acc' ) {
 
 	    push @{$x->{objectclass}}, @{$ldap_crud->cfg->{objectClass}->{acc_svc_ssh}};
-	    $x->{sshkey}     = $element->field('sshkey')->value;
+	    my $ssh_key = $element->field('sshkey')->value;
+	    $x->{sshkey}     = $ssh_key =~ tr/\r\n//d;
 	    $x->{sshkeyfile} = $element->field('sshkeyfile')->value;
 	    $x->{sshgid}     = $element->field('sshgid')->value;
 	    $x->{sshhome}    = $element->field('sshhome')->value;
@@ -479,7 +482,13 @@ we skip empty (criteria of emptiness is a concatenation of each field value) rep
 			       $self->pwdgen( { pwd => $element->field('password2')->value } ) };
 	  }
 
-	  $x->{login} = $element->field('login')->value // $uid;
+	  $x->{login}         = $element->field('login')->value // $uid;
+	  
+	  # log_debug { "\n" . '+' x 70 . "\n" . np($element->field('login_complex')) }
+	  #   if exists $args->{'account.' . $repeatable_idx . '.login_complex'} ;
+	  # log_debug { np($element->field('login_complex')->value) };
+	  $x->{login_complex} = $form_field eq 'account' &&
+	    exists $args->{$form_field . '.' . $repeatable_idx . '.login_complex'} ? 1 : 0;
 
 	  $x->{userCertificate} = $element->field('userCertificate')->value
 	    if defined $element->field('userCertificate')->value &&
@@ -509,6 +518,9 @@ we skip empty (criteria of emptiness is a concatenation of each field value) rep
 	push @{$final_message->{success}}, @{$leaf->{success}} if defined $leaf->{success};
 	push @{$final_message->{warning}}, @{$leaf->{warning}} if defined $leaf->{warning};
 	push @{$final_message->{error}},   @{$leaf->{error}}   if defined $leaf->{error};
+
+	$repeatable_idx++;
+	
       }
       $is_svc_empty = '';
     }

@@ -5,7 +5,7 @@
 
 <link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">
 
-<[% site.pageheading %] class="font-weight-bold p-3">
+<[% site.pageheading %] class="[% site.pageheadingclass %]">
 <i class="fas fa-users-cog fa-lg mr-3 text-muted"></i>
 User Groups Modification Form <small><em class="text-muted font-monospace">
   for user: [% ldap_modify_group %]

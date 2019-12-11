@@ -150,7 +150,7 @@
 
 [% END %]
 
-<script>
+<script> 
  $(document).ready(function () {
    var $panel = $('#sidebar-left');
    var $toggl = $('#sidebarLeftCollapse');

@@ -3,7 +3,7 @@
 [% # stash.name %]
 
 [% IF from_searchadvanced %]
-<[% site.pageheading %] class="font-weight-bold p-3">
+<[% site.pageheading %] class="[% site.pageheadingclass %]">
 <i class="fas fa-search-plus fa-lg mr-3 text-muted"></i>
 Search Advanced
 <small><em class="text-muted font-monospace">( advanced search form )</em></small>
@@ -58,11 +58,7 @@ Search Advanced
 
 [% INCLUDE ldap_err.tt %]
 
-[% # fa_child = 'fa-circle-thin' %]
-[% # child = '<i class="fa fa-fw ' _ fa_child _ ' text-default"></i>' %]
-
-[% child = '⬚';
-   blocked = '';
+[% blocked = '';
    btn_blocked = ' btn-link';
    blocked_title = '';
    branch_class = ' ml-1';

@@ -2,7 +2,7 @@
 
 <link href="/static/css/jquery.json-browse.css" rel="stylesheet" type="text/css">
 
-<[% site.pageheading %] class="font-weight-bold p-3">
+<[% site.pageheading %] class="[% site.pageheadingclass %]">
 <i class="fas fa-info-circle fa-lg mr-3 text-muted"></i>
 System Info<small><em class="text-muted font-monospace"></em></small>
 </[% site.pageheading %]>

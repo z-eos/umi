@@ -1,6 +1,6 @@
 [% META title = 'Password Generator' %]
 
-<[% site.pageheading %] class="font-weight-bold p-3">
+<[% site.pageheading %] class="[% site.pageheadingclass %]">
 <i class="fa fa-unlock-alt fa-lg m-3 text-muted"></i>
 Password Generator Form <small><em class="font-monospace text-muted"> completely random or random pronounceable word</em></small>
 </[% site.pageheading %]>

@@ -1,6 +1,6 @@
 [% META title = 'Search Advanced Results' %]
 
-<[% site.pageheading %] class="font-weight-bold p-3">
+<[% site.pageheading %] class="[% site.pageheadingclass %]">
 <i class="fas fa-binoculars fa-lg mr-3 text-muted"></i>
 Search Advanced
 <small><em class="text-muted font-monospace">( advanced search form )</em></small>

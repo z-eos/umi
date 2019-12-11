@@ -1,6 +1,6 @@
 [% META title = 'To Translit' %]
 
-<[% site.pageheading %] class="font-weight-bold p-3">
+<[% site.pageheading %] class="[% site.pageheadingclass %]">
 <i class="fas fa-language fa-lg mr-3 text-muted"></i>
 Text to translit <small><em class="text-muted font-monospace"></em></small>
 </[% site.pageheading %]>
