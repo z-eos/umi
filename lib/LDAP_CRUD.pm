@@ -17,12 +17,6 @@ BEGIN { with 'Tools'; }
 use Noder;
 use Logger;
 
-if ( UMI->config->{authentication}->{realms}->{ldap}->{store}->{ldap_server_options}->{debug} ) {
-  log_info { "LDAP debug option is set, I activate STDERR redirect." };
-  use Trapper;
-  tie *STDERR, "Trapper";
-}
-
 use utf8;
 use Net::LDAP;
 use Net::LDAP::LDIF;
@@ -361,7 +355,7 @@ sub _build_cfg {
 			      },
 	   'xmpp'          => {
 			       auth                    => 1,
-			       delim_mandatory      => 1,
+			       delim_mandatory         => 1,
 			       descr                   => 'XMPP (Jabber)',
 			       disabled                => 0,
 			       login_delim             => '@',
@@ -3362,8 +3356,8 @@ returns hash
 
 sub create_account_branch {
   my  ( $self, $args ) = @_;
-  my $arg =
-    { $self->cfg->{rdn}->{acc_root} => $args->{$self->cfg->{rdn}->{acc_root}},
+  my %arg =
+    ( $self->cfg->{rdn}->{acc_root} => $args->{$self->cfg->{rdn}->{acc_root}},
       authorizedservice => $args->{authorizedservice},
       associateddomain =>
       sprintf('%s%s',
@@ -3373,58 +3367,58 @@ sub create_account_branch {
 	      ->{$args->{associateddomain}} : '',
 	      $args->{associateddomain}),
       objectclass => $args->{objectclass},
-    };
+    );
 
   my $t = localtime;
-  $arg->{requestttl} = defined $args->{requestttl} &&
+  $arg{requestttl} = defined $args->{requestttl} &&
     $args->{requestttl} ? Time::Piece->strptime( $args->{requestttl}, "%Y.%m.%d %H:%M")->epoch - $t->epoch : 0;
   
-  $arg->{dn} =
+  $arg{dn} =
     sprintf("authorizedService=%s@%s,%s=%s,%s",
-	    $arg->{authorizedservice},
-	    $arg->{associateddomain},
+	    $arg{authorizedservice},
+	    $arg{associateddomain},
 	    $self->cfg->{rdn}->{acc_root},
 	    $args->{$self->cfg->{rdn}->{acc_root}},
 	    $self->cfg->{base}->{acc_root});
   # p $arg;
   my ( $return, $if_exist);
-  $arg->{add_attrs} =
-    [ uid => sprintf('%s@%s', $arg->{$self->cfg->{rdn}->{acc_root}}, $arg->{authorizedservice}),
+  $arg{add_attrs} =
+    [ uid => sprintf('%s@%s', $arg{$self->cfg->{rdn}->{acc_root}}, $arg{authorizedservice}),
       objectClass       => [ @{$self->cfg->{objectClass}->{acc_svc_branch}},
-			     @{$arg->{objectclass}} ],
-      associatedDomain  => $arg->{associateddomain},
+			     @{$arg{objectclass}} ],
+      associatedDomain  => $arg{associateddomain},
       authorizedService =>
-      sprintf('%s@%s%s', $arg->{authorizedservice},
+      sprintf('%s@%s%s', $arg{authorizedservice},
 	      defined $self->cfg->{authorizedService}->{$args->{authorizedservice}}
 	      ->{associateddomain_prefix}->{$args->{associateddomain}} ?
 	      $self->cfg->{authorizedService}->{$args->{authorizedservice}}
 	      ->{associateddomain_prefix}->{$args->{associateddomain}} : '',
-	      $arg->{associateddomain}), ];
-  # p $arg->{add_attrs};
+	      $arg{associateddomain}), ];
+  # p $arg{add_attrs};
   $if_exist =
-    $self->search( { base => $arg->{dn}, scope => 'base', attrs => [ 'authorizedService' ], } );
+    $self->search( { base => $arg{dn}, scope => 'base', attrs => [ 'authorizedService' ], } );
   if ( $if_exist->count ) {
-    $return->{warning} = 'branch DN: <b>&laquo;' . $arg->{dn} . '&raquo;</b> '
+    $return->{warning} = 'branch DN: <b>&laquo;' . $arg{dn} . '&raquo;</b> '
       . 'was not created since it <b>already exists</b>, I will use it further.';
-    $return->{dn} = $arg->{dn};
+    $return->{dn} = $arg{dn};
   } else {
-    my $mesg = $self->add( $arg->{dn}, $arg->{add_attrs} );
+    my $mesg = $self->add( $arg{dn}, $arg{add_attrs} );
     if ( $mesg ) {
       $return->{error} =
 	sprintf('Error during %s branch (dn: %s) creation occured: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s',
-		uc($arg->{authorizedservice}), $arg->{dn}, $mesg->{html}, $mesg->{srv}, $mesg->{text});
+		uc($arg{authorizedservice}), $arg{dn}, $mesg->{html}, $mesg->{srv}, $mesg->{text});
     } else {
-      if ( $arg->{requestttl} ) {
+      if ( $arg{requestttl} ) {
 	my $t = localtime;
-	my $refresh = $self->refresh( $arg->{dn}, $arg->{requestttl} );
+	my $refresh = $self->refresh( $arg{dn}, $arg{requestttl} );
 	if ( defined $refresh->{success} ) {
 	  $return->{success} = $refresh->{success};
 	} elsif ( defined $refresh->{error} ) {
 	  $return->{error} = $refresh->{error};
 	}
       }
-      $return->{dn} = $arg->{dn};
-      $return->{associateddomain_prefix} = $arg->{'associateddomain_prefix'};
+      $return->{dn} = $arg{dn};
+      $return->{associateddomain_prefix} = $arg{associateddomain_prefix};
     }
   }
   # p $return;
@@ -3468,8 +3462,8 @@ returns reference to hash of arrays
 sub create_account_branch_leaf {
   my  ( $self, $args ) = @_;
   # log_debug { np( $args )};
-  my $arg =
-    {
+  my %arg =
+    (
       basedn                 => $args->{basedn},
       service                => $args->{authorizedservice},
       associatedDomain       => sprintf('%s%s',
@@ -3514,238 +3508,238 @@ sub create_account_branch_leaf {
       radiusprofiledn        => $args->{radiusprofiledn}        || '',
 
       objectclass            => $args->{objectclass},
-    };
+    );
 
   my $t = localtime;
-  $arg->{requestttl} = defined $args->{requestttl} &&
+  $arg{requestttl} = defined $args->{requestttl} &&
     $args->{requestttl} ? Time::Piece->strptime( $args->{requestttl}, "%Y.%m.%d %H:%M")->epoch - $t->epoch : 0;
 
   my ( $return, $if_exist );
 
-  $arg->{prefixed_uid} =
+  $arg{prefixed_uid} =
     sprintf('%s%s',
-	    $self->cfg->{authorizedService}->{$arg->{service}}->{login_prefix} // '',
-	    $arg->{login});
+	    $self->cfg->{authorizedService}->{$arg{service}}->{login_prefix} // '',
+	    $arg{login});
 
-  $arg->{uid} = sprintf('%s%s%s',
-			$arg->{prefixed_uid},
+  $arg{uid} = sprintf('%s%s%s',
+			$arg{prefixed_uid},
 
-			$self->cfg->{authorizedService}->{$arg->{service}}->{delim_mandatory} ||
-			$arg->{login_complex} == 1 ?
-			$self->cfg->{authorizedService}->{$arg->{service}}->{login_delim} : '',
+			$self->cfg->{authorizedService}->{$arg{service}}->{delim_mandatory} ||
+			$arg{login_complex} == 1 ?
+			$self->cfg->{authorizedService}->{$arg{service}}->{login_delim} : '',
 
-			$self->cfg->{authorizedService}->{$arg->{service}}->{delim_mandatory} ||
-			$arg->{login_complex} == 1 ? $arg->{associatedDomain} : ''
+			$self->cfg->{authorizedService}->{$arg{service}}->{delim_mandatory} ||
+			$arg{login_complex} == 1 ? $arg{associatedDomain} : ''
 		       );
 
-  $arg->{dn} = sprintf('uid=%s,%s', $arg->{uid}, $arg->{basedn});
+  $arg{dn} = sprintf('uid=%s,%s', $arg{uid}, $arg{basedn});
 
-  log_debug { np($arg) };
+  log_debug { np(%arg) };
   
   my ($authorizedService, $sshkey, $authorizedService_add, $jpegPhoto_file, $description );
   my $sshPublicKey = [];
   
-  if ( $arg->{service}   eq 'ovpn' ||
-       $arg->{service}   eq 'ssh'  ||
-       ( $arg->{service} eq 'dot1x-eap-md5' ||
-	 $arg->{service} eq 'dot1x-eap-tls' ) ||
-       $arg->{service} eq 'web' ) {
+  if ( $arg{service}   eq 'ovpn' ||
+       $arg{service}   eq 'ssh'  ||
+       ( $arg{service} eq 'dot1x-eap-md5' ||
+	 $arg{service} eq 'dot1x-eap-tls' ) ||
+       $arg{service} eq 'web' ) {
     $authorizedService = [];
   } else {
     $authorizedService = [
 			  objectClass       => [ @{$self->cfg->{objectClass}->{acc_svc_common}},
-						 @{$arg->{objectclass}} ],
-			  authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
-			  associatedDomain  => $arg->{associatedDomain},
-			  uid               => $arg->{uid},
-			  cn                => $arg->{uid},
-			  givenName         => $arg->{givenName},
-			  sn                => $arg->{sn},
-# moved to each svc	  uidNumber => $arg->{uidNumber},
+						 @{$arg{objectclass}} ],
+			  authorizedService => $arg{service} . '@' . $arg{associatedDomain},
+			  associatedDomain  => $arg{associatedDomain},
+			  uid               => $arg{uid},
+			  cn                => $arg{uid},
+			  givenName         => $arg{givenName},
+			  sn                => $arg{sn},
+# moved to each svc	  uidNumber => $arg{uidNumber},
 # moved to ssh-acc        loginShell => $self->cfg->{stub}->{loginShell},
 			  gecos             => $self->utf2lat( sprintf('%s %s', $args->{givenName}, $args->{sn}) ),
 			 ];
   }
   
   $description = $args->{description} ne '' ? $args->{description} :
-    sprintf('%s: %s @ %s', uc($arg->{service}), $arg->{'login'}, $arg->{associatedDomain});
+    sprintf('%s: %s @ %s', uc($arg{service}), $arg{'login'}, $arg{associatedDomain});
 
   #=== SERVICE: mail =================================================
-  if ( $arg->{service} eq 'mail') {
+  if ( $arg{service} eq 'mail') {
     push @{$authorizedService},
-      homeDirectory => $self->cfg->{authorizedService}->{$arg->{service}}->{homeDirectory_prefix} .
-      $arg->{associatedDomain} . '/' . $arg->{uid},
-      'mu-mailBox'  => 'maildir:/var/mail/' . $arg->{associatedDomain} . '/' . $arg->{uid},
-      gidNumber     => $self->cfg->{authorizedService}->{$arg->{service}}->{gidNumber},
+      homeDirectory => $self->cfg->{authorizedService}->{$arg{service}}->{homeDirectory_prefix} .
+      $arg{associatedDomain} . '/' . $arg{uid},
+      'mu-mailBox'  => 'maildir:/var/mail/' . $arg{associatedDomain} . '/' . $arg{uid},
+      gidNumber     => $self->cfg->{authorizedService}->{$arg{service}}->{gidNumber},
       loginShell    => $self->cfg->{stub}->{loginShell},
-      uidNumber     => $arg->{uidNumber},
-      userPassword  => $arg->{password}->{$arg->{service}}->{'ssha'},
+      uidNumber     => $arg{uidNumber},
+      userPassword  => $arg{password}->{$arg{service}}->{'ssha'},
       objectClass   => [ @{$self->cfg->{objectClass}->{acc_svc_email}} ];
     
   #=== SERVICE: xmpp =================================================
-  } elsif ( $arg->{service} eq 'xmpp') {
-    if ( defined $arg->{jpegPhoto} ) {
-      $jpegPhoto_file = $arg->{jpegPhoto}->{'tempname'};
+  } elsif ( $arg{service} eq 'xmpp') {
+    if ( defined $arg{jpegPhoto} ) {
+      $jpegPhoto_file = $arg{jpegPhoto}->{'tempname'};
     } else {
-      $jpegPhoto_file = $self->cfg->{authorizedService}->{$arg->{service}}->{jpegPhoto_noavatar};
+      $jpegPhoto_file = $self->cfg->{authorizedService}->{$arg{service}}->{jpegPhoto_noavatar};
     }
 
     push @{$authorizedService},
       homeDirectory   => $self->cfg->{stub}->{homeDirectory},
-      gidNumber       => $self->cfg->{authorizedService}->{$arg->{service}}->{gidNumber},
+      gidNumber       => $self->cfg->{authorizedService}->{$arg{service}}->{gidNumber},
       loginShell      => $self->cfg->{stub}->{loginShell},
-      uidNumber       => $arg->{uidNumber},
-      userPassword    => $arg->{password}->{$arg->{service}}->{'ssha'},
-      telephonenumber => $arg->{telephoneNumber},
+      uidNumber       => $arg{uidNumber},
+      userPassword    => $arg{password}->{$arg{service}}->{'ssha'},
+      telephonenumber => $arg{telephoneNumber},
       jpegPhoto       => [ $self->file2var( $jpegPhoto_file, $return) ];
 
   #=== SERVICE: 802.1x ===============================================
-  } elsif ( $arg->{service} eq 'dot1x-eap-md5' ||
-	    $arg->{service} eq 'dot1x-eap-tls' ) {
+  } elsif ( $arg{service} eq 'dot1x-eap-md5' ||
+	    $arg{service} eq 'dot1x-eap-tls' ) {
     undef $authorizedService;
 
-    if ( $arg->{service} eq 'dot1x-eap-md5' ) {
-      $arg->{dn} = sprintf('%s=%s,%s',
+    if ( $arg{service} eq 'dot1x-eap-md5' ) {
+      $arg{dn} = sprintf('%s=%s,%s',
 			   $self->cfg->{rdn}->{acc_root},
-			   $self->macnorm({ mac => $arg->{login} }),
-			   $arg->{basedn});
+			   $self->macnorm({ mac => $arg{login} }),
+			   $arg{basedn});
       push @{$authorizedService},
-	objectClass => [ @{$self->cfg->{objectClass}->{acc_svc_dot1x}}, @{$arg->{objectclass}} ],
-	uid         => $self->macnorm({ mac => $arg->{login} }),
-	cn          => $self->macnorm({ mac => $arg->{login} });
+	objectClass => [ @{$self->cfg->{objectClass}->{acc_svc_dot1x}}, @{$arg{objectclass}} ],
+	uid         => $self->macnorm({ mac => $arg{login} }),
+	cn          => $self->macnorm({ mac => $arg{login} });
     }
 
     push @{$authorizedService},
-      authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
-      associatedDomain  => $arg->{associatedDomain},
-      userPassword      => $arg->{password}->{$arg->{service}}->{clear};
+      authorizedService => $arg{service} . '@' . $arg{associatedDomain},
+      associatedDomain  => $arg{associatedDomain},
+      userPassword      => $arg{password}->{$arg{service}}->{clear};
 
-    push @{$authorizedService}, radiusprofiledn => $arg->{radiusprofiledn}
-      if $arg->{radiusprofiledn} ne '';
+    push @{$authorizedService}, radiusprofiledn => $arg{radiusprofiledn}
+      if $arg{radiusprofiledn} ne '';
 
-    push @{$authorizedService}, radiusgroupname => $arg->{radiusgroupname}
-      if $arg->{radiusgroupname} ne '';
+    push @{$authorizedService}, radiusgroupname => $arg{radiusgroupname}
+      if $arg{radiusgroupname} ne '';
 
-    if ( $arg->{service} eq 'dot1x-eap-tls' ) {
-      $arg->{cert_info} =
-	$self->cert_info({ cert => $self->file2var($arg->{userCertificate}->{'tempname'}, $return),
+    if ( $arg{service} eq 'dot1x-eap-tls' ) {
+      $arg{cert_info} =
+	$self->cert_info({ cert => $self->file2var($arg{userCertificate}->{'tempname'}, $return),
 			   ts   => "%Y%m%d%H%M%S", });
 
-      $arg->{dn} = sprintf('%s=%s,%s', $self->cfg->{rdn}->{acc_root}, $arg->{cert_info}->{'CN'}, $arg->{basedn});
+      $arg{dn} = sprintf('%s=%s,%s', $self->cfg->{rdn}->{acc_root}, $arg{cert_info}->{'CN'}, $arg{basedn});
 
       push @{$authorizedService},
-	objectClass                 => [ @{$self->cfg->{objectClass}->{acc_svc_dot1x_eap_tls}}, @{$arg->{objectclass}} ],
-	uid                         => '' . $arg->{cert_info}->{'CN'},
-	cn                          => '' . $arg->{cert_info}->{'CN'},
-	umiUserCertificateSn        => '' . $arg->{cert_info}->{'S/N'},
-	umiUserCertificateNotBefore => '' . $arg->{cert_info}->{'Not Before'},
-	umiUserCertificateNotAfter  => '' . $arg->{cert_info}->{'Not  After'},
-	umiUserCertificateSubject   => '' . $arg->{cert_info}->{'Subject'},
-	umiUserCertificateIssuer    => '' . $arg->{cert_info}->{'Issuer'},
-	'userCertificate;binary'    => $arg->{cert_info}->{cert};
+	objectClass                 => [ @{$self->cfg->{objectClass}->{acc_svc_dot1x_eap_tls}}, @{$arg{objectclass}} ],
+	uid                         => '' . $arg{cert_info}->{'CN'},
+	cn                          => '' . $arg{cert_info}->{'CN'},
+	umiUserCertificateSn        => '' . $arg{cert_info}->{'S/N'},
+	umiUserCertificateNotBefore => '' . $arg{cert_info}->{'Not Before'},
+	umiUserCertificateNotAfter  => '' . $arg{cert_info}->{'Not  After'},
+	umiUserCertificateSubject   => '' . $arg{cert_info}->{'Subject'},
+	umiUserCertificateIssuer    => '' . $arg{cert_info}->{'Issuer'},
+	'userCertificate;binary'    => $arg{cert_info}->{cert};
     }
 
   #=== SERVICE: ssh-acc ==============================================
-  } elsif ( $arg->{service} eq 'ssh-acc' ) {
-    if ( defined $arg->{sshkeyfile} ) {
-      $sshPublicKey = $self->file2var( $arg->{sshkeyfile}->{tempname}, $return, 1);
-      # log_debug { np($arg->{sshkeyfile}) };
+  } elsif ( $arg{service} eq 'ssh-acc' ) {
+    if ( defined $arg{sshkeyfile} ) {
+      $sshPublicKey = $self->file2var( $arg{sshkeyfile}->{tempname}, $return, 1);
+      # log_debug { np($arg{sshkeyfile}) };
       # log_debug { np($sshPublicKey) };
       # log_debug { np($return) };
       $description = $self->utf2lat( sprintf("%s ;\nkey file: %s ( %s bytes)",
 					     $description,
-					     $arg->{sshkeyfile}->{filename},
-					     $arg->{sshkeyfile}->{size}) );
+					     $arg{sshkeyfile}->{filename},
+					     $arg{sshkeyfile}->{size}) );
     }
-    push @{$sshPublicKey}, $arg->{sshkey}
-      if defined $arg->{sshkey} && $arg->{sshkey} ne '';
+    push @{$sshPublicKey}, $arg{sshkey}
+      if defined $arg{sshkey} && $arg{sshkey} ne '';
     push @{$authorizedService}, sshPublicKey => [ @$sshPublicKey ],
-      gidNumber     => $arg->{sshgid}   // $self->cfg->{authorizedService}->{$arg->{service}}->{gidNumber},
-#      uidNumber => $arg->{uidNumber} + $self->cfg->{authorizedService}->{$arg->{service}}->{uidNumberShift},
+      gidNumber     => $arg{sshgid}   // $self->cfg->{authorizedService}->{$arg{service}}->{gidNumber},
+#      uidNumber => $arg{uidNumber} + $self->cfg->{authorizedService}->{$arg{service}}->{uidNumberShift},
       uidNumber     => $self->last_uidNumber_ssh + 1,
-      userPassword  => $arg->{password}->{$arg->{service}}->{'ssha'},
-      loginShell    => $arg->{sshshell} // $self->cfg->{authorizedService}->{$arg->{service}}->{loginShell},
-      homeDirectory => $arg->{sshhome}  // sprintf("%s/%s",
-						   $self->cfg->{authorizedService}->{$arg->{service}}->{homeDirectory_prefix},
-						   $arg->{uid});
+      userPassword  => $arg{password}->{$arg{service}}->{'ssha'},
+      loginShell    => $arg{sshshell} // $self->cfg->{authorizedService}->{$arg{service}}->{loginShell},
+      homeDirectory => $arg{sshhome}  // sprintf("%s/%s",
+						   $self->cfg->{authorizedService}->{$arg{service}}->{homeDirectory_prefix},
+						   $arg{uid});
     # ,
-    #   homeDirectory => $self->cfg->{authorizedService}->{$arg->{service}}->{homeDirectory_prefix} . '/' . $arg->{uid};
+    #   homeDirectory => $self->cfg->{authorizedService}->{$arg{service}}->{homeDirectory_prefix} . '/' . $arg{uid};
     # log_debug { np( $arg ) };
 
   #=== SERVICE: ovpn =================================================
-  } elsif ( $arg->{service} eq 'ovpn' ) {
-    $arg->{dn} = 'cn=' . substr($arg->{userCertificate}->{filename},0,-4) . ',' . $arg->{basedn};
-    $arg->{cert_info} =
-      $self->cert_info({ cert => $self->file2var($arg->{userCertificate}->{'tempname'}, $return),
+  } elsif ( $arg{service} eq 'ovpn' ) {
+    $arg{dn} = 'cn=' . substr($arg{userCertificate}->{filename},0,-4) . ',' . $arg{basedn};
+    $arg{cert_info} =
+      $self->cert_info({ cert => $self->file2var($arg{userCertificate}->{'tempname'}, $return),
 			 ts   => "%Y%m%d%H%M%S", });
     $authorizedService = [
-			  cn                          => '' . $arg->{cert_info}->{CN},
-			  associatedDomain            => $arg->{associatedDomain},
-			  authorizedService           => $arg->{service} . '@' . $arg->{associatedDomain},
+			  cn                          => '' . $arg{cert_info}->{CN},
+			  associatedDomain            => $arg{associatedDomain},
+			  authorizedService           => $arg{service} . '@' . $arg{associatedDomain},
 			  objectClass                 => [ @{$self->cfg->{objectClass}->{ovpn}},
-						           @{$arg->{objectclass}} ],
-			  umiOvpnCfgIfconfigPush      => $arg->{umiOvpnCfgIfconfigPush},
-			  umiOvpnCfgIroute            => $arg->{umiOvpnCfgIroute},
-			  umiOvpnCfgPush              => $arg->{umiOvpnCfgPush},
-			  umiOvpnCfgConfig            => $arg->{umiOvpnCfgConfig},
-			  umiOvpnAddStatus            => $arg->{umiOvpnAddStatus},
-			  umiUserCertificateSn        => '' . $arg->{cert_info}->{'S/N'},
-			  umiUserCertificateNotBefore => '' . $arg->{cert_info}->{'Not Before'},
-			  umiUserCertificateNotAfter  => '' . $arg->{cert_info}->{'Not  After'},
-			  umiUserCertificateSubject   => '' . $arg->{cert_info}->{'Subject'},
-			  umiUserCertificateIssuer    => '' . $arg->{cert_info}->{'Issuer'},
-			  umiOvpnAddDevType           => $arg->{umiOvpnAddDevType},
-			  umiOvpnAddDevMake           => $arg->{umiOvpnAddDevMake},
-			  umiOvpnAddDevModel          => $arg->{umiOvpnAddDevModel},
-			  umiOvpnAddDevOS             => $arg->{umiOvpnAddDevOS},
-			  umiOvpnAddDevOSVer          => $arg->{umiOvpnAddDevOSVer},
-			  'userCertificate;binary'    => $arg->{cert_info}->{cert},
+						           @{$arg{objectclass}} ],
+			  umiOvpnCfgIfconfigPush      => $arg{umiOvpnCfgIfconfigPush},
+			  umiOvpnCfgIroute            => $arg{umiOvpnCfgIroute},
+			  umiOvpnCfgPush              => $arg{umiOvpnCfgPush},
+			  umiOvpnCfgConfig            => $arg{umiOvpnCfgConfig},
+			  umiOvpnAddStatus            => $arg{umiOvpnAddStatus},
+			  umiUserCertificateSn        => '' . $arg{cert_info}->{'S/N'},
+			  umiUserCertificateNotBefore => '' . $arg{cert_info}->{'Not Before'},
+			  umiUserCertificateNotAfter  => '' . $arg{cert_info}->{'Not  After'},
+			  umiUserCertificateSubject   => '' . $arg{cert_info}->{'Subject'},
+			  umiUserCertificateIssuer    => '' . $arg{cert_info}->{'Issuer'},
+			  umiOvpnAddDevType           => $arg{umiOvpnAddDevType},
+			  umiOvpnAddDevMake           => $arg{umiOvpnAddDevMake},
+			  umiOvpnAddDevModel          => $arg{umiOvpnAddDevModel},
+			  umiOvpnAddDevOS             => $arg{umiOvpnAddDevOS},
+			  umiOvpnAddDevOSVer          => $arg{umiOvpnAddDevOSVer},
+			  'userCertificate;binary'    => $arg{cert_info}->{cert},
 			 ];
 
-    push @{$return->{error}}, $arg->{cert_info}->{error} if defined $arg->{cert_info}->{error};
+    push @{$return->{error}}, $arg{cert_info}->{error} if defined $arg{cert_info}->{error};
     
   #=== SERVICE: web ==================================================
-  } elsif ( $arg->{service} eq 'web' ) {
+  } elsif ( $arg{service} eq 'web' ) {
     $authorizedService = [
 			  objectClass       => [ @{$self->cfg->{objectClass}->{acc_svc_web}},
-						 @{$arg->{objectclass}} ],
-			  authorizedService => $arg->{service} . '@' . $arg->{associatedDomain},
-			  associatedDomain  => $arg->{associatedDomain},
-			  uid               => $arg->{uid},
-			  userPassword      => $arg->{password}->{$arg->{service}}->{'ssha'},
+						 @{$arg{objectclass}} ],
+			  authorizedService => $arg{service} . '@' . $arg{associatedDomain},
+			  associatedDomain  => $arg{associatedDomain},
+			  uid               => $arg{uid},
+			  userPassword      => $arg{password}->{$arg{service}}->{'ssha'},
 			 ];
   }
 
   push @{$authorizedService}, description => $description;
   
-  # p $arg->{dn};
+  # p $arg{dn};
   # p $authorizedService;
   # p $sshPublicKey;
   my $mesg;
   # for an existent SSH object we have to modify rather than add
-  $if_exist = $self->search( { base => $arg->{dn}, scope => 'base', } );
-  if ( $arg->{service} eq 'ssh' && $if_exist->count ) {
-    $mesg = $self->modify( $arg->{dn},
+  $if_exist = $self->search( { base => $arg{dn}, scope => 'base', } );
+  if ( $arg{service} eq 'ssh' && $if_exist->count ) {
+    $mesg = $self->modify( $arg{dn},
 				[ add => [ sshPublicKey => $sshPublicKey, ], ], );
     if ( $mesg ) {
       push @{$return->{error}},
 	sprintf('Error during %s service modification: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s',
-		$arg->{service}, $mesg->{html}, $mesg->{srv}, $mesg->{text});
+		$arg{service}, $mesg->{html}, $mesg->{srv}, $mesg->{text});
     } else {
       push @{$return->{success}},
 	sprintf('<i class="%s fa-fw"></i>&nbsp;<em>key was added</em>',
-		$self->cfg->{authorizedService}->{$arg->{service}}->{icon} );
+		$self->cfg->{authorizedService}->{$arg{service}}->{icon} );
     }
   } else {
     # for nonexistent SSH object and all others
-    $mesg = $self->add( $arg->{dn}, $authorizedService, );
+    $mesg = $self->add( $arg{dn}, $authorizedService, );
     if ( $mesg ) {
       push @{$return->{error}},
 	sprintf('Error during %s account creation occured: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s',
-		uc($arg->{service}), $mesg->{html}, $mesg->{srv}, $mesg->{text});
+		uc($arg{service}), $mesg->{html}, $mesg->{srv}, $mesg->{text});
     } else {
-      if ( $arg->{requestttl} ) {
-	my $refresh = $self->refresh( $arg->{dn}, $arg->{requestttl});
+      if ( $arg{requestttl} ) {
+	my $refresh = $self->refresh( $arg{dn}, $arg{requestttl});
 	if ( defined $refresh->{success} ) {
 	  push @{$return->{success}}, $refresh->{success};
 	} elsif ( defined $refresh->{error} ) {
@@ -3754,29 +3748,29 @@ sub create_account_branch_leaf {
       }
       push @{$return->{success}},
 	sprintf('<i class="%s fa-fw"></i>&nbsp;<em>%s account login:</em> <strong class="text-success">%s</strong> <em>password:</em> <strong class="text-success text-monospace">%s</strong>',
-		$self->cfg->{authorizedService}->{$arg->{service}}->{icon},
-		$arg->{service},
-		(split(/=/,(split(/,/,$arg->{dn}))[0]))[1], # taking RDN value
-		$arg->{password}->{$arg->{service}}->{'clear'});
+		$self->cfg->{authorizedService}->{$arg{service}}->{icon},
+		$arg{service},
+		(split(/=/,(split(/,/,$arg{dn}))[0]))[1], # taking RDN value
+		$arg{password}->{$arg{service}}->{'clear'});
 
 
       ### !!! RADIUS group modify with new member add if 802.1x
-      if ( $arg->{service} eq 'dot1x-eap-md5' || $arg->{service} eq 'dot1x-eap-tls' &&
-	   defined $arg->{radiusgroupname} && $arg->{radiusgroupname} ne '' ) {
-	$if_exist = $self->search( { base => $arg->{radiusgroupname},
+      if ( $arg{service} eq 'dot1x-eap-md5' || $arg{service} eq 'dot1x-eap-tls' &&
+	   defined $arg{radiusgroupname} && $arg{radiusgroupname} ne '' ) {
+	$if_exist = $self->search( { base => $arg{radiusgroupname},
 					  scope => 'base',
-					  filter => '(' . $arg->{dn} . ')', } );
+					  filter => '(' . $arg{dn} . ')', } );
 	if ( ! $if_exist->count ) {
-	  $mesg = $self->modify( $arg->{radiusgroupname},
-				      [ add => [ member => $arg->{dn}, ], ], );
+	  $mesg = $self->modify( $arg{radiusgroupname},
+				      [ add => [ member => $arg{dn}, ], ], );
 	  if ( $mesg && $mesg->{code} == 20 ) {
 	    push @{$return->{warning}},
 	      sprintf('Warning during %s group modification: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s',
-		      $arg->{radiusgroupname}, $mesg->{html}, $mesg->{srv}, $mesg->{text});
+		      $arg{radiusgroupname}, $mesg->{html}, $mesg->{srv}, $mesg->{text});
 	  } elsif ( $mesg ) {
 	    push @{$return->{error}},
 	      sprintf('Error during %s group modification: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s',
-		      $arg->{radiusgroupname}, $mesg->{html}, $mesg->{srv}, $mesg->{text});
+		      $arg{radiusgroupname}, $mesg->{html}, $mesg->{srv}, $mesg->{text});
 	  }
 
 	}

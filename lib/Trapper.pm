@@ -9,6 +9,18 @@ use Log::Log4perl::Level;
 use Log::Log4perl::Filter;
 use Log::Log4perl::Filter::LevelMatch;
 
+
+=head1 NAME
+
+Trapper
+
+=head1 DESCRIPTION
+
+part of logging system to trap DEBUG messages to redirect them to file
+
+=cut
+
+
 ### DEBUG, INFO, WARN, ERROR, FATAL
 
 ###=== APPENDER FILE ==================================================
@@ -34,7 +46,7 @@ $apn_file->filter($flt_file);
 
 my $layout_file =
 #  Log::Log4perl::Layout::PatternLayout->new( "%m" );
-  Log::Log4perl::Layout::PatternLayout->new( "<<< %d{yyyy.MM.dd HH:mm:ss} [%p]: L%05L @ %M: %F{2}: %m{chomp} L%05L @ %M: %F{2} >>>%n" );
+  Log::Log4perl::Layout::PatternLayout->new( "<<<<< %d{yyyy.MM.dd HH:mm:ss} [%p]: L%05L @ %M: %F{2}:%n %m{chomp} %n>>>>> %d{yyyy.MM.dd HH:mm:ss} [%p]: L%05L @ %M: %F{2}%n%n" );
 
 $apn_file->layout($layout_file);
 

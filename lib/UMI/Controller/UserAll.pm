@@ -38,8 +38,8 @@ Catalyst Controller.
 sub index :Path :Args(0) {
   my ( $self, $c ) = @_;
   my $params = $c->req->parameters;
-  # p $self->form->add_svc_acc( defined $params->{add_svc_acc} && $params->{add_svc_acc} ne '' ? $params->{add_svc_acc} : '' );
-  
+  log_debug { np($params) };
+
   my $final_message;
 
   # here we initialize repeatable fields to be rendered when the form is called from
@@ -110,23 +110,13 @@ sub index :Path :Args(0) {
 sub create_account {
   my  ( $self, $ldap_crud, $args ) = @_;
   my ( @form_fields,
-       $attr_hash,
-       $uid,
-       $uidNumber,
-       $descr,
-       $pwd,
-       $file,
-       $jpeg,
-       $objectClass,
-       $final_message,
-       $success_message,
-       $warning_message,
-       $error_message );
+       $attr_hash,       $descr, $error_message, $file,
+       $final_message,   $jpeg,  $objectClass,   $pwd,
+       $success_message, $uid,   $uidNumber,     $warning_message );
 
-  log_debug { np($args) };
-  
-  my $is_person_exp = defined $args->{person_exp} && $args->{person_exp} ne '' && $args->{person_exp} ne '____.__.__ __:__' ? 1 : 0;
-  
+  my $is_person_exp = defined $args->{person_exp} && $args->{person_exp} ne '' &&
+    $args->{person_exp} ne '____.__.__ __:__' ? 1 : 0;
+
   ###################################################################################
   # NEW ACCOUNT, not additional service one
   ###################################################################################
@@ -188,8 +178,8 @@ sub create_account {
     push @{$objectClass}, 'umiSettings';
     push @{$objectClass}, 'dynamicObject' if $is_person_exp;
     
-    my $root_add_options =
-      [
+    my @root_add_options =
+      (
        uid                        => $uid, # $ldap_crud->cfg->{rdn}->{acc_root} => $uid,
        userPassword               => $pwd->{root}->{ssha},
        telephoneNumber            => $args->{person_telephonenumber},
@@ -213,12 +203,12 @@ sub create_account {
        title                      => lc($args->{'person_title'}),
        umiSettingsJson            => q({"ui":{"debug":0,"aside":0,"sidebar":0}}),
        objectClass                => $objectClass,
-      ];
+      );
 
-    push @{$root_add_options}, mail => $args->{person_mail}
+    push @root_add_options, mail => $args->{person_mail}
       if exists $args->{person_mail} && $args->{person_mail} ne '';
 
-    my $ldif = $ldap_crud->add( $root_add_dn, $root_add_options );
+    my $ldif = $ldap_crud->add( $root_add_dn, \@root_add_options );
     if ( $ldif ) {
       push @{$final_message->{error}},
 	'Error during management account creation occured',
@@ -300,8 +290,8 @@ sub create_account {
     #---------------------------------------------------------------------
     # Simplified Leaf of the account mail branch of ROOT Object
     #---------------------------------------------------------------------
-    my $x =
-      {
+    my %x =
+      (
        basedn            => $branch->{dn},
        authorizedservice => 'mail',
        associateddomain  => $branch->{associateddomain_prefix} . $args->{person_associateddomain},
@@ -313,19 +303,19 @@ sub create_account {
        $args->{person_login} ne '' ? $args->{person_login} : $uid,
        objectclass       => $args->{dynamic_object} || $is_person_exp ? [ 'dynamicObject' ] : [],
        requestttl        => $is_person_exp ? $args->{person_exp} : '',
-      };
+      );
 
     if ( ! $args->{person_password1} &&
 	 ! $args->{person_password2} ) {
-      $x->{password}->{mail} = $self->pwdgen;
-      $x->{password}->{xmpp} = $self->pwdgen;
+      $x{password}->{mail} = $self->pwdgen;
+      $x{password}->{xmpp} = $self->pwdgen;
     } else {
-      $x->{password}->{mail} = $self->pwdgen( { pwd => $args->{person_password2} } );
-      $x->{password}->{xmpp} = $self->pwdgen( { pwd => $args->{person_password2} } );
+      $x{password}->{mail} = $self->pwdgen( { pwd => $args->{person_password2} } );
+      $x{password}->{xmpp} = $self->pwdgen( { pwd => $args->{person_password2} } );
     }
 
     $leaf =
-      $ldap_crud->create_account_branch_leaf ( $x );
+      $ldap_crud->create_account_branch_leaf ( \%x );
     push @{$final_message->{success}}, @{$leaf->{success}} if defined $leaf->{success};
     push @{$final_message->{warning}}, @{$leaf->{warning}} if defined $leaf->{warning};
     push @{$final_message->{error}},   @{$leaf->{error}}   if defined $leaf->{error};
@@ -347,12 +337,12 @@ sub create_account {
     #---------------------------------------------------------------------
     # Simplified Leaf of the account email branch of ROOT Object
     #---------------------------------------------------------------------
-    $x->{basedn}            = $branch->{dn};
-    $x->{authorizedservice} = 'xmpp';
-    $x->{objectclass}       = $args->{dynamic_object} || $is_person_exp ? [ 'dynamicObject' ] : [];
-    $x->{requestttl}        = $is_person_exp ? $args->{person_exp} : '';
+    $x{basedn}            = $branch->{dn};
+    $x{authorizedservice} = 'xmpp';
+    $x{objectclass}       = $args->{dynamic_object} || $is_person_exp ? [ 'dynamicObject' ] : [];
+    $x{requestttl}        = $is_person_exp ? $args->{person_exp} : '';
 
-    $leaf = $ldap_crud->create_account_branch_leaf ( $x );
+    $leaf = $ldap_crud->create_account_branch_leaf ( \%x );
     
     push @{$final_message->{success}}, @{$leaf->{success}} if defined $leaf->{success};
     push @{$final_message->{warning}}, @{$leaf->{warning}} if defined $leaf->{warning};
@@ -405,8 +395,8 @@ we skip empty (criteria of emptiness is a concatenation of each field value) rep
 	#---------------------------------------------------------------------
 	# LEAF of the account BRANCH
 	#---------------------------------------------------------------------
-	my $x =
-	  {
+	my %x =
+	  (
 	   basedn => $branch->{dn},
 	   authorizedservice => $form_field ne 'account' ?
 	   substr($form_field, 10) : $element->field('authorizedservice')->value,
@@ -433,21 +423,21 @@ we skip empty (criteria of emptiness is a concatenation of each field value) rep
 	   telephoneNumber => $args->{person_telephonenumber},
 	   # jpegPhoto => $jpeg,
 	   requestttl => $is_person_exp ? $args->{person_exp} : '',
-	  };
+	  );
 
-	$x->{description} =
+	$x{description} =
 	  defined $element->field('description') ? $element->field('description')->value : '';
 
-	$x->{objectclass} = $is_person_exp ? [ 'dynamicObject' ] : [];
+	$x{objectclass} = $is_person_exp ? [ 'dynamicObject' ] : [];
 
 	if ( $form_field eq 'account' ) {
 	  if ( $element->field('authorizedservice')->value =~ /^dot1x-.*/ ) {
 	    if ( $element->field('authorizedservice')->value eq 'dot1x-eap-md5' ) {
-	      $x->{password} = { $element->field('authorizedservice')->value =>
+	      $x{password} = { $element->field('authorizedservice')->value =>
 				 { clear => $self->macnorm({ mac => $element->field('login')->value }) }
 			       };
 	    } elsif ( $element->field('authorizedservice')->value eq 'dot1x-eap-tls' ) {
-	      $x->{password} = { $element->field('authorizedservice')->value =>
+	      $x{password} = { $element->field('authorizedservice')->value =>
 				 { clear =>
 				   sprintf('%s%s',
 					   $ldap_crud->cfg->{authorizedService}->{$element->field('authorizedservice')->value}
@@ -456,65 +446,65 @@ we skip empty (criteria of emptiness is a concatenation of each field value) rep
 			       };
 	    }
 
-	    $x->{radiusgroupname} = $element->field('radiusgroupname')->value
+	    $x{radiusgroupname} = $element->field('radiusgroupname')->value
 	      if defined $element->field('radiusgroupname')->value;
-	    $x->{radiusprofiledn} = $element->field('radiusprofiledn')->value
+	    $x{radiusprofiledn} = $element->field('radiusprofiledn')->value
 	      if defined $element->field('radiusprofiledn')->value;
 
 	  } elsif ( $element->field('authorizedservice')->value eq 'ssh-acc' ) {
 
-	    push @{$x->{objectclass}}, @{$ldap_crud->cfg->{objectClass}->{acc_svc_ssh}};
+	    push @{$x{objectclass}}, @{$ldap_crud->cfg->{objectClass}->{acc_svc_ssh}};
 	    my $ssh_key = $element->field('sshkey')->value;
-	    $x->{sshkey}     = $ssh_key =~ tr/\r\n//d;
-	    $x->{sshkeyfile} = $element->field('sshkeyfile')->value;
-	    $x->{sshgid}     = $element->field('sshgid')->value;
-	    $x->{sshhome}    = $element->field('sshhome')->value;
-	    $x->{sshshell}   = $element->field('sshshell')->value;
-	    $x->{password}->{$element->field('authorizedservice')->value} =
+	    $x{sshkey}     = $ssh_key =~ tr/\r\n//d;
+	    $x{sshkeyfile} = $element->field('sshkeyfile')->value;
+	    $x{sshgid}     = $element->field('sshgid')->value;
+	    $x{sshhome}    = $element->field('sshhome')->value;
+	    $x{sshshell}   = $element->field('sshshell')->value;
+	    $x{password}->{$element->field('authorizedservice')->value} =
 	      ! $element->field('password2')->value ?
 	      $self->pwdgen : $self->pwdgen({ pwd => $element->field('password2')->value });
 
 	  } elsif ( ! $element->field('password1')->value &&
 		    ! $element->field('password2')->value) {
-	    $x->{password} = { $element->field('authorizedservice')->value => $self->pwdgen };
+	    $x{password} = { $element->field('authorizedservice')->value => $self->pwdgen };
 	  } else {
-	    $x->{password} = { $element->field('authorizedservice')->value =>
+	    $x{password} = { $element->field('authorizedservice')->value =>
 			       $self->pwdgen( { pwd => $element->field('password2')->value } ) };
 	  }
 
-	  $x->{login}         = $element->field('login')->value // $uid;
+	  $x{login}         = $element->field('login')->value // $uid;
 	  
 	  # log_debug { "\n" . '+' x 70 . "\n" . np($element->field('login_complex')) }
 	  #   if exists $args->{'account.' . $repeatable_idx . '.login_complex'} ;
 	  # log_debug { np($element->field('login_complex')->value) };
-	  $x->{login_complex} = $form_field eq 'account' &&
+	  $x{login_complex} = $form_field eq 'account' &&
 	    exists $args->{$form_field . '.' . $repeatable_idx . '.login_complex'} ? 1 : 0;
 
-	  $x->{userCertificate} = $element->field('userCertificate')->value
+	  $x{userCertificate} = $element->field('userCertificate')->value
 	    if defined $element->field('userCertificate')->value &&
 	    $element->field('userCertificate')->value ne '';
 	  
-	} elsif ( $x->{authorizedservice} eq 'ovpn' ) {
-	  $x->{userCertificate} = $element->field('userCertificate')->value
+	} elsif ( $x{authorizedservice} eq 'ovpn' ) {
+	  $x{userCertificate} = $element->field('userCertificate')->value
 	    if defined $element->field('userCertificate')->value;
-	  $x->{password}               = { $x->{authorizedservice} =>
+	  $x{password}               = { $x{authorizedservice} =>
 					   { clear => '<del>NOPASSWORD</del>' } };
-	  $x->{associateddomain}       = $element->field('associateddomain')->value;
-	  $x->{umiOvpnCfgConfig}       = $element->field('config')->value       || 'NA';
-	  $x->{umiOvpnCfgIfconfigPush} = $element->field('ifconfigpush')->value || 'NA';
-	  $x->{umiOvpnCfgIroute}       = $element->field('iroute')->value       || 'NA';
-	  $x->{umiOvpnCfgPush}         = $element->field('push')->value         || 'NA';
-	  $x->{umiOvpnAddDevType}      = $element->field('devtype')->value      || 'NA';
-	  $x->{umiOvpnAddDevMake}      = $element->field('devmake')->value      || 'NA';
-	  $x->{umiOvpnAddDevModel}     = $element->field('devmodel')->value     || 'NA';
-	  $x->{umiOvpnAddDevOS}        = $element->field('devos')->value        || 'NA';
-	  $x->{umiOvpnAddDevOSVer}     = $element->field('devosver')->value     || 'NA';
-	  $x->{umiOvpnAddStatus}       = $element->field('status')->value       || 'blocked';
+	  $x{associateddomain}       = $element->field('associateddomain')->value;
+	  $x{umiOvpnCfgConfig}       = $element->field('config')->value       || 'NA';
+	  $x{umiOvpnCfgIfconfigPush} = $element->field('ifconfigpush')->value || 'NA';
+	  $x{umiOvpnCfgIroute}       = $element->field('iroute')->value       || 'NA';
+	  $x{umiOvpnCfgPush}         = $element->field('push')->value         || 'NA';
+	  $x{umiOvpnAddDevType}      = $element->field('devtype')->value      || 'NA';
+	  $x{umiOvpnAddDevMake}      = $element->field('devmake')->value      || 'NA';
+	  $x{umiOvpnAddDevModel}     = $element->field('devmodel')->value     || 'NA';
+	  $x{umiOvpnAddDevOS}        = $element->field('devos')->value        || 'NA';
+	  $x{umiOvpnAddDevOSVer}     = $element->field('devosver')->value     || 'NA';
+	  $x{umiOvpnAddStatus}       = $element->field('status')->value       || 'blocked';
 	}
 
 	# log_debug { np($x) };
 	$leaf =
-	  $ldap_crud->create_account_branch_leaf ( $x );
+	  $ldap_crud->create_account_branch_leaf ( \%x );
 	push @{$final_message->{success}}, @{$leaf->{success}} if defined $leaf->{success};
 	push @{$final_message->{warning}}, @{$leaf->{warning}} if defined $leaf->{warning};
 	push @{$final_message->{error}},   @{$leaf->{error}}   if defined $leaf->{error};

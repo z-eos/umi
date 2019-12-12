@@ -16,6 +16,20 @@ use Log::Log4perl::InternalDebug;
 use base qw(Log::Dispatch::Output);
 use base 'Log::Contextual';
 
+
+=head1 NAME
+
+Logger
+
+=head1 DESCRIPTION
+
+logging system to log not DEBUG messages
+
+DEBUG is served with Trapper
+
+=cut
+
+
 ### DEBUG, INFO, WARN, ERROR, FATAL
 
 ###=== APPENDER FILE ==================================================
@@ -78,8 +92,6 @@ my $layout_scrn =
   Log::Log4perl::Layout::PatternLayout->new( "%d{yyyy.MM.dd HH:mm:ss} [%p]: L%05L @ %F{2}: %m{chomp}%n%n" );
 
 $apn_scrn->layout($layout_scrn);
-
-
 
 
 get_logger->add_appender($apn_file);

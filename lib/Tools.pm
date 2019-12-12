@@ -24,6 +24,12 @@ use Net::SSH::Perl::Key;
 use Net::LDAP::Util qw(	generalizedTime_to_time ldap_explode_dn );
 
 use Logger;
+if ( UMI->config->{authentication}->{realms}->{ldap}->{store}->{ldap_server_options}->{debug} ) {
+  log_info { "LDAP debug option is set, I activate STDERR redirect." };
+  use Trapper;
+  tie *STDERR, "Trapper";
+}
+
 
 # ??? # use Scalar::Util;
 # ??? # use List::Util;

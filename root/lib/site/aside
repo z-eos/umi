@@ -1,6 +1,6 @@
 [% # -*- mode: web; -*- %]
 
-<aside>
+<aside id="aside">
   <nav id="sidebar-right"
        class="text-light bg-dark float-right [% c.session.settings.ui.aside == 0 ? 'folded' : '' %]"
        data-url-tree="/ldap_tree">

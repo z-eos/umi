@@ -5,6 +5,13 @@ html,body {
   font-size: 0.95rem;
 }
 
+body {
+  height: 100%;
+  font-size: 0.95rem;
+  max-height: 100vh;
+  overflow: hidden;
+}
+
 /* @include media-breakpoint-up(sm) {
    html {
 	 font-size: 1.2rem;
@@ -321,12 +328,20 @@ html,body {
 
 .outmost-wrapper {
   overflow: hidden;
+  height: 100%;
 }
 
+/* 50px is for hight of header */
 .wrapper {
   display: flex;
   width: 100%;
   align-items: stretch;
+  height: calc(100% - 50px);
+}
+
+aside, main {
+  height: 100%;
+  overflow-y: auto;
 }
 
 /* -------------------------------
@@ -414,13 +429,14 @@ html,body {
 
 #sidebar-right {
   width: 370px;
-  min-height: 100vh;
+  min-height: 100%;
   transition: width ease 250ms;
 }
 
 #sidebar-right.folded:not(:hover) {
   width: 55px;
   text-align: center;
+  overflow-x: hidden;
 }
 
 #sidebar-right.folded:hover {

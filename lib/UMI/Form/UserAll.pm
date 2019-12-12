@@ -961,9 +961,9 @@ sub validate {
 			   base   => $ldap_crud->cfg->{base}->{acc_root},
 			   attrs  => [ 'uid' ], });
 
-    log_debug { "\n" . '+' x 70 . "\nnamesake checkbox: " .
+    log_debug { "+++ 1 " . '+' x 70 . "\nnamesake checkbox: " .
 		  np($self->field('person_namesake')->value) . "\n" .
-    		  np($mesg->count) . "\n" .
+    		  "namesake count: " . np($mesg->count) . "\n" .
     		  'base: ' . np($ldap_crud->cfg->{base}->{acc_root}) . "\n" .
     		  'filter: (uid=' . $self->autologin . "*)\n"
     		};
@@ -1050,7 +1050,7 @@ sub validate {
 	$login_error_pfx = 'Login';
       }
 
-      log_debug { "\n+++ 1 " . '+' x 70 . "\nlogin_complex checkbox No.$i exists" }
+      log_debug { "+++ 2 " . '+' x 70 . "\nlogin_complex checkbox No.$i exists" }
 	if exists $self->params->{account}->[$i]->{login_complex};
       
       $passwd_acc_filter =
@@ -1184,7 +1184,7 @@ sub validate {
 		   $element->field('authorizedservice')->value,
 		   exists $self->params->{account}->[$i]->{login_complex} ?
 		   $element->field('associateddomain')->value : '');
-      # log_debug { "\n" . '+' x 70 . "\nlogin_complex: " . np($element->field('login_complex')->value) };
+      # log_debug { "+++ 3 " . '+' x 70 . "\nlogin_complex: " . np($element->field('login_complex')->value) };
       ### !!! on submit account.1.login_complex is undefined while it is == 1
       $elementcmp->{$k}++;
 
@@ -1210,10 +1210,10 @@ sub validate {
 			      attrs => [ 'uid' ],
 			     });
 
-	log_debug { "\n" . '+' x 70 . "\niteration: " . $i . "\n" . np($logintmp) };
-	log_debug { "\n" . '+' x 70 . "\n" .
+	log_debug { "+++ 4 " . '+' x 70 . "\niteration: " . $i . "\n" . np($logintmp) };
+	log_debug { "+++ 5 " . '+' x 70 . "\n" .
 		      "iteration: " . $i . "\n" .
-		      np($mesg->count) . "\n" .
+		      "namesake count: " . np($mesg->count) . "\n" .
 		      'base: ' . np($ldap_crud->cfg->{base}->{acc_root}) . "\n" .
 		      'filter: ' . np($filter) . "\n"
 		    };
@@ -1232,7 +1232,7 @@ sub validate {
       $i++;
     }
 
-    log_debug { "\n" . '+' x 70 . "\n" . np($elementcmp) };
+    log_debug { "+++ 6 " . '+' x 70 . "\n" . np($elementcmp) };
 
     # error rising if login+service+fqdn not uniq
     foreach $element ( $self->field('account')->fields ) {

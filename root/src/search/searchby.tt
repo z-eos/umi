@@ -46,8 +46,8 @@ Search Advanced
   </div>
   <div class="col-xs-6 col-sm-6 col-md-9 col-lg-9">
     <dl class="row font-monospace text-muted umi-text-xs">
-      <dt class="col-1 text-right">base:</dt>  <dd class="col-11">[% base_dn %]</dd>
-      <dt class="col-1 text-right">filter:</dt><dd class="col-11">[% filter %]</dd>
+      <dt class="col-1 text-right">base:</dt>  <dd class="col-11 text-break">[% base_dn %]</dd>
+      <dt class="col-1 text-right">filter:</dt><dd class="col-11 text-break">[% filter %]</dd>
     </dl>
   </div>
 </div>
@@ -471,7 +471,7 @@ Search Advanced
 	      <div class="card-body">
 		<dl class="row">
 		  <dt class="card-title col-2 text-right text-truncate">dn:</dt>
-		  <dd class="card-title col-10 font-weight-bolder font-monospace">[% entry.key %]</dd>
+		  <dd class="card-title col-10 font-weight-bolder font-monospace text-break">[% entry.key %]</dd>
 
 		  [% FOREACH h_attr IN entry.val.attrs # h_attr is for each attr/value pair hash;
 		     d_class = '';
