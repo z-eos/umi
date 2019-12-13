@@ -3,14 +3,10 @@
 html,body {
   height: 100%;
   font-size: 0.95rem;
-}
-
-body {
-  height: 100%;
-  font-size: 0.95rem;
   max-height: 100vh;
   overflow: hidden;
 }
+
 
 /* @include media-breakpoint-up(sm) {
    html {
@@ -352,7 +348,7 @@ aside, main {
 
 #sidebar-left {
   width: 210px;
-  min-height: 100vh;
+/*  min-height: 100vh; */
   transition: width ease 250ms;
 /*!  transition: border-radius .15s cubic-bezier(0.4,0.0,0.2,1),margin .15s cubic-bezier(0.4,0.0,0.2,1),width .15s cubic-bezier(0.4,0.0,0.2,1);*/
 }
@@ -476,7 +472,7 @@ aside, main {
   align-items: center;
 }
 ul.ldap-tree {
-  font-size: .97em;
+  font-size: .93em;
   padding-left: 1em;
   padding-right: 0.5em;
   list-style-type: none;

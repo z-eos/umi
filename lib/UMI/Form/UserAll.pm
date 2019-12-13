@@ -1006,6 +1006,15 @@ sub validate {
     #----------------------------------------------------------
     my $i = 0;
     foreach $element ( $self->field('account')->fields ) {
+
+      foreach ( $element->fields ) {
+	my $nnn = $_->name;
+	if ( $nnn eq 'login_complex' ) {
+	  log_debug { "+++ 0 " . '+' x 70 . "\nrepeatable account No.$i, field $nnn dump:\n" .
+			np( $_, max_depth => 0, class => { inherited => 'all' } ) };
+	}
+      }
+
       # new user, defined neither fqdn nor svc, but login
       if ( $self->add_svc_acc eq '' &&
 	   defined $element->field('login')->value &&
@@ -1050,7 +1059,7 @@ sub validate {
 	$login_error_pfx = 'Login';
       }
 
-      log_debug { "+++ 2 " . '+' x 70 . "\nlogin_complex checkbox No.$i exists" }
+      log_debug { "+++ 2 " . '+' x 70 . "\nlogin_complex checkbox, repeatable No.$i exists" }
 	if exists $self->params->{account}->[$i]->{login_complex};
       
       $passwd_acc_filter =

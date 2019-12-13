@@ -40,7 +40,8 @@ var handleResponce = function(html) {
 	location.href="/signin";
 	return;
     }
-    
+
+    $('main').scrollTop(0);
     $('#workingfield').html(html);
     
     $('#workingfield form.formajaxer').on('submit', function(e) {
