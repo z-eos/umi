@@ -285,6 +285,14 @@ sub _build_cfg {
 					  simpleSecurityObject
 					  uidObject
 				       ) ],
+	   acc_svc_gitlab        => [ qw(
+					  applicationProcess
+					  authorizedServiceObject
+					  domainRelatedObject
+					  inetLocalMailRecipient
+					  simpleSecurityObject
+					  uidObject
+				       ) ],
 	   acc_svc_ssh           => [ qw(
 					  ldapPublicKey
 				       ) ],
@@ -384,6 +392,15 @@ sub _build_cfg {
 			       data_fields   => 'login,password1,password2,radiusgroupname,radiusprofile,userCertificate',
 			       data_relation => 'dot1x-eap-tls',
 			       login_prefix  => 'rad-',
+			      },
+	   'gitlab'        => {
+			       auth          => 1,
+			       descr         => 'GitLab Account',
+			       disabled      => 0,
+			       icon          => 'fab fa-gitlab',
+			       login_delim   => '@',
+			       data_fields   => 'login,login_complex,password1,password2',
+			       data_relation => 'passw',
 			      },
 	   'otrs'          => {
 			       auth          => 1,
@@ -3464,55 +3481,55 @@ sub create_account_branch_leaf {
   # log_debug { np( $args )};
   my %arg =
     (
-      basedn                 => $args->{basedn},
-      service                => $args->{authorizedservice},
-      associatedDomain       => sprintf('%s%s',
-					$self->cfg->{authorizedService}->{$args->{authorizedservice}}
-					->{associateddomain_prefix}->{$args->{associateddomain}} // '',
-					$args->{associateddomain}),
-      uidNumber              => $args->{uidNumber},
-      givenName              => $args->{givenName},
-      sn                     => $args->{sn},
-      login                  => $args->{login},
-      login_complex          => $args->{login_complex},
-      password               => $args->{password},
-      gecos                  => $self->utf2lat( sprintf('%s %s', $args->{givenName}, $args->{sn}) ),
+     basedn                 => $args->{basedn},
+     service                => $args->{authorizedservice},
+     associatedDomain       => sprintf('%s%s',
+				       $self->cfg->{authorizedService}->{$args->{authorizedservice}}
+				       ->{associateddomain_prefix}->{$args->{associateddomain}} // '',
+				       $args->{associateddomain}),
+     uidNumber              => $args->{uidNumber},
+     givenName              => $args->{givenName},
+     sn                     => $args->{sn},
+     login                  => $args->{login},
+     login_complex          => $args->{login_complex},
+     password               => $args->{password},
+     gecos                  => $self->utf2lat( sprintf('%s %s', $args->{givenName}, $args->{sn}) ),
 
-      telephoneNumber        => $args->{telephoneNumber}        || '666',
-      jpegPhoto              => $args->{jpegPhoto}              || undef,
+     telephoneNumber        => $args->{telephoneNumber}        // '666',
+     jpegPhoto              => $args->{jpegPhoto}              // undef,
 
-      to_sshkeygen           => $args->{to_sshkeygen}           || undef,
-      sshpublickey           => $args->{sshpublickey}           || undef,
-      sshpublickeyfile       => $args->{sshpublickeyfile}       || undef,
-      sshkeydescr            => $args->{sshkeydescr}            || undef,
-      sshkey                 => $args->{sshkey}                 || undef,
-      sshkeyfile             => $args->{sshkeyfile}             || undef,
-      sshgid                 => $args->{sshgid}                 || undef,
-      sshhome                => $args->{sshhome}                || undef,
-      sshshell               => $args->{sshshell}               || undef,
+     to_sshkeygen           => $args->{to_sshkeygen}           // undef,
+     sshpublickey           => $args->{sshpublickey}           // undef,
+     sshpublickeyfile       => $args->{sshpublickeyfile}       // undef,
+     sshkeydescr            => $args->{sshkeydescr}            // undef,
+     sshkey                 => $args->{sshkey}                 // undef,
+     sshkeyfile             => $args->{sshkeyfile}             // undef,
+     sshgid                 => $args->{sshgid}                 // undef,
+     sshhome                => $args->{sshhome}                // undef,
+     sshshell               => $args->{sshshell}               // undef,
 
-      # !!! here we much need check for cert existance !!!
-      userCertificate        => $args->{userCertificate}        || '',
-      umiOvpnCfgIfconfigPush => $args->{umiOvpnCfgIfconfigPush} || 'NA',
-      umiOvpnCfgIroute       => $args->{umiOvpnCfgIroute}       || 'NA',
-      umiOvpnCfgPush         => $args->{umiOvpnCfgPush}         || 'NA',
-      umiOvpnCfgConfig       => $args->{umiOvpnCfgConfig}       || '',
-      umiOvpnAddStatus       => $args->{umiOvpnAddStatus}       || 'blocked',
-      umiOvpnAddDevType      => $args->{umiOvpnAddDevType}      || 'NA',
-      umiOvpnAddDevMake      => $args->{umiOvpnAddDevMake}      || 'NA',
-      umiOvpnAddDevModel     => $args->{umiOvpnAddDevModel}     || 'NA',
-      umiOvpnAddDevOS        => $args->{umiOvpnAddDevOS}        || 'NA',
-      umiOvpnAddDevOSVer     => $args->{umiOvpnAddDevOSVer}     || 'NA',
+     # !!! here we much need check for cert existance !!!
+     userCertificate        => $args->{userCertificate}        // '',
+     umiOvpnCfgIfconfigPush => $args->{umiOvpnCfgIfconfigPush} // 'NA',
+     umiOvpnCfgIroute       => $args->{umiOvpnCfgIroute}       // 'NA',
+     umiOvpnCfgPush         => $args->{umiOvpnCfgPush}         // 'NA',
+     umiOvpnCfgConfig       => $args->{umiOvpnCfgConfig}       // '',
+     umiOvpnAddStatus       => $args->{umiOvpnAddStatus}       // 'blocked',
+     umiOvpnAddDevType      => $args->{umiOvpnAddDevType}      // 'NA',
+     umiOvpnAddDevMake      => $args->{umiOvpnAddDevMake}      // 'NA',
+     umiOvpnAddDevModel     => $args->{umiOvpnAddDevModel}     // 'NA',
+     umiOvpnAddDevOS        => $args->{umiOvpnAddDevOS}        // 'NA',
+     umiOvpnAddDevOSVer     => $args->{umiOvpnAddDevOSVer}     // 'NA',
 
-      radiusgroupname        => $args->{radiusgroupname}        || '',
-      radiusprofiledn        => $args->{radiusprofiledn}        || '',
+     radiusgroupname        => $args->{radiusgroupname}        // '',
+     radiusprofiledn        => $args->{radiusprofiledn}        // '',
 
-      objectclass            => $args->{objectclass},
+     objectclass            => $args->{objectclass},
     );
 
   my $t = localtime;
-  $arg{requestttl} = defined $args->{requestttl} &&
-    $args->{requestttl} ? Time::Piece->strptime( $args->{requestttl}, "%Y.%m.%d %H:%M")->epoch - $t->epoch : 0;
+  $arg{requestttl} = defined $args->{requestttl} && $args->{requestttl} ?
+    Time::Piece->strptime( $args->{requestttl}, "%Y.%m.%d %H:%M")->epoch - $t->epoch : 0;
 
   my ( $return, $if_exist );
 
@@ -3543,6 +3560,7 @@ sub create_account_branch_leaf {
        $arg{service}   eq 'ssh'  ||
        ( $arg{service} eq 'dot1x-eap-md5' ||
 	 $arg{service} eq 'dot1x-eap-tls' ) ||
+       $arg{service}   eq 'gitlab'  ||
        $arg{service} eq 'web' ) {
     $authorizedService = [];
   } else {
@@ -3705,6 +3723,18 @@ sub create_account_branch_leaf {
 						 @{$arg{objectclass}} ],
 			  authorizedService => $arg{service} . '@' . $arg{associatedDomain},
 			  associatedDomain  => $arg{associatedDomain},
+			  uid               => $arg{uid},
+			  userPassword      => $arg{password}->{$arg{service}}->{'ssha'},
+			 ];
+  #=== SERVICE: gitlab ==================================================
+  } elsif ( $arg{service} eq 'gitlab' ) {
+    $authorizedService = [
+			  objectClass       => [ @{$self->cfg->{objectClass}->{acc_svc_gitlab}},
+						 @{$arg{objectclass}} ],
+			  authorizedService => $arg{service} . '@' . $arg{associatedDomain},
+			  associatedDomain  => $arg{associatedDomain},
+			  cn                => sprintf("%s %s", $arg{givenName}, $arg{sn}),
+			  mailLocalAddress  => $args->{mail} // 'NA',
 			  uid               => $arg{uid},
 			  userPassword      => $arg{password}->{$arg{service}}->{'ssha'},
 			 ];

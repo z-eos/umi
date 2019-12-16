@@ -118,7 +118,7 @@ sub create_account {
     $args->{person_exp} ne '____.__.__ __:__' ? 1 : 0;
 
   ###################################################################################
-  # NEW ACCOUNT, not additional service one
+  # NEW ACCOUNT, not additional service
   ###################################################################################
   # NEW/ADDITIONAL acoount start
   if ( defined $self->form->add_svc_acc && $self->form->add_svc_acc eq '' ) {
@@ -251,6 +251,8 @@ sub create_account {
     $uidNumber                        = $add_to_obj->get_value('uidNumber');
     $args->{'person_givenname'}       = $add_to_obj->get_value('givenName');
     $args->{'person_sn'}              = $add_to_obj->get_value('sn');
+    $args->{'person_mail'}            = $add_to_obj->exists('mail') ?
+      $add_to_obj->get_value('mail') : 'NA';
     $args->{'person_telephonenumber'} = $add_to_obj->exists('telephonenumber') ?
       $add_to_obj->get_value('telephonenumber') : '666';
     $descr                            = $add_to_obj->exists('description') ?
@@ -305,8 +307,7 @@ sub create_account {
        requestttl        => $is_person_exp ? $args->{person_exp} : '',
       );
 
-    if ( ! $args->{person_password1} &&
-	 ! $args->{person_password2} ) {
+    if ( ! $args->{person_password1} && ! $args->{person_password2} ) {
       $x{password}->{mail} = $self->pwdgen;
       $x{password}->{xmpp} = $self->pwdgen;
     } else {
@@ -323,10 +324,10 @@ sub create_account {
     #---------------------------------------------------------------------
     # Simplified Account xmpp branch of ROOT Object Creation
     #---------------------------------------------------------------------
-    $attr_hash = { uid => $uid,
+    $attr_hash = { uid               => $uid,
 		   authorizedservice => 'xmpp',
-		   associateddomain => $args->{person_associateddomain},
-		   objectclass => $args->{dynamic_object} || $is_person_exp ? [ 'dynamicObject' ] : [],
+		   associateddomain  => $args->{person_associateddomain},
+		   objectclass       => $args->{dynamic_object} || $is_person_exp ? [ 'dynamicObject' ] : [],
 		   requestttl => $is_person_exp ? $args->{person_exp} : '', };
     $branch = $ldap_crud->create_account_branch ( $attr_hash );
 
@@ -397,32 +398,33 @@ we skip empty (criteria of emptiness is a concatenation of each field value) rep
 	#---------------------------------------------------------------------
 	my %x =
 	  (
-	   basedn => $branch->{dn},
+	   basedn            => $branch->{dn},
 	   authorizedservice => $form_field ne 'account' ?
 	   substr($form_field, 10) : $element->field('authorizedservice')->value,
-	   associateddomain => sprintf('%s%s',
-				       defined $ldap_crud->cfg
-				       ->{authorizedService}
-				       ->{$form_field ne 'account' ?
-					  substr($form_field, 10) : $element->field('authorizedservice')->value}
-				       ->{associateddomain_prefix}
-				       ->{$element->field('associateddomain')->value} ?
-				       $ldap_crud->cfg
-				       ->{authorizedService}
-				       ->{$form_field ne 'account' ?
-					  substr($form_field, 10) : $element->field('authorizedservice')->value}
-				       ->{associateddomain_prefix}
-				       ->{$element->field('associateddomain')->value} : '',
-				       $element->field('associateddomain')->value),
-	   uidNumber => $uidNumber,
-	   gecos => $self->utf2lat( sprintf('%s %s',
-					    $args->{person_givenname},
-					    $args->{person_sn}) ),
-	   givenName => $args->{person_givenname},
-	   sn => $args->{person_sn},
-	   telephoneNumber => $args->{person_telephonenumber},
-	   # jpegPhoto => $jpeg,
-	   requestttl => $is_person_exp ? $args->{person_exp} : '',
+	   associateddomain  => sprintf('%s%s',
+					defined $ldap_crud->cfg
+					->{authorizedService}
+					->{$form_field ne 'account' ?
+					   substr($form_field, 10) : $element->field('authorizedservice')->value}
+					->{associateddomain_prefix}
+					->{$element->field('associateddomain')->value} ?
+					$ldap_crud->cfg
+					->{authorizedService}
+					->{$form_field ne 'account' ?
+					   substr($form_field, 10) : $element->field('authorizedservice')->value}
+					->{associateddomain_prefix}
+					->{$element->field('associateddomain')->value} : '',
+					$element->field('associateddomain')->value),
+	   uidNumber         => $uidNumber,
+	   gecos             => $self->utf2lat( sprintf('%s %s',
+							$args->{person_givenname},
+							$args->{person_sn}) ),
+	   givenName         => $args->{person_givenname},
+	   mail              => $args->{person_mail},
+	   sn                => $args->{person_sn},
+	   telephoneNumber   => $args->{person_telephonenumber},
+	   # jpegPhoto         => $jpeg,
+	   requestttl        => $is_person_exp ? $args->{person_exp} : '',
 	  );
 
 	$x{description} =
