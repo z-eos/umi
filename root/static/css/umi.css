@@ -273,7 +273,12 @@ html,body {
   overflow-x: visible;
 }
 
-.clear {
+.umi-d-none {
+  transition: width cubic-bezier(1,-0.03,1,-0.09) 700ms;
+  opeacity: 0;
+}
+
+  .clear {
   display: block;
   clear: both;
 }
@@ -348,25 +353,18 @@ aside, main {
 
 #sidebar-left {
   width: 210px;
-/*  min-height: 100vh; */
-  transition: width ease 250ms;
-/*!  transition: border-radius .15s cubic-bezier(0.4,0.0,0.2,1),margin .15s cubic-bezier(0.4,0.0,0.2,1),width .15s cubic-bezier(0.4,0.0,0.2,1);*/
+  /*  min-height: 100vh; */
+  transition: width cubic-bezier(1,-0.03,1,-0.09) 700ms;
 }
 
 #sidebar-left.folded:not(:hover) {
   width: 55px;
-  text-align: center;
+  text-align: left;
 }
 
 #sidebar-left.folded:hover {
   width: 210px;
-/*!  transition-delay: 1s;
-  transition-property: width; */
 }
-
-/* #sidebar-left.folded:hover ul.nav.show {
-  transition-delay: 1s;
-} */
 
 #sidebar-left ul.show li a {
   text-align: left;
@@ -385,19 +383,23 @@ aside, main {
 }
 
 #sidebar-left.folded:not(:hover) ul li a {
-  text-align: center;
+  text-align: left;
   font-size: 0.85em;
 }
 
 #sidebar-left.folded:not(:hover) ul li a b {
-  display: none;
+/*  display: none; */
+  max-width: 0px;
+  min-width: 0px;
+  width: 0px;
+  transition: width cubic-bezier(1,-0.03,1,-0.09) 700ms;
 }
 
 @media (max-width: 768px) {
   #sidebar-left.folded:not(:hover) {
     min-width: 55px;
     max-width: 55px;
-    text-align: center;
+    text-align: left;
     margin-left: -55px !important;
   }
 
@@ -426,7 +428,7 @@ aside, main {
 #sidebar-right {
   width: 370px;
   min-height: 100%;
-  transition: width ease 250ms;
+  transition: width cubic-bezier(1,-0.03,1,-0.09) 700ms;
 }
 
 #sidebar-right.folded:not(:hover) {

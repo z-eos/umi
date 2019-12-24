@@ -37,9 +37,11 @@
 	   data-toggle="collapse"
 	   aria-expanded="false"
 	   aria-controls="submenuAnalyze"
-	   class="nav-link text-white-50">
+	   class="nav-link text-white-50 text-truncate">
 	  <i class="fas fa-lg fa-fw fa-flask"></i>
-	  <b class="text-uppercase">Analyze</b>
+	  <div class="d-none d-inline-flex">
+	    <b class="text-uppercase">Analyze</b>
+	  </div>
 	</a>
 	<ul class="nav flex-column collapse ml-3 p-0" id="submenuAnalyze">
           <li class="nav-item">
@@ -87,8 +89,10 @@
       [% END %]
       
       <li class="nav-item">
-	<a href="#submenuTools" data-toggle="collapse" aria-expanded="false"
-	   class="nav-link text-white-50">
+	<a href="#submenuTools"
+	   data-toggle="collapse"
+	   aria-expanded="false"
+	   class="nav-link text-white-50 text-truncate">
 	  <i class="fas fa-lg fa-fw fa-toolbox"></i>
 	  <div class="d-none d-inline-flex">
 	    <b class="text-uppercase">Tools</b>
@@ -140,8 +144,10 @@
       </li>
 
       <li class="nav-item">
-	<a href="#submenuObjects" data-toggle="collapse" aria-expanded="false"
-	   class="nav-link text-white-50">
+	<a href="#submenuObjects"
+	   data-toggle="collapse"
+	   aria-expanded="false"
+	   class="nav-link text-white-50 text-truncate">
 	  <i class="fas fa-lg fa-fw fa-magic"></i>
 	  <div class="d-none d-inline-flex">
 	    <b class="text-uppercase">New Obj</b>
@@ -231,8 +237,10 @@
       <li class="nav-item divider"></li>
       
       <li class="nav-item">
-	<a href="#submenuInfo" data-toggle="collapse" aria-expanded="false"
-	   class="nav-link text-white-50">
+	<a href="#submenuInfo"
+	   data-toggle="collapse"
+	   aria-expanded="false"
+	   class="nav-link text-white-50 text-truncate">
 	  <i class="fas fa-lg fa-fw fa-info"></i>
 	  <div class="d-none d-inline-flex">
 	    <b class="text-uppercase">Info</b>

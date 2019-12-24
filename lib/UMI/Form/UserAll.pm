@@ -14,6 +14,8 @@ use Logger;
 use HTML::FormHandler::Types (':all');
 
 use Data::Printer caller_info => 1, colored => 1;
+use POSIX;
+use Net::CIDR::Set;
 
 # has '+error_message' => ( default => 'There were errors in your form.' );has '+item_class' => ( default =>'UserAll' );
 has '+enctype'       => ( default => 'multipart/form-data');
@@ -728,7 +730,7 @@ has_field 'loginless_ovpn.devtype'
 has_field 'loginless_ovpn.devos'
   => ( apply                 => [ Printable ],
        label                 => 'OS',
-       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', 'required', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        element_attr          => { placeholder  => 'xNIX, MacOS, Android, Windows',
@@ -906,6 +908,41 @@ has_block 'aux_submitit'
 # ====================================================================
 ######################################################################
 
+sub check_loginless_ovpn_userCertificate {
+  my $self      = shift;
+  my $ldap_crud = $self->form->ldap_crud;
+  my ( $mesg, %return );
+  my $cert_info = $self->form
+    ->cert_info({ cert => $self->form->file2var($self->value->tempname, \%return), ts => "%s", });
+
+  $self->add_error( $return{error} ) if defined $return{error};
+
+  # log_debug { np($cert_info) };
+  # log_debug { np($self->parent->field('associateddomain')->value) };
+
+  my $now = strftime ("%s", localtime);
+  $self->add_error( 'Certificate has passed expiration date' )
+    if $now > $cert_info->{'Not  After'};
+  $self->add_error( 'Certificate activation date in in the future' )
+    if $now < $cert_info->{'Not Before'};
+
+  $mesg =
+    $ldap_crud
+    ->search({ filter => sprintf("(&(authorizedService=ovpn@%s)(cn=%s))",
+				 $self->parent->field('associateddomain')->value,
+				 $cert_info->{CN}),
+  	       base   => $ldap_crud->cfg->{base}->{acc_root},
+  	       attrs  => [ 'cn', 'umiUserCertificateSn', ], } );
+
+  if ( $mesg->count > 0 ) {
+    $self
+      ->add_error( 'Certificate with the same CN for the same domain already exists' );
+  } elsif ( $mesg->is_error ) {
+    $self->add_error( $ldap_crud->err($mesg)->{html} );
+  }
+
+}
+
 before 'validate_form' => sub {
   my $self = shift;
   if ( defined $self->params->{add_svc_acc} &&
@@ -925,12 +962,15 @@ sub validate {
       $element, $elementcmp,
       $mesg, $entry,
       $err, $error,
+      $re,
       $field,
       $is_x509,
       $ldap_crud,
       $login_error_pfx,
       $logintmp,
       $passwd_acc_filter,
+      $autologin_mesg,
+      $autologin_entry,
       $a1, $b1, $c1, $k, $filter
      );
 
@@ -944,11 +984,11 @@ sub validate {
 			 $self->utf2lat( $self->field('person_sn')->value )));
   } else {
     # log_debug { 'add_svc_acc: ' . np($self->add_svc_acc) };
-    my $autologin_mesg =
+    $autologin_mesg =
       $ldap_crud->search({ scope => 'base',
 			   base  => $self->add_svc_acc,
-			   attrs => [ 'givenName', 'sn', 'uid' ], });
-    my $autologin_entry = $autologin_mesg->entry(0);
+			   attrs => [ 'givenName', 'sn', 'uid', 'mail', ], });
+    $autologin_entry = $autologin_mesg->entry(0);
     $self->autologin( lc( $autologin_entry->get_value('givenName') . '.' .
 			  $autologin_entry->get_value('sn') ) );
   }
@@ -1007,13 +1047,13 @@ sub validate {
     my $i = 0;
     foreach $element ( $self->field('account')->fields ) {
 
-      foreach ( $element->fields ) {
-	my $nnn = $_->name;
-	if ( $nnn eq 'login_complex' ) {
-	  log_debug { "+++ 0 " . '+' x 70 . "\nrepeatable account No.$i, field $nnn dump:\n" .
-			np( $_, max_depth => 0, class => { inherited => 'all' } ) };
-	}
-      }
+      # foreach ( $element->fields ) {
+      # 	my $nnn = $_->name;
+      # 	if ( $nnn eq 'login_complex' ) {
+      # 	  log_debug { "+++ 0 " . '+' x 70 . "\nrepeatable account No.$i, field $nnn dump:\n" .
+      # 			np( $_, max_depth => 0, class => { inherited => 'all' } ) };
+      # 	}
+      # }
 
       # new user, defined neither fqdn nor svc, but login
       if ( $self->add_svc_acc eq '' &&
@@ -1047,7 +1087,7 @@ sub validate {
       }
 
       #---[ login preparation for check + ]------------------------------------------------
-      log_debug { 'namesake: ' . np($self->namesake) };
+      # log_debug { 'namesake: ' . np($self->namesake) };
       $k = $ldap_crud->{cfg}->{authorizedService}
 	->{$element->field('authorizedservice')->value}->{login_prefix} // '';
 
@@ -1075,6 +1115,23 @@ sub validate {
 
       #---[ login preparation for check - ]------------------------------------------------
 
+      #---[ gitlab + ]--------------------------------------------------------------------
+      if ( defined $element->field('authorizedservice')->value &&
+	   $element->field('authorizedservice')->value =~ /^gitlab.*$/ ) {
+	if ( ( defined $self->field('person_mail')->value &&
+	       $self->field('person_mail')->value ne '' ) ||
+	     ( ! $autologin_entry->exists('mail') ||
+	       $autologin_entry->get_value('mail') eq '' ||
+	       $autologin_entry->get_value('mail') eq 'NA' ) ) {
+	  $self->add_form_error('<span class="fa-stack fa-fw">' .
+				'<i class="fas fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
+				'<i class="fab fa-gitlab pull-right fa-stack-1x"></i></span>' .
+				'<b class="visible-lg-inline">&nbsp;NoEmail&nbsp;</b>' .
+				'<b> <i class="fa fa-arrow-right"></i> GitLab:</b> Root object has no email address! Provide valid email, please');
+	}
+      }
+      #---[ gitlab - ]--------------------------------------------------------------------
+
       #---[ ssh-acc + ]--------------------------------------------------------------------
       if ( defined $element->field('authorizedservice')->value &&
 	   $element->field('authorizedservice')->value =~ /^ssh-acc.*$/ ) {
@@ -1101,8 +1158,6 @@ sub validate {
 				'<b> <i class="fa fa-arrow-right"></i> SSH:</b> Empty duplicatee! Fill it or remove, please');
 	}
 
-
-	  
       }
       #---[ ssh-acc - ]--------------------------------------------------------------------
 
@@ -1130,29 +1185,14 @@ sub validate {
 	    $is_x509 = $self->cert_info({ cert => $cert });
 	    $element->field('userCertificate')->add_error('Certificate file is broken or not DER format!')
 	      if defined $is_x509->{error};
-	    $element->field('userCertificate')->add_error('Problems with certificate file');
-	    $self->add_form_error('<span class="fa-stack fa-fw">' .
-				  '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
-				  '<i class="fa fa-user pull-right fa-stack-1x"></i></span>' .
-				  '<b class="visible-lg-inline">&nbsp;Pass&nbsp;</b>' .
-				  'Problems with certificate file<br>' .
-				  $is_x509->{error})
+	    $element->field('userCertificate')->add_error('Problems with certificate file<br>' .
+							  $is_x509->{error})
 	      if defined $is_x509->{error};
 	  } elsif ( defined $element->field('userCertificate')->value &&
 		    ! defined $element->field('userCertificate')->value->{tempname} ) {
 	    $element->field('userCertificate')->add_error('userCertificate file was not uploaded');
-	    $self->add_form_error('<span class="fa-stack fa-fw">' .
-				  '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
-				  '<i class="fa fa-user pull-right fa-stack-1x"></i></span>' .
-				  '<b class="visible-lg-inline">&nbsp;Pass&nbsp;</b>' .
-				  'userCertificate file was not uploaded<br>');
 	  } elsif ( ! defined $element->field('userCertificate')->value ) {
 	    $element->field('userCertificate')->add_error('userCertificate is mandatory!');
-	    $self->add_form_error('<span class="fa-stack fa-fw">' .
-				  '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
-				  '<i class="fa fa-user pull-right fa-stack-1x"></i></span>' .
-				  '<b class="visible-lg-inline">&nbsp;Pass&nbsp;</b>' .
-				  'userCertificate is mandatory!<br>');
 	  }
 	  $logintmp = 'rad-' . $element->field('login')->value;
 	}
@@ -1175,7 +1215,7 @@ sub validate {
 					 $self->add_svc_acc)
 		     });
 	  $element->field('radiusgroupname')
-	    ->add_error(sprintf('<span class="mono">%s</span> already is in this RADIUS group.<br>This service object <span class="mono">%s</span> either was deleted but not removed from, or is still the member of the group.',
+	    ->add_error(sprintf('%s is already in this RADIUS group.<br>This service object %s either was deleted but not removed from, or is still the member of the group.',
 				$logintmp,
 				sprintf('uid=%s,authorizedService=%s@%s,%s',
 					$logintmp,
@@ -1231,17 +1271,10 @@ sub validate {
 	  if ($mesg->count);
       }
 
-      $self->add_form_error('<span class="fa-stack fa-fw">' .
-			    '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
-			    '<i class="fa fa-key pull-right fa-stack-1x"></i></span>' .
-			    '<b class="visible-lg-inline">&nbsp;Pass&nbsp;</b>' .
-			    'Has error/s! Correct or remove, please')
-	if $self->field('account')->has_error_fields;
-
       $i++;
     }
 
-    log_debug { "+++ 6 " . '+' x 70 . "\n" . np($elementcmp) };
+    # log_debug { "+++ 6 " . '+' x 70 . "\n" . np($elementcmp) };
 
     # error rising if login+service+fqdn not uniq
     foreach $element ( $self->field('account')->fields ) {
@@ -1360,31 +1393,32 @@ sub validate {
     #----------------------------------------------------------
     #== VALIDATION password less ------------------------------
     #----------------------------------------------------------
-  
+
     #---[ OpenVPN + ]--------------------------------------------
-    my $ovpn_tmp;
     $i = 0;
+
     foreach $element ( $self->field('loginless_ovpn')->fields ) {
       # p $_->value foreach ($element->field('userCertificate'));
 
       if ((( defined $element->field('associateddomain')->value &&
-	     defined $element->field('userCertificate')->value &&
-	     defined $element->field('ifconfigpush')->value &&
-	     ( $element->field('associateddomain')->value eq '' ||
-	       $element->field('userCertificate')->value eq '' ||
-	       $element->field('ifconfigpush')->value eq '' ) ) ||
+	     defined $element->field('userCertificate')->value  &&
+	     defined $element->field('ifconfigpush')->value       &&
+	     ( $element->field('associateddomain')->value eq ''   ||
+	       $element->field('userCertificate')->value eq ''    ||
+	       $element->field('ifconfigpush')->value eq '' ) )     ||
 	   ( ! defined $element->field('associateddomain')->value ||
-	     ! defined $element->field('userCertificate')->value ||
+	     ! defined $element->field('userCertificate')->value  ||
 	     ! defined $element->field('ifconfigpush')->value  )) && $i > 0 ) {
 	$element->field('associateddomain')->add_error('');
 	$element->field('userCertificate')->add_error('');
 	$element->field('ifconfigpush')->add_error('');
       }
-    
+
+      ### empty duplicate (repeatable)
       if ( ! defined $element->field('associateddomain')->value &&
-	   ! defined $element->field('userCertificate')->value &&
-	   ! defined $element->field('ifconfigpush')->value &&
-	   $i > 0 ) {	   # empty duplicate (repeatable)
+	   ! defined $element->field('userCertificate')->value  &&
+	   ! defined $element->field('ifconfigpush')->value     &&
+	   $i > 0 ) {
 	# $element->add_error('Empty duplicatee!');
 	$self->add_form_error('<span class="fa-stack fa-fw">' .
 			      '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
@@ -1394,80 +1428,95 @@ sub validate {
       }
 
       if ( defined $element->field('associateddomain')->value &&
-	   defined $element->field('status')->value &&
-	   defined $element->field('ifconfigpush')->value &&
+	   defined $element->field('status')->value           &&
+	   defined $element->field('ifconfigpush')->value     &&
 	   ( $element->field('associateddomain')->value ne '' ||
-	     $element->field('status')->value ne '' ||
+	     $element->field('status')->value ne ''           ||
 	     $element->field('ifconfigpush')->value ne '' ) ) {
-	if ( defined $element->field('userCertificate')->value &&
-	     ref($element->field('userCertificate')->value) eq 'HASH' ) {
+	if ( defined $element->field('userCertificate')->value ) {
+
 	  $cert = $self->file2var( $element->field('userCertificate')->value->{tempname}, $cert_msg);
 	  $element->field('userCertificate')->add_error($cert_msg->{error})
 	    if defined $cert_msg->{error};
-	  $is_x509 = $self->cert_info({ cert => $cert });
-	  $element->field('userCertificate')->add_error('Certificate file is broken or not DER format!')
+	  $is_x509 = $self->cert_info({ cert => $cert, ts => "%s", });
+	  $element->field('userCertificate')->
+	    add_error('Cert is broken or not DER format!' . $is_x509->{error})
 	    if defined $is_x509->{error};
-	  $element->field('userCertificate')->add_error('Problems with certificate file');
-	  $self->add_form_error('<span class="fa-stack fa-fw">' .
-				'<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
-				'<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
-				'<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
-				'<b> <i class="fa fa-arrow-right"></i> OpenVPN:</b> Problems with certificate file<br>' . $is_x509->{error})
-	    if defined $is_x509->{error};
+
+	  my $now = strftime ("%s", localtime);
+	  $element->field('userCertificate')->add_error( 'Cert has passed expiration date' )
+	    if $now > $is_x509->{'Not  After'};
+	  $element->field('userCertificate')->add_error( 'Cert activation date is in the future' )
+	    if $now < $is_x509->{'Not Before'};
+
+	  $mesg = $ldap_crud->search({ filter => sprintf("(&(authorizedService=ovpn@%s)(cn=%s))",
+							 $element->field('associateddomain')->value,
+							 $is_x509->{CN}),
+				       base   => $ldap_crud->{cfg}->{base}->{acc_root},
+				       attrs  => [ 'cn', 'umiUserCertificateSn', ], } );
+
+	  if ( $mesg->count > 0 ) {
+	    $element->field('userCertificate')->
+	      add_error( sprintf("Cert CN: %s for domain: %s already exists",
+				 $is_x509->{CN},
+				 $element->field('associateddomain')->value));
+	  } elsif ( $mesg->is_error ) {
+	    $element->field('userCertificate')->add_error( $ldap_crud->err($mesg)->{html} );
+	  }
+
+	  # ??? # $element->field('userCertificate')->add_error('Problems with certificate file');
+
 	} elsif ( ! defined $element->field('userCertificate')->value ) {
 	  $element->field('userCertificate')->add_error('userCertificate is mandatory!');
-	  $self->add_form_error('<span class="fa-stack fa-fw">' .
-				'<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
-				'<i class="fa fa-user-times pull-right fa-stack-1x"></i></span>' .
-				'<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
-				'<b> <i class="fa fa-arrow-right"></i> OpenVPN:</b> userCertificate is mandatory!<br>');
 	}
       }
 
+      $re  = $self->{a}->{re}->{ip};
       if ( defined $element->field('ifconfigpush')->value &&
-	   $element->field('ifconfigpush')->value =~ /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-5][0-9]) (([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-5][0-9])$/ ) {
-	# $ovpn_tmp = $self->vld_ifconfigpush({
-	# 				     concentrator_fqdn => $element->field('associateddomain')->value,
-	# 				     ifconfigpush => $element->field('ifconfigpush')->value,
-	# 				     mode => lc( $element->field('devos')->value ) eq 'windows' ? 'net30' : '',
-	# 				    });
+	   $element->field('ifconfigpush')->value =~ /^($re)\s+($re)$/ ) {
+	my $lor = $1;
+	my $ror = $2;
+	my $l = defined $element->field('devos')->value &&
+	  exists $self->{a}->{topology}->{os}->{lc($element->field('devos')->value)} ?
+	  sprintf("%s/%s", $lor,
+		  $self->{a}->{topology}->{os}->{lc($element->field('devos')->value)}) :
+		    sprintf("%s/%s", $lor, $self->{a}->{topology}->{default});
 
-	$ovpn_tmp = 0; # HARDCODE !!! logics of vld_ifconfigpush NEED TO BE FIXED !!!
-	$mesg =
-	  $ldap_crud->search({ filter => '(&(umiOvpnAddStatus=active)(umiOvpnCfgIfconfigPush=' .
-			       $element->field('ifconfigpush')->value . '))',
-			       base => $ldap_crud->cfg->{base}->{acc_root},
-			       attrs => [ 'umiOvpnCfgIfconfigPush' ], });
-	
+	my $ip = Net::CIDR::Set->new( $l );
+	$element->field('ifconfigpush')->
+	  add_error( sprintf("ip %s and %s does not belong to %s net as expected for choosen OS %s",
+			     $lor,
+			     $ror,
+			     ($ip->as_cidr_array)[0],
+			     $element->field('devos')->value ) )
+	  if ! $ip->contains( sprintf("%s/32", $ror) );
+
+	my $fltr = sprintf("(umiOvpnCfgIfconfigPush=%s)",
+			   $element->field('ifconfigpush')->value );
+	log_debug { np( $fltr ) };
+	$mesg = $ldap_crud->search({ filter => $fltr,
+				     base   => $ldap_crud->{cfg}->{base}->{db},
+				     attrs  => [ 'umiOvpnCfgIfconfigPush' ], } );
 	if ( $mesg->count ) {
-	  $entry = $mesg->entry(0);
-	  $element->field('ifconfigpush')
-	    ->add_error( sprintf('The same addresses are used for account: <span class="mono"><b>%s</b></span>', $entry->dn) );
-	} elsif ( $ovpn_tmp ) {
-	  $element->field('ifconfigpush')->add_error( $ovpn_tmp->{error} );
+	  foreach $entry ( $mesg->entries ) {
+	    $element->field('ifconfigpush')->
+	      add_error( sprintf('addresses %s are used by %s',
+				 $element->field('ifconfigpush')->value,
+				 $entry->dn) );
+	  }
 	}
-      } elsif ( defined $element->field('ifconfigpush')->value &&
-		$element->field('ifconfigpush')->value !~ /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-5][0-9]) (([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-5][0-9])$/ ) {
-      	$element->field('ifconfigpush')->add_error( 'The input is not two IP addresses!' );
+      } else {
+	$element->field('ifconfigpush')->add_error( 'The input is not two IP addresses!' );
       }
-
-      #
-      ## !!! add check for this cert existance !!! since when it is absent in the input data, PSGI falls
-      #
 
       $i++;
     }
-
-    $self->add_form_error('<span class="fa-stack fa-fw">' .
-			  '<i class="fa fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
-			  '<i class="fa fa-lock-open pull-right fa-stack-1x"></i></span>' .
-			  '<b class="visible-lg-inline">&nbsp;NoPass&nbsp;</b>' .
-			  '<b> <i class="fa fa-arrow-right"></i> OpenVPN:</b> Has error/s! Correct or remove, please')
-      if $self->field('loginless_ovpn')->has_error_fields;
     #---[ OpenVPN - ]--------------------------------------------
-
   }
   # not simplified variant stop
+
+  $self->add_form_error("Form didn't pass validation.") if $self->has_error_fields;
+
 }
 
 ######################################################################

@@ -34,6 +34,36 @@ if ( UMI->config->{authentication}->{realms}->{ldap}->{store}->{ldap_server_opti
 # ??? # use Scalar::Util;
 # ??? # use List::Util;
 
+=head2 a
+
+attributes (mostly constant)
+
+=cut
+
+has 'a' => ( traits => ['Hash'], is => 'ro', isa => 'HashRef', builder => '_build_a', );
+
+sub _build_a {
+  my $self = shift;
+
+  return {
+	  re => {
+		 ip        => '(?:(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-5][0-9])',
+		 sshpubkey => {
+			       type   => qr/ssh-rsa|ssh-dss|ssh-ed25519|ecdsa-\S+/,
+			       id     => "[a-zA-Z_][a-zA-Z0-9_-]+",
+			       base64 => "[A-Za-z0-9+/]",
+			      },
+		},
+	  topology => {
+		       default => 24,
+		       os => { windows => 30,
+			       unix    => 24,
+			       ubuntu  => 24,
+			       macos   => 24, },
+		      },
+	 };
+}
+
 =head1 NAME
 
 UMI::Tools
@@ -71,7 +101,7 @@ returns 0 if it is and 1 if not
 
 sub is_ip {
   my ($self, $arg) = @_;
-  if ( defined $arg && $arg ne '' && $arg =~ /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-5][0-9])$/ ) {
+  if ( defined $arg && $arg ne '' && $arg =~ /^$self->{a}-{re}->{ip}$/ ) {
     return 1;
   } else {
     return 0;
@@ -182,23 +212,6 @@ sub ipam_first_free {
     return $_;
   }
   return 0;
-}
-
-
-=head2 regex
-
-regexps and other variables
-
-=cut
-
-has 'regex' => ( traits => ['Hash'], is => 'ro', isa => 'HashRef', builder => '_build_regex', );
-
-sub _build_regex {
-  my $self = shift;
-
-  return { sshpubkey => { type => qr/ssh-rsa|ssh-dss|ssh-ed25519|ecdsa-\S+/,
-			  id => "[a-zA-Z_][a-zA-Z0-9_-]+",
-			  base64 => "[A-Za-z0-9+/]", }, }
 }
 
 
@@ -714,7 +727,7 @@ sub sshpubkey_parse_options {
       # boolean option (without `=' sign)
       $in = $+{tail};
       my $is_type = $+{id};
-      if ( $is_type =~ /(?<type>$self->{regex}->{sshpubkey}->{type})/ ) {
+      if ( $is_type =~ /(?<type>$self->{a}->{re}->{sshpubkey}->{type})/ ) {
 	$key_hash->{type} = $+{type};
 	$value = 'NO_OPTIONS'; # key contains no option, starts just with key type
       } else {
@@ -773,7 +786,7 @@ sub sshpubkey_parse_type {
   my ($self, $pub_key, $key_hash) = @_;
   my $in = $$pub_key;
 
-  if ( $in !~ /^.*\s*(?<type>$self->{regex}->{sshpubkey}->{type})\s(?<tail>.*)/ ) {
+  if ( $in !~ /^.*\s*(?<type>$self->{a}->{re}->{sshpubkey}->{type})\s(?<tail>.*)/ ) {
     $key_hash->{error} = "Parsing problem, no valid SSH2 key type found!";
     return 0;
   } else {
@@ -794,7 +807,7 @@ sub sshpubkey_parse_body {
   my ($self, $pub_key, $key_hash) = @_;
   my $in = $$pub_key;
 
-  if ( $in !~ /^(?<key>$self->{regex}->{sshpubkey}->{base64}+)\s*(?<tail>.*)/ ) {
+  if ( $in !~ /^(?<key>$self->{a}->{re}->{sshpubkey}->{base64}+)\s*(?<tail>.*)/ ) {
     $key_hash->{error} = "Parsing problem, no valid SSH2 key body found!";
     return 0;
   } else {
@@ -802,7 +815,7 @@ sub sshpubkey_parse_body {
     # !!! STUB !!! here we need base64 validation !!! STUB !!!
     my $x = $+{key};
     my $y = decode_base64($x);
-    if ( $y ne '' && length($x) > 100 && $y =~ $self->{regex}->{sshpubkey}->{type} ) {
+    if ( $y ne '' && length($x) > 100 && $y =~ $self->{a}->{re}->{sshpubkey}->{type} ) {
       $key_hash->{key} = $x;
     } else {
       $key_hash->{error} = "Parsing problem, key body is not base64!";
@@ -1285,7 +1298,7 @@ validation of the addresses for ifconfigpush OpenVPN option
     weather it is /30
     or /32
 
-return either error message or 0 if validation has been successfully passed
+return either error message or 0 if validation has successfully passed
 
 =cut
 
