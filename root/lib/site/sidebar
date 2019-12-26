@@ -37,13 +37,13 @@
 	   data-toggle="collapse"
 	   aria-expanded="false"
 	   aria-controls="submenuAnalyze"
-	   class="nav-link text-white-50 text-truncate">
+	   class="nav-link text-white-50 umi-text-truncate-noelipsis">
 	  <i class="fas fa-lg fa-fw fa-flask"></i>
-	  <div class="d-none d-inline-flex">
+	  <div class="sidebar-left-item d-inline-flex">
 	    <b class="text-uppercase">Analyze</b>
 	  </div>
 	</a>
-	<ul class="nav flex-column collapse ml-3 p-0" id="submenuAnalyze">
+	<ul class="nav flex-column collapse ml-4 p-0" id="submenuAnalyze">
           <li class="nav-item">
 	    <a class="text-light nav-link" href="#modal-is-accounts" data-toggle="modal">
 	      <i class="fas fa-id-card"></i>
@@ -92,13 +92,13 @@
 	<a href="#submenuTools"
 	   data-toggle="collapse"
 	   aria-expanded="false"
-	   class="nav-link text-white-50 text-truncate">
+	   class="nav-link text-white-50 umi-text-truncate-noelipsis">
 	  <i class="fas fa-lg fa-fw fa-toolbox"></i>
-	  <div class="d-none d-inline-flex">
+	  <div class="sidebar-left-item d-inline-flex">
 	    <b class="text-uppercase">Tools</b>
 	  </div>
 	</a>
-	<ul class="nav flex-column collapse m-3 p-0" id="submenuTools">
+	<ul class="nav flex-column collapse ml-4 p-0" id="submenuTools">
           <li class="nav-item">
 	    <a class="text-light nav-link" href="/tooltranslit">
 	      <i class="fas fa-fw fa-language"></i>
@@ -147,13 +147,13 @@
 	<a href="#submenuObjects"
 	   data-toggle="collapse"
 	   aria-expanded="false"
-	   class="nav-link text-white-50 text-truncate">
+	   class="nav-link text-white-50 umi-text-truncate-noelipsis">
 	  <i class="fas fa-lg fa-fw fa-magic"></i>
-	  <div class="d-none d-inline-flex">
+	  <div class="sidebar-left-item d-inline-flex">
 	    <b class="text-uppercase">New Obj</b>
 	  </div>
 	</a>
-	<ul class="nav flex-column collapse m-3 p-0" id="submenuObjects">
+	<ul class="nav flex-column collapse ml-4 p-0" id="submenuObjects">
 	  [% IF c.check_any_user_role ('admin', 'coadmin', 'acl-w-people') %]
           <li class="nav-item">
 	    <a class="text-light nav-link" href="/userall" tabindex="2">
@@ -240,13 +240,13 @@
 	<a href="#submenuInfo"
 	   data-toggle="collapse"
 	   aria-expanded="false"
-	   class="nav-link text-white-50 text-truncate">
+	   class="nav-link text-white-50 umi-text-truncate-noelipsis">
 	  <i class="fas fa-lg fa-fw fa-info"></i>
-	  <div class="d-none d-inline-flex">
+	  <div class="sidebar-left-item d-inline-flex">
 	    <b class="text-uppercase">Info</b>
 	  </div>
 	</a>
-	<ul class="nav flex-column collapse m-3 p-0" id="submenuInfo">
+	<ul class="nav flex-column collapse ml-4 p-0" id="submenuInfo">
 	  <li class="nav-item">
 	    <a class="text-light nav-link" href="/motto"><i class="fas fa-hand-spock"></i> user's motto</a>
 	  </li>

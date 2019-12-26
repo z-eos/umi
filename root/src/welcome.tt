@@ -9,9 +9,9 @@
 	<thead>
 	  <tr class="h3">
 	    <th scope="col"></th>
-	    <th scope="col"><i class="fab fa-windows"></i></th>
 	    <th scope="col"><i class="fab fa-linux"></i></th>
 	    <th scope="col"><i class="fab fa-apple"></i></th>
+	    <th scope="col"><i class="fab fa-windows"></i></th>
 	  </tr>
 	</thead>
 	<tbody>
@@ -19,22 +19,22 @@
 	  <tr>
 	    <td class="h3" scope="row"><i class="fab fa-firefox"></i></td>
 	    <td class="align-middle">Alt + Shift + <kbd><em>key</em></kbd></td>
-	    <td class="align-middle">Alt + Shift + <kbd><em>key</em></kbd></td>
 	    <td class="align-middle">Ctrl + Alt + <kbd><em>key</em></kbd></td>
+	    <td class="align-middle">Alt + Shift + <kbd><em>key</em></kbd></td>
 	  </tr>
 	  [% ELSIF c.request.headers.header('User-Agent').search('hrom') %]
 	  <tr>
 	    <td class="h3" scope="row"><i class="fab fa-chrome"></i></td>
 	    <td class="align-middle">Alt + <kbd><em>key</em></kbd></td>
-	    <td class="align-middle">Alt + <kbd><em>key</em></kbd></td>
 	    <td class="align-middle">Ctrl + Alt + <kbd><em>key</em></kbd></td>
+	    <td class="align-middle">Alt + <kbd><em>key</em></kbd></td>
 	  </tr>
 	  [% ELSIF c.request.headers.header('User-Agent').search('afar') %]
 	  <tr>
 	    <td class="h3" scope="row"><i class="fab fa-safari"></i></td>
-	    <td class="align-middle">Alt + <kbd><em>key</em></kbd></td>
 	    <td class="align-middle">N/A</td>
 	    <td class="align-middle">Ctrl + Alt + <kbd><em>key</em></kbd></td>
+	    <td class="align-middle">Alt + <kbd><em>key</em></kbd></td>
 	  </tr>
 	  [% ELSIF c.request.headers.header('User-Agent').search('pera') %]
 	  <tr>

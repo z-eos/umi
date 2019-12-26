@@ -274,8 +274,8 @@ html,body {
 }
 
 .umi-d-none {
-  transition: width cubic-bezier(1,-0.03,1,-0.09) 700ms;
-  opeacity: 0;
+  transition: opacity cubic-bezier(1,-0.03,1,-0.09) 700ms;
+  opacity: 0;
 }
 
   .clear {
@@ -351,6 +351,20 @@ aside, main {
 
    ------------------------------- */
 
+.sidebar-left-item {
+  opacity: 1;
+  transition: opacity cubic-bezier(1,-0.03,1,-0.09) 700ms;  
+}
+  
+.umi-text-truncate-noelipsis {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+#sidebar-left.folded:not(:hover) .sidebar-left-item {
+  opacity: 0;
+}
+
 #sidebar-left {
   width: 210px;
   /*  min-height: 100vh; */
@@ -376,17 +390,26 @@ aside, main {
   padding: 0.2rem 1rem;
 }
 
+#sidebar-left ul.nav.show {
+  max-width: 210px;
+  max-height: 1000px;
+  opacity: 1;
+  transition: opacity cubic-bezier(1,-0.03,1,-0.09) 700ms, max-width  cubic-bezier(1,-0.03,1,-0.09) 700ms, max-height  cubic-bezier(1,-0.03,1,-0.09) 700ms;  
+}
+  
 #sidebar-left.folded:not(:hover) ul.nav.show {
   max-height: 0px;
   max-width: 0px;
   opacity: 0;
 }
 
+/*
 #sidebar-left.folded:not(:hover) ul li a {
   text-align: left;
   font-size: 0.85em;
 }
-
+*/
+  
 #sidebar-left.folded:not(:hover) ul li a b {
 /*  display: none; */
   max-width: 0px;
