@@ -55,7 +55,7 @@ sub _build_a {
 			      },
 		},
 	  topology => {
-		       default => 24,
+		       default => 8,
 		       os => { windows => 30,
 			       unix    => 8,
 			       ubuntu  => 8,

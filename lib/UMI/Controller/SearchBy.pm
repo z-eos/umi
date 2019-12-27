@@ -206,7 +206,7 @@ sub index :Path :Args(0) {
     my $mesg =
       $ldap_crud->search({base      => $base,
 			  filter    => $filter4search,
-			  sizelimit => $sizelimit // $ldap_crud->cfg->{sizelimit},
+			  sizelimit => $sizelimit // $ldap_crud->{cfg}->{defaults}->{sizelimit},
 			  scope     => $scope,
 			  attrs     => [ '*',
 					 'createTimestamp',

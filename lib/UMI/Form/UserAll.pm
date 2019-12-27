@@ -1505,7 +1505,8 @@ sub validate {
 				 $entry->dn) );
 	  }
 	}
-      } else {
+      } elsif ( defined $element->field('ifconfigpush')->value &&
+	   $element->field('ifconfigpush')->value !~ /^($re)\s+($re)$/ ) {
 	$element->field('ifconfigpush')->add_error( 'The input is not two IP addresses!' );
       }
 
