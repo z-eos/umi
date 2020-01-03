@@ -53,6 +53,10 @@ sub _build_a {
 			       id     => "[a-zA-Z_][a-zA-Z0-9_-]+",
 			       base64 => "[A-Za-z0-9+/]",
 			      },
+		 mac       => {
+			       mac48 => '(?:[[:xdigit:]]{2}([-:]))(?:[[:xdigit:]]{2}\1){4}[[:xdigit:]]{2}',
+			       cisco => '(?:[[:xdigit:]]{4})(?:([\.])[[:xdigit:]]{4}){2}',
+			      },
 		},
 	  topology => {
 		       default => 8,
@@ -645,17 +649,9 @@ For the examples above it will look: 0123456789ab
 
 MAC address to process
 
-=item oct
-
-regex pattern for group of two hexadecimal digits [0-9a-f]{2}
-
-=item sep
-
-pattern for acceptable separator [.:-]
-
 =item dlm
 
-delimiter for concatenation after splitting
+I<delimiter>, if defined (allowed characters: `-` and `:`), then returned mac is normalyzed to human-friendly form as six groups of two hexadecimal digits, separated by this I<delimiter>
 
 =back
 
@@ -665,29 +661,27 @@ delimiter for concatenation after splitting
 sub macnorm {
   my ( $self, $args ) = @_;
   my $arg = {
-	     mac => defined $args->{mac} && $args->{mac} ne '' ? lc($args->{mac}) : '',
-	     oct => $args->{oct} || '[0-9a-fA-F]{2}',
-	     sep => $args->{sep} || '[.:-]',
+	     mac => $args->{mac},
 	     dlm => $args->{dlm} || '',
 	    };
-  if (( $arg->{mac} =~ /^$arg->{oct}($arg->{sep})$arg->{oct}($arg->{sep})$arg->{oct}($arg->{sep})$arg->{oct}($arg->{sep})$arg->{oct}($arg->{sep})$arg->{oct}$/ ) &&
-      ($1 x 4 eq "$2$3$4$5")) {
-    return join( $arg->{dlm}, split(/$arg->{sep}/, $arg->{mac}) );
-  } elsif (( $arg->{mac} =~ /^$arg->{oct}$arg->{oct}$arg->{oct}$arg->{oct}$arg->{oct}$arg->{oct}$/ ) &&
-	   ($1 x 4 eq "$2$3$4$5")) {
-    my @mac_arr = split('', $arg->{mac});
-    return join( $arg->{dlm},
-		 "$mac_arr[0]$mac_arr[1]",
-		 "$mac_arr[2]$mac_arr[3]",
-		 "$mac_arr[4]$mac_arr[5]",
-		 "$mac_arr[6]$mac_arr[7]",
-		 "$mac_arr[8]$mac_arr[9]",
-		 "$mac_arr[10]$mac_arr[11]" );
+
+  my $re1 = $self->{a}->{re}->{mac}->{mac48};
+  my $re2 = $self->{a}->{re}->{mac}->{cisco};
+  if ( ($arg->{mac} =~ /^$re1$/ || $arg->{mac} =~ /^$re2$/) &&
+       ($arg->{dlm} eq '' || $arg->{dlm} eq ':' || $arg->{dlm} eq '-') ) {
+    my $sep = $1 eq '.' ? '\.' : $1;
+
+    my @mac_arr = split(/$sep/, $arg->{mac});
+
+    @mac_arr = map { substr($_, 0, 2), substr($_, 2) } @mac_arr
+      if scalar(@mac_arr) == 3;
+
+    log_debug { np(@mac_arr) };
+    return lc( join( $arg->{dlm}, @mac_arr ) );
   } else {
     return 0;
   }
 }
-
 
 =head2 sshpubkey_parse
 
@@ -719,7 +713,7 @@ sub sshpubkey_parse_options {
   my ($self, $pub_key, $key_hash) = @_;
   my $in = $$pub_key;
   $key_hash->{options} = {};
-  my $id = "[a-zA-Z_][a-zA-Z0-9_-]+";
+  my $id = $self->a->{re}->{sshpubkey}->{id}; # "[a-zA-Z_][a-zA-Z0-9_-]+";
 
   while (1) {
     my $value;
@@ -1664,10 +1658,10 @@ sub ask_mikrotik {
   use MikroTik::API;
 
   my $api = MikroTik::API->new({
-				host     => $arg->{host},
-				username => $arg->{username},
-				password => $arg->{password},
-				use_ssl  => 1,
+				host            => $arg->{host},
+				username        => $arg->{username},
+				password        => $arg->{password},
+				use_ssl         => 0,
 				new_auth_method => 1,
 			       });
 

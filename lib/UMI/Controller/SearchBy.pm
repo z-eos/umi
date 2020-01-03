@@ -94,7 +94,7 @@ sub index :Path :Args(0) {
     #=============================================================
 
     if ( $params->{'ldapsearch_global'} // ! exists $params->{'ldapsearch_base'}) {
-      $base = $ldap_crud->cfg->{base}->{db};
+      $base = $ldap_crud->{cfg}->{base}->{db};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( $params->{'ldapsearch_by_name'}  //
 	      $params->{'ldapsearch_by_email'} //
@@ -136,8 +136,10 @@ sub index :Path :Args(0) {
       $base   = $ldap_crud->cfg->{base}->{pgp};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_mac'} ) {
+      my $mac = $self->macnorm({ mac => $filter_meta });
+      log_debug { np($mac) };
       push @{$return->{error}}, 'incorrect MAC address'
-	if ! $self->macnorm({ mac => $filter_meta });
+	if ! $mac;
       $filter = sprintf("|(dhcpHWAddress=ethernet %s)(&(uid=%s)(authorizedService=dot1x*))(&(cn=%s)(authorizedService=dot1x*))(hwMac=%s)",
 			$self->macnorm({ mac => $filter_meta, dlm => ':', }),
 			$self->macnorm({ mac => $filter_meta }),

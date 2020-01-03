@@ -394,7 +394,7 @@ aside, main {
   max-width: 210px;
   max-height: 1000px;
   opacity: 1;
-  transition: opacity cubic-bezier(1,-0.03,1,-0.09) 700ms, max-width  cubic-bezier(1,-0.03,1,-0.09) 700ms, max-height  cubic-bezier(1,-0.03,1,-0.09) 700ms;  
+  transition: opacity cubic-bezier(1,-0.03,1,-0.09) 700ms, max-width cubic-bezier(1,-0.03,1,-0.09) 700ms, max-height cubic-bezier(1,-0.03,1,-0.09) 700ms;  
 }
   
 #sidebar-left.folded:not(:hover) ul.nav.show {
@@ -451,7 +451,7 @@ aside, main {
 #sidebar-right {
   width: 370px;
   min-height: 100%;
-  transition: width cubic-bezier(1,-0.03,1,-0.09) 700ms;
+  transition: width cubic-bezier(1,-0.03,1,-0.09) 700ms, min-height cubic-bezier(1,-0.03,1,-0.09) 700ms;
 }
 
 #sidebar-right.folded:not(:hover) {
@@ -468,6 +468,7 @@ aside, main {
   max-height: 0px;
   max-width: 0px;
   opacity: 0;
+  transition: opacity cubic-bezier(1,-0.03,1,-0.09) 700ms, max-width cubic-bezier(1,-0.03,1,-0.09) 700ms, max-height cubic-bezier(1,-0.03,1,-0.09) 700ms;  
 }
 
 @media (max-width: 768px) {
