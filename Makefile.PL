@@ -33,6 +33,7 @@ requires 'Log::Dispatch'
 requires 'Cache::FastMmap';
 requires 'Compress::LZ4';
 requires 'Crypt::GeneratePassword';
+requires 'Crypt::HSXKPasswd';
 requires 'Crypt::RSA';
 requires 'Data::Printer';
 # ??? # requires 'DateTime::Format::Duration';

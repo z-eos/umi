@@ -53,7 +53,7 @@ sub index :Path :Args(0) {
 					  params    => $params,
 					  ldap_crud => $ldap_crud, );
     }
-    log_debug { np($params) };
+    # log_debug { np($params) };
     my $entry = $self->attributes($ldap_crud->cfg->{objectClass}->{netgroup}, $params);
     # log_debug { np($entry) };
     if ( defined $params->{aux_dn_form_to_modify} && $params->{aux_dn_form_to_modify} ne '' ) {
@@ -61,9 +61,9 @@ sub index :Path :Args(0) {
       $entry->{aux_dn_form_to_modify} = $params->{aux_dn_form_to_modify};
       delete $entry->{netgroup}; # since no attribute `netgroup' exist
 
+      # log_debug { np($entry) };
       my $tmp = $c->controller('SearchBy')->modify($c, $entry);
-      log_debug { np($tmp) };
-      ## $c->stash( final_message => $tmp );
+      # $c->stash( final_message => $tmp );
     } else {
       $c->stash( final_message => $self->add( $ldap_crud, $entry), );
     }

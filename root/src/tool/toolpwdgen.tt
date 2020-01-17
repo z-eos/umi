@@ -2,10 +2,75 @@
 
 <[% site.pageheading %] class="[% site.pageheadingclass %]">
 <i class="fa fa-unlock-alt fa-lg m-3 text-muted"></i>
-Password Generator Form <small><em class="font-monospace text-muted"> completely random or random pronounceable word</em></small>
+Password Generator Form <small><em class="font-monospace text-muted">( XKCD stuff is described <a href="https://xkpasswd.net/s/" target="_blank">here</a>)</em></small>
 </[% site.pageheading %]>
 <hr>
 
 [% INCLUDE ldap_err.tt %]
 
-[% form.render %]
+<script>
+  function emptyFields () {
+    $('input').each(function() {
+      this.value = '';
+    });
+    $('select').each(function() {
+      this.value = 'NONE';
+    });
+  };
+</script>
+
+<form id="[% form.name %]"
+	class="formajaxer umi-margings-fixer form-horizontal tab-content"
+	method="post" enctype="multipart/form-data" action="/toolpwdgen">
+
+  <div class="accordion" id="pwdGen">
+    <div class="card card-sm border border-info my-2">
+      <div class="card-header bg-info" id="headingTwo" title="https://xkpasswd.net/s/">
+        <button class="btn btn-link text-white text-left font-weight-bold collapsed"
+		type="button"
+		onclick="emptyFields()"
+		data-toggle="collapse"
+		data-target="#collapseTwo"
+		aria-expanded="false"
+		aria-controls="collapseTwo">
+	  <i class="fas fa-lg fa-quote-right"></i>
+	    XKCD memorable password
+          </button>
+      </div>
+      <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#pwdGen">
+	<div class="card-body">
+	  [% form.field('xk_preset').render %]
+	</div>
+      </div>
+    </div>
+
+    <div class="card border border-info my-2">
+      <div class="card-header bg-info" id="headingOne">
+
+        <button class="btn btn-link text-white text-left font-weight-bold"
+		type="button"
+		onclick="emptyFields()"
+		data-toggle="collapse"
+		data-target="#collapseOne"
+		aria-expanded="true"
+		aria-controls="collapseOne">
+          <i class="fas fa-lg fa-random"></i>
+	  Random Password (improved FIPS-181)
+        </button>
+
+      </div>
+      <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#pwdGen">
+	<div class="card-body">
+	  [% form.field('pronounceable').render %]
+	  [% form.field('pwd_len').render %]
+	  [% form.field('pwd_cap').render %]
+	  [% form.field('pwd_num').render %]
+	</div>
+      </div>
+      
+    </div>
+  </div>
+
+  [% form.block('aux_submitit').render %]
+
+</form>

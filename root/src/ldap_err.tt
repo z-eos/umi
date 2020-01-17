@@ -7,8 +7,8 @@
 <div class="card-group m-0 my-3" id="accordion">
   <div class="card card-sm border border-danger">
     <div class="card-header bg-danger clearfix p-0 pt-2" role="tab" id="headErr">
-    <h4 class="text-light">
-      <a class="chevron_toggleable btn btn-link btn-sm pull-left"
+      <h4 class="text-light">
+	<a class="chevron_toggleable btn btn-link btn-sm pull-left"
 	 href="#"
 	 title="Collapse In/Out"
 	 data-toggle="collapse"
@@ -16,10 +16,10 @@
 	 role="button"
 	 aria-expanded="true"
 	 aria-controls="cardBodyError">
-	<i id="chevron_switcher" class="text-white fas fa-fw [% site.icons.toggle_right %]"></i>
-      </a>
-      <i class="fas fa-exclamation-circle mr-3"></i><strong>Error!</strong>
-    </h4>
+	  <i id="chevron_switcher" class="text-white fas fa-fw [% site.icons.toggle_right %]"></i>
+	</a>
+	<i class="fas fa-exclamation-circle mr-3"></i><strong>Error!</strong>
+      </h4>
     </div>
     <div class="umi-collapsable collapse" id="cardBodyError">
       <div class="card-body pb-0">
@@ -88,7 +88,8 @@
 	 aria-controls="cardBodySuccess">
 	<i id="chevron_switcher" class="text-white fas fa-fw [% site.icons.toggle_down %]"></i>
       </a>
-      <i class="fas fa-check-circle ml-1 mr-3"></i><strong>Success! [% final_message.title %]</strong>
+      <i class="fas fa-check-circle ml-1 mr-3"></i>
+      <strong>Success! [% final_message.title %]</strong>
     </h4>
   </div>
   <div class="umi-collapsable collapse show" id="cardBodySuccess">
@@ -110,7 +111,7 @@
   */ 
 
  $('.chevron_toggleable').on('click', function() { 
-   if ($(this).closest('.card').find('.umi-collapsable').hasClass('show')) { 
+   if ($(this).hasClass('collapsed')) { 
      $(this).find('#chevron_switcher').removeClass('[% site.icons.toggle_down %]').addClass('[% site.icons.toggle_right %]')
    } else { 
      $(this).find('#chevron_switcher').removeClass('[% site.icons.toggle_right %]').addClass('[% site.icons.toggle_down %]')

@@ -1027,30 +1027,31 @@ if provided, then the first password field is used
 
 sub modify_userpassword :Path(modify_userpassword) :Args(0) {
   my ( $self, $c ) = @_;
-  my $params = $c->req->parameters;
+  my $p = $c->req->parameters;
 
   $c->stash(
 	    template             => 'user/user_modpwd.tt',
 	    form                 => $self->form_mod_pwd,
-	    ldap_modify_password => $params->{ldap_modify_password},
+	    ldap_modify_password => $p->{ldap_modify_password},
 	   );
 
   return unless $self->form_mod_pwd->process(
 					     posted => ($c->req->method eq 'POST'),
-					     params => $params,
+					     params => $p,
 					    ) &&
-  					      ( defined $params->{password_init} ||
-  						defined $params->{password_cnfm} ||
-  						defined $params->{pwd_cap}       ||
-  						defined $params->{pwd_len}       ||
-  						defined $params->{pwd_num}       ||
-  						defined $params->{checkonly}     ||
-  						defined $params->{pronounceable} );
+  					      ( defined $p->{password_init} ||
+  						defined $p->{password_cnfm} ||
+  						defined $p->{pwd_cap}       ||
+  						defined $p->{pwd_len}       ||
+  						defined $p->{pwd_num}       ||
+  						defined $p->{checkonly}     ||
+  						defined $p->{pronounceable} );
 
-  my $arg = { mod_pwd_dn    => $params->{ldap_modify_password},
-	      password_init => $params->{password_init},
-	      password_cnfm => $params->{password_cnfm},
-	      checkonly     => $params->{checkonly} || 0, };
+  my $arg = { mod_pwd_dn    => $p->{ldap_modify_password},
+	      password_init => $p->{password_init},
+	      password_cnfm => $p->{password_cnfm},
+	      checkonly     => $p->{checkonly} || 0,
+	      xk_preset     => $p->{xk_preset} ne 'NONE' ? $p->{xk_preset} : undef };
   my ( $return, $pwd, $mesg, $entry );
   my $ldap_crud = $c->model('LDAP_CRUD');
   my ( $is_pwd_msg, $is_pwd, $modify_action );
@@ -1064,12 +1065,15 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
     
     if ( $self->form_mod_pwd->validated && $self->form_mod_pwd->ran_validation ) {
 
-      if ( $arg->{password_init} eq '' && $arg->{password_cnfm} eq '' ) {
+      if ( defined $arg->{xk_preset} ) {
+	$arg->{password_gen} = $self->pwdgen({ xk_preset => $p->{xk_preset} });
+      } elsif ( $arg->{password_init} eq '' && $arg->{password_cnfm} eq '' ) {
 	$arg->{password_gen} =
-	  $self->pwdgen({ len           => $params->{'pwd_len'}     || undef,
-			  num           => $params->{'pwd_num'}     || undef,
-			  cap           => $params->{'pwd_cap'}     || undef,
-			  pronounceable => $params->{pronounceable} || 0, });
+	  $self->
+	  pwdgen({ len => defined $p->{pwd_len} && length($p->{pwd_len}) ? $p->{pwd_len} : undef,
+		   num => defined $p->{pwd_num} && length($p->{pwd_num}) ? $p->{pwd_num} : undef,
+		   cap => defined $p->{pwd_cap} && length($p->{pwd_cap}) ? $p->{pwd_cap} : undef,
+		   pronounceable => $p->{pronounceable} // 0, });
       } elsif ( $arg->{'password_init'} ne '' ) {
 	$arg->{password_gen} = $self->pwdgen({ pwd => $arg->{'password_init'} });
       }
@@ -1418,7 +1422,7 @@ modify whole form (all present fields except RDN)
 
 sub modify :Path(modify) :Args(0) {
   my ( $self, $c, $params ) = @_;
-  
+
   log_debug { np($params) };
 
   # whether we edit object as is or via creation form
@@ -1474,8 +1478,8 @@ sub modify :Path(modify) :Args(0) {
     next if $attr =~ /$ldap_crud->{cfg}->{exclude_prefix}/ ||
       $attr eq 'dn'; # ||
       # $attr =~ /userPassword/; ## !! stub, not processed yet !!
-    if ( $attr eq 'jpegPhoto' ||
-	 $attr eq 'cACertificate' ||
+    if ( $attr eq 'jpegPhoto'                 ||
+	 $attr eq 'cACertificate'             ||
 	 $attr eq 'certificateRevocationList' ||
 	 $attr eq 'userCertificate' ) {
       $params->{$attr} = $c->req->upload($attr);

@@ -11,6 +11,7 @@ use Time::Piece;
 use POSIX qw(strftime);
 use MIME::Base64;
 use MIME::QuotedPrint;
+use List::MoreUtils ':all';
 
 BEGIN { with 'Tools'; }
 
@@ -2972,36 +2973,27 @@ uses sub bld_select()
 
 =cut
 
-has 'select_uid' => ( traits => ['Array'],
-		      is => 'ro', isa => 'ArrayRef', required => 0, lazy => 1,
-		      builder => '_build_select_uid',
-	     );
+has 'select_uid' => ( traits => ['Array'], builder => '_build_select_uid',
+		      is => 'ro', isa => 'ArrayRef', required => 0, lazy => 1, );
 
 sub _build_select_uid {
   my $self = shift;
-
-  my @uids;
   my $mesg = $self->search( { base      => $self->cfg->{base}->{acc_root},
-			      scope     => 'one',
 			      sizelimit => 0,
-			      attrs     => [ 'uid' ],
-			    } );
+			      attrs     => [ 'uid' ], } );
   my $err_message = '';
-  $err_message = '<div class="alert alert-danger">' .
-    '<i class="' . $self->{cfg}->{stub}->{icon_error} . '"></i><ul>' .
-    $self->err($mesg) . '</ul></div>'
-      if ! $mesg->count;
+  $err_message = sprintf("<div class=\"alert alert-danger\"><i class=\"%s\"></i><ul>%s</ul></div>",
+			 $self->{cfg}->{stub}->{icon_error},
+			 $self->err($mesg) )
+    if ! $mesg->count || $mesg->is_error;
 
-  my @entries = $mesg->sorted('uid');
-  my (@i, @j);
-  foreach my $entry ( @entries ) {
-    @i = $entry->get_value('uid');
-    foreach (@i) {
-      push @j, $_;
-    }
+  my ($i, @i, @j);
+  foreach my $entry ( $mesg->sorted('uid') ) {
+    $i = $entry->get_value('uid',  asref => 1);
+    push @j, $_ foreach (@{$i});
   }
-  @uids = map { { value => $_, label => $_ } } sort @j;
-  
+  my @uids = map { { value => $_, label => $_ } } uniq sort grep {!/^.*\@.*$/} @j;
+
   return \@uids;
 }
 
@@ -3032,10 +3024,10 @@ sub _build_select_dhcp_nets {
   } else {
     @dhcp_cfg_arr = $mesg->sorted('cn');
     foreach $dhcp_cfg ( @dhcp_cfg_arr ) {
-      $mesg = $self->search( { base     => $dhcp_cfg->dn,
-			      filter    => '(&(objectClass=dhcpSubnet)(cn=*))',
-			      sizelimit => 0,
-			      attrs     => [ qw(cn dhcpOption dhcpNetMask dhcpComments) ],
+      $mesg = $self->search( { base      => $dhcp_cfg->dn,
+			       filter    => '(&(objectClass=dhcpSubnet)(cn=*))',
+			       sizelimit => 0,
+			       attrs     => [ qw(cn dhcpOption dhcpNetMask dhcpComments) ],
 			    } );
       if ( ! $mesg->count ) {
 	$err_message =

@@ -41,29 +41,31 @@ QR version is defined dynamicaly (previous to the one spawning error)
 
 sub index :Path :Args(0) {
   my ( $self, $c ) = @_;
-  my $params = $c->req->parameters;
+  my $p = $c->req->parameters;
 
   $c->stash( template => 'tool/toolpwdgen.tt',
 	     form     => $self->form );
 
-  if ( keys %{$params} > 0 ) {
+  if ( keys %{$p} > 0 ) {
     return unless
       $self->form->process( posted => ($c->req->method eq 'POST'),
-			    init_object => { pwd_len       => $params->{pwd_len},
-					     pwd_num       => $params->{pwd_num},
-					     pwd_cap       => $params->{pwd_cap},
-					     pronounceable => $params->{pronounceable}, },
-			    params => $params, );
+			    init_object => { pwd_len       => $p->{pwd_len},
+					     pwd_num       => $p->{pwd_num},
+					     pwd_cap       => $p->{pwd_cap},
+					     pronounceable => $p->{pronounceable}, },
+			    params => $p, );
   } else {
     return unless
       $self->form->process( posted      => ($c->req->method eq 'POST'),
-			    params      => $params, );
+			    params      => $p, );
   }
 
-  my $pwd = $self->pwdgen({ len           => $params->{'pwd_len'}     || undef,
-			    num           => $params->{'pwd_num'}     || undef,
-			    cap           => $params->{'pwd_cap'}     || undef,
-			    pronounceable => $params->{pronounceable} || 0, });
+  my $pwd =
+    $self->pwdgen({ len => defined $p->{pwd_len} && length($p->{pwd_len}) ? $p->{pwd_len} : undef,
+		    num => defined $p->{pwd_num} && length($p->{pwd_num}) ? $p->{pwd_num} : undef,
+		    cap => defined $p->{pwd_cap} && length($p->{pwd_cap}) ? $p->{pwd_cap} : undef,
+		    pronounceable => $p->{pronounceable} // 0,
+		    xk_preset     => $p->{xk_preset}   // undef, });
 
   my $final_message->{success} = '<div class="row">' .
     '<div class="col-12 h3 text-monospace text-break text-center">' . $pwd->{clear} .

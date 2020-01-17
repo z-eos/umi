@@ -621,17 +621,17 @@ Search Advanced
   */ 
 
  $('.collapse_in_out').on('click', function() {
-   console.log('toggle from searchby.tt');
+   // console.log('toggle event from searchby.tt');
    $("[id^=collaps]").toggleClass('umi-collapsable collapse show').toggleClass('umi-collapsable collapse');
    $("[id^=chevron_switcher]").toggleClass('[% site.icons.toggle_right %]').toggleClass('[% site.icons.toggle_down %]');
  });
 
  $('.chevron_toggleable').on('click', function() { 
-   if ($(this).closest('.card-group').find('.umi-collapsable').hasClass('show')) { 
-     console.log('searchby.tt: chevron_toggleable collapsed');
+   if ($(this).hasClass('collapsed')) { 
+     // console.log('searchby.tt: chevron_toggleable [% site.icons.toggle_right %]');
      $(this).find('#chevron_switcher').removeClass('[% site.icons.toggle_down %]').addClass('[% site.icons.toggle_right %]')
    } else { 
-     console.log('searchby.tt: chevron_toggleable');
+     // console.log('searchby.tt: chevron_toggleable [% site.icons.toggle_down %]');
      $(this).find('#chevron_switcher').removeClass('[% site.icons.toggle_right %]').addClass('[% site.icons.toggle_down %]')
    }
  })

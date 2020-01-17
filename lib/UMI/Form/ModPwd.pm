@@ -245,6 +245,25 @@ has_field 'pwd_num'
 #       wrapper_class         => [ 'row', 'deactivate-top', ],
 #      );
 
+has_field 'xk_preset'
+  => ( type                  => 'Select',
+       label                 => 'Preset',
+       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
+       wrapper_class         => [ 'row', 'mt-4', ],
+       element_wrapper_class => [ 'input-sm', 'col-10', ],
+       element_class         => [ 'custom-select', ],
+       element_attr          => { title => 'SSH key types', },
+       options_method        => \&xk_preset_options, );
+
+sub xk_preset_options {
+  my %p = %{ UMI->config->{pwd}->{xk}->{preset} };
+  my @o;
+  push @o, { value => 'NONE', label => '-none-', selected => 'selected' };
+  push @o, { value => $_, label => sprintf("%9s (example: %s)", $_, $p{$_}) }
+    foreach (sort (keys %p));
+  return @o;
+}
+
 has_field 'aux_reset'
   => ( type          => 'Reset',
        element_class => [ qw( btn

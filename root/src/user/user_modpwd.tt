@@ -7,6 +7,52 @@ Password Check or Modification Form <small><em class="font-monospace text-muted"
 
 [% INCLUDE ldap_err.tt %]
 
-[% form.render %]
+<form id="[% form.name %]"
+	class="formajaxer umi-margings-fixer form-horizontal tab-content"
+	method="post" enctype="multipart/form-data" action="/searchby/modify_userpassword">
+
+  <div class="accordion" id="pwdGen">
+    <div class="card card-sm border border-info my-2">
+      <div class="card-header bg-info" id="headingTwo" title="https://xkpasswd.net/s/">
+        <button class="btn btn-link text-white text-left font-weight-bold collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+	  <i class="fas fa-lg fa-quote-right"></i>
+	    XKCD memorable password
+          </button>
+      </div>
+      <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-parent="#pwdGen">
+	<div class="card-body">
+	  [% form.field('xk_preset').render %]
+	</div>
+      </div>
+    </div>
+
+    <div class="card border border-info my-2">
+      <div class="card-header bg-info" id="headingOne">
+
+        <button class="btn btn-link text-white text-left font-weight-bold" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+          <i class="fas fa-lg fa-random"></i>
+	  Random Password (improved FIPS-181)
+        </button>
+
+      </div>
+      <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#pwdGen">
+	<div class="card-body">
+	  [% form.field('checkonly').render %]
+	  [% form.field('ldap_modify_password').render %]
+	  [% form.field('password_init').render %]
+	  [% form.field('password_cnfm').render %]
+	  [% form.field('pronounceable').render %]
+	  [% form.field('pwd_len').render %]
+	  [% form.field('pwd_cap').render %]
+	  [% form.field('pwd_num').render %]
+	</div>
+      </div>
+      
+    </div>
+  </div>
+
+  [% form.block('aux_submitit').render %]
+
+</form>
     
 <script src="/static/js/umi-deactivate-top-bottom.js"></script>

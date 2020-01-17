@@ -8,7 +8,6 @@ use namespace::autoclean;
 use Data::Printer  colored => 1;
 use Data::Dumper;
 
-use Logger;
 
 use Catalyst::Runtime 5.8;
 

@@ -271,7 +271,7 @@
 	      <td></td>
 	      <td>
 		<dl class="row">
-		  <dt class="inline-group">
+		  <dt class="col-md-2">
 
 		    [% IF y.auth && ( y.authorizedService.search('mail') ||
 		       y.authorizedService.search('xmpp') ||
@@ -305,7 +305,7 @@
 		       END %]		  
 
 		  </dt>
-		  <dd>
+		  <dd class="col-md-10">
 		    
 		    [%   IF y.cert.${z.key};
 		           IF y.authorizedService.search('ovpn') &&

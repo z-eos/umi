@@ -15,8 +15,14 @@ use List::MoreUtils;
 use List::Util;
 use Scalar::Util;
 
+use MIME::Base64;
+use Digest::SHA;
+
 use Crypt::X509;
 use Crypt::X509::CRL;
+
+use Crypt::HSXKPasswd;
+use Crypt::GeneratePassword qw(word word3 chars);
 
 use Net::DNS;
 use Net::CIDR::Set;
@@ -55,6 +61,7 @@ sub _build_a {
 			      },
 		 mac       => {
 			       mac48 => '(?:[[:xdigit:]]{2}([-:]))(?:[[:xdigit:]]{2}\1){4}[[:xdigit:]]{2}',
+			       # https://stackoverflow.com/a/21457070
 			       cisco => '(?:[[:xdigit:]]{4})(?:([\.])[[:xdigit:]]{4}){2}',
 			      },
 		},
@@ -402,6 +409,7 @@ sub pwdgen {
      cnt           => $args->{cnt}           // UMI->config->{pwd}->{cnt},
      salt          => $args->{salt}          // UMI->config->{pwd}->{salt},
      pronounceable => $args->{pronounceable} // UMI->config->{pwd}->{pronounceable},
+     xk_preset     => $args->{xk_preset}     // undef,
     };
 
   $pwdgen->{len} = UMI->config->{pwd}->{lenp}
@@ -409,21 +417,20 @@ sub pwdgen {
 
   # p $args;
   p $pwdgen;
-  use Crypt::GeneratePassword qw(word word3 chars);
 
-  if ( ( ! defined $pwdgen->{'pwd'} || $pwdgen->{'pwd'} eq '' )
-       && $pwdgen->{'pronounceable'} ) {
-    $pwdgen->{'pwd'} = word3( $pwdgen->{'len'},
-			      $pwdgen->{'len'},
-			      'en',
-			      $pwdgen->{'num'},
-			      $pwdgen->{'cap'} );
+  if ( defined $pwdgen->{xk_preset} && $pwdgen->{xk_preset} ne 'NONE' ) {
+    $pwdgen->{pwd} = hsxkpasswd( preset => $pwdgen->{xk_preset} );
   } elsif ( ( ! defined $pwdgen->{'pwd'} || $pwdgen->{'pwd'} eq '' )
-	    && ! $pwdgen->{'pronounceable'} ) {
-    $pwdgen->{'pwd'} = chars( $pwdgen->{'len'}, $pwdgen->{'len'} );
+	    && $pwdgen->{'pronounceable'} ) {
+    $pwdgen->{pwd} = word3( $pwdgen->{len},
+			    $pwdgen->{len},
+			    'en',
+			    $pwdgen->{num},
+			    $pwdgen->{cap} );
+  } elsif ( ( ! defined $pwdgen->{pwd} || $pwdgen->{pwd} eq '' )
+	    && ! $pwdgen->{pronounceable} ) {
+    $pwdgen->{pwd} = chars( $pwdgen->{len}, $pwdgen->{len} );
   }
-
-  use MIME::Base64;
 
   # use Digest::SHA1;
   # my $sha1 = Digest::SHA1->new;
@@ -434,13 +441,12 @@ sub pwdgen {
   # 	  ssha => '{SSHA}' . encode_base64( $sha1->digest . $pwdgen->{'salt'}, '' )
   # 	 };
 
-  use Digest::SHA;
   my $sha = Digest::SHA->new(1);
-  $sha->add( $pwdgen->{'pwd'}, $pwdgen->{'salt'} );
+  $sha->add( $pwdgen->{pwd}, $pwdgen->{salt} );
 
   $pwdgen->{return} = {
-		       clear => $pwdgen->{'pwd'},
-		       ssha => '{SSHA}' . $self->pad_base64( encode_base64( $sha->digest . $pwdgen->{'salt'}, '' ) )
+		       clear => $pwdgen->{pwd},
+		       ssha => '{SSHA}' . $self->pad_base64( encode_base64( $sha->digest . $pwdgen->{salt}, '' ) )
 		      };
   # log_debug { np($pwdgen->{return}) };
   return $pwdgen->{return};
@@ -1975,13 +1981,13 @@ sub factoroff_searchby {
 
     if ( $e->get_value( 'objectClass' ) eq 'auditModify' &&
 	 ( $attr eq 'reqMod' || $attr eq 'reqOld' ) ) {
-      foreach $tmp ( @{ $tt_e->{attrs}->{$attr} } ) {
-	$diff->{$attr} .= sprintf("%s\n", $tmp)
-	  if $tmp !~ /.*entryCSN.*/     &&
-	  $tmp !~ /.*modifiersName.*/   &&
-	  $tmp !~ /.*modifyTimestamp.*/ &&
-	  $tmp !~ /.*creatorsName.*/    &&
-	  $tmp !~ /.*createTimestamp.*/ ;
+      foreach ( @{ $tt_e->{attrs}->{$attr} } ) {
+	$diff->{$attr} .= sprintf("%s\n", $_)
+	  if $_ !~ /.*entryCSN.*/     &&
+	  $_ !~ /.*modifiersName.*/   &&
+	  $_ !~ /.*modifyTimestamp.*/ &&
+	  $_ !~ /.*creatorsName.*/    &&
+	  $_ !~ /.*createTimestamp.*/ ;
       }
     }
   }
@@ -1999,14 +2005,15 @@ sub factoroff_searchby {
     );
 
   use Text::Diff;
-  $tmp = diff \$diff->{reqOld}, \$diff->{reqMod}, { STYLE => 'Text::Diff::HTML' }
-    if defined $diff->{reqMod} &&  defined $diff->{reqMod};
-  $tt_e->{attrs}->{reqOldModDiff} = $tmp
-    if defined $diff->{reqMod} &&  defined $diff->{reqMod};
+  if ( defined $diff->{reqOld} && defined $diff->{reqMod} ) {
+    $tmp = diff \$diff->{reqOld}, \$diff->{reqMod}, { STYLE => 'Text::Diff::HTML' };
+    $tt_e->{attrs}->{reqOldModDiff} = $tmp;
+  }
+
   undef $diff;
 
   # log_debug { np($tt_e) };
-  
+
   return { root   => $tt_e->{root},
 	   attrs  => $tt_e->{attrs},
 	   is_arr => $tt_e->{is_arr},
