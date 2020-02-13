@@ -1,4 +1,82 @@
 [% META title = 'Password Generator' %]
+<style>
+ /* ---------------------------------------------------
+
+    conditional un/hiding for elements
+
+    --------------------------------------------------- */
+
+ .show-none          .conditional-input {
+   display: none;
+ }
+ .show-appleid       .conditional-input:not(.on-appleid) {
+   display: none;
+ }
+ .show-default       .conditional-input:not(.on-default) {
+   display: none;
+ }
+ .show-ntlm          .conditional-input:not(.on-ntlm) {
+   display: none;
+ }
+ .show-securityq     .conditional-input:not(.on-securityq) {
+   display: none;
+ }
+ .show-web16         .conditional-input:not(.on-web16) {
+   display: none;
+ }
+ .show-web32         .conditional-input:not(.on-web32) {
+   display: none;
+ }
+ .show-wifi          .conditional-input:not(.on-wifi) {
+   display: none;
+ }
+ .show-xkcd          .conditional-input:not(.on-xkcd) {
+   display: none;
+ }
+ .show-classic       .conditional-input:not(.on-classic) {
+   display: none;
+ }
+
+
+ /* ------------------------------------------------------------- */
+ .show-none          .cond-input-padd {
+   display: none;
+ }
+ .show-padd-fixed    .cond-input-padd:not(.on-padd-fixed) {
+   display: none;
+ }
+ .show-padd-adaptive .cond-input-padd:not(.on-padd-adaptive) {
+   display: none;
+ }
+ .show-padd-char     .cond-input-padd:not(.on-padd-char) {
+   display: none;
+ }
+
+ /* ------------------------------------------------------------- */
+ .show-none                .cond-input-padd-char {
+   display: none;
+ }
+ .show-padd-char-char      .cond-input-padd-char:not(.on-padd-char-char) {
+   display: none;
+ }
+ .show-padd-char-random    .cond-input-padd-char:not(.on-padd-char-random) {
+   display: none;
+ }
+ .show-padd-char-separator .cond-input-padd-char:not(.on-padd-char-separator) {
+   display: none;
+ }
+
+ /* ------------------------------------------------------------- */
+ .show-none       .cond-input-sep {
+   display: none;
+ }
+ .show-sep-char   .cond-input-sep:not(.on-sep-char) {
+   display: none;
+ }
+ .show-sep-random .cond-input-sep:not(.on-sep-random) {
+   display: none;
+ }'
+</style>
 
 <[% site.pageheading %] class="[% site.pageheadingclass %]">
 <i class="fa fa-unlock-alt fa-lg m-3 text-muted"></i>
@@ -8,69 +86,182 @@ Password Generator Form <small><em class="font-monospace text-muted">( XKCD stuf
 
 [% INCLUDE ldap_err.tt %]
 
-<script>
-  function emptyFields () {
-    $('input').each(function() {
-      this.value = '';
-    });
-    $('select').each(function() {
-      this.value = 'NONE';
-    });
-  };
-</script>
+<form id="[% form.name %]" class="formajaxer form-horizonal pwdgen"
+      method="post" enctype="[% form.enctype %]" action="[% form.action %]">
+  <div id="pwd_operations" class="target-container conditional-input">
 
-<form id="[% form.name %]"
-	class="formajaxer umi-margings-fixer form-horizontal tab-content"
-	method="post" enctype="multipart/form-data" action="/toolpwdgen">
+    [% form.field('pwd_alg').render %]
+    <small id="pwd_algHelpBlock" class="offset-md-2 col-10 form-text text-muted mt-0 pt-0 mb-4 pb-4">
+    </small>
+      
+    [% form.field('pronounceable').render %]
+    [% form.field('pwd_len').render %]
+    [% form.field('pwd_cap').render %]
+    [% form.field('pwd_num').render %]
 
-  <div class="accordion" id="pwdGen">
-    <div class="card card-sm border border-info my-2">
-      <div class="card-header bg-info" id="headingTwo" title="https://xkpasswd.net/s/">
-        <button class="btn btn-link text-white text-left font-weight-bold collapsed"
-		type="button"
-		onclick="emptyFields()"
-		data-toggle="collapse"
-		data-target="#collapseTwo"
-		aria-expanded="false"
-		aria-controls="collapseTwo">
-	  <i class="fas fa-lg fa-quote-right"></i>
-	    XKCD memorable password
-          </button>
-      </div>
-      <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#pwdGen">
-	<div class="card-body">
-	  [% form.field('xk_preset').render %]
+    <div class="col-12 p-0 conditional-input on-appleid on-default on-ntlm on-securityq on-web16 on-web32 on-wifi on-xkcd">
+
+      <div class="row col-12 form-group">
+	[% form.field('xk_num_words').render %]
+	<div class="col-6 px-0">
+	  [% form.field('xk_word_length_min').render %]
+	  [% form.field('xk_word_length_max').render %]
 	</div>
       </div>
-    </div>
-
-    <div class="card border border-info my-2">
-      <div class="card-header bg-info" id="headingOne">
-
-        <button class="btn btn-link text-white text-left font-weight-bold"
-		type="button"
-		onclick="emptyFields()"
-		data-toggle="collapse"
-		data-target="#collapseOne"
-		aria-expanded="true"
-		aria-controls="collapseOne">
-          <i class="fas fa-lg fa-random"></i>
-	  Random Password (improved FIPS-181)
-        </button>
-
-      </div>
-      <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#pwdGen">
-	<div class="card-body">
-	  [% form.field('pronounceable').render %]
-	  [% form.field('pwd_len').render %]
-	  [% form.field('pwd_cap').render %]
-	  [% form.field('pwd_num').render %]
-	</div>
+      [% form.field('xk_case_transform').render %]
+      
+      <div id="sep" class="row col-12 mb-0 form-group target-container cond-input-sep">
+	[% form.field('xk_separator_character').render %]
+	[% form.field('xk_separator_character_char').render %]
+	[% form.field('xk_separator_character_random').render %]
       </div>
       
+      <div class="row col-12 form-group">
+	[% form.field('xk_padding_digits_before').render %]
+	[% form.field('xk_padding_digits_after').render %]
+      </div>
+      
+      <div id="padd" class="target-container cond-input-padd">
+	<div class="row col-12 form-group">
+	  [% form.field('xk_padding_type').render %]
+	  <div class="row offset-md-2 col-12 form-group">
+	    <div class="row col-12 form-group">
+	      <div class="col row form-group cond-input-padd on-padd-fixed">
+		[% form.field('xk_padding_characters_before').render %]
+		[% form.field('xk_padding_characters_after').render %]
+	      </div>
+	      [% form.field('xk_pad_to_length').render %]
+	    </div>
+	    <div class="row col-12 form-group cond-input-padd on-padd-fixed on-padd-adaptive">
+	      <div id="padd-char" class="col-12 target-container cond-input-padd-char">
+		[% form.field('xk_padding_character').render %]
+		[% form.field('xk_padding_character_separator').render %]
+		[% form.field('xk_padding_character_random').render %]
+	      </div>
+	    </div>
+
+	</div>
+      </div>
+
     </div>
+    
+    <div class="row">
+      <div class="col-4"></div>
+      [% form.field('aux_submit').render %]
+      <div class="col-4"></div>
+    </div>
+    
   </div>
-
-  [% form.block('aux_submitit').render %]
-
+  <small id="sepCharHelpBlock" class="form-text text-muted"></small>
 </form>
+
+<script>
+ var xkPresets = [% xk_presets %]; 
+ var onPost    = [% on_post ? on_post : '""' %]; 
+ console.log('onPost: →'+onPost+'←');
+ 
+ function loadPreset(presets, presetName) {
+   var preset;
+   if ( onPost == '' ) {
+     preset = presets.presets[presetName];
+   } else {
+     preset = onPost;
+     onPost = '';
+   }
+   // console.log(presets);
+   // console.log(presetName);
+   // console.log(preset);
+   
+   var descr  = presets.preset_descriptions[presetName]; 
+
+   if ( descr ) $('#pwd_algHelpBlock').html(descr);
+
+   if ( ! preset ) return;
+
+   Object.keys(preset).forEach(function (key) {
+     if ( key == 'separator_character' && preset[key].length == 1 ) {
+       $('#xk_'+key).val('CHAR');
+       $('#xk_separator_character').change();
+       var k = key+'_char';
+       $('#xk_'+k).val(preset[key]);
+     } else if ( key == 'separator_character' && preset[key] == 'RANDOM' ) {
+       $('#xk_'+key).val('RANDOM');
+       $('#xk_separator_character').change();
+       var k = key+'_random';
+       if ( 'separator_alphabet' in preset ) {
+	 $('#xk_'+k).val(preset.separator_alphabet.join(''));
+       } else {
+	 $('#xk_'+k).val('');
+       }
+     } else if ( key == 'padding_type' ) {
+       $('#xk_'+key).val(preset[key]);
+       $('#xk_padding_type').change();
+     } else if ( key == 'padding_character' ) {
+       $('#xk_'+key).val(preset[key]);
+       $('#xk_padding_character').change();
+       var k = key+'_random';
+       if ( 'padding_alphabet' in preset ) {
+	 $('#xk_'+k).val(preset.padding_alphabet.join(''));
+       } else {
+	 $('#xk_'+k).val('');
+       }
+     } else {
+       $('#xk_'+key).val(preset[key]);
+     }
+   });
+ }
+ 
+ $('#sepCharHelpBlock').appendTo( $('#xk_separator_character_char').parent() );
+ $('#xk_separator_character_char').change( function() {
+   console.log('CHANGED ', this.value);
+   var char = this.value.charCodeAt(0) < 255 ? 'ASCII' : 'char';
+   $('#sepCharHelpBlock').html( $(this).val() ? 'Char used '+char+' code: '+this.value.charCodeAt(0) : '' );
+ });
+
+ // -------------------------------------------------------------------------
+ $('#pwd_operations').on('change', 'select[id=pwd_alg]', function(e) {
+   var $container = $(this).closest('.target-container');
+   var value = $(this).val().toLowerCase();
+   if ( xkPresets ) {
+     loadPreset(xkPresets, value.toUpperCase());
+     // should be here, since #xk_separator_character_char is set not from form but via js
+     $('#xk_separator_character_char').change();
+   }
+   $container.attr(
+     'class', 'target-container ' + (value ? ' show-' + value : 'show-none'),
+   );
+ } ).change();
+
+ // -------------------------------------------------------------------------
+ $('#padd').on('change', '#xk_padding_type', function(e) {
+   var $container = $(this).closest('.target-container');
+   var value = $(this).val().toLowerCase();
+   $container.attr(
+     'class', 'row col-12 form-group target-container ' + (value != 'none' ? ' show-padd-' + value : 'show-none'),
+   );
+ } ).change();
+
+ // -------------------------------------------------------------------------
+ $('#padd-char').on('change', '#xk_padding_character', function(e) {
+   var $container = $(this).closest('.target-container');
+   var value = $(this).val().toLowerCase();
+   $container.attr(
+     'class', 'col-12 row form-group target-container ' + (value != 'separator' ? ' show-padd-char-' + value : 'show-none'),
+   );
+ } ).change();
+
+ // -------------------------------------------------------------------------
+ $('#sep').on('change', '#xk_separator_character', function(e) {
+   var $container = $(this).closest('.target-container');
+   var value = $(this).val().toLowerCase();
+   $container.attr(
+     'class', 'row col-12 mb-0 form-group target-container ' + (value != 'none' ? ' show-sep-' + value : 'show-none'),
+   );
+ } ).change();
+
+ $('#pwd_alg').change();
+ $('#xk_padding_type').change();
+ $('#xk_separator_character').change();
+ $('#xk_padding_character').change();
+
+</script>

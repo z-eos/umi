@@ -1,4 +1,4 @@
-/* -*- mode: web; mode: follow -*- */
+/* -*- mode: css; mode: follow -*- */
 
 html,body {
   height: 100%;
@@ -203,6 +203,10 @@ html,body {
 
 .umi-font-bold {
   font-weight: bold;
+}
+
+.umi-font-raleway {
+    font-family: Raleway
 }
 
 .umi-search, .umi-search:active {
@@ -504,6 +508,45 @@ ul.ldap-tree {
   list-style-type: none;
 }
 
+ /* ---------------------------------------------------
+
+    FORM: UserAll
+    conditional un/hiding for elements of each service
+
+    --------------------------------------------------- */
+ .show-none          .conditional-input {
+   display: none;
+ }
+ .show-mail          .conditional-input:not(.on-mail) {
+   display: none;
+ }
+ .show-ssh-acc       .conditional-input:not(.on-ssh-acc) {
+   display: none;
+ }
+ .show-comm-acc      .conditional-input:not(.on-comm-acc) {
+   display: none;
+ }
+ .show-dot1x-eap-md5 .conditional-input:not(.on-dot1x-eap-md5) {
+   display: none;
+ }
+ .show-dot1x-eap-tls .conditional-input:not(.on-dot1x-eap-tls) {
+   display: none;
+ }
+ .show-xmpp          .conditional-input:not(.on-xmpp) {
+   display: none;
+ }
+ .show-web           .conditional-input:not(.on-web) {
+   display: none;
+ }
+ .show-gitlab        .conditional-input:not(.on-gitlab) {
+   display: none;
+ }
+ form.new-user.show-simplified .hide-on-simplified {
+   display: none;
+ }
+ form.new-user:not(.show-simplified) .show-on-simplified {
+   display: none;
+ }
 
 /* -------------------------------
 

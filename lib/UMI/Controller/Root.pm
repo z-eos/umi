@@ -282,22 +282,23 @@ sub stat_monitor : Local {
     } else {
       foreach ( @{[$mesg->entries]} ) {
 	$monitor->{connections}->{ $_->get_value('cn') } =
-	  { monitorConnectionNumber => $_->exists('monitorConnectionNumber') ? $_->get_value('monitorConnectionNumber') : 'NA',
-	    monitorConnectionProtocol => $_->exists('monitorConnectionProtocol') ? $_->get_value('monitorConnectionProtocol') : 'NA',
-	    monitorConnectionOpsReceived => $_->exists('monitorConnectionOpsReceived') ? $_->get_value('monitorConnectionOpsReceived') : 'NA',
-	    monitorConnectionOpsExecuting => $_->exists('monitorConnectionOpsExecuting') ? $_->get_value('monitorConnectionOpsExecuting') : 'NA',
-	    monitorConnectionOpsPending => $_->exists('monitorConnectionOpsPending') ? $_->get_value('monitorConnectionOpsPending') : 'NA',
-	    monitorConnectionOpsCompleted => $_->exists('monitorConnectionOpsCompleted') ? $_->get_value('monitorConnectionOpsCompleted') : 'NA',
-	    monitorConnectionGet => $_->exists('monitorConnectionGet') ? $_->get_value('monitorConnectionGet') : 'NA',
-	    monitorConnectionRead => $_->exists('monitorConnectionRead') ? $_->get_value('monitorConnectionRead') : 'NA',
-	    monitorConnectionWrite => $_->exists('monitorConnectionWrite') ? $_->get_value('monitorConnectionWrite') : 'NA',
-	    monitorConnectionMask => $_->exists('monitorConnectionMask') ? $_->get_value('monitorConnectionMask') : 'NA',
-	    monitorConnectionAuthzDN => $_->exists('monitorConnectionAuthzDN') ? $_->get_value('monitorConnectionAuthzDN') : 'NA',
-	    monitorConnectionListener => $_->exists('monitorConnectionListener') ? $_->get_value('monitorConnectionListener') : 'NA',
-	    monitorConnectionPeerDomain => $_->exists('monitorConnectionPeerDomain') ? $_->get_value('monitorConnectionPeerDomain') : 'NA',
-	    monitorConnectionPeerAddress => $_->exists('monitorConnectionPeerAddress') ? $_->get_value('monitorConnectionPeerAddress') : 'NA',
-	    monitorConnectionLocalAddress => $_->exists('monitorConnectionLocalAddress') ? $_->get_value('monitorConnectionLocalAddress') : 'NA',
-	    entryDN => $_->exists('entryDN') ? $_->get_value('entryDN') : 'NA', };
+	  { monitorConnectionNumber       => $_->get_value('monitorConnectionNumber')       // 'NA',
+	    monitorConnectionProtocol     => $_->get_value('monitorConnectionProtocol')     // 'NA',
+	    monitorConnectionOpsReceived  => $_->get_value('monitorConnectionOpsReceived')  // 'NA',
+	    monitorConnectionOpsExecuting => $_->get_value('monitorConnectionOpsExecuting') // 'NA',
+	    monitorConnectionOpsPending   => $_->get_value('monitorConnectionOpsPending')   // 'NA',
+	    monitorConnectionOpsCompleted => $_->get_value('monitorConnectionOpsCompleted') // 'NA',
+	    monitorConnectionGet          => $_->get_value('monitorConnectionGet')          // 'NA',
+	    monitorConnectionRead         => $_->get_value('monitorConnectionRead')         // 'NA',
+	    monitorConnectionWrite        => $_->get_value('monitorConnectionWrite')        // 'NA',
+	    monitorConnectionMask         => $_->get_value('monitorConnectionMask')         // 'NA',
+	    monitorConnectionAuthzDN      => $_->get_value('monitorConnectionAuthzDN')      // 'NA',
+	    monitorConnectionListener     => $_->get_value('monitorConnectionListener')     // 'NA',
+	    monitorConnectionPeerDomain   => $_->get_value('monitorConnectionPeerDomain')   // 'NA',
+	    monitorConnectionPeerAddress  => $_->get_value('monitorConnectionPeerAddress')  // 'NA',
+	    monitorConnectionLocalAddress => $_->get_value('monitorConnectionLocalAddress') // 'NA',
+	    entryDN                       => $_->get_value('entryDN')                       // 'NA',
+	  };
       }
     }
 

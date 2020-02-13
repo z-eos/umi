@@ -16,6 +16,8 @@ use Data::Printer { use_prototypes => 0, caller_info => 1 };
 use Time::Piece;
 use List::MoreUtils qw(uniq);
 
+use Crypt::HSXKPasswd;
+
 # use Try::Tiny;
 
 BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
@@ -1028,11 +1030,19 @@ if provided, then the first password field is used
 sub modify_userpassword :Path(modify_userpassword) :Args(0) {
   my ( $self, $c ) = @_;
   my $p = $c->req->parameters;
+  use JSON;
+  my $presets = decode_json(Crypt::HSXKPasswd->presets_json());
+  push @{$presets->{defined_presets}}, 'CLASSIC';
+  $presets->{preset_descriptions}->{CLASSIC} = 'Single-word, improved FIPS-181 NIST standard, password';
+  push @{$presets->{defined_presets}}, 'USERDEFINED';
+  $presets->{preset_descriptions}->{USERDEFINED} = 'Password provided by user';
+  $presets = encode_json $presets;
 
   $c->stash(
 	    template             => 'user/user_modpwd.tt',
 	    form                 => $self->form_mod_pwd,
 	    ldap_modify_password => $p->{ldap_modify_password},
+	    xk_presets           => $presets,
 	   );
 
   return unless $self->form_mod_pwd->process(
@@ -1050,8 +1060,12 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
   my $arg = { mod_pwd_dn    => $p->{ldap_modify_password},
 	      password_init => $p->{password_init},
 	      password_cnfm => $p->{password_cnfm},
-	      checkonly     => $p->{checkonly} || 0,
-	      xk_preset     => $p->{xk_preset} ne 'NONE' ? $p->{xk_preset} : undef };
+	      checkonly     => $p->{checkonly} || 0, };
+
+  # log_debug { np($p) };
+  # log_debug { np($arg) };
+  # log_debug { np($presets) };
+
   my ( $return, $pwd, $mesg, $entry );
   my $ldap_crud = $c->model('LDAP_CRUD');
   my ( $is_pwd_msg, $is_pwd, $modify_action );
@@ -1065,18 +1079,64 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
     
     if ( $self->form_mod_pwd->validated && $self->form_mod_pwd->ran_validation ) {
 
-      if ( defined $arg->{xk_preset} ) {
-	$arg->{password_gen} = $self->pwdgen({ xk_preset => $p->{xk_preset} });
-      } elsif ( $arg->{password_init} eq '' && $arg->{password_cnfm} eq '' ) {
+      if ( $arg->{password_init} eq '' && $arg->{password_cnfm} eq '' ) {
+	my %xk;
+	foreach (sort (keys %{$p})) {
+	  next if $_ !~ /^xk_/;
+	  next if ! defined $p->{$_} || $p->{$_} eq '';
+	  if ( $_ =~ /^.*alphabet.*/ ) {
+	    $xk{ substr($_,3) } = [ split(//, $p->{$_})];
+	  } else {
+	    $xk{ substr($_,3) } = $p->{$_};
+	  }
+	}
+
+	if ( $xk{separator_character} eq 'CHAR' ) {
+	  $xk{separator_character} = $xk{separator_character_char};
+	  delete $xk{separator_character_char};
+	  delete $xk{separator_character_random};
+	} elsif ( $xk{separator_character} eq 'RANDOM' ) {
+	  $xk{separator_alphabet} = [ split(//, $xk{separator_character_random}) ];
+	  delete $xk{separator_character_random};
+	  delete $xk{separator_character_char};
+	} elsif ( $xk{separator_character} eq 'NONE' ) {
+	  delete $xk{separator_character_char};
+	  delete $xk{separator_character_random};
+	}
+
+	if ( $xk{padding_type} eq 'NONE' ) {
+	  delete $xk{padding_character};
+	  delete $xk{padding_character_char};
+	  delete $xk{padding_character_random};
+	} else {
+	  if (  $xk{padding_character} eq 'SEPARATOR' ) {
+	    delete $xk{padding_character_char};
+	    delete $xk{padding_character_random};
+	  } elsif (  $xk{padding_character} eq 'CHAR' ) {
+	    $xk{padding_character} = $xk{padding_character_char};
+	    delete $xk{padding_character_char};
+	    delete $xk{padding_character_random};
+	  } elsif ( $xk{padding_character} eq 'RANDOM' ) {
+	    $xk{padding_alphabet} = [ split(//, $xk{padding_character_random}) ];
+	    delete $xk{padding_character_char};
+	    delete $xk{padding_character_random};
+	  }
+	}
+
 	$arg->{password_gen} =
 	  $self->
-	  pwdgen({ len => defined $p->{pwd_len} && length($p->{pwd_len}) ? $p->{pwd_len} : undef,
-		   num => defined $p->{pwd_num} && length($p->{pwd_num}) ? $p->{pwd_num} : undef,
-		   cap => defined $p->{pwd_cap} && length($p->{pwd_cap}) ? $p->{pwd_cap} : undef,
-		   pronounceable => $p->{pronounceable} // 0, });
+	  pwdgen({ gp => {len => defined $p->{pwd_len} && length($p->{pwd_len}) ? $p->{pwd_len} : undef,
+			  num => defined $p->{pwd_num} && length($p->{pwd_num}) ? $p->{pwd_num} : undef,
+			  cap => defined $p->{pwd_cap} && length($p->{pwd_cap}) ? $p->{pwd_cap} : undef,
+			  pronounceable => $p->{pronounceable} // 0,
+			 },
+		   pwd_alg       => $p->{pwd_alg}       // undef,
+		   xk            => \%xk,});
       } elsif ( $arg->{'password_init'} ne '' ) {
-	$arg->{password_gen} = $self->pwdgen({ pwd => $arg->{'password_init'} });
+	$arg->{password_gen} = $self->pwdgen({ pwd => $arg->{password_init} });
       }
+
+      log_debug { np($arg) };
 
       if ( ! $arg->{checkonly} ) {
 	$pwd = $arg->{mod_pwd_dn} =~ /.*authorizedService=dot1x-eap-md5.*/ ? $arg->{password_gen}->{clear} : $arg->{password_gen}->{ssha};
@@ -1113,12 +1173,13 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
 	#p $arg->{password_gen}->{ssha};
 
 	$return->{success} = sprintf('%s<table class="table table-vcenter">
-  <tr><td width="50%%"><h1 class="mono text-center">%s</h1></td>
+  <tr><td width="50%%"><h2 class="mono text-center">%s</h2></td>
       <td class="text-center" width="50%%">',
-				     $mesg,
-				     $arg->{password_gen}->{clear},
-				    );
+                                     $mesg,
+                                     $arg->{password_gen}->{clear},
+                                    );
 
+	
 	my $qr;
 	for ( my $i = 0; $i < 41; $i++ ) {
 	  $qr = $self->qrcode({ txt => $arg->{password_gen}->{clear}, ver => $i, mod => 5 });
@@ -1126,16 +1187,49 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
 	}
 
 	$return->{error} = $qr->{error} if $qr->{error};
-	$return->{success} .= sprintf('<img alt="password QR" class="img-responsive img-thumbnail %s" src="data:image/jpg;base64,%s" title="password QR"/>',
-				      $qr_bg,
-				      $qr->{qr} );
-	$return->{success} .= '</td></tr></table>';
+
+	$return->{success} .=
+	  sprintf('<div class="row">
+  <div class="py-3 col-12 text-center">
+    <img alt="password QR" class="img-responsive img-thumbnail %s" src="data:image/jpg;base64,%s" title="password QR"/>
+  </div>',
+		  $qr_bg,
+		  $qr->{qr} );
+
+	$return->{success} .=
+	  sprintf('</td><tr><td colspan="2"><div class="py-3 col-12">
+  <div class="text-muted text-monospace" aria-label="Statistics" aria-describedby="button-addon2">
+    Entropy: between <b class="text-%s">%s</b> bits & <b class="text-%s">%s</b> bits blind &
+    <b class="text-%s">%s</b> bits with full knowledge
+    <small><em>(suggest keeping blind entropy above 78bits & seen above 52bits)</em></small>
+
+    <a class="btn btn-link" data-toggle="collapse" href="#pwdStatus"
+        role="button" aria-expanded="false" aria-controls="pwdStatus">
+        full status
+    </a>
+  </div>
+  <div class="collapse" id="pwdStatus">
+    <div class="card card-body"><small><pre class="text-muted text-monospace">%s</pre></small></div>
+  </div>',
+
+		  $arg->{password_gen}->{stats}->{password_entropy_blind_min} > 78 ? 'success' : 'danger',
+		  $arg->{password_gen}->{stats}->{password_entropy_blind_min},
+		  $arg->{password_gen}->{stats}->{password_entropy_blind_max} > 78 ? 'success' : 'danger',
+		  $arg->{password_gen}->{stats}->{password_entropy_blind_max},
+		  $arg->{password_gen}->{stats}->{password_entropy_seen}      > 52 ? 'success' : 'danger',
+		  $arg->{password_gen}->{stats}->{password_entropy_seen},
+		  $arg->{password_gen}->{status})
+	  if ! $arg->{checkonly} && $p->{pwd_alg} ne 'CLASSIC';
+
+	$return->{success} .= '</div></td></tr></table>';
 
       }
     }
   }
   # p $arg;
-  $c->stash( final_message => $return, );
+  $return->{success} .= '</div>';
+  $c->stash( final_message => $return,
+	     on_post       => encode_json $p );
 }
 
 

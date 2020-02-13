@@ -1,5 +1,86 @@
 [% META title = 'Password Modify' %]
 
+<style>
+ /* ---------------------------------------------------
+
+    conditional un/hiding for elements
+
+    --------------------------------------------------- */
+
+ .alg.none        .calg {
+   display: none;
+ }
+ .alg.appleid     .calg:not(.on-appleid) {
+   display: none;
+ }
+ .alg.default     .calg:not(.on-default) {
+   display: none;
+ }
+ .alg.ntlm        .calg:not(.on-ntlm) {
+   display: none;
+ }
+ .alg.securityq   .calg:not(.on-securityq) {
+   display: none;
+ }
+ .alg.web16       .calg:not(.on-web16) {
+   display: none;
+ }
+ .alg.web32       .calg:not(.on-web32) {
+   display: none;
+ }
+ .alg.wifi        .calg:not(.on-wifi) {
+   display: none;
+ }
+ .alg.xkcd        .calg:not(.on-xkcd) {
+   display: none;
+ }
+ .alg.classic     .calg:not(.on-classic) {
+   display: none;
+ }
+ .alg.userdefined .calg:not(.on-userdefined) {
+   display: none;
+ }
+ 
+ /* --- PADDING ------------------------------------------------- */
+ .pad.none        .cpad {
+   display: none;
+ }
+ .pad.fixed       .cpad:not(.on-padd-fixed) {
+   display: none;
+ }
+ .pad.adaptive    .cpad:not(.on-padd-adaptive) {
+   display: none;
+ }
+ .pad.char        .cpad:not(.on-padd-char) {
+   display: none;
+ }
+
+ /* --- PADDING CHARACTER --------------------------------------- */
+ .pch.none        .cpch {
+   display: none;
+ }
+ .pch.char        .cpch:not(.on-padd-char-char) {
+   display: none;
+ }
+ .pch.random      .cpch:not(.on-padd-char-random) {
+   display: none;
+ }
+ .pch.separator   .cpch:not(.on-padd-char-separator) {
+   display: none;
+ }
+
+ /* --- SEPARATOR ----------------------------------------------- */
+ .sep.none        .csep {
+   display: none;
+ }
+ .sep.char        .csep:not(.on-sep-char) {
+   display: none;
+ }
+ .sep.random      .csep:not(.on-sep-random) {
+   display: none;
+ }'
+</style>
+
 <[% site.pageheading %] class="[% site.pageheadingclass %]">
 <i class="fas fa-fingerprint fa-lg mr-3 text-muted"></i>
 Password Check or Modification Form <small><em class="font-monospace text-muted"> for user: [% ldap_modify_password %]</em></small>
@@ -7,52 +88,228 @@ Password Check or Modification Form <small><em class="font-monospace text-muted"
 
 [% INCLUDE ldap_err.tt %]
 
-<form id="[% form.name %]"
-	class="formajaxer umi-margings-fixer form-horizontal tab-content"
-	method="post" enctype="multipart/form-data" action="/searchby/modify_userpassword">
+<ul class="nav nav-tabs nav-justified pt-5" role="tablist">
+  <li class="nav-item">
+    <a class="nav-link active text-uppercase" data-toggle="tab"
+       id="tab-mod" href="#mod"
+       aria-controls="mod" aria-selected="true" role="tab">
+      <i class="fas fa-edit"></i>
+      Modify
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link text-uppercase" data-toggle="tab"
+       id="tab-chk" href="#chk"
+       aria-controls="chk" aria-selected="true" role="tab">
+      <i class="fas fa-spell-check"></i>
+      Verify
+    </a>
+  </li>
+</ul>
 
-  <div class="accordion" id="pwdGen">
-    <div class="card card-sm border border-info my-2">
-      <div class="card-header bg-info" id="headingTwo" title="https://xkpasswd.net/s/">
-        <button class="btn btn-link text-white text-left font-weight-bold collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-	  <i class="fas fa-lg fa-quote-right"></i>
-	    XKCD memorable password
-          </button>
-      </div>
-      <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-parent="#pwdGen">
-	<div class="card-body">
-	  [% form.field('xk_preset').render %]
-	</div>
-      </div>
-    </div>
+<div class="tab-content" id="pwdEvents">
+  <div class="tab-pane fade show active" id="mod" role="tabpanel" aria-labelledby="tab-mod">
+    <form id="[% form.name %]"
+	  class="formajaxer umi-margings-fixer form-horizontal tab-content"
+	  method="post" enctype="multipart/form-data" action="/searchby/modify_userpassword">
+      [% form.field('ldap_modify_password').render %]
 
-    <div class="card border border-info my-2">
-      <div class="card-header bg-info" id="headingOne">
+      <div id="pwd_operations" class="target-container">
+	
+	[% form.field('pwd_alg').render %]
+	<small id="pwd_algHelpBlock" class="offset-md-2 col-10 form-text text-muted mt-0 pt-0 mb-4 pb-4">
+	</small>
 
-        <button class="btn btn-link text-white text-left font-weight-bold" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-          <i class="fas fa-lg fa-random"></i>
-	  Random Password (improved FIPS-181)
-        </button>
-
-      </div>
-      <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#pwdGen">
-	<div class="card-body">
-	  [% form.field('checkonly').render %]
-	  [% form.field('ldap_modify_password').render %]
+	<div class="col-12 p-0 calg on-userdefined">
 	  [% form.field('password_init').render %]
 	  [% form.field('password_cnfm').render %]
+	</div>
+
+	<div class="col-12 p-0 calg on-classic">
 	  [% form.field('pronounceable').render %]
 	  [% form.field('pwd_len').render %]
 	  [% form.field('pwd_cap').render %]
 	  [% form.field('pwd_num').render %]
 	</div>
+	
+	<div class="col-12 p-0 calg on-appleid on-default on-ntlm on-securityq on-web16 on-web32 on-wifi on-xkcd on-checkonly">
+
+	  <div class="row col-12 form-group">
+	    [% form.field('xk_num_words').render %]
+	    <div class="col-6 px-0">
+	      [% form.field('xk_word_length_min').render %]
+	      [% form.field('xk_word_length_max').render %]
+	    </div>
+	  </div>
+	  [% form.field('xk_case_transform').render %]
+	  
+	  <div id="sep" class="row col-12 mb-0 form-group target-container csep">
+	    [% form.field('xk_separator_character').render %]
+	    [% form.field('xk_separator_character_char').render %]
+	    [% form.field('xk_separator_character_random').render %]
+	  </div>
+	  
+	  <div class="row col-12 form-group">
+	    [% form.field('xk_padding_digits_before').render %]
+	    [% form.field('xk_padding_digits_after').render %]
+	  </div>
+	  
+	  <div id="padd" class="target-container cpad">
+	    <div class="row col-12 form-group">
+	      [% form.field('xk_padding_type').render %]
+	      <div class="row offset-md-2 col-12 form-group">
+		<div class="row col-12 form-group">
+		  <div class="col row form-group cpad on-padd-fixed">
+		    [% form.field('xk_padding_characters_before').render %]
+		    [% form.field('xk_padding_characters_after').render %]
+		  </div>
+		  [% form.field('xk_pad_to_length').render %]
+		</div>
+		<div class="row col-12 form-group cpad on-padd-fixed on-padd-adaptive">
+		  <div id="padd-char" class="col-12 target-container cpch">
+		    [% form.field('xk_padding_character').render %]
+		    [% form.field('xk_padding_character_separator').render %]
+		    [% form.field('xk_padding_character_random').render %]
+		  </div>
+		</div>
+
+	      </div>
+	    </div>
+	  </div>    
+	</div>
+	<small id="sepCharHelpBlock" class="form-text text-muted"></small>
       </div>
-      
-    </div>
+
+      <div class="row">
+	<div class="col-4"></div>
+	[% form.field('aux_submit').render %]
+	<div class="col-4"></div>
+      </div>
+
+    </form>
   </div>
+  <div class="tab-pane fade" id="chk" role="tabpanel" aria-labelledby="tab-chk">
+    <form id="[% form.name %]"
+	  class="formajaxer umi-margings-fixer form-horizontal tab-content"
+	  method="post" enctype="multipart/form-data" action="/searchby/modify_userpassword">
+      [% form.field('ldap_modify_password').render %]
+      [% form.field('checkonly').value = 1 %]
+      [% form.field('checkonly').render %]
+      [% form.field('password_init').render %]
 
-  [% form.block('aux_submitit').render %]
+      <div class="row">
+	<div class="col-4"></div>
+	[% form.field('aux_submit').render %]
+	<div class="col-4"></div>
+      </div>
 
-</form>
-    
-<script src="/static/js/umi-deactivate-top-bottom.js"></script>
+    </form>
+  </div>
+</div>
+<script>
+ var xkPresets = [% xk_presets %]; 
+ var onPost    = [% on_post ? on_post : '""' %]; 
+ console.log('onPost: →'+onPost+'←');
+ 
+ function loadPreset(presets, presetName) {
+   var preset;
+   if ( onPost == '' ) {
+     preset = presets.presets[presetName];
+   } else {
+     preset = onPost;
+     onPost = '';
+   }
+   
+   var descr  = presets.preset_descriptions[presetName]; 
+   if ( descr ) $('#pwd_algHelpBlock').html(descr);
+   if ( ! preset ) return;
+
+   Object.keys(preset).forEach(function (key) {
+     if ( key == 'separator_character' && preset[key].length == 1 ) {
+       $('#xk_'+key).val('CHAR');
+       $('#xk_separator_character').change();
+       var k = key+'_char';
+       $('#xk_'+k).val(preset[key]);
+     } else if ( key == 'separator_character' && preset[key] == 'RANDOM' ) {
+       $('#xk_'+key).val('RANDOM');
+       $('#xk_separator_character').change();
+       var k = key+'_random';
+       if ( 'separator_alphabet' in preset ) {
+	 $('#xk_'+k).val(preset.separator_alphabet.join(''));
+       } else {
+	 $('#xk_'+k).val('');
+       }
+     } else if ( key == 'padding_type' ) {
+       $('#xk_'+key).val(preset[key]);
+       $('#xk_padding_type').change();
+     } else if ( key == 'padding_character' ) {
+       $('#xk_'+key).val(preset[key]);
+       $('#xk_padding_character').change();
+       var k = key+'_random';
+       if ( 'padding_alphabet' in preset ) {
+	 $('#xk_'+k).val(preset.padding_alphabet.join(''));
+       } else {
+	 $('#xk_'+k).val('');
+       }
+     } else {
+       $('#xk_'+key).val(preset[key]);
+     }
+   });
+ }
+ 
+ $('#sepCharHelpBlock').appendTo( $('#xk_separator_character_char').parent() );
+ $('#xk_separator_character_char').change( function() {
+   console.log('CHANGED ', this.value);
+   var char = this.value.charCodeAt(0) < 255 ? 'ASCII' : 'char';
+   $('#sepCharHelpBlock').html( $(this).val() ? char+' code: '+this.value.charCodeAt(0) : '' );
+ });
+
+ // -------------------------------------------------------------------------
+ $('#pwd_operations').on('change', 'select[id=pwd_alg]', function(e) {
+   var $container = $(this).closest('.target-container');
+   var value = $(this).val().toLowerCase();
+   if ( xkPresets ) {
+     loadPreset(xkPresets, value.toUpperCase());
+     // should be done here, since #xk_separator_character_char is set not from form but via js
+     $('#xk_separator_character_char').change();
+   }
+   $container.attr(
+     'class', 'target-container ' + (value ? ' alg '+value : ' alg none'),
+   );
+ } ).change();
+
+ // -------------------------------------------------------------------------
+ $('#padd').on('change', '#xk_padding_type', function(e) {
+   var $container = $(this).closest('.target-container');
+   var value = $(this).val().toLowerCase();
+   $container.attr(
+     'class', 'row col-12 form-group target-container ' + (value != 'none' ? ' pad '+value : ' pad none'),
+   );
+ } ).change();
+
+ // -------------------------------------------------------------------------
+ $('#padd-char').on('change', '#xk_padding_character', function(e) {
+   var $container = $(this).closest('.target-container');
+   var value = $(this).val().toLowerCase();
+   $container.attr(
+     'class', 'col-12 row form-group target-container ' + (value != 'separator' ? ' pch '+value : ' pch none'),
+   );
+ } ).change();
+
+ // -------------------------------------------------------------------------
+ $('#sep').on('change', '#xk_separator_character', function(e) {
+   var $container = $(this).closest('.target-container');
+   var value = $(this).val().toLowerCase();
+   $container.attr(
+     'class', 'row col-12 mb-0 form-group target-container ' + (value != 'none' ? ' sep '+value : ' sep none'),
+   );
+ } ).change();
+
+ $('#pwd_alg').change();
+ $('#xk_padding_type').change();
+ $('#xk_separator_character').change();
+ $('#xk_padding_character').change();
+
+</script>
+
+<!-- script src="/static/js/umi-deactivate-top-bottom.js"></script -->

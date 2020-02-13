@@ -30,7 +30,7 @@ for: [% form.field('add_svc_acc').value %]
 [% INCLUDE ldap_err.tt %]
 
 <form id="[% form.name %]"
-	class="formajaxer umi-margings-fixer form-horizontal tab-content"
+	class="formajaxer umi-margings-fixer form-horizontal tab-content new-user"
 	method="post" enctype="multipart/form-data" action="/userall">
 
   [% form.field('add_svc_acc').render %]
@@ -69,7 +69,7 @@ for: [% form.field('add_svc_acc').value %]
       </a>
     </li>
 
-    <li class="nav-item complex">
+    <li class="nav-item complex hide-on-simplified">
       <a class="nav-link d-flex justify-content-center align-items-center [% IF form.field('add_svc_acc').value %]active [% END %]"
 	 aria-controls="auth" data-toggle="tab"
 	 id="auth-tab" href="#auth" title="Login/Password Dependent Services"
@@ -83,7 +83,7 @@ for: [% form.field('add_svc_acc').value %]
       </a>
     </li>
 
-    <li id="nopass" class="nav-item complex dropdown">
+    <li id="nopass" class="nav-item complex dropdown hide-on-simplified">
 	<a aria-controls="sec-contents" data-toggle="dropdown"
 	   class="nav-link dropdown-toggle d-flex justify-content-center align-items-center" id="umiSec" href="#"
 	   title="Services Without Login/Password" aria-haspopup="true" aria-expanded="false">
@@ -101,7 +101,7 @@ for: [% form.field('add_svc_acc').value %]
     </li>
 
     [% IF ! form.field('add_svc_acc').value %]
-    <li class="nav-item complex">
+    <li class="nav-item complex hide-on-simplified">
       <a class="nav-link d-flex justify-content-center align-items-center"
 	 aria-controls="groups" data-toggle="tab" id="groups-tab"
 	 href="#groups" title="Group/s User Belongs to" aria-expanded="false">
@@ -149,10 +149,36 @@ for: [% form.field('add_svc_acc').value %]
 })
 </script>
 
+<script>
+ $('#auth').on('change', 'select[id$=authorizedservice]', function(e) {
+   var $container = $(this).closest('.target-container');
+   var value = $(this).val();
+   $container.attr(
+     'class', 'target-container ' + (value ? ' show-' + value : 'show-none'),
+   );
+ } ).on('click', '#aux_add_account', function () {
+   $('#auth select[id$=authorizedservice]').change();
+ } );
+
+ $('#person_simplified').on('change', function(e) {
+   var $container = $(this).closest('form');
+   var checked = $(this).prop('checked');
+   if (checked) {
+     $container.addClass('show-simplified');
+     // $('#person').addClass('show').addClass('active');
+   } else {
+     $container.removeClass('show-simplified');
+   }
+ }).change();
+
+ $('#account select[id$=authorizedservice]').change();
+ 
+</script>
+
 [% IF form.field('add_svc_acc').value %]
 <script type="text/javascript">
- /* --- FORM USED FOR AN EXISTENT DN ------------------------------------------
-    dn for account service to be added to, was selected in searchby form
+ /* --- WHEN THIS FORM IS USED FOR AN EXISTENT USER, NOT FOR A NEW ONE --------
+    dn for account service to be added to, has been selected in searchby form
   * --------------------------------------------------------------------------- */
 
  $('.addsvcacc').hide(300);
@@ -161,7 +187,7 @@ for: [% form.field('add_svc_acc').value %]
 </script>
 [% END %]
 
-<script src="/static/js/umi-user-all.js"></script>  
+<!-- script src="/static/js/umi-user-all.js"></script -->  
 <script src="/static/js/umi-multiselect.js"></script>
 
 <script type="text/javascript">

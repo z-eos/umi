@@ -399,57 +399,71 @@ Method returns hash with cleartext and ssha coded password.
 
 sub pwdgen {
   my ( $self, $args ) = @_;
-  my $pwdgen =
+  my $p =
     {
-     pwd           => $args->{pwd}           // undef,
-     alg           => $args->{pwd}           // UMI->config->{pwd}->{alg} || '1',
-     len           => $args->{len}           // UMI->config->{pwd}->{len},
-     num           => $args->{num}           // UMI->config->{pwd}->{num},
-     cap           => $args->{cap}           // UMI->config->{pwd}->{cap},
-     cnt           => $args->{cnt}           // UMI->config->{pwd}->{cnt},
-     salt          => $args->{salt}          // UMI->config->{pwd}->{salt},
-     pronounceable => $args->{pronounceable} // UMI->config->{pwd}->{pronounceable},
-     xk_preset     => $args->{xk_preset}     // undef,
+     pwd => $args->{pwd}           // undef,
+     gp  => {
+	     alg           => $args->{gp}->{alg}           // UMI->config->{pwd}->{gp}->{alg} || '1',
+	     len           => $args->{gp}->{len}           // UMI->config->{pwd}->{gp}->{len},
+	     num           => $args->{gp}->{num}           // UMI->config->{pwd}->{gp}->{num},
+	     cap           => $args->{gp}->{cap}           // UMI->config->{pwd}->{gp}->{cap},
+	     cnt           => $args->{gp}->{cnt}           // UMI->config->{pwd}->{gp}->{cnt},
+	     salt          => $args->{gp}->{salt}          // UMI->config->{pwd}->{gp}->{salt},
+	     pronounceable => $args->{gp}->{pronounceable} // UMI->config->{pwd}->{gp}->{pronounceable},
+	     },
+     xk  => $args->{xk}            // undef,
+     pwd_num => $args->{pwd_num}   // 1,
+     pwd_alg => $args->{pwd_alg}   // undef,
     };
 
-  $pwdgen->{len} = UMI->config->{pwd}->{lenp}
-    if $pwdgen->{pronounceable} && $pwdgen->{len} > UMI->config->{pwd}->{lenp};
+  $p->{gp}->{len} = UMI->config->{pwd}->{gp}->{lenp}
+    if $p->{gp}->{pronounceable} && $p->{gp}->{len} > UMI->config->{pwd}->{gp}->{lenp};
 
-  # p $args;
-  p $pwdgen;
+  if ( $p->{pwd_alg} ne 'CLASSIC' && defined $p->{xk} ) {
 
-  if ( defined $pwdgen->{xk_preset} && $pwdgen->{xk_preset} ne 'NONE' ) {
-    $pwdgen->{pwd} = hsxkpasswd( preset => $pwdgen->{xk_preset} );
-  } elsif ( ( ! defined $pwdgen->{'pwd'} || $pwdgen->{'pwd'} eq '' )
-	    && $pwdgen->{'pronounceable'} ) {
-    $pwdgen->{pwd} = word3( $pwdgen->{len},
-			    $pwdgen->{len},
-			    'en',
-			    $pwdgen->{num},
-			    $pwdgen->{cap} );
-  } elsif ( ( ! defined $pwdgen->{pwd} || $pwdgen->{pwd} eq '' )
-	    && ! $pwdgen->{pronounceable} ) {
-    $pwdgen->{pwd} = chars( $pwdgen->{len}, $pwdgen->{len} );
+    Crypt::HSXKPasswd->module_config('LOG_ERRORS', 1);
+    Crypt::HSXKPasswd->module_config('DEBUG', 1);
+    my $default_config = Crypt::HSXKPasswd->default_config();
+    my $c = Crypt::HSXKPasswd->preset_config( $p->{pwd_alg} );
+    $c->{$_} = $p->{xk}->{$_} foreach (keys %{$p->{xk}});
+    my $xk = Crypt::HSXKPasswd->new( config => $c );
+    $p->{pwd}->{clear}    = $xk->password( $p->{pwd_num} );
+    %{$p->{pwd}->{stats}} = $xk->stats();
+    $p->{pwd}->{status}   = $xk->status();
+
+  } elsif ((! defined $p->{pwd} || $p->{pwd} eq '') && $p->{gp}->{pronounceable} ) {
+
+    $p->{pwd}->{clear} = word3( $p->{gp}->{len},
+				$p->{gp}->{len},
+				'en',
+				$p->{gp}->{num},
+				$p->{gp}->{cap} );
+
+  } elsif ((! defined $p->{pwd} || $p->{pwd} eq '') && ! $p->{gp}->{pronounceable} ) {
+
+    $p->{pwd}->{clear} = chars($p->{gp}->{len}, $p->{gp}->{len});
+
   }
 
-  # use Digest::SHA1;
-  # my $sha1 = Digest::SHA1->new;
-  # $sha1->add( $pwdgen->{'pwd'}, $pwdgen->{'salt'} );
+  if ( ref($p->{pwd}) ne 'HASH' ) {
+    $p->{tmp} = $p->{pwd};
+    delete $p->{pwd};
+    $p->{pwd}->{clear} = $p->{tmp};
+  }
 
-  # return {
-  # 	  clear => $pwdgen->{'pwd'},
-  # 	  ssha => '{SSHA}' . encode_base64( $sha1->digest . $pwdgen->{'salt'}, '' )
-  # 	 };
+  my $sha = Digest::SHA->new( $p->{gp}->{alg} );
+  $sha->add( $p->{pwd}->{clear}, $p->{gp}->{salt} );
+  $p->{return} =
+    {
+     clear => $p->{pwd}->{clear},
+     ssha  => sprintf('{SSHA}%s',
+		      $self->pad_base64( encode_base64( $sha->digest . $p->{gp}->{salt}, '' ) ) ),
+    };
+  $p->{return}->{stats}  = $p->{pwd}->{stats}  if $p->{pwd}->{stats};
+  $p->{return}->{status} = $p->{pwd}->{status} if $p->{pwd}->{status};
 
-  my $sha = Digest::SHA->new(1);
-  $sha->add( $pwdgen->{pwd}, $pwdgen->{salt} );
-
-  $pwdgen->{return} = {
-		       clear => $pwdgen->{pwd},
-		       ssha => '{SSHA}' . $self->pad_base64( encode_base64( $sha->digest . $pwdgen->{salt}, '' ) )
-		      };
-  # log_debug { np($pwdgen->{return}) };
-  return $pwdgen->{return};
+  # log_debug { np($p) };
+  return $p->{return};
 }
 
 sub pad_base64 {

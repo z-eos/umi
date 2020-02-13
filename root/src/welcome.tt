@@ -1,8 +1,10 @@
 [% META title = 'UMI' %] 
 
+<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Raleway" />
+
 <br>
 
-<div id="keys" class="card text-white mb-3" style="max-width: 45rem;">
+<div id="keys" class="card text-white mb-3 umi-font-raleway" style="max-width: 45rem;">
   <div class="card-header"><h3><b>Access Keys Combinations</b></h3>
     <small>
       <table class="table table-sm table-hover text-white" id="table2">

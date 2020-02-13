@@ -235,7 +235,7 @@ has_field 'person_login'
 has_field 'person_associateddomain'
   => ( type                  => 'Select',
        wrapper_attr          => { id => 'simplified', },
-       wrapper_class         => [ 'simplified', 'row', ],
+       wrapper_class         => [ qw{ simplified row show-on-simplified }, ],
        label                 => 'Domain Name',
        label_class           => [ 'col-2', 'text-right', 'font-weight-bold', 'required' ],
        empty_select          => '--- Choose Domain ---',
@@ -345,11 +345,12 @@ has_field 'account'
   => ( type                  => 'Repeatable',
        setup_for_js          => 1,
        do_wrapper            => 1,
+       element_class         => [ qw{ target-container conditional-input }, ],
        element_wrapper_class => [ qw{controls}, ],
        wrapper_attr          => { class => 'no-has-error' },
        # wrap_repeatable_element_method => \&wrap_account_elements,
-       # wrapper_class => [ qw{bg-info}, ],
-       # init_contains => { element_class => [ qw{hfh repinst bg-info}], },
+       # wrapper_class         => [ qw{ target-container conditional-input }, ],
+       # init_contains => { element_class => [ qw{hfh repinst target-container conditional-input} ], },
      );
 
 # sub wrap_account_elements {
@@ -357,7 +358,7 @@ has_field 'account'
 #   # my $output = sprintf('%s%s%s', ! $subfield ? qq{\n<div class="duplicate">} : qq{\n<div class="duplicated">},
 #   # 		       $input,
 #   # 		       qq{</div>});
-#   my $output = sprintf('%s%s%s', qq{\n<div class="bg-info">}, $input, qq{</div>});
+#   my $output = sprintf('%s%s%s', qq{\n<div class="target-container conditional-input">}, $input, qq{</div>});
 # }
 
 has_field 'account.associateddomain'
@@ -368,8 +369,6 @@ has_field 'account.associateddomain'
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', 'custom-select', ],
        options_method        => \&associateddomains,
-       element_attr          => { 'data-name' => 'associateddomain',
-				  'data-group' => 'account', },
        wrapper_class         => [ 'row' ],
        required => 0 );
 
@@ -381,8 +380,6 @@ has_field 'account.authorizedservice'
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', 'custom-select', ],
        options_method        => \&authorizedservice,
-       element_attr          => { 'data-name' => 'authorizedservice',
-				  'data-group' => 'account', },
        wrapper_class         => [ 'row' ],
        required => 0,
      );
@@ -396,21 +393,17 @@ has_field 'account.login'
        element_class         => [ 'input-sm', ],
        element_attr          => { placeholder => 'john.doe',
 				  title => 'login to be added with @domain in the end; root uid is used if not provided.',
-				  'autocomplete' => 'off',
-				  'data-name' => 'login',
-				  'data-group' => 'account', },
+				  'autocomplete' => 'off', },
        wrapper_class         => [ 'row' ],
      );
 
 has_field 'account.login_complex'
   => ( type                  => 'Checkbox',
        label                 => 'complex login (example: login @ domain)',
-       element_attr          => { title               => 'login will be added with @domain',
-				  'data-name'         => 'login_complex',
-				  'data-group'        => 'account',},
+       element_attr          => { title               => 'login will be added with @domain', },
        element_class         => [ 'form-check-input', ],
        element_wrapper_class => [ 'offset-2 col-8', 'col-md-10' ],
-       wrapper_class         => [  qw{ form-check d-none passw sshacc relation row}, ],
+       wrapper_class         => [  qw{ form-check row conditional-input on-mail on-ssh-acc}, ],
        checkbox_value        => '1',
      );
 
@@ -419,16 +412,14 @@ has_field 'account.password1'
        minlength             => 7, maxlength => 128,
        label                 => 'Password',
        label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
-       wrapper_class         => [  qw{ d-none passw sshacc
-				       dot1x-eap-tls relation row}, ],
+       wrapper_class         => [  qw{ row conditional-input on-comm-acc on-xmpp on-gitlab on-web
+				       on-mail on-ssh-acc on-dot1x-eap-tls }, ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        ne_username           => 'login',
        apply                 => [ NoSpaces, NotAllDigits, Printable, StrongPassword ],
        element_attr          => { placeholder    => 'Password',
-				  'autocomplete' => 'off',
-				  'data-name'    => 'password1',
-				  'data-group'   => 'account', },
+				  'autocomplete' => 'off', },
      );
 
 has_field 'account.password2'
@@ -436,29 +427,15 @@ has_field 'account.password2'
        minlength             => 7, maxlength => 128,
        label                 => '',
        label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
-       wrapper_class         => [  qw{ d-none passw sshacc
-				       dot1x-eap-tls relation row}, ],
+       wrapper_class         => [  qw{ row conditional-input on-comm-acc on-xmpp on-gitlab on-web
+				       on-mail on-ssh-acc on-dot1x-eap-tls }, ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        ne_username           => 'login',
        apply                 => [ NoSpaces, NotAllDigits, Printable, StrongPassword ],
        element_attr          => { placeholder    => 'Confirm Password',
-				  'autocomplete' => 'off',
-				  'data-name'    => 'password2',
-				  'data-group'   => 'account', },
+				  'autocomplete' => 'off', },
      );
-
-has_field 'account.description'
-  => ( type                  => 'TextArea',
-       label                 => 'Description',
-       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
-       element_wrapper_class => [ 'col-8', 'col-md-10' ],
-       element_class         => [ 'input-sm', ],
-       element_attr          => { placeholder    => 'Any description.',
-				  'autocomplete' => 'off',
-				  'data-group'   => 'account', },
-       cols                  => 30, rows => 1,
-       wrapper_class         => [ 'row', ], );
 
 has_field 'account.radiusgroupname'
   => ( type                  => 'Select',
@@ -467,11 +444,9 @@ has_field 'account.radiusgroupname'
        label_class           => [ 'col-2', 'text-right', 'font-weight-bold', 'atleastone' ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', 'custom-select', ],
-       element_attr          => { 'data-name'  => 'radiusgroupname',
-				  'data-group' => 'account', },
        empty_select          => '--- Choose RADIUS default Group ---',
        options_method        => \&radgroup,
-       wrapper_class         => [ qw{d-none dot1x dot1x-eap-tls relation row}, ],
+       wrapper_class         => [  qw{ row conditional-input on-dot1x-eap-tls on-dot1x-eap-md5 }, ],
      );
 
 has_field 'account.radiusprofiledn'
@@ -481,12 +456,10 @@ has_field 'account.radiusprofiledn'
        label_class           => [ 'col-2', 'text-right', 'font-weight-bold', 'atleastone', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', 'custom-select', ],
-       element_attr          => { 'autocomplete' => 'off',
-				  'data-name'    => 'radiusprofiledn',
-				  'data-group'   => 'account', },
+       element_attr          => { 'autocomplete' => 'off', },
        empty_select          => '--- Choose RADIUS Profile ---',
        options_method        => \&radprofile,
-       wrapper_class         => [  qw{d-none dot1x dot1x-eap-tls relation row}, ],
+       wrapper_class         => [  qw{ row conditional-input on-dot1x-eap-tls on-dot1x-eap-md5 }, ],
      );
 
 has_field 'account.userCertificate'
@@ -496,11 +469,7 @@ has_field 'account.userCertificate'
        label_class           => [ 'col-2', 'text-right', 'font-weight-bold', 'required', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'btn', 'btn-default', 'btn-sm', 'btn-secondary', ],
-       element_attr          => {
-				 'data-group' => 'account',
-				 'data-name'  => 'userCertificate'
-				},
-       wrapper_class         => [  qw{d-none dot1x-eap-tls relation row}, ],
+       wrapper_class         => [  qw{ row conditional-input on-dot1x-eap-tls on-dot1x-eap-md5 }, ],
      );
 
 has_field 'account.sshgid'
@@ -512,10 +481,8 @@ has_field 'account.sshgid'
        element_class         => [ 'input-sm', 'text-monospaced' ],
        element_attr          => { placeholder    => 'default is 11102 (ssh-ci)',
 				  title          => 'Group ID of the user.',
-				  'autocomplete' => 'off',
-				  'data-name'    => 'sshgid',
-				  'data-group'   => 'account', },
-       wrapper_class         => [  qw{d-none sshacc relation row}, ],
+				  'autocomplete' => 'off', },
+       wrapper_class         => [  qw{ row conditional-input on-ssh-acc }, ],
      );
 
 has_field 'account.sshhome'
@@ -527,10 +494,8 @@ has_field 'account.sshhome'
        element_class         => [ 'input-sm', 'mono' ],
        element_attr          => { placeholder    => '/nonexistent',
 				  title          => 'Home directory of the user.',
-				  'autocomplete' => 'off',
-				  'data-name'    => 'sshhome',
-				  'data-group'   => 'account', },
-       wrapper_class         => [  qw{d-none sshacc relation row}, ],
+				  'autocomplete' => 'off', },
+       wrapper_class         => [  qw{ row conditional-input on-ssh-acc }, ],
      );
 
 has_field 'account.sshshell'
@@ -542,10 +507,8 @@ has_field 'account.sshshell'
        element_class         => [ 'input-sm', 'mono' ],
        element_attr          => { placeholder    => '/bin/bash',
 				  title          => 'Shell of the user.',
-				  'autocomplete' => 'off',
-				  'data-name'    => 'sshshell',
-				  'data-group'   => 'account', },
-       wrapper_class         => [  qw{d-none sshacc relation row}, ],
+				  'autocomplete' => 'off', },
+       wrapper_class         => [  qw{ row conditional-input on-ssh-acc }, ],
      );
 
 has_field 'account.sshkey'
@@ -556,11 +519,9 @@ has_field 'account.sshkey'
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', 'text-monospaced', ],
        element_attr          => { title        => 'Paste SSH key (read sshd(8) section AUTHORIZED_KEYS FILE FORMAT for reference)',
-				  placeholder  => q{command=&quot;...&quot;, environment=&quot;NAME=value&quot;,...,from=&quot;...&quot; no-agent-forwarding,no-port-forwarding,no-pty,no-user-rc,no-x11-forwarding,permitopen=&quot;host:port&quot;,tunnel=&quot;n&quot; ssh-rsa AAA...bZN Lorem ipsum dolor sit amet potenti},
-				  'data-name'  => 'sshkey',
-				  'data-group' => 'account', },
+				  placeholder  => q{command=&quot;...&quot;, environment=&quot;NAME=value&quot;,...,from=&quot;...&quot; no-agent-forwarding,no-port-forwarding,no-pty,no-user-rc,no-x11-forwarding,permitopen=&quot;host:port&quot;,tunnel=&quot;n&quot; ssh-rsa AAA...bZN Lorem ipsum dolor sit amet potenti}, },
        cols                  => 30, rows => 4,
-       wrapper_class         => [  qw{d-none sshacc relation row}, ],
+       wrapper_class         => [  qw{ row conditional-input on-ssh-acc }, ],
      );
 
 
@@ -571,14 +532,21 @@ has_field 'account.sshkeyfile'
        label_class           => [ 'col-2', 'text-right', 'font-weight-bold', 'required', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'btn', 'btn-default', 'btn-sm', 'btn-secondary', ],
-       element_attr          => {title        => 'SSH key file (read sshd(8) section AUTHORIZED_KEYS FILE FORMAT for reference)',
-				 'data-name'  => 'sshkeyfile',
-				 'data-group' => 'account',
-				 # 'onchange' => 'global.triggerTextarea(this)',
-				},
-       wrapper_class         => [  qw{d-none sshacc relation row}, ],
+       element_attr          => {title        => 'SSH key file (read sshd(8) section AUTHORIZED_KEYS FILE FORMAT for reference)', },
+       wrapper_class         => [  qw{ row conditional-input on-ssh-acc }, ],
      );
 
+
+has_field 'account.description'
+  => ( type                  => 'TextArea',
+       label                 => 'Description',
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', ],
+       element_attr          => { placeholder    => 'Any description.',
+				  'autocomplete' => 'off', },
+       cols                  => 30, rows => 1,
+       wrapper_class         => [ 'row', ], );
 
 has_field 'account.remove'
   => ( type                  => 'RmElement',
@@ -658,9 +626,7 @@ has_field 'loginless_ovpn.associateddomain'
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', 'custom-select', ],
        options_method        => \&associateddomains,
-       element_attr          => { title        => 'FQDN of the VPN server, client is configured for',
-				  'data-name'  => 'associateddomain',
-				  'data-group' => 'loginless_ovpn', },
+       element_attr          => { title        => 'FQDN of the VPN server, client is configured for', },
        wrapper_class         => [ 'row', ],
      );
 
@@ -670,8 +636,6 @@ has_field 'loginless_ovpn.userCertificate'
        label_class           => [ 'col-2', 'text-right', 'font-weight-bold', 'required' ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'btn', 'btn-default', 'btn-sm', 'btn-secondary', ],
-       element_attr          => { 'data-name'  => 'cert',
-				  'data-group' => 'loginless_ovpn', },
        wrapper_class         => [ 'row', ],
      );
 
@@ -682,9 +646,7 @@ has_field 'loginless_ovpn.ifconfigpush'
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        element_attr          => { placeholder  => '10.0.91.1 10.0.91.2 or 10.0.97.135 10.0.97.1 or 10.13.83.192 10.0.97.1',
-				  title        => 'openvpn(8) option &#96;--ifconfig l rn&#39; (Set TUN/TAP adapter parameters.  l is the IP address of the local VPN endpoint. rn is the IP address of the remote VPN endpoint.)',
-				  'data-name'  => 'ifconfigpush',
-				  'data-group' => 'loginless_ovpn', },
+				  title        => 'openvpn(8) option &#96;--ifconfig l rn&#39; (Set TUN/TAP adapter parameters.  l is the IP address of the local VPN endpoint. rn is the IP address of the remote VPN endpoint.)', },
        wrapper_class         => [ 'row', ],
      );
 
@@ -695,9 +657,7 @@ has_field 'loginless_ovpn.iroute'
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        element_attr          => { placeholder  => '10.0.99.2 255.255.255.0',
-				  title        => 'openvpn(8) option &#96;--iroute network [netmask]&#39; (Generate an internal route to a specific client. The netmask parameter, if omitted, defaults to 255.255.255.255.)',
-				  'data-name'  => 'iroute',
-				  'data-group' => 'loginless_ovpn', },
+				  title        => 'openvpn(8) option &#96;--iroute network [netmask]&#39; (Generate an internal route to a specific client. The netmask parameter, if omitted, defaults to 255.255.255.255.)', },
        wrapper_class         => [ 'row', ],
      );
 
@@ -708,9 +668,7 @@ has_field 'loginless_ovpn.push'
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        element_attr          => { placeholder  => 'route 192.168.222.144 255.255.255.128',
-				  title        => 'openvpn(8) option &#96;--push option&#39; (Push a config file option back to the client for remote execution.)',
-				  'data-name'  => 'push',
-				  'data-group' => 'loginless_ovpn', },
+				  title        => 'openvpn(8) option &#96;--push option&#39; (Push a config file option back to the client for remote execution.)', },
        wrapper_class         => [ 'row', ],
      );
 
@@ -721,9 +679,7 @@ has_field 'loginless_ovpn.devtype'
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        element_attr          => { placeholder  => 'notebook, netbook, smartphone',
-				  title        => 'OS type (defines which address to assign: /30 for Win like and /32 for XNIX like)',
-				  'data-name'  => 'dev',
-				  'data-group' => 'loginless_ovpn', },
+				  title        => 'OS type (defines which address to assign: /30 for Win like and /32 for XNIX like)', },
        wrapper_class         => [ 'row', ],
      );
 
@@ -733,9 +689,7 @@ has_field 'loginless_ovpn.devos'
        label_class           => [ 'col-2', 'text-right', 'font-weight-bold', 'required', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
-       element_attr          => { placeholder  => 'xNIX, MacOS, Android, Windows',
-				  'data-name'  => 'devos',
-				  'data-group' => 'loginless_ovpn', },
+       element_attr          => { placeholder  => 'xNIX, MacOS, Android, Windows', },
        wrapper_class         => [ 'row', ],
      );
 
@@ -746,9 +700,7 @@ has_field 'loginless_ovpn.config'
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        element_attr          => { placeholder  => 'path/to/some/additional/configfile.conf',
-				  title        => 'openvpn(8) option &#96;--config&#39; (Load additional config options from file where each line corresponds to one command line option, but with the leading &#39;--&#39; removed.)',
-				  'data-name'  => 'config',
-				  'data-group' => 'loginless_ovpn', },
+				  title        => 'openvpn(8) option &#96;--config&#39; (Load additional config options from file where each line corresponds to one command line option, but with the leading &#39;--&#39; removed.)', },
        wrapper_class         => [ 'row', ],
      );
 
@@ -758,9 +710,7 @@ has_field 'loginless_ovpn.devmake'
        label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
-       element_attr          => { placeholder  => 'HP, Dell, Asus, Lenovo',
-				  'data-name'  => 'devmake',
-				  'data-group' => 'loginless_ovpn', },
+       element_attr          => { placeholder  => 'HP, Dell, Asus, Lenovo', },
        wrapper_class         => [ 'row', ],
      );
 
@@ -770,9 +720,7 @@ has_field 'loginless_ovpn.devmodel'
        label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
-       element_attr          => { placeholder  => 'Pavilion dm1',
-				  'data-name'  => 'devmodel',
-				  'data-group' => 'loginless_ovpn', },
+       element_attr          => { placeholder  => 'Pavilion dm1', },
        wrapper_class         => [ 'row', ],
      );
 
@@ -782,9 +730,7 @@ has_field 'loginless_ovpn.devosver'
        label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
-       element_attr          => { placeholder  => '1.2.3',
-				  'data-name'  => 'devosv',
-				  'data-group' => 'loginless_ovpn', },
+       element_attr          => { placeholder  => '1.2.3', },
        wrapper_class         => [ 'row', ],
      );
 
@@ -794,9 +740,8 @@ has_field 'loginless_ovpn.description'
        label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
-       element_attr          => { placeholder    => 'Any description.',
-				  'autocomplete' => 'off',
-				  'data-group'   => 'loginless_ovpn', },
+       element_attr          => { placeholder  => 'Any description.',
+				  autocomplete => 'off', },
        cols                  => 30, rows => 1,
        wrapper_class         => [ 'row', ],
      );
