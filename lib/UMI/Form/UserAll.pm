@@ -75,7 +75,7 @@ has_field 'person_exp'
   <label class="col-2 text-right font-weight-bold control-label atleastone" title="Object Expiration">
     Exp.
   </label>
-  <div class="col-3">
+  <div class="col-4">
     <div class="">
       <div class="input-group date" id="person_exp" data-target-input="nearest">
         <input name="person_exp" type="text" class="form-control datetimepicker-input" data-target="#person_exp"/>

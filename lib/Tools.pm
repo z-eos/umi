@@ -411,23 +411,28 @@ sub pwdgen {
 	     salt          => $args->{gp}->{salt}          // UMI->config->{pwd}->{gp}->{salt},
 	     pronounceable => $args->{gp}->{pronounceable} // UMI->config->{pwd}->{gp}->{pronounceable},
 	     },
-     xk  => $args->{xk}            // undef,
+     xk      => $args->{xk}        // undef,
      pwd_num => $args->{pwd_num}   // 1,
      pwd_alg => $args->{pwd_alg}   // undef,
     };
 
+  $p->{pwd_alg} = UMI->config->{pwd}->{xk}->{preset_default}
+    if ! defined $p->{pwd_alg} && ! defined $p->{pwd} && ! defined $p->{xk};
+  
   $p->{gp}->{len} = UMI->config->{pwd}->{gp}->{lenp}
     if $p->{gp}->{pronounceable} && $p->{gp}->{len} > UMI->config->{pwd}->{gp}->{lenp};
 
-  if ( $p->{pwd_alg} ne 'CLASSIC' && defined $p->{xk} ) {
+  if ( defined $p->{pwd_alg} && $p->{pwd_alg} ne 'CLASSIC' ) {
 
     Crypt::HSXKPasswd->module_config('LOG_ERRORS', 1);
     Crypt::HSXKPasswd->module_config('DEBUG', 1);
     my $default_config = Crypt::HSXKPasswd->default_config();
     my $c = Crypt::HSXKPasswd->preset_config( $p->{pwd_alg} );
-    log_debug { 'PRESET ' . $p->{pwd_alg} . " ORIGINAL: \n" . np($c) };
-    $c->{$_} = $p->{xk}->{$_} foreach (keys %{$p->{xk}});
-    log_debug { 'PRESET ' . $p->{pwd_alg} . " MODIFIED: \n" . np($c) };
+    # log_debug { 'PRESET ' . $p->{pwd_alg} . " ORIGINAL: \n" . np($c) };
+    if ( defined $p->{xk} ) {
+      $c->{$_} = $p->{xk}->{$_} foreach (keys %{$p->{xk}});
+    }
+    # log_debug { 'PRESET ' . $p->{pwd_alg} . " MODIFIED: \n" . np($c) };
     my $xk = Crypt::HSXKPasswd->new( config => $c );
     $p->{pwd}->{clear}    = $xk->password( $p->{pwd_num} );
     %{$p->{pwd}->{stats}} = $xk->stats();
