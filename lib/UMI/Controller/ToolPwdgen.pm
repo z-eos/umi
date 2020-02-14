@@ -148,7 +148,7 @@ sub index :Path :Args(0) {
     $final_message->{success} .=
       sprintf('<div class="col-12">
   <div class="text-muted text-monospace" aria-label="Statistics" aria-describedby="button-addon2">
-    <i class="fas fa-info-circle text-success"></i>
+    <i class="fas fa-info-circle text-%s"></i>
     Entropy: between <b class="text-%s">%s</b> bits & <b class="text-%s">%s</b> bits blind &
     <b class="text-%s">%s</b> bits with full knowledge
     <small><em>(suggest keeping blind entropy above 78bits & seen above 52bits)</em></small>
@@ -162,6 +162,9 @@ sub index :Path :Args(0) {
     <div class="card card-body"><small><pre class="text-muted text-monospace">%s</pre></small></div>
   </div>
 </div>',
+	      $pwd->{stats}->{password_entropy_blind_min} < 78 ||
+	      $pwd->{stats}->{password_entropy_blind_max} < 78 ||
+	      $pwd->{stats}->{password_entropy_seen}      < 52 ? 'danger' : 'success',
 	      $pwd->{stats}->{password_entropy_blind_min} > 78 ? 'success' : 'danger',
 	      $pwd->{stats}->{password_entropy_blind_min},
 	      $pwd->{stats}->{password_entropy_blind_max} > 78 ? 'success' : 'danger',

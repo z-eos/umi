@@ -1199,7 +1199,7 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
 	$return->{success} .=
 	  sprintf('</td><tr><td colspan="2"><div class="py-3 col-12">
   <div class="text-muted text-monospace" aria-label="Statistics" aria-describedby="button-addon2">
-    <i class="fas fa-info-circle text-success"></i>
+    <i class="fas fa-info-circle text-%s"></i>
     Entropy: between <b class="text-%s">%s</b> bits & <b class="text-%s">%s</b> bits blind &
     <b class="text-%s">%s</b> bits with full knowledge
     <small><em>(suggest keeping blind entropy above 78bits & seen above 52bits)</em></small>
@@ -1212,7 +1212,9 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
   <div class="collapse" id="pwdStatus">
     <div class="card card-body"><small><pre class="text-muted text-monospace">%s</pre></small></div>
   </div>',
-
+		  $arg->{password_gen}->{stats}->{password_entropy_blind_min} < 78 ||
+		  $arg->{password_gen}->{stats}->{password_entropy_blind_max} < 78 ||
+		  $arg->{password_gen}->{stats}->{password_entropy_seen}      < 52 ? 'danger' : 'success',
 		  $arg->{password_gen}->{stats}->{password_entropy_blind_min} > 78 ? 'success' : 'danger',
 		  $arg->{password_gen}->{stats}->{password_entropy_blind_min},
 		  $arg->{password_gen}->{stats}->{password_entropy_blind_max} > 78 ? 'success' : 'danger',
