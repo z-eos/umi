@@ -1136,7 +1136,7 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
 	$arg->{password_gen} = $self->pwdgen({ pwd => $arg->{password_init} });
       }
 
-      log_debug { np($arg) };
+      # log_debug { np($arg) };
 
       if ( ! $arg->{checkonly} ) {
 	$pwd = $arg->{mod_pwd_dn} =~ /.*authorizedService=dot1x-eap-md5.*/ ? $arg->{password_gen}->{clear} : $arg->{password_gen}->{ssha};
@@ -1199,6 +1199,7 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
 	$return->{success} .=
 	  sprintf('</td><tr><td colspan="2"><div class="py-3 col-12">
   <div class="text-muted text-monospace" aria-label="Statistics" aria-describedby="button-addon2">
+    <i class="fas fa-info-circle text-success"></i>
     Entropy: between <b class="text-%s">%s</b> bits & <b class="text-%s">%s</b> bits blind &
     <b class="text-%s">%s</b> bits with full knowledge
     <small><em>(suggest keeping blind entropy above 78bits & seen above 52bits)</em></small>

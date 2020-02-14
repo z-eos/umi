@@ -1,84 +1,36 @@
 [% META title = 'Password Modify' %]
 
 <style>
- /* ---------------------------------------------------
+ /* --- ALG ----------------------------------------------------- */
 
-    conditional un/hiding for elements
-
-    --------------------------------------------------- */
-
- .alg.none        .calg {
-   display: none;
- }
- .alg.appleid     .calg:not(.on-appleid) {
-   display: none;
- }
- .alg.default     .calg:not(.on-default) {
-   display: none;
- }
- .alg.ntlm        .calg:not(.on-ntlm) {
-   display: none;
- }
- .alg.securityq   .calg:not(.on-securityq) {
-   display: none;
- }
- .alg.web16       .calg:not(.on-web16) {
-   display: none;
- }
- .alg.web32       .calg:not(.on-web32) {
-   display: none;
- }
- .alg.wifi        .calg:not(.on-wifi) {
-   display: none;
- }
- .alg.xkcd        .calg:not(.on-xkcd) {
-   display: none;
- }
- .alg.classic     .calg:not(.on-classic) {
-   display: none;
- }
- .alg.userdefined .calg:not(.on-userdefined) {
-   display: none;
- }
+ .alg.none        .calg                      { display: none; }
+ .alg.appleid     .calg:not(.on-appleid)     { display: none; }
+ .alg.default     .calg:not(.on-default)     { display: none; }
+ .alg.ntlm        .calg:not(.on-ntlm)        { display: none; }
+ .alg.securityq   .calg:not(.on-securityq)   { display: none; }
+ .alg.web16       .calg:not(.on-web16)       { display: none; }
+ .alg.web32       .calg:not(.on-web32)       { display: none; }
+ .alg.wifi        .calg:not(.on-wifi)        { display: none; }
+ .alg.xkcd        .calg:not(.on-xkcd)        { display: none; }
+ .alg.classic     .calg:not(.on-classic)     { display: none; }
+ .alg.userdefined .calg:not(.on-userdefined) { display: none; }
  
  /* --- PADDING ------------------------------------------------- */
- .pad.none        .cpad {
-   display: none;
- }
- .pad.fixed       .cpad:not(.on-padd-fixed) {
-   display: none;
- }
- .pad.adaptive    .cpad:not(.on-padd-adaptive) {
-   display: none;
- }
- .pad.char        .cpad:not(.on-padd-char) {
-   display: none;
- }
+ .pad.none        .cpad                        { display: none; }
+ .pad.fixed       .cpad:not(.on-padd-fixed)    { display: none; }
+ .pad.adaptive    .cpad:not(.on-padd-adaptive) { display: none; }
+ .pad.char        .cpad:not(.on-padd-char)     { display: none; }
 
  /* --- PADDING CHARACTER --------------------------------------- */
- .pch.none        .cpch {
-   display: none;
- }
- .pch.char        .cpch:not(.on-padd-char-char) {
-   display: none;
- }
- .pch.random      .cpch:not(.on-padd-char-random) {
-   display: none;
- }
- .pch.separator   .cpch:not(.on-padd-char-separator) {
-   display: none;
- }
+ .pch.none        .cpch                              { display: none; }
+ .pch.char        .cpch:not(.on-padd-char-char)      { display: none; }
+ .pch.random      .cpch:not(.on-padd-char-random)    { display: none; }
+ .pch.separator   .cpch:not(.on-padd-char-separator) { display: none; }
 
  /* --- SEPARATOR ----------------------------------------------- */
- .sep.none        .csep {
-   display: none;
- }
- .sep.char        .csep:not(.on-sep-char) {
-   display: none;
- }
- .sep.random      .csep:not(.on-sep-random) {
-   display: none;
- }'
+ .sep.none        .csep                     { display: none; }
+ .sep.char        .csep:not(.on-sep-char)   { display: none; }
+ .sep.random      .csep:not(.on-sep-random) { display: none; }
 </style>
 
 <[% site.pageheading %] class="[% site.pageheadingclass %]">

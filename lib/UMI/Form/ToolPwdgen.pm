@@ -28,44 +28,8 @@ has_field 'pronounceable'
 				     disabled-if-pwddefault ) ],
       element_attr          => { title => 'Completely random word if unchecked, othervise max lengh is ' .
 				 UMI->config->{pwd}->{lenp} },
-      wrapper_class         => [ qw( row deactivate-top mt-5 conditional-input on-classic ), ],
+      wrapper_class         => [ qw( row deactivate-top mt-5 calg on-classic ), ],
      );
-
-# has_field 'pwd_len'
-#   => ( type          => 'Display',
-#        html          => sprintf('
-# <div class="form-group row deactivate-top">
-#   <label class="col-2 text-right font-weight-bold control-label" title="" for="pwd_len">
-#     Pwd length: <span id="pwd_len_size" class="text-primary"></span>
-#   </label>
-#   <div class="col-9">
-#     <input id="pwd_len" name="pwd_len" type="range" class="custom-range" min="%s" max="%s" step="1" value="%s" title="min: %s; default common: %s; max common: %s; max pronouceable: %s"/>
-#   </div>
-#   <div class="col-1 font-weight-bold">
-#     <span>%s</span>
-#   </div>
-# </div>
-# <script>
-#  $(function () {
-#   var slider = document.getElementById("pwd_len");
-#   var output = document.getElementById("pwd_len_size");
-#   output.innerHTML = slider.value;
-
-#   slider.oninput = function() {
-#     output.innerHTML = this.value;
-#   }
-#  });
-# </script>
-# ',
-# 				UMI->config->{pwd}->{len_min},
-# 				UMI->config->{pwd}->{len_max},
-# 				UMI->config->{pwd}->{len},
-# 				UMI->config->{pwd}->{len_min},
-# 				UMI->config->{pwd}->{len},
-# 				UMI->config->{pwd}->{len_max},
-# 				UMI->config->{pwd}->{lenp},
-# 				UMI->config->{pwd}->{len_max}),
-#      );
 
 has_field 'pwd_len'
   => (
@@ -88,38 +52,8 @@ has_field 'pwd_len'
 					       UMI->config->{pwd}->{len},
 					       UMI->config->{pwd}->{len_max},
 					       UMI->config->{pwd}->{lenp} ), },
-      wrapper_class         => [ qw( row deactivate-top  conditional-input on-classic ), ],
+      wrapper_class         => [ qw( row deactivate-top  calg on-classic ), ],
      );
-
-# has_field 'pwd_cap'
-#   => ( type          => 'Display',
-#        html          => sprintf('
-# <div class="form-group row deactivate-top">
-#   <label class="col-2 text-right font-weight-bold control-label" title="" for="pwd_cap">
-#     Capital Chars: <span id="pwd_cap_size" class="text-primary"></span>
-#   </label>
-#   <div class="col-9">
-#     <input id="pwd_cap" name="pwd_cap" type="range" class="custom-range" min="0" max="%s" step="1" value="0"/>
-#   </div>
-#   <div class="col-1 font-weight-bold">
-#     <span>%s</span>
-#   </div>
-# </div>
-# <script>
-#  $(function () {
-#   var slider = document.getElementById("pwd_cap");
-#   var output = document.getElementById("pwd_cap_size");
-#   output.innerHTML = slider.value;
-
-#   slider.oninput = function() {
-#     output.innerHTML = this.value;
-#   }
-#  });
-# </script>
-# ',
-# 			       UMI->config->{pwd}->{cap},
-# 			       UMI->config->{pwd}->{cap}),
-#      );
 
 has_field 'pwd_cap'
   => (
@@ -130,38 +64,8 @@ has_field 'pwd_cap'
       element_wrapper_class => [ 'input-sm', 'col-10', ],
       element_attr          => { placeholder => 'max ' . UMI->config->{pwd}->{cap},
 				 title       => 'up to this many characters will be upper case', },
-      wrapper_class         => [ qw( row deactivate-top  conditional-input on-classic ), ],
+      wrapper_class         => [ qw( row deactivate-top  calg on-classic ), ],
      );
-
-# has_field 'pwd_num'
-#   => ( type          => 'Display',
-#        html          => sprintf('
-# <div class="form-group row deactivate-top">
-#   <label class="col-2 text-right font-weight-bold control-label" title="" for="pwd_num">
-#     Num And Spec. Chars: <span id="pwd_num_size" class="text-primary"></span>
-#   </label>
-#   <div class="col-9">
-#     <input id="pwd_num" name="pwd_num" type="range" class="custom-range" min="0" max="%s" step="1" value="0"/>
-#   </div>
-#   <div class="col-1 font-weight-bold">
-#     <span>%s</span>
-#   </div>
-# </div>
-# <script>
-#  $(function () {
-#   var slider = document.getElementById("pwd_num");
-#   var output = document.getElementById("pwd_num_size");
-#   output.innerHTML = slider.value;
-
-#   slider.oninput = function() {
-#     output.innerHTML = this.value;
-#   }
-#  });
-# </script>
-# ',
-# 			       UMI->config->{pwd}->{num},
-# 			       UMI->config->{pwd}->{num}),
-#      );
 
 has_field 'pwd_num'
   => (
@@ -173,7 +77,7 @@ has_field 'pwd_num'
       element_attr          => { placeholder => 'max ' . UMI->config->{pwd}->{num},
 				 title       => 'up to that many, numbers and special characters will occur in the password',
 				 'data-mode' => "pwdpronounceable", },
-      wrapper_class         => [ qw( row deactivate-top  conditional-input on-classic ), ],
+      wrapper_class         => [ qw( row deactivate-top  calg on-classic ), ],
      );
 
 has_field 'pwd_alg'
@@ -293,12 +197,12 @@ has_field 'xk_separator_character_char'
        label                 => '',
        # label_class           => [ qw(col-2 text-right font-weight-bold my-1) ],
        element_class         => [ qw( my-1 text-center text-monospace font-weight-bold ) ],
-       element_wrapper_class => [ 'input-sm col-4', ],
+       element_wrapper_class => [ 'input-sm col-12', ],
        element_attr          => { title => q{Separator Character (one of): !&#34;#$%&'()*+,-./:;&#60;=&#62;?@[\]^_{|}~}, },
        minlength             => 1,
        maxlength             => 1,
        # do_wrapper            => 0,
-       wrapper_class         => [ qw(col-6 row form-group cond-input-sep on-sep-char), ],
+       wrapper_class         => [ qw(col-2 row form-group csep on-sep-char), ],
      );
 
 has_field 'xk_separator_character_random'
@@ -307,9 +211,9 @@ has_field 'xk_separator_character_random'
        label                 => '',
        # label_class           => [ qw(col-2 text-right font-weight-bold my-1) ],
        element_class         => [ qw( my-1 text-center text-monospace font-weight-bold ) ],
-       element_wrapper_class => [ 'input-sm col-10', ],
+       element_wrapper_class => [ 'input-sm col-12', ],
        element_attr          => { title => q{Separator Character Alphabet: !&#34;#$%&'()*+,-./:;&#60;=&#62;?@[\]^_{|}~}, },
-       wrapper_class         => [ qw(col-6 row form-group cond-input-sep on-sep-random), ],
+       wrapper_class         => [ qw(col-5 row form-group csep on-sep-random), ],
      );
 
 has_field 'xk_padding_digits_before'
@@ -362,8 +266,8 @@ sub xk_padding_type_options {
 has_field 'xk_padding_characters_before'
   => ( type                  => 'Select',
        label                 => 'Symbols left/right',
-       label_class           => [ qw(col-3 col-md-2 text-right font-weight-bold my-1) ],
-       element_class         => [ qw(col-2 col-md-1 custom-select my-1 input-sm mr-3) ],
+       label_class           => [ qw(offset-md-1 col-3 col-md-3 text-right font-weight-bold my-1) ],
+       element_class         => [ qw(col-2 col-md-1 custom-select input-sm my-1 ml-4 mr-3) ],
        element_attr          => { title => 'Padding Symbols From the Left', },
        do_wrapper            => 0,
        options_method        => \&xk_padding_characters_before_options, );
@@ -394,21 +298,21 @@ sub xk_padding_characters_after_options {
 has_field 'xk_pad_to_length'
   => ( type                  => 'Integer',
        label                 => 'To Length',
-       label_class           => [ qw(col-2 col-md-2 text-right font-weight-bold my-1) ],
+       label_class           => [ qw(offset-md-1 col-3 col-md-3 text-right font-weight-bold my-1) ],
        element_class         => [ qw( my-1 text-center text-monospace font-weight-bold ) ],
        element_wrapper_class => [ 'input-sm col-2', ],
        element_attr          => { title => 'Padding To Length', min => 8, max => 999,},
        minlength             => 1,
        maxlength             => 3,
        size                  => 3,
-       wrapper_class         => [ qw(row col-12 form-group cond-input-padd on-padd-adaptive)],
+       wrapper_class         => [ qw(row col-12 form-group cpad on-padd-adaptive)],
        # do_wrapper            => 0,
      );
 
 has_field 'xk_padding_character'
   => ( type                  => 'Select',
        label                 => 'Padding Character',
-       label_class           => [ qw(col-2 text-right font-weight-bold my-1) ],
+       label_class           => [ qw(offset-md-1 col-3 text-right font-weight-bold my-1) ],
        element_class         => [ qw(col-2 custom-select my-1 input-sm mx-4) ],
        # element_wrapper_class => [ 'col-12', ],
        element_attr          => { title => 'Separator', },
@@ -427,7 +331,7 @@ has_field 'xk_padding_character_separator'
        element_attr          => { title => 'Padding Character', },
        minlength             => 1,
        maxlength             => 1,
-       wrapper_class         => [ qw(col-6 row form-group cond-input-padd-char on-padd-char-char)],
+       wrapper_class         => [ qw(col-6 row form-group cpch on-padd-char-char)],
      );
 
 has_field 'xk_padding_character_random'
@@ -436,7 +340,7 @@ has_field 'xk_padding_character_random'
        element_class         => [ qw( col my-1 text-center text-monospace font-weight-bold input-sm ) ],
        element_wrapper_class => [ qw(col pl-0), ],
        element_attr          => { title => q{Padding Character Alphabet: !&#34;#$%&'()*+,-./:;&#60;=&#62;?@[\]^_{|}~}, },
-       wrapper_class         => [ qw(col-6 row form-group cond-input-padd-char on-padd-char-random)],
+       wrapper_class         => [ qw(col-5 row form-group cpch on-padd-char-random)],
      );
 
 
@@ -491,7 +395,7 @@ sub validate {
 
 
   $f = $self->field('xk_separator_character_random');
-  if ( defined $f->value && $f->value ne '' ) {
+  if ( defined $f->value && length($f->value) > 0 ) {
     @arr = grep { $_ ne ""} map { $_ if $_ =~ m/[^[:punct:]]/ } @{[ split(/ /, $f->value) ]};
     $str = join ', ', @arr;
 
@@ -510,9 +414,15 @@ sub validate {
   }
 
   $f = $self->field('xk_separator_character_char');
-  log_debug { '-->' . np($f) . '<--' };
+  # log_debug { '-->' . np($f) . '<--' };
   $f->add_error('<div class="text-danger">Separator character is required.</div>')
     if defined $f->value && $f->value eq 'CHAR' && length($f->value) != 1;
+
+  $f = $self->field('xk_separator_character_random');
+  # log_debug { '-->' . np($f) . '<--' };
+  $f->add_error('<div class="text-danger">Separator alphabet is required.</div>')
+    if $self->field('xk_separator_character')->value eq 'RANDOM' &&
+    ( ! defined $f->value && length($f->value) < 1 );
 
   $f = $self->field('xk_separator_character_char');
   $f->add_error(sprintf('<div class="text-danger">Wrong separator character: %s</div>',$f->value))

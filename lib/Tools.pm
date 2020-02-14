@@ -425,7 +425,9 @@ sub pwdgen {
     Crypt::HSXKPasswd->module_config('DEBUG', 1);
     my $default_config = Crypt::HSXKPasswd->default_config();
     my $c = Crypt::HSXKPasswd->preset_config( $p->{pwd_alg} );
+    log_debug { "PRESET ORIGINAL: \n" . np($c) };
     $c->{$_} = $p->{xk}->{$_} foreach (keys %{$p->{xk}});
+    log_debug { "PRESET MODIFIED: \n" . np($c) };
     my $xk = Crypt::HSXKPasswd->new( config => $c );
     $p->{pwd}->{clear}    = $xk->password( $p->{pwd_num} );
     %{$p->{pwd}->{stats}} = $xk->stats();

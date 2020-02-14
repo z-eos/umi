@@ -19,19 +19,6 @@ sub build_form_element_class { [ 'form-horizontal formajaxer' ] }
 has_field 'ldap_modify_password' => ( type => 'Hidden', );
 
 has_field 'checkonly' => ( type => 'Hidden', value => 1 );
-# has_field 'checkonly'
-#   => (
-#       type                  => 'Checkbox',
-#       label                 => 'Check Only',
-#       element_wrapper_class => [ 'offset-md-2', 'col-10', ],
-#       element_class         => [ qw( disabler-checkbox
-# 				     disableable
-# 				     disabled-if-pwddefault
-# 				     disabled-if-pwdpronounceable ), ],
-#       element_attr          => { title => 'Check password against current one.',
-# 				 'data-mode' => "pwdcheckonly", },
-#       wrapper_class         => [ 'row', 'deactivate-bottom', ],
-#      );
 
 has_field 'password_init'
   => ( type                  => 'Password',
@@ -117,39 +104,6 @@ has_field 'pwd_len'
 				UMI->config->{pwd}->{len_max}),
      );
 
-# has_field 'pronounceable'
-#   => (
-#       type                  => 'Checkbox',
-#       label                 => 'Pronounceable',
-#       element_wrapper_class => [ 'offset-md-2', 'col-10', ],
-#       element_class         => [ qw( disabler-checkbox
-# 				     disableable
-# 				     disabled-if-pwdcheckonly
-# 				     disabled-if-pwddefault ) ],
-#       element_attr          => { title => 'Completely random word if unchecked, othervise max lengh is ' .
-# 				 UMI->config->{pwd}->{lenp},
-# 				 'data-mode' => "pwdpronounceable", },
-#       wrapper_class         => [ 'row', 'deactivate-top', ],
-#      );
-
-# has_field 'pwd_len'
-#   => (
-#       type                  => 'Integer',
-#       apply                 => [ NoSpaces, PositiveNum ],
-#       label                 => 'Password Length',
-#       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
-#       element_wrapper_class => [ 'input-sm', 'col-10', ],
-#       element_class         => [ qw( disabler-input
-# 				     disableable
-# 				     disabled-if-pwdcheckonly
-# 				     disabled-if-pwddefault ) ],
-#       element_attr          => { placeholder => 'max ' . UMI->config->{pwd}->{len} .
-# 				 ' for completely random and max ' .
-# 				 UMI->config->{pwd}->{lenp} . ' for pronounceable',
-# 				 'data-mode' => "pwdpronounceable", },
-#       wrapper_class         => [ 'row', 'deactivate-top', ],
-#      );
-
 has_field 'pwd_cap'
   => ( type          => 'Display',
        html          => sprintf('
@@ -180,23 +134,6 @@ has_field 'pwd_cap'
 			       UMI->config->{pwd}->{cap}),
      );
 
-# has_field 'pwd_cap'
-#   => (
-#       type                  => 'Integer',
-#       apply                 => [ NoSpaces, PositiveNum ],
-#       label                 => 'Capital Characters',
-#       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
-#       element_wrapper_class => [ 'input-sm', 'col-10', ],
-#       element_class         => [ qw( disabler-input
-# 				     disableable
-# 				     disabled-if-pwdcheckonly
-# 				     disabled-if-pwddefault ) ],
-#       element_attr          => { placeholder => 'max ' . UMI->config->{pwd}->{cap},
-# 				 title       => 'up to this many characters will be upper case',
-# 				 'data-mode' => "pwdpronounceable", },
-#       wrapper_class         => [ 'row', 'deactivate-top', ],
-#      );
-
 has_field 'pwd_num'
   => ( type          => 'Display',
        html          => sprintf('
@@ -226,23 +163,6 @@ has_field 'pwd_num'
 			       UMI->config->{pwd}->{num},
 			       UMI->config->{pwd}->{num}),
      );
-
-# has_field 'pwd_num'
-#   => (
-#       type                  => 'Integer',
-#       apply                 => [ NoSpaces, PositiveNum ],
-#       label                 => 'Numbers And Spec. Characters',
-#       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
-#       element_wrapper_class => [ 'input-sm', 'col-10', ],
-#       element_class         => [ qw( disabler-input
-# 				     disableable
-# 				     disabled-if-pwdcheckonly
-# 				     disabled-if-pwddefault ) ],
-#       element_attr          => { placeholder => 'max ' . UMI->config->{pwd}->{num},
-# 				 title       => 'up to that many, numbers and special characters will occur in the password',
-# 				 'data-mode' => "pwdpronounceable", },
-#       wrapper_class         => [ 'row', 'deactivate-top', ],
-#      );
 
 has_field 'pwd_alg'
   => ( type                  => 'Select',

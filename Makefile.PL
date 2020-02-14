@@ -35,12 +35,14 @@ requires 'Compress::LZ4';
 requires 'Crypt::GeneratePassword';
 requires 'Crypt::HSXKPasswd';
 requires 'Crypt::RSA';
+requires 'Data::Entropy';
 requires 'Data::Printer';
 # ??? # requires 'DateTime::Format::Duration';
 requires 'Digest::SHA';
 requires 'GD::Barcode::QRcode';
 requires 'Lingua::Translit';
 # ??? # requires 'MikroTik::API';
+requires 'Math::Random::Secure';
 requires 'MIME::Base64';
 requires 'Net::CIDR::Set'
 requires 'Net::LDAP';
