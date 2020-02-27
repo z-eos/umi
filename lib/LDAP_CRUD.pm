@@ -12,6 +12,7 @@ use POSIX qw(strftime);
 use MIME::Base64;
 use MIME::QuotedPrint;
 use List::MoreUtils ':all';
+use Net::CIDR::Set;
 
 BEGIN { with 'Tools'; }
 
@@ -2709,14 +2710,17 @@ sub ipam_used {
 
 =head2 ipa
 
-method to retieve IP addresses used
+method to retieve IP addresses used and unused
+
+if option naddr is passed, then unused addresses are returned (naddr
+is expected to be first 3 bytes of one single /24 network)
 
 =cut
 
 sub ipa {
   my ( $self, $args ) = @_;
   my $arg = { svc    => $args->{svc}    // 'ovpn',
-	      netdn  => $args->{netdn}  // '',
+	      naddr  => $args->{naddr}  // '',
 	      fqdn   => $args->{fqdn}   // '*',
 	      base   => $args->{base}   // $self->{cfg}->{base}->{ovpn},,
 	      filter => $args->{filter} // '(&(objectClass=umiOvpnCfg)(cn=*))',
@@ -2729,7 +2733,6 @@ sub ipa {
 
   my ( $key, $val, $k, $v, $l, $r, $tmp, $entry_svc, $entry_dhcp, $entry_ovpn, $ipspace, $ip_used );
 
-  use Net::CIDR::Set;
   my $ipa = Net::CIDR::Set->new;
 
   my $mesg_ovpn = $self->search({ base      => $self->{cfg}->{base}->{db},
@@ -2793,6 +2796,24 @@ sub ipa {
   }
 
   # log_debug { np(@{[$ipa->as_address_array]}) };
+
+  # log_debug { np($arg) };
+  if ( length($arg->{naddr}) > 0 ) {
+    my $re_net3b = $self->{a}->{re}->{net3b};
+    my $net_sufix;
+    if ( $arg->{naddr} =~ /$self->{a}->{re}->{net3b}/ ) {
+      $net_sufix = '.0/24';
+    } elsif ( $arg->{naddr} =~ /$self->{a}->{re}->{net2b}/ ) {
+      $net_sufix = '.0.0/16';
+    }
+    # log_debug { $arg->{naddr} . ' - ' . $net_sufix };
+    my $ipa_this = Net::CIDR::Set->new;
+    $ipa_this->add($arg->{naddr} . $net_sufix);
+    my $xset = $ipa_this->diff($ipa);
+    # log_debug { np(@{[$xset->as_address_array]}) };
+    $ipa = $xset;
+  }
+
   my $ipa_tree = Noder->new();
   foreach ( @{[ $ipa->as_address_array ]} ) {
     $tmp = join(',', reverse split(/\./, $_));
@@ -2804,8 +2825,10 @@ sub ipa {
   # log_debug { np($as_str) };
   my $as_hash = $ipa_tree->as_json_ipa(1);
   # log_debug { np($as_hash) };
-  $return->{ipa} = $as_hash;
-  return $as_hash;
+  $return->{ipa} = length($arg->{naddr}) > 0 ? $as_hash->{children}->[0]->{children}->[0]->{children}->[0] : $as_hash;
+  $return->{ipa} = {} if ! defined $return->{ipa};
+  log_debug { np( $return->{ipa} ) };
+  return $return->{ipa};
 }
 
 

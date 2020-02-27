@@ -2,14 +2,16 @@
 Vue.component('ipam-tree-item', {
     template: '#ipam-template',
     props: {
-	ipaitem: Object
+	ipaitem: Object,
+	faddr: Object
     },
     data: function () {
-	return { isOpen: this.ipaitem.isOpen }
+	return { isOpen: this.ipaitem && this.ipaitem.isOpen,
+	         isOpenFaddr: false }
     },
     computed: {
 	isIpaFolder: function () {
-	    return this.ipaitem.children && this.ipaitem.children.length
+	    return this.ipaitem && this.ipaitem.children && this.ipaitem.children.length
 	}
     },
     methods: {
@@ -39,25 +41,48 @@ Vue.component('ipam-tree-item', {
 	},
 	showIpaItem: function (scope) {
 	    // console.log(this.ipaitem.dn);
-	    var url =
-		'/searchby?ldapsearch_filter=|(dhcpStatements=fixed-address ' + this.ipaitem.dn
-		+ '*)(umiOvpnCfgIfconfigPush=' + this.ipaitem.dn
-		+ '*)(umiOvpnCfgIroute=' + this.ipaitem.dn
-		+ '*)(ipHostNumber=' + this.ipaitem.dn + ')&ldapsearch_scope=';
-	    
-	    url = scope ? url + 'base' : url + 'sub';
+	    var url;
+	    var re    = /^(?!0)(?!.*\.$)((1?\d?\d|25[0-5]|2[0-4]\d)(\.|$)){3}$/;
+	    var _this = this;
 
-	    // console.log(url)
-	    // console.log(encodeURIComponent(url))
-	    
-	    $.ajax({
-		url: url,
-		success: function (html) {
-		    $('#workingfield').html(html);
-		    handleResponce();
-		}
-	    });
-	    // console.log('showItem scope:', scope);
+	    if ( !re.test(this.ipaitem.dn) ) {
+		url =
+		    '/searchby?ldapsearch_filter=|'  +
+		    '(dhcpStatements=fixed-address ' + this.ipaitem.dn + '*)' +
+		    '(umiOvpnCfgIfconfigPush='       + this.ipaitem.dn + '*)' +
+		    '(umiOvpnCfgIroute='             + this.ipaitem.dn + '*)' +
+		    '(ipHostNumber='                 + this.ipaitem.dn +  ')' +
+		    '&ldapsearch_scope=';	    
+		url = scope ? url + 'base' : url + 'sub';
+		
+		$.ajax({
+		    url: url,
+		    success: function (html) {
+			$('#workingfield').html(html);
+			handleResponce();
+		    }
+		});
+	    } else {
+		url = '/ldap_tree/ipa?naddr=' + this.ipaitem.dn;
+		$.ajax({
+		    url: url,
+		    success: function(faddr) {
+			if (typeof faddr === 'string') {
+			    // console.log('faddr is string')
+			    faddr = JSON.parse(faddr)
+			} else if (typeof faddr === 'object') {
+			    // console.log('faddr is object')
+			    faddr = faddr.json_tree
+			} else {
+			    console.warn("Data has unusable format - ", typeof faddr)
+			    return
+			}
+			sortIpaRecursively(faddr);
+			_this.faddr = faddr;
+			// console.log(faddr)
+		    }
+		});
+	    }
 	},
 	resolveThis: function () {
 	    var item = this.ipaitem;
@@ -158,3 +183,32 @@ const sortIpaRecursively = arr => {
     }
     return arr;
 };
+
+// function for copying selected text in clipboard
+function copyText() {
+    selectText();
+
+    $('#ip-copied').html(event.target.innerText)
+    $('#ip-copied-toast').toast('show')
+    // $(event.target).popover({ container: $(event.target).parent(),
+    // 			      content: event.target.innerText + ' copied to clipboard' })
+    
+    //alert(event.target.innerText + ' copied to clipboard')
+    document.execCommand("copy");
+}
+
+function selectText() {
+    var element = event.target
+    var range;
+    if (document.selection) {
+        // IE
+        range = document.body.createTextRange();
+        range.moveToElementText(element);
+        range.select();
+    } else if (window.getSelection) {
+        range = document.createRange();
+        range.selectNode(element);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+    }
+}

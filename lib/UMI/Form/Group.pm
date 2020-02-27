@@ -144,7 +144,8 @@ sub branch {
 #		 scope  => 'one',
 		 attr   => [ 'ou', 'description', ],});
 
-  unshift @{$branch}, { label => "root --- groups in ou=group,dc=umidb", value => "ou=group,dc=umidb"};
+  unshift @{$branch}, { label => "root --- groups in ou=group,dc=umidb",
+			value => $self->form->ldap_crud->cfg->{base}->{group}};
   return $branch;
 }
 

@@ -1,4 +1,4 @@
-[% # -*- mode: web; -*- %]
+[% # -*- mode: html; mode: follow -*- %]
 
 <aside id="aside" class="bg-dark">
   <nav id="sidebar-right"
@@ -102,31 +102,31 @@
 	</div>
 	
 	<script type="text/x-template" id="item-template">
-	 <li>
-	  <div class="ldap-tree-point">
-	   <div class="umi-text-xs mr-1" v-if="isFolder""
-	    @click.exact="toggleItem"
-	    @click.ctrl.exact="toggleTree"> 
-	     <i class="fas fa-plus-square text-white-50" v-if="!item.isOpen"></i>
-	     <i class="fas fa-minus-square"              v-if="item.isOpen"></i>
-	   </div>
-	   <div class="umi-text-xs mr-1" v-if="!isFolder""> 
-	     <i class="fas fa-minus text-white-50"></i>
-	   </div>
-	   <div :class="{'font-weight-bold': item.isOpen, 'text-white-50': !item.isOpen}"
-	    @click.exact="showItem(0)"
-	    @click.ctrl.exact="showItem(1)">
-	     {{ item.name }}
-	   </div>
-	  </div>	 
-	  <ul class="font-monospace ldap-tree" v-show="item.isOpen" v-if="isFolder">
-	   <ldap-tree-item class="ldap-tree-item"
-	    v-for="(child, index) in item.children"
-	    :key="index"
-	    :item="child">
-	   </ldap-tree-item>
-	  </ul>
-	 </li>
+	  <li>
+	    <div class="ldap-tree-point">
+	      <div class="umi-text-xs mr-1" v-if="isFolder"
+		   @click.exact="toggleItem"
+		   @click.ctrl.exact="toggleTree">
+		<i class="fas fa-plus-square text-white-50" v-if="!item.isOpen"></i>
+		<i class="fas fa-minus-square"              v-if="item.isOpen"></i>
+	</div>
+	<div class="umi-text-xs mr-1" v-if="!isFolder"> 
+		<i class="fas fa-minus text-white-50"></i>
+	      </div>
+	      <div :class="{'font-weight-bold': item.isOpen, 'text-white-50': !item.isOpen}"
+		   @click.exact="showItem(0)"
+		   @click.ctrl.exact="showItem(1)">
+		{{ item.name }}
+	      </div>
+	    </div>	 
+	    <ul class="font-monospace ldap-tree" v-show="item.isOpen" v-if="isFolder">
+	      <ldap-tree-item class="ldap-tree-item"
+			      v-for="(child, index) in item.children"
+			      :key="index"
+			      :item="child">
+	      </ldap-tree-item>
+	    </ul>
+	  </li>
 	</script>
 	
 	<ul class="font-monospace ldap-tree" id="ldap-tree">
@@ -167,15 +167,19 @@
 	    <dd class="col-sm-9 mb-0 pb-0">
 	      <ul class="my-0 py-0 ml-0 pl-0 list-unstyled">
 		<li>on <i class="fas fa-plus-square""></i>/<i class="fas fa-minus-square""></i> to expand/collapse item</li>
-		<li>on <b>item</b> to search it</li>
+		<li>on <b>item</b> to search it<sup class="text-pink">*</sup></li>
 	      </ul>
 	    </dd>
 	    <dt class="pt-0 mt-0 col-sm-3 text-right">Ctrl+Click</dt>
 	    <dd class="col-sm-9">
 	      <ul class="my-0 py-0 ml-0 pl-0 list-unstyled">
-		<li>on <i class="fas fa-plus-square""></i>/<i class="fas fa-minus-square""></i> to expand/collapse whole branch</li>
+		<li>on <i class="fas fa-plus-square""></i>/<i class="fas fa-minus-square""></i> to expand/collapse whole branch<sup class="text-pink">*</sup></li>
 		<li>on <b>item</b> searches whole branch</li>
 	      </ul>
+	    </dd>
+	    <dt class="col-sm-3 text-right text-pink">*</dt>
+	    <dd class="col-sm-9 mb-0 pb-0">
+	      click on net shows free ip addresses
 	    </dd>
 	    <dt class="col-sm-3 text-right">MouseOver</dt>
 	    <dd class="col-sm-9 mb-0 pb-0">
@@ -193,66 +197,97 @@
 	</div>
 
 	<div id="ipam" class="">
-	<script type="text/x-template" id="ipam-template">
-	 <li>
-	  <div class="ldap-tree-point">
-	   <div class="umi-text-xs mr-1" v-if="isIpaFolder"
-	    @click.exact="toggleIpaItem"
-	    @click.ctrl.exact="toggleIpaTree"> 
-	     <i class="fas fa-plus-square text-white-50" v-if="!ipaitem.isOpen"></i>
-	     <i class="fas fa-minus-square"              v-if="ipaitem.isOpen"></i>
-	   </div>
-	 
-	   <div class="umi-text-xs mr-1" v-if="!isIpaFolder"> 
-	    <i class="fas text-white-50"
-	     :class="{ 'font-weight-bold': ipaitem.isOpen,
-                       'text-white-50': !ipaitem.isOpen,
-                       'fa-minus': !ipaitem.host,
-                       'text-success fa-check-circle': ipaitem.host && ipaitem.host.indexOf('.') !== -1,
-                       'text-danger  fa-exclamation-triangle': ipaitem.host === 'query timed out',
-                       'text-warning fa-exclamation-triangle':  ipaitem.host && ipaitem.host === 'NXDOMAIN',
-                       'text-danger fa-exclamation-circle': ipaitem.host && ipaitem.host !== 'NXDOMAIN' && ipaitem.host !== 'NOERROR' && ipaitem.host.indexOf('.') === -1 }"
-	    ></i>
-	   </div>
+	  <script type="text/x-template" id="ipam-template">
+	    <li>
+	      <div class="ldap-tree-point">
+		<div class="umi-text-xs mr-1" v-if="isIpaFolder"
+		     @click.exact="toggleIpaItem"
+		     @click.ctrl.exact="toggleIpaTree"> 
+		  <i class="fas fa-plus-square text-white-50" v-if="!ipaitem.isOpen"></i>
+		  <i class="fas fa-minus-square"              v-if="ipaitem.isOpen"></i>
+		</div>
+		
+		<div class="umi-text-xs mr-1" v-if="!isIpaFolder"> 
+		  <i class="fas text-white-50"
+		     :class="{ 'font-weight-bold': ipaitem.isOpen,
+			     'text-white-50': !ipaitem.isOpen,
+			     'fa-minus': !ipaitem.host,
+			     'text-success fa-check-circle': ipaitem.host && ipaitem.host.indexOf('.') !== -1,
+			     'text-danger  fa-exclamation-triangle': ipaitem.host === 'query timed out',
+			     'text-warning fa-exclamation-triangle':  ipaitem.host && ipaitem.host === 'NXDOMAIN',
+			     'text-danger fa-exclamation-circle': ipaitem.host && ipaitem.host !== 'NXDOMAIN' && ipaitem.host !== 'NOERROR' && ipaitem.host.indexOf('.') === -1 }"
+		     ></i>
+		</div>
 
-	   <div v-bind:title="ipaitem.host"
-	    :class="{ 'font-weight-bold': ipaitem.isOpen,
-                      'text-white-50': !ipaitem.isOpen,
-                      'text-success': ipaitem.host && ipaitem.host.indexOf('.') !== -1,
-                      'text-danger': ipaitem.host === 'query timed out',
-                      'text-warning': ipaitem.host && ipaitem.host === 'NXDOMAIN',
-                      'text-danger': ipaitem.host && ipaitem.host !== 'NXDOMAIN' && ipaitem.host !== 'NOERROR' && ipaitem.host.indexOf('.') === -1 }"
-	    @mouseover="resolveThis"
-	    @click.exact="showIpaItem(0)"
-	    @click.ctrl.exact="showIpaItem(1)">
-	     {{ ipaitem.dn }}
-	   </div>
-	  </div>
-	  <ul class="font-monospace ldap-tree" v-if="isIpaFolder && ipaitem.isOpen">
-	   <ipam-tree-item class="ldap-tree-item"
-	                   v-for="(child, index) in ipaitem.children"
-	   		   :key="index"
-	                   :ipaitem="child">
-	   </ipam-tree-item>
+		<div v-bind:title="ipaitem.host"
+		     :class="{ 'font-weight-bold': ipaitem.isOpen,
+			     'text-white-50': !ipaitem.isOpen,
+			     'text-success': ipaitem.host && ipaitem.host.indexOf('.') !== -1,
+			     'text-danger': ipaitem.host === 'query timed out',
+			     'text-warning': ipaitem.host && ipaitem.host === 'NXDOMAIN',
+			     'text-danger': ipaitem.host && ipaitem.host !== 'NXDOMAIN' && ipaitem.host !== 'NOERROR' && ipaitem.host.indexOf('.') === -1 }"
+		     @mouseover="resolveThis"
+		     @click.exact="showIpaItem(0)"
+		     @click.ctrl.exact="showIpaItem(1)">
+		  {{ipaitem.dn}}
+		  <small class="text-info"
+			 v-if="ipaitem.dn && (ipaitem.dn.match(/\./g) || []).length == 2 && ipaitem.children && ipaitem.children.length">
+		    /used {{ipaitem.children.length}} ip/
+		  </small>
+		</div>
+	      </div>
+	      <div class="faddr ldap-tree-point ml-4 text-info" v-if="faddr && faddr.children && faddr.children.length"
+		   @click.exact="isOpenFaddr = !isOpenFaddr">
+		<div class="umi-text-xs mr-2">
+		  <i class="fas fa-plus-square"  v-if="!isOpenFaddr"></i>
+		  <i class="fas fa-minus-square" v-if="isOpenFaddr"></i>
+		</div>
+		unused {{faddr.children.length}} ip
+	      </div>
+	      <ul class="font-monospace ldap-tree text-info" v-if="faddr && faddr.children && faddr.children.length && isOpenFaddr">
+		<li class="faddr-leaf ldap-tree-item ml-4" v-for="(child, index) in faddr.children"
+		    @click.exact="copyText();"
+		    data-toggle="popover" data-placement="top"
+		    :key="index">{{child.dn}}</li>
+	      </ul>
+	      <ul class="font-monospace ldap-tree" v-if="isIpaFolder && ipaitem.isOpen">
+		<ipam-tree-item class="ldap-tree-item"
+				v-for="(child, index) in ipaitem.children"
+	   			:key="index"
+				:ipaitem="child">
+		</ipam-tree-item>
+	      </ul>
+	    </li>
+	  </script>
+
+	  <ul class="font-monospace ldap-tree" id="ipam-tree">
+	    <li class="border-bottom border-secondary mb-2">
+	      <i class="fas fa-sync-alt text-white-50"
+		 :class="{ 'fa-spin': loading }"
+		 @click.exact="getIpaTreeData()"
+		 title="reload the tree">
+	      </i>
+	    </li>
+	    <ipam-tree-item class="ipam-tree-item"
+			    :ipaitem="ipamtree"
+			    @make-folder="makeIpaFolder">
+	    </ipam-tree-item>
 	  </ul>
-	 </li>
-	</script>
-	
-	<ul class="font-monospace ldap-tree" id="ipam-tree">
-	  <li class="border-bottom border-secondary mb-2">
-	    <i class="fas fa-sync-alt text-white-50"
-	       :class="{ 'fa-spin': loading }"
-	       @click.exact="getIpaTreeData()"
-	       title="reload the tree">
-	    </i>
-	  </li>
-	  <ipam-tree-item class="ipam-tree-item"
-			  :ipaitem="ipamtree"
-			  @make-folder="makeIpaFolder">
-	  </ipam-tree-item>
-	</ul>
+	  
 	</div>
       </div>
+
+      <div id="ip-copied-toast" class="toast border border-success" data-delay="2000"
+	   style="position: absolute; top: 20px; right: 20px;"
+	   role="alert" aria-live="assertive" aria-atomic="true">
+	<div class="toast-header bg-info text-white font-weight-bold">
+	  <i class="fas fa-clipboard mr-4"></i>
+	  IP Copied
+	</div>
+	<div id="ip-copied" class="toast-body text-gray text-center font-weight-bold">
+	</div>
+      </div>
+      
       [% END %]
       
       

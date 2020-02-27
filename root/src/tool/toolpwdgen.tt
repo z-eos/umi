@@ -202,6 +202,7 @@ Password Generator Form <small><em class="font-monospace text-muted">( XKCD stuf
    if ( descr ) $('#pwd_algHelpBlock').html(descr);
    if ( ! preset ) return;
 
+   console.log(preset);
    Object.keys(preset).forEach(function (key) {
      if ( key == 'separator_character' && preset[key].length == 1 ) {
        $('#xk_'+key).val('CHAR');

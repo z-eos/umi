@@ -45,6 +45,7 @@ QR version is defined dynamicaly (previous to the one spawning error)
 sub index :Path :Args(0) {
   my ( $self, $c ) = @_;
   my $p = $c->req->parameters;
+  my $dc = Crypt::HSXKPasswd->default_config();
   use JSON;
   my $presets = decode_json(Crypt::HSXKPasswd->presets_json());
   push @{$presets->{defined_presets}}, 'CLASSIC';
@@ -87,7 +88,9 @@ sub index :Path :Args(0) {
     delete $xk{separator_character_char};
     delete $xk{separator_character_random};
   } elsif ( $xk{separator_character} eq 'RANDOM' ) {
-    $xk{separator_alphabet} = [ split(//, $xk{separator_character_random}) ];
+    $xk{separator_alphabet} =
+      defined $xk{separator_character_random} && length($xk{separator_character_random}) > 0 ?
+      [ split(//, $xk{separator_character_random}) ] : $dc->{symbol_alphabet};
     delete $xk{separator_character_random};
     delete $xk{separator_character_char};
   } elsif ( $xk{separator_character} eq 'NONE' ) {
@@ -108,7 +111,9 @@ sub index :Path :Args(0) {
       delete $xk{padding_character_char};
       delete $xk{padding_character_random};
     } elsif ( $xk{padding_character} eq 'RANDOM' ) {
-      $xk{padding_alphabet} = [ split(//, $xk{padding_character_random}) ];
+      $xk{padding_alphabet} = 
+	defined $xk{padding_character_random} && length($xk{padding_character_random}) > 0 ?
+	[ split(//, $xk{padding_character_random}) ] :$dc->{symbol_alphabet};
       delete $xk{padding_character_char};
       delete $xk{padding_character_random};
     }

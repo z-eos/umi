@@ -75,11 +75,13 @@ sub index_neo :Path(ldap_tree_neo) :Args(0) {
 
 sub ipa :Path(ipa) :Args(0) {
   my ( $self, $c ) = @_;
+  my $p = $c->req->params;
+  # log_debug { np($p) };
   $c->stats->profile(begin => 'IPA tree');
   $c->stats->profile('IPA tree building complete');
 
   $c->stash( current_view => 'WebJSON_LDAP_Tree',
-	     json_tree    => $c->model('LDAP_CRUD')->ipa, );
+	     json_tree    => $c->model('LDAP_CRUD')->ipa($p), );
 
   $c->stats->profile(end  => 'IPA tree');
 }

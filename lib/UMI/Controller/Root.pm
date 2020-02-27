@@ -127,11 +127,12 @@ sub sysinfo : Local {
   my $syntaxes;
   my $sch = $ldap_crud->schema;
   foreach my $syn (@{[$sch->all_syntaxes]}) {
-    foreach (keys (%{$syn})) {
+    foreach (sort (keys (%{$syn}))) {
       next if $_ eq 'oid';
       $syntaxes->{$syn->{oid}}->{$_} = $syn->{$_};
     }
   }
+  my %synsort = map { $_ => $syntaxes->{$_} } sort( keys( %{$syntaxes}));
 
   $sysinfo = { 'UMI session'    => { title => 'Session',
 				     data  => $x, },
@@ -140,7 +141,7 @@ sub sysinfo : Local {
 	      'LDAP monitor'    => { title => 'OpenLDAP daemon monitor',
 				     data  => $monitor, },
 	      'LDAP syntaxes'   => { title => 'LDAP syntaxes',
-				     data  => $syntaxes, },
+				     data  => \%synsort, },
 	     };
 
   $c->stash( template      => 'sysinfo.tt',
@@ -904,7 +905,7 @@ sub test : Local {
 
   my $ipa = $ldap_crud->ipa;
   
-    # log_debug { np( $iu ) };
+  # log_debug { np( $ipa ) };
 
     # $c->stash( template => 'test.tt',
     # 	       final_message => $ldap_crud->ipam_first_free({ ipspace => $iu->{ipspace},

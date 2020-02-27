@@ -524,12 +524,14 @@ sub validate {
 
   $self->field('pwd_cap')
     ->add_error('Incorrect capital characters number! It can be 0 to ' . UMI->config->{pwd}->{cap})
-    if $self->field('pwd_cap')->value > UMI->config->{pwd}->{cap};
+    if defined $self->field('pwd_cap')->value &&
+    $self->field('pwd_cap')->value > UMI->config->{pwd}->{cap};
 
   $self->field('pwd_num')
     ->add_error('Numbers and special characters can occure only 0 to ' .
 		UMI->config->{pwd}->{num} . ' times!')
-    if $self->field('pwd_num')->value > UMI->config->{pwd}->{num};
+    if defined $self->field('pwd_num')->value &&
+    $self->field('pwd_num')->value > UMI->config->{pwd}->{num};
 
 
   $f = $self->field('xk_separator_character_random');
@@ -546,15 +548,21 @@ sub validate {
     $f->add_error('<div class="text-danger">Padding character is required.</div>')
       if $self->field('xk_padding_character')->value eq 'CHAR' && $f->value eq '';
 
-    $f = $self->field('xk_padding_character_random');
-    $f->add_error('<div class="text-danger">Padding alphabet is required.</div>')
-      if $self->field('xk_padding_character')->value eq 'RANDOM' && $f->value eq '';
+    # $f = $self->field('xk_padding_character_random');
+    # $f->add_error('<div class="text-danger">Padding alphabet is required.</div>')
+    #   if $self->field('xk_padding_character')->value eq 'RANDOM' && $f->value eq '';
   }
 
   $f = $self->field('xk_separator_character_char');
   # log_debug { '-->' . np($f) . '<--' };
   $f->add_error('<div class="text-danger">Separator character is required.</div>')
     if defined $f->value && $f->value eq 'CHAR' && length($f->value) != 1;
+
+  $f = $self->field('xk_separator_character_random');
+  # log_debug { '-->' . np($f) . '<--' };
+  # $f->add_error('<div class="text-danger">Separator alphabet is required.</div>')
+  #   if $self->field('xk_separator_character')->value eq 'RANDOM' &&
+  #   ( ! defined $f->value && length($f->value) < 1 );
 
   $f = $self->field('xk_separator_character_char');
   $f->add_error(sprintf('<div class="text-danger">Wrong separator character: %s</div>',$f->value))

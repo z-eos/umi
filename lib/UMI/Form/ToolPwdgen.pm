@@ -408,9 +408,9 @@ sub validate {
     $f->add_error('<div class="text-danger">Padding character is required.</div>')
       if $self->field('xk_padding_character')->value eq 'CHAR' && $f->value eq '';
 
-    $f = $self->field('xk_padding_character_random');
-    $f->add_error('<div class="text-danger">Padding alphabet is required.</div>')
-      if $self->field('xk_padding_character')->value eq 'RANDOM' && $f->value eq '';
+    # $f = $self->field('xk_padding_character_random');
+    # $f->add_error('<div class="text-danger">Padding alphabet is required.</div>')
+    #   if $self->field('xk_padding_character')->value eq 'RANDOM' && $f->value eq '';
   }
 
   $f = $self->field('xk_separator_character_char');
@@ -420,9 +420,9 @@ sub validate {
 
   $f = $self->field('xk_separator_character_random');
   # log_debug { '-->' . np($f) . '<--' };
-  $f->add_error('<div class="text-danger">Separator alphabet is required.</div>')
-    if $self->field('xk_separator_character')->value eq 'RANDOM' &&
-    ( ! defined $f->value && length($f->value) < 1 );
+  # $f->add_error('<div class="text-danger">Separator alphabet is required.</div>')
+  #   if $self->field('xk_separator_character')->value eq 'RANDOM' &&
+  #   ( ! defined $f->value && length($f->value) < 1 );
 
   $f = $self->field('xk_separator_character_char');
   $f->add_error(sprintf('<div class="text-danger">Wrong separator character: %s</div>',$f->value))

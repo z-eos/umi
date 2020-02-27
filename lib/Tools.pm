@@ -54,6 +54,8 @@ sub _build_a {
   return {
 	  re => {
 		 ip        => '(?:(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-5][0-9])',
+		 net3b     => '(?:(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){2}',
+		 net2b     => '(?:(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){1}',
 		 sshpubkey => {
 			       type   => qr/ssh-rsa|ssh-dss|ssh-ed25519|ecdsa-\S+/,
 			       id     => "[a-zA-Z_][a-zA-Z0-9_-]+",
@@ -112,7 +114,7 @@ returns 0 if it is and 1 if not
 
 sub is_ip {
   my ($self, $arg) = @_;
-  if ( defined $arg && $arg ne '' && $arg =~ /^$self->{a}-{re}->{ip}$/ ) {
+  if ( defined $arg && $arg ne '' && $arg =~ /^$self->{a}->{re}->{ip}$/ ) {
     return 1;
   } else {
     return 0;
@@ -425,14 +427,15 @@ sub pwdgen {
   if ( defined $p->{pwd_alg} && $p->{pwd_alg} ne 'CLASSIC' ) {
 
     Crypt::HSXKPasswd->module_config('LOG_ERRORS', 1);
-    Crypt::HSXKPasswd->module_config('DEBUG', 1);
+    Crypt::HSXKPasswd->module_config('DEBUG', 0);
     my $default_config = Crypt::HSXKPasswd->default_config();
+    # log_debug { "DEFAULT CONFIG: \n" . np($default_config) };
     my $c = Crypt::HSXKPasswd->preset_config( $p->{pwd_alg} );
     # log_debug { 'PRESET ' . $p->{pwd_alg} . " ORIGINAL: \n" . np($c) };
     if ( defined $p->{xk} ) {
       $c->{$_} = $p->{xk}->{$_} foreach (keys %{$p->{xk}});
     }
-    # log_debug { 'PRESET ' . $p->{pwd_alg} . " MODIFIED: \n" . np($c) };
+    log_debug { 'PRESET ' . $p->{pwd_alg} . " MODIFIED: \n" . np($c) };
     my $xk = Crypt::HSXKPasswd->new( config => $c );
     $p->{pwd}->{clear}    = $xk->password( $p->{pwd_num} );
     %{$p->{pwd}->{stats}} = $xk->stats();
