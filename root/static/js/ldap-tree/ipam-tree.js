@@ -44,17 +44,24 @@ Vue.component('ipam-tree-item', {
 	    var url;
 	    var re    = /^(?!0)(?!.*\.$)((1?\d?\d|25[0-5]|2[0-4]\d)(\.|$)){3}$/;
 	    var _this = this;
-
-	    if ( !re.test(this.ipaitem.dn) ) {
+	    var ip; 
+	    if ( !re.test(this.ipaitem.dn) || (re.test(this.ipaitem.dn) && scope) ) {
+		re = /^(?!0)(?!.*\.$)((1?\d?\d|25[0-5]|2[0-4]\d)(\.|$)){4}$/;
+		if ( re.test(this.ipaitem.dn) ) {
+		    ip    = this.ipaitem.dn
+		    scope = 1
+		} else {
+		    ip = this.ipaitem.dn + '*'
+		}
 		url =
 		    '/searchby?ldapsearch_filter=|'  +
-		    '(dhcpStatements=fixed-address ' + this.ipaitem.dn + '*)' +
-		    '(umiOvpnCfgIfconfigPush='       + this.ipaitem.dn + '*)' +
-		    '(umiOvpnCfgIroute='             + this.ipaitem.dn + '*)' +
-		    '(ipHostNumber='                 + this.ipaitem.dn +  ')' +
+		    '(dhcpStatements=fixed-address ' + ip + ')' +
+		    '(umiOvpnCfgIfconfigPush='       + ip + ')' +
+		    '(umiOvpnCfgIroute='             + ip + ')' +
+		    '(ipHostNumber='    + this.ipaitem.dn + ')' +
 		    '&ldapsearch_scope=';	    
-		url = scope ? url + 'base' : url + 'sub';
-		
+		url = scope ? url + 'sub' : url + 'base';
+		console.log('scope: '+scope+'; url: '+url)
 		$.ajax({
 		    url: url,
 		    success: function (html) {

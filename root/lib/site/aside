@@ -178,17 +178,17 @@
 	      </ul>
 	    </dd>
 	    <dt class="col-sm-3 text-right text-pink">*</dt>
-	    <dd class="col-sm-9 mb-0 pb-0">
-	      click on net shows free ip addresses
+	    <dd class="col-sm-9">
+	      click on 3 net byte <b>item</b> (A.B.C) shows unused ip addresses of that /24 network
 	    </dd>
 	    <dt class="col-sm-3 text-right">MouseOver</dt>
 	    <dd class="col-sm-9 mb-0 pb-0">
 	      <ul class="my-0 py-0 ml-0 pl-0 list-unstyled">
-		<li>on <b>item</b> launching DNS resolve of IP address,
-		  after that the item is colored and marked with
-		  <i class="fas fa-check-circle text-success"></i>,
-		  <i class="fas fa-exclamation-triangle text-warning"></i> or
-		  <i class="fas fa-exclamation-circle text-danger"></i>
+		<li>on <b>item</b> launch DNS resolve of that IP address,
+		  to color and mark the <b>item</b> with
+		  <i class="fas fa-globe text-success"></i>,
+		  <i class="fas fa-globe text-warning"></i> or
+		  <i class="fas fa-globe text-danger"></i>
 		  according to the results of the resolve
 		</li>
 	      </ul>
@@ -209,29 +209,30 @@
 		
 		<div class="umi-text-xs mr-1" v-if="!isIpaFolder"> 
 		  <i class="fas text-white-50"
-		     :class="{ 'font-weight-bold': ipaitem.isOpen,
+		     :class="{
+			     'font-weight-bold': ipaitem.isOpen,
 			     'text-white-50': !ipaitem.isOpen,
 			     'fa-minus': !ipaitem.host,
-			     'text-success fa-check-circle': ipaitem.host && ipaitem.host.indexOf('.') !== -1,
-			     'text-danger  fa-exclamation-triangle': ipaitem.host === 'query timed out',
-			     'text-warning fa-exclamation-triangle':  ipaitem.host && ipaitem.host === 'NXDOMAIN',
-			     'text-danger fa-exclamation-circle': ipaitem.host && ipaitem.host !== 'NXDOMAIN' && ipaitem.host !== 'NOERROR' && ipaitem.host.indexOf('.') === -1 }"
-		     ></i>
+			     'text-success fa-globe': ipaitem.host && ipaitem.host.indexOf('.') !== -1,
+			     'text-danger  fa-globe': ipaitem.host === 'query timed out',
+			     'text-warning fa-globe': ipaitem.host && ipaitem.host === 'NXDOMAIN',
+			     'text-danger fa-exclamation-circle': ipaitem.host && ipaitem.host !== 'NXDOMAIN' && ipaitem.host !== 'NOERROR' && ipaitem.host.indexOf('.') === -1 
+			     }"></i>
 		</div>
 
-		<div v-bind:title="ipaitem.host"
-		     :class="{ 'font-weight-bold': ipaitem.isOpen,
+		<div :class="{ 'font-weight-bold': ipaitem.isOpen,
 			     'text-white-50': !ipaitem.isOpen,
 			     'text-success': ipaitem.host && ipaitem.host.indexOf('.') !== -1,
 			     'text-danger': ipaitem.host === 'query timed out',
 			     'text-warning': ipaitem.host && ipaitem.host === 'NXDOMAIN',
 			     'text-danger': ipaitem.host && ipaitem.host !== 'NXDOMAIN' && ipaitem.host !== 'NOERROR' && ipaitem.host.indexOf('.') === -1 }"
-		     @mouseover="resolveThis"
-		     @click.exact="showIpaItem(0)"
-		     @click.ctrl.exact="showIpaItem(1)">
+		     @mouseover        = "resolveThis"
+		     @click.exact      = "showIpaItem(0)"
+		     @click.ctrl.exact = "showIpaItem(1)"
+		     v-bind:title="ipaitem.host">
 		  {{ipaitem.dn}}
-		  <small class="text-info"
-			 v-if="ipaitem.dn && (ipaitem.dn.match(/\./g) || []).length == 2 && ipaitem.children && ipaitem.children.length">
+		  <small v-if="ipaitem.dn && (ipaitem.dn.match(/\./g) || []).length == 2 && ipaitem.children && ipaitem.children.length"
+			 class="badge badge-info">
 		    /used {{ipaitem.children.length}} ip/
 		  </small>
 		</div>
@@ -248,6 +249,7 @@
 		<li class="faddr-leaf ldap-tree-item ml-4" v-for="(child, index) in faddr.children"
 		    @click.exact="copyText();"
 		    data-toggle="popover" data-placement="top"
+		    title="click to copy to clipboard"
 		    :key="index">{{child.dn}}</li>
 	      </ul>
 	      <ul class="font-monospace ldap-tree" v-if="isIpaFolder && ipaitem.isOpen">

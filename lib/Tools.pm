@@ -1914,7 +1914,8 @@ sub factoroff_searchby {
   my $k;
   foreach $k (keys (%{$all_s})) {
     $root_gr->{$k} = 1
-      if exists $all_s->{$k}->{$tt_e->{root}->{$ldap_crud->{cfg}->{rdn}->{acc_root}}};
+      if defined $all_s->{$k}->{$tt_e->{root}->{$ldap_crud->{cfg}->{rdn}->{acc_root}}} &&
+      defined $tt_e->{root}->{$ldap_crud->{cfg}->{rdn}->{acc_root}};
     # log_debug { "\n\nkey: $k\n" . np($ldap_crud->{cfg}->{rdn}->{acc_root}) };
   }
 
