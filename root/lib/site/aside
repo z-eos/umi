@@ -231,7 +231,7 @@
 		     @click.ctrl.exact = "showIpaItem(1)"
 		     v-bind:title="ipaitem.host">
 		  {{ipaitem.dn}}
-		  <small v-if="ipaitem.dn && (ipaitem.dn.match(/\./g) || []).length == 2 && ipaitem.children && ipaitem.children.length"
+		  <small v-if="faddr && ipaitem.dn && (ipaitem.dn.match(/\./g) || []).length == 2 && ipaitem.children && ipaitem.children.length"
 			 class="badge badge-info">
 		    /used {{ipaitem.children.length}} ip/
 		  </small>
