@@ -2827,7 +2827,7 @@ sub ipa {
   # log_debug { np($as_hash) };
   $return->{ipa} = length($arg->{naddr}) > 0 ? $as_hash->{children}->[0]->{children}->[0]->{children}->[0] : $as_hash;
   $return->{ipa} = {} if ! defined $return->{ipa};
-  log_debug { np( $return->{ipa} ) };
+  # log_debug { np( $return->{ipa} ) };
   return $return->{ipa};
 }
 

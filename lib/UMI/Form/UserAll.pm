@@ -1063,11 +1063,13 @@ sub validate {
       #---[ gitlab + ]--------------------------------------------------------------------
       if ( defined $e->field('authorizedservice')->value &&
 	   $e->field('authorizedservice')->value =~ /^gitlab.*$/ ) {
+	log_debug { np($self->field('person_mail')) };
 	if ( ( defined $self->field('person_mail')->value &&
 	       $self->field('person_mail')->value ne '' ) ||
-	     ( ! $autologin_entry->exists('mail') ||
-	       $autologin_entry->get_value('mail') eq '' ||
-	       $autologin_entry->get_value('mail') eq 'NA' ) ) {
+	     ( defined $autologin_entry && ref($autologin_entry) eq 'Net::LDAP::Entry' &&
+	       ( ! $autologin_entry->exists('mail') ||
+		 $autologin_entry->get_value('mail') eq '' ||
+		 $autologin_entry->get_value('mail') eq 'NA' ) ) ) {
 	  $self->add_form_error('<span class="fa-stack fa-fw">' .
 				'<i class="fas fa-cog fa-stack-2x text-muted umi-opacity05"></i>' .
 				'<i class="fab fa-gitlab pull-right fa-stack-1x"></i></span>' .
@@ -1172,16 +1174,19 @@ sub validate {
       }
       #---[ 802.1x - ]---------------------------------------------------------------------
 
-      # prepare to know if login+service+fqdn is unique?
+      # prepare to know if login+service+fqdn is unique
       $k = sprintf("%s-%s-%s",
 		   $logintmp,
 		   $e->field('authorizedservice')->value,
-		   exists $self->params->{account}->[$i]->{login_complex} ?
-		   $e->field('associateddomain')->value : '');
+		   $e->field('associateddomain')->value);
+
+		   # exists $self->params->{account}->[$i]->{login_complex} ?
+		   # $e->field('associateddomain')->value : '');
+      
       # log_debug { "+++ 3 " . '+' x 70 . "\nlogin_complex: " . np($e->field('login_complex')->value) };
       ### !!! on submit account.1.login_complex is undefined while it is == 1
       $elementcmp->{$k}++;
-
+      # log_debug { np($elementcmp->{$k}) };
       if ( defined $e->field('authorizedservice')->value &&
 	   $e->field('authorizedservice')->value ne '' &&
 	   defined $e->field('associateddomain')->value

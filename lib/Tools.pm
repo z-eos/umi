@@ -15,6 +15,7 @@ use List::MoreUtils;
 use List::Util;
 use Scalar::Util;
 
+use Storable;
 use MIME::Base64;
 use Digest::SHA;
 
@@ -1629,7 +1630,6 @@ sub store_data {
   my $arg = { data => $args->{data},
 	      file => $args->{file},
 	      mode => $args->{mode} || 0640};
-  use Storable;
   store $arg->{data}, $arg->{file};
   chmod $arg->{mode}, $arg->{file};
 }
@@ -1957,7 +1957,23 @@ sub factoroff_searchby {
 
   $tt_e->{mgmnt}->{userPassword}  = 0;
   $tt_e->{mgmnt}->{dynamicObject} = 0;
-  foreach $k ( @{$e->get_value('objectClass', asref => 1)} ) {
+  my $objectClass;
+  if ( $e->exists('objectClass') ) {
+    $objectClass = $e->get_value('objectClass', asref => 1);
+  } else {
+    my $msg_e = $ldap_crud->search({ base   => $e->dn,
+				     filter => '(objectClass=*)',
+				     scope  => 'base',
+				     attrs  => [ '(objectClass' ], });
+    if ( $msg_e->is_error() ) {
+      $return->{error} .= $ldap_crud->err( $msg_e )->{html};
+      $objectClass = [];
+    } elsif ( $msg_e->count ) {
+      my $tmp_e = $msg_e->entry(0);
+      $objectClass = $tmp_e->get_value('objectClass', asref => 1);
+    }
+  }
+  foreach $k ( @{$objectClass} ) {
     $tt_e->{mgmnt}->{userPassword} = 1
       if exists $sess->{ldap}->{obj_schema}->{$k}->{may}->{userPassword} ||
       exists $sess->{ldap}->{obj_schema}->{$k}->{must}->{userPassword};

@@ -134,9 +134,9 @@ sub proc :Path(proc) :Args(0) {
 
       $c->stats->profile( begin => "searchby_advanced_search" );
 
-      # p $params;
-      my @attrs = ( '*' );
-      @attrs = split(/,/, $params->{'show_attrs'}) if $params->{'show_attrs'} ne '';
+      my @attrs = $params->{'show_attrs'} ne '' ?
+	split(/,/, $params->{'show_attrs'}) : ( '*' );
+
       push @attrs,
 	'createTimestamp',
       	'creatorsName',
