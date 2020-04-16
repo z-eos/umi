@@ -1527,7 +1527,7 @@ modify whole form (all present fields except RDN)
 sub modify :Path(modify) :Args(0) {
   my ( $self, $c, $params ) = @_;
 
-  log_debug { np($params) };
+  log_debug { "modify(): params on start:\n" . np($params) };
 
   # whether we edit object as is or via creation form
   $params = $c->req->parameters if ! defined $params;
@@ -1617,19 +1617,21 @@ sub modify :Path(modify) :Args(0) {
     if ( $attr =~ /^add_.*$/ && $val_params ne '' ) {
       # log_debug { $attr . ';' . substr($attr,4) . ';' . $val_params };
       push @{$add}, substr($attr,4) => $val_params;
-    } elsif ( $val_params ne '' && ( $attr eq 'sshPublicKey' || $attr eq 'grayPublicKey') ) {
-      log_debug { '%%% ONE %%%' };
+    } elsif ( $val_params ne '' &&
+	      ref($val_params) ne "ARRAY" &&
+	      ( $attr eq 'sshPublicKey' || $attr eq 'grayPublicKey') ) {
+      log_debug { '%%% ONE val single & not empty & ssh key %%%' };
       # log_debug { np($val_params) };
       $val_params =~ tr/\r\n//d;
       # log_debug { np($val_params) };
       push @{$replace}, $attr => $val_params;
     } elsif ( $attr eq 'jpegPhoto' && $val_params ne '' ) {
-      log_debug { '%%% TWO %%%' };
+      log_debug { '%%% TWO val not empty & photo %%%' };
       $jpeg = $self->file2var( $val_params->{'tempname'}, $return );
       return $jpeg if ref($jpeg) eq 'HASH' && defined $jpeg->{error};
       push @{$replace}, $attr => [ $jpeg ];
     } elsif ( $attr eq 'userCertificate' && $val_params ne '' ) {
-      log_debug { '%%% THREE %%%' };
+      log_debug { '%%% THREE val not empty & cert %%%' };
       $binary = $self->file2var( $val_params->{'tempname'}, $return );
       return $binary if ref($binary) eq 'HASH' && defined $binary->{error};
       push @{$replace}, $attr . ';binary' => [ $binary ];
@@ -1653,15 +1655,15 @@ sub modify :Path(modify) :Args(0) {
 
     } elsif ( ( $attr eq 'cACertificate' ||
 		$attr eq 'certificateRevocationList' ) && $val_params ne '' ) {
-      log_debug { '%%% FOUR %%%' };
+      log_debug { '%%% FOUR val not empty & CA or CRL %%%' };
       $binary = $self->file2var( $val_params->{'tempname'}, $return );
       return $binary if ref($binary) eq 'HASH' && defined $binary->{error};
       push @{$replace}, $attr . ';binary' => [ $binary ];
     } elsif ( $val_params eq '' && $entry->exists($attr) ) {
-      log_debug { '%%% FIVE %%%' };
+      log_debug { '%%% FIVE val empty & exists in LDAP %%%' };
       push @{$delete}, $attr => [];
     } elsif ( $val_params ne '' && ! defined $entry->get_value($attr) ) {
-      log_debug { "%%% SIX %%% attr: $attr" };
+      log_debug { "%%% SIX val not empty & not in LDAP %%% attr: $attr" };
       # !!! ??? is it necessary here? can we leave it instead of replacing by itself
       if ( $attr eq 'jpegPhoto' ) {
 	$jpeg = $self->file2var( $val_params->{'tempname'}, $return );
@@ -1670,10 +1672,14 @@ sub modify :Path(modify) :Args(0) {
       }
       push @{$add}, $attr => $val_params;
     } elsif ( ref($val_params) eq "ARRAY" && $#{$val_params} >= -1 ) {
-      log_debug { "%%% SEVEN %%% attr: $attr" };
-      push @{$replace}, $attr => $val_params;
+      log_debug { "%%% SEVEN val multi & not empty %%% attr: $attr" };
+      if ( $attr eq 'sshPublicKey' || $attr eq 'grayPublicKey' ) {
+	push @{$replace}, map { $_ =~ tr/\r\n//d; $attr => $_ } @{$val_params};
+      } else {
+	push @{$replace}, $attr => $val_params;
+      }
     } elsif ( ref($val_params) ne "ARRAY" && $val_params ne "" ) { # && $val_params ne $val_entry ) {
-      log_debug { '%%% EIGHT %%%' };
+      log_debug { '%%% EIGHT val single & not empty %%%' };
       push @{$replace}, $attr => $val_params;
     }
   }

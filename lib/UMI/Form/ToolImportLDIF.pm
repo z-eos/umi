@@ -63,7 +63,7 @@ has_field 'ldif'
        label                 => 'LDIF Data',
        label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'input-sm', 'col-10', ],
-       element_class         => [ 'text-monospace' ],
+       element_class         => [ 'mono-only', 'text-monospace' ],
        element_attr          => { placeholder => 'LDIF data', },
        # cols => 30,
        rows                  => 20

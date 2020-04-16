@@ -1,30 +1,33 @@
 /*
- * 1. cp _variables-umi.scss git/bootstrap/scss/
- * 2. emacs git/bootstrap/scss/bootstrap.scss
+ * 1. cd git/bootstrap/
+ * 2. npm install
+ *    https://getbootstrap.com/docs/4.4/getting-started/build-tools/#tooling-setup
+ * 3. cp _variables-umi.scss scss/
+ * 4. emacs scss/bootstrap.scss
  *    add `@import "variables-umi";` before `@import "variables";`
- * 3. npm run dist
- * 4. cp -iv scss dist/css/bootstrap.css /storage/work-stuff/Catalyst/UMI/root/static/bootstrap/css
- * 5. cp -iv scss dist/css/bootstrap.css.map /storage/work-stuff/Catalyst/UMI/root/static/bootstrap/css
+ * 5. npm run dist
+ * 6. cp -iv dist/css/bootstrap.css /storage/work-stuff/Catalyst/UMI/root/static/bootstrap/css
+ * 7. cp -iv dist/css/bootstrap.css.map /storage/work-stuff/Catalyst/UMI/root/static/bootstrap/css
  */
 
 // Color system
 
-$gray-base:              #050505 !default;
-$gray-darker:            lighten($gray-base, 13.5%) !default; // #222
-$gray-dark:              lighten($gray-base, 20%) !default;   // #333
-$gray:                   lighten($gray-base, 33.5%) !default; // #555
-$gray-light:             #4E5D6C !default;   // #999
-$gray-lighter:           #EBEBEB !default; // #eee
+$gray-base:              hsla(208, 7%,  9%, 1) !default;
+$gray-darker:            hsla(208, 7%, 16%, 1) !default;
+$gray-dark:              hsla(208, 7%, 23%, 1) !default;
+$gray:                   hsla(208, 7%, 46%, 1) !default;
+$gray-light:             hsla(208, 7%, 56%, 1) !default;
+$gray-lighter:           hsla(208, 7%, 70%, 1) !default;
 
-$gray-100: lighten($gray-base, 90%) !default;
-$gray-200: lighten($gray-base, 80%) !default;
-$gray-300: lighten($gray-base, 70%) !default;
-$gray-400: lighten($gray-base, 60%) !default;
-$gray-500: lighten($gray-base, 50%) !default;
-$gray-600: lighten($gray-base, 40%) !default;
-$gray-700: lighten($gray-base, 30%) !default;
-$gray-800: lighten($gray-base, 20%) !default;
-$gray-900: lighten($gray-base, 10%) !default;
+$gray-100: hsla(0, 0%, 93%, 1) !default;
+$gray-200: hsla(0, 0%, 85%, 1) !default;
+$gray-300: hsla(0, 0%, 75%, 1) !default;
+$gray-400: hsla(0, 0%, 65%, 1) !default;
+$gray-500: hsla(0, 0%, 56%, 1) !default;
+$gray-600: hsla(0, 0%, 50%, 1) !default;
+$gray-700: hsla(0, 0%, 40%, 1) !default;
+$gray-800: hsla(0, 0%, 30%, 1) !default;
+$gray-900: hsla(0, 0%, 20%, 1) !default;
 
 // primary:   blue
 // secondary: gray-600
@@ -35,19 +38,11 @@ $gray-900: lighten($gray-base, 10%) !default;
 // light:     gray-100
 // dark:      gray-800
 
-$blue:     #325d88 !default;
-$green:    #5cb85c !default;
-$red:      #d9534f !default;
-$cyan:     #5bc0de !default;
-$yellow:   #f0ad4e !default;
-// $gray-600: #889396 !default;
-// $gray-100: #eef0f2 !default;
-// $gray-800: #3c3e4c !default;
-
-// $gray-600: #98978B !default;
-// $gray-100: #F8F5F0 !default;
-// $gray-800: #3E3F3A !default;
-// $gray-700: #8E8C84 !default;
+$blue:     hsla(202, 92%, 33%, 1) !default;
+$green:    hsla(150, 52%, 41%, 1) !default;
+$red:      hsla(  0, 98%, 63%, 1) !default;
+$cyan:     hsla(202, 75%, 60%, 1) !default;
+$yellow:   hsla(40, 100%, 46%, 1) !default;
 
 $enable-gradients:  false !default;
 
@@ -100,3 +95,12 @@ $pre-bg:                      #d5d5d5 !default;
 $pre-color:                   $gray-dark !default;
 $pre-border-color:            #ccc !default;
 $pre-scrollable-max-height:   340px !default;
+
+//## Customizes the `.table` component with basic values, each used across all table variations.
+$table-cell-padding:            6px !default;
+$table-condensed-cell-padding:  3px !default;
+$table-bg:                      transparent !default;
+$table-bg-accent:               $gray-light !default;
+$table-bg-hover:                darken($gray-light, 3%) !default;
+$table-bg-active:               $table-bg-hover !default;
+$table-border-color:            $gray-light !default;  

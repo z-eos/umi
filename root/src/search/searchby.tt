@@ -6,7 +6,7 @@
 <[% site.pageheading %] class="[% site.pageheadingclass %]">
 <i class="fas fa-search-plus fa-lg mr-3 text-muted"></i>
 Search Advanced
-<small><em class="text-muted font-monospace">( advanced search form )</em></small>
+<small><em class="text-muted text-monospace">( advanced search form )</em></small>
 </[% site.pageheading %]>
 <hr>
 
@@ -45,7 +45,7 @@ Search Advanced
     </[% site.pageheading %]>
   </div>
   <div class="col-xs-6 col-sm-6 col-md-9 col-lg-9">
-    <dl class="row font-monospace text-muted umi-text-xs">
+    <dl class="row text-monospace text-muted umi-text-xs">
       <dt class="col-1 text-right">base:</dt>  <dd class="col-11 text-break">[% base_dn %]</dd>
       <dt class="col-1 text-right">filter:</dt><dd class="col-11 text-break">[% filter %]</dd>
     </dl>
@@ -415,7 +415,7 @@ Search Advanced
 			  <i class="[% ph_class %]" title="[% ph_title %]"></i>
 			  [% END %]
 			  
-			  <b class="font-monospace [% icon_color _ ' ' _ entry_text_size %]">
+			  <b class="text-monospace [% icon_color _ ' ' _ entry_text_size %]">
 			    [% IF entry.key.match('People');
 			       entry.key.replace('uid=','').replace('authorizedService=','').split(',').slice(0,-3).join('<i class="fa fa-ellipsis-h ml-1 mr-1"></i>');
 			       entry.val.attrs.reqStart.0;
@@ -435,7 +435,7 @@ Search Advanced
 	      <div class="col-2">
 
 		<!-- small class="umi-text-xs" -->
-		<ul class="fa-ul text-white text-left m-0 umi-text-tiny font-monospace">
+		<ul class="fa-ul text-white text-left m-0 umi-text-tiny text-monospace">
 		  
 		  [% crtd = entry.val.root.ts.createTimestamp _ ' by ' _ entry.val.root.ts.creatorsName _ '&nbsp' %]
 		  <li title="created (YYYYmmddHHMM), GMT: [% crtd %]" class="d-none.d-lg-block.d-xl-none d-none.d-md-block.d-lg-none">
@@ -471,7 +471,7 @@ Search Advanced
 	      <div class="card-body">
 		<dl class="row">
 		  <dt class="card-title col-2 text-right text-truncate">dn:</dt>
-		  <dd class="card-title col-10 font-weight-bolder font-monospace text-break">[% entry.key %]</dd>
+		  <dd class="card-title col-10 font-weight-bolder text-monospace text-break">[% entry.key %]</dd>
 
 		  [% FOREACH h_attr IN entry.val.attrs # h_attr is for each attr/value pair hash;
 		     d_class = '';
@@ -495,7 +495,7 @@ Search Advanced
 		    [% h_attr.key.trim %]&#58;
 		    [% END %]
 		  </dt>
-		  <dd class="col-10 font-monospace [% d_class %]">
+		  <dd class="col-10 text-monospace [% d_class %]">
 		    [% IF h_attr.key == 'userPassword' %]
 		    [% aster = '<i class="fa fa-circle"></i>&nbsp;' %][% aster.repeat(8)%]
 		    [% ELSIF h_attr.key.match('userCertificate;binary') ||
@@ -510,7 +510,7 @@ Search Advanced
 			   IF h_attr.key.match('certificateRevocationList;binary') &&
 			   cert.key.match('RevokedCertificates') %]
 			<dt class="col-sm-3 text-right">[%   cert.key %]</dt>
-			<dd class="col-sm-9 font-monospace">
+			<dd class="col-sm-9 text-monospace">
 			  <div class="card">
 			    <div class="card-header bg-info">
 			      <b class="card-title text-light">
@@ -545,7 +545,7 @@ Search Advanced
 			</dd>
 			[%     ELSE %]
 			<dt class="col-2 text-right">[%   cert.key %]</dt>
-			<dd class="col-10 font-monospace text-left">[% cert.value %]</dd>
+			<dd class="col-10 text-monospace text-left">[% cert.value %]</dd>
 			[%     END %]
 			[% END %]
 		      </dl>
@@ -565,7 +565,7 @@ Search Advanced
 		       FOREACH i IN h_attr.value;
 		       IF h_attr.key == 'sshPublicKey' || h_attr.key == 'grayPublicKey' %]
 		    <div class="kludge-minus-700px">
-		      <small class="font-monospace">[% i %]</small>
+		      <small class="text-monospace">[% i %]</small>
 		    </div>
 		    [% ELSE;
 		       IF schema.${h_attr.key} == 'distinguishedNameMatch' ||

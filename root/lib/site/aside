@@ -119,7 +119,7 @@
 		{{ item.name }}
 	      </div>
 	    </div>	 
-	    <ul class="font-monospace ldap-tree" v-show="item.isOpen" v-if="isFolder">
+	    <ul class="text-monospace ldap-tree" v-show="item.isOpen" v-if="isFolder">
 	      <ldap-tree-item class="ldap-tree-item"
 			      v-for="(child, index) in item.children"
 			      :key="index"
@@ -129,7 +129,7 @@
 	  </li>
 	</script>
 	
-	<ul class="font-monospace ldap-tree" id="ldap-tree">
+	<ul class="text-monospace ldap-tree" id="ldap-tree">
 	  <li class="border-bottom border-secondary mb-2">
 	    <i class="fas fa-sync-alt text-white-50"
 	       :class="{ 'fa-spin': loading }"
@@ -245,14 +245,14 @@
 		</div>
 		unused {{faddr.children.length}} ip
 	      </div>
-	      <ul class="font-monospace ldap-tree text-info" v-if="faddr && faddr.children && faddr.children.length && isOpenFaddr">
+	      <ul class="text-monospace ldap-tree text-info" v-if="faddr && faddr.children && faddr.children.length && isOpenFaddr">
 		<li class="faddr-leaf ldap-tree-item ml-4" v-for="(child, index) in faddr.children"
 		    @click.exact="copyText();"
 		    data-toggle="popover" data-placement="top"
 		    title="click to copy to clipboard"
 		    :key="index">{{child.dn}}</li>
 	      </ul>
-	      <ul class="font-monospace ldap-tree" v-if="isIpaFolder && ipaitem.isOpen">
+	      <ul class="text-monospace ldap-tree" v-if="isIpaFolder && ipaitem.isOpen">
 		<ipam-tree-item class="ldap-tree-item"
 				v-for="(child, index) in ipaitem.children"
 	   			:key="index"
@@ -262,7 +262,7 @@
 	    </li>
 	  </script>
 
-	  <ul class="font-monospace ldap-tree" id="ipam-tree">
+	  <ul class="text-monospace ldap-tree" id="ipam-tree">
 	    <li class="border-bottom border-secondary mb-2">
 	      <i class="fas fa-sync-alt text-white-50"
 		 :class="{ 'fa-spin': loading }"
