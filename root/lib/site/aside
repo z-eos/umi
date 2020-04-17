@@ -232,8 +232,8 @@
 		     v-bind:title="ipaitem.host">
 		  {{ipaitem.dn}}
 		  <small v-if="faddr && ipaitem.dn && (ipaitem.dn.match(/\./g) || []).length == 2 && ipaitem.children && ipaitem.children.length"
-			 class="badge badge-info">
-		    /used {{ipaitem.children.length}} ip/
+			 class="badge badge-pill badge-info pt-2">
+		    used {{ipaitem.children.length}} ip
 		  </small>
 		</div>
 	      </div>

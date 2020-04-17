@@ -12,22 +12,22 @@
 
 // Color system
 
-$gray-base:              hsla(208, 7%,  9%, 1) !default;
-$gray-darker:            hsla(208, 7%, 16%, 1) !default;
-$gray-dark:              hsla(208, 7%, 23%, 1) !default;
-$gray:                   hsla(208, 7%, 46%, 1) !default;
-$gray-light:             hsla(208, 7%, 56%, 1) !default;
-$gray-lighter:           hsla(208, 7%, 70%, 1) !default;
+$gray-100: hsla(0, 0%, 86%, 1) !default;
+$gray-200: hsla(0, 0%, 76%, 1) !default;
+$gray-300: hsla(0, 0%, 66%, 1) !default;
+$gray-400: hsla(0, 0%, 56%, 1) !default;
+$gray-500: hsla(0, 0%, 46%, 1) !default;
+$gray-600: hsla(0, 0%, 36%, 1) !default;
+$gray-700: hsla(0, 0%, 29%, 1) !default;
+$gray-800: hsla(0, 0%, 22%, 1) !default;
+$gray-900: hsla(0, 0%, 14%, 1) !default;
 
-$gray-100: hsla(0, 0%, 93%, 1) !default;
-$gray-200: hsla(0, 0%, 85%, 1) !default;
-$gray-300: hsla(0, 0%, 75%, 1) !default;
-$gray-400: hsla(0, 0%, 65%, 1) !default;
-$gray-500: hsla(0, 0%, 56%, 1) !default;
-$gray-600: hsla(0, 0%, 50%, 1) !default;
-$gray-700: hsla(0, 0%, 40%, 1) !default;
-$gray-800: hsla(0, 0%, 30%, 1) !default;
-$gray-900: hsla(0, 0%, 20%, 1) !default;
+// $gray-base:              hsla(208, 7%,  9%, 1) !default;
+// $gray-darker:            hsla(0, 0%, 14%, 1) !default;
+// $gray-dark:              hsla(0, 0%, 18%, 1) !default;
+// $gray:                   hsla(0, 0%, 36%, 1) !default;
+// $gray-light:             hsla(0, 0%, 45%, 1) !default;
+// $gray-lighter:           hsla(0, 0%, 60%, 1) !default;
 
 // primary:   blue
 // secondary: gray-600
@@ -85,6 +85,9 @@ $font-family-monospace:    "Input Mono", consolas, sfmono-regular, menlo, monaco
 //
 //##
 
+$input-color:                 $gray-800 !default;
+$input-placeholder-color:     $gray-200 !default;
+
 $code-color:                  #c7254e !default;
 $code-bg:                     #f9f2f4 !default;
 
@@ -92,7 +95,7 @@ $kbd-color:                   #fff !default;
 $kbd-bg:                      #333 !default;
 
 $pre-bg:                      #d5d5d5 !default;
-$pre-color:                   $gray-dark !default;
+$pre-color:                   $gray-800 !default;
 $pre-border-color:            #ccc !default;
 $pre-scrollable-max-height:   340px !default;
 
@@ -100,7 +103,7 @@ $pre-scrollable-max-height:   340px !default;
 $table-cell-padding:            6px !default;
 $table-condensed-cell-padding:  3px !default;
 $table-bg:                      transparent !default;
-$table-bg-accent:               $gray-light !default;
-$table-bg-hover:                darken($gray-light, 3%) !default;
+$table-bg-accent:               $gray-500 !default;
+$table-bg-hover:                darken($gray-500, 3%) !default;
 $table-bg-active:               $table-bg-hover !default;
-$table-border-color:            $gray-light !default;  
+$table-border-color:            $gray-500 !default;  
