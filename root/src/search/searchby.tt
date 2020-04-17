@@ -164,15 +164,15 @@ Search Advanced
 	 # === OBJECT CLASSES ACCORDING THE RDN DEFINITION ===;
 	 IF entry.val.mgmnt.is_root && entry.key.match('People');
 	 entry_text_size = 'umi-text-lg';
-	 entry_icon_size = 'fa-lg';
+	 entry_icon_size = 'fa-2x';
 	 root_of_rec_btn = 'col-xs-12 text-truncate';
 	 ELSIF entry.key.match('^author');
 	 entry_text_size = '';
-	 entry_icon_size = '';
+	 entry_icon_size = 'fa-lg';
 	 root_of_rec_btn = 'col-xs-12 text-truncate';
 	 ELSE;
 	 entry_text_size = 'umi-text-sm';
-	 entry_icon_size = 'fa-sm';
+	 entry_icon_size = 'fa-lg';
 	 root_of_rec_btn = 'col-xs-12 text-truncate';
 	 END;
 

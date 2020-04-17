@@ -88,14 +88,14 @@
 	    <dt class="col-sm-3 text-right">Click</dt>
 	    <dd class="col-sm-9 mb-0 pb-0">
 	      <ul class="my-0 py-0 ml-0 pl-0 list-unstyled">
-		<li>on <i class="fas fa-plus-square""></i>/<i class="fas fa-minus-square""></i> to expand/collapse item</li>
+		<li>on <i class="fas fa-plus-circle""></i>/<i class="fas fa-minus-circle""></i> to expand/collapse item</li>
 		<li>on item to search it</li>
 	      </ul>
 	    </dd>
 	    <dt class="pt-0 mt-0 col-sm-3 text-right">Ctrl+Click</dt>
 	    <dd class="col-sm-9">
 	      <ul class="my-0 py-0 ml-0 pl-0 list-unstyled">
-		<li>on <i class="fas fa-plus-square""></i>/<i class="fas fa-minus-square""></i> to expand/collapse whole branch</li>
+		<li>on <i class="fas fa-plus-circle""></i>/<i class="fas fa-minus-circle""></i> to expand/collapse whole branch</li>
 		<li>on item searches whole branch</li>
 	      </ul>
 	  </dl>
@@ -107,8 +107,8 @@
 	      <div class="umi-text-xs mr-1" v-if="isFolder"
 		   @click.exact="toggleItem"
 		   @click.ctrl.exact="toggleTree">
-		<i class="fas fa-plus-square text-white-50" v-if="!item.isOpen"></i>
-		<i class="fas fa-minus-square"              v-if="item.isOpen"></i>
+		<i class="fas fa-plus-circle text-white-50" v-if="!item.isOpen"></i>
+		<i class="fas fa-minus-circle"              v-if="item.isOpen"></i>
 	</div>
 	<div class="umi-text-xs mr-1" v-if="!isFolder"> 
 		<i class="fas fa-minus text-white-50"></i>
@@ -166,14 +166,14 @@
 	    <dt class="col-sm-3 text-right">Click</dt>
 	    <dd class="col-sm-9 mb-0 pb-0">
 	      <ul class="my-0 py-0 ml-0 pl-0 list-unstyled">
-		<li>on <i class="fas fa-plus-square""></i>/<i class="fas fa-minus-square""></i> to expand/collapse item</li>
+		<li>on <i class="fas fa-plus-circle""></i>/<i class="fas fa-minus-circle""></i> to expand/collapse item</li>
 		<li>on <b>item</b> to search it<sup class="text-pink">*</sup></li>
 	      </ul>
 	    </dd>
 	    <dt class="pt-0 mt-0 col-sm-3 text-right">Ctrl+Click</dt>
 	    <dd class="col-sm-9">
 	      <ul class="my-0 py-0 ml-0 pl-0 list-unstyled">
-		<li>on <i class="fas fa-plus-square""></i>/<i class="fas fa-minus-square""></i> to expand/collapse whole branch<sup class="text-pink">*</sup></li>
+		<li>on <i class="fas fa-plus-circle""></i>/<i class="fas fa-minus-circle""></i> to expand/collapse whole branch<sup class="text-pink">*</sup></li>
 		<li>on <b>item</b> searches whole branch</li>
 	      </ul>
 	    </dd>
@@ -203,8 +203,8 @@
 		<div class="umi-text-xs mr-1" v-if="isIpaFolder"
 		     @click.exact="toggleIpaItem"
 		     @click.ctrl.exact="toggleIpaTree"> 
-		  <i class="fas fa-plus-square text-white-50" v-if="!ipaitem.isOpen"></i>
-		  <i class="fas fa-minus-square"              v-if="ipaitem.isOpen"></i>
+		  <i class="fas fa-plus-circle text-white-50" v-if="!ipaitem.isOpen"></i>
+		  <i class="fas fa-minus-circle"              v-if="ipaitem.isOpen"></i>
 		</div>
 		
 		<div class="umi-text-xs mr-1" v-if="!isIpaFolder"> 
@@ -240,8 +240,8 @@
 	      <div class="faddr ldap-tree-point ml-4 text-info" v-if="faddr && faddr.children && faddr.children.length"
 		   @click.exact="isOpenFaddr = !isOpenFaddr">
 		<div class="umi-text-xs mr-2">
-		  <i class="fas fa-plus-square"  v-if="!isOpenFaddr"></i>
-		  <i class="fas fa-minus-square" v-if="isOpenFaddr"></i>
+		  <i class="fas fa-plus-circle"  v-if="!isOpenFaddr"></i>
+		  <i class="fas fa-minus-circle" v-if="isOpenFaddr"></i>
 		</div>
 		unused {{faddr.children.length}} ip
 	      </div>

@@ -48,20 +48,24 @@ Vue.component('ipam-tree-item', {
 	    if ( !re.test(this.ipaitem.dn) || (re.test(this.ipaitem.dn) && scope) ) {
 		re = /^(?!0)(?!.*\.$)((1?\d?\d|25[0-5]|2[0-4]\d)(\.|$)){4}$/;
 		if ( re.test(this.ipaitem.dn) ) {
-		    ip    = this.ipaitem.dn
-		    scope = 1
+		    url =
+			'/searchby?ldapsearch_filter=|'  +
+			'(dhcpStatements=fixed-address ' + this.ipaitem.dn + ')'  +
+			'(umiOvpnCfgIfconfigPush='       + this.ipaitem.dn + '*)' +
+			'(umiOvpnCfgIroute='             + this.ipaitem.dn + '*)' +
+			'(ipHostNumber='                 + this.ipaitem.dn + ')'  +
+			'&ldapsearch_scope=sub';
+		    console.log('re match: url: '+url)
 		} else {
-		    ip = this.ipaitem.dn + '*'
+		    url =
+			'/searchby?ldapsearch_filter=|'  +
+			'(dhcpStatements=fixed-address ' + this.ipaitem.dn + '*)' +
+			'(umiOvpnCfgIfconfigPush='       + this.ipaitem.dn + '*)' +
+			'(umiOvpnCfgIroute='             + this.ipaitem.dn + '*)' +
+			'(ipHostNumber='                 + this.ipaitem.dn + '*)' +
+			'&ldapsearch_scope=sub';
+		    console.log('re not match: url: '+url)
 		}
-		url =
-		    '/searchby?ldapsearch_filter=|'  +
-		    '(dhcpStatements=fixed-address ' + ip + ')' +
-		    '(umiOvpnCfgIfconfigPush='       + ip + ')' +
-		    '(umiOvpnCfgIroute='             + ip + ')' +
-		    '(ipHostNumber='    + this.ipaitem.dn + ')' +
-		    '&ldapsearch_scope=';	    
-		url = scope ? url + 'sub' : url + 'base';
-		console.log('scope: '+scope+'; url: '+url)
 		$.ajax({
 		    url: url,
 		    success: function (html) {
