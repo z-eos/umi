@@ -128,8 +128,10 @@ sub index :Path :Args(0) {
       $base   = $ldap_crud->cfg->{base}->{acc_root};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_by_ip'} ) {
-      $filter = sprintf("|(dhcpStatements=fixed-address %s)(umiOvpnCfgIfconfigPush=%s*)",
-			$filter_meta, $filter_meta);
+      my @narr = split(/\./, $filter_meta);
+      pop @narr if scalar @narr == 4;
+      $filter = sprintf("|(dhcpStatements=fixed-address %s)(umiOvpnCfgIfconfigPush=%s)(umiOvpnCfgIroute=%s.*)",
+			$filter_meta, $filter_meta, join('.', @narr));
       $base   = $ldap_crud->cfg->{base}->{db};
       $params->{'ldapsearch_base'} = $base;
     } elsif ( defined $params->{'ldapsearch_pgp'} ) {
