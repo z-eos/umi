@@ -152,7 +152,7 @@ sub _build_cfg {
 					   workstations	) ],
 		   icon => {
 			     DHCP          => 'fas fa-network-wired',
-			     GitACL        => 'fab fa-git',
+			     GitACL        => 'fab fa-git-square',
 			     OpenVPN       => 'fas fa-sitemap',
 			     Organizations => 'fas fa-industry',
 			     People        => 'fas fa-address-card',

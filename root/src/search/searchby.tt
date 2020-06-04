@@ -94,7 +94,7 @@ Search Advanced
 	<td colspan=2>
 	  <div class="btn-group" role="group">
 	    <a href="#"
-	       class="collapse_in_out btn btn-secondary text-light" role="button"
+	       class="collapse_in_out btn btn-secondary text-white" role="button"
 	       title="Collapse In/Out Each Element On This Page"
 	       accesskey="f"
 	       data-target="#collapse"
@@ -115,7 +115,7 @@ Search Advanced
 	      [% FOREACH item IN attrs %]
 	      <input type="hidden"  name="ldap_ldif_attrs" value="[% item %]">
 	      [% END %]
-	      <a href="#" class="btn btn-secondary text-light umi-btn-event umi-btn-logic"
+	      <a href="#" class="btn btn-secondary text-white umi-btn-event umi-btn-logic"
 		      value="[% base_dn %]"
 		      name="ldap_ldif"
 		      data-umiact="/searchby/ldif_gen2f"
@@ -320,7 +320,7 @@ Search Advanced
 		       ph_class="umi-search-padding " _ entry_icon_size _ " fas fa-edit";
 		       ELSIF entry.val.attrs.reqType.0 == 'modrdn';
 		       ph_title="History Object Request type: ModRDN";
-		       ph_meta=[ 'umi-search-padding'
+		       ph_meta=[ 'umi-search-padding '
 			 entry_icon_size
 			 'fas fa-share-alt-square' ];
 		       ph_class=ph_meta.join;
@@ -339,7 +339,7 @@ Search Advanced
 		       cur_svc = dn.authorizedService.split('@').0;
 		       IF services.$cur_svc.icon;
 		       ph_title=services.$cur_svc.descr _ " Service Account Branch";
-		       ph_meta=[ 'umi-search-padding'
+		       ph_meta=[ 'umi-search-padding '
 			 services.$cur_svc.icon
 			 entry_icon_size
 			 branch_class ];
@@ -357,7 +357,7 @@ Search Advanced
 		       cur_svc = dn.authorizedService.split('@').0;
 		       IF services.$cur_svc.icon;
 		       ph_title=services.$cur_svc.descr _ " Service Account";
-		       ph_meta=[ 'umi-search-padding'
+		       ph_meta=[ 'umi-search-padding '
 			 services.$cur_svc.icon
 			 entry_icon_size
 			 icon_color
@@ -380,7 +380,7 @@ Search Advanced
 
 		       ELSIF entry.key.match('GitACL');
 		       ph_title="Subject to GitACL";
-		       ph_class="umi-search-padding" _ base_icon.GitACL _ ' ' _ branch_class _ ' ' _ entry_icon_size;
+		       ph_class="umi-search-padding " _ base_icon.GitACL _ ' ' _ branch_class _ ' ' _ entry_icon_size;
 		       ELSIF entry.key.match('DHCP');
 		       ph_title="DHCP Object";
 		       ph_class="umi-search-padding " _ base_icon.DHCP _ ' ' _ branch_class _ ' ' _ entry_icon_size;
@@ -513,7 +513,7 @@ Search Advanced
 			<dd class="col-sm-9 text-monospace">
 			  <div class="card">
 			    <div class="card-header bg-info">
-			      <b class="card-title text-light">
+			      <b class="card-title text-white">
 				<a class="collapsed chevron_toggleable" data-toggle="collapse"
 				   href="#collapse_personal_data" aria-expanded="true" aria-controls="collapse_personal_data">
 				  <i class="fas fa-fw [% site.icons.toggle_down %] text-white"></i>

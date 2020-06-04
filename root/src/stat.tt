@@ -8,7 +8,7 @@
   [% # #stat-form is relocated on ajaxCom in umi-core-ajax.js %]
   <div id="stat-from">
 
-    <table class="table table-condensed table-sm text-light">
+    <table class="table table-condensed table-sm text-white">
       <thead>
 	<tr>
 	  <th colspan="2">
@@ -72,7 +72,7 @@
 	  <td>
 	    [% IF i.1.match('dn: ') %]
 	    <span class="text-[% tr_class %][% default %]">
-	      [% i.1.replace('dn: ','<b>dn:</b> <i class="text-light text-wrap">').replace(',', ', ') %]</i></span>
+	      [% i.1.replace('dn: ','<b>dn:</b> <i class="text-white text-wrap">').replace(',', ', ') %]</i></span>
 	    [% ELSE %]
 	    <span class="text-[% tr_class %][% default %]">[% i.1.replace(',', ', ') %]</span>
 	    [% END %]

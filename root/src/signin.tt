@@ -10,7 +10,7 @@
 	     alt="Unified Management Interface"
 	     width="290" height="290"
 	     class="img-responsive mx-auto">
-      <[% site.pageheading %] class="form-signin-heading text-center text-light text-uppercase">please sign in</[% site.pageheading %]>
+      <[% site.pageheading %] class="form-signin-heading text-center text-white text-uppercase">please sign in</[% site.pageheading %]>
 
       <div class="input-group">
 	<div class="input-group-prepend" id="basic-login">
@@ -36,7 +36,7 @@
 	       aria-describedby="basic-password-prepend"
 	       name="auth_pwd" required>
       </div>
-      <!-- <div class="checkbox text-light">
+      <!-- <div class="checkbox text-white">
 	      <label>
               <input name="auth_mem" type="checkbox" value="remember-me"> remember me
 	      </label>

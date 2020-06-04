@@ -125,7 +125,7 @@
 </script>
 
 <script type="text/x-template" id="template-tree">
-  <div class="tree-container mono-only umi-text-xs">
+  <div class="tree-container text-monospace umi-text-xs">
     <ul class="tree-root tree">
       <tree-item
 	v-for="(item, index) in tree" 

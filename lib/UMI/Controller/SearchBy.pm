@@ -1537,7 +1537,7 @@ sub modify :Path(modify) :Args(0) {
     $action_detach_to = '/searchby/modform';
   }
 
-  # log_debug { np($params) };
+  log_debug { np($params) };
 
   my $return;
   my $dn = $params->{dn};
@@ -1674,7 +1674,7 @@ sub modify :Path(modify) :Args(0) {
     } elsif ( ref($val_params) eq "ARRAY" && $#{$val_params} >= -1 ) {
       log_debug { "%%% SEVEN val multi & not empty %%% attr: $attr" };
       if ( $attr eq 'sshPublicKey' || $attr eq 'grayPublicKey' ) {
-	push @{$replace}, map { $_ =~ tr/\r\n//d; $attr => $_ } @{$val_params};
+	push @{$replace}, $attr => [ map { $_ =~ tr/\r\n//d; $_ } @{$val_params} ];
       } else {
 	push @{$replace}, $attr => $val_params;
       }

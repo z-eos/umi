@@ -27,7 +27,7 @@ Users Accounts Statistics
 
 <div class="table-responsive">
   <table id="dataTableToDraw" class="table table-sm table-hover">
-    <thead class="bg-dark text-light">
+    <thead class="bg-dark text-white">
       <tr class="text-uppercase info">
 	<th>LName</th>
 	<th>FName</th>
@@ -39,7 +39,7 @@ Users Accounts Statistics
 	<th>svc cn</th>
       </tr>
     </thead>
-    <tfoot class="bg-dark text-light">
+    <tfoot class="bg-dark text-white">
       <tr class="text-uppercase info">
 	<th>LName</th>
 	<th>FName</th>

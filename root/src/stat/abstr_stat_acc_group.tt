@@ -28,7 +28,7 @@ Account <i class="fas fa-exchange-alt"></i> Group Statistics<br><em class="h6 te
 
 <div class="table-responsive">
   <table id="dataTableToDraw" class="table table-sm table-hover font-monospace">
-    <thead class="bg-dark text-light">
+    <thead class="bg-dark text-white">
       <tr class="text-uppercase border-0">
 	<th>LName</th>
 	<th>FName</th>
@@ -38,7 +38,7 @@ Account <i class="fas fa-exchange-alt"></i> Group Statistics<br><em class="h6 te
 	<th>netgroups</th>
       </tr>
     </thead>
-    <tfoot class="bg-dark text-light">
+    <tfoot class="bg-dark text-white">
       <tr class="text-uppercase border-0">
 	<th>LName</th>
 	<th>FName</th>

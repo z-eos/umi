@@ -66,7 +66,7 @@
 	    </div>
 
 	    [% icon_class = "fas fa-fw text-success" %]
-	    [% menu_item = "dropdown-item btn btn-link umi-font-bold " %]
+	    [% menu_item = "dropdown-item btn btn-link " %]
 	    [% color = "text-success" %]
 
 	    <div class="dropdown-menu dropdown-menu-right">

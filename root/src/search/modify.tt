@@ -179,7 +179,7 @@ Modify Fields of DN: <small><em>
      role="dialog" aria-labelledby="modal-area-is-accounts">
   <div class="modal-dialog border border-success" role="document">
     <div class="modal-content border-0">
-      <div class="modal-header bg-success text-light">
+      <div class="modal-header bg-success text-white">
 	<h4 id="modal-area-is-accounts" class="modal-title">
 	  <i class="fas fa-shapes"></i>
 	  <b>Add objectClass</b>

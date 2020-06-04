@@ -28,7 +28,7 @@
 
 <div class="card w-100 border border-info">
   <div class="card-header bg-info p-0" id="heading_personal_data">
-    <[% card_header %] class="card-title text-light m-0 mt-1">
+    <[% card_header %] class="card-title text-white m-0 mt-1">
     <a href="#"
        class="chevron_toggleable btn btn-link pull-light"
        data-target="#collapse_personal_data"
@@ -126,7 +126,7 @@
 
   <div class="card w-100 border border-info">
     <div class="card-header bg-info p-0" id="heading_org">
-      <[% card_header %] class="card-title text-light m-0 mt-1">
+      <[% card_header %] class="card-title text-white m-0 mt-1">
       <a href="#"
 	 class="chevron_toggleable btn btn-link pull-light"
 	 data-target="#collapse_org"
@@ -168,7 +168,7 @@
   [% IF dhcp.size > 0 %]
   <div class="card w-100 border border-success">
     <div class="card-header bg-success p-0" id="heading_dhcp">
-      <[% card_header %] class="card-title text-light m-0 mt-1">
+      <[% card_header %] class="card-title text-white m-0 mt-1">
       <a href="#"
 	 class="chevron_toggleable btn btn-link pull-light"
 	 data-target="#collapse_dhcp"
@@ -208,7 +208,7 @@
   [% IF pgp.size > 0 %]
   <div class="card w-100 border border-success">
     <div class="card-header bg-success p-0" id="heading_pgp">
-      <[% card_header %] class="card-title text-light m-0 mt-1">
+      <[% card_header %] class="card-title text-white m-0 mt-1">
       <a href="#"
 	 class="chevron_toggleable btn btn-link pull-light"
 	 data-target="#collapse_pgp"
@@ -243,7 +243,7 @@
   [% IF service.size > 0 %]
   <div class="card w-100 border border-success">
     <div class="card-header bg-success p-0" id="heading_service">
-      <[% card_header %] class="card-title text-light m-0 mt-1">
+      <[% card_header %] class="card-title text-white m-0 mt-1">
       <a href="#"
 	 class="chevron_toggleable btn btn-link pull-light"
 	 data-target="#collapse_service"
@@ -344,7 +344,7 @@
   [% IF inventory.size > 0 %]
   <div class="card w-100 border border-success">
     <div class="card-header bg-success p-0" id="heading_inventory">
-      <[% card_header %] class="card-title text-light m-0 mt-1">
+      <[% card_header %] class="card-title text-white m-0 mt-1">
       <a href="#"
 	 class="chevron_toggleable btn btn-link pull-light"
 	 data-target="#collapse_inventory"

@@ -18,7 +18,7 @@ MTA
 
 <div class="table-responsive">
   <table id="dataTableToDraw" class="table table-condensed table-hover table-sm">
-    <thead class="bg-dark text-light">
+    <thead class="bg-dark text-white">
       <tr class="text-uppercase active">
 	<th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">Domain</th>
 	<th title="the highest priority MX record">primary MX</th>
@@ -28,7 +28,7 @@ MTA
 	<th>SMARTHOST IP</th>
       </tr>
     </thead>
-    <tfoot class="bg-dark text-light">
+    <tfoot class="bg-dark text-white">
       <tr class="text-uppercase active">
 	<th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">Domain</th>
 	<th title="the highest priority MX record">primary MX</th>

@@ -6,7 +6,7 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header bg-danger row m-0">
-	<h4 class="modal-title text-light col-12 mb-3" id="modal_delete[% id_suffix %]_label">
+	<h4 class="modal-title text-white col-12 mb-3" id="modal_delete[% id_suffix %]_label">
 	  <i class="fa fa-skull mr-3"></i>
 	  Object deletion</h4>
 	<b class="text-white col-12">DN: [% entry.key.replace(',', ', ') %]</b>
@@ -81,7 +81,7 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header bg-danger">
-	<h4 class="modal-title text-light" id="modal_block[% id_suffix %]_label">
+	<h4 class="modal-title text-white" id="modal_block[% id_suffix %]_label">
 	  <i class="fa fa-ban"></i>
 	  You are about to block user with DN: <b>[% entry.key.replace(',', ', ') %]</b>
 	</h4>
@@ -90,7 +90,7 @@
 	<div class="modal-footer">
 	  <div>
 	    <button type="button" class="btn btn-secondary umi-btn-event" data-dismiss="modal">Close</button>
-	    <button type="submit" class="btn bg-danger text-light umi-btn-event umi-btn-ajax"
+	    <button type="submit" class="btn bg-danger text-white umi-btn-event umi-btn-ajax"
 		    name="user_block" value="[% entry.key %]"
 		    onClick="$(modal_block[% id_suffix %]).modal('hide')"
 		    data-action="block">
@@ -109,7 +109,7 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
 	<div class="modal-header bg-danger">
-	  <h4 class="modal-title text-light" id="modal_reassign[% id_suffix %]_label">
+	  <h4 class="modal-title text-white" id="modal_reassign[% id_suffix %]_label">
 	    <span class="fa fa-recycle"></span>
 	    You are about to change root DN for: <b>[% entry.key.replace(',', ', ') %]</b>
 	  </h4>
@@ -163,7 +163,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
 	<div class="modal-header bg-danger">
-	  <h4 class="modal-title text-light" id="modal_moddn[% id_suffix %]_label">
+	  <h4 class="modal-title text-white" id="modal_moddn[% id_suffix %]_label">
 	    <span class="fa fa-highlighter"></span>
 	    You are about to modify RDN for:<br><b>[% entry.key.replace(',', ', ') %]</b>
 	  </h4>
@@ -194,7 +194,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	<div class="modal-footer">
 	  <div>
 	    <button type="button" class="btn btn-secondary umi-btn-event" data-dismiss="modal">Close</button>
-	    <button type="submit" class="btn bg-danger text-light umi-btn-event umi-btn-ajax"
+	    <button type="submit" class="btn bg-danger text-white umi-btn-event umi-btn-ajax"
 		    onClick="$(modal_moddn[% id_suffix %]).modal('hide')"
 		    name="src_dn"
 		    value="[% entry.key %]" data-action="refresh" >
@@ -213,7 +213,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header bg-info">
-	<h4 class="modal-title text-light" id="modal_ldif[% id_suffix %]_label">
+	<h4 class="modal-title text-white" id="modal_ldif[% id_suffix %]_label">
 	  <i class="fa fa-info-circle"></i>
 	  LDIF of DN: <b>[% entry.key.replace(',', ', ') %]</b>
 	</h4>
@@ -258,7 +258,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	    <button type="button" class="offset-md-2 col-3 btn btn-secondary umi-btn-event" data-dismiss="modal">Close</button>
 	    <button type="submit"
 		    onClick="$(modal_ldif[% id_suffix %]).modal('hide')"
-		    class="btn bg-info text-light umi-btn-event umi-btn-logic col-7"
+		    class="btn bg-info text-white umi-btn-event umi-btn-logic col-7"
 		    data-umiact="/searchby/ldif_gen"
 		    name="ldap_ldif"
 		    value="[% entry.key %]">
@@ -277,7 +277,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header bg-info">
-	<h4 class="modal-title text-light" id="modal_vcard[% id_suffix %]_label">
+	<h4 class="modal-title text-white" id="modal_vcard[% id_suffix %]_label">
 	  <span class="fa fa-files-o fa-lg"></span>
 	  vCard of DN:<b>[% entry.key.replace(',', ', ') %]</b>
 	</h4>
@@ -317,7 +317,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	  <button type="button" class="btn btn-secondary umi-btn-event" data-dismiss="modal">Close</button>
 	  <button type="submit"
 		  onClick="$(modal_vcard[% id_suffix %]).modal('hide')"
-		  class="btn bg-info text-light umi-btn-event umi-btn-logic"
+		  class="btn bg-info text-white umi-btn-event umi-btn-logic"
 		  data-umiact="/searchby/vcard_gen"
 		  name="vcard_dn"
 		  value="[% entry.key %]">
@@ -335,7 +335,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header bg-info">
-	<h4 class="modal-title text-light" id="modal_refresh[% id_suffix %]_label">
+	<h4 class="modal-title text-white" id="modal_refresh[% id_suffix %]_label">
 	  <span class="fa fa-clock"></span>
 	  You are about to refresh TTL for:<b>[% entry.key.replace(',', ', ') %]</b>
 	</h4>

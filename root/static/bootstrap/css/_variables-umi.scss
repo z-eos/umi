@@ -22,12 +22,12 @@ $gray-700: hsla(0, 0%, 29%, 1) !default;
 $gray-800: hsla(0, 0%, 22%, 1) !default;
 $gray-900: hsla(0, 0%, 14%, 1) !default;
 
-// $gray-base:              hsla(208, 7%,  9%, 1) !default;
-// $gray-darker:            hsla(0, 0%, 14%, 1) !default;
-// $gray-dark:              hsla(0, 0%, 18%, 1) !default;
-// $gray:                   hsla(0, 0%, 36%, 1) !default;
-// $gray-light:             hsla(0, 0%, 45%, 1) !default;
-// $gray-lighter:           hsla(0, 0%, 60%, 1) !default;
+$gray-base:    hsla(0, 0%,  9%, 1) !default;
+$gray-darker:  hsla(0, 0%, 14%, 1) !default;
+$gray-dark:    hsla(0, 0%, 22%, 1) !default;
+$gray:         hsla(0, 0%, 36%, 1) !default;
+$gray-light:   hsla(0, 0%, 45%, 1) !default;
+$gray-lighter: hsla(0, 0%, 60%, 1) !default;
 
 // primary:   blue
 // secondary: gray-600
@@ -38,11 +38,16 @@ $gray-900: hsla(0, 0%, 14%, 1) !default;
 // light:     gray-100
 // dark:      gray-800
 
-$blue:     hsla(202, 92%, 33%, 1) !default;
-$green:    hsla(150, 52%, 41%, 1) !default;
-$red:      hsla(  0, 98%, 63%, 1) !default;
-$cyan:     hsla(202, 75%, 60%, 1) !default;
-$yellow:   hsla(40, 100%, 46%, 1) !default;
+$blue:   hsla(202,  92%, 33%, 1) !default;
+$indigo: hsla(263,  90%, 60%, 1) !default;
+$purple: hsla(297,  38%, 50%, 1) !default;
+$pink:   hsla(332,  79%, 70%, 1) !default;
+$red:    hsla(  0,  98%, 63%, 1) !default;
+$orange: hsla( 21,  89%, 60%, 1) !default;
+$yellow: hsla( 40, 100%, 46%, 1) !default;
+$green:  hsla(150,  52%, 41%, 1) !default;
+$teal:   hsla(162,  73%, 60%, 1) !default;
+$cyan:   hsla(202,  75%, 60%, 1) !default;
 
 $enable-gradients:  false !default;
 

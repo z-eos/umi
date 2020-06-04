@@ -7,7 +7,7 @@
 <div class="card-group m-0 my-3" id="accordion">
   <div class="card card-sm border border-danger">
     <div class="card-header bg-danger clearfix p-0 pt-2" role="tab" id="headErr">
-      <h4 class="text-light">
+      <h4 class="text-white">
 	<a class="chevron_toggleable btn btn-link btn-sm pull-left"
 	 href="#"
 	 title="Collapse In/Out"
@@ -56,7 +56,7 @@
       <!-- span class="text-white" aria-hidden="true">&times;</span -->
       <span aria-hidden="true" class="text-white fas fa-times-circle"></span>
     </button>
-    <h4 class="text-light">
+    <h4 class="text-white">
       <i class="fas fa-exclamation-triangle pl-3"></i>
       <b>Warning!</b>
       <em><small>
@@ -77,7 +77,7 @@
 [% IF final_message.success %]
 <div class="card m-0 my-3 border border-success">
   <div class="card-header bg-success clearfix p-0 pt-2">
-    <h4 class="text-light">
+    <h4 class="text-white">
       <a class="chevron_toggleable btn btn-link btn-sm pull-left"
 	 href="#"
 	 title="Collapse In/Out"
