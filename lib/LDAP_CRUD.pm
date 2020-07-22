@@ -725,14 +725,13 @@ it uses sub last_seq_val()
 
 =cut
 
-has 'last_gidNumber' => ( is       => 'ro',
-			  isa      => 'Num',
-			  required => 0, lazy => 1,
+has 'last_gidNumber' => ( is       => 'ro', isa => 'Num',
+			  required => 0,   lazy => 1,
 			  builder  => 'build_last_gidNumber', );
 
 sub build_last_gidNumber {
   my $self = shift;
-  return $self->last_seq_val({ base  => $self->cfg->{base}->{acc_root},
+  return $self->last_seq_val({ base  => $self->cfg->{base}->{group},
 			       attr  => 'gidNumber', })
     // $self->cfg->{defaults}->{ldap}->{gidNumber_start};
 }
@@ -765,7 +764,7 @@ sub last_seq_val {
 	      filter => $args->{filter} // sprintf("(%s=*)", $args->{attr}),
 	      scope  => $args->{scope}  // 'one',
 	      deref  => $args->{deref}  // 'never', };
-  # log_debug { np($arg) };
+  log_debug { np($arg) };
   my $callername = (caller(1))[3];
   $callername = 'main' if ! defined $callername;
   my $return = 'call to LDAP_CRUD->last_seq_val from ' . $callername . ': ';
@@ -2731,14 +2730,25 @@ sub ipa {
   my $return;
   $return->{arg} = $arg;
 
-  my ( $key, $val, $k, $v, $l, $r, $tmp, $entry_svc, $entry_dhcp, $entry_ovpn, $ipspace, $ip_used );
+  my ( $key, $val, $k, $v, $l, $r, $f, $tmp, $entry_svc, $entry_dhcp, $entry_ovpn, $ipspace, $ip_used );
 
   my $ipa = Net::CIDR::Set->new;
 
+  if ( $arg->{naddr} =~ /$self->{a}->{re}->{net2b}/ || $arg->{naddr} =~ /$self->{a}->{re}->{net3b}/ ) {
+    $f = sprintf('(|(umiOvpnCfgIfconfigPush=*%s.*)(umiOvpnCfgIroute=%s.*)(dhcpStatements=fixed-address %s.*)(ipHostNumber=%s.*))',
+		 $arg->{naddr},
+		 $arg->{naddr},
+		 $arg->{naddr},
+		 $arg->{naddr},
+		 $arg->{fqdn});
+  } else {
+    $f = sprintf('(|(&(authorizedService=ovpn@%s)(cn=*))(dhcpStatements=fixed-address *)(ipHostNumber=*))',
+		 $arg->{fqdn});
+  }
+
   my $mesg_ovpn = $self->search({ base      => $self->{cfg}->{base}->{db},
 				  sizelimit => 0,
-  				  filter    => sprintf('(|(&(authorizedService=ovpn@%s)(cn=*))(dhcpStatements=fixed-address *)(ipHostNumber=*))',
-						       $arg->{fqdn}),
+  				  filter    => $f,
   				  attrs     => [ qw( umiOvpnCfgIfconfigPush
 						     umiOvpnCfgIroute
 						     ipHostNumber
