@@ -1,9 +1,6 @@
 [% META
    title = 'Group Modify'
-   link = '<link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">'
 %]
-
-<link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">
 
 <[% site.pageheading %] class="[% site.pageheadingclass %]">
 <i class="fas fa-users-cog fa-lg mr-3 text-muted"></i>
@@ -17,50 +14,11 @@ User Groups Modification Form <small><em class="text-muted font-monospace">
 
 [% form.render %]
 
-<script src="/static/js/umi-multiselect.js"></script>
-
 <script>
-//
-// $(function(){
-//   $('#groups').multiSelect({
-//     keepOrder: true,
-//     
-//     selectableHeader: "<button type='button' class='btn btn-block btn-info'><span class='fa fa-users'>&nbsp;</span><b>Available Groups</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",
-//     selectionHeader: "<button type='button' class='btn btn-block btn-success'><span class='fa fa-users'>&nbsp;</span><b>Groups User Belongs To</b></button><input type='text' class='form-control search-input' autocomplete='off' placeholder='type to search or clear all for default'>",
-//     
-//     afterInit: function(ms){
-//       var that = this,
-//           $selectableSearch = that.$selectableUl.prev(),
-//           $selectionSearch = that.$selectionUl.prev(),
-//           selectableSearchString = '#'+that.$container.attr('id')+' .ms-elem-selectable:not(.ms-selected)',
-//           selectionSearchString = '#'+that.$container.attr('id')+' .ms-elem-selection.ms-selected';
-//       
-//       that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
-// 				   .on('keydown', function(e){
-// 				     if (e.which === 40){
-// 				       that.$selectableUl.focus();
-// 				       return false;
-// 				     }
-// 				   });
-//       
-//       that.qs2 = $selectionSearch.quicksearch(selectionSearchString)
-// 				  .on('keydown', function(e){
-// 				    if (e.which == 40){
-// 				      that.$selectionUl.focus();
-// 				      return false;
-// 				    }
-// 				  });
-//     },
-//     afterSelect: function(){
-//       this.qs1.cache();
-//       this.qs2.cache();
-//     },
-//     afterDeselect: function(){
-//       this.qs1.cache();
-//       this.qs2.cache();
-//     }
-//     
-//   });
-// });
-//
+$(function() {
+    $('.umi-multiselect2').select2({
+      placeholder: 'select a group',
+      allowClear: true
+    });
+});
 </script>

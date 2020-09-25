@@ -20,6 +20,8 @@
 
    <link href="/static/css/jquery.datetimepicker.css" media="screen" rel="stylesheet" type="text/css">
 
+   <link href="/static/select2/css/select2.min.css" rel="stylesheet" />
+
    [% template.link %]
 
    <link href="/static/css/umi.css" rel="stylesheet" type="text/css">

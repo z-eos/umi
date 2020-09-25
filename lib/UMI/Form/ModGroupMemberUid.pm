@@ -17,7 +17,7 @@ has_field 'ldap_modify_memberUid' => ( type => 'Hidden', );
 
 has_field 'memberUid' => ( type => 'Multiple',
 			   label => '',
-			   # element_class => [ 'umi-multiselect' ],
+			   element_class => [ 'umi-multiselect2' ],
 			   # required => 1,
 			 );
 
@@ -52,26 +52,11 @@ sub options_memberUid {
 }
 
 
-has_field 'aux_reset' => ( type => 'Reset',
-		       label => '',
-		       wrapper_class => [ 'col-xs-4' ],
-		       element_class => [ 'btn', 'btn-danger', 'btn-block', ],
-		       element_wrapper_class => [ 'col-xs-12', ],
-		       value => 'Reset' );
-
-has_field 'aux_submit' => ( type => 'Submit',
-			wrapper_class => [ 'col-xs-8' ],
-			element_class => [ 'btn', 'btn-success', 'btn-block', ],
-			   element_wrapper_class => [ 'col-xs-12', ],
-			value => 'Submit' );
-
-# has_block 'submitit' => ( tag => 'div',
-#                         render_list => [ 'reset', 'submit'],
-#                         label => '&nbsp;',
-#                         class => [ 'row' ]
-#                       );
-
-# sub build_render_list {[ 'groups', 'submitit' ]}
+has_field 'aux_submit' => ( type                  => 'Submit',
+			    wrapper_class         => [ 'col-xs-8' ],
+			    element_class         => [ 'btn', 'btn-success', 'btn-block', ],
+			    element_wrapper_class => [ 'col-xs-12', ],
+			    value                 => 'Submit' );
 
 sub html_attributes {
   my ( $self, $field, $type, $attr ) = @_;

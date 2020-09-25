@@ -22,19 +22,10 @@ has_field 'aux_runflag'       => ( type => 'Hidden', value => '0' );
 
 has_field 'groups'
   => ( type           => 'Multiple',
-       label          => '',
-       element_class  => [ 'umi-multiselect', ],
+       label          => 'Select/Remove a group ',
+       label_class    => [ 'font-weight-bold' ],
+       element_class  => [ 'umi-multiselect2', ],
        options_method => \&group, );
-
-has_field 'aux_reset'
-  => ( type          => 'Reset',
-       element_class => [ qw( btn
-			      btn-danger
-			      btn-block
-			      font-weight-bold
-			      text-uppercase) ],
-       wrapper_class => [ 'col-4' ],
-       value         => 'Reset' );
 
 has_field 'aux_submit'
   => ( type          => 'Submit',
@@ -43,19 +34,19 @@ has_field 'aux_submit'
 			      btn-block
 			      font-weight-bold
 			      text-uppercase) ],
-       wrapper_class => [ 'col-8', ],
+       wrapper_class => [ '', ],
        value         => 'Submit' );
 
 has_block 'aux_submitit'
   => ( tag => 'div',
-       render_list => [ 'aux_reset', 'aux_submit'],
+       render_list => [ 'aux_submit'],
        class => [ 'row', ]
      );
 
 sub build_render_list {[ qw( ldap_modify_group
 			     aux_runflag
 			     groups
-			     aux_submitit ) ]}
+			     aux_submit ) ]}
 
 sub validate {
   my $self = shift;

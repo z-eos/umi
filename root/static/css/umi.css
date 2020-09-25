@@ -554,3 +554,35 @@ table.dataTable thead .sorting::after, table.dataTable thead .sorting_asc::after
     font-family: "Font Awesome 5 Free" !important;
 }
 
+/* -------------------------------
+
+   KLUDGE fixes of Select2
+   https://select2.org/
+
+   ------------------------------- */
+
+.select2-dropdown {
+    border-radius: 0;
+}
+.select2-container--default .select2-selection--single {
+    border-radius: 0;
+}
+.select2-container--default .select2-selection--multiple {
+    border-radius: 0;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    border-radius: 0;
+}
+.select2-container--classic .select2-selection--single {
+    border-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+.select2-container--classic .select2-selection--multiple {
+    border-radius: 0;
+}
+.select2-container--classic .select2-selection--multiple .select2-selection__choice {
+    border-radius: 0;
+}

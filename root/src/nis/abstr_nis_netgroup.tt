@@ -1,9 +1,8 @@
 [% META
    title = 'abstrNisNetGroup'
-   link = '<link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">'
 %]
 
-<link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">
+<!-- <link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css"> -->
 
 <[% site.pageheading %] class="[% site.pageheadingclass %]">
 <i class="fas fa-user-friends fa-lg mr-3 text-muted"></i>
@@ -24,40 +23,47 @@
 [% END %]
 
 <script>
-    $(function() {
-	$('#netgroup').change(function(){
-	    // console.log($(this).val());
-	    if( -1 == $(this).val().indexOf('category')) {
-		// console.log('not category');
-		$('#uids').parent().parent().removeClass('d-none');
-		$('#ng_access').parent().parent().removeClass('d-none');
-		$('#ng_category').parent().parent().addClass('d-none');
-	    } else {
-		// console.log('category');
-		$('#uids').parent().parent().addClass('d-none');
-		$('#ng_category').parent().parent().removeClass('d-none');
-		$('#ng_access').parent().parent().addClass('d-none');
-	    }
-	});
-    });
+ $(function() {
+   $('.umi-multiselect2').select2({
+     placeholder: 'select a group',
+     allowClear: true
+   });
+ });
 
-    if ( $('#aux_dn_form_to_modify').val().length ) {
-	$('#netgroup').parent().parent().addClass('d-none');
-	$('#cn').parent().parent().addClass('d-none');
-	console.log($('#netgroup').val());
-	if( -1 != $('#netgroup').val().indexOf('category')) {
-	    $('#uids').parent().parent().addClass('d-none');
-	    $('#ng_category').parent().parent().removeClass('d-none');
-	    $('#ng_access').parent().parent().addClass('d-none');
-	} else {
-	    $('#uids').parent().parent().removeClass('d-none');
-	    $('#ng_category').parent().parent().addClass('d-none');
-	    $('#ng_access').parent().parent().removeClass('d-none');
-	}
-    }
+ $(function() {
+   $('#netgroup').change(function(){
+     // console.log($(this).val());
+     if( -1 == $(this).val().indexOf('category')) {
+       // console.log('not category');
+       $('#uids').parent().parent().removeClass('d-none');
+       $('#ng_access').parent().parent().removeClass('d-none');
+       $('#ng_category').parent().parent().addClass('d-none');
+     } else {
+       // console.log('category');
+       $('#uids').parent().parent().addClass('d-none');
+       $('#ng_category').parent().parent().removeClass('d-none');
+       $('#ng_access').parent().parent().addClass('d-none');
+     }
+   });
+ });
 
-    </script>
+ if ( $('#aux_dn_form_to_modify').val().length ) {
+   $('#netgroup').parent().parent().addClass('d-none');
+   $('#cn').parent().parent().addClass('d-none');
+   console.log($('#netgroup').val());
+   if( -1 != $('#netgroup').val().indexOf('category')) {
+     $('#uids').parent().parent().addClass('d-none');
+     $('#ng_category').parent().parent().removeClass('d-none');
+     $('#ng_access').parent().parent().addClass('d-none');
+   } else {
+     $('#uids').parent().parent().removeClass('d-none');
+     $('#ng_category').parent().parent().addClass('d-none');
+     $('#ng_access').parent().parent().removeClass('d-none');
+   }
+ }
 
-<script src="/static/js/umi-multiselect.js"></script>
+</script>
+
+<!-- <script src="/static/js/umi-multiselect.js"></script>
 <script src="/static/js/jquery.multi-select.js" type="text/javascript"></script>
-<script src="/static/js/jquery.quicksearch.js" type="text/javascript"></script>
+<script src="/static/js/jquery.quicksearch.js" type="text/javascript"></script> -->

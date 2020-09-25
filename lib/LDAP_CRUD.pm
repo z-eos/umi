@@ -3329,7 +3329,7 @@ sub bld_select {
 			       $_->exists($arg->{attr}->[1]) ? ' --- ' . $_->get_value( $arg->{attr}->[1] ) : '');
       utf8::decode($arg->{toutfy});
       push @arr, { value => $_->dn,
-		   label => $arg->{toutfy}, };
+		   label => $arg->{toutfy}, }; # here it occures Missing argument in sprintf at 
     }
   }
 

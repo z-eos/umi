@@ -44,7 +44,7 @@ has_field 'memberUid'
        label                 => 'Group Members',
        label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
        element_wrapper_class => [ 'input-sm', 'col-10', ],
-       element_class         => [ 'umi-multiselect' ],
+       element_class         => [ 'umi-multiselect2' ],
        wrapper_class         => [ 'row' ],
        # required => 1,
      );
@@ -88,16 +88,6 @@ has_field 'descr'
        wrapper_class         => [ 'row' ],
        cols                  => 30, rows => 2);
 
-has_field 'aux_reset'
-  => ( type          => 'Reset',
-       element_class => [ qw( btn
-			      btn-danger
-			      btn-block
-			      font-weight-bold
-			      text-uppercase) ],
-       wrapper_class => [ 'col-4' ],
-       value         => 'Reset' );
-
 has_field 'aux_submit'
   => ( type          => 'Submit',
        element_class => [ qw( btn
@@ -105,16 +95,10 @@ has_field 'aux_submit'
 			      btn-block
 			      font-weight-bold
 			      text-uppercase) ],
-       wrapper_class => [ 'col-8', ],
+       wrapper_class => [ '', ],
        value         => 'Submit' );
 
-has_block 'aux_submitit'
-  => ( tag => 'div',
-       render_list => [ 'aux_reset', 'aux_submit'],
-       class => [ 'row', ]
-     );
-
-sub build_render_list {[ 'branch', 'cn', 'memberUid', 'descr', 'aux_submitit' ]}
+sub build_render_list {[ 'branch', 'cn', 'memberUid', 'descr', 'aux_submit' ]}
 
 
 sub validate {

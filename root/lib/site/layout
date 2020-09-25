@@ -65,6 +65,8 @@
 <script type="text/javascript" src="/static/js/moment-with-locales.js"></script>
 <script type="text/javascript" src="/static/js/tempusdominus-bootstrap-4.min.js"></script>
 
+<script src="/static/select2/js/select2.min.js"></script>
+
 [% IF c.check_user_roles('admin') %]
 <!-- LDAP tree related (Vue based) -->
 <!--

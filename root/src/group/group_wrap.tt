@@ -1,6 +1,5 @@
 [% META
    title = 'Group root'
-   link = '<link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">'
 %]
 
 <link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">
@@ -15,4 +14,11 @@ New Group<small><em class="text-muted font-monospace"></em></small>
 
 [% form.render %]
 
-<script src="/static/js/umi-multiselect.js"></script>
+<script>
+ $(function() {
+    $('.umi-multiselect2').select2({
+      placeholder: 'select user/s',
+      allowClear: true
+    });
+});
+</script>

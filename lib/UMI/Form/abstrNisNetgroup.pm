@@ -60,9 +60,9 @@ has_field 'uids'
 				  'data-ico-r'       => 'fa-user',
 				  'data-placeholder' => 'users', },
        element_wrapper_class => [ 'input-sm', 'col-11' ],
-       element_class         => [ 'umi-multiselect' ],
+       element_class         => [ 'umi-multiselect2' ],
        options_method        => \&uids,
-       wrapper_class         => [ 'row', 'd-none', ],
+       wrapper_class         => [ 'row', ],
        required              => 0,
      );
 
@@ -74,7 +74,7 @@ has_field 'associatedDomain'
 				  'data-ico-r'       => 'fa-desktop',
 				  'data-placeholder' => 'hosts', },
        element_wrapper_class => [ 'input-sm', 'col-11' ],
-       element_class         => [ 'umi-multiselect' ],
+       element_class         => [ 'umi-multiselect2' ],
        options_method        => \&associatedDomain,
        wrapper_class         => [ 'row', ],
        required              => 1,
@@ -88,9 +88,9 @@ has_field 'ng_access'
 				  'data-ico-r'       => 'fa-users',
 				  'data-placeholder' => 'access netgroups', },
        element_wrapper_class => [ 'input-sm', 'col-11' ],
-       element_class         => [ 'umi-multiselect' ],
+       element_class         => [ 'umi-multiselect2' ],
        options_method        => \&ng_access,
-       wrapper_class         => [ 'row', 'd-none', ],
+       wrapper_class         => [ 'row', ],
        required              => 0,
      );
 
@@ -102,9 +102,9 @@ has_field 'ng_category'
 				  'data-ico-r'       => 'fa-users',
 				  'data-placeholder' => 'category netgroups', },
        element_wrapper_class => [ 'input-sm', 'col-11' ],
-       element_class         => [ 'umi-multiselect' ],
+       element_class         => [ 'umi-multiselect2' ],
        options_method        => \&ng_category,
-       wrapper_class         => [ 'row', 'd-none', ],
+       wrapper_class         => [ 'row', ],
        required              => 0,
      );
 
@@ -117,16 +117,6 @@ has_field 'description'
        wrapper_class         => [ 'row', 'mt-5', ],
        cols                  => 30, rows => 2);
 
-has_field 'aux_reset'
-  => ( type          => 'Reset',
-       element_class => [ qw( btn
-			      btn-danger
-			      btn-block
-			      font-weight-bold
-			      text-uppercase) ],
-       wrapper_class => [ 'col-4' ],
-       value         => 'Reset' );
-
 has_field 'aux_submit'
   => ( type          => 'Submit',
        element_class => [ qw( btn
@@ -134,15 +124,8 @@ has_field 'aux_submit'
 			      btn-block
 			      font-weight-bold
 			      text-uppercase) ],
-       wrapper_class => [ 'col-8', ],
+       wrapper_class => [ '', ],
        value         => 'Submit' );
-
-has_block 'aux_submitit'
-  => ( tag => 'div',
-       render_list => [ 'aux_reset', 'aux_submit'],
-       class => [ 'row', 'mt-5', ]
-     );
-
 
 sub build_render_list {[ qw( aux_dn_form_to_modify
 			     netgroup
@@ -152,7 +135,7 @@ sub build_render_list {[ qw( aux_dn_form_to_modify
 			     associatedDomain
 			     ng_access
 			     ng_category
-			     aux_submitit ) ]}
+			     aux_submit ) ]}
 
 # sub validate {
 #   my $self = shift;
