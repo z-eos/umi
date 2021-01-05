@@ -87,7 +87,7 @@ Modify Fields of DN: <small><em>
   [% # -------------------------------------------------------------------------------------------- %]
   [% FOREACH attr IN entries %]
   [% attrId = attr.key _ '_' _ loop.index %]
-  <div class="form-group row">
+  <div class="form-group row" title="title">
     <label class="col-sm-3 text-right text-truncate h6 font-weight-bold">
       <b>[% attr.key %]:</b>
     </label>

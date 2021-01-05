@@ -23,7 +23,7 @@ has_field 'aux_runflag'           => ( type => 'Hidden', value => '0' );
 has_field 'groups'
   => ( type           => 'Multiple',
        label          => '',
-       element_class  => [ 'umi-multiselect', ],
+       element_class  => [ 'umi-multiselect2', ],
        element_attr   => { 'data-ico-l'       => 'fa-users-cog',
 			   'data-ico-r'       => 'fa-users-cog',
 			   'data-placeholder' => 'rad group', },

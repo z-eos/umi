@@ -62,7 +62,8 @@ sub signin :Path Global {
     $c->session->{auth_uid} = eval '$c->user->' . UMI->config->{authentication}->{realms}->{ldap}->{store}->{user_field};
     # log_debug { np($c->session) };
 
-    my $umiSettingsJson = $c->user->has_attribute('umisettingsjson');
+    my $umiSettingsJson = defined $c->user ? $c->user->has_attribute('umisettingsjson') : '{}';
+
     if ( defined $umiSettingsJson ) {
       use JSON;
       my $json = JSON->new->allow_nonref;

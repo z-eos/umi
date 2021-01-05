@@ -2,8 +2,6 @@
    title = 'RADIUS Groups Modify'
 %]
 
-<link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">
-
 <[% site.pageheading %] class="[% site.pageheadingclass %]">
 <i class="fas fa-users-cog fa-lg mr-3 text-muted"></i>
 User's RADIUS Group/s Modification Form <small><em class="text-muted font-monospace">
@@ -16,4 +14,11 @@ User's RADIUS Group/s Modification Form <small><em class="text-muted font-monosp
 
 [% form.render %]
 
-<script src="/static/js/umi-multiselect.js"></script>
+<script>
+ $(function() {
+    $('.umi-multiselect2').select2({
+      placeholder: 'select group/s',
+      allowClear: true,
+    });
+});
+</script>

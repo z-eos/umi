@@ -770,43 +770,50 @@ has_block 'ovpn'
 has_field 'groups'
   => ( type                  => 'Multiple',
        label                 => '',
-       element_wrapper_class => [ 'col-12', ],
-       element_class         => [ 'multiselect', 'input-sm', 'umi-multiselect', ],
+       element_wrapper_class => [ '', ],
+       element_class         => [ 'input-sm', 'umi-multiselect2', 'w-100', ],
+       options_method        => \&group,
        # required => 1,
      );
 
-sub options_groups {
+sub group {
   my $self = shift;
-  my ( @groups, $return );
-
-  return unless $self->ldap_crud;
-
-  my $ldap_crud = $self->ldap_crud;
-  my $mesg = $ldap_crud->search( { base      => $ldap_crud->cfg->{base}->{group},
-				   scope     => 'one',
-				   sizelimit => 0,
-				   attrs     => [ 'cn' ], } );
-
-  push @{$return->{error}}, $ldap_crud->err($mesg)
-    if ! $mesg->count;
-
-  my @groups_all = $mesg->sorted('cn');
-
-  push @groups, { value => $_->get_value('cn'), label => $_->get_value('cn'), }
-    foreach @groups_all;
-
-  return \@groups;
+  return unless $self->form->ldap_crud;
+  return $self->form->ldap_crud->select_group;
 }
 
-has_field 'groupspace'
-  => ( type => 'Display',
-       html => '<p>&nbsp;</p>',
-     );
+# sub options_groups {
+#   my $self = shift;
+#   my ( @groups, $return );
+
+#   return unless $self->ldap_crud;
+
+#   my $ldap_crud = $self->ldap_crud;
+#   my $mesg = $ldap_crud->search( { base      => $ldap_crud->cfg->{base}->{group},
+# 				   scope     => 'one',
+# 				   sizelimit => 0,
+# 				   attrs     => [ 'cn' ], } );
+
+#   push @{$return->{error}}, $ldap_crud->err($mesg)
+#     if ! $mesg->count;
+
+#   my @groups_all = $mesg->sorted('cn');
+
+#   push @groups, { value => $_->get_value('cn'), label => $_->get_value('cn'), }
+#     foreach @groups_all;
+
+#   return \@groups;
+# }
+
+# has_field 'groupspace'
+#   => ( type => 'Display',
+#        html => '<p>&nbsp;</p>',
+#      );
 
 
 has_block 'groupsselect'
   => ( tag         => 'fieldset',
-       label       => 'Groups user belongs to',
+       label       => 'Groups, user belongs to',
        render_list => [ 'groups', ], # 'groupspace', ],
        class       => [ 'tab-pane', 'fade', ],
        attr        => { id                => 'groups',
@@ -1441,8 +1448,8 @@ sub validate {
 			     $e->field('devos')->value ) )
 	  if ! $ip->contains( sprintf("%s/32", $ror) );
 
-	my $fltr = sprintf("(umiOvpnCfgIfconfigPush=%s)",
-			   $e->field('ifconfigpush')->value );
+	my $fltr = sprintf("(umiOvpnCfgIfconfigPush=%s *)", $ror);
+			   # $e->field('ifconfigpush')->value );
 	log_debug { np( $fltr ) };
 	$mesg = $ldap_crud->search({ filter => $fltr,
 				     base   => $ldap_crud->{cfg}->{base}->{db},

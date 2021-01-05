@@ -1,7 +1,6 @@
 [% # -*- mode: web; mode: follow; -*- %]
 [% META
    title = 'Add Service Account (New)'
-   link = '<link href="/static/css/multi-select.css" media="screen" rel="stylesheet" type="text/css">'
    %]
 
 <[% site.pageheading %] class="[% site.pageheadingclass %]">
@@ -187,8 +186,16 @@ for: [% form.field('add_svc_acc').value %]
 </script>
 [% END %]
 
-<!-- script src="/static/js/umi-user-all.js"></script -->  
-<script src="/static/js/umi-multiselect.js"></script>
+<script>
+ $(function() {
+    $('.umi-multiselect2').select2({
+      placeholder: 'select group/s',
+      allowClear: true,
+      dropdownAutoWidth: false,
+      width: '100%'
+    });
+});
+</script>
 
 <script type="text/javascript">
  initDateTimePicker('#person_exp');
