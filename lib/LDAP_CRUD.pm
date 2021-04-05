@@ -1253,9 +1253,18 @@ sub reassign {
   undef $attrs;
 
   # src BRANCH already EXISTS in dst subtree and here
-  # we are to process all objects bellow it (bellow src branch)
+  # we process all objects bellow it (bellow src branch)
   if ( $arg->{type} eq 'people' && $arg->{src}->{is_branch} ) {
     $result = $self->search( { base  => $arg->{src}->{str}, scope => 'children', } );
+
+    ### FINISH
+    ## *first* we must delete src subtree, to avoid collision/s
+    ## with any tool which process LDAP_SYNC_ events (if any)
+    ## we delete src subtree recursively if @{$return->{error}} is empty
+    $self->delr( $arg->{src}->{str} )
+      if ref($return) ne "HASH" ||
+      ( ref($return) eq "HASH" && $#{$return->{error}} < 0);
+
     foreach $entry ( $result->entries ) {
       $clone = $entry->clone;
       $mesg  = $clone->dn(sprintf('%s,%s',
@@ -1277,11 +1286,6 @@ sub reassign {
       push @{$return->{error}}, $mesg if $mesg;
     }
 
-    ### FINISH
-    # here we have to delete src subtree recursively if @{$return->{error}} is empty
-    $self->delr( $arg->{src}->{str} )
-      if ref($return) ne "HASH" ||
-      ( ref($return) eq "HASH" && $#{$return->{error}} < 0);
   } else {
     $result = $self->search( { base  => $arg->{src}->{str}, scope => 'base', } );
     $clone = $result->entry(0)->clone;
@@ -1300,16 +1304,19 @@ sub reassign {
 	}
 	push @{$attrs}, $_ => $val;
       }
-    $mesg = $self->add( $clone->dn, $attrs );
-    undef $attrs;
-    push @{$return->{error}}, $mesg if $mesg;
 
     ### FINISH
-    # here we have to delete src dn if @{$return->{error}} is empty
+    ## *first* we must delete, to avoid collision with any tool which
+    ## process LDAP_SYNC_ events
+    ## we delete src dn if @{$return->{error}} is empty
     # $self->del( $arg->{src}->{str} ) if $return != 0 && $#{$return->{error}} > -1;
     $self->del( $arg->{src}->{str} )
       if ref($return) ne "HASH" ||
       ( ref($return) eq "HASH" && $#{$return->{error}} < 0);
+
+    $mesg = $self->add( $clone->dn, $attrs );
+    undef $attrs;
+    push @{$return->{error}}, $mesg if $mesg;
   }
   return $return;
 }
