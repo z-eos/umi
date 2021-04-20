@@ -31,8 +31,10 @@ Users Accounts Statistics
       <tr class="text-uppercase info">
 	<th>LName</th>
 	<th>FName</th>
+	<th>Email</th>
 	<th>blocked</th>
 	<th>root uid</th>
+	<th>sshkey</th>
 	<th>service</th>
 	<th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">fqdn</th>
 	<th>svc uid</th>
@@ -43,8 +45,10 @@ Users Accounts Statistics
       <tr class="text-uppercase info">
 	<th>LName</th>
 	<th>FName</th>
+	<th>Email</th>
 	<th>blocked</th>
 	<th>root uid</th>
+	<th>sshkey</th>
 	<th>service</th>
 	<th title="Fully Qualified Domain Name (FQDN), an absolute domain name, a domain name (DNS)">fqdn</th>
 	<th>svc uid</th>
@@ -60,10 +64,12 @@ Users Accounts Statistics
       <tr class="umi-text-xs [% 'table-danger' IF accounts.$dn.blocked %]">
 	<th>[% accounts.$dn.sn %]</th>
 	<th>[% accounts.$dn.givenName %]</th>
+	<th>[% accounts.$dn.mail %]</th>
 	<td class="mono">[% accounts.$dn.blocked %]</td>
 	<td class="mono">[% buttonizer( buttonizer_id='',
 	       buttonizer_dn=dn,
 	       buttonizer_text=accounts.$dn.uid ) %]</td>
+	<td class="mono">[% accounts.$dn.sshkey %]</td>
 	<td class="mono">[% svc %]</td>
 	<td class="mono">[% fqdn %]</td>
 	<td class="mono">[% svcacc.cn %]</td>
@@ -76,10 +82,12 @@ Users Accounts Statistics
       <tr class="umi-text-xs [% 'table-danger' IF accounts.$dn.blocked %]">
 	<th>[% accounts.$dn.sn %]</th>
 	<th>[% accounts.$dn.givenName %]</th>
+	<th>[% accounts.$dn.mail %]</th>
 	<td class="mono">[% accounts.$dn.blocked %]</td>
 	<td class="mono">[% buttonizer( buttonizer_id='',
 	       buttonizer_dn=dn,
 	       buttonizer_text=accounts.$dn.uid ) %]</td>
+	<td class="mono">[% accounts.$dn.sshkey %]</td>
 	<td></td>
 	<td></td>
 	<td></td>

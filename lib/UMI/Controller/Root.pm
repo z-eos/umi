@@ -179,12 +179,13 @@ sub stat_acc : Local {
     $mesg = $ldap_crud->search({ base      => $ldap_crud->{cfg}->{base}->{acc_root},
 				 scope     => 'sub',
 				 sizelimit => 0,
-				 attrs     => [ qw( authorizedService
-						    cn
-						    gidNumber
-						    givenName
-						    sn
-						    uid ) ],
+				 # attrs     => [ qw( authorizedService
+				 # 		    cn
+				 # 		    gidNumber
+				 # 		    givenName
+				 # 		    mail
+				 # 		    sn
+				 # 		    uid ) ],
 				 filter    => '(objectClass=*)', });
     if ( $mesg->code ) {
       push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
@@ -202,7 +203,9 @@ sub stat_acc : Local {
 	  utf8::decode($val->{givenname}->[0]);
 	  $acc->{$key}->{givenName}         = $val->{givenname}->[0];
 	  utf8::decode($val->{sn}->[0]);
+	  $acc->{$key}->{mail}              = exists $val->{mail} ? $val->{mail}->[0] : 'NA';
 	  $acc->{$key}->{sn}                = $val->{sn}->[0];
+	  $acc->{$key}->{sshkey}            = exists $val->{graypublickey} ? 1 : 0;
 	  $acc->{$key}->{uid}               = $val->{uid}->[0];
 	  $acc->{$key}->{authorizedService} = {};
 	  $acc->{$key}->{blocked}           = exists $gr_block->{$val->{uid}->[0]} ||

@@ -1,4 +1,4 @@
-#-*- cperl -*-
+#-*- mode: cperl; eval: (follow-mode) -*-
 #
 
 package UMI::Controller::abstrStatAccGroups;
@@ -46,7 +46,7 @@ sub index :Path :Args(0) {
 	 $return, );
 
     my $params = $c->req->params;
-	
+
     my $ldap_crud = $c->model('LDAP_CRUD');
     #-- collect all root accounts
     my $mesg = $ldap_crud->search({ base      => $ldap_crud->{cfg}->{base}->{acc_root},
@@ -103,7 +103,7 @@ sub index :Path :Args(0) {
 	#-- collect all netgroups current account is member of
 	$mesg_grp = $ldap_crud->search({ base => $ldap_crud->{cfg}->{base}->{netgroup},
 					 sizelimit => 0,
-					 filter => '(nisNetgroupTriple=*' . $account->get_value('uid') . '*)', });
+					 filter => '(nisNetgroupTriple=*,' . $account->get_value('uid') . ',*)', });
 	if ( $mesg_grp->code ) {
 	  push @{$return->{error}}, $ldap_crud->err($mesg_grp)->{html};
 	} else {

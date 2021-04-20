@@ -1514,6 +1514,15 @@ sub block {
 
   log_debug { np( $args ) };
 
+  $msg = $self->modify( $args->{dn},
+			[ replace => [ gidNumber => $self->cfg->{stub}->{group_blocked_gid}, ],	], );
+
+  if ( ref($msg) eq 'HASH' ) {
+    $return->{error} .= $msg->{html};
+  } else {
+    $return->{success} .= $ent_svc->dn . "\n";
+  }
+
   $msg_usr = $self->search ( { base      => $args->{dn},
 			       sizelimit => 0, } );
   if ( $msg_usr->is_error() ) {
@@ -1522,10 +1531,18 @@ sub block {
     # bellow we are blocking services
     my @ent_toblock = $msg_usr->entries;
     foreach $ent_svc ( @ent_toblock ) {
-      if ( $ent_svc->exists('userPassword') ) {
-	$userPassword = $self->pwdgen;
+      if ( $ent_svc->exists('userPassword') &&
+	 $ent_svc->get_value('userPassword') !~ /^\!-disabled-on-/) {
+	# before 20210419 # $userPassword = $self->pwdgen;
 	$msg = $self->modify( $ent_svc->dn,
-			      [ replace => [ userPassword => $userPassword->{ssha}, ], ], );
+			      [ replace =>
+				[ userPassword =>
+				  sprintf("!-disabled-on-%s-by-%s-%s",
+					  $self->user,
+					  $self->ts({ format => "%Y%m%d%H%M%S" }),
+					  $ent_svc->get_value('userPassword')),	],
+			      ], );
+# before 20210419 #	      [ replace => [ userPassword => $userPassword->{ssha}, ], ], );
 	if ( ref($msg) eq 'HASH' ) {
 	  $return->{error} .= $msg->{html};
 	} else {
@@ -1538,6 +1555,18 @@ sub block {
 	@keys = map { $_ !~ /^from="127.0.0.1" / ? sprintf('from="127.0.0.1" %s', $_) : $_ } @userPublicKeys;
 	$msg = $self->modify( $ent_svc->dn,
 			      [ replace => [ sshPublicKey => \@keys, ],], );
+	if ( ref($msg) eq 'HASH' ) {
+	  $return->{error} .= $msg->{html};
+	} else {
+	  $return->{success} .= $ent_svc->dn . "\n";
+	}
+      }
+
+      if ( $ent_svc->exists('grayPublicKey') ) {
+	@userPublicKeys = $ent_svc->get_value('grayPublicKey');
+	@keys = map { $_ !~ /^from="127.0.0.1" / ? sprintf('from="127.0.0.1" %s', $_) : $_ } @userPublicKeys;
+	$msg = $self->modify( $ent_svc->dn,
+			      [ replace => [ grayPublicKey => \@keys, ],], );
 	if ( ref($msg) eq 'HASH' ) {
 	  $return->{error} .= $msg->{html};
 	} else {
@@ -1563,13 +1592,13 @@ sub block {
     sprintf('cn=%s,%s',
 	    $self->cfg->{stub}->{group_blocked},
 	    $self->cfg->{base}->{group});
-  
+
   $msg = $self->search ( { base   => $self->cfg->{base}->{group},
 			   filter => sprintf('(&(cn=%s)(memberUid=%s))',
 					     $self->cfg->{stub}->{group_blocked},
 					     substr( (split /,/, $args->{dn})[0], 4 )),
 			   sizelimit => 0, } );
-  if ( $msg->is_error() ) {    
+  if ( $msg->is_error() ) {
     $return->{error} .= $self->err( $msg )->{html};
   } elsif ( $msg->count == 0) {
     $msg_chg = $self->search ( { base => $blockgr_dn, } );
