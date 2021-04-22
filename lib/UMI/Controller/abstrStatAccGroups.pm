@@ -38,7 +38,7 @@ sub index :Path :Args(0) {
   my ( $self, $c ) = @_;
 
   if ( $c->user_exists() ) {
-    my ( $account, $accounts, $utf_givenName, $utf_sn, $gidNumber,
+    my ( $account, $accounts, $utf_givenName, $utf_sn, $gidNumber, $mail,
 	 $grp, @services, $service,
 	 $mesg_blk, @mesg_blk_entries,
 	 $mesg_grp, @mesg_grp_entries,
@@ -52,7 +52,7 @@ sub index :Path :Args(0) {
     my $mesg = $ldap_crud->search({ base      => $ldap_crud->{cfg}->{base}->{acc_root},
 				    scope     => 'one',
 				    sizelimit => 0,
-				    attrs     => [ 'uid', 'givenName', 'sn', 'gidNumber', ],
+				    attrs     => [ 'uid', 'givenName', 'sn', 'gidNumber', 'mail', ],
 				    filter    => '(objectClass=*)', });
     if ( $mesg->code ) {
       push @{$return->{error}}, $ldap_crud->err($mesg)->{html};
@@ -63,13 +63,15 @@ sub index :Path :Args(0) {
 	utf8::decode($utf_givenName) if defined $utf_givenName;
 	utf8::decode($utf_sn) if defined $utf_sn;
 	$gidNumber  = $account->get_value('gidNumber');
+	$mail = $account->exists('mail') ? $account->get_value('mail') : 'NA';
 	# log_debug { $account->dn };
 	$accounts->{$account->dn} =
 	  {
-	   uid               => $account->get_value('uid'),
-	   givenName         => $utf_givenName,
-	   sn                => $utf_sn,
-	   blocked           => $gidNumber == $ldap_crud->cfg->{stub}->{group_blocked_gid} ? 1 : 0,
+	   uid       => $account->get_value('uid'),
+	   givenName => $utf_givenName,
+	   sn        => $utf_sn,
+	   mail      => $mail,
+	   blocked   => $gidNumber == $ldap_crud->cfg->{stub}->{group_blocked_gid} ? 1 : 0,
 	  };
 
 	#-- is current account blocked?

@@ -32,6 +32,7 @@ Account <i class="fas fa-exchange-alt"></i> Group Statistics<br><em class="h6 te
       <tr class="text-uppercase border-0">
 	<th>LName</th>
 	<th>FName</th>
+	<th>Mail</th>
 	<th>blocked</th>
 	<th>root uid</th>
 	<th>groups</th>
@@ -42,6 +43,7 @@ Account <i class="fas fa-exchange-alt"></i> Group Statistics<br><em class="h6 te
       <tr class="text-uppercase border-0">
 	<th>LName</th>
 	<th>FName</th>
+	<th>Mail</th>
 	<th>blocked</th>
 	<th>root uid</th>
 	<th>groups</th>
@@ -53,6 +55,7 @@ Account <i class="fas fa-exchange-alt"></i> Group Statistics<br><em class="h6 te
       <tr class="border-0">
 	<th>[% accounts.$dn.sn %]</th>
 	<th>[% accounts.$dn.givenName %]</th>
+	<th>[% accounts.$dn.mail %]</th>
 	<td>[% accounts.$dn.blocked %]</td>
 	<td>[% accounts.$dn.uid %]</td>
 	<td>[% accounts.$dn.groups.group.cn.join(', ') %]</td>
