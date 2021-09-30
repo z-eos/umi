@@ -417,7 +417,7 @@ Search Advanced
 			  
 			  <b class="text-monospace [% icon_color _ ' ' _ entry_text_size %]">
 			    [% IF entry.key.match('People');
-			       entry.key.replace('uid=','').replace('authorizedService=','').split(',').slice(0,-3).join('<i class="fa fa-ellipsis-h ml-1 mr-1"></i>');
+			       entry.key.replace('uid=','').replace('authorizedService=','').split(',').slice(0,-3).join('<i class="fa fa-sliders-h ml-1 mr-1"></i>');
 			       entry.val.attrs.reqStart.0;
 			       ELSE;
 			       entry.key;

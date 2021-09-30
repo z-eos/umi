@@ -99,6 +99,12 @@ sub pwd_alg_options {
   my $opt;
   # push @o, { value => 'NONE', label => '-none-', selected => 'selected' };
   foreach (sort ( Crypt::HSXKPasswd->defined_presets() )) {
+    ### !!! TO FIX !!!
+    # Caught exception in UMI::Controller::ToolPwdgen->index "ERROR - Crypt::HSXKPasswd::password(): Failed to generate password with the following error: ERROR - Crypt::HSXKPasswd::_increment_random_cache(): random function returned and invalid value (8.5160369053483e-05) at /usr/local/src/UMI/git/umi/script/../lib/UMI/Form/ToolPwdgen.pm line 102.
+ # at /usr/local/src/UMI/git/umi/script/../lib/UMI/Form/ToolPwdgen.pm line 102."
+
+    # Couldn't render template "tool/toolpwdgen.tt: undef error - No attribute session for User it-zeus"
+
     $opt = { value => $_,
 	     label => sprintf("%9s (example: %s)",
 			      $_,

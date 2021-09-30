@@ -1378,7 +1378,7 @@ sub mod_memberUid {
   push @memberUid_old, map { $_->get_value('memberUid') } $mesg->sorted('memberUid');
 
   my @a = sort @{$arg->{memberUid}};
-  my @b = sort @memberUid_old; p \@b;
+  my @b = sort @memberUid_old;
   if ( @a ~~ @b ) {
     $return->{success} = 'Nothing changed.';
   } else {

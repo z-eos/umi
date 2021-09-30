@@ -98,7 +98,7 @@ sub index :Path :Args(0) {
     if ( defined $tmp->{success} ) {
       $mta->{default}->{smarthost}->{ip} = $tmp->{success};
     } elsif ( defined $tmp->{error} ) {
-      push @{$return->{error}}, @{[$tmp->{error}]};
+      push @{$return->{error}}, np( $tmp->{error} );
     }
 
     # for each smarthost node
@@ -124,7 +124,7 @@ sub index :Path :Args(0) {
 	if ( defined $tmp->{success} ) {
 	  $mx = $tmp->{success};
 	} elsif ( defined $tmp->{error} ) {
-	  push @{$return->{error}}, @{[$tmp->{error}]};
+	  push @{$return->{error}}, np( $tmp->{error} );
 	}
 
 	# node IP address
@@ -136,7 +136,7 @@ sub index :Path :Args(0) {
 	if ( defined $tmp->{success} ) {
 	  $ip = $tmp->{success};
 	} elsif ( defined $tmp->{error} ) {
-	  push @{$return->{error}}, @{[$tmp->{error}]};
+	  push @{$return->{error}}, np( $tmp->{error} );
 	}
 
 	# A record (IP address) of MX
@@ -148,7 +148,7 @@ sub index :Path :Args(0) {
 	if ( defined $tmp->{success} ) {
 	  $mx_a = $tmp->{success};
 	} elsif ( defined $tmp->{error} ) {
-	  push @{$return->{error}}, @{[$tmp->{error}]};
+	  push @{$return->{error}}, np( $tmp->{error} );
 	}
 	  
 	# PTR of MX
@@ -160,7 +160,7 @@ sub index :Path :Args(0) {
 	if ( defined $tmp->{success} ) {
 	  $mx_ptr = $tmp->{success};
 	} elsif ( defined $tmp->{error} ) {
-	  push @{$return->{error}}, @{[$tmp->{error}]};
+	  push @{$return->{error}}, np( $tmp->{error} );
 	}
 
 	$mta->{custom}->{$fqdn}->{smarthost} =
@@ -199,7 +199,7 @@ sub index :Path :Args(0) {
 	if ( defined $tmp->{success} ) {
 	  $mx = $tmp->{success};
 	} elsif ( defined $tmp->{error} ) {
-	  push @{$return->{error}}, @{[$tmp->{error}]};
+	  push @{$return->{error}}, np( $tmp->{error} );
 	}
 
 	# node IP address
@@ -211,7 +211,7 @@ sub index :Path :Args(0) {
 	if ( defined $tmp->{success} ) {
 	  $ip = $tmp->{success};
 	} elsif ( defined $tmp->{error} ) {
-	  push @{$return->{error}}, @{[$tmp->{error}]};
+	  push @{$return->{error}}, np( $tmp->{error} );
 	}
 
 	# A record (IP address) of MX
@@ -223,7 +223,7 @@ sub index :Path :Args(0) {
 	if ( defined $tmp->{success} ) {
 	  $mx_a = $tmp->{success};
 	} elsif ( defined $tmp->{error} ) {
-	  push @{$return->{error}}, @{[$tmp->{error}]};
+	  push @{$return->{error}}, np( $tmp->{error} );
 	}
 
 	# PTR of MX
@@ -235,7 +235,7 @@ sub index :Path :Args(0) {
 	if ( defined $tmp->{success} ) {
 	  $mx_ptr = $tmp->{success};
 	} elsif ( defined $tmp->{error} ) {
-	  push @{$return->{error}}, @{[$tmp->{error}]};
+	  push @{$return->{error}}, np( $tmp->{error} );
 	}
 
 	$mta->{custom}->{$fqdn}->{smarthost} =

@@ -24,7 +24,7 @@
 	      aria-haspopup="true"
 	      aria-expanded="false"
 	      title="Action Menu">
-	<span class="fas fa-ellipsis-h"></span>
+	<span class="fas fa-sliders-h"></span>
       </button>
 
       <div class="dropdown-menu" aria-labelledby="dropdownMenuActions"> [% # dropdown-menu start %]
