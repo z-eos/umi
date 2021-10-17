@@ -1,0 +1,163 @@
+################################################################################
+# Gray's experimental LDAP schema items
+#
+# depends upon:
+#    nis.schema
+#
+# version: 20170809155847 by zeus
+################################################################################
+
+attributetype ( 1.3.6.1.4.1.9163.2.1.0 NAME 'grayPublicKey'
+	DESC 'SSH public key'
+	EQUALITY caseExactIA5Match
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+attributetype ( 1.3.6.1.4.1.9163.2.1.1 NAME 'grayHost'
+        DESC 'host computer'
+        EQUALITY caseIgnoreMatch
+        SUBSTR caseIgnoreSubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} )
+
+# Object Class Definitions
+
+objectclass ( 1.3.6.1.4.1.9163.2.2.0 NAME 'grayAccount'
+	DESC 'Abstraction of an employee account'
+	SUP posixAccount AUXILIARY
+	MUST ( cn $ uid $ uidNumber $ gidNumber $ homeDirectory )
+	MAY ( userPassword $ loginShell $ gecos $ grayPublicKey $ grayHost $ mail ) )
+
+objectclass ( 1.3.6.1.4.1.9163.2.2.1 NAME 'grayGroup'
+        DESC 'Abstraction of an access group'
+        SUP posixGroup STRUCTURAL
+        MUST ( cn $ gidNumber )
+        MAY ( grayHost ) )
+#
+attributetype ( 1.3.6.1.4.1.9163.2.1.2 NAME 'grayInstanceID'
+        DESC 'Virtual Instance ID'
+	EQUALITY caseExactIA5Match
+	SUBSTR caseExactIA5SubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26{64} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.2.1.3 NAME 'grayInstanceType'
+        DESC 'Virtual Instance Type'
+	EQUALITY caseExactIA5Match
+	SUBSTR caseExactIA5SubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26{64} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.2.1.4 NAME 'grayInstanceRegion'
+        DESC 'Region where the instance is located'
+        EQUALITY caseIgnoreMatch
+        SUBSTR caseIgnoreSubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{64} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.2.1.5 NAME 'grayDeviceMapping'
+        DESC 'Mapping of a virtual device'
+	EQUALITY caseExactMatch
+	SUBSTR caseExactSubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} )
+
+attributetype ( 1.3.6.1.4.1.9163.2.1.6 NAME 'grayStatus'
+        DESC 'Status of the Instance'
+        EQUALITY caseIgnoreMatch
+        SUBSTR caseIgnoreSubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{64} SINGLE-VALUE )
+	
+attributetype ( 1.3.6.1.4.1.9163.2.1.7 NAME 'grayMasterAccount'
+        DESC 'Master account this machine/instance belongs to'
+        EQUALITY caseIgnoreMatch
+        SUBSTR caseIgnoreSubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{64} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.2.1.8 NAME 'grayWSUser'
+        DESC 'Primary user of a workstation'
+        EQUALITY caseExactMatch
+        SUBSTR caseExactSubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} )
+	
+attributetype ( 1.3.6.1.4.1.9163.2.1.9 NAME 'grayHostingID'
+        DESC 'Hosting ID for the machine'
+        EQUALITY caseExactMatch
+        SUBSTR caseExactSubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE)
+
+attributetype ( 1.3.6.1.4.1.9163.2.1.10 NAME 'grayHostName'
+        DESC 'Host name'
+        EQUALITY caseIgnoreMatch
+        SUBSTR caseIgnoreSubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE)
+
+attributetype ( 1.3.6.1.4.1.9163.2.1.11 NAME 'grayCPUCount'
+        DESC 'Number of CPUs on the machine'
+        EQUALITY integerMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 SINGLE-VALUE)
+
+attributetype ( 1.3.6.1.4.1.9163.2.1.12 NAME 'grayRAMSize'
+        DESC 'Available RAM'
+        EQUALITY integerMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 SINGLE-VALUE)
+
+attributetype ( 1.3.6.1.4.1.9163.2.1.13 NAME 'grayOSName'
+        DESC 'Name of the operating system'
+	EQUALITY caseIgnoreIA5Match
+	SUBSTR caseIgnoreIA5SubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.2.1.14 NAME 'grayOSDistribution'
+        DESC 'OS Distribution'
+	EQUALITY caseIgnoreIA5Match
+	SUBSTR caseIgnoreIA5SubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE )
+	
+attributetype ( 1.3.6.1.4.1.9163.2.1.15 NAME 'grayOSDistributionFamily'
+        DESC 'OS Distribution Family'
+	EQUALITY caseIgnoreIA5Match
+	SUBSTR caseIgnoreIA5SubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.2.1.16 NAME 'grayOSVersion'
+        DESC 'Version of the operating system'
+	EQUALITY caseIgnoreIA5Match
+	SUBSTR caseIgnoreIA5SubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE )
+	
+attributetype ( 1.3.6.1.4.1.9163.2.1.17 NAME 'grayOSDistributionVersion'
+        DESC 'Version of the operating system distribution'
+	EQUALITY caseIgnoreIA5Match
+	SUBSTR caseIgnoreIA5SubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.2.1.18 NAME 'grayOSArchitecture'
+        DESC 'Hardware architecture string'
+	EQUALITY caseIgnoreIA5Match
+	SUBSTR caseIgnoreIA5SubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE )
+	
+# grayInstanceID	Virtual Instance ID, when applicable
+# grayInstanceType	Virtual Instance Type, when applicable
+# grayInstanceRegion	Zone
+# grayDeviceMapping	Device mapping, one attr per device
+# grayStatus		Machine status: up/down
+# grayMasterAccount	Master account ID (key for EC2 instances)
+#* grayHostingID	Hosting ID
+#* grayHostName
+#* ipHostNumber		Primary IP address (from nis.schema)
+# description		Free-text description
+# cn			Common Name
+
+objectclass ( 1.3.6.1.4.1.9163.2.2.2 NAME 'grayMachine'
+        DESC 'Abstraction for a machine or instance'
+	SUP account STRUCTURAL
+	MAY ( grayInstanceID $ grayInstanceType $ grayInstanceRegion $
+	      grayDeviceMapping $ grayStatus $ grayMasterAccount $
+              grayHostingID $ ipHostNumber $ grayHostName $
+	      grayCPUCount $ grayRAMSize $
+	      description $ cn $ grayOSName $ grayOSDistribution $
+	      grayOSDistributionFamily $ grayOSVersion $
+	      grayOSDistributionVersion $ grayOSArchitecture ) )
+
+objectclass ( 1.3.6.1.4.1.9163.2.2.3 NAME 'grayWorkStation'
+        DESC 'Abstraction for a workstation in a LAN'
+	SUP account STRUCTURAL
+	MUST ( uid $ grayWSUser $ macAddress $ ipHostNumber ) 
+	MAY ( cn $ memberUid $ description ) )
+

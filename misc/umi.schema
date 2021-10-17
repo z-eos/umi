@@ -1,0 +1,528 @@
+# -*- mode: conf; eval: (follow-mode) -*-
+#
+################################################################################
+# UMI OIDs
+# version: 20170809155847 by zeus
+#
+# https://github.com/z-eos/umi
+#
+################################################################################
+
+# Main OID: 1.3.6.1.4.1.9163
+# Sub  OID: .864
+#
+# OID Tree:
+#   .864
+#     |
+#     +--.10 userCertificate amendments
+#     |
+#     +--.11 openvpn(8) options attributes
+#     |
+#     +--.12 additional, not openvpn(8), attributes
+#     |
+#     +--.13.0 objectClass: umiOvpnCfg
+#     |
+#     +--.14.0 objectClass: umiUserCertificate
+#     |
+#     +--.15 Inventory
+#     |   |
+#     |   +--.15.1 HardWare Inventory attributes
+#     |   |
+#     |   +--.15.2 HardWare Inventory object-classes
+#     |   |
+#     |   +--.15.3 Virtual Machines Inventory attributes
+#     |   |
+#     |   +--.15.4 Virtual Machines Inventory object-classes
+#     |
+#     +--.16 UMI Settings
+#         |
+#         +--.16.1 UMI Settings attributes
+#         |
+#         +--.16.2 UMI Settings objectclass
+#
+
+#===========================================================
+# .10 strongAuthenticationUser amendation attributes
+#===========================================================
+attributetype ( 1.3.6.1.4.1.9163.864.10.1 NAME 'umiUserCertificateSn'
+	DESC 'User Certificate SN'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.10.2 NAME 'umiUserCertificateIssuer'
+	DESC 'User Certificate Issuer'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.10.3 NAME 'umiUserCertificateNotAfter'
+	DESC 'User Certificate Not After'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.10.4 NAME 'umiUserCertificateNotBefore'
+	DESC 'User Certificate Not Before'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.10.5 NAME 'umiUserCertificateSubject'
+	DESC 'User Certificate Subject'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+#===========================================================
+# .11 openvpn(8) options attributes
+#===========================================================
+
+attributetype ( 1.3.6.1.4.1.9163.864.11.1 NAME 'umiOvpnCfgIfconfigPush'
+	DESC 'openvpn(8) option --ifconfig-push Push virtual IP endpoints for client tunnel'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.11.2 NAME 'umiOvpnCfgIroute'
+	DESC 'openvpn(8) option --iroute Internal route to a specific client'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} )
+
+attributetype ( 1.3.6.1.4.1.9163.864.11.3 NAME 'umiOvpnCfgPush'
+	DESC 'openvpn(8) option --push Push a config file option back to the client for remote execution'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} )
+
+attributetype ( 1.3.6.1.4.1.9163.864.11.4 NAME 'umiOvpnCfgMaxRoutes'
+	DESC 'openvpn(8) option --max-routes Allow a maximum number of n --route options to be specified'
+	EQUALITY integerMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.11.5 NAME 'umiOvpnCfgServer'
+	DESC 'openvpn(8) option --server A helper directive.'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.11.6 NAME 'umiOvpnCfgRoute'
+	DESC 'openvpn(8) option --route Add route to routing table after connection is established.'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} )
+
+attributetype ( 1.3.6.1.4.1.9163.864.11.7 NAME 'umiOvpnCfgConfig'
+	DESC 'openvpn(8) option --config Load additional config options from file.'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+#===========================================================
+# .12 additional, not openvpn(8), attributes 
+#===========================================================
+
+attributetype ( 1.3.6.1.4.1.9163.864.12.1 NAME 'umiOvpnAddStatus'
+	DESC 'client status active/blocked/revoked e.t.c.'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.12.2 NAME 'umiOvpnAddDevType'
+	DESC 'Device, certificate issued for (notebook, desktop, smartphone, e.t.c.)'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.12.3 NAME 'umiOvpnAddDevMake'
+	DESC 'Device maker Lenovo/Asus/e.t.c.'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.12.4 NAME 'umiOvpnAddDevModel'
+	DESC 'Device model'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.12.5 NAME 'umiOvpnAddDevOS'
+	DESC 'Device Operating System'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.12.6 NAME 'umiOvpnAddDevOSVer'
+	DESC 'Device Operating System Version'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.12.7 NAME 'umiOvpnAddCcCommonPad'
+	DESC 'Raw addition to each client config (like when you need to add same confing chunk to each cc)'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+
+#===========================================================
+# .13.0 OpenVPN Configuration
+#===========================================================
+
+objectclass ( 1.3.6.1.4.1.9163.864.13.0 NAME 'umiOvpnCfg'
+	DESC 'Abstraction of an OpenVPN configuration. It supposed to contain both, openvpn(8) options and custom (not openvpn(8)) attributes'
+	SUP ( pkiUser $ domainRelatedObject $ authorizedServiceObject ) AUXILIARY
+	MUST ( umiOvpnAddStatus $ associatedDomain )
+	MAY ( umiOvpnCfgIroute $ umiOvpnCfgServer $umiOvpnCfgPush $ umiOvpnCfgMaxRoutes $
+	      umiOvpnAddDevType $ umiOvpnCfgConfig $ umiOvpnAddDevMake $ umiOvpnAddDevModel $
+	      umiOvpnAddDevOS $ umiOvpnAddDevOSVer $ umiOvpnAddCcCommonPad $ umiOvpnCfgRoute $
+	      umiOvpnCfgIfconfigPush $  userCertificate $ authorizedService ) )
+
+#===========================================================
+# .14.0 umiUserCertificate
+#===========================================================
+
+objectclass ( 1.3.6.1.4.1.9163.864.14.0 NAME 'umiUserCertificate'
+	DESC 'strongAuthenticationUser amendation with x509 certificate details'
+	SUP strongAuthenticationUser AUXILIARY
+	MUST ( umiUserCertificateSn $ umiUserCertificateIssuer $ umiUserCertificateNotAfter $
+	       umiUserCertificateNotBefore $ umiUserCertificateSubject ) )
+
+#===========================================================
+# .15.1.0 hwInventory
+#===========================================================
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.1 NAME 'hwMb'
+	DESC 'RFC4517 DN of the object holding configuration of MotherBoard'
+	EQUALITY distinguishedNameMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.12 )
+
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.2 NAME 'hwCpu'
+	DESC 'RFC4517 DN of the object holding configuration of CPU unit'
+	EQUALITY distinguishedNameMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.12 )
+
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.3 NAME 'hwRam'
+	DESC 'RFC4517 DN of the object holding configuration of RAM module'
+	EQUALITY distinguishedNameMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.12 )
+
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.4 NAME 'hwDisk'
+	DESC 'RFC4517 DN of the object holding configuration of Disk (HDD/SSD) unit'
+	EQUALITY distinguishedNameMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.12 )
+
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.5 NAME 'hwIf'
+	DESC 'RFC4517 DN of the object holding configuration of an interface'
+	EQUALITY distinguishedNameMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.12 )
+
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.6 NAME 'hwMonitor'
+	DESC 'RFC4517 DN of the object holding configuration of a monitor'
+	EQUALITY distinguishedNameMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.12 )
+
+
+# --- strings ---------------------------------------------------------
+
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.100 NAME 'hwType'
+	DESC 'any type of anything'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.100.1 NAME 'hwTypeIf'
+	DESC 'type of interface: eth, wlan, bt, onboard or external'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.100.2 NAME 'hwTypeDisk'
+	DESC 'type of disk (HDD/SSD)'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.101 NAME 'hwState'
+	DESC 'possible states of the object: new, good, bad, broken, gleetches, burned'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.102 NAME 'hwStatus'
+	DESC 'possible status/es of the object: assigned, unassigned, lost, stolen'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.103 NAME 'hwAssignedTo'
+	DESC 'RFC4517 DN of the object, this one assigned too'
+	EQUALITY distinguishedNameMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.12 )
+
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.104 NAME 'hwManufacturer'
+	DESC 'Manufacturer of the device/compart'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.105 NAME 'hwModel'
+	DESC 'model of the device'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.106 NAME 'hwProductName'
+	DESC 'Product Name'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+
+# --- BIOS -----------------------------------------------------------
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.107 NAME 'hwBios'
+	DESC 'BIOS/Firmvare'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.107.1.1 NAME 'hwBiosVendor'
+	DESC 'BIOS Vendor'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.107.1.2 NAME 'hwBiosVersion'
+	DESC 'BIOS Version'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.107.1.3 NAME 'hwBiosReleaseDate'
+	DESC 'BIOS Release Date'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.107.1.4 NAME 'hwBiosRevision'
+	DESC 'BIOS Revision'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.107.2.1 NAME 'hwFirmware'
+	DESC 'Firmware'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.107.2.2 NAME 'hwFirmwareType'
+	DESC 'Firmware Type'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+
+# --- SPEED ----------------------------------------------------------
+	
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.108 NAME 'hwSpeed'
+	DESC 'Speed/MaxSpeed of the device/module/compart/e.t.c.'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.108.1 NAME 'hwSpeedCpu'
+	DESC 'CPU Max Speed'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.108.2 NAME 'hwSpeedRam'
+	DESC 'RAM Speed'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.108.3 NAME 'hwSpeedIf'
+	DESC 'Interface speed'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+# --- SIZE -----------------------------------------------------------
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.109 NAME 'hwSize'
+	DESC 'Size/volume/capacity'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.109.1 NAME 'hwSizeDisk'
+	DESC 'HDD/SDD Size/volume/capacity'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.109.2 NAME 'hwSizeRam'
+	DESC 'RAM Size/volume/capacity'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+# --------------------------------------------------------------------
+	
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.110 NAME 'hwBus'
+	DESC 'type of bus: SATA, SAS, SCSI, PCI, ISA, e.t.c.'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} )
+	
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.111 NAME 'hwMac'
+	DESC 'device MAC address'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+# --- ID -------------------------------------------------------------
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.112 NAME 'hwId'
+	DESC 'device/compart ID (like for CPU)'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.112.1 NAME 'inventoryNumber'
+	DESC 'Inventory Number Assigned'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} )
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.112.2 NAME 'hwSerialNumber'
+	DESC 'Serial Number of the device'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.112.3 NAME 'hwPartNumber'
+	DESC 'Part Number'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.112.4 NAME 'hwFamily'
+	DESC 'device/compart family (like for CPU)'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.112.5 NAME 'hwVersion'
+	DESC 'device/compart Version (like for CPU)'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.112.6 NAME 'hwSignature'
+	DESC 'device/compart Signature (like for CPU)'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.112.7 NAME 'hwUuid'
+	DESC 'UUID'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.112.8 NAME 'hwFccId'
+	DESC 'device/compart FCC ID'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.112.9 NAME 'hwSocket'
+	DESC 'hardware module socket'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.113 NAME 'hwName'
+	DESC 'device/compart Name'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.113.1 NAME 'hwNameIf'
+	DESC 'interface Name like eth13, wlan6, e.t.c.'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+#-------------------------------------------------------------------	--
+	
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.114 NAME 'hwBankLocator'
+	DESC 'RAM (P1_Node1_Channel3_Dimm0 or BANK2)'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.115 NAME 'hwLocator'
+	DESC 'RAM locator (DIMM5 or P2-DIMMG1)'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.9163.864.15.1.116 NAME 'hwFormFactor'
+	DESC 'RAM form factor (DIMM)'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} SINGLE-VALUE )
+
+# --- objectClass ---------------------------------------------------------
+
+objectclass ( 1.3.6.1.4.1.9163.864.15.2 NAME 'hwInventory'
+	DESC 'HardWare Inventory'
+	SUP device STRUCTURAL
+	MUST ( cn $ hwType $ hwState $ hwStatus )
+	MAY ( hwAssignedTo $ description $ hwMb $ hwCpu $ hwRam $ hwDisk $ hwIf $ hwMonitor $ hwManufacturer $ hwModel $ hwProductName $ hwBios $ hwBiosVendor $ hwBiosVersion $ hwBiosReleaseDate $ hwBiosRevision $ hwFirmware $ hwFirmwareType $ hwSpeed $ hwSpeedCpu $ hwSpeedRam $ hwSpeedIf $ hwSize $ hwSizeDisk $ hwSizeRam $ hwBus $ hwMac $ hwId $ inventoryNumber $ hwSerialNumber $ hwPartNumber $ hwFamily $ hwVersion $ hwSignature $ hwUuid $ hwFccId $ hwSocket $ hwName $ hwNameIf $ hwTypeIf $ hwTypeDisk $ hwBankLocator $ hwLocator $ hwFormFactor ) )
+
+#===========================================================
+# .16.1 umiSettings UMI UI related attributes
+#===========================================================
+attributetype ( 1.3.6.1.4.1.9163.864.16.1.1 NAME 'umiSettingsJson'
+	DESC 'UMI UI settings JSON structure up to 32K in length.'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{32768} SINGLE-VALUE )
+
+#===========================================================
+# .16.2 umiSettings
+#===========================================================
+
+objectclass ( 1.3.6.1.4.1.9163.864.16.2 NAME 'umiSettings'
+	DESC 'UMI UI settings'
+	SUP extensibleObject AUXILIARY
+	MAY ( umiSettingsJson ) )
+
