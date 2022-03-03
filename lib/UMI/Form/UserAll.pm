@@ -334,7 +334,7 @@ has_block 'person'
 has_field 'aux_add_account'
   => ( type          => 'AddElement',
        repeatable    => 'account',
-       value         => 'Add new account',
+       value         => 'Add another one service',
        element_class => [ 'btn-success', ],
        element_wrapper_class => [ 'col-3', 'offset-md-2', ],
        element_attr  => { title => 'new fields are added to the bottom, bellow existent ones', },

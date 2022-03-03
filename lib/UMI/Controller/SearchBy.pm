@@ -1594,6 +1594,26 @@ sub modify :Path(modify) :Args(0) {
     # skip equal and undefined data
     $val_params  = $params->{$attr};
     next if ! defined $val_params;
+
+
+
+
+    
+    if ( $attr eq 'mu-sieveOnReceive' ) {
+      my $file = "/tmp/sieve.tmp.$$";
+      open(my $fh, '>', $file) or die "Could not open file '$file' $!";
+      print $fh $params->{$attr};
+      close $fh;
+      # my @sysargs = ( '/usr/local/bin/sieve', '-c ', $file );
+      my $out = `/usr/local/bin/sieve -c $file 2>&1`;
+      push @{$return->{error}}, "sieve script validation failed: $out"
+	if $? ne "0";
+      # unlink $file;
+    }
+
+
+
+    
     if ( ref($params->{$attr} ) eq 'ARRAY' ) {
       $val_entry      = $entry->exists($attr) ? $entry->get_value($attr, asref => 1) : [];
       @{$val_params}  = sort( @{$val_params} );
