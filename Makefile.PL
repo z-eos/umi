@@ -26,10 +26,10 @@ requires 'Catalyst::View::Download';
 requires 'Catalyst::View::JSON';
 requires 'Catalyst::View::TT';
 
-requires 'Log::Log4perl'
-requires 'Log::Contextual'
-requires 'Log::Dispatch'
-    
+requires 'Log::Log4perl';
+requires 'Log::Contextual';
+requires 'Log::Dispatch';
+
 requires 'Cache::FastMmap';
 requires 'Compress::LZ4';
 requires 'Crypt::GeneratePassword';
@@ -44,7 +44,7 @@ requires 'Lingua::Translit';
 # ??? # requires 'MikroTik::API';
 requires 'Math::Random::Secure';
 requires 'MIME::Base64';
-requires 'Net::CIDR::Set'
+requires 'Net::CIDR::Set';
 requires 'Net::LDAP';
 requires 'Net::Netmask';
 requires 'Net::SSH::Perl';
