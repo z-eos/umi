@@ -1,0 +1,24 @@
+version: '3.4'
+
+networks:
+  umi:
+    driver: bridge
+
+services:
+  umi:
+    hostname: umi
+    build:
+      context: .
+    image: umi:1
+    restart: unless-stopped
+    networks:
+      - umi
+    ports:
+      - "127.0.0.1:${UMI_PORT}:80"
+    volumes:
+      - conf:/umi/conf
+      - log:/umi/log
+
+volumes:
+  conf:
+  log:
