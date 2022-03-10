@@ -38,7 +38,6 @@ extends 'Catalyst';
 
 our $VERSION = '0.92';
 
-__PACKAGE__->path_to($ENV{UMI_CONFIG_DIR});
 __PACKAGE__
   ->config({
 	    'Plugin::Cache' => { backend => { class => "Cache::Memory", }, },
