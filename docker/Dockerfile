@@ -45,14 +45,22 @@ RUN cd /usr/src && \
 
 RUN cpan -i \
     Test::More \
+    Array::Utils \
     Catalyst::Runtime \
     Cache::FastMmap \
+    Cache::Memory \
+    Catalyst::Model::Factory::PerRequest \
     Catalyst::Action::RenderView \
     Catalyst::Authentication::Store::LDAP \
     Catalyst::Plugin::Authentication \
+    Catalyst::Plugin::Authorization::ACL \
+    Catalyst::Plugin::Authorization::Roles \
+    Catalyst::Plugin::Cache \
     Catalyst::Plugin::ConfigLoader \
     Catalyst::Plugin::Session::Store::FastMmap \
+    Catalyst::Plugin::StackTrace \
     Catalyst::Plugin::Static::Simple \
+    Catalyst::Plugin::StatusMessage \
     Catalyst::Plugin::Unicode \
     Catalyst::View::Download \
     Catalyst::View::JSON \
@@ -62,8 +70,11 @@ RUN cpan -i \
     Crypt::GeneratePassword \
     Crypt::HSXKPasswd \
     Crypt::RSA \
+    Crypt::X509 \
+    Crypt::X509::CRL \
     Data::Entropy \
     Data::Printer \
+    DateTime::Format::Duration \
     Digest::SHA1 \
     GD::Barcode::QRcode \
     Lingua::Translit \
@@ -71,6 +82,7 @@ RUN cpan -i \
     Log::Dispatch \
     Log::Log4perl \
     MIME::Base64 \
+    MikroTik::API \
     Math::Random::Secure \
     Module::Install \
     Module::Install::Catalyst \
@@ -78,24 +90,34 @@ RUN cpan -i \
     Net::CIDR::Set \
     Net::LDAP \
     Net::Netmask \
+    Set::Object \
     Template::Plugin::JSON \
     Text::Diff::HTML \
     Text::Unidecode \
     Sub::Identify \
     HTML::Entities \
+    HTML::FormHandler::Moose \
+    YAML \
     Net::SSH::Perl
 
 RUN git clone https://github.com/z-eos/umi.git && \
     catalyst.pl umi && \
-    cd /umi && perl Makefile.PL && make
+    cd /umi && perl Makefile.PL && make && \
+    /bin/busybox --install && \
+    mkdir /umi.d
 
-ADD  tree/umi*          /umi/
-COPY --from=pies /pies  /pies
-ADD  tree/pies/pies.d/* /pies/conf.d/
+ADD  tree/bin/*                 /usr/bin/
+# ADD  tree/umi_local.pl.xenv     /umi/
+ADD  tree/umi_local.pl          /umi.d/
+COPY --from=pies /pies          /pies
+ADD  tree/pies/pies.d/*         /pies/conf.d/
+COPY tree/lets-encrypt-root.pem /etc/ssl/
 
 WORKDIR /umi
 
 ENV PATH="/pies/sbin:/pies/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+ENV UMI_CONFIG_DIR=
 
 HEALTHCHECK --interval=30s --timeout=10s  --retries=5 \
     CMD /usr/bin/tallyman -- "${TALLYMAN_SRVID}"
