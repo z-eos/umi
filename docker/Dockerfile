@@ -102,9 +102,7 @@ RUN cpan -T -i \
 
 RUN git clone https://github.com/z-eos/umi.git && \
     catalyst.pl umi && \
-    cd /umi && perl Makefile.PL && make && \
-    /bin/busybox --install && \
-    mkdir /umi.d
+    cd /umi && perl Makefile.PL && make
 
 ADD  tree/umi*          /umi/
 ADD  tree/conf		/umi/conf
@@ -114,8 +112,6 @@ ADD  tree/pies/pies.d/* /pies/conf.d/
 WORKDIR /umi
 
 ENV PATH="/pies/sbin:/pies/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-
-ENV UMI_CONFIG_DIR=
 
 HEALTHCHECK --interval=30s --timeout=10s  --retries=5 \
     CMD /usr/bin/tallyman -- "${TALLYMAN_SRVID}"

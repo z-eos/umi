@@ -36,7 +36,7 @@ use Catalyst qw/
 
 extends 'Catalyst';
 
-our $VERSION = '0.92';
+our $VERSION = '0.91';
 
 __PACKAGE__
   ->config({
