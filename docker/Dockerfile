@@ -43,7 +43,7 @@ RUN cd /usr/src && \
     perl Makefile.PL && \
     make && make install
 
-RUN cpan -i \
+RUN cpan -T -i \
     Test::More \
     Array::Utils \
     Catalyst::Runtime \
@@ -106,12 +106,10 @@ RUN git clone https://github.com/z-eos/umi.git && \
     /bin/busybox --install && \
     mkdir /umi.d
 
-ADD  tree/bin/*                 /usr/bin/
-# ADD  tree/umi_local.pl.xenv     /umi/
-ADD  tree/umi_local.pl          /umi.d/
-COPY --from=pies /pies          /pies
-ADD  tree/pies/pies.d/*         /pies/conf.d/
-COPY tree/lets-encrypt-root.pem /etc/ssl/
+ADD  tree/umi*          /umi/
+ADD  tree/conf		/umi/conf
+COPY --from=pies /pies  /pies
+ADD  tree/pies/pies.d/* /pies/conf.d/
 
 WORKDIR /umi
 
@@ -122,7 +120,7 @@ ENV UMI_CONFIG_DIR=
 HEALTHCHECK --interval=30s --timeout=10s  --retries=5 \
     CMD /usr/bin/tallyman -- "${TALLYMAN_SRVID}"
 
-EXPOSE 80 443 8073
+EXPOSE 80 8073
 
 # the entrypoint used in pies image
 ENTRYPOINT ["/pies/conf/rc"]
