@@ -3,9 +3,7 @@ FROM graygnuorg/pies:debian-2.8.1 as pies
 FROM perl:5.34.0-buster
 
 ENV DEBIAN_FRONTEND=noninteractive \
-    \
-    TZ='UTC' \
-    SET_X='-'
+    TZ='UTC'
 
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
@@ -31,7 +29,6 @@ RUN apt-get -qq update && apt-get -qq install -y --no-install-recommends \
     echo "deb [arch=amd64] https://debian.archive.norse.digital/$(lsb_release -sc) $(lsb_release -sc) main" > /etc/apt/sources.list.d/norse.list \
     && \
     apt-get -qq update && apt-get -qq install -y --no-install-recommends \
-    micron \
     tallyman
 
 COPY tree/Crypt-Curve25519-0.06-fmul.diff /usr/src/
@@ -105,6 +102,7 @@ RUN git clone https://github.com/z-eos/umi.git && \
     cd /umi && perl Makefile.PL && make
 
 ADD  tree/umi*          /umi/
+ADD  tree/healthcheck   /umi/
 ADD  tree/conf		/umi/conf
 COPY --from=pies /pies  /pies
 ADD  tree/pies/pies.d/* /pies/conf.d/
@@ -113,8 +111,8 @@ WORKDIR /umi
 
 ENV PATH="/pies/sbin:/pies/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
-HEALTHCHECK --interval=30s --timeout=10s  --retries=5 \
-    CMD /usr/bin/tallyman -- "${TALLYMAN_SRVID}"
+HEALTHCHECK \
+    CMD /usr/bin/tallyman ${UMI_HEALTHCHECK_COLLECTOR:+-s$UMI_HEALTHCHECK_COLLECTOR} -- "${UMI_SRVID:-umi}" /umi/healthcheck
 
 EXPOSE 80 8073
 
