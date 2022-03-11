@@ -9,7 +9,7 @@ services:
     hostname: umi
     build:
       context: .
-    image: umi:1
+    image: umi:latest
     restart: unless-stopped
     networks:
       - umi

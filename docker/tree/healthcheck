@@ -1,0 +1,3 @@
+#!/bin/sh
+# FIXME: Better check needed.
+curl -o/dev/null -s -S http://localhost/sysinfo
