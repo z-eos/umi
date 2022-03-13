@@ -1,5 +1,5 @@
 # -*- mode: dockerfile; eval: (follow-mode) -*-
-FROM graygnuorg/pies:debian-2.8.1 as pies
+FROM graygnuorg/pies:debian-2.8.2 as pies
 FROM perl:5.34.0-buster
 
 ENV DEBIAN_FRONTEND=noninteractive \
