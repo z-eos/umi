@@ -7,7 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
-ARG BUILD_DEPS="libssl-dev git make gcc"
+ARG BUILD_DEPS="libssl-dev git make gcc libgd-dev"
 ARG DEBUG_DEPS="vim net-tools procps busybox"
 
 RUN apt-get -qq update && apt-get -qq install -y --no-install-recommends \
@@ -22,7 +22,7 @@ RUN apt-get -qq update && apt-get -qq install -y --no-install-recommends \
     curl \
     jq \
     tzdata \
-    libgd-dev \
+    libgd3 \
     ${BUILD_DEPS} \
     ${DEBUG_DEPS} \
     && \
