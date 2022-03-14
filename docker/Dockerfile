@@ -7,7 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
-ARG BUILD_DEPS="libssl-dev git make gcc"
+ARG BUILD_DEPS="libssl-dev git make gcc libgd-dev"
 ARG DEBUG_DEPS="vim net-tools procps busybox"
 
 RUN apt-get -qq update && apt-get -qq install -y --no-install-recommends \
@@ -73,6 +73,8 @@ RUN cpan -T -i \
     Data::Printer \
     DateTime::Format::Duration \
     Digest::SHA1 \
+    ExtUtils::PkgConfig \
+    GD::Image \
     GD::Barcode::QRcode \
     Lingua::Translit \
     Log::Contextual \
