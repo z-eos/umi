@@ -1,4 +1,4 @@
-#-*- cperl -*-
+#-*- mode: cperl; eval: (follow-mode); -*-
 #
 
 
@@ -7,6 +7,9 @@ use Moose;
 use namespace::autoclean;
 use Data::Printer colored => 0;
 use JSON;
+use Try::Tiny;
+# use Net::LDAP;
+use Net::LDAP qw( LDAP_COMPARE_FALSE LDAP_COMPARE_TRUE );
 
 use Logger;
 
@@ -45,6 +48,59 @@ sub index :Path :Args(0) {
       $c->stash( template => 'signin.tt', );
     }
   }
+
+=head2 healthcheck
+
+docker healthcheck
+
+=cut
+
+sub healthcheck :Path(healthcheck) :Args(0) {
+  my ( $self, $c ) = @_;
+
+  my ($return, $entry, $mesg);
+
+  my $ldap = try {
+    Net::LDAP->new( UMI->config->{authentication}->{realms}->{ldap}->{store}->{ldap_server} );
+  } catch {
+    $c->res->status(500);
+  };
+  # START TLS if defined
+  if ( defined UMI->config->{ldap_crud_cafile} &&
+       UMI->config->{ldap_crud_cafile} ne '' ) {
+    $mesg = try {
+      $ldap->start_tls(
+		       verify   => 'none',
+		       cafile   => UMI->config->{ldap_crud_cafile},
+		       checkcrl => 0,
+		      );
+    }
+    catch {
+      $c->res->status(500);
+    }
+  }
+
+  $mesg = $ldap->bind( UMI->config->{authentication}->{realms}->{ldap}->{store}->{binddn},
+			  password => UMI->config->{authentication}->{realms}->{ldap}->{store}->{bindpw},
+			  version  => 3, );
+
+  if ( $mesg->is_error ) {
+    $c->res->body( 'FAIL' );
+    $c->res->status(500);
+  }
+
+  $mesg = $ldap->compare( UMI->config->{ldap_crud_db},
+			  attr => 'o',
+			  value => 'UMI' );
+  if ( $mesg->code == LDAP_COMPARE_TRUE ) {
+    $c->res->body( 'OK' );
+    $c->res->status(200);
+  } else {
+    $c->res->body( 'FAIL' );
+    $c->res->status(500);
+  }
+  # log_debug { np ( $mesg->code ) };
+}
 
 sub about :Path(about) :Args(0) {
     my ( $self, $c ) = @_;
@@ -859,6 +915,7 @@ sub resolve_this : Local {
   $c->response->headers->content_type($arg->{content_type});
   $c->response->headers->content_type_charset($arg->{content_type_charset});
 }
+
 
 =head2 test
 

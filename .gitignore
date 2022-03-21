@@ -1,3 +1,9 @@
 *~
 .emacs.*
 \#*
+.git
+
+*-orig
+umi_local.pl*
+
+
