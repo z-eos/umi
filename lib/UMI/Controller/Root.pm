@@ -57,47 +57,50 @@ docker healthcheck
 
 sub healthcheck :Path(healthcheck) :Args(0) {
   my ( $self, $c ) = @_;
+  my ($ldap, $return, $res, $mesg);
 
-  my ($return, $entry, $mesg);
+  $res = '';
+  $ldap = try {
+    Net::LDAP->new( UMI->config->{authentication}->{realms}->{ldap}->{store}->{ldap_server}, version => 3 )
+    } catch { $res = 'FAIL'; };
 
-  my $ldap = try {
-    Net::LDAP->new( UMI->config->{authentication}->{realms}->{ldap}->{store}->{ldap_server} );
-  } catch {
-    $c->res->status(500);
-  };
-  # START TLS if defined
-  if ( defined UMI->config->{ldap_crud_cafile} &&
-       UMI->config->{ldap_crud_cafile} ne '' ) {
-    $mesg = try {
-      $ldap->start_tls(
-		       verify   => 'none',
-		       cafile   => UMI->config->{ldap_crud_cafile},
-		       checkcrl => 0,
-		      );
-    }
-    catch {
-      $c->res->status(500);
-    }
-  }
-
-  $mesg = $ldap->bind( UMI->config->{authentication}->{realms}->{ldap}->{store}->{binddn},
-			  password => UMI->config->{authentication}->{realms}->{ldap}->{store}->{bindpw},
-			  version  => 3, );
-
-  if ( $mesg->is_error ) {
+  if ( ! defined $ldap || $res eq 'FAIL' ) {
     $c->res->body( 'FAIL' );
     $c->res->status(500);
-  }
-
-  $mesg = $ldap->compare( UMI->config->{ldap_crud_db},
-			  attr => 'o',
-			  value => 'UMI' );
-  if ( $mesg->code == LDAP_COMPARE_TRUE ) {
-    $c->res->body( 'OK' );
-    $c->res->status(200);
   } else {
-    $c->res->body( 'FAIL' );
-    $c->res->status(500);
+    if ( defined UMI->config->{ldap_crud_cafile} &&
+	 UMI->config->{ldap_crud_cafile} ne '' ) {
+      $mesg = try {
+	$ldap->start_tls( verify   => 'none',
+			  cafile   => UMI->config->{ldap_crud_cafile},
+			  checkcrl => 0, );
+      }
+      catch { $res = 'FAIL'; };
+    }
+    if ( $res eq 'FAIL' ) {
+      $c->res->body( 'FAIL' );
+      $c->res->status(500);
+    } else {
+      $mesg = $ldap->
+	bind( UMI->config->{authentication}->{realms}->{ldap}->{store}->{binddn},
+	      password => UMI->config->{authentication}->{realms}->{ldap}->{store}->{bindpw},
+	      version  => 3, );
+      if ( $mesg->is_error ) {
+	$c->res->body( 'FAIL' );
+	$c->res->status(500);
+      } else {
+	$mesg = $ldap->compare( UMI->config->{healthcheck_dn},
+				attr  => UMI->config->{healthcheck_attr},
+				value => UMI->config->{healthcheck_value} );
+	if ( $mesg->code == LDAP_COMPARE_TRUE ) {
+	  $c->res->body( 'OK' );
+	  $c->res->status(200);
+	} else {
+	  $c->res->body( 'FAIL' );
+	  $c->res->status(500);
+	}
+      }
+    }
   }
   # log_debug { np ( $mesg->code ) };
 }
