@@ -17,7 +17,7 @@ services:
       - "127.0.0.1:${UMI_PORT}:80"
     volumes:
       - conf:/umi/conf
-      - log:/umi/log/umi
+      - log:/var/log/umi
 
 volumes:
   conf:
