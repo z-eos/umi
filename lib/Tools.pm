@@ -145,12 +145,14 @@ stolen from http://ddiguru.com/blog/25-ip-address-conversions-in-perl
 
 sub ipam_ip2dec {
   my ($self, $arg) = @_;
+  $arg = '0.0.0.0' if ! defined $arg;
   return unpack N => pack 'C4' => split /\./ => $arg;
 }
 
 # pow: exp( log( $self->ip2dec($arg) ) / 2 )
 sub ipam_msk_ip2dec {
   my ($self, $arg) = @_;
+  $arg = '0.0.0.0' if ! defined $arg;
   return (unpack 'B*' => pack 'N' => $self->ipam_ip2dec($arg)) =~ tr/1/1/;
 }
 
