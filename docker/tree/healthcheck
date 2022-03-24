@@ -1,3 +1,3 @@
 #!/bin/sh
 # FIXME: Better check needed.
-curl -o/dev/null -s -S http://localhost/sysinfo
+curl -o/dev/null -m ${UMI_HEALTHCHECK_TIMEOUT:-2} -s -S http://localhost/sysinfo
