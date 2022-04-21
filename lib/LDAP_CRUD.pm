@@ -2815,7 +2815,7 @@ sub ipa {
 	  next if $_ eq 'NA';
 	  # log_debug { np($_) };
 	  ($l, $r) = split(/ /, $_);
-	  $ipa->add($l . '/' . $self->ipam_msk_ip2dec($r));
+	  $ipa->add($l . '/' . length($r) == 0 ? 32 : $self->ipam_msk_ip2dec($r));
 	  # $ipa->add($_ . '/32');
 	}
       }

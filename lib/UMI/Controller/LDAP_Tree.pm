@@ -61,8 +61,8 @@ sub index_neo :Path(ldap_tree_neo) :Args(0) {
     my $ldap_tree = Noder->new();
     $ldap_tree->insert($_->dn) foreach ( $mesg->entries );
     $as_hash = $ldap_tree->as_json_vue;
-    my $tmp;
-    %{$tmp} = $ldap_tree->as_string;
+    # my $tmp;
+    # %{$tmp} = $ldap_tree->as_string;
     # log_debug { np( $tmp ) };
     
     $c->stats->profile('tree neo, building complete');

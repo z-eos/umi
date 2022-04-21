@@ -1888,7 +1888,8 @@ sub factoroff_searchby {
   if ( defined $sess->{settings}->{ui}->{isblock} && $sess->{settings}->{ui}->{isblock} == 1 ) {
     $c_stats->profile(begin => '- is-blocked check');
 
-    if ( $tt_e->{root}->{gidNumber} eq $ldap_crud->{cfg}->{stub}->{group_blocked_gid} ) {
+    if ( defined $tt_e->{root}->{gidNumber} &&
+	 $tt_e->{root}->{gidNumber} eq $ldap_crud->{cfg}->{stub}->{group_blocked_gid} ) {
       $tt_e->{mgmnt}->{is_blocked} = 1;
     } elsif ( $dn =~ /^.*authorizedService=.*$/ ) {
       my $is_blocked_filter =
@@ -1916,8 +1917,8 @@ sub factoroff_searchby {
   my $k;
   foreach $k (keys (%{$all_s})) {
     $root_gr->{$k} = 1
-      if defined $all_s->{$k}->{$tt_e->{root}->{$ldap_crud->{cfg}->{rdn}->{acc_root}}} &&
-      defined $tt_e->{root}->{$ldap_crud->{cfg}->{rdn}->{acc_root}};
+      if defined $tt_e->{root}->{$ldap_crud->{cfg}->{rdn}->{acc_root}} &&
+      defined $all_s->{$k}->{$tt_e->{root}->{$ldap_crud->{cfg}->{rdn}->{acc_root}}};
     # log_debug { "\n\nkey: $k\n" . np($ldap_crud->{cfg}->{rdn}->{acc_root}) };
   }
 
