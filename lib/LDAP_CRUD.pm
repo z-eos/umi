@@ -2798,28 +2798,46 @@ sub ipa {
     $val = $mesg_ovpn->as_struct;
     # log_debug { np($val) };
     foreach $key (keys ( %{$val} )) {
+      undef $l;
+      undef $r;
+
       # log_debug { np($key) };
       # log_debug { np($val->{$key}) };
 
+      # OpenVPN option --ifconfig-push local remote-netmask [alias]
       if ( exists $val->{$key}->{umiovpncfgifconfigpush} ) {
 	foreach ( @{$val->{$key}->{umiovpncfgifconfigpush}} ) {
 	  # log_debug { np($_) };
-	  ($l, $r) = split(/ /, $_);
-	  $r = $self->ipam_ip2dec($r) - $self->ipam_ip2dec($l) == 1 ? $l . '/30' : $l;
-	  $ipa->add($r);
+	  ($l, $r, $tmp) = split(/ /, $_);
+	  if ( $self->ipam_ip2dec($r) - $self->ipam_ip2dec($l) == 1 ) {
+	    $ipa->add($l . '/30');
+	  } else {
+	    $ipa->add($l);
+	  }
 	}
+	undef $tmp;
       }
 
+      # OpenVPN option  --iroute network [netmask]
+      # Generate an internal route to a specific client.
+      # The netmask parameter, if omitted, defaults to 255.255.255.255.
       if ( exists $val->{$key}->{umiovpncfgiroute} ) {
 	foreach ( @{$val->{$key}->{umiovpncfgiroute}} ) {
 	  next if $_ eq 'NA';
 	  # log_debug { np($_) };
 	  ($l, $r) = split(/ /, $_);
-	  $ipa->add($l . '/' . length($r) == 0 ? 32 : $self->ipam_msk_ip2dec($r));
-	  # $ipa->add($_ . '/32');
+	  if ( length($r) == 0 ) {
+            $ipa->add($l);
+          } else {
+            $ipa->add($l . '/' . $self->ipam_msk_ip2dec($r));
+          }
 	}
       }
 
+      # ISC DHCP Manual Pages - dhcpd.conf
+      # The fixed-address declaration `fixed-address address [, address ... ];`
+      # The fixed-address declaration is used to assign one or more fixed IP addresses to a client.
+      # BUT WE EXPECT ONE SINGLE IP ADDRESS
       if ( exists $val->{$key}->{dhcpstatements} ) {
       	foreach ( @{$val->{$key}->{dhcpstatements}} ) {
       	  next if $_ !~ /^fixed-address/;
@@ -2834,7 +2852,6 @@ sub ipa {
 	  next if $_ eq 'NA' || ! $self->is_ip($_);
 	  # log_debug { np($_) };
 	  $ipa->add($_);
-	  # $ipa->add($_ . '/32');
 	}
       }
 
