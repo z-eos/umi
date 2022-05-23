@@ -1,14 +1,14 @@
 # -*- mode: cperl; mode: follow; -*-
 #
 
-package UMI::Form::ToolSshKeyGen;
+package UMI::Form::ToolGpgKeyGen;
 
 use HTML::FormHandler::Moose;
 extends 'UMI::Form::LDAP';
 
 use utf8;
 
-has '+action' => ( default => '/toolsshkeygen' );
+has '+action' => ( default => '/toolgpgkeygen' );
 
 sub build_form_element_class { [ qw(form-horizontal formajaxer), ] }
 
@@ -17,23 +17,6 @@ sub html_attributes {
   push @{$attr->{'class'}}, 'required'
     if $type eq 'label' && $field->required;
 }
-
-has_field 'key_type'
-  => ( type                  => 'Select',
-       label                 => 'Type',
-       label_class           => [ 'col', 'text-right', 'font-weight-bold', ],
-       wrapper_class         => [ 'row', 'mt-4', ],
-       element_wrapper_class => [ 'input-sm', 'col-10', ],
-       element_class         => [ 'custom-select', ],
-       element_attr          => { title => 'SSH key types', },
-       options               => [{ value => 'RSA',      label => 'RSA'},
-				 { value => 'DSA',      label => 'DSA', disabled => 'disabled' },
-				 { value => 'ECDSA256', label => 'ECDSA256',  },
-				 { value => 'ECDSA384', label => 'ECDSA384',  },
-				 { value => 'ECDSA521', label => 'ECDSA521',  },
-				 { value => 'Ed25519',  label => 'Ed25519',   },
- ],
-       required              => 1 );
 
 has_field 'bits'
   => ( type          => 'Display',
@@ -87,7 +70,7 @@ has_field 'aux_submit'
 			      btn-block
 			      font-weight-bold
 			      text-uppercase) ],
-       wrapper_class => [ 'col-2', ],
+       wrapper_class => [ 'col-1', ],
        value         => 'Submit' );
 
 has_block 'aux_submitit'
@@ -97,7 +80,7 @@ has_block 'aux_submitit'
      );
 
 
-sub build_render_list {[ 'key_type', 'bits', 'aux_submitit' ]}
+sub build_render_list {[ 'bits', 'aux_submitit' ]}
 
 
 ######################################################################

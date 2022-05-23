@@ -1,0 +1,144 @@
+[% META title = 'GPG keygen' %]
+
+<[% site.pageheading %] class="[% site.pageheadingclass %]">
+<i class="fas fa-id-card fa-lg mr-3 text-muted"></i>
+Onboarding<small><em class="text-muted font-monospace"></em></small>
+</[% site.pageheading %]>
+<hr>
+
+[% INCLUDE ldap_err.tt %]
+
+<div class="alert alert-success" role="alert">
+  <p>
+    On submit, this page will do these things:
+    <ul>
+      <li>generate GPG and SSH key pairs for you.</li>
+      <li>distribute your GPG and SSH public keys to a corporate database, all your prior, here generated keys will be withdrawn</li>
+    </ul>
+  <hr>
+  <p class="mb-0">
+    Please do remember: your private key must be kept securely!
+  </p>
+</div>
+
+
+[% form.render %]
+
+<hr>
+
+[% IF key %]
+<h1 class="display-5 m-5 p-5">
+  Your Stuff
+  <small class="text-muted"><i>([% key.name.real %] &lt;[% key.name.email %]&gt;)</i></small>
+</h1>
+
+<div class="accordion" id="accordionExample">
+  <div class="card">
+    <div class="card-header" id="headingOne">
+      <h4 class="h4 mb-0">
+        <button class="btn btn-link btn-block btn-lg text-left"
+		type="button" data-toggle="collapse" data-target="#collapseOne"
+		aria-expanded="false" aria-controls="collapseOne">
+          <i class="fas fa-lock fa-fw fa-lg mr-5"></i>GPG Keys
+        </button>
+      </h2>
+    </div>
+
+    <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+      <div class="card-body">
+
+	<div class="alert alert-success" role="alert">
+	  <p>
+	    Here are your GPG keys, you need import them to your keyring.
+	    Do it like this <code>gpg --import &lt;filename&gt;</code>
+	  </p>
+	  <hr>
+	  <p class="mb-0">
+	    Please do remember: your private key must be kept securely!
+	  </p>
+	</div>
+	
+	<div class="row m-5 p-5">
+          <div class="col-12">
+      	    <pre>[% FILTER html %][% key.gpg.list_key %][% END %]</pre>
+    	  </div>
+    	  <div class="col">
+      	    <button class="btn btn-info p-3 my-3"
+                    onclick="copyToClipboard('#gpg_private')"
+	            title="Copy GPG private key to clipboard"
+                    type="button">
+              <span>
+		<i class="fas fa-copy fa-lg fa-fw"></i>
+	      </span>
+	    </button>
+	    <pre id="gpg_private">[% key.gpg.private %]</pre>	
+	  </div>
+	  <div class="col">
+	    <button class="btn btn-info p-3 my-3"
+		    onclick="copyToClipboard('#gpg_public')"
+       		    title="Copy GPG public key to clipboard"
+		    type="button">
+              <span>
+		<i class="fas fa-copy fa-lg fa-fw"></i>
+	      </span>
+	    </button>
+	    <pre id="gpg_public">[% key.gpg.public %]</pre>
+	  </div>
+	</div>
+
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header" id="headingTwo">
+      <h2 class="mb-0">
+        <button class="btn btn-link btn-block btn-lg text-left collapsed"
+		type="button" data-toggle="collapse" data-target="#collapseTwo"
+		aria-expanded="false" aria-controls="collapseTwo">
+          <i class="fas fa-key fa-fw fa-lg mr-5"></i>SSH Keys
+        </button>
+      </h2>
+    </div>
+    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+      <div class="card-body">
+
+	<div class="alert alert-success" role="alert">
+	  <p>
+	    Here are your SSH keys, place them to a directory <code>.ssh</code> in your homedir. Don't forget set correct attributes <code>700</code> to the private key
+	  </p>
+	  <hr>
+	  <p class="mb-0">
+	    Please do remember: your private key must be kept securely!
+	  </p>
+	</div>
+	
+	<div class="row m-5 p-5">
+	  <div class="col">
+	    <button class="btn btn-info p-3 my-3"
+		    onclick="copyToClipboard('#ssh_private')"
+		    title="Copy SSH private key to clipboard"
+		    type="button">
+	      <span>
+		<i class="fas fa-copy fa-lg fa-fw"></i>
+	      </span>
+	    </button>
+	    <pre id="ssh_private">[% key.ssh.private %]</pre>	
+	  </div>
+	  <div class="col">
+	    <button class="btn btn-info p-3 my-3"
+		    onclick="copyToClipboard('#ssh_public')"
+     		    title="Copy SSH public key to clipboard"
+		    type="button">
+	      <span>
+		<i class="fas fa-copy fa-lg fa-fw"></i>
+	      </span>
+	    </button>
+	    <pre id="ssh_public">[% key.ssh.public %]</pre>
+	  </div>
+	</div>
+
+      </div>
+    </div>
+  </div>
+</div>
+[% END %]

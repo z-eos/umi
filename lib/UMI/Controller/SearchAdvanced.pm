@@ -63,7 +63,11 @@ sub index :Path :Args(0) {
 sub proc :Path(proc) :Args(0) {
     my ( $self, $c ) = @_;
     my $params = $c->req->params;
-    # log_debug { np($params) };
+
+    $params->{search_filter} = '(objectClass=*)'
+      if defined $params->{search_filter} && $params->{search_filter} eq '';
+
+    log_debug { np($params) };
 
     if ( defined $c->user_exists ) {
       my ( $ldap_crud, $basedn, @filter_arr, $filter, $scope, $sort_order );

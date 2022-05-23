@@ -32,7 +32,7 @@ $(function(){
 	    // original // item.parents().prepend(getErrorBlock(message));
 	    // item.closest('.modal-body').append(getErrorBlock(message));
 	    // item.parent().prepend(getErrorBlock(message));
-	    item.closest('.modal-content').find(".modal-footer").html(message);
+	    item.closest('.modal-content').find(".modal-error").html(message);
 	},
 
 	createHiddenButton = function(item, value) {

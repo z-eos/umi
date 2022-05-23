@@ -848,6 +848,7 @@ returns hash with formatted details
 
 sub err {
   my ($self, $mesg, $debug, $dn) = @_;
+  log_debug { np($mesg->{errorMessage}) } if defined $debug && $debug > 0;
 
   my $caller = (caller(1))[3];
   my $err = {
@@ -890,7 +891,7 @@ sub err {
 			  ldap_error_name($mesg),
 			  ldap_error_text($mesg),
 			  ldap_error_desc($mesg),
-			  $mesg->server_error
+			  np($mesg->server_error)
 			 );
 
   log_error { np($err) } if defined $debug && $debug > 0;
@@ -1637,6 +1638,7 @@ sub modify {
     $msg = $self->ldap->modify ( $dn, changes => $changes, );
     if ($msg->is_error()) {
       $return = $self->err( $msg );
+      log_debug { np($return) };
     } else {
       log_info { 'DN: ' . $dn . ' was successfully modified.' };
       $return = 0;

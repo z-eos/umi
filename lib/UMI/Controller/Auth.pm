@@ -166,7 +166,7 @@ sub signin :Path Global {
 
     $c->stash( template => 'welcome.tt', );
   } catch {
-    log_fatal { sprintf(" user %s session was not found (expired session or server restarted);\n\n %s \n\n %s\n %s \n ",
+    log_debug { sprintf(" user %s session was not found (expired session or server restarted);\n\n %s \n\n %s\n %s \n ",
 			$c->session->{auth_uid},
 			'=' x 70,
 			$_,

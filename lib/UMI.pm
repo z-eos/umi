@@ -177,6 +177,7 @@ __PACKAGE__
 
 __PACKAGE__->allow_access("/healthcheck");
 __PACKAGE__->allow_access("/searchby/modify_userpassword");
+__PACKAGE__->allow_access("/onboarding");
 __PACKAGE__->allow_access("/toolpwdgen");
 __PACKAGE__->allow_access("/toolqr");
 __PACKAGE__->allow_access("/tooltranslit");

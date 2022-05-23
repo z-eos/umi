@@ -10,3 +10,56 @@ SSH key generator<small><em class="text-muted font-monospace"></em></small>
 
 [% form.render %]
 
+
+<hr>
+
+[% IF key %]
+<h1 class="display-5 m-5 p-5">
+  Your Stuff
+  <small class="text-muted"><i>([% key.name.real %] &lt;[% key.name.email %]&gt;)</i></small>
+</h1>
+
+<div class="accordion" id="accordionExample">
+  <div class="card">
+    <div class="card-header" id="headingTwo">
+      <h2 class="mb-0">
+        <button class="btn btn-link btn-block text-left collapsed"
+		type="button" data-toggle="collapse" data-target="#collapseTwo"
+		aria-expanded="false" aria-controls="collapseTwo">
+          <i class="fas fa-key fa-fw mr-5"></i>SSH Keys
+        </button>
+      </h2>
+    </div>
+    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+      <div class="card-body">
+
+	<div class="row m-5 p-5">
+	  <div class="col">
+	    <button class="btn btn-info p-3 my-3"
+		    onclick="copyToClipboard('#ssh_private')"
+		    title="Copy SSH private key to clipboard"
+		    type="button">
+	      <span>
+		<i class="fas fa-copy fa-lg fa-fw"></i>
+	      </span>
+	    </button>
+	    <pre id="ssh_private">[% key.ssh.private %]</pre>	
+	  </div>
+	  <div class="col">
+	    <button class="btn btn-info p-3 my-3"
+		    onclick="copyToClipboard('#ssh_public')"
+     		    title="Copy SSH public key to clipboard"
+		    type="button">
+	      <span>
+		<i class="fas fa-copy fa-lg fa-fw"></i>
+	      </span>
+	    </button>
+	    <pre id="ssh_public">[% key.ssh.public %]</pre>
+	  </div>
+	</div>
+
+      </div>
+    </div>
+  </div>
+</div>
+[% END %]

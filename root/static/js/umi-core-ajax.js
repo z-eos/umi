@@ -35,7 +35,7 @@ $(document).bind("ajaxSend", function(){
 
 var handleResponce = function(html) {
 
-    console.log('UMI CORE AJAX: RESPONSE handleResponce()');
+  console.log('UMI CORE AJAX: RESPONSE handleResponce()',html);
 
     if( $(html).find("#form-signin").length ) {
 	console.log('UMI CORE AJAX: is signin? '+$(html).find("#form-signin").length);

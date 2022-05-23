@@ -472,14 +472,14 @@ sub user_preferences :Path(user_prefs) :Args(0) {
       $title = $c->user->has_attribute('title') ? $c->user->title : 'N/A';
 
       $arg = {
-	      uid => $c->user->uid,
-	      givenname => $c->user->givenname || 'N/A',
-	      sn => $c->user->sn || 'N/A',
-	      title => $title,
-	      mail => $c->user->has_attribute('mail') ? [ $c->user->mail ] : [ 'N/A' ],
-	      o => [ $o ],
+	      uid                        => $c->user->uid,
+	      givenname                  => $c->user->givenname || 'N/A',
+	      sn                         => $c->user->sn || 'N/A',
+	      title                      => $title,
+	      mail                       => $c->user->has_attribute('mail') ? [ $c->user->mail ] : [ 'N/A' ],
+	      o                          => [ $o ],
 	      physicaldeliveryofficename => $physicaldeliveryofficename,
-	      telephonenumber => [ $telephonenumber ],
+	      telephonenumber            => [ $telephonenumber ],
 	      # roles => \@{[$c->user->roles]} || 'N/A',
 	     };
       undef $o;
@@ -534,6 +534,21 @@ sub user_preferences :Path(user_prefs) :Args(0) {
       }
     }
 
+    #=================================================================
+    # user ssh
+    #
+    my $ssh;
+    $mesg = $ldap_crud->search({ base   => $ldap_crud->cfg->{base}->{acc_root},
+				 filter => '(uid=' . $arg->{uid} . ')',
+				 attrs  => [ 'grayPublicKey' ], });
+    if ( $mesg->code ) {
+      $return->{error} .= sprintf('<li>ssh keys: %s</li>',
+ 				  $ldap_crud->err($mesg)->{html});
+    } else {
+      my $entry_ssh = $mesg->as_struct;
+      $ssh = $entry_ssh->{'uid=' . $arg->{uid} . ',' . $ldap_crud->cfg->{base}->{acc_root}}->{graypublickey};
+    }
+    
     #=================================================================
     # user organizations
     #
@@ -766,6 +781,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 	       inventory     => \@inventory,
 	       jpegPhoto     => $jpegPhoto,
 	       orgs          => $orgs,
+	       ssh           => $ssh,
 	       service       => $service,
 	       session       => $c->session,
 	       final_message => $return, );

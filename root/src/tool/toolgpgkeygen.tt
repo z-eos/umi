@@ -1,0 +1,54 @@
+[% META title = 'GPG keygen' %]
+
+<[% site.pageheading %] class="[% site.pageheadingclass %]">
+<i class="fas fa-lock fa-lg mr-3 text-muted"></i>
+GPG key generator<small><em class="text-muted font-monospace"></em></small>
+</[% site.pageheading %]>
+<hr>
+
+[% INCLUDE ldap_err.tt %]
+
+[% form.render %]
+
+<hr>
+
+[% IF key %]
+<div class="row m-5 p-5">
+    <div class="col-12">
+      <pre>[% FILTER html %][% key.list_key %][% END %]</pre>
+    </div>
+    <div class="col">
+      <button class="btn btn-info p-3 my-3"
+              onclick="copyDivToClipboard('#private')"
+	      title="Copy private key to clipboard"
+              type="button">
+        <span>
+	  <i class="fas fa-copy fa-lg fa-fw"></i>
+	</span>
+      </button>
+      <pre id="private">[% key.private %]</pre>	
+    </div>
+    <div class="col">
+      <button class="btn btn-info p-3 my-3"
+              onclick="copyDivToClipboard('#public')"
+       	      title="Copy public key to clipboard"
+              type="button">
+        <span>
+	  <i class="fas fa-copy fa-lg fa-fw"></i>
+	</span>
+      </button>
+      <pre id="public">[% key.public %]</pre>
+    </div>
+</div>
+
+<script>
+  function copyDivToClipboard(selector) {
+    var range = document.createRange();
+    range.selectNode(document.querySelector(selector));
+    window.getSelection().removeAllRanges(); // clear current selection
+    window.getSelection().addRange(range);   // to select text
+    document.execCommand("copy");
+    window.getSelection().removeAllRanges(); // to deselect
+  }
+</script>
+[% END %]

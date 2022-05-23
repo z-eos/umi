@@ -206,7 +206,7 @@ has_field 'search_filter'
        wrapper_class         => [ 'row', 'searchaccount', ],
        element_wrapper_class => [ 'input-sm', 'col-10', ],
        element_attr          => { placeholder => 'objectClass=*',
-				  title => q{A filter that defines the conditions an entry in the directory must meet in order for it to be returned by the search. It is a string (without parenthesis). Values inside filters may need to be escaped to avoid security problems.}, },
+				  title => q{A filter that defines the conditions an entry in the directory must meet in order for it to be returned by the search. It is a string (without outmost parenthesis). Characters of filter values may need to be escaped.}, },
        rows                  => 1, );
 
 has_field 'show_attrs'

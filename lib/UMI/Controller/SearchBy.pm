@@ -1181,8 +1181,17 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
 	#p $entry;
 	#p $arg->{password_gen}->{ssha};
 
-	$return->{success} = sprintf('%s<table class="table table-vcenter">
-  <tr><td width="50%%"><h2 class="mono text-center">%s</h2></td>
+	$return->{success} = sprintf('
+<button class="btn btn-info p-2 m-2"
+        onclick="copyToClipboard(\'#pwd_clear\')"
+        title="Copy password to clipboard"
+        type="button">
+    <span>
+      <i class="fas fa-copy fa-lg fa-fw"></i>
+    </span>
+</button>
+%s<table class="table table-vcenter">
+  <tr><td width="50%%"><h2 id="pwd_clear" class="mono text-center">%s</h2></td>
       <td class="text-center" width="50%%">',
                                      $mesg,
                                      $arg->{password_gen}->{clear},
@@ -2144,24 +2153,32 @@ moddn
 sub moddn :Path(moddn) :Args(0) {
   my ( $self, $c ) = @_;
   my $params = $c->req->parameters;
-  log_debug { np( $params ) };
+  # log_debug { np( $params ) };
   my $err = $c->model('LDAP_CRUD')->moddn($params);
-  log_debug { np ( $err ) };
   if ( $params->{type} eq 'json' ) {
+
     $c->stash->{current_view} = 'WebJSON';
     $c->stash->{success} = ref($err) ne 'HASH' && ref($err) ne 'ARRAY' ? 1 : 0;
 
     if ( ref($err) ne 'HASH' && ref($err) ne 'ARRAY' ) {
       $c->stash->{message} = 'OK';
-    } elsif ( (ref($err) eq 'HASH' || ref($err) eq 'ARRAY' ) && $#{$err->{error}} > -1 ) {
+    } elsif ( (ref($err) eq 'HASH' || ref($err) eq 'ARRAY' )
+	      # && $#{$err->{error}} > -1
+	    ) {
       $c->stash->{success} = 0;
-      $c->stash->{message} = $self->msg2html({ type => 'panel',
-  					       data => $err->{error}->[0]->{html} });
+      # $c->stash->{message} = $self->msg2html({ type => 'panel',
+      # 					 data => $err->{error}->[0]->{html} });
+      $c->stash->{message} = $self->msg2html({ type => 'alert',
+						     data => $err->{html} });
+
+      # log_debug { np ( $c->stash->{message} ) };
+
+      $c->stash( template => 'ldap_err.tt');
     }
   } else {
     $c->stash( template => 'stub.tt',
-  	       params => $params,
-  	       err => $err, );
+  	       params   => $params,
+  	       err      => $err, );
   }
 }
 

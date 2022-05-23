@@ -131,9 +131,17 @@ sub index :Path :Args(0) {
 
   my $final_message->{success} =
     sprintf('<div class="row">
-  <div class="col-12 h3 text-monospace text-break text-center">
-    %s
+  <div class="col-1 h3" >
+    <button class="btn btn-info p-2 m-2"
+            onclick="copyToClipboard(\'#pwd_clear\')"
+	    title="Copy password to clipboard"
+            type="button">
+        <span>
+	  <i class="fas fa-copy fa-lg fa-fw"></i>
+	</span>
+    </button>
   </div>
+  <div id="pwd_clear" class="col-11 h3 text-monospace text-break text-center">%s</div>
   <div class="col-12 text-center">', $pwd->{clear});
 
   my $qr;

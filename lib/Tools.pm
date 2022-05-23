@@ -2,14 +2,20 @@
 #
 
 package Tools;
+
 use Moose::Role;
 
 use utf8;
 use Data::Printer;
 use Try::Tiny;
-use POSIX qw(strftime);
 use Time::Piece;
-use IO::File;
+
+use IPC::Run qw( run timeout );
+use POSIX qw(strftime);
+use POSIX::Run::Capture qw(:std);
+use File::Path qw(make_path remove_tree);
+use File::Temp qw/ tempfile tempdir :POSIX /;
+use File::Which;
 
 use List::MoreUtils;
 use List::Util;
@@ -334,6 +340,7 @@ sub msg2html {
       data  => $args->{data},
       title => '<b>Error! Just close the window and inform administrator.</b>',
     };
+
   $arg->{element} = { card  =>
 		      { root   => sprintf("<div class=\"card text-left border border-%s\">",
 					   $arg->{color}),
@@ -352,12 +359,13 @@ sub msg2html {
 		      $arg->{title},
 		      $arg->{element}->{card}->{body},
 		      $arg->{data});
-  } elsif ( $arg->{type} eq 'alert' ) {
+  } elsif ( $arg->{type} eq 'alert') {
     $return = sprintf("%s<h4>%s</h4><hr><p>%s</p></div>",
 		      $arg->{element}->{alert}->{root},
 		      $arg->{title},
 		      $arg->{data});
   }
+
   return $return;
 }
 
@@ -487,76 +495,180 @@ sub pad_base64 {
   return $to_pad;
 }
 
-=head2 ssh_keygen
+=head2 keygen_ssh
 
 ssh key generator
 
 default key_type is RSA, default bits 2048
 
-wrapper for Net::SSH::Perl::Key
+wrapper for ssh-keygen(1)
 
 =cut
 
-sub ssh_keygen {
-  my ( $self, $args ) = @_;
-  my $arg = { key_type => $args->{key_type} || 'RSA',
-	      bits     => $args->{bits}     || 2048, };
 
-  my $key;
-  try {
-    $key = Net::SSH::Perl::Key->keygen($arg->{key_type}, $arg->{bits});
-    return { private => $key->{rsa_priv}->export_key_pem('private'),
-  	     public  => $key->dump_public };
-  } catch {
-    return { error => qq($_) };
+sub keygen_ssh {
+  my ( $self, $args ) = @_;
+  my $arg = { type => $args->{type} || 'RSA',
+	      bits => $args->{bits} || 2048,
+	      name => $args->{name} };
+
+  my (@ssh, $res, $fh, $key_file, $kf);
+
+  push @ssh, which 'ssh-keygen';
+
+  if ( $arg->{type} eq 'RSA' ) {
+    $arg->{type} = 'rsa';
+    push @ssh, '-b', $arg->{bits};
+  } elsif ( $arg->{type} eq 'Ed25519' ) {
+    $arg->{type} = 'ed25519';
+  } elsif ( $arg->{type} eq 'ECDSA256' ) {
+    $arg->{type} = 'ecdsa';
+    push @ssh, '-b', 256;
+  } elsif ( $arg->{type} eq 'ECDSA384' ) {
+    $arg->{type} = 'ecdsa';
+    push @ssh, '-b', 384;
+  } elsif ( $arg->{type} eq 'ECDSA521' ) {
+    $arg->{type} = 'ecdsa';
+    push @ssh, '-b', 521;
   }
 
-  # # my $key;
-  # # try {
-  # #   $key = Crypt::PK::RSA->new;
-  # #   $key->generate_key($arg->{bits}/8);
-  # #   my $hash = $key->key2hash;
-  # #   my $e = substr('0',0,length($hash->{e}) % 2) . $hash->{e}; # prepend 0 if hex string is odd length, ie: 10001 (65537 decimal)
-  # #   $b->put_mp_int(pack('H*',$e));
-  # #   $b->put_mp_int(pack('H*',$hash->{N}));
-  # #   $b->bytes;
-  # #   $arg->{return} { private => $key->export_key_jwk('private', 1),
-  # # 		       public  => $key->export_key_jwk('public', 1) };
-  # #   log_debug {np($key->key2hash)};
-  # # } catch {
-  # #   return { error => qq($_) };
-  # # }
+  (undef, $key_file) = tempfile('/tmp/.umi-ssh.XXXXXX', OPEN => 0, CLEANUP => 1);
+  # my $key_file = tmpnam();
+  my $date = strftime("%F %T", localtime);
+
+  push @ssh, '-t', $arg->{type}, '-N', '', '-f', $key_file,
+    '-C', qq/by umi for $arg->{name}->{real} ( $arg->{name}->{email} ) on $date/;
+  $arg->{opt} = \@ssh;
+  my $obj = new POSIX::Run::Capture(argv => [ @ssh ] );
+  $res->{error} = $obj->errno if ! $obj->run;
+  # log_debug { np($arg) };
+
+  # $arg->{key}->{pvt} = $self->file2var( "$key_file.1", $res);
+  # $arg->{key}->{pub} = $self->file2var( "$key_file.pub1", $res);
+
+  open($fh, '<', $key_file) or die "Cannot open file $key_file: $!";
+  {
+    local $/;
+    $arg->{key}->{pvt} = <$fh>;
+  }
+  close($fh) || die "Cannot close file $key_file: $!";
+  unlink $key_file || die "Could not unlink $key_file: $!";;
+
+  open($fh, '<', "$key_file.pub") or die "Cannot open file $key_file.pub: $!";
+  {
+    local $/;
+    $arg->{key}->{pub} = <$fh>;
+  }
+  close($fh) || die "Cannot close file $key_file.pub: $!";
+  unlink "$key_file.pub" || die "Could not unlink $key_file.pub: $!";;
+
+  $res->{private} = $arg->{key}->{pvt};
+  $res->{public}  = $arg->{key}->{pub};
+
+  # log_debug { np($res) };
+  # log_debug { np($arg) };
+  return $res;
 }
 
+=head2 keygen_gpg
+
+gpg key generator
+
+default key_type is , default bits 2048
+
+wrapper for gpg(1)
+
+=cut
+
+sub keygen_gpg {
+  my ( $self, $args ) = @_;
+  my $arg = { bits => $args->{bits} || 2048,
+	      name => $args->{name} || { real  => "not signed in $$",
+					 email => "not signed in $$" }
+	    };
+
+  my $date = strftime("%F %T", localtime);
+  my $key;
+
+  $ENV{GNUPGHOME} = tempdir(TEMPLATE => '/tmp/.umi-gnupg.XXXXXX', CLEANUP => 1 );
+  my ($fh, $bf) = tempfile( 'batch.XXXXXX', DIR => $ENV{GNUPGHOME} );
+
+  ### https://www.gnupg.org/documentation/manuals/gnupg-devel/Unattended-GPG-key-generation.html
+  my $batch = <<"END_MSG";
+%no-protection
+Key-Type: default
+Key-Length: $arg->{bits}
+Subkey-Type: default
+Name-Real: $arg->{name}->{real}
+Name-Email: $arg->{name}->{email}
+Name-Comment: UMI auto generated on $date
+Expire-Date: 0
+END_MSG
+
+  print $fh $batch;
+  close $fh;
+  my (@gpg, $obj, $gpg_bin, $res);
+  $gpg_bin = which 'gpg';
+  push @gpg, $gpg_bin, '--no-tty', '--quiet', '--yes';
+
+  $obj = new POSIX::Run::Capture(argv    => [ @gpg, '--batch', '--gen-key', $bf ] );
+  $res->{error} = $obj->errno if ! $obj->run;
+
+  $obj = new POSIX::Run::Capture(argv    => [ @gpg, '--fingerprint', $arg->{name}->{email} ] );
+  $res->{error} = $obj->errno if ! $obj->run;
+  $arg->{fingerprint} = $obj->get_lines(1)->[1];
+  $arg->{fingerprint} =~ tr/ //ds;
+
+  $obj = new POSIX::Run::Capture(argv    => [ @gpg, '--armor', '--export', $arg->{name}->{email} ] );
+  $res->{error} = $obj->errno if ! $obj->run;
+  $arg->{key}->{pub} = join '', @{$obj->get_lines(1)};
+
+  $obj = new POSIX::Run::Capture(argv    => [ @gpg, '--armor', '--export-secret-key', $arg->{name}->{email} ] );
+  $res->{error} = $obj->errno if ! $obj->run;
+  $arg->{key}->{pvt} = join '', @{$obj->get_lines(1)};
+
+  $obj = new POSIX::Run::Capture(argv    => [ @gpg, '--list-keys', $arg->{name}->{email} ] );
+  $res->{error} = $obj->errno if ! $obj->run;
+  $arg->{key}->{lst} = join '', @{$obj->get_lines(1)};
+
+### gpg2 --keyserver 'ldap://192.168.137.1/ou=Keys,ou=PGP,dc=umidb????bindname=uid=umi-admin%2Cou=People%2Cdc=umidb,password=testtest' --send-keys 79F6E0C65DF4EC16
+
+  File::Temp::cleanup();
+
+  $res->{private}  = $arg->{key}->{pvt};
+  $res->{public}   = $arg->{key}->{pub};
+  $res->{list_key} = $arg->{key}->{lst};
+
+  return $res;
+}
+
+=head2 file2var
+
+reading file to a string or array
+
+TODO: error handling
+
+=cut
 
 sub file2var {
   my ( $self, $file, $final_message, $return_as_arr ) = @_;
   my ( @file_in_arr,$file_in_str, $fh );
 
-  try {
-    $fh = IO::File->new($file, "r");
-  } catch {
-    push @{$final_message->{error}}, "Can not open $file: $_";
-  };
-
-  $fh->binmode;
-    
-  if ( defined $return_as_arr && $return_as_arr == 1 ) {
-    while (<$fh>) {
-      chomp;
-      push @file_in_arr, $_;
+  open($fh, '<', "$file") || die "Cannot open file $file: $!";
+  {
+    local $/;
+    if ( defined $return_as_arr && $return_as_arr == 1 ) {
+      while (<$fh>) {
+	chomp;
+	push @file_in_arr, $_;
+      }
+    } else {
+      local $/ = undef;
+      $file_in_str = <$fh>;
     }
-  } else {
-    local $/ = undef;
-    $file_in_str = <$fh>;
   }
+  close($fh) || die "Cannot close file $file: $!";
 
-  try {
-    $fh->close;
-  } catch {
-    push @{$final_message->{error}}, "$_";
-  };
-  
   return defined $return_as_arr && $return_as_arr == 1 ? \@file_in_arr : $file_in_str;
 }
 

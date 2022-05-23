@@ -25,7 +25,8 @@
 	      </label>
 	    </div>
 	  </div>
-	  <div class="row">
+	  <div class="modal-error mx-5"></div>
+	  <div class="modal-footer row">
 	    <div class="col-3">
 	      <button type="button" class="btn btn-block btn-secondary umi-btn-event"
 		      data-dismiss="modal">Close</button>
@@ -40,7 +41,6 @@
 	  </div>
 	</form>
       </div>
-      <div class="modal-footer"></div>
     </div>
   </div>
 </div>
@@ -90,14 +90,15 @@
 	<div class="modal-footer">
 	  <div>
 	    <button type="button" class="btn btn-secondary umi-btn-event" data-dismiss="modal">Close</button>
+	    <!-- onClick="$(modal_block[% id_suffix %]).modal('hide')" -->
 	    <button type="submit" class="btn bg-danger text-white umi-btn-event umi-btn-ajax"
 		    name="user_block" value="[% entry.key %]"
-		    onClick="$(modal_block[% id_suffix %]).modal('hide')"
 		    data-action="block">
 	      Yes, I really want to block this user all accounts, and yes, I understand all consequences!
 	    </button>
 	  </div>
 	</div>
+      <div class="modal-footer"></div>
       </form>
     </div>
   </div>
@@ -144,14 +145,15 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	<div class="modal-footer">
 	  <div>
 	    <button type="button" class="btn btn-secondary umi-btn-event" data-dismiss="modal">Close</button>
+	    <!-- onClick="$(modal_reassign[% id_suffix %]).modal('hide')" -->
 	    <button type="submit" class="btn bg-danger umi-btn-event umi-btn-ajax"
-		    onClick="$(modal_reassign[% id_suffix %]).modal('hide')"
 		    name="src_dn"
 		    value="[% entry.key %]" data-action="reassign" >
 	      Yes, I really want to change it and yes, I understand all consequences!
 	    </button>
 	  </div>
 	</div>
+	<div class="modal-error mx-5"></div>
       </form>
     </div>
   </div>
@@ -195,13 +197,19 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	  <div>
 	    <button type="button" class="btn btn-secondary umi-btn-event" data-dismiss="modal">Close</button>
 	    <button type="submit" class="btn bg-danger text-white umi-btn-event umi-btn-ajax"
-		    onClick="$(modal_moddn[% id_suffix %]).modal('hide')"
 		    name="src_dn"
 		    value="[% entry.key %]" data-action="refresh" >
 	      Yes, I really want to change it and yes, I understand all consequences!
 	    </button>
+<!--	    <button type="submit" class="btn bg-danger text-white umi-btn-event umi-btn-ajax"
+		    onClick="$(modal_moddn[% id_suffix %]).modal('hide')"
+		    name="src_dn"
+		    value="[% entry.key %]" data-action="refresh" >
+	      Yes, I really want to change it and yes, I understand all consequences!
+	    </button> -->
 	  </div>
 	</div>
+	<div class="modal-error mx-5"></div>
       </form>
     </div>
   </div>
@@ -267,6 +275,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	  </div>
 	</form>
       </div>
+      <div class="modal-footer"></div>
     </div>
   </div>
 </div>
@@ -324,6 +333,7 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
 	    Yes, to get vCard
 	  </button>
 	</div>
+      <div class="modal-footer"></div>
       </form>
     </div>
   </div>

@@ -26,10 +26,10 @@ requires 'Catalyst::View::Download';
 requires 'Catalyst::View::JSON';
 requires 'Catalyst::View::TT';
 
-requires 'Log::Log4perl';
-requires 'Log::Contextual';
-requires 'Log::Dispatch';
-
+requires 'Log::Log4perl'
+requires 'Log::Contextual'
+requires 'Log::Dispatch'
+    
 requires 'Cache::FastMmap';
 requires 'Compress::LZ4';
 requires 'Crypt::GeneratePassword';
@@ -39,6 +39,7 @@ requires 'Data::Entropy';
 requires 'Data::Printer';
 # ??? # requires 'DateTime::Format::Duration';
 requires 'Digest::SHA';
+requires 'File::Which';
 requires 'GD::Barcode::QRcode';
 requires 'Lingua::Translit';
 # ??? # requires 'MikroTik::API';
@@ -47,7 +48,7 @@ requires 'MIME::Base64';
 requires 'Net::CIDR::Set';
 requires 'Net::LDAP';
 requires 'Net::Netmask';
-requires 'Net::SSH::Perl';
+requires 'POSIX::Run::Capture';
 requires 'Template::Plugin::JSON';
 requires 'Text::Unidecode';
 requires 'Text::Diff::HTML';

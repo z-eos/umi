@@ -1,7 +1,7 @@
 # -*- mode: cperl; mode: follow; -*-
 #
 
-package UMI::Controller::ToolSshKeyGen;
+package UMI::Controller::ToolGpgKeyGen;
 use Moose;
 use namespace::autoclean;
 
@@ -10,17 +10,17 @@ use Data::Printer;
 
 BEGIN { extends 'Catalyst::Controller'; with 'Tools'; }
 
-use UMI::Form::ToolSshKeyGen;
+use UMI::Form::ToolGpgKeyGen;
 has 'form' => (
-	       isa => 'UMI::Form::ToolSshKeyGen', is => 'rw',
+	       isa => 'UMI::Form::ToolGpgKeyGen', is => 'rw',
 	       lazy => 1, documentation => q{Form to generate SSH key},
-	       default => sub { UMI::Form::ToolSshKeyGen->new },
+	       default => sub { UMI::Form::ToolGpgKeyGen->new },
 	      );
 
 
 =head1 NAME
 
-UMI::Controller::ToolSshKeyGen - Catalyst Controller
+UMI::Controller::ToolGpgKeyGen - Catalyst Controller
 
 =head1 DESCRIPTION
 
@@ -43,7 +43,7 @@ sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
     my $params = $c->req->parameters;
 
-    $c->stash( template => 'tool/toolsshkeygen.tt',
+    $c->stash( template => 'tool/toolgpgkeygen.tt',
 	       form     => $self->form );
 
     return unless
@@ -52,20 +52,18 @@ sub index :Path :Args(0) {
 			   params => $params,
 			  );
 
-    my $key->{name} = { real  => $c->session->{__user}->{user}->{attributes}->{gecos} // 'not signed in',
-			email => $c->session->{__user}->{user}->{attributes}->{mail}  // 'not signed in', };
-
-    $key->{ssh} = $self->keygen_ssh({ type => $params->{key_type},
-				      bits => $params->{bits},
-				      name => $key->{name} });
+    my $key = $self->keygen_gpg({ bits => $params->{bits},
+				  name => { real  => $c->session->{__user}->{user}->{attributes}->{gecos} // 'not signed in',
+					    email => $c->session->{__user}->{user}->{attributes}->{mail} // 'not signed in',
+					  },
+				});
 
     if ( exists $key->{error} ) {
       $key->{html}->{error} = $key->{error};
     }
 
     $c->stash( final_message => $key->{html},
-	       key           => $key
-	     );
+	       key           => $key );
 }
 
 =head1 AUTHOR

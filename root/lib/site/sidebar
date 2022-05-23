@@ -118,9 +118,21 @@
 	    </a>
 	  </li>
           <li class="nav-item">
+	    <a class="text-light nav-link" href="/toolgpgkeygen">
+	      <i class="fas fa-fw fa-lock"></i>
+	      GPG keygen
+	    </a>
+	  </li>
+          <li class="nav-item">
 	    <a class="text-light nav-link" href="/toolqr">
 	      <i class="fas fa-fw fa-qrcode"></i>
 	      QR
+	    </a>
+	  </li>
+          <li class="nav-item">
+	    <a class="text-light nav-link" href="/onboarding">
+	      <i class="fas fa-fw fa-id-card"></i>
+	      Onboarding
 	    </a>
 	  </li>
 	  [% IF c.check_user_roles('admin') %]
@@ -143,6 +155,7 @@
 	</ul>
       </li>
 
+      [% IF c.check_any_user_role ('admin', 'coadmin', 'acl-w-people', 'acl-w-organizations', 'acl-w-inventory', 'dhcp') %]
       <li class="nav-item">
 	<a href="#submenuObjects"
 	   data-toggle="collapse"
@@ -233,6 +246,7 @@
 	  
 	</ul>
       </li>
+      [% END %]
 
       <li class="nav-item divider"></li>
       
