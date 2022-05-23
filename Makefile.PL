@@ -26,9 +26,9 @@ requires 'Catalyst::View::Download';
 requires 'Catalyst::View::JSON';
 requires 'Catalyst::View::TT';
 
-requires 'Log::Log4perl'
-requires 'Log::Contextual'
-requires 'Log::Dispatch'
+requires 'Log::Log4perl';
+requires 'Log::Contextual';
+requires 'Log::Dispatch';
     
 requires 'Cache::FastMmap';
 requires 'Compress::LZ4';
