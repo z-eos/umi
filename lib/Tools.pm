@@ -18,7 +18,7 @@ use File::Temp qw/ tempfile tempdir :POSIX /;
 use File::Which;
 
 use List::MoreUtils;
-use List::Util;
+use List::Util qw(tail);
 use Scalar::Util;
 
 use Storable;
@@ -64,9 +64,17 @@ sub _build_a {
 		 net3b     => '(?:(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){2}',
 		 net2b     => '(?:(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){1}',
 		 sshpubkey => {
-			       type   => qr/ssh-rsa|ssh-dss|ssh-ed25519|ecdsa-\S+/,
-			       id     => "[a-zA-Z_][a-zA-Z0-9_-]+",
-			       base64 => "[A-Za-z0-9+/]",
+			       type    => qr/ssh-rsa|ssh-dss|ssh-ed25519|ecdsa-\S+/,
+			       id      => "[a-zA-Z_][a-zA-Z0-9_-]+",
+			       base64  => "[A-Za-z0-9+/]",
+			       comment => "by umi for",
+			      },
+		 gpgpubkey => {
+			       expire => '1y',
+			       comment => 'by umi for',
+			       type => {
+					1 => 'RSA',
+				       },
 			      },
 		 mac       => {
 			       mac48 => '(?:[[:xdigit:]]{2}([-:]))(?:[[:xdigit:]]{2}\1){4}[[:xdigit:]]{2}',
@@ -537,7 +545,7 @@ sub keygen_ssh {
   my $date = strftime("%F %T", localtime);
 
   push @ssh, '-t', $arg->{type}, '-N', '', '-f', $key_file,
-    '-C', qq/by umi for $arg->{name}->{real} ( $arg->{name}->{email} ) on $date/;
+    '-C', qq/$self->{a}->{re}->{sshpubkey}->{comment} $arg->{name}->{real} ( $arg->{name}->{email} ) on $date/;
   $arg->{opt} = \@ssh;
   my $obj = new POSIX::Run::Capture(argv => [ @ssh ] );
   $res->{error} = $obj->errno if ! $obj->run;
@@ -587,7 +595,7 @@ sub keygen_gpg {
 					 email => "not signed in $$" }
 	    };
 
-  my $date = strftime("%F %T", localtime);
+  my $date = strftime('%Y%m%d%H%M%S', localtime);
   my $key;
 
   $ENV{GNUPGHOME} = tempdir(TEMPLATE => '/tmp/.umi-gnupg.XXXXXX', CLEANUP => 1 );
@@ -601,8 +609,8 @@ Key-Length: $arg->{bits}
 Subkey-Type: default
 Name-Real: $arg->{name}->{real}
 Name-Email: $arg->{name}->{email}
-Name-Comment: UMI auto generated on $date
-Expire-Date: 0
+Name-Comment: $self->{a}->{re}->{gpgpubkey}->{comment} on $date
+Expire-Date: $self->{a}->{re}->{gpgpubkey}->{expire}
 END_MSG
 
   print $fh $batch;
@@ -629,8 +637,34 @@ END_MSG
 
   $obj = new POSIX::Run::Capture(argv    => [ @gpg, '--list-keys', $arg->{name}->{email} ] );
   $res->{error} = $obj->errno if ! $obj->run;
-  $arg->{key}->{lst} = join '', @{$obj->get_lines(1)};
+  $arg->{key}->{lst}->{hr} = join '', @{$obj->get_lines(1)};
 
+  # https://gnupg.org/documentation/manuals/gnupg/GPG-Input-and-Output.html#GPG-Input-and-Output
+  $obj = new POSIX::Run::Capture(argv    => [ @gpg, '--with-colons', '--list-keys', $arg->{name}->{email} ] );
+  $res->{error} = $obj->errno if ! $obj->run;
+
+  %{$arg->{key}->{lst}->{colons}} =
+    map { (split(/:/, $_))[0] => [tail(-1, @{[split(/:/, $_)]})] } @{$obj->get_lines(1)};
+
+  $arg->{key}->{snd} = {
+			objectClass => [ 'pgpKeyInfo' ],
+			pgpSignerID => $arg->{key}->{lst}->{colons}->{pub}->[3],
+			pgpCertID   => $arg->{key}->{lst}->{colons}->{pub}->[3],
+			pgpKeyID    => substr($arg->{key}->{lst}->{colons}->{pub}->[3], 8),
+			pgpKeySize  => sprintf("%05s", $arg->{key}->{lst}->{colons}->{pub}->[1]),
+			pgpKeyType  => $self->{a}->{re}->{gpgpubkey}->{type}->{$arg->{key}->{lst}->{colons}->{pub}->[2]},
+			pgpRevoked  => 0,
+			pgpDisabled => 0,
+			pgpKey      => $arg->{key}->{pub},
+			pgpUserID   => $arg->{key}->{lst}->{colons}->{uid}->[8],
+			pgpSubKeyID => $arg->{key}->{lst}->{colons}->{sub}->[3],
+			pgpKeyCreateTime => strftime('%Y%m%d%H%M%SZ', localtime($arg->{key}->{lst}->{colons}->{pub}->[4])),
+			pgpKeyExpireTime => strftime('%Y%m%d%H%M%SZ', localtime($arg->{key}->{lst}->{colons}->{pub}->[5])),
+		       };
+
+  # log_debug { np($arg->{key}->{snd}) };
+
+  # log_debug { np($arg->{key}->{lst}->{colons}) };
 ### gpg2 --keyserver 'ldap://192.168.137.1/ou=Keys,ou=PGP,dc=umidb????bindname=uid=umi-admin%2Cou=People%2Cdc=umidb,password=testtest' --send-keys 79F6E0C65DF4EC16
 
   File::Temp::cleanup();
@@ -638,6 +672,7 @@ END_MSG
   $res->{private}  = $arg->{key}->{pvt};
   $res->{public}   = $arg->{key}->{pub};
   $res->{list_key} = $arg->{key}->{lst};
+  $res->{send_key} = $arg->{key}->{snd};
 
   return $res;
 }

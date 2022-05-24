@@ -187,6 +187,14 @@ sub _build_cfg {
 				       uidNumber_ssh_start => 20100,
 				       uidNumber_start     => 10000,
 				      },
+			      key => {
+				      ssh => {
+					      comment => 'by umi for',
+					     },
+				      gpg => {
+					      comment => 'by umi for',
+					     },
+				     },
 			      notAvailable => 'NA', },
 	  ui => { debug     => 0,
 		  aside     => 0,

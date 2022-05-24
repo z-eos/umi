@@ -59,13 +59,20 @@ sub index :Path :Args(0) {
     $key->{name} = { real  => $c->session->{__user}->{user}->{attributes}->{gecos} // 'N/A',
 		     email => $c->session->{__user}->{user}->{attributes}->{mail}  // 'N/A', };
 
-    $key->{ssh} = $self->keygen_ssh({ type => $params->{ssh_key_type}, bits => $params->{ssh_key_bits}, name => $key->{name} });
+    #
+    ## SSH
+    #
+
+    $key->{ssh} = $self->keygen_ssh({ type => $params->{ssh_key_type},
+				      bits => $params->{ssh_key_bits},
+				      name => $key->{name}             });
     push @{$key->{html}->{error}}, $key->{ssh}->{error}
       if exists $key->{ssh}->{error};
 
     $key->{gpg} = $self->keygen_gpg({ bits => $params->{gpg_key_bits}, name => $key->{name}, });
     push @{$key->{html}->{error}}, $key->{gpg}->{error}
       if exists $key->{gpg}->{error};
+
 
     my $ldap_crud = $c->model('LDAP_CRUD');
     my $mesg =
@@ -76,37 +83,53 @@ sub index :Path :Args(0) {
       if $mesg->code ne '0';
 
     my ($keys_ssh, $delete, $add);
-    push @{$delete}, 'grayPublicKey' =>
-      [
-       grep { $_ =~ /.*umi for.*/ }
-       @{$mesg->entry(0)->get_value( 'grayPublicKey', asref => 1 )}
-      ];
 
     push @{$add}, 'grayPublicKey' => $key->{ssh}->{public};
-    push @{$keys_ssh}, delete => $delete;
-    push @{$keys_ssh}, add    => $add;
+    push @{$keys_ssh}, add => $add;
 
-
-log_debug { np($keys_ssh) };
-
+    ### find all onboarded ssh keys to delete
+    if ( my @a = grep { /.* $self->{a}->{re}->{sshpubkey}->{comment} .*/ }
+	 @{$mesg->entry(0)->get_value( 'grayPublicKey', asref => 1 )} ) {
+      push @{$delete}, 'grayPublicKey' => \@a;
+      push @{$keys_ssh}, delete => $delete;
+    }
     my $msg = $ldap_crud->modify( $mesg->entry(0)->dn, $keys_ssh);
-    push @{$key->{html}->{error}}, $msg->{html}
-      if $msg ne '0';
+    push @{$key->{html}->{error}}, $msg->{html} if $msg ne '0';
+    # log_debug { np($keys_ssh) };
 
-log_debug { np($key->{html}) };
+    #
+    ## GPG
+    #
 
+    ### DELETE
+    $mesg =
+      $ldap_crud->search( { base   => $ldap_crud->cfg->{base}->{pgp},
+			    filter => sprintf('pgpUserID=*%s*', $self->{a}->{re}->{gpgpubkey}->{comment}),
+			    attrs  => ['pgpUserID'], } );
+    push @{$key->{html}->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
+      if $mesg->code ne '0';
 
+    my ($keys_gpg, $err);
+    foreach ( @{[$mesg->entries]} ) {
+      log_debug { 'GPG key to delete: ' . np($_->dn) };
+      $err = $ldap_crud->del($_->dn)
+	if $_->get_value( 'pgpUserId' ) =~ /.*$self->{a}->{re}->{gpgpubkey}->{comment} .*/;
 
+      push @{$key->{html}->{error}}, $err if $err;
+    }
 
+    ### ADD
+    my ($add_dn, $add_attrs);
+    $add_dn = sprintf("pgpCertID=%s,%s",
+			 $key->{gpg}->{send_key}->{pgpCertID},
+			 $ldap_crud->cfg->{base}->{pgp});
+    @{$add_attrs} = map { $_ => $key->{gpg}->{send_key}->{$_} } keys %{$key->{gpg}->{send_key}};
+    $mesg = $ldap_crud->add( $add_dn, $add_attrs );
 
+    push @{$key->{html}->{error}}, $mesg->{html} if $mesg;
 
+    # log_debug { np($key->{html}) };
 
-
-
-
-
-
-    
     $c->stash( final_message => $key->{html},
 	       key           => $key
 	     );

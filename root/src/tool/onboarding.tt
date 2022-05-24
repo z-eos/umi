@@ -60,7 +60,7 @@ Onboarding<small><em class="text-muted font-monospace"></em></small>
 	
 	<div class="row m-5 p-5">
           <div class="col-12">
-      	    <pre>[% FILTER html %][% key.gpg.list_key %][% END %]</pre>
+      	    <pre>[% FILTER html %][% key.gpg.list_key.hr %][% END %]</pre>
     	  </div>
     	  <div class="col">
       	    <button class="btn btn-info p-3 my-3"
