@@ -239,12 +239,6 @@
 	  [% END %]
 	</div>
       </li>
-      [%     ELSE %]
-      <li class="nav-item">
-	<div class="nav-link">
-	  <i class="fas fa-sticky-note text-white-50"></i>
-	</div>
-      </li>
       [%     END %]
       [%   END %]
       <li class="nav-item dropdown">

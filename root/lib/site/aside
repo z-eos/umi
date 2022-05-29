@@ -197,6 +197,17 @@
 	</div>
 
 	<div id="ipam" class="">
+	  <div id="ip-copied-toast" class="toast border border-success" data-delay="2000"
+	       style="position: absolute; top: 20px; right: 20px;"
+	       role="alert" aria-live="assertive" aria-atomic="true">
+	    <div class="toast-header bg-info text-white font-weight-bold">
+	      <i class="fas fa-clipboard mr-4"></i>
+	      IP Copied
+	    </div>
+	    <div id="ip-copied" class="toast-body text-gray text-center font-weight-bold">
+	    </div>
+	  </div>
+
 	  <script type="text/x-template" id="ipam-template">
 	    <li>
 	      <div class="ldap-tree-point">
@@ -276,17 +287,6 @@
 	    </ipam-tree-item>
 	  </ul>
 	  
-	</div>
-      </div>
-
-      <div id="ip-copied-toast" class="toast border border-success" data-delay="2000"
-	   style="position: absolute; top: 20px; right: 20px;"
-	   role="alert" aria-live="assertive" aria-atomic="true">
-	<div class="toast-header bg-info text-white font-weight-bold">
-	  <i class="fas fa-clipboard mr-4"></i>
-	  IP Copied
-	</div>
-	<div id="ip-copied" class="toast-body text-gray text-center font-weight-bold">
 	</div>
       </div>
       

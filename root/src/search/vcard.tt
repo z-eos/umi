@@ -10,6 +10,7 @@ vCard<small><em class="text-muted font-monospace">
 
 [% INCLUDE ldap_err.tt %]
 
+<!--
 <form method="POST"
       class="mt-5"
       role="form"
@@ -30,12 +31,31 @@ vCard<small><em class="text-muted font-monospace">
     <i class="fas fa-file-export fa-lg"></i>&nbsp;vCard DOWNLOAD
   </button>
 </form>
+-->
+<div class="btn-group" role="group">
+  <button class="btn btn-info p-3 my-3"
+	  onclick="copyToClipboard('#vcard')"
+	  title="Copy vCard to clipboard"
+	  type="button">
+    <span>
+      <i class="fas fa-copy fa-lg fa-fw"></i>
+    </span>
+  </button>
+  <button class="btn btn-info p-3 my-3"
+	  onclick="downloadString(document.querySelector('#vcard').innerText, 'text/vcard', '[% final_message.outfile_name %].vcard')"
+       	  title="Download vCard as file"
+	  type="button">
+    <span>
+      <i class="fas fa-file-download fa-lg fa-fw"></i>
+    </span>
+  </button>
+</div>
 <br>
 
 <div class="row">
   <div class="col-3"></div>
   <div class="col-6 card border border-success">
-    <pre class="mt-3"><code>[% final_message.vcard %]</code></pre>
+    <pre id="vcard" class="mt-3"><code>[% final_message.vcard %]</code></pre>
   </div>
   <div class="col-3"></div>
   <div class="col-12 text-center mt-5">
@@ -43,6 +63,8 @@ vCard<small><em class="text-muted font-monospace">
   </div>
 </div>
 
+<!--
 <script type="text/javascript">  
  $(function(){ $('form#f_vcard_gen2f').off('submit'); });
 </script>
+-->

@@ -30,10 +30,10 @@
 	  [% IF i != '' %]<li>[% i %]</li>[% END %]
 	  [% END %]
 	</ul>
+	<hr>
 	[% END %]
 	[% IF final_message.error %]
-	<hr>
-	<ul id="finalmessagem-errors" class="list-unstyled">
+	<ul id="finalmessagem-errors">
 	  [% FOREACH i IN final_message.error %]
 	  [% IF i != '' %]<li>[% i %]</li>[% END %]
 	  [% END %]

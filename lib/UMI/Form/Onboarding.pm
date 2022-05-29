@@ -82,9 +82,9 @@ has_field 'gpg_key_bits'
 
 has_field 'aux_submit'
   => ( type          => 'Submit',
-       element_class => [ qw( btn btn-success btn-block
+       element_class => [ qw( btn btn-success btn-block btn-lg
 			      font-weight-bold text-uppercase) ],
-       wrapper_class => [ 'col-2', ],
+       wrapper_class => [ 'col-6', ],
        value         => 'Submit' );
 
 has_block 'aux_submitit'

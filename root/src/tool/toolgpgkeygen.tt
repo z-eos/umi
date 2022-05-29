@@ -15,28 +15,48 @@ GPG key generator<small><em class="text-muted font-monospace"></em></small>
 [% IF key %]
 <div class="row m-5 p-5">
     <div class="col-12">
-      <pre>[% FILTER html %][% key.list_key %][% END %]</pre>
+      <pre>[% FILTER html %][% key.list_key.hr %][% END %]</pre>
     </div>
     <div class="col">
-      <button class="btn btn-info p-3 my-3"
-              onclick="copyDivToClipboard('#private')"
-	      title="Copy private key to clipboard"
-              type="button">
-        <span>
-	  <i class="fas fa-copy fa-lg fa-fw"></i>
-	</span>
-      </button>
+      <div class="btn-group" role="group">
+	<button class="btn btn-info p-3 my-3"
+		onclick="copyDivToClipboard('#private')"
+		title="Copy private key to clipboard"
+		type="button">
+          <span>
+	    <i class="fas fa-copy fa-lg fa-fw"></i>
+	  </span>
+	</button>
+	<button class="btn btn-info p-3 my-3"
+		onclick="downloadString(document.querySelector('#private').innerText, 'text/plain', 'gpg-key-[% key.gpg.send_key.pgpKeyCreateTime %]-pvt.asc')"
+       		title="Download private key"
+		type="button">
+	  <span>
+	    <i class="fas fa-file-download fa-lg fa-fw"></i>
+	  </span>
+	</button>
+      </div>
       <pre id="private">[% key.private %]</pre>	
     </div>
     <div class="col">
-      <button class="btn btn-info p-3 my-3"
-              onclick="copyDivToClipboard('#public')"
-       	      title="Copy public key to clipboard"
-              type="button">
-        <span>
-	  <i class="fas fa-copy fa-lg fa-fw"></i>
-	</span>
-      </button>
+      <div class="btn-group" role="group">
+	<button class="btn btn-info p-3 my-3"
+		onclick="copyDivToClipboard('#public')"
+       		title="Copy public key to clipboard"
+		type="button">
+          <span>
+	    <i class="fas fa-copy fa-lg fa-fw"></i>
+	  </span>
+	</button>
+	<button class="btn btn-info p-3 my-3"
+		onclick="downloadString(document.querySelector('#public').innerText, 'text/plain', 'gpg-key-[% key.gpg.send_key.pgpKeyCreateTime %]-pub.asc')"
+       		title="Download public key"
+		type="button">
+	  <span>
+	    <i class="fas fa-file-download fa-lg fa-fw"></i>
+	  </span>
+	</button>
+      </div>
       <pre id="public">[% key.public %]</pre>
     </div>
 </div>

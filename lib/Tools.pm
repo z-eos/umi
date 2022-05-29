@@ -71,7 +71,7 @@ sub _build_a {
 			      },
 		 gpgpubkey => {
 			       expire => '1y',
-			       comment => 'by umi for',
+			       comment => 'by umi',
 			       type => {
 					1 => 'RSA',
 				       },
@@ -521,8 +521,14 @@ sub keygen_ssh {
 	      name => $args->{name} };
 
   my (@ssh, $res, $fh, $key_file, $kf);
-
-  push @ssh, which 'ssh-keygen';
+  my $to_which = 'ssh-keygen';
+  my $ssh_bin = which $to_which;
+  if ( defined $ssh_bin ) {
+    push @ssh, $ssh_bin;
+  } else {
+    push @{$res->{error}},  "command <code>$to_which</code> not found";
+    return $res;
+  }
 
   if ( $arg->{type} eq 'RSA' ) {
     $arg->{type} = 'rsa';
@@ -542,13 +548,13 @@ sub keygen_ssh {
 
   (undef, $key_file) = tempfile('/tmp/.umi-ssh.XXXXXX', OPEN => 0, CLEANUP => 1);
   # my $key_file = tmpnam();
-  my $date = strftime("%F %T", localtime);
+  my $date = strftime("%Y%m%d%H%M%S", localtime);
 
   push @ssh, '-t', $arg->{type}, '-N', '', '-f', $key_file,
     '-C', qq/$self->{a}->{re}->{sshpubkey}->{comment} $arg->{name}->{real} ( $arg->{name}->{email} ) on $date/;
   $arg->{opt} = \@ssh;
   my $obj = new POSIX::Run::Capture(argv => [ @ssh ] );
-  $res->{error} = $obj->errno if ! $obj->run;
+  push @{$res->{error}},  $obj->errno if ! $obj->run;
   # log_debug { np($arg) };
 
   # $arg->{key}->{pvt} = $self->file2var( "$key_file.1", $res);
@@ -572,8 +578,9 @@ sub keygen_ssh {
 
   $res->{private} = $arg->{key}->{pvt};
   $res->{public}  = $arg->{key}->{pub};
+  $res->{date}    = $date;
 
-  # log_debug { np($res) };
+  log_debug { np($res) };
   # log_debug { np($arg) };
   return $res;
 }
@@ -616,32 +623,38 @@ END_MSG
   print $fh $batch;
   close $fh;
   my (@gpg, $obj, $gpg_bin, $res);
-  $gpg_bin = which 'gpg';
-  push @gpg, $gpg_bin, '--no-tty', '--quiet', '--yes';
+  my $to_which = 'gpg';
+  $gpg_bin = which $to_which;
+  if ( defined $gpg_bin ) {
+    push @gpg, $gpg_bin, '--no-tty', '--quiet', '--yes';
+  } else {
+    push @{$res->{error}},  "command <code>$to_which</code> not found";
+    return $res;
+  }
 
   $obj = new POSIX::Run::Capture(argv    => [ @gpg, '--batch', '--gen-key', $bf ] );
-  $res->{error} = $obj->errno if ! $obj->run;
+  push @{$res->{error}},  $obj->errno if ! $obj->run;
 
   $obj = new POSIX::Run::Capture(argv    => [ @gpg, '--fingerprint', $arg->{name}->{email} ] );
-  $res->{error} = $obj->errno if ! $obj->run;
+  push @{$res->{error}},  $obj->errno if ! $obj->run;
   $arg->{fingerprint} = $obj->get_lines(1)->[1];
   $arg->{fingerprint} =~ tr/ //ds;
 
   $obj = new POSIX::Run::Capture(argv    => [ @gpg, '--armor', '--export', $arg->{name}->{email} ] );
-  $res->{error} = $obj->errno if ! $obj->run;
+  push @{$res->{error}},  $obj->errno if ! $obj->run;
   $arg->{key}->{pub} = join '', @{$obj->get_lines(1)};
 
   $obj = new POSIX::Run::Capture(argv    => [ @gpg, '--armor', '--export-secret-key', $arg->{name}->{email} ] );
-  $res->{error} = $obj->errno if ! $obj->run;
+  push @{$res->{error}},  $obj->errno if ! $obj->run;
   $arg->{key}->{pvt} = join '', @{$obj->get_lines(1)};
 
   $obj = new POSIX::Run::Capture(argv    => [ @gpg, '--list-keys', $arg->{name}->{email} ] );
-  $res->{error} = $obj->errno if ! $obj->run;
+  push @{$res->{error}},  $obj->errno if ! $obj->run;
   $arg->{key}->{lst}->{hr} = join '', @{$obj->get_lines(1)};
 
   # https://gnupg.org/documentation/manuals/gnupg/GPG-Input-and-Output.html#GPG-Input-and-Output
   $obj = new POSIX::Run::Capture(argv    => [ @gpg, '--with-colons', '--list-keys', $arg->{name}->{email} ] );
-  $res->{error} = $obj->errno if ! $obj->run;
+  push @{$res->{error}},  $obj->errno if ! $obj->run;
 
   %{$arg->{key}->{lst}->{colons}} =
     map { (split(/:/, $_))[0] => [tail(-1, @{[split(/:/, $_)]})] } @{$obj->get_lines(1)};
@@ -673,6 +686,7 @@ END_MSG
   $res->{public}   = $arg->{key}->{pub};
   $res->{list_key} = $arg->{key}->{lst};
   $res->{send_key} = $arg->{key}->{snd};
+  # log_debug { np($res) };
 
   return $res;
 }

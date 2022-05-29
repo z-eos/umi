@@ -1,10 +1,9 @@
 [% META title = 'UNAUTHORIZED' %]
 
-
-<div class="row justify-content-center">
+<div class="row justify-content-center m-5">
   <div class="col-md-6">
     <div class="clearfix">
-      <h1 class="float-left display-3 mr-4">404</h1>
+      <h1 class="float-left display-3 mr-4"><b>404</b></h1>
       <h4 class="pt-3">Oops
 	<strong class="text-info">
 	  <em>
@@ -12,14 +11,6 @@
 	  </em>
 	</strong>! You're lost.</h4>
       <p class="text-muted">The page you are looking for was not found yet/already/don't know why ...</p>
-    </div>
-    <div class="input-prepend input-group disabled">
-      <span class="input-group-addon"><i class="fa fa-search"></i>
-      </span>
-      <input disabled id="prependedInput" class="form-control" size="16" type="text" placeholder="What are you looking for?">
-      <span class="input-group-btn">
-        <button disabled class="btn btn-info" type="button">Search</button>
-      </span>
     </div>
   </div>
 </div>

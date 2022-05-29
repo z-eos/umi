@@ -10,6 +10,7 @@ use JSON;
 use Try::Tiny;
 # use Net::LDAP;
 use Net::LDAP qw( LDAP_COMPARE_FALSE LDAP_COMPARE_TRUE );
+use POSIX qw(strftime);
 
 use Logger;
 
@@ -1040,6 +1041,25 @@ Attempt to render a view, if needed.
 sub end : ActionClass('RenderView') {
   my ( $self, $c ) = @_;
 
+  ### https://metacpan.org/dist/Catalyst-Manual/view/lib/Catalyst/Manual/Cookbook.pod#Delivering-a-Custom-Error-Page
+  if ( scalar @{ $c->error } ) {
+    $c->stash->{errors}   = $c->error;
+    for my $error ( @{ $c->error } ) {
+      log_error { np($error) };
+    }
+    $c->stash->{template} = 'error.tt2';
+    $c->forward('MyApp::View::TT');
+    $c->clear_errors;
+  }
+
+  return 1 if $c->response->status =~ /^(3|5)\d\d$/;
+  return 1 if $c->response->body;
+
+  unless ( $c->response->content_type ) {
+    $c->response->content_type('text/html; charset=utf-8');
+  }
+
+  # store action data
   my $size = 0;
   my $navbar_note;
   if ( defined $c->user &&
@@ -1051,10 +1071,9 @@ sub end : ActionClass('RenderView') {
     my @a = split(/\//, UMI->config->{session}->{storage});
     # !!! HARDCODE ... need to be rewritten
     my $b = join('/', $a[0],$a[1],$a[2]);
-    use POSIX qw(strftime);
     my $now = strftime "%Y%m%d%H%M%S", localtime;
     my $action = $c->req->action;
-    
+
     $action =~ s|/|_|g;
     my $file = sprintf("%s/store-data_%s_%s_%s.perl-storable",
 			 $b,
@@ -1071,7 +1090,6 @@ sub end : ActionClass('RenderView') {
     # EJDU # 			    color => $size > UMI->config->{session_storage_size} ? 'danger' : 'info',
     # EJDU # 			    icon => 'fa-trash' };
   }
-
 
   my @rep = $c->stats->report;
   my $stats = { debug   => $c->session->{settings}->{ui}->{debug} // UMI->config->{debug}->{level},

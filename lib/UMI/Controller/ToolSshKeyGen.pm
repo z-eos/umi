@@ -59,10 +59,9 @@ sub index :Path :Args(0) {
 				      bits => $params->{bits},
 				      name => $key->{name} });
 
-    if ( exists $key->{error} ) {
-      $key->{html}->{error} = $key->{error};
-    }
-
+    $key->{html}->{error} = $key->{ssh}->{error}
+      if exists $key->{ssh}->{error};
+    log_debug { np($key) };
     $c->stash( final_message => $key->{html},
 	       key           => $key
 	     );

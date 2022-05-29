@@ -66,11 +66,11 @@ sub index :Path :Args(0) {
     $key->{ssh} = $self->keygen_ssh({ type => $params->{ssh_key_type},
 				      bits => $params->{ssh_key_bits},
 				      name => $key->{name}             });
-    push @{$key->{html}->{error}}, $key->{ssh}->{error}
+    push @{$key->{html}->{error}}, @{$key->{ssh}->{error}}
       if exists $key->{ssh}->{error};
 
     $key->{gpg} = $self->keygen_gpg({ bits => $params->{gpg_key_bits}, name => $key->{name}, });
-    push @{$key->{html}->{error}}, $key->{gpg}->{error}
+    push @{$key->{html}->{error}}, @{$key->{gpg}->{error}}
       if exists $key->{gpg}->{error};
 
 

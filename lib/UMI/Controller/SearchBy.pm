@@ -1451,12 +1451,14 @@ sub ldif_gen :Path(ldif_gen) :Args(0) {
 
 method to download ldif_gen() results as text/plain file
 
+deprecated in favour of js function downloadString in umi-head.js
+
 =cut
 
 sub ldif_gen2f :Path(ldif_gen2f) :Args(0) {
   my ( $self, $c ) = @_;
   my $params = $c->req->parameters;
-  log_debug { np($params) };
+  # log_debug { np($params) };
 
   my $attrs;
   if ( defined $params->{ldap_ldif_attrs} && ref($params->{ldap_ldif_attrs}) eq 'ARRAY' ) {
@@ -1488,7 +1490,7 @@ sub ldif_gen2f :Path(ldif_gen2f) :Args(0) {
 
 #=====================================================================
 
-=head1 vcard
+=head1 vcard_gen
 
 get vCard (recursive or not, with or without system data) for the DN
 given

@@ -36,16 +36,22 @@ use Catalyst qw/
 
 extends 'Catalyst';
 
-our $VERSION = '0.91';
+our $VERSION = '0.92';
 
 __PACKAGE__
   ->config({
 	    'Plugin::Cache' => { backend => { class => "Cache::Memory", }, },
-	    name            => 'UMI',
+	    name             => 'UMI',
+	    ### https://metacpan.org/dist/Catalyst-Manual/view/lib/Catalyst/Manual/Cookbook.pod#Skipping-your-VCS's-directories
+	    setup_components => { except => qr/\..*/ },
 	    # Disable deprecated behavior needed by old applications
 	    disable_component_resolution_regex_fallback => 1,
 	    enable_catalyst_header                      => 1, # Send X-Catalyst header
 	    default_view                                => "Web",
+
+	    # Plugin::Static::Simple => {
+	    # 	       ignore_dirs => [ qr/\..*/ ],
+	    # 	      },
 
 	    session => {# cookie_name => "umi_cookie",
 			cookie_expires => 0,

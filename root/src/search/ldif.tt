@@ -10,7 +10,9 @@ LDIF<small><em class="text-muted font-monospace">
 
 [% INCLUDE ldap_err.tt %]
 
-<form method="POST"
+<div class="btn-group" role="group">
+<!--
+  <form method="POST"
       class="mt-5"
       role="form"
       action="/searchby/ldif_gen2f"
@@ -35,8 +37,26 @@ LDIF<small><em class="text-muted font-monospace">
     <span class="fa fa-download fa-lg"></span>
   </button>
 </form>
+-->
+  <button class="btn btn-info p-3 my-3"
+	  onclick="copyToClipboard('#ldif')"
+	  title="Copy LDIF to clipboard"
+	  type="button">
+    <span>
+      <i class="fas fa-copy fa-lg fa-fw"></i>
+    </span>
+  </button>
+  <button class="btn btn-info p-3 my-3"
+	  onclick="downloadString(document.querySelector('#ldif').innerText, 'text/plain', '[% key.ssh.date %].ldif')"
+       	  title="Download LDIF as file"
+	  type="button">
+    <span>
+      <i class="fas fa-file-download fa-lg fa-fw"></i>
+    </span>
+  </button>
+</div>
 <br>
-<pre>
+<pre id="ldif">
   [% FILTER html %]
   [% final_message.ldif %]
   [% END %]

@@ -8,19 +8,21 @@ Onboarding<small><em class="text-muted font-monospace"></em></small>
 
 [% INCLUDE ldap_err.tt %]
 
-<div class="alert alert-success" role="alert">
-  <p>
+<div class="card border border-info">
+  <h4 class="card-header bg-info text-white">
     On submit, this page will do these things:
+  </h4>
+  <div class="card-body">
     <ul>
-      <li>generate GPG and SSH key pairs for you.</li>
+      <li>generate GPG and SSH key pairs for you (both available on due rows bellow).</li>
       <li>distribute your GPG and SSH public keys to a corporate database, all your prior, here generated keys will be withdrawn</li>
     </ul>
-  <hr>
-  <p class="mb-0">
-    Please do remember: your private key must be kept securely!
-  </p>
+    <h6>
+      Please do remember: your private keys should be kept securely!
+    </h6>
+  </div>
 </div>
-
+<hr>
 
 [% form.render %]
 
@@ -33,11 +35,13 @@ Onboarding<small><em class="text-muted font-monospace"></em></small>
 </h1>
 
 <div class="accordion" id="accordionExample">
-  <div class="card">
-    <div class="card-header" id="headingOne">
+  <div class="card border-success border-top">
+    <div class="card-header alert-success" id="headingOne">
       <h4 class="h4 mb-0">
         <button class="btn btn-link btn-block btn-lg text-left"
 		type="button" data-toggle="collapse" data-target="#collapseOne"
+		title="Click to unfold"
+
 		aria-expanded="false" aria-controls="collapseOne">
           <i class="fas fa-lock fa-fw fa-lg mr-5"></i>GPG Keys
         </button>
@@ -49,8 +53,9 @@ Onboarding<small><em class="text-muted font-monospace"></em></small>
 
 	<div class="alert alert-success" role="alert">
 	  <p>
-	    Here are your GPG keys, you need import them to your keyring.
-	    Do it like this <code>gpg --import &lt;filename&gt;</code>
+	    Here are your GPG keys, you need import them.
+	    
+	    <code>gpg --import &lt;filename&gt;</code>
 	  </p>
 	  <hr>
 	  <p class="mb-0">
@@ -63,25 +68,45 @@ Onboarding<small><em class="text-muted font-monospace"></em></small>
       	    <pre>[% FILTER html %][% key.gpg.list_key.hr %][% END %]</pre>
     	  </div>
     	  <div class="col">
-      	    <button class="btn btn-info p-3 my-3"
-                    onclick="copyToClipboard('#gpg_private')"
-	            title="Copy GPG private key to clipboard"
-                    type="button">
-              <span>
-		<i class="fas fa-copy fa-lg fa-fw"></i>
-	      </span>
-	    </button>
+	    <div class="btn-group" role="group">
+      	      <button class="btn btn-info p-3 my-3"
+                      onclick="copyToClipboard('#gpg_private')"
+	              title="Copy GPG private key to clipboard"
+                      type="button">
+		<span>
+		  <i class="fas fa-copy fa-lg fa-fw"></i>
+		</span>
+	      </button>
+	      <button class="btn btn-info p-3 my-3"
+		      onclick="downloadString(document.querySelector('#gpg_private').innerText, 'text/plain', 'gpg-key-[% key.gpg.send_key.pgpKeyCreateTime %]-pvt.asc')"
+       		      title="Download GPG private key"
+		      type="button">
+		<span>
+		  <i class="fas fa-file-download fa-lg fa-fw"></i>
+		</span>
+	      </button>
+	    </div>
 	    <pre id="gpg_private">[% key.gpg.private %]</pre>	
 	  </div>
 	  <div class="col">
-	    <button class="btn btn-info p-3 my-3"
-		    onclick="copyToClipboard('#gpg_public')"
-       		    title="Copy GPG public key to clipboard"
-		    type="button">
-              <span>
-		<i class="fas fa-copy fa-lg fa-fw"></i>
-	      </span>
-	    </button>
+	    <div class="btn-group" role="group">
+	      <button class="btn btn-info p-3 my-3"
+		      onclick="copyToClipboard('#gpg_public')"
+       		      title="Copy GPG public key to clipboard"
+		      type="button">
+		<span>
+		  <i class="fas fa-copy fa-lg fa-fw"></i>
+		</span>
+	      </button>
+	      <button class="btn btn-info p-3 my-3"
+		      onclick="downloadString(document.querySelector('#gpg_public').innerText, 'text/plain', 'gpg-key-[% key.gpg.send_key.pgpKeyCreateTime %]-pub.asc')"
+       		      title="Download GPG public key"
+		      type="button">
+		<span>
+		  <i class="fas fa-file-download fa-lg fa-fw"></i>
+		</span>
+	      </button>
+	    </div>
 	    <pre id="gpg_public">[% key.gpg.public %]</pre>
 	  </div>
 	</div>
@@ -89,11 +114,12 @@ Onboarding<small><em class="text-muted font-monospace"></em></small>
       </div>
     </div>
   </div>
-  <div class="card">
-    <div class="card-header" id="headingTwo">
+  <div class="card border-success border-top">
+    <div class="card-header alert-success" id="headingTwo">
       <h2 class="mb-0">
         <button class="btn btn-link btn-block btn-lg text-left collapsed"
 		type="button" data-toggle="collapse" data-target="#collapseTwo"
+		title="Click to unfold"
 		aria-expanded="false" aria-controls="collapseTwo">
           <i class="fas fa-key fa-fw fa-lg mr-5"></i>SSH Keys
         </button>
@@ -114,26 +140,47 @@ Onboarding<small><em class="text-muted font-monospace"></em></small>
 	
 	<div class="row m-5 p-5">
 	  <div class="col">
-	    <button class="btn btn-info p-3 my-3"
-		    onclick="copyToClipboard('#ssh_private')"
-		    title="Copy SSH private key to clipboard"
-		    type="button">
-	      <span>
-		<i class="fas fa-copy fa-lg fa-fw"></i>
-	      </span>
-	    </button>
+	    <div class="btn-group" role="group">
+	      <button class="btn btn-info p-3 my-3"
+		      onclick="copyToClipboard('#ssh_private')"
+		      title="Copy SSH private key to clipboard"
+		      type="button">
+		<span>
+		  <i class="fas fa-copy fa-lg fa-fw"></i>
+		</span>
+	      </button>
+	      <button class="btn btn-info p-3 my-3"
+		      onclick="downloadString(document.querySelector('#ssh_private').innerText, 'text/plain', 'ssh-key-[% key.ssh.date %].pvt')"
+       		      title="Download SSH private key"
+		      type="button">
+		<span>
+		  <i class="fas fa-file-download fa-lg fa-fw"></i>
+		</span>
+	      </button>
+	    </div>
 	    <pre id="ssh_private">[% key.ssh.private %]</pre>	
 	  </div>
 	  <div class="col">
-	    <button class="btn btn-info p-3 my-3"
-		    onclick="copyToClipboard('#ssh_public')"
-     		    title="Copy SSH public key to clipboard"
-		    type="button">
-	      <span>
-		<i class="fas fa-copy fa-lg fa-fw"></i>
-	      </span>
-	    </button>
-	    <pre id="ssh_public">[% key.ssh.public %]</pre>
+	    <div class="btn-group" role="group">
+	      <button class="btn btn-info p-3 my-3"
+		      onclick="copyToClipboard('#ssh_public')"
+     		      title="Copy SSH public key to clipboard"
+		      type="button">
+		<span>
+		  <i class="fas fa-copy fa-lg fa-fw"></i>
+		</span>
+	      </button>
+	      <button class="btn btn-info p-3 my-3"
+		      onclick="downloadString(document.querySelector('#ssh_public').innerText, 'text/plain', 'ssh-key-[% key.ssh.date %].pub')"
+       		      title="Download SSH public key"
+		      type="button">
+		<span>
+		  <i class="fas fa-file-download fa-lg fa-fw"></i>
+		</span>
+	      </button>
+	    </div>
+	    <div class="kludge-minus-700px m-4">
+	      <small id="ssh_public" class="text-monospace">[% key.ssh.public %]</small>
 	  </div>
 	</div>
 

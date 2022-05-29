@@ -1660,9 +1660,9 @@ sub modify {
 
 =head2 ldif
 
-LDIF export
+export LDAP object as LDIF
 
-    attrs - is expected to be array ref
+    attrs - is expected to be an array ref
 
 =cut
 
@@ -1744,7 +1744,162 @@ on input we expect
     - vCard type to generate (onscreen or file)
     - non ASCII fields transliterated or not
 
+https://en.wikipedia.org/wiki/VCard
+
 =cut
+
+# works but lacks features # sub vcard_neo {
+# works but lacks features #   my ($self, $args) = @_;
+# works but lacks features # 
+# works but lacks features #   my $ts = strftime "%Y%m%dT%H%M%SZ", localtime;
+# works but lacks features #   my $arg = { dn       => $args->{vcard_dn},
+# works but lacks features # 	      type     => $args->{vcard_type},
+# works but lacks features # 	      translit => $args->{vcard_translit} || 0, };
+# works but lacks features # 
+# works but lacks features #   my (@vcf, $msg, $branch, @branches, $branch_entry, $leaf, @leaves, $leaf_entry, $entry, @entries, @vcard, $return, $tmp);
+# works but lacks features # 
+# works but lacks features #   use vCard;
+# works but lacks features #   my $vcard = vCard->new;
+# works but lacks features #   my $vcard_hash;
+# works but lacks features #   
+# works but lacks features #   $msg = $self->ldap->search ( base => $arg->{dn}, scope => 'base', filter => 'objectClass=*', );
+# works but lacks features #   if ($msg->is_error()) {
+# works but lacks features #     $return->{error} .= $self->err( $msg )->{html};
+# works but lacks features #   } else {
+# works but lacks features #     $entry = $msg->as_struct;
+# works but lacks features # 
+# works but lacks features #     $vcard_hash->{given_names}  = [ $entry->{$arg->{dn}}->{givenname}->[0] ];
+# works but lacks features #     $vcard_hash->{family_names} = [ $entry->{$arg->{dn}}->{sn}->[0] ];
+# works but lacks features #     $vcard_hash->{full_name}    = $entry->{$arg->{dn}}->{givenname}->[0] . ' ' . $entry->{$arg->{dn}}->{sn}->[0];
+# works but lacks features #     $vcard_hash->{title}        = $entry->{$arg->{dn}}->{title}->[0];
+# works but lacks features # 
+# works but lacks features #     # # --- ORGANIZATION ------------------------------------------------
+# works but lacks features #     # if ( exists $entry->{$arg->{dn}}->{o} ) {
+# works but lacks features #     #   ## https://tools.ietf.org/html/rfc6350#section-6.6.4
+# works but lacks features #     #   ## so we take the first one
+# works but lacks features #     #   $tmp = $self->search ( { base => $entry->{$arg->{dn}}->{o}->[0], scope => 'base', } );
+# works but lacks features #     #   if ($tmp->is_error()) {
+# works but lacks features #     # 	$return->{error} .= $self->err( $tmp )->{html};
+# works but lacks features #     #   } else {
+# works but lacks features #     # 	my $org = $tmp->as_struct;
+# works but lacks features #     # 	$vcard_hash->{title}        = 
+# works but lacks features #     # 	utf8::decode($org->{$entry->{$arg->{dn}}->{o}->[0]}->{physicaldeliveryofficename}->[0]);
+# works but lacks features #     # 	push @vcf, sprintf('ORG:%s', $org->{$entry->{$arg->{dn}}->{o}->[0]}->{physicaldeliveryofficename}->[0]);
+# works but lacks features #     #   }
+# works but lacks features #     # }
+# works but lacks features # 
+# works but lacks features #     # --- TELEPHONENUMBER ---------------------------------------------
+# works but lacks features # 
+# works but lacks features #     if ( exists $entry->{$arg->{dn}}->{telephonenumber} ) {
+# works but lacks features #       log_debug { np( $entry->{$arg->{dn}}->{telephonenumber} ) };
+# works but lacks features #       push @{$vcard_hash->{phones}}, { type => ['work'], number => $_ }
+# works but lacks features # 	foreach (@{$entry->{$arg->{dn}}->{telephonenumber}});
+# works but lacks features #     }
+# works but lacks features #     if ( exists $entry->{$arg->{dn}}->{mobiletelephonenumber} ) {
+# works but lacks features #       log_debug { np( $entry->{$arg->{dn}}->{mobiletelephonenumber} ) };
+# works but lacks features #       push @{$vcard_hash->{phones}}, { type => ['work'], number => $_ }
+# works but lacks features # 	foreach (@{$entry->{$arg->{dn}}->{mobiletelephonenumber}});
+# works but lacks features #     }
+# works but lacks features #     if ( exists $entry->{$arg->{dn}}->{mobile} ) {
+# works but lacks features #       log_debug { np( $entry->{$arg->{dn}}->{mobile} ) };
+# works but lacks features #       push @{$vcard_hash->{phones}}, { type => ['work'], number => $_ }
+# works but lacks features # 	foreach (@{$entry->{$arg->{dn}}->{mobile}});
+# works but lacks features #     }
+# works but lacks features #     if ( exists $entry->{$arg->{dn}}->{facsimiletelephonenumber} ) {
+# works but lacks features #       log_debug { np( $entry->{$arg->{dn}}->{facsimiletelephonenumber} ) };
+# works but lacks features #       push @{$vcard_hash->{phones}}, { type => ['work'], number => $_ }
+# works but lacks features # 	foreach (@{$entry->{$arg->{dn}}->{facsimiletelephonenumber}});
+# works but lacks features #     }
+# works but lacks features # 
+# works but lacks features #     # log_debug { np(@vcf) };
+# works but lacks features #     
+# works but lacks features #     my $scope = $arg->{dn} =~ /^.*=.*,authorizedService.*$/ ? 'sub' : 'one';
+# works but lacks features # 
+# works but lacks features #     # --- EMAIL -------------------------------------------------------
+# works but lacks features #     if ( $entry->{$arg->{dn}}->{mail} ) {
+# works but lacks features #       push @{$vcard_hash->{email_addresses}}, { type => ['work'], address => $_ }
+# works but lacks features # 	foreach (@{$entry->{$arg->{dn}}->{mail}});
+# works but lacks features #     }
+# works but lacks features # 
+# works but lacks features #     $branch = $self->ldap->search ( base   => $arg->{dn},
+# works but lacks features # 				    scope  => $scope,
+# works but lacks features # 				    filter => 'authorizedService=mail@*', );
+# works but lacks features #     if ($branch->is_error()) {
+# works but lacks features #       $return->{error} .= $self->err( $branch )->{html};
+# works but lacks features #     } elsif ( $branch->count) {
+# works but lacks features #       foreach $branch_entry ( $branch->entries ) {
+# works but lacks features # 	$leaf = $self->search ( { base  => $branch_entry->dn,
+# works but lacks features # 				  scope => $scope ne 'one' ? 'base' : 'one', } );
+# works but lacks features # 	if ($leaf->is_error()) {
+# works but lacks features # 	  $return->{error} .= $self->err( $leaf )->{html};
+# works but lacks features # 	} else {
+# works but lacks features # 	  if ( $leaf->count ) {
+# works but lacks features # 	    push @{$vcard_hash->{email_addresses}}, { type => ['work'], address => $_->get_value('uid') }
+# works but lacks features # 	      foreach ( $leaf->entries );
+# works but lacks features # 	  }
+# works but lacks features # 	}
+# works but lacks features #       }
+# works but lacks features #     }
+# works but lacks features # 
+# works but lacks features #     # # --- XMPP --------------------------------------------------------
+# works but lacks features #     # $branch = $self->ldap->search ( base   => $arg->{dn},
+# works but lacks features #     # 				    scope  => $scope,
+# works but lacks features #     # 				    filter => 'authorizedService=xmpp@*', );
+# works but lacks features #     # if ($branch->is_error()) {
+# works but lacks features #     #   $return->{error} .= $self->err( $branch )->{html};
+# works but lacks features #     # } elsif ( $branch->count) {
+# works but lacks features #     #   foreach $branch_entry ( $branch->entries ) {
+# works but lacks features #     # 	$leaf = $self->search ( { base  => $branch_entry->dn,
+# works but lacks features #     # 				  scope => $scope ne 'one' ? 'base' : 'one', } );
+# works but lacks features #     # 	if ($leaf->is_error()) {
+# works but lacks features #     # 	  $return->{error} .= $self->err( $leaf )->{html};
+# works but lacks features #     # 	} else {
+# works but lacks features #     # 	  if ( $leaf->count ) {
+# works but lacks features #     # 	    push @vcf, sprintf('X-JABBER;HOME:%s', $_->get_value('uid'))
+# works but lacks features #     # 	      foreach ( $leaf->entries );
+# works but lacks features #     # 	  }
+# works but lacks features #     # 	}
+# works but lacks features #     #   }
+# works but lacks features #     # }
+# works but lacks features # 
+# works but lacks features #     # if ( $arg->{type} eq 'file' ) {
+# works but lacks features #     #   # push @vcf, sprintf('PHOTO:data:image/jpeg;base64,%s',
+# works but lacks features #     #   my $meta_photo = encode_base64( $entry->{$arg->{dn}}->{jpegphoto}->[0] );
+# works but lacks features #     #   $meta_photo =~ s/\n/\n /g;
+# works but lacks features #     #   $meta_photo = substr $meta_photo, 0, -1;
+# works but lacks features #     #   # log_debug { np( $meta_photo ) };
+# works but lacks features #     #   push @{$vcard_hash->{photo}, sprintf('PHOTO;ENCODING=BASE64;JPEG:%s', $meta_photo)
+# works but lacks features #     # 	if $entry->{$arg->{dn}}->{jpegphoto};
+# works but lacks features #     # }
+# works but lacks features # 
+# works but lacks features #     $vcard->load_hashref($vcard_hash);
+# works but lacks features # 
+# works but lacks features #     
+# works but lacks features #     $return->{success} .= sprintf('vCard generated for object with DN: <b class="mono"><em>%s</em></b>.', $arg->{dn} );
+# works but lacks features #     
+# works but lacks features #     $return->{dn}           = $arg->{dn};
+# works but lacks features #     $return->{type}         = $arg->{type};
+# works but lacks features #     $return->{vcard}        = $vcard->as_string;
+# works but lacks features #     $return->{outfile_name} = $entry->{$arg->{dn}}->{uid}->[0];
+# works but lacks features #   }
+# works but lacks features # 
+# works but lacks features #   if ( $arg->{type} ne 'file' ) {
+# works but lacks features #     my $qr;
+# works but lacks features #     for ( my $i = 0; $i < 41; $i++ ) {
+# works but lacks features #       $qr = $self->qrcode({ txt => $return->{vcard}, ver => $i, mod => 5 });
+# works but lacks features #       last if ! exists $qr->{error};
+# works but lacks features #     }
+# works but lacks features #     
+# works but lacks features #     $return->{qr} =
+# works but lacks features #       sprintf('<img alt="QR for DN %s" src="data:image/jpg;base64,%s" class="img-responsive img-thumbnail" title="QR for DN %s"/>',
+# works but lacks features # 	      $arg->{dn}, $qr->{qr}, $arg->{dn} );
+# works but lacks features #   }
+# works but lacks features # 
+# works but lacks features #   utf8::decode($return->{vcard});
+# works but lacks features #   # p @vcard; p $return->{vcard};
+# works but lacks features #   # log_debug { np($return) };
+# works but lacks features #   return $return;
+# works but lacks features # }
 
 sub vcard_neo {
   my ($self, $args) = @_;
@@ -1755,13 +1910,16 @@ sub vcard_neo {
 	      translit => $args->{vcard_translit} || 0, };
 
   my (@vcf, $msg, $branch, @branches, $branch_entry, $leaf, @leaves, $leaf_entry, $entry, @entries, @vcard, $return, $tmp);
-  $msg = $self->ldap->search ( base => $arg->{dn}, scope => 'base', filter => 'objectClass=*', );
+  $msg = $self->ldap->search ( base   => $arg->{dn},
+			       scope  => 'base',
+			       filter => 'objectClass=*',
+			       attrs  => [qw( * entryUUID)], );
   if ($msg->is_error()) {
     $return->{error} .= $self->err( $msg )->{html};
   } else {
     $entry = $msg->as_struct;
 
-    push @vcf, 'BEGIN:VCARD', 'VERSION:2.1';
+    push @vcf, 'BEGIN:VCARD', 'VERSION:3.0', 'UID:urn:uuid:' . $entry->{$arg->{dn}}->{entryuuid}->[0];
 
     $arg->{vcard}->{sn}        = $self->utf2lat($entry->{$arg->{dn}}->{sn}->[0]);
     $arg->{vcard}->{givenName} = $self->utf2lat($entry->{$arg->{dn}}->{givenname}->[0]);
@@ -1809,7 +1967,7 @@ sub vcard_neo {
 	foreach (@{$entry->{$arg->{dn}}->{facsimiletelephonenumber}});
     }
 
-    log_debug { np(@vcf) };
+    # log_debug { np(@vcf) };
     
     my $scope = $arg->{dn} =~ /^.*=.*,authorizedService.*$/ ? 'sub' : 'one';
 
@@ -1853,7 +2011,8 @@ sub vcard_neo {
     	  $return->{error} .= $self->err( $leaf )->{html};
     	} else {
     	  if ( $leaf->count ) {
-    	    push @vcf, sprintf('X-JABBER;HOME:%s', $_->get_value('uid'))
+    	    push @vcf, sprintf('IMPP:xmpp:%s', $_->get_value('uid'))
+	    # push @vcf, sprintf('X-JABBER;HOME:%s', $_->get_value('uid'))
     	      foreach ( $leaf->entries );
     	  }
     	}
@@ -1894,12 +2053,9 @@ sub vcard_neo {
   }
 
   # p @vcard; p $return->{vcard};
+  # log_debug { np($return) };
   return $return;
 }
-
-
-
-
 
 
 sub vcard {
