@@ -1499,7 +1499,6 @@ Since it is separate action, it is poped out of action proc()
 
 =cut
 
-
 sub vcard_gen :Path(vcard_gen) :Args(0) {
   my ( $self, $c ) = @_;
   my $params = $c->req->parameters;
@@ -1509,6 +1508,12 @@ sub vcard_gen :Path(vcard_gen) :Args(0) {
 	    final_message => $vcard,
 	   );
 }
+
+=head1 vcard_gen2f
+
+get vCard for the DN given as a file
+
+=cut
 
 sub vcard_gen2f :Path(vcard_gen2f) :Args(0) {
   my ( $self, $c ) = @_;
@@ -1595,21 +1600,16 @@ sub modify :Path(modify) :Args(0) {
     next if $attr =~ /$ldap_crud->{cfg}->{exclude_prefix}/ ||
       $attr eq 'dn'; # ||
       # $attr =~ /userPassword/; ## !! stub, not processed yet !!
-    if ( $attr eq 'jpegPhoto'                 ||
+    $params->{$attr} = $c->req->upload($attr)
+      if $attr eq 'jpegPhoto'                 ||
 	 $attr eq 'cACertificate'             ||
 	 $attr eq 'certificateRevocationList' ||
-	 $attr eq 'userCertificate' ) {
-      $params->{$attr} = $c->req->upload($attr);
-    }
+	 $attr eq 'userCertificate';
 
     # skip equal and undefined data
     $val_params  = $params->{$attr};
     next if ! defined $val_params;
 
-
-
-
-    
     if ( $attr eq 'mu-sieveOnReceive' ) {
       my $file = "/tmp/sieve.tmp.$$";
       open(my $fh, '>', $file) or die "Could not open file '$file' $!";
@@ -1622,9 +1622,6 @@ sub modify :Path(modify) :Args(0) {
       # unlink $file;
     }
 
-
-
-    
     if ( ref($params->{$attr} ) eq 'ARRAY' ) {
       $val_entry      = $entry->exists($attr) ? $entry->get_value($attr, asref => 1) : [];
       @{$val_params}  = sort( @{$val_params} );
@@ -2070,6 +2067,7 @@ single page with all user data assembled to the convenient view
 sub user_preferences :Path(user_preferences) :Args(0) {
   my ( $self, $c ) = @_;
   my $params = $c->req->parameters;
+  log_debug { np($params) };
   $c->controller('Root')->user_preferences( $c, $params->{'user_preferences'} );
 }
 

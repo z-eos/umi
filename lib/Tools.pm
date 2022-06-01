@@ -252,7 +252,7 @@ utf8 input (cyrillic in particular) to latin1 transliteration
 =cut
 
 sub utf2lat {
-  my ($self, $to_translit, $allvariants) = @_;
+  my ($self, $to_translit, $allvariants, $as_is) = @_;
   # noLingva # use utf8;
   # noLingva # use Text::Unidecode;
   # noLingva # # Catalyst provides utf8::encoded data! here we need them to
@@ -264,7 +264,7 @@ sub utf2lat {
   # Lingua::Translit::Tables
   # "ALA-LC RUS", "GOST 7.79 RUS", "DIN 1460 RUS"
   my $table = "GOST 7.79 RUS";
-
+log_debug { np($as_is) };
   my ($tr, $return);
   use utf8;
   use Lingua::Translit;
@@ -276,8 +276,7 @@ sub utf2lat {
     $return =~ s/ė/e/g;
     $return =~ s/′//g;
     # remove non-alphas (like ' and `)
-    $return =~ tr/a-zA-Z0-9\,\.\_\-\ \@\#\%\*\(\)\!//cds;
-    return $return;
+    $return =~ tr/a-zA-Z0-9\,\.\_\-\ \@\#\%\*\(\)\!//cds if ! defined $as_is;
   } else {
     $tr = Lingua::Translit->new('ALA-LC RUS');
     $return->{'ALA-LC RUS'} = $tr->translit( $to_translit );
@@ -295,8 +294,9 @@ sub utf2lat {
     $return->{'UMI use ' . $table . ' with non-alphas removed'} =~ s/ī/i/g;
     $return->{'UMI use ' . $table . ' with non-alphas removed'} =~ s/′//g;
     $return->{'UMI use ' . $table . ' with non-alphas removed'} =~ tr/a-zA-Z0-9\,\.\_\-\ \@\#\%\*\(\)\!//cds;
-    return $return;
   }
+  # log_debug { np($return) };
+  return $return;
 }
 
 =head2 utf2qp
@@ -580,7 +580,7 @@ sub keygen_ssh {
   $res->{public}  = $arg->{key}->{pub};
   $res->{date}    = $date;
 
-  log_debug { np($res) };
+  # log_debug { np($res) };
   # log_debug { np($arg) };
   return $res;
 }
@@ -1029,13 +1029,13 @@ sub qrcode {
 	     ecc => $args->{ecc} || 'M',
 	     mod => $args->{mod} || 1,
 	    };
-
+  # log_debug { np($arg->{txt}) };
   $arg->{ops} = {
-		 Ecc => $arg->{ecc},
+		 Ecc        => $arg->{ecc},
 		 ModuleSize => $arg->{mod},
 		};
   if ( defined $args->{ver} ) {
-    $arg->{ver} = $args->{ver};
+    $arg->{ver}            = $args->{ver};
     $arg->{ops}->{Version} = $arg->{ver};
   }
 
@@ -1043,7 +1043,7 @@ sub qrcode {
   use MIME::Base64;
 
   try {
-    $arg->{gd} = GD::Barcode::QRcode->new( $arg->{txt}, $arg->{ops} )->plot();
+    $arg->{gd} = GD::Barcode::QRcode->new( "$arg->{txt}", $arg->{ops} )->plot();
     $arg->{white} = $arg->{gd}->colorClosest(255,255,255);
     $arg->{gd}->transparent($arg->{white});
     $arg->{gd}->interlaced('true');

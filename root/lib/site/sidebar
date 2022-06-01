@@ -100,6 +100,12 @@
 	</a>
 	<ul class="nav flex-column collapse ml-4 p-0" id="submenuTools">
           <li class="nav-item">
+	    <a class="text-light nav-link" href="/onboarding">
+	      <i class="fas fa-fw fa-child text-success"></i>
+	      Onboarding
+	    </a>
+	  </li>
+          <li class="nav-item">
 	    <a class="text-light nav-link" href="/tooltranslit">
 	      <i class="fas fa-fw fa-language"></i>
 	      Translit
@@ -127,12 +133,6 @@
 	    <a class="text-light nav-link" href="/toolqr">
 	      <i class="fas fa-fw fa-qrcode"></i>
 	      QR
-	    </a>
-	  </li>
-          <li class="nav-item">
-	    <a class="text-light nav-link" href="/onboarding">
-	      <i class="fas fa-fw fa-id-card"></i>
-	      Onboarding
 	    </a>
 	  </li>
 	  [% IF c.check_user_roles('admin') %]

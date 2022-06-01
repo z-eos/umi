@@ -119,7 +119,7 @@ sub index :Path :Args(0) {
     }
   }
 
-  # log_debug { np(%xk) };
+   log_debug { np(%xk) };
 
   my $pwd =
     $self->pwdgen({ len => defined $p->{pwd_len} && length($p->{pwd_len}) ? $p->{pwd_len} : undef,

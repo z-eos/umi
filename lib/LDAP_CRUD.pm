@@ -189,9 +189,12 @@ sub _build_cfg {
 				      },
 			      key => {
 				      ssh => {
+					      type    => 'Ed25519',
+					      bits    => 2048,
 					      comment => 'by umi for',
 					     },
 				      gpg => {
+					      bits    => 3072,
 					      comment => 'by umi for',
 					     },
 				     },
@@ -663,7 +666,7 @@ around 'ldap' =>
 			 $mesg->error_desc,
 			 $mesg->error_text,
 			 $mesg->server_error );
-      log_fatal { $err };
+      log_error { $err };
     }
 
     return $ldap;
@@ -1646,9 +1649,9 @@ sub modify {
     $msg = $self->ldap->modify ( $dn, changes => $changes, );
     if ($msg->is_error()) {
       $return = $self->err( $msg );
-      log_debug { np($return) };
+      # log_debug { np($return) };
     } else {
-      log_info { 'DN: ' . $dn . ' was successfully modified.' };
+      # log_info { 'DN: ' . $dn . ' was successfully modified.' };
       $return = 0;
     }
   } else { $return = $msg->ldif; }
@@ -1907,7 +1910,7 @@ sub vcard_neo {
   my $ts = strftime "%Y%m%dT%H%M%SZ", localtime;
   my $arg = { dn       => $args->{vcard_dn},
 	      type     => $args->{vcard_type},
-	      translit => $args->{vcard_translit} || 0, };
+	      translit => $args->{vcard_translit} // 0, };
 
   my (@vcf, $msg, $branch, @branches, $branch_entry, $leaf, @leaves, $leaf_entry, $entry, @entries, @vcard, $return, $tmp);
   $msg = $self->ldap->search ( base   => $arg->{dn},
@@ -1921,14 +1924,18 @@ sub vcard_neo {
 
     push @vcf, 'BEGIN:VCARD', 'VERSION:3.0', 'UID:urn:uuid:' . $entry->{$arg->{dn}}->{entryuuid}->[0];
 
-    $arg->{vcard}->{sn}        = $self->utf2lat($entry->{$arg->{dn}}->{sn}->[0]);
-    $arg->{vcard}->{givenName} = $self->utf2lat($entry->{$arg->{dn}}->{givenname}->[0]);
+    # $arg->{vcard}->{sn}        = $self->utf2lat($entry->{$arg->{dn}}->{sn}->[0]);
+    # $arg->{vcard}->{givenName} = $self->utf2lat($entry->{$arg->{dn}}->{givenname}->[0]);
+    $arg->{vcard}->{sn}        = $entry->{$arg->{dn}}->{sn}->[0];
+    $arg->{vcard}->{givenName} = $entry->{$arg->{dn}}->{givenname}->[0];
     push @vcf, sprintf('N:%s;%s;;;', $arg->{vcard}->{sn}, $arg->{vcard}->{givenName});
     $arg->{vcard}->{fn}        = sprintf('%s %s',
 					 $entry->{$arg->{dn}}->{sn}->[0],
 					 $arg->{vcard}->{givenName});
-    push @vcf, sprintf('FN:%s', $self->utf2lat($arg->{vcard}->{fn}));
-    push @vcf, sprintf('TITLE:%s', $self->utf2lat($entry->{$arg->{dn}}->{title}->[0]));
+    # push @vcf, sprintf('FN:%s', $self->utf2lat($arg->{vcard}->{fn}));
+    # push @vcf, sprintf('TITLE:%s', $self->utf2lat($entry->{$arg->{dn}}->{title}->[0]));
+    push @vcf, sprintf('FN:%s', $arg->{vcard}->{fn});
+    push @vcf, sprintf('TITLE:%s', $entry->{$arg->{dn}}->{title}->[0]);
 
     # --- ORGANIZATION ------------------------------------------------
     if ( exists $entry->{$arg->{dn}}->{o} ) {
@@ -1947,7 +1954,7 @@ sub vcard_neo {
     # --- TELEPHONENUMBER ---------------------------------------------
     my $tel_prefix = 'TEL;WORK:';
     if ( exists $entry->{$arg->{dn}}->{telephonenumber} ) {
-      log_debug { np( $entry->{$arg->{dn}}->{telephonenumber} ) };
+      # log_debug { np( $entry->{$arg->{dn}}->{telephonenumber} ) };
       push @vcf, sprintf('%s%s', $tel_prefix, $_)
 	foreach (@{$entry->{$arg->{dn}}->{telephonenumber}});
     }
@@ -2031,12 +2038,12 @@ sub vcard_neo {
 
     push @vcf, 'END:VCARD';
 
-    
-    $return->{success} .= sprintf('vCard generated for object with DN: <b class="mono"><em>%s</em></b>.', $arg->{dn} );
-    
+    $return->{success} .= sprintf('vCard for DN: <b class="mono"><em>%s</em></b>.', $arg->{dn} );
     $return->{dn}           = $arg->{dn};
     $return->{type}         = $arg->{type};
     $return->{vcard}        = join("\n", @vcf);
+    $return->{vcard}        = $self->utf2lat($return->{vcard}, undef, 1) if $arg->{translit} ne '0';
+    log_debug { np($return->{vcard}) };
     $return->{outfile_name} = $entry->{$arg->{dn}}->{uid}->[0];
   }
 
@@ -2052,7 +2059,9 @@ sub vcard_neo {
 	      $arg->{dn}, $qr->{qr}, $arg->{dn} );
   }
 
-  # p @vcard; p $return->{vcard};
+  ### otherwise, utf vcard text on result page is miss-coded
+  utf8::decode $return->{vcard};
+
   # log_debug { np($return) };
   return $return;
 }

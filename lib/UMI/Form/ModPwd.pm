@@ -14,7 +14,8 @@ use HTML::FormHandler::Types ('NoSpaces', 'WordChars', 'NotAllDigits', 'Printabl
 has '+item_class' => ( default =>'ModPwd' );
 has '+action' => ( default => '/searchby/modify_userpassword' );
 
-sub build_form_element_class { [ 'form-horizontal formajaxer' ] }
+### sub build_form_element_class { [ 'form-horizontal formajaxer' ] }
+sub build_form_element_class { [ 'form-horizontal' ] }
 
 has_field 'ldap_modify_password' => ( type => 'Hidden', );
 

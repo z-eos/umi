@@ -418,6 +418,7 @@ sub download_from_ldap : Local {
 sub user_preferences :Path(user_prefs) :Args(0) {
   my ( $self, $c, $user_dn ) = @_;
   if ( $c->user_exists ) {
+    $user_dn = $c->user->dn if ! defined $user_dn;
     # p $c->user->supported_features;
     my @user_rdn = split('=', $user_dn);
     my $ldap_crud = $c->model('LDAP_CRUD');
@@ -742,7 +743,7 @@ sub user_preferences :Path(user_prefs) :Args(0) {
 		      };
       }
     }
-    log_debug{ np($pgp) };
+    # log_debug{ np($pgp) };
 
     #=================================================================
     # Inventory assigned to user
@@ -1043,12 +1044,12 @@ sub end : ActionClass('RenderView') {
 
   ### https://metacpan.org/dist/Catalyst-Manual/view/lib/Catalyst/Manual/Cookbook.pod#Delivering-a-Custom-Error-Page
   if ( scalar @{ $c->error } ) {
-    $c->stash->{errors}   = $c->error;
+    $c->stash->{errors} = $c->error;
     for my $error ( @{ $c->error } ) {
       log_error { np($error) };
     }
     $c->stash->{template} = 'error.tt2';
-    $c->forward('MyApp::View::TT');
+    # $c->forward('UMI::View::TT');
     $c->clear_errors;
   }
 

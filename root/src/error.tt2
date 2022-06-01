@@ -1,24 +1,22 @@
+[% # -*- mode: web; mode: follow -*- %]
 [% META title = 'Catalyst/TT Error' %]
 
-<div class="panel panel-warning">
-  <div class="panel-heading">
-    <h1 class="panel-title">
-    	<span class="fa fa-exclamation-triangle">&nbsp;</span>
-    	<b>An error has occurred!</b>
+<div class="card card-sm border border-danger m-5">
+  <div class="card-header bg-danger clearfix p-0 pt-2">
+    <h1 class="text-white">
+      <i class="fa fa-exclamation-circle mx-3"></i>
+      <b>An error has occurred!</b>
     </h1>
   </div>
-  <div class="panel-body">
-    To talk to UMI admin concerning this case you'll have to provide 
-      (<abbr title="copy/paste error text when talk to admin">
-	<span class="fa fa-camera"></span>
-      </abbr>)
-      error text bellow:
-      <br>
-      <br>
-    <div class="well">
-      <em>[% error %]</em>
-    </div>
-      [% USE dumper(indent=0, pad="<br>") %]
-      <pre>[% dumper.dump(c.user.session) %]</pre>
+  <div class="card-body">
+      <ul id="finalmessagem-errors">
+	[% FOREACH i IN errors %]
+	[%   IF i != '' %]<li>[% i %]</li>[% END %]
+	[% END %]
+      </ul>
+    [% # IF c.user.session %]
+    [% #  USE dumper(indent=0, pad="<br>") %]
+    <pre>[% # dumper.dump(c.user.session) %]</pre>
+    [% # END %]
   </div>
 </div>
