@@ -61,9 +61,7 @@ SSH key generator<small><em class="text-muted font-monospace"></em></small>
 	</span>
       </button>
     </div>
-    <div class="kludge-minus-700px m-4">
-      <small id="ssh_public" class="text-monospace">[% key.ssh.public %]</small>
-    </div>
+    <div class="kludge-minus-700px m-4"><small id="ssh_public" class="text-monospace">[% key.ssh.public %]</small></div>
   </div>
 </div>
 [% END %]

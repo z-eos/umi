@@ -10,7 +10,7 @@ Onboarding<small><em class="text-muted font-monospace"></em></small>
 
 <div class="card border border-info">
   <h4 class="card-header bg-info text-white">
-    <i class="fas fa-exclamation-circle fa-lg mr-4"></i>On submit this page will do next:
+    <i class="fas fa-exclamation-circle fa-lg mr-4"></i>On submit this page will do next for user <b>&laquo;[% c.user %]&raquo;</b>:
   </h4>
   <div class="card-body">
     <ul>
@@ -57,8 +57,8 @@ Onboarding<small><em class="text-muted font-monospace"></em></small>
 	    </p>
 	  </div>
 	  
-	  <div class="row m-5 p-5">
-	    <div class="col-1 h3" >
+	  <div class="d-flex justify-content-around m-5 p-5">
+	    <div class="flex-start h3" >
 	      <button class="btn btn-info p-2 m-2"
 		      onclick="copyToClipboard('#pwd_clear')"
 		      title="Copy password to clipboard"
@@ -68,10 +68,8 @@ Onboarding<small><em class="text-muted font-monospace"></em></small>
 		</span>
 	      </button>
 	    </div>
-	    <div id="pwd_clear" class="col-11 h3 text-monospace text-break text-center">
-	      [% key.pwd.clear %]
-	    </div>
-	    <div class="col-12 text-center">
+	    <div id="pwd_clear" class="flex-start h3 text-monospace text-break text-center">[% key.pwd.clear %]</div>
+	    <div class="flex-start text-center">
 	      [% key.pwd.qr %]
 	    </div>
 	  </div>

@@ -249,6 +249,7 @@ sub create_account {
     my $add_to_obj = $add_to->entry(0);
 
     $uidNumber                        = $add_to_obj->get_value('uidNumber');
+    log_debug { np($uidNumber) };
     $args->{'person_givenname'}       = $add_to_obj->get_value('givenName');
     $args->{'person_sn'}              = $add_to_obj->get_value('sn');
     $args->{'person_mail'}            = $add_to_obj->exists('mail') ?
@@ -456,8 +457,10 @@ we skip empty (criteria of emptiness is a concatenation of each field value) rep
 	  } elsif ( $element->field('authorizedservice')->value eq 'ssh-acc' ) {
 
 	    push @{$x{objectclass}}, @{$ldap_crud->cfg->{objectClass}->{acc_svc_ssh}};
+	    $x{uidNumber} = $ldap_crud->last_uidNumber_ssh + 1 + $repeatable_idx;
 	    my $ssh_key = $element->field('sshkey')->value;
-	    $x{sshkey}     = $ssh_key =~ tr/\r\n//d;
+	    $ssh_key =~ s/\r\n//g;
+	    $x{sshkey}     = $ssh_key;
 	    $x{sshkeyfile} = $element->field('sshkeyfile')->value;
 	    $x{sshgid}     = $element->field('sshgid')->value;
 	    $x{sshhome}    = $element->field('sshhome')->value;
@@ -465,7 +468,7 @@ we skip empty (criteria of emptiness is a concatenation of each field value) rep
 	    $x{password}->{$element->field('authorizedservice')->value} =
 	      ! $element->field('password2')->value ?
 	      $self->pwdgen : $self->pwdgen({ pwd => $element->field('password2')->value });
-
+	    log_debug { np(%x) };
 	  } elsif ( ! $element->field('password1')->value &&
 		    ! $element->field('password2')->value) {
 	    $x{password} = { $element->field('authorizedservice')->value => $self->pwdgen };
@@ -475,7 +478,7 @@ we skip empty (criteria of emptiness is a concatenation of each field value) rep
 	  }
 
 	  $x{login}         = $element->field('login')->value // $uid;
-	  
+
 	  # log_debug { "\n" . '+' x 70 . "\n" . np($element->field('login_complex')) }
 	  #   if exists $args->{'account.' . $repeatable_idx . '.login_complex'} ;
 	  # log_debug { np($element->field('login_complex')->value) };
@@ -485,8 +488,9 @@ we skip empty (criteria of emptiness is a concatenation of each field value) rep
 	  $x{userCertificate} = $element->field('userCertificate')->value
 	    if defined $element->field('userCertificate')->value &&
 	    $element->field('userCertificate')->value ne '';
-	  
+
 	} elsif ( $x{authorizedservice} eq 'ovpn' ) {
+	  ### passwordless account
 	  $x{userCertificate} = $element->field('userCertificate')->value
 	    if defined $element->field('userCertificate')->value;
 	  $x{password}               = { $x{authorizedservice} =>
@@ -504,7 +508,7 @@ we skip empty (criteria of emptiness is a concatenation of each field value) rep
 	  $x{umiOvpnAddStatus}       = $element->field('status')->value       || 'blocked';
 	}
 
-	# log_debug { np($x) };
+	# log_debug { np(%x) };
 	$leaf =
 	  $ldap_crud->create_account_branch_leaf ( \%x );
 	push @{$final_message->{success}}, @{$leaf->{success}} if defined $leaf->{success};
@@ -512,7 +516,7 @@ we skip empty (criteria of emptiness is a concatenation of each field value) rep
 	push @{$final_message->{error}},   @{$leaf->{error}}   if defined $leaf->{error};
 
 	$repeatable_idx++;
-	
+
       }
       $is_svc_empty = '';
     }

@@ -56,13 +56,9 @@ sub index :Path :Args(0) {
 			   params => $params,
 			  );
 
-    my $key;
+    my ($err, $key);
     $key->{name} = { real  => $c->user->gecos // 'N/A',
 		     email => $c->user->has_attribute('mail')  // 'N/A', };
-
-    #
-    ## SSH
-    #
 
     $key->{ssh} = $self->keygen_ssh({ type => $ldap_crud->cfg->{defaults}->{key}->{ssh}->{type},
 				      bits => $ldap_crud->cfg->{defaults}->{key}->{ssh}->{bits},
@@ -74,6 +70,10 @@ sub index :Path :Args(0) {
 				      name => $key->{name}, });
     push @{$key->{html}->{error}}, @{$key->{gpg}->{error}}
       if exists $key->{gpg}->{error};
+
+    #
+    ## SSH
+    #
 
     my $mesg =
       $ldap_crud->search( { base   => $ldap_crud->cfg->{base}->{acc_root},
@@ -97,6 +97,70 @@ sub index :Path :Args(0) {
     push @{$key->{html}->{error}}, $msg->{html} if $msg ne '0';
     # log_debug { np($keys_ssh) };
 
+    ### delete objects authorizedService=ssh-acc@
+    $mesg = $ldap_crud->search( { base => $c->user->dn, filter => 'objectClass=ldapPublicKey', } );
+    push @{$key->{html}->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
+      if $mesg->code ne '0';
+
+    foreach ( $mesg->entries ) {
+      $err = $ldap_crud->del($_->dn)
+	if $_->get_value( 'sshPublicKey' ) =~ /.* $self->{a}->{re}->{sshpubkey}->{comment} .*/;
+      push @{$key->{html}->{error}}, $err if $err;
+    }
+
+    $mesg =
+      $ldap_crud->search({ base => sprintf('authorizedService=ssh-acc@%s',
+					   $ldap_crud->cfg->{defaults}->{ldap}->{associatedDomain}) });
+    push @{$key->{html}->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
+      if $mesg->code ne '0' && $mesg->code ne '32';
+
+    if ( $mesg->code == 32 ) {
+      my $branch = $ldap_crud->
+	create_account_branch ({
+				authorizedservice => 'ssh-acc',
+				associateddomain  => $ldap_crud->cfg->{defaults}->{ldap}->{associatedDomain},
+				objectclass       => [],
+				requestttl        => '',
+				uid               => $c->user->uid,
+			       });
+
+      push @{$key->{html}->{success}}, $branch->{success} if defined $branch->{success};
+      push @{$key->{html}->{warning}}, $branch->{warning} if defined $branch->{warning};
+      push @{$key->{html}->{error}},   $branch->{error}   if defined $branch->{error};
+    }
+
+    my $leaf = $ldap_crud->
+      create_account_branch_leaf (
+				  {
+				   associateddomain    => $ldap_crud->cfg->{defaults}->{ldap}->{associatedDomain},
+				   authorizedservice   => "ssh-acc",
+				   basedn              => sprintf('authorizedService=ssh-acc@%s,%s',
+								  $ldap_crud->cfg->{defaults}->{ldap}->{associatedDomain},
+								  $c->user->dn),
+				   description         => undef,
+				   gecos               => $c->user->gecos,
+				   givenName           => $c->user->givenname,
+				   mail                => undef,
+				   objectclass         => $ldap_crud->cfg->{objectClass}->{acc_svc_ssh},
+				   password            => { 'ssh-acc' => $self->pwdgen },
+				   requestttl          => '',
+				   sn                  => $c->user->sn,
+				   sshgid              => undef,
+				   sshhome             => undef,
+				   sshkey              => $key->{ssh}->{public},
+				   sshkeyfile          => undef,
+				   sshshell            => undef,
+				   telephoneNumber     => undef,
+				   uidNumber           => $ldap_crud->last_uidNumber_ssh + 1,
+				   uid                 => $c->user->uid,
+				   login               => $c->user->uid,
+				  }
+				 );
+
+    push @{$key->{html}->{success}}, @{$leaf->{success}} if defined $leaf->{success};
+    push @{$key->{html}->{warning}}, @{$leaf->{warning}} if defined $leaf->{warning};
+    push @{$key->{html}->{error}},   @{$leaf->{error}}   if defined $leaf->{error};
+
     #
     ## GPG
     #
@@ -109,9 +173,8 @@ sub index :Path :Args(0) {
     push @{$key->{html}->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
       if $mesg->code ne '0';
 
-    my ($keys_gpg, $err);
+    my ($keys_gpg, $qr);
     foreach ( @{[$mesg->entries]} ) {
-      log_debug { 'GPG key to delete: ' . np($_->dn) };
       $err = $ldap_crud->del($_->dn)
 	if $_->get_value( 'pgpUserId' ) =~ /.*$self->{a}->{re}->{gpgpubkey}->{comment} .*/;
 
@@ -128,9 +191,15 @@ sub index :Path :Args(0) {
 
     push @{$key->{html}->{error}}, $mesg->{html} if $mesg;
 
+    #
+    ## PWD
+    #
+
     if ( defined $c->session->{auth_uid} ) {
       my $pwd =
-	$self->pwdgen({ len => undef, num => undef, cap => undef, pronounceable => 0, pwd_alg => 'XKCD',
+	$self->pwdgen({ len => undef, num => undef, cap => undef,
+			pronounceable => 0,
+			pwd_alg => 'XKCD',
 			xk  => {
 				allow_accents               => 0,
 				case_transform              => "RANDOM",
@@ -146,7 +215,6 @@ sub index :Path :Args(0) {
 			       }
 		      });
       $key->{pwd} = $pwd;
-      my $qr;
       for ( my $i = 0; $i < 41; $i++ ) {
 	$qr = $self->qrcode({ txt => $pwd->{clear}, ver => $i, mod => 5 });
 	last if ! exists $qr->{error};
@@ -166,7 +234,9 @@ sub index :Path :Args(0) {
     }
 
     # log_debug { np($key->{html}) };
-
+    delete $key->{html}->{success};
+    delete $key->{html}->{warning}
+      if $key->{html}->{warning}->[0] =~ /branch DN: .* was not created since .* I will use it further./;
     $c->stash( final_message => $key->{html},
 	       key           => $key
 	     );

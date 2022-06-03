@@ -25,17 +25,17 @@
       <div class="card-body pb-0">
 	[% IF form.errors %]
 	<b class="text-danger">Form contains error/s! Check for fields constraints met, please!</b>
-	<ul id="form-errors" class="list-unstyled">
+	<ul class="fa-ul" id="form-errors" class="list-unstyled">
 	  [% FOREACH i IN form.errors %]
-	  [% IF i != '' %]<li>[% i %]</li>[% END %]
+	  [% IF i != '' %]<li><span class="fa-li"><i class="fa-ellipsis text-danger"></i></span>[% i %]</li>[% END %]
 	  [% END %]
 	</ul>
 	<hr>
 	[% END %]
 	[% IF final_message.error %]
-	<ul id="finalmessagem-errors">
+	<ul class="fa-ul" id="finalmessagem-errors">
 	  [% FOREACH i IN final_message.error %]
-	  [% IF i != '' %]<li>[% i %]</li>[% END %]
+	  [% IF i != '' %]<li><span class="fa-li"><i class="fa-ellipsis-h text-danger"></i></span>[% i %]</li>[% END %]
 	  [% END %]
 	</ul>
 	[% END %]
@@ -43,7 +43,7 @@
     </div>
   </div>
 </div>
-<br>
+
 [% END %]
 
 [% IF final_message.warning %]

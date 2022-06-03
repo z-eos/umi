@@ -264,7 +264,7 @@ sub utf2lat {
   # Lingua::Translit::Tables
   # "ALA-LC RUS", "GOST 7.79 RUS", "DIN 1460 RUS"
   my $table = "GOST 7.79 RUS";
-log_debug { np($as_is) };
+
   my ($tr, $return);
   use utf8;
   use Lingua::Translit;
@@ -454,7 +454,7 @@ sub pwdgen {
     if ( defined $p->{xk} ) {
       $c->{$_} = $p->{xk}->{$_} foreach (keys %{$p->{xk}});
     }
-    log_debug { 'PRESET ' . $p->{pwd_alg} . " MODIFIED: \n" . np($c) };
+    # log_debug { 'PRESET ' . $p->{pwd_alg} . " MODIFIED: \n" . np($c) };
     my $xk = Crypt::HSXKPasswd->new( config => $c );
     $p->{pwd}->{clear}    = $xk->password( $p->{pwd_num} );
     %{$p->{pwd}->{stats}} = $xk->stats();
@@ -578,6 +578,7 @@ sub keygen_ssh {
 
   $res->{private} = $arg->{key}->{pvt};
   $res->{public}  = $arg->{key}->{pub};
+  $res->{public}  =~ s/[\n\r]//;
   $res->{date}    = $date;
 
   # log_debug { np($res) };

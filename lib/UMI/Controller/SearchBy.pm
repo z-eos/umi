@@ -1240,7 +1240,7 @@ sub modify_userpassword :Path(modify_userpassword) :Args(0) {
 		  $arg->{password_gen}->{stats}->{password_entropy_seen}      > 52 ? 'success' : 'danger',
 		  $arg->{password_gen}->{stats}->{password_entropy_seen},
 		  $arg->{password_gen}->{status})
-	  if ! $arg->{checkonly} && $p->{pwd_alg} ne 'CLASSIC';
+	  if ! defined $arg->{checkonly} && $p->{pwd_alg} ne 'CLASSIC';
 
 	$return->{success} .= '</div></td></tr></table>';
 

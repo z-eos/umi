@@ -29,12 +29,14 @@
 <div class="card w-100 border border-info">
   <div class="card-header bg-info p-0" id="heading_personal_data">
     <[% card_header %] class="card-title text-white m-0 mt-1">
+
     <a href="#"
        class="chevron_toggleable btn btn-link pull-light"
        data-target="#collapse_personal_data"
        data-toggle="collapse">
       <i id="chevron_switcher" class="text-white fas fa-fw [% site.icons.toggle %][% chevron_toggle %]"></i>
     </a>
+
     <div class="btn p-0">
       [%   buttonizer( buttonizer_id='to_user_dn',
 	 buttonizer_dn=auth_obj.dn
@@ -239,6 +241,7 @@
 		  <dt class="mr-3 d-flex flex-row align-items-start">
 
 		    [% IF y.auth && ( y.authorizedService.search('mail') ||
+		       y.authorizedService.search('gitlab') ||
 		       y.authorizedService.search('xmpp') ||
 		       y.authorizedService.search('web') ) %]
 		    <div class="dropdown pull-left">
@@ -289,7 +292,7 @@
 		    </small>
 		    [% ELSIF y.sshkey.${z.key};
 		         FOREACH cert IN y.sshkey.${z.key};
-		         '<small class="kludge-minus-700px text-monospace umi-text-xs">' _ cert _ '</small>';
+		         '<div class="kludge-minus-700px text-monospace umi-text-xs">' _ cert _ '</div>';
 		         END;
 		        END;
 		       END %]

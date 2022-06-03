@@ -169,6 +169,7 @@ sub _build_cfg {
 	  exclude_prefix => 'aux_',
 	  sizelimit      => 50,
 	  defaults       => { ldap => {
+				       associatedDomain    => '.norse.digital',
 				       attrs               => [ '*' ],
 				       deref               => 'never',
 				       filter              => '(objectClass=*)',
@@ -450,7 +451,7 @@ sub _build_cfg {
 			       login_delim          => '_',
 			       homeDirectory_prefix => '/usr/local/home',
 			       icon                 => 'fas fa-key',
-			       loginShell           => '/usr/bin/false',
+			       loginShell           => '/bin/sh',
 			       descr                => 'SSH',
 			       disabled             => 0,
 			       gidNumber            => 11102,
@@ -775,7 +776,7 @@ sub last_seq_val {
 	      filter => $args->{filter} // sprintf("(%s=*)", $args->{attr}),
 	      scope  => $args->{scope}  // 'one',
 	      deref  => $args->{deref}  // 'never', };
-  log_debug { np($arg) };
+  # log_debug { np($arg) };
   my $callername = (caller(1))[3];
   $callername = 'main' if ! defined $callername;
   my $return = 'call to LDAP_CRUD->last_seq_val from ' . $callername . ': ';
@@ -880,15 +881,30 @@ sub err {
   $err->{supplementary} = '<div class=""><ul class="list-unstyled">' . $err->{supplementary} . '</ul></div>'
     if $err->{supplementary} ne '';
   
-  $err->{html} = sprintf( 'call from <b><em>%s</em></b>: <dl class="row">
-  <dt class="col-2 text-right">DN</dt>                <dd class="col-10 text-monospace">%s</dd>
-  <dt class="col-2 text-right">admin note</dt>        <dd class="col-10 text-monospace">%s</dd>
-  <dt class="col-2 text-right">supplementary data</dt><dd class="col-10 text-monospace">%s</dd>
-  <dt class="col-2 text-right">code</dt>              <dd class="col-10 text-monospace">%s</dd>
-  <dt class="col-2 text-right">error name</dt>        <dd class="col-10 text-monospace">%s</dd>
-  <dt class="col-2 text-right">error text</dt>        <dd class="col-10 text-monospace"><em><small><pre><samp>%s</samp></pre></small></em></dd>
-  <dt class="col-2 text-right">error description</dt> <dd class="col-10 text-monospace">%s</dd>
-  <dt class="col-2 text-right">server_error</dt>      <dd class="col-10 text-monospace">%s</dd>
+  $err->{html} = sprintf( 'call from <b><em>%s</em></b>: <dl class="row mt-5">
+  <dt class="col-2 text-right">DN</dt>
+  <dd class="col-10 text-monospace">%s</dd>
+
+  <dt class="col-2 text-right">admin note</dt>
+  <dd class="col-10 text-monospace">%s</dd>
+
+  <dt class="col-2 text-right">supplementary data</dt>
+  <dd class="col-10 text-monospace">%s</dd>
+
+  <dt class="col-2 text-right">code</dt>
+  <dd class="col-10 text-monospace">%s</dd>
+
+  <dt class="col-2 text-right">error name</dt>
+  <dd class="col-10 text-monospace">%s</dd>
+  
+  <dt class="col-2 text-right">error text</dt>
+  <dd class="col-10 text-monospace"><em><small><pre><samp>%s</samp></pre></small></em></dd>
+
+  <dt class="col-2 text-right">error description</dt>
+  <dd class="col-10 text-monospace">%s</dd>
+ 
+  <dt class="col-2 text-right">server_error</dt>
+  <dd class="col-10 text-monospace">%s</dd>
 </dl>',
 			  $caller,
 			  $err->{dn},
@@ -3675,8 +3691,8 @@ sub create_account_branch {
     my $mesg = $self->add( $arg{dn}, $arg{add_attrs} );
     if ( $mesg ) {
       $return->{error} =
-	sprintf('Error during %s branch (dn: %s) creation occured: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s',
-		uc($arg{authorizedservice}), $arg{dn}, $mesg->{html}, $mesg->{srv}, $mesg->{text});
+	sprintf('Error during %s branch (dn: %s) creation occured: %s',
+		uc($arg{authorizedservice}), $arg{dn}, $mesg->{html});
     } else {
       if ( $arg{requestttl} ) {
 	my $t = localtime;
@@ -3792,15 +3808,15 @@ sub create_account_branch_leaf {
 	    $arg{login});
 
   $arg{uid} = sprintf('%s%s%s',
-			$arg{prefixed_uid},
+		      $arg{prefixed_uid},
 
-			$self->cfg->{authorizedService}->{$arg{service}}->{delim_mandatory} ||
-			$arg{login_complex} == 1 ?
-			$self->cfg->{authorizedService}->{$arg{service}}->{login_delim} : '',
+		      $self->cfg->{authorizedService}->{$arg{service}}->{delim_mandatory} ||
+		      defined $arg{login_complex} && $arg{login_complex} eq '1' ?
+		      $self->cfg->{authorizedService}->{$arg{service}}->{login_delim} : '',
 
-			$self->cfg->{authorizedService}->{$arg{service}}->{delim_mandatory} ||
-			$arg{login_complex} == 1 ? $arg{associatedDomain} : ''
-		       );
+		      $self->cfg->{authorizedService}->{$arg{service}}->{delim_mandatory} ||
+		      defined $arg{login_complex} && $arg{login_complex} eq '1' ? $arg{associatedDomain} : ''
+		     );
 
   $arg{dn} = sprintf('uid=%s,%s', $arg{uid}, $arg{basedn});
 
@@ -3832,7 +3848,7 @@ sub create_account_branch_leaf {
 			 ];
   }
   
-  $description = $args->{description} ne '' ? $args->{description} :
+  $description = defined $args->{description} && $args->{description} ne '' ? $args->{description} :
     sprintf('%s: %s @ %s', uc($arg{service}), $arg{'login'}, $arg{associatedDomain});
 
   #=== SERVICE: mail =================================================
@@ -3923,21 +3939,23 @@ sub create_account_branch_leaf {
 					     $arg{sshkeyfile}->{size}) );
     }
     push @{$sshPublicKey}, $arg{sshkey}
-      if defined $arg{sshkey} && $arg{sshkey} ne '';
+      if defined $arg{sshkey} && $arg{sshkey} ne '' && $arg{sshkey} ne '0';
+
     push @{$authorizedService}, sshPublicKey => [ @$sshPublicKey ],
       gidNumber     => $arg{sshgid}   // $self->cfg->{authorizedService}->{$arg{service}}->{gidNumber},
 #      uidNumber => $arg{uidNumber} + $self->cfg->{authorizedService}->{$arg{service}}->{uidNumberShift},
-      uidNumber     => $self->last_uidNumber_ssh + 1,
+#      uidNumber     => $ssh_uidNumber, $self->last_uidNumber_ssh + 1,
+      uidNumber     => $arg{uidNumber},
       userPassword  => $arg{password}->{$arg{service}}->{'ssha'},
       loginShell    => $arg{sshshell} // $self->cfg->{authorizedService}->{$arg{service}}->{loginShell},
       homeDirectory => $arg{sshhome}  // sprintf("%s/%s",
-						   $self->cfg->{authorizedService}->{$arg{service}}->{homeDirectory_prefix},
-						   $arg{uid});
+						 $self->cfg->{authorizedService}->{$arg{service}}->{homeDirectory_prefix},
+						 $arg{uid});
     # ,
     #   homeDirectory => $self->cfg->{authorizedService}->{$arg{service}}->{homeDirectory_prefix} . '/' . $arg{uid};
     # log_debug { np( $arg ) };
 
-  #=== SERVICE: ovpn =================================================
+  #=== SERVICE: ovpn ====================================================
   } elsif ( $arg{service} eq 'ovpn' ) {
     $arg{dn} = 'cn=' . substr($arg{userCertificate}->{filename},0,-4) . ',' . $arg{basedn};
     $arg{cert_info} =
@@ -3969,7 +3987,7 @@ sub create_account_branch_leaf {
 
     push @{$return->{error}}, $arg{cert_info}->{error} if defined $arg{cert_info}->{error};
     
-  #=== SERVICE: web ==================================================
+  #=== SERVICE: web =====================================================
   } elsif ( $arg{service} eq 'web' ) {
     $authorizedService = [
 			  objectClass       => [ @{$self->cfg->{objectClass}->{acc_svc_web}},
@@ -4001,7 +4019,7 @@ sub create_account_branch_leaf {
   my $mesg;
   # for an existent SSH object we have to modify rather than add
   $if_exist = $self->search( { base => $arg{dn}, scope => 'base', } );
-  if ( $arg{service} eq 'ssh' && $if_exist->count ) {
+  if ( $arg{service} eq 'ssh-acc' && $if_exist->count ) {
     $mesg = $self->modify( $arg{dn},
 				[ add => [ sshPublicKey => $sshPublicKey, ], ], );
     if ( $mesg ) {
@@ -4015,11 +4033,12 @@ sub create_account_branch_leaf {
     }
   } else {
     # for nonexistent SSH object and all others
+    # log_debug { np($authorizedService) };
     $mesg = $self->add( $arg{dn}, $authorizedService, );
     if ( $mesg ) {
       push @{$return->{error}},
-	sprintf('Error during %s account creation occured: %s<br><b>srv: </b><pre>%s</pre><b>text: </b>%s',
-		uc($arg{service}), $mesg->{html}, $mesg->{srv}, $mesg->{text});
+	sprintf('Error during %s account creation occured: %s',
+		uc($arg{service}), $mesg->{html});
     } else {
       if ( $arg{requestttl} ) {
 	my $refresh = $self->refresh( $arg{dn}, $arg{requestttl});

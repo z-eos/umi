@@ -60,7 +60,8 @@ sub signin :Path Global {
 
     # depending of what RDN type is used for auth e.g.uid, cn
     $c->session->{auth_uid} = eval '$c->user->' . UMI->config->{authentication}->{realms}->{ldap}->{store}->{user_field};
-    # log_debug { np($c->session) };
+     # log_debug { np($c->user->uid) . "\n" . np($c->user->cn) };
+     # log_debug { np($c->session) };
 
     my $umiSettingsJson = defined $c->user ? $c->user->has_attribute('umisettingsjson') : '{}';
 
