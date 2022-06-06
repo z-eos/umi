@@ -106,12 +106,6 @@
 	    </a>
 	  </li>
           <li class="nav-item">
-	    <a class="text-light nav-link" href="/tooltranslit">
-	      <i class="fas fa-fw fa-language"></i>
-	      Translit
-	    </a>
-	  </li>
-          <li class="nav-item">
 	    <a class="text-light nav-link" href="/toolpwdgen">
 	      <i class="fas fa-fw fa-fingerprint"></i>
 	      Pwdgen
@@ -133,6 +127,12 @@
 	    <a class="text-light nav-link" href="/toolqr">
 	      <i class="fas fa-fw fa-qrcode"></i>
 	      QR
+	    </a>
+	  </li>
+          <li class="nav-item">
+	    <a class="text-light nav-link" href="/tooltranslit">
+	      <i class="fas fa-fw fa-language"></i>
+	      Translit
 	    </a>
 	  </li>
 	  [% IF c.check_user_roles('admin') %]

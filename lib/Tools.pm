@@ -1030,6 +1030,9 @@ sub qrcode {
 	     ecc => $args->{ecc} || 'M',
 	     mod => $args->{mod} || 1,
 	    };
+
+  utf8::encode($arg->{txt}); # without it QR is broken
+
   # log_debug { np($arg->{txt}) };
   $arg->{ops} = {
 		 Ecc        => $arg->{ecc},

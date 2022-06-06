@@ -2065,17 +2065,23 @@ sub vcard_neo {
 
   if ( $arg->{type} ne 'file' ) {
     my $qr;
+
+    # otherwise utf in qr appears broken
+    my $v = $return->{vcard};
+    utf8::decode($v);
+
     for ( my $i = 0; $i < 41; $i++ ) {
-      $qr = $self->qrcode({ txt => $return->{vcard}, ver => $i, mod => 5 });
+      # $qr = $self->qrcode({ txt => $return->{vcard}, ver => $i, mod => 5 });
+      $qr = $self->qrcode({ txt => $v, ver => $i, mod => 5 });
       last if ! exists $qr->{error};
     }
-    
+
     $return->{qr} =
       sprintf('<img alt="QR for DN %s" src="data:image/jpg;base64,%s" class="img-responsive img-thumbnail" title="QR for DN %s"/>',
 	      $arg->{dn}, $qr->{qr}, $arg->{dn} );
   }
 
-  ### otherwise, utf vcard text on result page is miss-coded
+  ### otherwise, utf vcard text on result page is broken
   utf8::decode $return->{vcard};
 
   # log_debug { np($return) };

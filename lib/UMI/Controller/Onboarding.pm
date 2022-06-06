@@ -75,30 +75,8 @@ sub index :Path :Args(0) {
     ## SSH
     #
 
-    my $mesg =
-      $ldap_crud->search( { base   => $ldap_crud->cfg->{base}->{acc_root},
-			    filter => sprintf('uid=%s', $c->user),
-			    attrs  => ['grayPublicKey'], } );
-    push @{$key->{html}->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
-      if $mesg->code ne '0';
-
-    my ($keys_ssh, $delete, $add);
-
-    push @{$add}, 'grayPublicKey' => $key->{ssh}->{public};
-    push @{$keys_ssh}, add => $add;
-
-    ### find all onboarded ssh keys to delete
-    if ( my @a = grep { /.* $self->{a}->{re}->{sshpubkey}->{comment} .*/ }
-	 @{$mesg->entry(0)->get_value( 'grayPublicKey', asref => 1 )} ) {
-      push @{$delete}, 'grayPublicKey' => \@a;
-      push @{$keys_ssh}, delete => $delete;
-    }
-    my $msg = $ldap_crud->modify( $mesg->entry(0)->dn, $keys_ssh);
-    push @{$key->{html}->{error}}, $msg->{html} if $msg ne '0';
-    # log_debug { np($keys_ssh) };
-
     ### delete objects authorizedService=ssh-acc@
-    $mesg = $ldap_crud->search( { base => $c->user->dn, filter => 'objectClass=ldapPublicKey', } );
+    my $mesg = $ldap_crud->search( { base => $c->user->dn, filter => 'objectClass=ldapPublicKey', } );
     push @{$key->{html}->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
       if $mesg->code ne '0';
 
