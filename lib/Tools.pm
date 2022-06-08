@@ -11,7 +11,7 @@ use Try::Tiny;
 use Time::Piece;
 
 use IPC::Run qw( run timeout );
-use POSIX qw(strftime);
+use POSIX qw(strftime :sys_wait_h);
 use POSIX::Run::Capture qw(:std);
 use File::Path qw(make_path remove_tree);
 use File::Temp qw/ tempfile tempdir :POSIX /;
@@ -73,7 +73,8 @@ sub _build_a {
 			       expire => '1y',
 			       comment => 'by umi',
 			       type => {
-					1 => 'RSA',
+					1  => 'RSA',
+					22 => 'ed25519',
 				       },
 			      },
 		 mac       => {
@@ -557,30 +558,43 @@ sub keygen_ssh {
   push @{$res->{error}},  $obj->errno if ! $obj->run;
   # log_debug { np($arg) };
 
-  # $arg->{key}->{pvt} = $self->file2var( "$key_file.1", $res);
-  # $arg->{key}->{pub} = $self->file2var( "$key_file.pub1", $res);
+    push @{$res->{error}},
+      sprintf('<code>%s</code> exited with code: %s
+<dl class="row mt-4">
+  <dt class="col-2 text-right">STDERR:</dt>
+  <dd class="col-10 text-monospace"><small><pre>%s</pre></small></dd>
+  <dt class="col-2 text-right">STDOUT:</dt>
+  <dd class="col-10 text-monospace"><small><pre>%s</pre></small></dd>
+</dl>',
+	      join(' ', @{$obj->argv}),
+	      WEXITSTATUS($obj->status),
+	      join('', @{$obj->get_lines(SD_STDERR)}),
+	      join('', @{$obj->get_lines(SD_STDOUT)}) )
+      if WIFEXITED($obj->status) && WEXITSTATUS($obj->status) != 0;
 
-  open($fh, '<', $key_file) or die "Cannot open file $key_file: $!";
-  {
-    local $/;
-    $arg->{key}->{pvt} = <$fh>;
+  if ( WIFEXITED($obj->status) && WEXITSTATUS($obj->status) == 0 ) {
+
+    open($fh, '<', $key_file) or die "Cannot open file $key_file: $!";
+    {
+      local $/;
+      $arg->{key}->{pvt} = <$fh>;
+    }
+    close($fh) || die "Cannot close file $key_file: $!";
+    unlink $key_file || die "Could not unlink $key_file: $!";;
+
+    open($fh, '<', "$key_file.pub") or die "Cannot open file $key_file.pub: $!";
+    {
+      local $/;
+      $arg->{key}->{pub} = <$fh>;
+    }
+    close($fh) || die "Cannot close file $key_file.pub: $!";
+    unlink "$key_file.pub" || die "Could not unlink $key_file.pub: $!";;
+
+    $res->{private} = $arg->{key}->{pvt};
+    $res->{public}  = $arg->{key}->{pub};
+    $res->{public}  =~ s/[\n\r]//;
+    $res->{date}    = $date;
   }
-  close($fh) || die "Cannot close file $key_file: $!";
-  unlink $key_file || die "Could not unlink $key_file: $!";;
-
-  open($fh, '<', "$key_file.pub") or die "Cannot open file $key_file.pub: $!";
-  {
-    local $/;
-    $arg->{key}->{pub} = <$fh>;
-  }
-  close($fh) || die "Cannot close file $key_file.pub: $!";
-  unlink "$key_file.pub" || die "Could not unlink $key_file.pub: $!";;
-
-  $res->{private} = $arg->{key}->{pvt};
-  $res->{public}  = $arg->{key}->{pub};
-  $res->{public}  =~ s/[\n\r]//;
-  $res->{date}    = $date;
-
   # log_debug { np($res) };
   # log_debug { np($arg) };
   return $res;
@@ -594,100 +608,164 @@ default key_type is , default bits 2048
 
 wrapper for gpg(1)
 
+this method is supposed to work with the only one single key in keyring
+
 =cut
 
 sub keygen_gpg {
   my ( $self, $args ) = @_;
-  my $arg = { bits => $args->{bits} || 2048,
-	      name => $args->{name} || { real  => "not signed in $$",
-					 email => "not signed in $$" }
+  my $arg = { bits   => $args->{bits}   // 2048,
+	      type   => $args->{type}   // 'default',
+	      import => $args->{import} // '',
+	      name   => $args->{name}   // { real  => "not signed in $$",
+					     email => "not signed in $$" },
 	    };
-
+  # log_debug { np($arg) };
   my $date = strftime('%Y%m%d%H%M%S', localtime);
-  my $key;
 
   $ENV{GNUPGHOME} = tempdir(TEMPLATE => '/tmp/.umi-gnupg.XXXXXX', CLEANUP => 1 );
-  my ($fh, $bf) = tempfile( 'batch.XXXXXX', DIR => $ENV{GNUPGHOME} );
 
-  ### https://www.gnupg.org/documentation/manuals/gnupg-devel/Unattended-GPG-key-generation.html
-  my $batch = <<"END_MSG";
-%no-protection
-Key-Type: default
-Key-Length: $arg->{bits}
-Subkey-Type: default
-Name-Real: $arg->{name}->{real}
-Name-Email: $arg->{name}->{email}
-Name-Comment: $self->{a}->{re}->{gpgpubkey}->{comment} on $date
-Expire-Date: $self->{a}->{re}->{gpgpubkey}->{expire}
-END_MSG
-
-  print $fh $batch;
-  close $fh;
-  my (@gpg, $obj, $gpg_bin, $res);
+  my ($key, @gpg, $obj, $gpg_bin, $res, $fh, $tf, $z);
   my $to_which = 'gpg';
   $gpg_bin = which $to_which;
   if ( defined $gpg_bin ) {
     push @gpg, $gpg_bin, '--no-tty', '--quiet', '--yes';
   } else {
     push @{$res->{error}},  "command <code>$to_which</code> not found";
-    return $res;
   }
 
-  $obj = new POSIX::Run::Capture(argv    => [ @gpg, '--batch', '--gen-key', $bf ] );
-  push @{$res->{error}},  $obj->errno if ! $obj->run;
+  if ( $arg->{import} ne '' ) {
 
-  $obj = new POSIX::Run::Capture(argv    => [ @gpg, '--fingerprint', $arg->{name}->{email} ] );
-  push @{$res->{error}},  $obj->errno if ! $obj->run;
-  $arg->{fingerprint} = $obj->get_lines(1)->[1];
-  $arg->{fingerprint} =~ tr/ //ds;
+    if ( defined $arg->{import}->{file} ) {
+      $tf = $arg->{import}->{file};
+    } elsif ( defined $arg->{import}->{text} ) {
+      ($fh, $tf) = tempfile( 'import.XXXXXX', DIR => $ENV{GNUPGHOME} );
+      print $fh $arg->{import}->{text};
+      close $fh;
+    }
 
-  $obj = new POSIX::Run::Capture(argv    => [ @gpg, '--armor', '--export', $arg->{name}->{email} ] );
-  push @{$res->{error}},  $obj->errno if ! $obj->run;
-  $arg->{key}->{pub} = join '', @{$obj->get_lines(1)};
+    # $obj = new POSIX::Run::Capture(argv    => [ 'stat', '-x', $tf ]);
+    # log_debug { np($obj->errno) } if ! $obj->run;
+    # $z = join('', @{$obj->get_lines(SD_STDOUT)}); log_debug { np($z) };
 
-  $obj = new POSIX::Run::Capture(argv    => [ @gpg, '--armor', '--export-secret-key', $arg->{name}->{email} ] );
-  push @{$res->{error}},  $obj->errno if ! $obj->run;
-  $arg->{key}->{pvt} = join '', @{$obj->get_lines(1)};
+    $obj = new POSIX::Run::Capture(argv    => [ @gpg, '--import', $tf ]);
+    push @{$res->{error}},  $obj->errno
+      if ! $obj->run;
 
-  $obj = new POSIX::Run::Capture(argv    => [ @gpg, '--list-keys', $arg->{name}->{email} ] );
-  push @{$res->{error}},  $obj->errno if ! $obj->run;
-  $arg->{key}->{lst}->{hr} = join '', @{$obj->get_lines(1)};
+  } else {
 
+    ($fh, $tf) = tempfile( 'batch.XXXXXX', DIR => $ENV{GNUPGHOME} );
+    ### https://www.gnupg.org/documentation/manuals/gnupg-devel/Unattended-GPG-key-generation.html
+    ### https://lists.gnupg.org/pipermail/gnupg-users/2017-December/059622.html
+
+# Key-Type: default
+# Key-Length: $arg->{bits}
+# Subkey-Type: default
+
+    my $batch = <<"END_MSG";
+%no-protection
+Key-Type: eddsa
+Key-Curve: Ed25519
+Key-Usage: sign
+Subkey-Type: ecdh
+Subkey-Curve: Curve25519
+Subkey-Usage: encrypt
+Name-Real: $arg->{name}->{real}
+Name-Email: $arg->{name}->{email}
+Name-Comment: $self->{a}->{re}->{gpgpubkey}->{comment} on $date
+Expire-Date: $self->{a}->{re}->{gpgpubkey}->{expire}
+END_MSG
+
+    print $fh $batch;
+    close $fh;
+
+    $obj = new POSIX::Run::Capture(argv    => [ @gpg, '--batch', '--gen-key', $tf ] );
+    push @{$res->{error}},  $obj->errno if ! $obj->run;
+
+  }
+
+  push @{$res->{error}},
+    sprintf('<code>%s</code> exited with code: %s
+<dl class="row mt-4">
+  <dt class="col-2 text-right">STDERR:</dt>
+  <dd class="col-10 text-monospace"><small><pre>%s</pre></small></dd>
+  <dt class="col-2 text-right">STDOUT:</dt>
+  <dd class="col-10 text-monospace"><small><pre>%s</pre></small></dd>
+</dl>',
+	    join(' ', @{$obj->argv}),
+	    WEXITSTATUS($obj->status),
+	    join('', @{$obj->get_lines(SD_STDERR)}),
+	    join('', @{$obj->get_lines(SD_STDOUT)}) )
+    if WIFEXITED($obj->status) && WEXITSTATUS($obj->status) != 0;
+
+  if ( WIFEXITED($obj->status) && WEXITSTATUS($obj->status) == 0 ) {
+    $obj = new POSIX::Run::Capture(argv    => [ @gpg, '--fingerprint' ]);
+    push @{$res->{error}},  $obj->errno if ! $obj->run;
+    $arg->{fingerprint} = $obj->get_lines(SD_STDOUT)->[3];
+    $arg->{fingerprint} =~ tr/ \n//ds;
+    # log_debug { np($arg->{fingerprint}) };
+  }
+
+  if ( WIFEXITED($obj->status) && WEXITSTATUS($obj->status) == 0 ) {
+    $obj = new POSIX::Run::Capture(argv => [ @gpg, '--armor', '--export', $arg->{fingerprint} ]);
+    push @{$res->{error}},  $obj->errno if ! $obj->run;
+    $arg->{key}->{pub} = join '', @{$obj->get_lines(SD_STDOUT)};
+  }
+
+  if ( WIFEXITED($obj->status) && WEXITSTATUS($obj->status) == 0 ) {
+    if ( $arg->{import} eq '' ) {
+      $obj = new POSIX::Run::Capture(argv => [ @gpg, '--armor', '--export-secret-key', $arg->{fingerprint} ]);
+      push @{$res->{error}},  $obj->errno if ! $obj->run;
+      $arg->{key}->{pvt} = join '', @{$obj->get_lines(SD_STDOUT)};
+    }
+  }
+
+  if ( WIFEXITED($obj->status) && WEXITSTATUS($obj->status) == 0 ) {
+    $obj = new POSIX::Run::Capture(argv   => [ @gpg, '--list-keys', $arg->{fingerprint} ] );
+    push @{$res->{error}},  $obj->errno if ! $obj->run;
+    $arg->{key}->{lst}->{hr} = join '', @{$obj->get_lines(SD_STDOUT)};
+  }
   # https://gnupg.org/documentation/manuals/gnupg/GPG-Input-and-Output.html#GPG-Input-and-Output
-  $obj = new POSIX::Run::Capture(argv    => [ @gpg, '--with-colons', '--list-keys', $arg->{name}->{email} ] );
-  push @{$res->{error}},  $obj->errno if ! $obj->run;
+  # https://github.com/CSNW/gnupg/blob/master/doc/DETAILS
+  # $arg->{key}->{lst}->{colons} indexes are -2 from described in DETAILS file
+  if ( WIFEXITED($obj->status) && WEXITSTATUS($obj->status) == 0 ) {
+    $obj = new POSIX::Run::Capture(argv => [ @gpg, '--with-colons', '--list-keys', $arg->{fingerprint} ]);
+    push @{$res->{error}},  $obj->errno if ! $obj->run;
 
-  %{$arg->{key}->{lst}->{colons}} =
-    map { (split(/:/, $_))[0] => [tail(-1, @{[split(/:/, $_)]})] } @{$obj->get_lines(1)};
+    %{$arg->{key}->{lst}->{colons}} =
+      map { (split(/:/, $_))[0] => [tail(-1, @{[split(/:/, $_)]})] } @{$obj->get_lines(SD_STDOUT)};
 
-  $arg->{key}->{snd} = {
-			objectClass => [ 'pgpKeyInfo' ],
-			pgpSignerID => $arg->{key}->{lst}->{colons}->{pub}->[3],
-			pgpCertID   => $arg->{key}->{lst}->{colons}->{pub}->[3],
-			pgpKeyID    => substr($arg->{key}->{lst}->{colons}->{pub}->[3], 8),
-			pgpKeySize  => sprintf("%05s", $arg->{key}->{lst}->{colons}->{pub}->[1]),
-			pgpKeyType  => $self->{a}->{re}->{gpgpubkey}->{type}->{$arg->{key}->{lst}->{colons}->{pub}->[2]},
-			pgpRevoked  => 0,
-			pgpDisabled => 0,
-			pgpKey      => $arg->{key}->{pub},
-			pgpUserID   => $arg->{key}->{lst}->{colons}->{uid}->[8],
-			pgpSubKeyID => $arg->{key}->{lst}->{colons}->{sub}->[3],
-			pgpKeyCreateTime => strftime('%Y%m%d%H%M%SZ', localtime($arg->{key}->{lst}->{colons}->{pub}->[4])),
-			pgpKeyExpireTime => strftime('%Y%m%d%H%M%SZ', localtime($arg->{key}->{lst}->{colons}->{pub}->[5])),
-		       };
+    $arg->{key}->{snd} = {
+			  objectClass => [ 'pgpKeyInfo' ],
+			  pgpSignerID => $arg->{key}->{lst}->{colons}->{pub}->[3],
+			  pgpCertID   => $arg->{key}->{lst}->{colons}->{pub}->[3],
+			  pgpKeyID    => substr($arg->{key}->{lst}->{colons}->{pub}->[3], 8),
+			  pgpKeySize  => sprintf("%05s", $arg->{key}->{lst}->{colons}->{pub}->[1]),
+			  pgpKeyType  => $arg->{key}->{lst}->{colons}->{pub}->[2],
+			  pgpRevoked  => 0,
+			  pgpDisabled => 0,
+			  pgpKey      => $arg->{key}->{pub},
+			  pgpUserID   => $arg->{key}->{lst}->{colons}->{uid}->[8],
+			  pgpSubKeyID => $arg->{key}->{lst}->{colons}->{sub}->[3],
+			  pgpKeyCreateTime => strftime('%Y%m%d%H%M%SZ', localtime($arg->{key}->{lst}->{colons}->{pub}->[4])),
+			  pgpKeyExpireTime => strftime('%Y%m%d%H%M%SZ', localtime($arg->{key}->{lst}->{colons}->{pub}->[5])),
+			 };
 
-  # log_debug { np($arg->{key}->{snd}) };
+    # log_debug { np($arg->{key}->{snd}) };
 
-  # log_debug { np($arg->{key}->{lst}->{colons}) };
-### gpg2 --keyserver 'ldap://192.168.137.1/ou=Keys,ou=PGP,dc=umidb????bindname=uid=umi-admin%2Cou=People%2Cdc=umidb,password=testtest' --send-keys 79F6E0C65DF4EC16
+    # log_debug { np($arg->{key}->{lst}->{colons}) };
+    ### gpg2 --keyserver 'ldap://192.168.137.1/ou=Keys,ou=PGP,dc=umidb????bindname=uid=umi-admin%2Cou=People%2Cdc=umidb,password=testtest' --send-keys 79F6E0C65DF4EC16
 
-  File::Temp::cleanup();
+    File::Temp::cleanup();
 
-  $res->{private}  = $arg->{key}->{pvt};
-  $res->{public}   = $arg->{key}->{pub};
-  $res->{list_key} = $arg->{key}->{lst};
-  $res->{send_key} = $arg->{key}->{snd};
-  # log_debug { np($res) };
+    $res->{private}  = $arg->{key}->{pvt}
+      if $arg->{import} eq '';
+
+    $res->{public}   = $arg->{key}->{pub};
+    $res->{list_key} = $arg->{key}->{lst};
+    $res->{send_key} = $arg->{key}->{snd};
+    # log_debug { np($res->{error}) };
+  }
 
   return $res;
 }
@@ -1031,7 +1109,7 @@ sub qrcode {
 	     mod => $args->{mod} || 1,
 	    };
 
-  utf8::encode($arg->{txt}); # without it QR is broken
+  utf8::encode($arg->{txt}); # without it non latin in QR is broken
 
   # log_debug { np($arg->{txt}) };
   $arg->{ops} = {

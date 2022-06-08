@@ -28,7 +28,7 @@ GPG key generator<small><em class="text-muted font-monospace"></em></small>
 	  </span>
 	</button>
 	<button class="btn btn-info p-3 my-3"
-		onclick="downloadString(document.querySelector('#private').innerText, 'text/plain', 'gpg-key-[% key.gpg.send_key.pgpKeyCreateTime %]-pvt.asc')"
+		onclick="downloadString(document.querySelector('#private').innerText, 'text/plain', 'gpg-key-[% key.send_key.pgpKeyCreateTime %]-pvt.asc')"
        		title="Download private key"
 		type="button">
 	  <span>
@@ -49,7 +49,7 @@ GPG key generator<small><em class="text-muted font-monospace"></em></small>
 	  </span>
 	</button>
 	<button class="btn btn-info p-3 my-3"
-		onclick="downloadString(document.querySelector('#public').innerText, 'text/plain', 'gpg-key-[% key.gpg.send_key.pgpKeyCreateTime %]-pub.asc')"
+		onclick="downloadString(document.querySelector('#public').innerText, 'text/plain', 'gpg-key-[% key.send_key.pgpKeyCreateTime %]-pub.asc')"
        		title="Download public key"
 		type="button">
 	  <span>

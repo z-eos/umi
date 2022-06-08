@@ -384,6 +384,9 @@ Search Advanced
 		       ELSIF entry.key.match('DHCP');
 		       ph_title="DHCP Object";
 		       ph_class="umi-search-padding " _ base_icon.DHCP _ ' ' _ branch_class _ ' ' _ entry_icon_size;
+		       ELSIF entry.key.match('PGP');
+		       ph_title="GPG Object";
+		       ph_class="umi-search-padding " _ base_icon.pgp _ ' ' _ branch_class _ ' ' _ entry_icon_size;
 		       ELSIF entry.key.match('^cn=.*,ou=Inventory');
 		       ph_title="Subject to Inventory";
 		       ph_class="umi-search-padding fas fa-tag " _ branch_class _ ' ' _ entry_icon_size;

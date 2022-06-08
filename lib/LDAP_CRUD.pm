@@ -162,7 +162,7 @@ sub _build_cfg {
 			     inventory     => 'fas fa-tag',
 			     mta           => 'fas fa-envelope',
 			     netgroup      => 'fas fa-user-friends',
-			     pgp           => 'fas fa-key',
+			     pgp           => 'fas fa-lock',
 			     rad_groups    => 'fas fa-users',
 			     rad_profiles  => 'fas fa-cogs',
 			   }, },
@@ -195,6 +195,7 @@ sub _build_cfg {
 					      comment => 'by umi for',
 					     },
 				      gpg => {
+					      type    => 'Ed25519',
 					      bits    => 3072,
 					      comment => 'by umi for',
 					     },
@@ -4055,8 +4056,18 @@ sub create_account_branch_leaf {
 	}
       }
       push @{$return->{success}},
-	sprintf('<i class="%s fa-fw"></i>&nbsp;<em>%s account login:</em> <strong class="text-success">%s</strong> <em>password:</em> <strong class="text-success text-monospace">%s</strong>',
+	# sprintf('<i class="%s fa-fw mr-3"></i><em class="ml-3">domain:</em> <strong class="text-success">%s</strong>; <em class="ml-3">%s account login:</em> <strong class="text-success">%s</strong>; <em class="ml-3">password:</em> <strong class="text-success text-monospace">%s</strong>',
+	sprintf('<small>
+<dl class="row">
+  <dt class="col-sm-3 text-right"><i class="%s fa-fw mr-3"></i>domain:</dt>
+  <dd class="col-sm-9 text-success">%s</dd>
+  <dt class="col-sm-3 text-right">%s account login:</dt>
+  <dd class="col-sm-9 text-success">%s</dd>
+  <dt class="col-sm-3 text-right">password:</dt>
+  <dd class="col-sm-9 text-success text-monospace">%s</dd>
+</dl></small>',
 		$self->cfg->{authorizedService}->{$arg{service}}->{icon},
+		$arg{associatedDomain},
 		$arg{service},
 		(split(/=/,(split(/,/,$arg{dn}))[0]))[1], # taking RDN value
 		$arg{password}->{$arg{service}}->{'clear'});

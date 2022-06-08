@@ -38,7 +38,7 @@ has_field 'avatar'
   => ( type                  => 'File',
        wrapper_attr          => { id => 'fieldfile', },
        wrapper_class         => [ 'custom-file', 'ml-1', 'mb-3', 'row', ],
-       label                 => 'Select LDIF File',
+       label                 => 'Select GPG File',
        label_class           => [ 'custom-file-label', 'col-10', 'offset-md-2', ],
        label_attr            => {  'data-browse' => 'Chose File', },
        element_class         => [ 'btn', 'btn-default', 'btn-secondary', 'custom-file-input', ],

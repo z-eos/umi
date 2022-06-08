@@ -93,8 +93,21 @@
     </h4>
   </div>
   <div class="umi-collapsable collapse show" id="cardBodySuccess">
-    <div class="card-body pb-0">
-      <ul class="list-unstyled">
+    <div class="card-body pb-0
+      [% IF ! final_message.success.join.match('copyToClipboard|figure') %]
+ d-flex">
+      <div class="align-flex-start">
+	<button class="btn btn-info"
+		onclick="copyToClipboard('#final_message_success')"
+     		title="Copy results to clipboard"
+		type="button">
+	  <i class="fas fa-copy fa-lg my-3"></i>
+	</button>
+      </div>
+      [% ELSE %]
+      ">
+      [% END %]
+      <ul id="final_message_success" class="list-unstyled align-flex-start mx-3">
 	[% FOREACH i IN final_message.success %]
 	<li>[% IF i == 1 %]Operation went well![% ELSE %][% i %][% END %]</li>
 	[% END %]

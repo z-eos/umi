@@ -67,6 +67,7 @@ sub index :Path :Args(0) {
       if exists $key->{ssh}->{error};
 
     $key->{gpg} = $self->keygen_gpg({ bits => $ldap_crud->cfg->{defaults}->{key}->{gpg}->{bits},
+				      type => $ldap_crud->cfg->{defaults}->{key}->{gpg}->{type},
 				      name => $key->{name}, });
     push @{$key->{html}->{error}}, @{$key->{gpg}->{error}}
       if exists $key->{gpg}->{error};

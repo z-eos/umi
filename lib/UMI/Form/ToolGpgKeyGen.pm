@@ -18,33 +18,33 @@ sub html_attributes {
     if $type eq 'label' && $field->required;
 }
 
-has_field 'bits'
-  => ( type          => 'Display',
-       html          => sprintf('
-<div class="form-group row deactivate-top">
-  <label class="col-2 text-right font-weight-bold control-label" title="" for="bits">
-    Bits: <span id="bits_size" class="text-primary"></span>
-  </label>
-  <div class="col-9">
-    <input id="bits" name="bits" type="range" class="custom-range" min="1024" max="4096" step="1024" value="2048"/>
-  </div>
-  <div class="col-1 font-weight-bold">
-    <span>4096</span>
-  </div>
-</div>
-<script>
- $(function () {
-  var slider = document.getElementById("bits");
-  var output = document.getElementById("bits_size");
-  output.innerHTML = slider.value;
+### has_field 'bits'
+###   => ( type          => 'Display',
+###        html          => sprintf('
+### <div class="form-group row deactivate-top">
+###   <label class="col-2 text-right font-weight-bold control-label" title="" for="bits">
+###     Bits: <span id="bits_size" class="text-primary"></span>
+###   </label>
+###   <div class="col-9">
+###     <input id="bits" name="bits" type="range" class="custom-range" min="1024" max="4096" step="1024" value="2048"/>
+###   </div>
+###   <div class="col-1 font-weight-bold">
+###     <span>4096</span>
+###   </div>
+### </div>
+### <script>
+###  $(function () {
+###   var slider = document.getElementById("bits");
+###   var output = document.getElementById("bits_size");
+###   output.innerHTML = slider.value;
 
-  slider.oninput = function() {
-    output.innerHTML = this.value;
-  }
- });
-</script>
-'),
-     );
+###   slider.oninput = function() {
+###     output.innerHTML = this.value;
+###   }
+###  });
+### </script>
+### '),
+###      );
 
 # has_field 'bits'
 #   => ( type                  => 'Select',
@@ -80,7 +80,8 @@ has_block 'aux_submitit'
      );
 
 
-sub build_render_list {[ 'bits', 'aux_submitit' ]}
+### sub build_render_list {[ 'bits', 'aux_submitit' ]}
+sub build_render_list {[ 'aux_submitit' ]}
 
 
 ######################################################################
