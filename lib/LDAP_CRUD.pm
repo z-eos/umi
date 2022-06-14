@@ -3659,7 +3659,7 @@ sub create_account_branch {
 	      $self->cfg->{authorizedService}->{$args->{authorizedservice}}->{associateddomain_prefix}
 	      ->{$args->{associateddomain}} : '',
 	      $args->{associateddomain}),
-      objectclass => $args->{objectclass},
+      objectclass => $args->{objectclass} // [],
     );
 
   my $t = localtime;
@@ -3800,7 +3800,7 @@ sub create_account_branch_leaf {
      radiusgroupname        => $args->{radiusgroupname}        // '',
      radiusprofiledn        => $args->{radiusprofiledn}        // '',
 
-     objectclass            => $args->{objectclass},
+     objectclass            => $args->{objectclass}            // [],
     );
 
   my $t = localtime;
@@ -3837,7 +3837,7 @@ sub create_account_branch_leaf {
        ( $arg{service} eq 'dot1x-eap-md5' ||
 	 $arg{service} eq 'dot1x-eap-tls' ) ||
        $arg{service}   eq 'gitlab'  ||
-       $arg{service} eq 'web' ) {
+       $arg{service}   eq 'web' ) {
     $authorizedService = [];
   } else {
     $authorizedService = [
@@ -4014,7 +4014,7 @@ sub create_account_branch_leaf {
 			  cn                => sprintf("%s %s", $arg{givenName}, $arg{sn}),
 			  mailLocalAddress  => $args->{mail} // 'NA',
 			  uid               => $arg{uid},
-			  userPassword      => $arg{password}->{$arg{service}}->{'ssha'},
+			  userPassword      => $arg{password}->{$arg{service}}->{ssha},
 			 ];
   }
 
@@ -4058,14 +4058,17 @@ sub create_account_branch_leaf {
       push @{$return->{success}},
 	# sprintf('<i class="%s fa-fw mr-3"></i><em class="ml-3">domain:</em> <strong class="text-success">%s</strong>; <em class="ml-3">%s account login:</em> <strong class="text-success">%s</strong>; <em class="ml-3">password:</em> <strong class="text-success text-monospace">%s</strong>',
 	sprintf('<small>
-<dl class="row">
-  <dt class="col-sm-3 text-right"><i class="%s fa-fw mr-3"></i>domain:</dt>
-  <dd class="col-sm-9 text-success">%s</dd>
-  <dt class="col-sm-3 text-right">%s account login:</dt>
-  <dd class="col-sm-9 text-success">%s</dd>
-  <dt class="col-sm-3 text-right">password:</dt>
-  <dd class="col-sm-9 text-success text-monospace">%s</dd>
-</dl></small>',
+  <dl class="row">
+    <dt class="col-sm-3 text-right"><i class="%s fa-fw mr-3"></i>domain:</dt>
+    <dd class="col-sm-9 text-success">%s</dd>
+
+    <dt class="col-sm-3 text-right">%s account login:</dt>
+    <dd class="col-sm-9 text-success">%s</dd>
+
+    <dt class="col-sm-3 text-right">password:</dt>
+    <dd class="col-sm-9 text-success text-monospace">%s</dd>
+  </dl>
+</small>',
 		$self->cfg->{authorizedService}->{$arg{service}}->{icon},
 		$arg{associatedDomain},
 		$arg{service},

@@ -87,6 +87,22 @@ Search Advanced
 </form>
 [% END %]
 
+[% MACRO getit BLOCK %]
+<div class="btn-group" role="group">
+  <button class="btn btn-info p-3 my-3"
+	  title="Copy attribute value to clipboard"
+	  onclick="copyToClipboard('#getitid')" type="button">
+    <span><i class="fas fa-copy fa-lg fa-fw"></i></span>
+  </button>
+  <button class="btn btn-info p-3 my-3"
+	  onclick="downloadString(document.querySelector('#getitid').innerText, 'text/plain', 'attribute-value.txt')"
+       	  title="Download attribute value as file" type="button">
+    <span><i class="fas fa-file-download fa-lg fa-fw"></i></span>
+  </button>
+</div>
+[% END %]
+[% d_id = '' %]
+
 <div class="table-responsive umi-overflow-x-vis">
   <table class="table table-sm table-borderless">
     <thead>
@@ -494,11 +510,15 @@ Search Advanced
 		    [% h_attr.key.replace(';binary', bindata) %]&#58;
 		    [% ELSIF h_attr.key == 'userPKCS12' %]
 		    [% h_attr.key.trim %]&nbsp;<abbr title="binary data"><span class="fa [% binary_data %] text-info" title="binary data"></span></abbr>&#58;
+		    [% ELSIF h_attr.key == 'pgpKey' %]
+		    [% h_attr.key.trim %]&#58;
+		    [% getit %]
+		    [% d_id='getitid' %]
 		    [% ELSE %]
 		    [% h_attr.key.trim %]&#58;
 		    [% END %]
 		  </dt>
-		  <dd class="col-10 text-monospace [% d_class %]">
+		  <dd id="[% d_id %]" class="col-10 text-monospace [% d_class %]">
 		    [% IF h_attr.key == 'userPassword' %]
 		    [% aster = '<i class="fa fa-circle"></i>&nbsp;' %][% aster.repeat(8)%]
 		    [% ELSIF h_attr.key.match('userCertificate;binary') ||

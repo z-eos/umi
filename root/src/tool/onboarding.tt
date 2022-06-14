@@ -14,7 +14,7 @@ Onboarding<small><em class="text-muted font-monospace"></em></small>
   </h4>
   <div class="card-body">
     <ul>
-      <li>generate GPG and SSH key pairs (both available on due rows bellow). you must save them.</li>
+      <li>generate GPG and SSH key pairs, gitlab, vault and docker accounts  (all are available bellow). you must save them.</li>
       <li>distribute your GPG and SSH public keys to a corporate database, all your prior, here generated keys will be withdrawn</li>
       <li>finally your password for this account will be reset, so, don't forget to save it as well
     </ul>
@@ -33,6 +33,7 @@ Onboarding<small><em class="text-muted font-monospace"></em></small>
 <div class="accordion" id="accordionExample">
   <div class="card border-success border">
 
+    <!-- password -->
     <div class="card">
       <div class="card-header alert-success" id="headingPwd">
 	<h2 class="mb-0">
@@ -40,23 +41,13 @@ Onboarding<small><em class="text-muted font-monospace"></em></small>
 		  type="button" data-toggle="collapse" data-target="#collapsePwd"
 		  title="Click to unfold"
 		  aria-expanded="false" aria-controls="collapsePwd">
-            <i class="fas fa-keyboard fa-fw fa-lg mr-5"></i>Password
+            <i class="fas fa-keyboard fa-fw fa-lg mr-5"></i>Password to access this page
 	  </button>
 	</h2>
       </div>
       <div id="collapsePwd" class="collapse" aria-labelledby="headingPwd" data-parent="#accordionExample">
 	<div class="card-body">
 
-	  <div class="alert alert-success" role="alert">
-	    <p>
-	      Here are your new password
-	    </p>
-	    <hr>
-	    <p class="mb-0">
-	      Please do remember: your password must be kept securely!
-	    </p>
-	  </div>
-	  
 	  <div class="d-flex justify-content-around m-5 p-5">
 	    <div class="flex-start h3" >
 	      <button class="btn btn-info p-2 m-2"
@@ -94,22 +85,19 @@ Onboarding<small><em class="text-muted font-monospace"></em></small>
     <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
       <div class="card-body">
 
-	<div class="alert alert-success" role="alert">
-	  <p>
-	    Here are your GPG keys, you need import them.
-	    
-	    <code>gpg --import &lt;filename&gt;</code>
-	  </p>
-	  <hr>
-	  <p class="mb-0">
-	    Please do remember: your private key must be kept securely!
-	  </p>
+	<div class="">
+	  Here are your GPG keys, you need import each of them with these commands: <code>gpg --import gpg-key-[% key.gpg.send_key.pgpKeyCreateTime %]-pvt.asc</code> and <code>gpg --import gpg-key-[% key.gpg.send_key.pgpKeyCreateTime %]-pub.asc</code>
 	</div>
 	
-	<div class="row m-5 p-5">
-	  <div class="col-12">
-      	    <pre>[% FILTER html %][% key.gpg.list_key.hr %][% END %]</pre>
+	<div class="card">
+	  <div class="card-header">Key info:</div>
+	  <div class="card-body">
+      	    <small><pre>[% FILTER html %][% key.gpg.list_key.hr %][% END %]</pre></small>
 	  </div>
+	</div>
+	  
+	<div class="row m-5 p-5">
+
 	  <div class="col">
 	    <div class="btn-group" role="group">
       	      <button class="btn btn-info p-3 my-3"
@@ -172,14 +160,9 @@ Onboarding<small><em class="text-muted font-monospace"></em></small>
       <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
 	<div class="card-body">
 
-	  <div class="alert alert-success" role="alert">
-	    <p>
-	      Here are your SSH keys, place them to a directory <code>.ssh</code> in your homedir. Don't forget set correct attributes <code>700</code> to the private key
-	    </p>
-	    <hr>
-	    <p class="mb-0">
-	      Please do remember: your private key must be kept securely!
-	    </p>
+	  <div class="mb-5">
+	    Here are your SSH keys, place them to a directory <code>.ssh</code> in your homedir.
+	    Don't forget set correct attributes <code>700</code> on private key
 	  </div>
 	  
 	  <div class="row m-5 p-5">
@@ -232,6 +215,133 @@ Onboarding<small><em class="text-muted font-monospace"></em></small>
 	</div>
       </div>
     </div>
+
+    [% IF key.gitlab %]
+    <div class="card border-success border-top">
+      <div class="card-header alert-success" id="headingGitlabPwd">
+	<h2 class="mb-0">
+	  <button class="btn btn-link btn-block btn-lg text-left collapsed"
+		  type="button" data-toggle="collapse" data-target="#collapseGitlabPwd"
+		  title="Click to unfold"
+		  aria-expanded="false" aria-controls="collapseGitlabPwd">
+            <i class="fas fa-gitlab fa-fw fa-lg mr-5"></i>Gitlab account
+	  </button>
+	</h2>
+      </div>
+      <div id="collapseGitlabPwd" class="collapse" aria-labelledby="headingGitlabPwd" data-parent="#accordionExample">
+	<div class="card-body">
+
+	  <div class="mb-5">
+	    Your gitlab login to <code>https://gitlab.norse.digital</code> is <code>[% key.gitlab.uid %]</code>,
+	    your gitlab password password is bellow
+	  </div>
+	  
+	  <div class="d-flex justify-content-around m-5 p-5">
+	    <div class="flex-start h3" >
+	      <button class="btn btn-info p-2 m-2"
+		      onclick="copyToClipboard('#gitlab_pwd_clear')"
+		      title="Copy password to clipboard"
+		      type="button">
+		<span>
+		  <i class="fas fa-copy fa-lg fa-fw"></i>
+		</span>
+	      </button>
+	    </div>
+	    <div id="gitlab_pwd_clear" class="flex-start h3 text-monospace text-break text-center">[% key.gitlab.pwd.clear %]</div>
+	    <div class="flex-start text-center">
+	      [% key.gitlab.pwd.qr %]
+	    </div>
+	  </div>
+
+	</div>
+      </div>
+    </div>
+    [% END %]
+
+    [% IF key.vault %]
+    <div class="card border-success border-top">
+      <div class="card-header alert-success" id="headingVaultPwd">
+	<h2 class="mb-0">
+	  <button class="btn btn-link btn-block btn-lg text-left collapsed"
+		  type="button" data-toggle="collapse" data-target="#collapseVaultPwd"
+		  title="Click to unfold"
+		  aria-expanded="false" aria-controls="collapseVaultPwd">
+            <i class="fas fa-wallet fa-fw fa-lg mr-5"></i>Vault account
+	  </button>
+	</h2>
+      </div>
+      <div id="collapseVaultPwd" class="collapse" aria-labelledby="headingVaultPwd" data-parent="#accordionExample">
+	<div class="card-body">
+
+	  <div class="mb-5">
+	    Your vault login to <code>https://vault.norse.digital</code> is <code>[% key.vault.uid %]</code>,
+	    your vault password password is bellow
+	  </div>
+	  
+	  <div class="d-flex justify-content-around m-5 p-5">
+	    <div class="flex-start h3" >
+	      <button class="btn btn-info p-2 m-2"
+		      onclick="copyToClipboard('#vault_pwd_clear')"
+		      title="Copy password to clipboard"
+		      type="button">
+		<span>
+		  <i class="fas fa-copy fa-lg fa-fw"></i>
+		</span>
+	      </button>
+	    </div>
+	    <div id="vault_pwd_clear" class="flex-start h3 text-monospace text-break text-center">[% key.vault.pwd.clear %]</div>
+	    <div class="flex-start text-center">
+	      [% key.vault.pwd.qr %]
+	    </div>
+	  </div>
+
+	</div>
+      </div>
+    </div>
+    [% END %]
+        
+    [% IF key.docker %]
+    <div class="card border-success border-top">
+      <div class="card-header alert-success" id="headingDockerPwd">
+	<h2 class="mb-0">
+	  <button class="btn btn-link btn-block btn-lg text-left collapsed"
+		  type="button" data-toggle="collapse" data-target="#collapseDockerPwd"
+		  title="Click to unfold"
+		  aria-expanded="false" aria-controls="collapseDockerPwd">
+            <i class="fas fa-docker fa-fw fa-lg mr-5"></i>Docker Registry Credentials
+	  </button>
+	</h2>
+      </div>
+      <div id="collapseDockerPwd" class="collapse" aria-labelledby="headingDockerPwd" data-parent="#accordionExample">
+	<div class="card-body">
+
+	  <div class="mb-5">
+	    Your docker login to <code>https://portus.norse.co</code> is <code>[% key.docker.uid %]</code>,
+	    your docker password password is bellow
+	  </div>
+	  
+	  <div class="d-flex justify-content-around m-5 p-5">
+	    <div class="flex-start h3" >
+	      <button class="btn btn-info p-2 m-2"
+		      onclick="copyToClipboard('#docker_pwd_clear')"
+		      title="Copy password to clipboard"
+		      type="button">
+		<span>
+		  <i class="fas fa-copy fa-lg fa-fw"></i>
+		</span>
+	      </button>
+	    </div>
+	    <div id="docker_pwd_clear" class="flex-start h3 text-monospace text-break text-center">[% key.docker.pwd.clear %]</div>
+	    <div class="flex-start text-center">
+	      [% key.docker.pwd.qr %]
+	    </div>
+	  </div>
+
+	</div>
+      </div>
+    </div>
+    [% END %]
+        
   </div>
 </div>
 [% END %]

@@ -435,26 +435,11 @@
   * un/collaps-er (@ user_preferences_neo.tt)
   */ 
 
-
- /*
-  * searchby result/s un/collaps-er (@ searchby.tt)
-  */ 
-
  $('.collapse_in_out').on('click', function() {
    console.log('toggle from searchby.tt');
    $("[id^=collaps]").toggleClass('umi-collapsable collapse show').toggleClass('umi-collapsable collapse');
    $("[id^=chevron_switcher]").toggleClass('[% site.icons.toggle_right %]').toggleClass('[% site.icons.toggle_down %]');
  });
-
- $('.chevron_toggleable').on('click', function() { 
-   if ($(this).closest('.card').find('.umi-collapsable').hasClass('show')) { 
-     console.log('searchby.tt: chevron_toggleable collapsed');
-     $(this).find('#chevron_switcher').removeClass('[% site.icons.toggle_down %]').addClass('[% site.icons.toggle_right %]')
-   } else { 
-     console.log('searchby.tt: chevron_toggleable');
-     $(this).find('#chevron_switcher').removeClass('[% site.icons.toggle_right %]').addClass('[% site.icons.toggle_down %]')
-   }
- })
 
 </script>
 

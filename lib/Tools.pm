@@ -432,10 +432,22 @@ sub pwdgen {
 	     cnt           => $args->{gp}->{cnt}           // UMI->config->{pwd}->{gp}->{cnt},
 	     salt          => $args->{gp}->{salt}          // UMI->config->{pwd}->{gp}->{salt},
 	     pronounceable => $args->{gp}->{pronounceable} // UMI->config->{pwd}->{gp}->{pronounceable},
-	     },
-     xk      => $args->{xk}        // undef,
-     pwd_num => $args->{pwd_num}   // 1,
-     pwd_alg => $args->{pwd_alg}   // undef,
+	    },
+     xk                    => $args->{xk}                  // {
+							       allow_accents             => 0,
+							       case_transform            => "RANDOM",
+							       num_words                 => 5,
+							       padding_characters_after  => 0,
+							       padding_characters_before => 0,
+							       padding_digits_after      => 0,
+							       padding_digits_before     => 0,
+							       padding_type              => "NONE",
+							       separator_character       => "-",
+							       word_length_max           => 8,
+							       word_length_min           => 4
+							      },
+     pwd_num               => $args->{pwd_num}             // 1,
+     pwd_alg               => $args->{pwd_alg}             // undef,
     };
 
   $p->{pwd_alg} = UMI->config->{pwd}->{xk}->{preset_default}
@@ -617,6 +629,7 @@ sub keygen_gpg {
   my $arg = { bits   => $args->{bits}   // 2048,
 	      type   => $args->{type}   // 'default',
 	      import => $args->{import} // '',
+	      ldap   => $args->{ldap},
 	      name   => $args->{name}   // { real  => "not signed in $$",
 					     email => "not signed in $$" },
 	    };
@@ -710,6 +723,7 @@ END_MSG
     $obj = new POSIX::Run::Capture(argv => [ @gpg, '--armor', '--export', $arg->{fingerprint} ]);
     push @{$res->{error}},  $obj->errno if ! $obj->run;
     $arg->{key}->{pub} = join '', @{$obj->get_lines(SD_STDOUT)};
+    $res->{public}   = $arg->{key}->{pub};
   }
 
   if ( WIFEXITED($obj->status) && WEXITSTATUS($obj->status) == 0 ) {
@@ -717,6 +731,7 @@ END_MSG
       $obj = new POSIX::Run::Capture(argv => [ @gpg, '--armor', '--export-secret-key', $arg->{fingerprint} ]);
       push @{$res->{error}},  $obj->errno if ! $obj->run;
       $arg->{key}->{pvt} = join '', @{$obj->get_lines(SD_STDOUT)};
+      $res->{private} = $arg->{key}->{pvt};
     }
   }
 
@@ -724,11 +739,46 @@ END_MSG
     $obj = new POSIX::Run::Capture(argv   => [ @gpg, '--list-keys', $arg->{fingerprint} ] );
     push @{$res->{error}},  $obj->errno if ! $obj->run;
     $arg->{key}->{lst}->{hr} = join '', @{$obj->get_lines(SD_STDOUT)};
+    $res->{list_key} = $arg->{key}->{lst};
   }
-  # https://gnupg.org/documentation/manuals/gnupg/GPG-Input-and-Output.html#GPG-Input-and-Output
-  # https://github.com/CSNW/gnupg/blob/master/doc/DETAILS
-  # $arg->{key}->{lst}->{colons} indexes are -2 from described in DETAILS file
-  if ( WIFEXITED($obj->status) && WEXITSTATUS($obj->status) == 0 ) {
+
+    ### gpg2 --keyserver 'ldap://192.168.137.1/ou=Keys,ou=PGP,dc=umidb????bindname=uid=umi-admin%2Cou=People%2Cdc=umidb,password=testtest' --send-keys 79F6E0C65DF4EC16
+  if ( WIFEXITED($obj->status) && WEXITSTATUS($obj->status) == 0 && defined $arg->{ldap} ) {
+    $arg->{ldap}->{bindname} =~ s/,/%2C/g;
+    $obj = new POSIX::Run::Capture(argv   => [ @gpg,
+					       '--keyserver',
+					       sprintf( 'ldap://%s:389/%s????bindname=%s,password=%s',
+						        $arg->{ldap}->{server},
+						        $arg->{ldap}->{base},
+						        $arg->{ldap}->{bindname},
+						        $arg->{ldap}->{password} ),
+					       '--send-keys',
+					       $arg->{fingerprint} ] );
+    push @{$res->{error}},  $obj->errno if ! $obj->run;
+    push @{$res->{error}},
+      sprintf('<code class="kludge-minus-700px">%s</code>
+<dl class="row mt-4">
+  <dt class="col-2 text-right">STDERR:</dt>
+  <dd class="col-10 text-monospace"><small><pre class="kludge-minus-700px">%s</pre></small></dd>
+  <dt class="col-2 text-right">STDOUT:</dt>
+  <dd class="col-10 text-monospace kludge-minus-700px"><small><pre>%s</pre></small></dd>
+  <dt class="col-2 text-right">WIFEXITED:</dt>
+  <dd class="col-10 text-monospace">%s</dd>
+  <dt class="col-2 text-right">WIFSIGNALED:</dt>
+  <dd class="col-10 text-monospace">%s</dd>
+</dl>',
+	      join(' ', @{$obj->argv}),
+	      join('', @{$obj->get_lines(SD_STDERR)}),
+	      join('', @{$obj->get_lines(SD_STDOUT)}),
+	      WIFEXITED($obj->status)   ? WEXITSTATUS($obj->status) : '',
+	      WIFSIGNALED($obj->status) ? WTERMSIG($obj->status)    : '',
+	     )
+      if WIFEXITED($obj->status) && WEXITSTATUS($obj->status) != 0;
+
+  } elsif ( WIFEXITED($obj->status) && WEXITSTATUS($obj->status) == 0 && ! defined $arg->{ldap_crud} ) {
+    # https://gnupg.org/documentation/manuals/gnupg/GPG-Input-and-Output.html#GPG-Input-and-Output
+    # https://github.com/CSNW/gnupg/blob/master/doc/DETAILS
+    # $arg->{key}->{lst}->{colons} indexes are -2 from described in DETAILS file
     $obj = new POSIX::Run::Capture(argv => [ @gpg, '--with-colons', '--list-keys', $arg->{fingerprint} ]);
     push @{$res->{error}},  $obj->errno if ! $obj->run;
 
@@ -751,22 +801,12 @@ END_MSG
 			  pgpKeyExpireTime => strftime('%Y%m%d%H%M%SZ', localtime($arg->{key}->{lst}->{colons}->{pub}->[5])),
 			 };
 
-    # log_debug { np($arg->{key}->{snd}) };
-
-    # log_debug { np($arg->{key}->{lst}->{colons}) };
-    ### gpg2 --keyserver 'ldap://192.168.137.1/ou=Keys,ou=PGP,dc=umidb????bindname=uid=umi-admin%2Cou=People%2Cdc=umidb,password=testtest' --send-keys 79F6E0C65DF4EC16
-
-    File::Temp::cleanup();
-
-    $res->{private}  = $arg->{key}->{pvt}
-      if $arg->{import} eq '';
-
-    $res->{public}   = $arg->{key}->{pub};
-    $res->{list_key} = $arg->{key}->{lst};
     $res->{send_key} = $arg->{key}->{snd};
-    # log_debug { np($res->{error}) };
   }
 
+  File::Temp::cleanup();
+
+  # log_debug { np($res->{error}) };
   return $res;
 }
 

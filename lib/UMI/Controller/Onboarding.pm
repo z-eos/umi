@@ -51,14 +51,142 @@ sub index :Path :Args(0) {
 	       form     => $self->form );
 
     return unless
-      $self->form->process(
-			   posted => ($c->req->method eq 'POST'),
-			   params => $params,
-			  );
+      $self->form->process( posted => ($c->req->method eq 'POST'),
+			    params => $params, );
 
     my ($err, $key);
     $key->{name} = { real  => $c->user->gecos // 'N/A',
 		     email => $c->user->has_attribute('mail')  // 'N/A', };
+
+    #
+    ## GITLAB
+    #
+
+    my $gitlab_pwd = $self->pwdgen({ pwd_alg => 'XKCD', });
+
+    ### create branch if doesn't exist
+    my $mesg = $ldap_crud->search({ base   => $c->user->dn,
+				    filter => q{authorizedService=gitlab@gitlab.norse.digital} });
+    push @{$key->{html}->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
+      if $mesg->code != 0 && $mesg->code != 32;
+
+    if ( $mesg->code == 32 || $mesg->count < 2 ) {
+      my $branch = $ldap_crud->
+	create_account_branch ({ authorizedservice => 'gitlab',
+				 associateddomain  => 'gitlab.norse.digital',
+				 uid               => $c->user->uid, });
+
+      push @{$key->{html}->{success}}, $branch->{success} if defined $branch->{success};
+      push @{$key->{html}->{warning}}, $branch->{warning} if defined $branch->{warning};
+      push @{$key->{html}->{error}},   $branch->{error}   if defined $branch->{error};
+
+      my $leaf = $ldap_crud->
+	create_account_branch_leaf ({
+				     associateddomain    => 'gitlab.norse.digital',
+				     authorizedservice   => 'gitlab',
+				     basedn              => sprintf('authorizedService=gitlab@gitlab.norse.digital,%s',
+								    $c->user->dn),
+				     description         => sprintf('GITLAB: %s @ gitlab.norse.digital', $c->user->uid),
+				     mail                => $c->user->mail,
+				     password            => { gitlab => $gitlab_pwd },
+				     givenName           => $c->user->givenname,
+				     sn                  => $c->user->sn,
+				     uid                 => $c->user->uid,
+				     login               => $c->user->uid,
+				    });
+
+      push @{$key->{html}->{success}}, @{$leaf->{success}} if defined $leaf->{success};
+      push @{$key->{html}->{warning}}, @{$leaf->{warning}} if defined $leaf->{warning};
+      push @{$key->{html}->{error}},   @{$leaf->{error}}   if defined $leaf->{error};
+
+      $key->{gitlab} = { uid => $c->user->uid, pwd => $gitlab_pwd };
+    }
+
+    #
+    ## VAULT
+    #
+
+    my $vault_pwd = $self->pwdgen({ pwd_alg => 'XKCD', });
+
+    ### create branch if doesn't exist
+    $mesg = $ldap_crud->search({ base   => $c->user->dn,
+				 filter => q{authorizedService=web@vault.norse.digital} });
+    push @{$key->{html}->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
+      if $mesg->code != 0 && $mesg->code != 32;
+
+    if ( $mesg->code == 32 || $mesg->count < 2 ) {
+      my $branch = $ldap_crud->
+	create_account_branch ({ authorizedservice => 'web',
+				 associateddomain  => 'vault.norse.digital',
+				 uid               => $c->user->uid, });
+
+      push @{$key->{html}->{success}}, $branch->{success} if defined $branch->{success};
+      push @{$key->{html}->{warning}}, $branch->{warning} if defined $branch->{warning};
+      push @{$key->{html}->{error}},   $branch->{error}   if defined $branch->{error};
+
+      my $leaf = $ldap_crud->
+	create_account_branch_leaf ({
+				     associateddomain    => 'vault.norse.digital',
+				     authorizedservice   => 'web',
+				     basedn              => sprintf('authorizedService=web@vault.norse.digital,%s',
+								    $c->user->dn),
+				     description         => sprintf('VAULT: %s @ vault.norse.digital', $c->user->uid),
+				     password            => { web => $vault_pwd },
+				     uid                 => $c->user->uid,
+				     login               => $c->user->uid,
+				    });
+
+      push @{$key->{html}->{success}}, @{$leaf->{success}} if defined $leaf->{success};
+      push @{$key->{html}->{warning}}, @{$leaf->{warning}} if defined $leaf->{warning};
+      push @{$key->{html}->{error}},   @{$leaf->{error}}   if defined $leaf->{error};
+
+      $key->{vault} = { uid => $c->user->uid, pwd => $vault_pwd };
+    }
+
+    #
+    ## DOCKER REGISTRY, PORTUS
+    #
+
+    my $docker_pwd = $self->pwdgen({ pwd_alg => 'XKCD', });
+
+    ### create branch if doesn't exist
+    $mesg = $ldap_crud->search({ base   => $c->user->dn,
+				 filter => q{authorizedService=web@tools.norse.co} });
+    push @{$key->{html}->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
+      if $mesg->code != 0 && $mesg->code != 32;
+
+    if ( $mesg->code == 32 || $mesg->count < 2 ) {
+      my $branch = $ldap_crud->
+	create_account_branch ({ authorizedservice => 'web',
+				 associateddomain  => 'tools.norse.co',
+				 uid               => $c->user->uid, });
+
+      push @{$key->{html}->{success}}, $branch->{success} if defined $branch->{success};
+      push @{$key->{html}->{warning}}, $branch->{warning} if defined $branch->{warning};
+      push @{$key->{html}->{error}},   $branch->{error}   if defined $branch->{error};
+
+      my $leaf = $ldap_crud->
+	create_account_branch_leaf ({
+				     associateddomain    => 'tools.norse.co',
+				     authorizedservice   => 'web',
+				     basedn              => sprintf('authorizedService=web@tools.norse.co,%s',
+								    $c->user->dn),
+				     description         => sprintf('DOCKER: %s @ tools.norse.co', $c->user->uid),
+				     password            => { web => $docker_pwd },
+				     uid                 => $c->user->uid,
+				     login               => $c->user->uid,
+				    });
+
+      push @{$key->{html}->{success}}, @{$leaf->{success}} if defined $leaf->{success};
+      push @{$key->{html}->{warning}}, @{$leaf->{warning}} if defined $leaf->{warning};
+      push @{$key->{html}->{error}},   @{$leaf->{error}}   if defined $leaf->{error};
+
+      $key->{docker} = { uid => $c->user->uid, pwd => $docker_pwd };
+    }
+
+    #
+    ## SSH
+    #
 
     $key->{ssh} = $self->keygen_ssh({ type => $ldap_crud->cfg->{defaults}->{key}->{ssh}->{type},
 				      bits => $ldap_crud->cfg->{defaults}->{key}->{ssh}->{bits},
@@ -66,18 +194,8 @@ sub index :Path :Args(0) {
     push @{$key->{html}->{error}}, @{$key->{ssh}->{error}}
       if exists $key->{ssh}->{error};
 
-    $key->{gpg} = $self->keygen_gpg({ bits => $ldap_crud->cfg->{defaults}->{key}->{gpg}->{bits},
-				      type => $ldap_crud->cfg->{defaults}->{key}->{gpg}->{type},
-				      name => $key->{name}, });
-    push @{$key->{html}->{error}}, @{$key->{gpg}->{error}}
-      if exists $key->{gpg}->{error};
-
-    #
-    ## SSH
-    #
-
-    ### delete objects authorizedService=ssh-acc@
-    my $mesg = $ldap_crud->search( { base => $c->user->dn, filter => 'objectClass=ldapPublicKey', } );
+    ### delete objects objectClass=ldapPublicKey with attribute sshPublicKey matching 
+    $mesg = $ldap_crud->search( { base => $c->user->dn, filter => 'objectClass=ldapPublicKey', } );
     push @{$key->{html}->{error}}, $ldap_crud->err($mesg)->{caller} . $ldap_crud->err($mesg)->{html}
       if $mesg->code ne '0';
 
@@ -87,6 +205,7 @@ sub index :Path :Args(0) {
       push @{$key->{html}->{error}}, $err if $err;
     }
 
+    ### create branch if doesn't exist
     $mesg =
       $ldap_crud->search({ base => sprintf('authorizedService=ssh-acc@%s',
 					   $ldap_crud->cfg->{defaults}->{ldap}->{associatedDomain}) });
@@ -95,13 +214,9 @@ sub index :Path :Args(0) {
 
     if ( $mesg->code == 32 ) {
       my $branch = $ldap_crud->
-	create_account_branch ({
-				authorizedservice => 'ssh-acc',
-				associateddomain  => $ldap_crud->cfg->{defaults}->{ldap}->{associatedDomain},
-				objectclass       => [],
-				requestttl        => '',
-				uid               => $c->user->uid,
-			       });
+	create_account_branch ({ authorizedservice => 'ssh-acc',
+				 associateddomain  => $ldap_crud->cfg->{defaults}->{ldap}->{associatedDomain},
+				 uid               => $c->user->uid, });
 
       push @{$key->{html}->{success}}, $branch->{success} if defined $branch->{success};
       push @{$key->{html}->{warning}}, $branch->{warning} if defined $branch->{warning};
@@ -109,8 +224,7 @@ sub index :Path :Args(0) {
     }
 
     my $leaf = $ldap_crud->
-      create_account_branch_leaf (
-				  {
+      create_account_branch_leaf ({
 				   associateddomain    => $ldap_crud->cfg->{defaults}->{ldap}->{associatedDomain},
 				   authorizedservice   => "ssh-acc",
 				   basedn              => sprintf('authorizedService=ssh-acc@%s,%s',
@@ -122,7 +236,6 @@ sub index :Path :Args(0) {
 				   mail                => undef,
 				   objectclass         => $ldap_crud->cfg->{objectClass}->{acc_svc_ssh},
 				   password            => { 'ssh-acc' => $self->pwdgen },
-				   requestttl          => '',
 				   sn                  => $c->user->sn,
 				   sshgid              => undef,
 				   sshhome             => undef,
@@ -133,8 +246,7 @@ sub index :Path :Args(0) {
 				   uidNumber           => $ldap_crud->last_uidNumber_ssh + 1,
 				   uid                 => $c->user->uid,
 				   login               => $c->user->uid,
-				  }
-				 );
+				  });
 
     push @{$key->{html}->{success}}, @{$leaf->{success}} if defined $leaf->{success};
     push @{$key->{html}->{warning}}, @{$leaf->{warning}} if defined $leaf->{warning};
@@ -144,7 +256,7 @@ sub index :Path :Args(0) {
     ## GPG
     #
 
-    ### DELETE
+    ### DELETE EXISTENT AUTOGENERATED KEYS
     $mesg =
       $ldap_crud->search( { base   => $ldap_crud->cfg->{base}->{pgp},
 			    filter => sprintf('pgpUserID=*%s*', $self->{a}->{re}->{gpgpubkey}->{comment}),
@@ -160,39 +272,35 @@ sub index :Path :Args(0) {
       push @{$key->{html}->{error}}, $err if $err;
     }
 
-    ### ADD
-    my ($add_dn, $add_attrs);
-    $add_dn = sprintf("pgpCertID=%s,%s",
-			 $key->{gpg}->{send_key}->{pgpCertID},
-			 $ldap_crud->cfg->{base}->{pgp});
-    @{$add_attrs} = map { $_ => $key->{gpg}->{send_key}->{$_} } keys %{$key->{gpg}->{send_key}};
-    $mesg = $ldap_crud->add( $add_dn, $add_attrs );
+    ### GENERATE KEY
+    $key->{gpg} = $self->keygen_gpg({ bits => $ldap_crud->cfg->{defaults}->{key}->{gpg}->{bits},
+				      type => $ldap_crud->cfg->{defaults}->{key}->{gpg}->{type},
+				      name => $key->{name},
+				      ldap => { server   => UMI->config->{authentication}->{realms}->{ldap}->{store}->{ldap_server},
+						base     => $ldap_crud->cfg->{base}->{pgp},
+						bindname => $c->user->dn,
+						password => $c->session->{auth_pwd}, }, });
+    push @{$key->{html}->{error}}, @{$key->{gpg}->{error}}
+      if defined $key->{gpg}->{error};
 
-    push @{$key->{html}->{error}}, $mesg->{html} if $mesg;
+    ### ADD 
+    if ( exists $key->{gpg}->{send_key} ) {
+      my ($add_dn, $add_attrs);
+      $add_dn = sprintf("pgpCertID=%s,%s",
+			$key->{gpg}->{send_key}->{pgpCertID},
+			$ldap_crud->cfg->{base}->{pgp});
+      @{$add_attrs} = map { $_ => $key->{gpg}->{send_key}->{$_} } keys %{$key->{gpg}->{send_key}};
+      $mesg = $ldap_crud->add( $add_dn, $add_attrs );
+
+      push @{$key->{html}->{error}}, $mesg->{html} if $mesg;
+    }
 
     #
     ## PWD
     #
 
     if ( defined $c->session->{auth_uid} ) {
-      my $pwd =
-	$self->pwdgen({ len => undef, num => undef, cap => undef,
-			pronounceable => 0,
-			pwd_alg => 'XKCD',
-			xk  => {
-				allow_accents               => 0,
-				case_transform              => "RANDOM",
-				num_words                   => 5,
-				padding_characters_after    => 0,
-				padding_characters_before   => 0,
-				padding_digits_after        => 0,
-				padding_digits_before       => 0,
-				padding_type                => "NONE",
-				separator_character         => "-",
-				word_length_max             => 8,
-				word_length_min             => 4
-			       }
-		      });
+      my $pwd = $self->pwdgen({ pwd_alg => 'XKCD', });
       $key->{pwd} = $pwd;
       for ( my $i = 0; $i < 41; $i++ ) {
 	$qr = $self->qrcode({ txt => $pwd->{clear}, ver => $i, mod => 5 });
@@ -211,6 +319,7 @@ sub index :Path :Args(0) {
 	$c->session->{auth_pwd} = $pwd->{clear};
       }
     }
+
 
     # log_debug { np($key->{html}) };
     delete $key->{html}->{success};
