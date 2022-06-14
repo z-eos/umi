@@ -37,7 +37,9 @@ new Text Pwdgen
 
 
 sub index :Path :Args(0) {
-    my ( $self, $c ) = @_;
+  my ( $self, $c ) = @_;
+  if ( defined $c->user_exists && $c->user_exists == 1 ) {
+
     my $params = $c->req->parameters;
     
     $c->stash( template => 'tool/toolqr.tt',
@@ -52,7 +54,7 @@ sub index :Path :Args(0) {
     my ($final_message, $qr);
 
     # $qr = $self->qrcode({ txt => $params->{toqr}, ecc => 'Q', ver => 6, mod => 8 });
-    for( my $i = 0; $i < 41; $i++ ) {
+    for ( my $i = 0; $i < 41; $i++ ) {
       $qr = $self->qrcode({ txt => $params->{toqr},
 			    ver => $i,
 			    mod => $params->{mod},
@@ -73,7 +75,9 @@ sub index :Path :Args(0) {
 					  $params->{toqr},
 					  $qr->{qr} );
     }
-    $c->stash( final_message => $final_message );
+  } else {
+    $c->stash( template => 'signin.tt', );
+  }
 }
 
 =head1 AUTHOR

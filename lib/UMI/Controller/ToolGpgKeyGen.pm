@@ -40,7 +40,9 @@ new Text Translit
 
 
 sub index :Path :Args(0) {
-    my ( $self, $c ) = @_;
+  my ( $self, $c ) = @_;
+
+  if ( defined $c->user_exists && $c->user_exists == 1 ) {
     my $params = $c->req->parameters;
 
     $c->stash( template => 'tool/toolgpgkeygen.tt',
@@ -64,6 +66,9 @@ sub index :Path :Args(0) {
 
     $c->stash( final_message => $key->{html},
 	       key           => $key );
+  } else {
+    $c->stash( template => 'signin.tt', );
+  }
 }
 
 =head1 AUTHOR

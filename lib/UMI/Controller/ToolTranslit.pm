@@ -37,7 +37,9 @@ new Text Translit
 
 
 sub index :Path :Args(0) {
-    my ( $self, $c ) = @_;
+  my ( $self, $c ) = @_;
+
+  if ( defined $c->user_exists && $c->user_exists == 1 ) {
     my $params = $c->req->parameters;
 
     $c->stash( template => 'tool/tooltranslit.tt',
@@ -53,10 +55,13 @@ sub index :Path :Args(0) {
     my $tr = $self->utf2lat( $params->{totranslit}, 1 );
     
     $final_message->{success} .= sprintf('<dt>%s</dt><dd>%s</dd>', $_, $tr->{"$_"})
-        foreach (sort(keys %{$tr}));
+      foreach (sort(keys %{$tr}));
 
     $final_message->{success} .= '</dl>';
     $c->stash( final_message => $final_message, );
+  } else {
+    $c->stash( template => 'signin.tt', );
+  }
 }
 
 =head1 AUTHOR
