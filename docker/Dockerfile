@@ -100,7 +100,9 @@ RUN cpan -T -i \
     YAML \
     Net::SSH::Perl
 
+ARG UMI_TAG
 RUN git clone https://github.com/z-eos/umi.git && \
+    if [ -n "$UMI_TAG" ]; then git -C /umi checkout $UMI_TAG; else true; fi && \
     catalyst.pl umi && \
     cd /umi && perl Makefile.PL && make
 
