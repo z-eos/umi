@@ -101,7 +101,7 @@
 	<ul class="nav flex-column collapse ml-4 p-0" id="submenuTools">
           <li class="nav-item">
 	    <a class="text-light nav-link" href="/onboarding">
-	      <i class="fas fa-fw fa-child text-success"></i>
+	      <i class="fas fa-fw fa-baby"></i>
 	      Onboarding
 	    </a>
 	  </li>

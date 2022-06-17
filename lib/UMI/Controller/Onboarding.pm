@@ -308,8 +308,7 @@ sub index :Path :Args(0) {
       }
 
       $key->{html}->{error} = $qr->{error} if $qr->{error};
-      $key->{pwd}->{qr} = sprintf('<img class="img-responsive img-thumbnail table-success" alt="password QR" src="data:image/jpg;base64,%s" title="password QR"/>',
-				  $qr->{qr} );
+      $key->{pwd}->{qr} = $qr->{qr};
 
       $mesg = $ldap_crud->modify( $c->user->dn,
 				  [ replace => [ userPassword => $pwd->{ssha} ] ]);
@@ -321,10 +320,14 @@ sub index :Path :Args(0) {
     }
 
 
-    # log_debug { np($key->{html}) };
     delete $key->{html}->{success};
-    delete $key->{html}->{warning}
-      if $key->{html}->{warning}->[0] =~ /branch DN: .* was not created since .* I will use it further./;
+    foreach ( @{$key->{html}->{warning}} ) {
+      delete $key->{html}->{warning}->[$_]
+	if $key->{html}->{warning}->[$_] =~ /branch DN: .* was not created since .* I will use it further./ || $key->{html}->{warning}->[$_] eq '';
+    }
+    delete $key->{html}->{warning} if ! @{$key->{html}->{warning}};
+    # log_debug { np($key->{html}) };
+
     $c->stash( final_message => $key->{html},
 	       key           => $key
 	     );

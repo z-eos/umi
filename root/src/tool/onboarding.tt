@@ -1,7 +1,7 @@
 [% META title = 'Onboarding' %]
 
 <[% site.pageheading %] class="[% site.pageheadingclass %]">
-<i class="fas fa-child fa-lg mr-3 text-muted"></i>
+<i class="fas fa-baby fa-lg mr-3 text-muted"></i>
 Onboarding<small><em class="text-muted font-monospace"></em></small>
 </[% site.pageheading %]>
 <hr>
@@ -9,9 +9,9 @@ Onboarding<small><em class="text-muted font-monospace"></em></small>
 [% INCLUDE ldap_err.tt %]
 
 <div class="card border border-info">
-  <h4 class="card-header bg-info text-white">
+  <h5 class="card-header bg-info text-white">
     <i class="fas fa-exclamation-circle fa-lg mr-4"></i>On submit this page will do next for user <b>&laquo;[% c.user %]&raquo;</b>:
-  </h4>
+  </h5>
   <div class="card-body">
     <ul>
       <li>generate GPG and SSH key pairs, gitlab, vault and docker accounts  (all are available bellow). you must save them.</li>
@@ -30,318 +30,270 @@ Onboarding<small><em class="text-muted font-monospace"></em></small>
 </h1>
 
 
-<div class="accordion" id="accordionExample">
-  <div class="card border-success border">
+<!-- password -->
+<div class="card border border-info">
+  <div class="card-header bg-info text-white">
+    <h5>
+      <i class="fas fa-keyboard fa-fw fa-lg mr-5"></i>Password to access this page
+    </h5>
+  </div>
+  <div class="card-body">
 
-    <!-- password -->
-    <div class="card">
-      <div class="card-header alert-success" id="headingPwd">
-	<h2 class="mb-0">
-	  <button class="btn btn-link btn-block btn-lg text-left collapsed"
-		  type="button" data-toggle="collapse" data-target="#collapsePwd"
-		  title="Click to unfold"
-		  aria-expanded="false" aria-controls="collapsePwd">
-            <i class="fas fa-keyboard fa-fw fa-lg mr-5"></i>Password to access this page
-	  </button>
-	</h2>
+    <div class="d-flex justify-content-center">
+      <div class="h3 m-1" >
+	<button class="btn btn-info p-2"
+		onclick="copyToClipboard('#pwd_clear')"
+		title="Copy password to clipboard"
+		type="button">
+	  <span>
+	    <i class="fas fa-copy fa-lg fa-fw"></i>
+	  </span>
+	</button>
       </div>
-      <div id="collapsePwd" class="collapse" aria-labelledby="headingPwd" data-parent="#accordionExample">
-	<div class="card-body">
-
-	  <div class="d-flex justify-content-around m-5 p-5">
-	    <div class="flex-start h3" >
-	      <button class="btn btn-info p-2 m-2"
-		      onclick="copyToClipboard('#pwd_clear')"
-		      title="Copy password to clipboard"
-		      type="button">
-		<span>
-		  <i class="fas fa-copy fa-lg fa-fw"></i>
-		</span>
-	      </button>
-	    </div>
-	    <div id="pwd_clear" class="flex-start h3 text-monospace text-break text-center">[% key.pwd.clear %]</div>
-	    <div class="flex-start text-center">
-	      [% key.pwd.qr %]
-	    </div>
-	  </div>
-
-	</div>
-      </div>
+      <div id="pwd_clear" class="h5 text-monospace text-break text-center mx-5">[% key.pwd.clear %]</div>
+      <img class="img-responsive img-thumbnail table-info mx-1"
+	   src="data:image/jpg;base64,[% key.pwd.qr %]"
+	   alt="password QR" title="password QR"/>
     </div>
 
-    <!-- gpg keys -->
-    <div class="card-header alert-success border-success border-top" id="headingOne">
-      <h4 class="h4 mb-0">
-        <button class="btn btn-link btn-block btn-lg text-left"
-		type="button" data-toggle="collapse" data-target="#collapseOne"
-		title="Click to unfold"
-
-		aria-expanded="false" aria-controls="collapseOne">
-          <i class="fas fa-lock fa-fw fa-lg mr-5"></i>GPG Keys
-        </button>
-	</h2>
-    </div>
-
-    <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
-      <div class="card-body">
-
-	<div class="">
-	  Here are your GPG keys, you need import each of them with these commands: <code>gpg --import gpg-key-[% key.gpg.send_key.pgpKeyCreateTime %]-pvt.asc</code> and <code>gpg --import gpg-key-[% key.gpg.send_key.pgpKeyCreateTime %]-pub.asc</code>
-	</div>
-	
-	<div class="card">
-	  <div class="card-header">Key info:</div>
-	  <div class="card-body">
-      	    <small><pre>[% FILTER html %][% key.gpg.list_key.hr %][% END %]</pre></small>
-	  </div>
-	</div>
-	  
-	<div class="row m-5 p-5">
-
-	  <div class="col">
-	    <div class="btn-group" role="group">
-      	      <button class="btn btn-info p-3 my-3"
-                      onclick="copyToClipboard('#gpg_private')"
-	              title="Copy GPG private key to clipboard"
-                      type="button">
-		<span>
-		  <i class="fas fa-copy fa-lg fa-fw"></i>
-		</span>
-	      </button>
-	      <button class="btn btn-info p-3 my-3"
-		      onclick="downloadString(document.querySelector('#gpg_private').innerText, 'text/plain', 'gpg-key-[% key.gpg.send_key.pgpKeyCreateTime %]-pvt.asc')"
-       		      title="Download GPG private key"
-		      type="button">
-		<span>
-		  <i class="fas fa-file-download fa-lg fa-fw"></i>
-		</span>
-	      </button>
-	    </div>
-	    <pre id="gpg_private">[% key.gpg.private %]</pre>	
-	  </div>
-	  <div class="col">
-	    <div class="btn-group" role="group">
-	      <button class="btn btn-info p-3 my-3"
-		      onclick="copyToClipboard('#gpg_public')"
-       		      title="Copy GPG public key to clipboard"
-		      type="button">
-		<span>
-		  <i class="fas fa-copy fa-lg fa-fw"></i>
-		</span>
-	      </button>
-	      <button class="btn btn-info p-3 my-3"
-		      onclick="downloadString(document.querySelector('#gpg_public').innerText, 'text/plain', 'gpg-key-[% key.gpg.send_key.pgpKeyCreateTime %]-pub.asc')"
-       		      title="Download GPG public key"
-		      type="button">
-		<span>
-		  <i class="fas fa-file-download fa-lg fa-fw"></i>
-		</span>
-	      </button>
-	    </div>
-	    <pre id="gpg_public">[% key.gpg.public %]</pre>
-	  </div>
-	</div>
-
-      </div>
-    </div>
-
-    <!-- ssh keys -->
-    <div class="card border-success border-top">
-      <div class="card-header alert-success" id="headingTwo">
-	<h2 class="mb-0">
-	  <button class="btn btn-link btn-block btn-lg text-left collapsed"
-		  type="button" data-toggle="collapse" data-target="#collapseTwo"
-		  title="Click to unfold"
-		  aria-expanded="false" aria-controls="collapseTwo">
-            <i class="fas fa-key fa-fw fa-lg mr-5"></i>SSH Keys
-	  </button>
-	</h2>
-      </div>
-      <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
-	<div class="card-body">
-
-	  <div class="mb-5">
-	    Here are your SSH keys, place them to a directory <code>.ssh</code> in your homedir.
-	    Don't forget set correct attributes <code>700</code> on private key
-	  </div>
-	  
-	  <div class="row m-5 p-5">
-	    <div class="col">
-	      <div class="btn-group" role="group">
-		<button class="btn btn-info p-3 my-3"
-			onclick="copyToClipboard('#ssh_private')"
-			title="Copy SSH private key to clipboard"
-			type="button">
-		  <span>
-		    <i class="fas fa-copy fa-lg fa-fw"></i>
-		  </span>
-		</button>
-		<button class="btn btn-info p-3 my-3"
-			onclick="downloadString(document.querySelector('#ssh_private').innerText, 'text/plain', 'ssh-key-[% key.ssh.date %].pvt')"
-       			title="Download SSH private key"
-			type="button">
-		  <span>
-		    <i class="fas fa-file-download fa-lg fa-fw"></i>
-		  </span>
-		</button>
-	      </div>
-	      <pre id="ssh_private">[% key.ssh.private %]</pre>	
-	    </div>
-	    <div class="col">
-	      <div class="btn-group" role="group">
-		<button class="btn btn-info p-3 my-3"
-			onclick="copyToClipboard('#ssh_public')"
-     			title="Copy SSH public key to clipboard"
-			type="button">
-		  <span>
-		    <i class="fas fa-copy fa-lg fa-fw"></i>
-		  </span>
-		</button>
-		<button class="btn btn-info p-3 my-3"
-			onclick="downloadString(document.querySelector('#ssh_public').innerText, 'text/plain', 'ssh-key-[% key.ssh.date %].pub')"
-       			title="Download SSH public key"
-			type="button">
-		  <span>
-		    <i class="fas fa-file-download fa-lg fa-fw"></i>
-		  </span>
-		</button>
-	      </div>
-	      <div class="kludge-minus-700px m-4">
-		<small id="ssh_public" class="text-monospace">[% key.ssh.public %]</small>
-	      </div>
-	    </div>
-
-	  </div>
-	</div>
-      </div>
-    </div>
-
-    [% IF key.gitlab %]
-    <div class="card border-success border-top">
-      <div class="card-header alert-success" id="headingGitlabPwd">
-	<h2 class="mb-0">
-	  <button class="btn btn-link btn-block btn-lg text-left collapsed"
-		  type="button" data-toggle="collapse" data-target="#collapseGitlabPwd"
-		  title="Click to unfold"
-		  aria-expanded="false" aria-controls="collapseGitlabPwd">
-            <i class="fas fa-gitlab fa-fw fa-lg mr-5"></i>Gitlab account
-	  </button>
-	</h2>
-      </div>
-      <div id="collapseGitlabPwd" class="collapse" aria-labelledby="headingGitlabPwd" data-parent="#accordionExample">
-	<div class="card-body">
-
-	  <div class="mb-5">
-	    Your gitlab login to <code>https://gitlab.norse.digital</code> is <code>[% key.gitlab.uid %]</code>,
-	    your gitlab password password is bellow
-	  </div>
-	  
-	  <div class="d-flex justify-content-around m-5 p-5">
-	    <div class="flex-start h3" >
-	      <button class="btn btn-info p-2 m-2"
-		      onclick="copyToClipboard('#gitlab_pwd_clear')"
-		      title="Copy password to clipboard"
-		      type="button">
-		<span>
-		  <i class="fas fa-copy fa-lg fa-fw"></i>
-		</span>
-	      </button>
-	    </div>
-	    <div id="gitlab_pwd_clear" class="flex-start h3 text-monospace text-break text-center">[% key.gitlab.pwd.clear %]</div>
-	    <div class="flex-start text-center">
-	      [% key.gitlab.pwd.qr %]
-	    </div>
-	  </div>
-
-	</div>
-      </div>
-    </div>
-    [% END %]
-
-    [% IF key.vault %]
-    <div class="card border-success border-top">
-      <div class="card-header alert-success" id="headingVaultPwd">
-	<h2 class="mb-0">
-	  <button class="btn btn-link btn-block btn-lg text-left collapsed"
-		  type="button" data-toggle="collapse" data-target="#collapseVaultPwd"
-		  title="Click to unfold"
-		  aria-expanded="false" aria-controls="collapseVaultPwd">
-            <i class="fas fa-wallet fa-fw fa-lg mr-5"></i>Vault account
-	  </button>
-	</h2>
-      </div>
-      <div id="collapseVaultPwd" class="collapse" aria-labelledby="headingVaultPwd" data-parent="#accordionExample">
-	<div class="card-body">
-
-	  <div class="mb-5">
-	    Your vault login to <code>https://vault.norse.digital</code> is <code>[% key.vault.uid %]</code>,
-	    your vault password password is bellow
-	  </div>
-	  
-	  <div class="d-flex justify-content-around m-5 p-5">
-	    <div class="flex-start h3" >
-	      <button class="btn btn-info p-2 m-2"
-		      onclick="copyToClipboard('#vault_pwd_clear')"
-		      title="Copy password to clipboard"
-		      type="button">
-		<span>
-		  <i class="fas fa-copy fa-lg fa-fw"></i>
-		</span>
-	      </button>
-	    </div>
-	    <div id="vault_pwd_clear" class="flex-start h3 text-monospace text-break text-center">[% key.vault.pwd.clear %]</div>
-	    <div class="flex-start text-center">
-	      [% key.vault.pwd.qr %]
-	    </div>
-	  </div>
-
-	</div>
-      </div>
-    </div>
-    [% END %]
-        
-    [% IF key.docker %]
-    <div class="card border-success border-top">
-      <div class="card-header alert-success" id="headingDockerPwd">
-	<h2 class="mb-0">
-	  <button class="btn btn-link btn-block btn-lg text-left collapsed"
-		  type="button" data-toggle="collapse" data-target="#collapseDockerPwd"
-		  title="Click to unfold"
-		  aria-expanded="false" aria-controls="collapseDockerPwd">
-            <i class="fas fa-docker fa-fw fa-lg mr-5"></i>Docker Registry Credentials
-	  </button>
-	</h2>
-      </div>
-      <div id="collapseDockerPwd" class="collapse" aria-labelledby="headingDockerPwd" data-parent="#accordionExample">
-	<div class="card-body">
-
-	  <div class="mb-5">
-	    Your docker login to <code>https://portus.norse.co</code> is <code>[% key.docker.uid %]</code>,
-	    your docker password password is bellow
-	  </div>
-	  
-	  <div class="d-flex justify-content-around m-5 p-5">
-	    <div class="flex-start h3" >
-	      <button class="btn btn-info p-2 m-2"
-		      onclick="copyToClipboard('#docker_pwd_clear')"
-		      title="Copy password to clipboard"
-		      type="button">
-		<span>
-		  <i class="fas fa-copy fa-lg fa-fw"></i>
-		</span>
-	      </button>
-	    </div>
-	    <div id="docker_pwd_clear" class="flex-start h3 text-monospace text-break text-center">[% key.docker.pwd.clear %]</div>
-	    <div class="flex-start text-center">
-	      [% key.docker.pwd.qr %]
-	    </div>
-	  </div>
-
-	</div>
-      </div>
-    </div>
-    [% END %]
-        
   </div>
 </div>
+
+<!-- gpg keys -->
+<div class="card border border-info">
+  <div class="card-header bg-info text-white">
+    <h5>
+      <i class="fas fa-lock fa-fw fa-lg mr-5"></i>GPG Keys
+    </h5>
+  </div>
+  <div class="card-body">
+
+    <div class="mb-5">
+      Here are your GPG keys, you need import each of them with these commands: <code>gpg --import gpg-key-[% key.gpg.send_key.pgpKeyCreateTime %]-pvt.asc</code> and <code>gpg --import gpg-key-[% key.gpg.send_key.pgpKeyCreateTime %]-pub.asc</code>
+    </div>
+    
+    <div class="card border border-info">
+      <div class="card-header h6 bg-info text-white">
+	<i class="fas fa-exclamation-circle mr-3"></i>Key info:
+      </div>
+      <div class="card-body mb-0 pb-0">
+      	<small class="mb-0 pb-0"><pre class="mb-0 pb-0">[% FILTER html %][% key.gpg.list_key.hr %][% END %]</pre></small>
+      </div>
+    </div>
+    
+    <div class="row m-5 p-5">
+
+      <div class="col">
+	<div class="btn-group" role="group">
+      	  <button class="btn btn-info p-3 my-3"
+                  onclick="copyToClipboard('#gpg_private')"
+	          title="Copy GPG private key to clipboard"
+                  type="button">
+	    <span>
+	      <i class="fas fa-copy fa-lg fa-fw"></i>
+	    </span>
+	  </button>
+	  <button class="btn btn-info p-3 my-3"
+		  onclick="downloadString(document.querySelector('#gpg_private').innerText, 'text/plain', 'gpg-key-[% key.gpg.send_key.pgpKeyCreateTime %]-pvt.asc')"
+       		  title="Download GPG private key"
+		  type="button">
+	    <span>
+	      <i class="fas fa-file-download fa-lg fa-fw"></i>
+	    </span>
+	  </button>
+	</div>
+	<small><pre id="gpg_private">[% key.gpg.private %]</pre></small>
+      </div>
+      <div class="col">
+	<div class="btn-group" role="group">
+	  <button class="btn btn-info p-3 my-3"
+		  onclick="copyToClipboard('#gpg_public')"
+       		  title="Copy GPG public key to clipboard"
+		  type="button">
+	    <span>
+	      <i class="fas fa-copy fa-lg fa-fw"></i>
+	    </span>
+	  </button>
+	  <button class="btn btn-info p-3 my-3"
+		  onclick="downloadString(document.querySelector('#gpg_public').innerText, 'text/plain', 'gpg-key-[% key.gpg.send_key.pgpKeyCreateTime %]-pub.asc')"
+       		  title="Download GPG public key"
+		  type="button">
+	    <span>
+	      <i class="fas fa-file-download fa-lg fa-fw"></i>
+	    </span>
+	  </button>
+	</div>
+	<small><pre id="gpg_public">[% key.gpg.public %]</pre></small>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ssh keys -->
+<div class="card border border-info">
+  <div class="card-header bg-info text-white">
+    <h5>
+      <i class="fas fa-key fa-fw fa-lg mr-5"></i>SSH Keys
+    </h5>
+  </div>
+  <div class="card-body">
+
+    <div class="mb-5">
+      Here are your SSH keys, place them to a directory <code>.ssh</code> in your homedir.
+      Don't forget set correct attributes <code>700</code> on private key
+    </div>
+    
+    <div class="row m-5 p-5">
+      <div class="col">
+	<div class="btn-group" role="group">
+	  <button class="btn btn-info p-3 my-3"
+		  onclick="copyToClipboard('#ssh_private')"
+		  title="Copy SSH private key to clipboard"
+		  type="button">
+	    <span>
+	      <i class="fas fa-copy fa-lg fa-fw"></i>
+	    </span>
+	  </button>
+	  <button class="btn btn-info p-3 my-3"
+		  onclick="downloadString(document.querySelector('#ssh_private').innerText, 'text/plain', 'ssh-key-[% key.ssh.date %].pvt')"
+       		  title="Download SSH private key"
+		  type="button">
+	    <span>
+	      <i class="fas fa-file-download fa-lg fa-fw"></i>
+	    </span>
+	  </button>
+	</div>
+	<small><pre id="ssh_private">[% key.ssh.private %]</pre></small>
+      </div>
+      <div class="col">
+	<div class="btn-group" role="group">
+	  <button class="btn btn-info p-3 my-3"
+		  onclick="copyToClipboard('#ssh_public')"
+     		  title="Copy SSH public key to clipboard"
+		  type="button">
+	    <span>
+	      <i class="fas fa-copy fa-lg fa-fw"></i>
+	    </span>
+	  </button>
+	  <button class="btn btn-info p-3 my-3"
+		  onclick="downloadString(document.querySelector('#ssh_public').innerText, 'text/plain', 'ssh-key-[% key.ssh.date %].pub')"
+       		  title="Download SSH public key"
+		  type="button">
+	    <span>
+	      <i class="fas fa-file-download fa-lg fa-fw"></i>
+	    </span>
+	  </button>
+	</div>
+	<small><pre id="ssh_public" class="text-wrap">[% key.ssh.public %]</pre></small>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+[% IF key.gitlab %]
+<div class="card border border-info">
+  <div class="card-header bg-info text-white">
+    <h5>
+      <i class="fas fa-gitlab fa-fw fa-lg mr-5"></i>Gitlab account
+    </h5>
+  </div>
+  <div class="card-body">
+
+    <div class="mb-5">
+      Your gitlab login to <code>https://gitlab.norse.digital</code> is <code>[% key.gitlab.uid %]</code>,
+      your gitlab password password is bellow
+    </div>
+    
+    <div class="d-flex justify-content-around m-5 p-5">
+      <div class="flex-start h3" >
+	<button class="btn btn-info p-2 m-2"
+		onclick="copyToClipboard('#gitlab_pwd_clear')"
+		title="Copy password to clipboard"
+		type="button">
+	  <span>
+	    <i class="fas fa-copy fa-lg fa-fw"></i>
+	  </span>
+	</button>
+      </div>
+      <div id="gitlab_pwd_clear" class="flex-start h5 text-monospace text-break text-center">[% key.gitlab.pwd.clear %]</div>
+      <div class="flex-start text-center">
+	[% key.gitlab.pwd.qr %]
+      </div>
+    </div>
+
+  </div>
+</div>
+[% END %]
+
+[% IF key.vault %]
+<div class="card border border-info">
+  <div class="card-header bg-info text-white">
+    <h5>
+      <i class="fas fa-wallet fa-fw fa-lg mr-5"></i>Vault account
+    </h5>
+  </div>
+  <div class="card-body">
+
+    <div class="mb-5">
+      Your vault login to <code>https://vault.norse.digital</code> is <code>[% key.vault.uid %]</code>,
+      your vault password password is bellow
+    </div>
+    
+    <div class="d-flex justify-content-around m-5 p-5">
+      <div class="flex-start h3" >
+	<button class="btn btn-info p-2 m-2"
+		onclick="copyToClipboard('#vault_pwd_clear')"
+		title="Copy password to clipboard"
+		type="button">
+	  <span>
+	    <i class="fas fa-copy fa-lg fa-fw"></i>
+	  </span>
+	</button>
+      </div>
+      <div id="vault_pwd_clear" class="flex-start h5 text-monospace text-break text-center">[% key.vault.pwd.clear %]</div>
+      <div class="flex-start text-center">
+	[% key.vault.pwd.qr %]
+      </div>
+    </div>
+
+  </div>
+</div>
+[% END %]
+
+[% IF key.docker %]
+<div class="card border border-info">
+  <div class="card-header bg-info text-white">
+    <h5>
+      <i class="fas fa-docker fa-fw fa-lg mr-5"></i>Docker Registry Credentials
+    </h5>
+  </div>
+  <div class="card-body">
+
+    <div class="mb-5">
+      Your docker login to <code>https://portus.norse.co</code> is <code>[% key.docker.uid %]</code>,
+      your docker password password is bellow
+    </div>
+    
+    <div class="d-flex justify-content-around m-5 p-5">
+      <div class="flex-start h3" >
+	<button class="btn btn-info p-2 m-2"
+		onclick="copyToClipboard('#docker_pwd_clear')"
+		title="Copy password to clipboard"
+		type="button">
+	  <span>
+	    <i class="fas fa-copy fa-lg fa-fw"></i>
+	  </span>
+	</button>
+      </div>
+      <div id="docker_pwd_clear" class="flex-start h5 text-monospace text-break text-center">[% key.docker.pwd.clear %]</div>
+      <div class="flex-start text-center">
+	[% key.docker.pwd.qr %]
+      </div>
+    </div>
+
+  </div>
+</div>
+[% END %]
+
 [% END %]
