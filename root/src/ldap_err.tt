@@ -93,7 +93,7 @@
     </h4>
   </div>
   <div class="umi-collapsable collapse show" id="cardBodySuccess">
-    <div class="card-body pb-0
+    <div class="card-body
       [% IF ! final_message.success.join.match('copyToClipboard|figure') %]
  d-flex">
       <div class="align-flex-start">

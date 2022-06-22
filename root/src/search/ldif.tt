@@ -10,7 +10,6 @@ LDIF<small><em class="text-muted font-monospace">
 
 [% INCLUDE ldap_err.tt %]
 
-<div class="btn-group" role="group">
 <!--
   <form method="POST"
       class="mt-5"
@@ -38,6 +37,7 @@ LDIF<small><em class="text-muted font-monospace">
   </button>
 </form>
 -->
+<div class="btn-group" role="group">
   <button class="btn btn-info p-3 my-3"
 	  onclick="copyToClipboard('#ldif')"
 	  title="Copy LDIF to clipboard"

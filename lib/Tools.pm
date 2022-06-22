@@ -2302,6 +2302,14 @@ sub factoroff_searchby {
       #my @te = sort @{$ta};
       #p \@te;
       # $tt_e->{attrs}->{$attr} = $e->get_value( $attr, asref => 1 );
+    } elsif ( $attr eq 'umiUserCertificateNotAfter' ||
+	      $attr eq 'pgpKeyExpireTime' ) {
+
+      $tt_e->{mgmnt}->{cert_expired} =
+	Time::Piece->strptime( substr($e->get_value( $attr ), 0, 14),
+			       "%Y%m%d%H%M%S" ) < localtime ? 1 : 0;
+
+      $tt_e->{attrs}->{$attr} = $e->get_value( $attr );
     } elsif ( ref( $tt_e->{attrs}->{$attr} ) eq 'ARRAY') {
       $tt_e->{is_arr}->{$attr} = 1;
     }

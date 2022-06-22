@@ -12,6 +12,8 @@ Search Advanced
 
 [% form.render %]
 
+[% USE date(time = date.now, format = '%Y.%m.%d', locale = 'en_US') %]
+
 <script>
  $(function() {
    var $search_history = $("#search_history");
@@ -53,7 +55,6 @@ Search Advanced
 </div>
 [% END %]
 
-[% USE date(time = date.now, format = '%Y.%m.%d', locale = 'en_US') %]
 [% dds_max_ttl_years = 10 %]
 
 [% INCLUDE ldap_err.tt %]
@@ -192,8 +193,10 @@ Search Advanced
 	 root_of_rec_btn = 'col-xs-12 text-truncate';
 	 END;
 
-	 # === OBJECT TYPE CARD COLOR DEFINING ===;
+
+	 # === OBJECT TYPE CARD COLOR DEFINITION ===;
 	 IF entry.val.mgmnt.is_blocked ||
+	 entry.val.mgmnt.cert_expired ||
 	 (entry.val.attrs.exists('umiOvpnAddStatus') &&
 	   entry.val.attrs.umiOvpnAddStatus.0 != 'enabled');
 	 tr_color = 'danger';

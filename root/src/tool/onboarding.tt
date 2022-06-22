@@ -25,10 +25,11 @@ Onboarding<small><em class="text-muted font-monospace"></em></small>
 
 [% IF key %]
 <h1 class="display-5 m-5 p-5">
-  Your Stuff
+  Onboarding
   <small class="text-muted"><i>([% key.name.real %] &lt;[% key.name.email %]&gt;)</i></small>
 </h1>
 
+  
 
 <!-- password -->
 <div class="card border border-info">
