@@ -31,7 +31,8 @@ sub prepare_arguments {
 	  uid  => $c->session->{auth_uid},
 	  pwd  => $c->session->{auth_pwd},
 	  user => $c->user,
-	  role_admin => $c->check_user_roles( qw/admin/ ),
+	  role_admin   => $c->check_user_roles( qw/admin/ ),
+	  role_coadmin => $c->check_user_roles( qw/coadmin/ ),
 	  # path_to_images => $c->path_to('root', 'static', 'images'),
 	 };
 }

@@ -151,7 +151,7 @@
 		      title="base: [% c.session.ldap.base.org %]">
 		<i class="[% icon_class %] fa-building"></i> organization
 	      </button>
-	      [% IF c.user_exists && c.check_any_user_role ('admin') %]
+	      [% IF c.user_exists && c.check_any_user_role ('admin','coadmin') %]
 	      <button type="submit" class="[% menu_item %][% color %]"
 		      onClick="$('#ldap_base_case').val(this.value);$('#ldapsearch_filter').focus()"
 		      value="[% helper_cfg('cfg_ldap_crud','base', 'group') %]"

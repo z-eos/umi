@@ -1,4 +1,4 @@
-# -*- cperl -*-
+# -*- mode: cperl; eval: (follow-mode); -*-
 #
 
 package UMI::Controller::SearchBy;
@@ -274,6 +274,7 @@ sub index :Path :Args(0) {
 
     foreach (@entries) {
       $dn = $_->dn;
+      # log_debug { np( $dn ) };
 
       $c->stats->profile(begin => 'ENTRY', comment => 'dn: ' . $dn);
 
@@ -293,7 +294,6 @@ sub index :Path :Args(0) {
       $ttentries->{$dn}->{attrs}  = $foffs->{attrs};
       $ttentries->{$dn}->{is_arr} = $foffs->{is_arr};
 
-
       if ( $dn =~ /.*,$ldap_crud->{cfg}->{base}->{acc_root}/ ) {
 	#=============================================================
 	### ACCES CONTROL to ou=People,dc=... objects for not admins
@@ -303,7 +303,7 @@ sub index :Path :Args(0) {
 	# 1. all-domains-of-root-object-orgs array for each search result entry
 	# 2. current search result entry associatedDomain attribute value/s, if any
 
-	if ( ! $ldap_crud->role_admin ) {
+	if ( ! $ldap_crud->role_admin && ! $ldap_crud->role_coadmin ) {
 	  $c->stats->profile(begin => '- acl check');
 
 	  # !!! TODO !!! to process errors when no "o" attribute exists or it is not DN
@@ -380,7 +380,7 @@ sub index :Path :Args(0) {
 
     }
 
-    # log_debug { np($all_entries) };
+    # log_debug { np($ttentries) };
     
     # suffix array of dn preparation to respect LDAP objects "inheritance"
     # http://en.wikipedia.org/wiki/Suffix_array

@@ -5,7 +5,7 @@
        class="text-light bg-dark float-right [% c.session.settings.ui.aside == 0 ? 'folded' : '' %]"
        data-url-tree="/ldap_tree">
     <ul class="nav nav-pills nav-fill" role="tablist">
-      [% IF c.check_user_roles('admin') %]
+      [% IF c.check_any_user_role('admin','coadmin') %]
       <li class="nav-item" title="LDAP tree">
 	<a class="nav-link text-white-50 active" data-toggle="tab" href="#ldap-tree-tab" role="tab">
 	  <i class="fas fa-project-diagram"></i>
@@ -61,7 +61,7 @@
       </div>
       -->
 
-      [% IF c.check_user_roles('admin') %]
+      [% IF c.check_any_user_role('admin','coadmin') %]
       <!-- === LDAP tree (neo) ===  -->
       <div class="tab-pane p-3 active" id="ldap-tree-tab" role="tabpanel">
 	<div class="callout m-0 py-2 text-white-50 text-center text-uppercase">

@@ -592,15 +592,18 @@ sub _build_cfg {
 	 };
 }
 
+has 'version' => ( is => 'ro', isa => 'Str', required => 1, default => '0.90.1' );
+
 has 'host'    => ( is => 'ro', isa => 'Str', required => 1,
 		   default => UMI->config->{authentication}->{realms}->{ldap}->{store}->{ldap_server});
 has 'dry_run'    => ( is => 'ro', isa => 'Bool', default => 0 );
 
 # these ones are declared in Model/LDAP_CRUD.pm
-has 'uid'        => ( is => 'ro', isa => 'Str', required => 1 );
-has 'pwd'        => ( is => 'ro', isa => 'Str', required => 1 );
-has 'user'       => ( is => 'ro', required => 1 );
-has 'role_admin' => ( is => 'ro', required => 1 );
+has 'uid'          => ( is => 'ro', isa => 'Str', required => 1 );
+has 'pwd'          => ( is => 'ro', isa => 'Str', required => 1 );
+has 'user'         => ( is => 'ro', required => 1 );
+has 'role_admin'   => ( is => 'ro', required => 1 );
+has 'role_coadmin' => ( is => 'ro', required => 1 );
 
 # has 'path_to_images' => ( is => 'ro', isa => 'Str', required => 1 );
 

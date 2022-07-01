@@ -157,7 +157,7 @@ __PACKAGE__->deny_access_unless_any( "/sudo",                [ qw/admin/ ]);
 
 # here we allow search to all members of admin, coadmin and operator groups, while the very permition to
 # search some LDAP filter or not is controlled by Tools::is_searchable method in Controller::SearchBy::index
-__PACKAGE__->deny_access_unless_any( "/searchadvanced",      [ qw/admin/ ]);
+__PACKAGE__->deny_access_unless_any( "/searchadvanced",      [ qw/admin coadmin/ ]);
 __PACKAGE__->deny_access_unless_any( "/searchby",            [ qw/admin coadmin operator/ ]);
 
 __PACKAGE__->deny_access_unless_any( "/searchby/ldif_gen",   [ qw/admin coadmin/ ]);

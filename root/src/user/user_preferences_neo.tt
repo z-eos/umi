@@ -2,6 +2,10 @@
 
 [% INCLUDE ldap_err.tt %]
 
+[% FOREACH role IN auth_obj.roles.sort %]
+[% auth_obj_is_admin = role == 'admin' ? 1 : 0 %]
+[% END %]
+
 [% chevron_toggle = 'right';
    h = site.pageheading.substr(1,1) + 2;
    card_header = 'h' _ h %]
@@ -157,7 +161,9 @@
 		<dl class="d-flex flex-row">
 		  <dt class="mr-3 d-flex flex-row align-items-start">
 
-		    [% IF y.auth && ( y.authorizedService.search('mail') ||
+		    [% IF ( c.check_user_roles('admin') ||
+		       (! auth_obj_is_admin && ! c.check_user_roles('admin')) ) &&
+		       y.auth && ( y.authorizedService.search('mail') ||
 		       y.authorizedService.search('gitlab') ||
 		       y.authorizedService.search('xmpp') ||
 		       y.authorizedService.search('web') ) %]
