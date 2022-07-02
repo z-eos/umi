@@ -2,9 +2,13 @@
 
 [% INCLUDE ldap_err.tt %]
 
-[% FOREACH role IN auth_obj.roles.sort %]
-[% auth_obj_is_admin = role == 'admin' ? 1 : 0 %]
-[% END %]
+[% auth_obj_is_admin = 0;
+FOREACH role IN auth_obj.roles.sort;
+  IF role == 'admin';
+    auth_obj_is_admin = 1;
+  END;
+END
+%]
 
 [% chevron_toggle = 'right';
    h = site.pageheading.substr(1,1) + 2;
