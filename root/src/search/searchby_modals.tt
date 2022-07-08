@@ -46,35 +46,6 @@
 </div>
 [% END %]
 
-[% IF to_rollback %]
-<div class="modal" id="modal_rollback[% id_suffix %]"
-     tabindex="-1" role="dialog" aria-labelledby="modal_rollback[% id_suffix %]_label"
-     aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header bg-danger">
-	<h4 class="modal-title" id="modal_rollback[% id_suffix %]_label">
-	  <i class="fa fa-times-circle"></i>
-	  You are about to perform last change rollback of DN: <b>[% entry.key.replace(',', ', ') %]</b>
-	</h4>
-      </div>
-      <form role="form" method="POST" action="/searchby/delete"><!-- === TO FINISH === -->
-	<div class="modal-body">
-          <p>Now, there is no way to show you what will happen, so, if you hesitate, then please, inspect the history first!</p>
-	</div>
-	<div class="modal-footer">
-	  <button type="button" class="btn btn-secondary umi-btn-event" data-dismiss="modal">Close</button>
-	  <button type="submit" class="btn bg-danger umi-btn-event umi-btn-ajax"  name="ldap_rollback"
-		  value="[% entry.key %]" data-action="rollback">
-	    Yes, I really want to rollback it and yes, I understand all consequences!
-	  </button>
-	</div>
-      </form>
-    </div>
-  </div>
-</div>
-[% END %]
-
 <div class="modal" id="modal_block[% id_suffix %]"
      tabindex="-1" role="dialog" aria-labelledby="modal_block[% id_suffix %]_label"
      aria-hidden="true">
@@ -85,7 +56,7 @@
 	  <i class="fa fa-ban"></i>
 	  You are about to block user with DN: <b>[% entry.key.replace(',', ', ') %]</b>
 	</h4>
-	</div>
+      </div>
       <form role="form" method="POST" class="formajaxer" action="/searchby/block">
 	<div class="modal-footer">
 	  <div>
@@ -98,7 +69,8 @@
 	    </button>
 	  </div>
 	</div>
-      <div class="modal-footer"></div>
+	<div class="modal-footer"></div>
+	<div class="modal-error mx-5"></div>
       </form>
     </div>
   </div>
@@ -402,4 +374,33 @@ above is applicable too and all is done under &laquo;ou=Composite,ou=hw,ou=Inven
     </div>
   </div>
 </div>
+
+[% IF to_rollback %]
+<div class="modal" id="modal_rollback[% id_suffix %]"
+     tabindex="-1" role="dialog" aria-labelledby="modal_rollback[% id_suffix %]_label"
+     aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-danger">
+	<h4 class="modal-title" id="modal_rollback[% id_suffix %]_label">
+	  <i class="fa fa-times-circle"></i>
+	  You are about to perform last change rollback of DN: <b>[% entry.key.replace(',', ', ') %]</b>
+	</h4>
+      </div>
+      <form role="form" method="POST" action="/searchby/delete"><!-- === TO FINISH === -->
+	<div class="modal-body">
+          <p>Now, there is no way to show you what will happen, so, if you hesitate, then please, inspect the history first!</p>
+	</div>
+	<div class="modal-footer">
+	  <button type="button" class="btn btn-secondary umi-btn-event" data-dismiss="modal">Close</button>
+	  <button type="submit" class="btn bg-danger umi-btn-event umi-btn-ajax"  name="ldap_rollback"
+		  value="[% entry.key %]" data-action="rollback">
+	    Yes, I really want to rollback it and yes, I understand all consequences!
+	  </button>
+	</div>
+      </form>
+    </div>
+  </div>
+</div>
+[% END %]
 

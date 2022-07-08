@@ -32,7 +32,12 @@ $(function(){
 	    // original // item.parents().prepend(getErrorBlock(message));
 	    // item.closest('.modal-body').append(getErrorBlock(message));
 	    // item.parent().prepend(getErrorBlock(message));
-	    item.closest('.modal-content').find(".modal-error").html(message);
+	  const errorContainer = item.closest('.modal-content').find(".modal-error");
+	  if ( errorContainer.length ) {
+	    errorContainer.html(message);
+	  } else {
+	    console.error('applyError: find returned zerro length; ' + message);
+	  }
 	},
 
 	createHiddenButton = function(item, value) {

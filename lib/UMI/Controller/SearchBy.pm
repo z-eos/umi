@@ -1545,7 +1545,8 @@ modify whole form (all present fields except RDN)
 sub modify :Path(modify) :Args(0) {
   my ( $self, $c, $params ) = @_;
 
-  log_debug { "modify(): params on start:\n" . np($params) };
+  log_debug { "modify(): params on start:\n" . np($params) }
+     if ! defined $params;
 
   # whether we edit object as is or via creation form
   $params = $c->req->parameters if ! defined $params;
@@ -2126,22 +2127,40 @@ sub reassign :Path(reassign) :Args(0) {
 
   my $err = $c->model('LDAP_CRUD')->reassign($params);
 
+  # if ( $params->{type} eq 'json' ) {
+  #   $c->stash->{current_view} = 'WebJSON';
+    
+  #   $c->stash->{success} = ref($err) ne 'HASH' && ref($err) ne 'ARRAY' ? 1 : 0;
+
+  #   if ( ref($err) ne 'HASH' && ref($err) ne 'ARRAY' ) {
+  #     $c->stash->{message} = 'OK';
+  #   } elsif ( (ref($err) eq 'HASH' || ref($err) eq 'ARRAY' ) && $#{$err->{error}} > -1 ) {
+  #     $c->stash->{success} = 0;
+  #     $c->stash->{message} = $self->msg2html({ type => 'alert',
+  # 					       data => $err->{error}->[0]->{html} });
+  #   }
+  # } else {
+  #   $c->stash( template => 'stub.tt',
+  # 	       params   => $params,
+  # 	       err      => $err, );
+  # }
+
   if ( $params->{type} eq 'json' ) {
     $c->stash->{current_view} = 'WebJSON';
-    $c->stash->{success} = ref($err) ne 'HASH' && ref($err) ne 'ARRAY' ? 1 : 0;
-
-    if ( ref($err) ne 'HASH' && ref($err) ne 'ARRAY' ) {
+    if ( ref($err) eq 'HASH' && ! defined $err->{error} ) {
+      $c->stash->{success} = 1;
       $c->stash->{message} = 'OK';
-    } elsif ( (ref($err) eq 'HASH' || ref($err) eq 'ARRAY' ) && $#{$err->{error}} > -1 ) {
+    } elsif ( ref($err) eq 'HASH' || ref($err) eq 'ARRAY' ) { # && $#{$err->{error}} > -1 ) {
       $c->stash->{success} = 0;
-      $c->stash->{message} = $self->msg2html({ type => 'alert',
-					       data => $err->{error}->[0]->{html} });
+      $c->stash->{message} = $self->msg2html({ type => 'panel',
+					       data => $err->{error} });
+    } else {
+      $c->stash( template => 'stub.tt',
+		 err      => $err,
+		 params   => $params, );
     }
-  } else {
-    $c->stash( template => 'stub.tt',
-	       params   => $params,
-	       err      => $err, );
   }
+
 }
 
 =head1 moddn
@@ -2234,9 +2253,10 @@ to make it impossible to use any of them
 sub block :Path(block) :Args(0) {
   my ( $self, $c ) = @_;
   my $args = $c->req->parameters;
-  my $params = { dn => $args->{user_block},
+  my $params = { dn   => $args->{user_block},
 		 type => $args->{type}, };
   my $err = $c->model('LDAP_CRUD')->block( $params );
+  log_debug { np($err) };
 
   if ( $params->{type} eq 'json' ) {
     $c->stash->{current_view} = 'WebJSON';

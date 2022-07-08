@@ -986,7 +986,7 @@ sub search {
   $arg->{control}   = [ $self->control_sync_req ] if exists  $args->{control};
 
   my $mesg = $self->ldap->search( %{$arg} );
-
+  # log_debug { np($mesg) };
   return $mesg;
 }
 
@@ -1544,19 +1544,22 @@ sub block {
   my @keys;
   my ( $msg, $msg_usr, $msg_add, $msg_chg, $ent_svc, $ent_chg, @blockgr );
 
-  log_debug { np( $args ) };
+  # log_debug { np( $args ) };
 
   $msg = $self->modify( $args->{dn},
 			[ replace => [ gidNumber => $self->cfg->{stub}->{group_blocked_gid}, ],	], );
 
-  if ( ref($msg) eq 'HASH' ) {
-    $return->{error} .= $msg->{html};
+  # log_debug { np( $msg ) };
+  if ( $msg eq '0' ) {
+    $return->{success} = $args->{dn} . "\n";
   } else {
-    $return->{success} .= $ent_svc->dn . "\n";
+    $return->{error} = $msg->{html};
   }
+  # log_debug { np( $return ) };
 
   $msg_usr = $self->search ( { base      => $args->{dn},
 			       sizelimit => 0, } );
+  # log_debug { np( $msg_usr->count ) };
   if ( $msg_usr->is_error() ) {
     $return->{error} = $self->err( $msg_usr )->{html};
   } else {
@@ -1581,6 +1584,7 @@ sub block {
 	  $return->{success} .= $ent_svc->dn . "\n";
 	}
       }
+      # log_debug { np( $return ) };
 
       if ( $ent_svc->exists('sshPublicKey') ) {
 	@userPublicKeys = $ent_svc->get_value('sshPublicKey');
@@ -1593,6 +1597,7 @@ sub block {
 	  $return->{success} .= $ent_svc->dn . "\n";
 	}
       }
+      # log_debug { np( $return ) };
 
       if ( $ent_svc->exists('grayPublicKey') ) {
 	@userPublicKeys = $ent_svc->get_value('grayPublicKey');
@@ -1605,6 +1610,7 @@ sub block {
 	  $return->{success} .= $ent_svc->dn . "\n";
 	}
       }
+      # log_debug { np( $return ) };
 
       if ( $ent_svc->exists('umiOvpnAddStatus') ) {
 	$msg = $self->modify( $ent_svc->dn,
@@ -1615,9 +1621,11 @@ sub block {
 	  $return->{success} .= $ent_svc->dn . "\n";
 	}
       }
+      # log_debug { np( $return ) };
 
     }
   }
+  # log_debug { np( $return ) };
 
   # is this user in block group?
   my $blockgr_dn =
