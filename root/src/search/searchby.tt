@@ -514,8 +514,8 @@ Search Advanced
 		    [% ELSIF h_attr.key == 'userPKCS12' %]
 		    [% h_attr.key.trim %]&nbsp;<abbr title="binary data"><span class="fa [% binary_data %] text-info" title="binary data"></span></abbr>&#58;
 		    [% ELSIF h_attr.key == 'pgpKey' %]
+		    [% getit %]&nbsp;
 		    [% h_attr.key.trim %]&#58;
-		    [% getit %]
 		    [% d_id='getitid' %]
 		    [% ELSE %]
 		    [% h_attr.key.trim %]&#58;

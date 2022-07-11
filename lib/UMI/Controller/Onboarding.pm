@@ -276,10 +276,12 @@ sub index :Path :Args(0) {
     $key->{gpg} = $self->keygen_gpg({ bits => $ldap_crud->cfg->{defaults}->{key}->{gpg}->{bits},
 				      type => $ldap_crud->cfg->{defaults}->{key}->{gpg}->{type},
 				      name => $key->{name},
-				      ldap => { server   => UMI->config->{authentication}->{realms}->{ldap}->{store}->{ldap_server},
-						base     => $ldap_crud->cfg->{base}->{pgp},
-						bindname => $c->user->dn,
-						password => $c->session->{auth_pwd}, }, });
+				      ## gpg --send-key doen't send description
+				      # ldap => { server   => UMI->config->{authentication}->{realms}->{ldap}->{store}->{ldap_server},
+				      # 		base     => $ldap_crud->cfg->{base}->{pgp},
+				      # 		bindname => $c->user->dn,
+				      # 		password => $c->session->{auth_pwd}, },
+				    });
     push @{$key->{html}->{error}}, @{$key->{gpg}->{error}}
       if defined $key->{gpg}->{error};
 
