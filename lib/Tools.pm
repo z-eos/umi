@@ -25,6 +25,9 @@ use Storable;
 use MIME::Base64;
 use Digest::SHA;
 
+use GD;
+use GD::Barcode::QRcode;
+
 use Crypt::X509;
 use Crypt::X509::CRL;
 
@@ -1161,9 +1164,6 @@ sub qrcode {
     $arg->{ops}->{Version} = $arg->{ver};
   }
 
-  use GD::Barcode::QRcode;
-  use MIME::Base64;
-
   try {
     $arg->{gd} = GD::Barcode::QRcode->new( "$arg->{txt}", $arg->{ops} )->plot();
     $arg->{white} = $arg->{gd}->colorClosest(255,255,255);
@@ -1175,6 +1175,76 @@ sub qrcode {
   return $arg->{ret};
 }
 
+
+=head2 img_resize
+
+resize input image to an input size with an input quality and return result as base64 encoded jpeg
+
+=cut
+
+sub img_resize {
+  my ($self, $args) = @_;
+  my $arg = {
+	     file    => $args->{file},
+	     size    => $args->{size}    // 300,
+	     quality => $args->{quality} // 85,
+	    };
+  # my $img;
+  # open $img, $arg->{file} || push @{$arg->{error}}, "error: could not open $arg->{file}";
+  # $arg->{im_orig} = new GD::Image($img) || push @{$arg->{error}}, "error: could not do new GD::Image";
+  # close $img;
+
+  my ($in, $ou);
+  try {
+    $in = GD::Image->new($arg->{file}) || push @{$arg->{error}}, "error: could not do new GD::Image";
+  } catch { push @{$arg->{error}}, sprintf("%s:%s: %s", __FILE__, __LINE__, $_); };
+
+  my $w = $in->width;
+  my $h = $in->height;
+
+  my ( $dest_w, $dest_h );
+
+  if ( $w > $arg->{size} && $h > $arg->{size} ) {
+    if ( $w == $h ) {
+      $dest_w = $dest_h = $arg->{size};
+    } elsif ( $w > $h ) {
+      $dest_w = $arg->{size};
+      $dest_h = $arg->{size} * ($h / $w);
+    } else {
+      $dest_w = $arg->{size} * ($w / $h);
+      $dest_h = $arg->{size};
+    }
+  } elsif ( $w >  $arg->{size} && $h <= $arg->{size} ) {
+    $dest_w = $arg->{size};
+    $dest_h = $arg->{size} * ($h / $w);
+  } elsif ( $w <= $arg->{size} && $h > $arg->{size} ) {
+    $dest_w = $arg->{size} * ($w / $h);
+    $dest_h = $arg->{size};
+  } else {
+    $dest_w = $w;
+    $dest_h = $h;
+  }
+
+  log_debug { np( $dest_w . ' x ' . $dest_h ) };
+  try {
+    $ou = GD::Image->new($dest_w, $dest_h, 1);
+    # log_debug { np($arg) };
+  } catch { push @{$arg->{error}}, sprintf("%s:%s: %s", __FILE__, __LINE__, $_); };
+
+  try {
+    $ou->copyResampled($in, 0, 0, 0, 0, $dest_w, $dest_h, $w, $h);
+  } catch { push @{$arg->{error}}, sprintf("%s:%s: %s", __FILE__, __LINE__, $_); };
+  try {
+    $arg->{avatar} = $ou->jpeg($arg->{quality});
+  } catch { push @{$arg->{error}}, sprintf("%s:%s: %s", __FILE__, __LINE__, $_); };
+
+  # log_debug { np($arg) };
+  if ( defined $arg->{error} ) {
+    return $arg;
+  } else {
+    return $arg->{avatar};
+  }
+}
 
 =head2 lrtrim
 

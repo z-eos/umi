@@ -43,6 +43,7 @@ requires 'Data::Printer';
 # ??? # requires 'DateTime::Format::Duration';
 requires 'Digest::SHA';
 requires 'File::Which';
+requires 'GD';
 requires 'GD::Barcode::QRcode';
 requires 'Lingua::Translit';
 # ??? # requires 'MikroTik::API';

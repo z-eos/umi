@@ -988,8 +988,10 @@ sub mod_jpegPhoto {
 
   my ( $fh, $final_message, $file, $jpeg);
   if (defined $arg->{jpegPhoto}) {
-    $jpeg = $self->file2var( $arg->{jpegPhoto}->{'tempname'}, $final_message );
+    # $jpeg = $self->file2var( $arg->{jpegPhoto}->{'tempname'}, $final_message );
+    $jpeg = $self->img_resize({ file => $arg->{jpegPhoto}->{'tempname'} });
 
+    # log_debug { np($jpeg) };
     return $jpeg if ref($jpeg) eq 'HASH' && defined $jpeg->{error};
 
     my $mesg = $ldap_crud->modify( $arg->{mod_jpegPhoto_dn},
