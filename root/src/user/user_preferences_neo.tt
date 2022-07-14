@@ -149,7 +149,7 @@ END
 	<table class="table table-condenced table-stripped table-hover">
 	  <tbody>
 	    [% FOREACH y IN service %]
-	    <tr class="active font-monospace">
+	    <tr class="active font-monospace table-success">
 	      <th colspan="2">
 		<span class="text-success">
 		  <span class="[% y.icon %] fa-lg"></span>
