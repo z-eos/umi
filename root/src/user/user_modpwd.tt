@@ -45,7 +45,7 @@ Password Check or Modification Form <small><em class="font-monospace text-muted"
     <a class="nav-link active text-uppercase" data-toggle="tab"
        id="tab-mod" href="#mod"
        aria-controls="mod" aria-selected="true" role="tab">
-      <i class="fas fa-edit"></i>
+      <i class="fas fa-pencil-alt fa-lg mx-3"></i>
       Modify
     </a>
   </li>
@@ -53,7 +53,7 @@ Password Check or Modification Form <small><em class="font-monospace text-muted"
     <a class="nav-link text-uppercase" data-toggle="tab"
        id="tab-chk" href="#chk"
        aria-controls="chk" aria-selected="true" role="tab">
-      <i class="fas fa-spell-check"></i>
+      <i class="fas fa-equals fa-lg mr-3"></i>/<i class="fas fa-not-equal fa-lg mx-3"></i>
       Verify
     </a>
   </li>

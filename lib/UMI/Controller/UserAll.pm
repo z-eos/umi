@@ -152,7 +152,7 @@ sub create_account {
     $jpeg = $self->file2var( $file, $final_message );
 
     $pwd = $args->{'person_password1'} eq '' ?
-      { root => $self->pwdgen } :
+      { root => $self->pwdgen({ pwd_alg => 'XKCD', }) } :
       { root => $self->pwdgen( { pwd => $args->{'person_password1'} } ) };
 
     #---------------------------------------------------------------------
@@ -226,7 +226,26 @@ sub create_account {
       }
       
       push @{$final_message->{success}},
-	sprintf('<i class="%s fa-lg fa-fw"></i>&nbsp;<em>root account login:</em> <strong class="text-success">%s</strong> <em>password:</em> <strong class="text-success text-monospace">%s</strong>%s',
+# 	sprintf('<table class="table">
+# <tr>
+# <td class=""><i class="%s fa-lg fa-fw"></i> root account login:</td>
+# <td class="text-success">%s</td>
+# </tr>
+# <tr>
+# <td class="">password:</td>
+# <td class="text-success text-monospace">%s</td>
+# </tr></table>
+	sprintf('<i class="%s fa-lg fa-fw"></i> root account
+<small>
+<ul class="row">
+<dt class="col-4 text-right">login:</dt>
+<dd class="col-8 text-success">%s</dd>
+
+<dt class="col-4 text-right">password:</td>
+<dd class="col-8 text-success text-monospace">%s</dd>
+</ul>
+</small>
+%s',
 		$ldap_crud->{cfg}->{stub}->{icon},
 		$uid,
 		$pwd->{root}->{'clear'},
@@ -234,7 +253,7 @@ sub create_account {
 						      dn      => $root_add_dn,
 						      btn_txt => $root_add_dn,
 						      css_btn => 'btn-success',
-						      css_frm => 'float-right' }) ) ;
+						      css_frm => 'float-right ml-5' }) ) ;
     }
     # p $final_message->{success};
   } else {
@@ -309,7 +328,7 @@ sub create_account {
       );
 
     if ( ! $args->{person_password1} && ! $args->{person_password2} ) {
-      $x{password}->{mail} = $self->pwdgen;
+      $x{password}->{mail} = $self->pwdgen({ pwd_alg => 'XKCD', });
       $x{password}->{xmpp} = $self->pwdgen;
     } else {
       $x{password}->{mail} = $self->pwdgen( { pwd => $args->{person_password2} } );

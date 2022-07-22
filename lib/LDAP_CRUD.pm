@@ -592,7 +592,7 @@ sub _build_cfg {
 	 };
 }
 
-has 'version' => ( is => 'ro', isa => 'Str', required => 1, default => '0.90.3' );
+has 'version' => ( is => 'ro', isa => 'Str', required => 1, default => '0.90.4' );
 
 has 'host'    => ( is => 'ro', isa => 'Str', required => 1,
 		   default => UMI->config->{authentication}->{realms}->{ldap}->{store}->{ldap_server});

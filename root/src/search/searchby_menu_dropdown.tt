@@ -111,7 +111,7 @@
 	<div class="dropdown-item">
 	  <form role="form" method="POST"
 		action="/searchby/proc"
-		class="STUB123">
+		class="formajaxer STUB123">
 	    <button type="button" title="reassign to other root account (move this object to another root account)"
 		    class="btn btn-link" value="[% entry.key %]"
 		    name="chg_acc"
@@ -130,7 +130,7 @@
 	<div class="dropdown-item">
 	  <form role="form" method="POST"
 		action="/searchby/proc"
-		class="STUB123">
+		class="formajaxer STUB123">
 	    <button type="button" title="refresh object (RFC2589)"
 		    class="btn btn-link" value="[% entry.key %]"
 		    name="chg_acc"
@@ -229,7 +229,7 @@
 	<div class="dropdown-item">
 	  <form role="form" method="POST"
 		action="/searchby/proc"
-		class="STUB123">
+		class="formajaxer STUB123">
 	    <button type="submit" title="modify group members" class="btn btn-link"
 		    value="[% entry.key %]"
 		    data-order="[% site.searchby.menu.order.ldap_modify_memberUid %]"
@@ -299,7 +299,7 @@
 	<div class="dropdown-item">
 	  <form role="form" method="POST"
 		action="/searchby/proc"
-		class="STUB123">
+		class="formajaxer STUB123">
 	    <button type="submit" title="reorder gitAcl" class="btn btn-link"
 		    value="[% entry.key %]"
 		    data-order="[% site.searchby.menu.order.ldap_gitacl_reorder %]"
