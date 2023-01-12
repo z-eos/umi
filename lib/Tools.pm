@@ -36,7 +36,6 @@ use Crypt::GeneratePassword qw(word word3 chars);
 
 use Net::DNS;
 use Net::CIDR::Set;
-use Net::SSH::Perl::Key;
 use Net::LDAP::Util qw(	generalizedTime_to_time ldap_explode_dn );
 
 use Logger;

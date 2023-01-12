@@ -38,7 +38,7 @@ Catalyst Controller.
 sub index :Path :Args(0) {
   my ( $self, $c ) = @_;
   my $params = $c->req->parameters;
-  log_debug { np($params) };
+  # log_debug { np($params) };
 
   my $final_message;
 
@@ -508,7 +508,10 @@ we skip empty (criteria of emptiness is a concatenation of each field value) rep
 	    if defined $element->field('userCertificate')->value &&
 	    $element->field('userCertificate')->value ne '';
 
-	} elsif ( $x{authorizedservice} eq 'ovpn' ) {
+	  $x{email} = $element->field('email')->value
+	    if $element->field('authorizedservice')->value eq 'matrix' && defined $element->field('email');
+
+} elsif ( $x{authorizedservice} eq 'ovpn' ) {
 	  ### passwordless account
 	  $x{userCertificate} = $element->field('userCertificate')->value
 	    if defined $element->field('userCertificate')->value;

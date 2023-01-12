@@ -413,7 +413,7 @@ has_field 'account.password1'
        label                 => 'Password',
        label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        wrapper_class         => [  qw{ row conditional-input on-comm-acc on-xmpp on-gitlab on-web
-				       on-mail on-ssh-acc on-dot1x-eap-tls }, ],
+				       on-matrix on-mail on-ssh-acc on-dot1x-eap-tls }, ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        ne_username           => 'login',
@@ -428,13 +428,26 @@ has_field 'account.password2'
        label                 => '',
        label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
        wrapper_class         => [  qw{ row conditional-input on-comm-acc on-xmpp on-gitlab on-web
-				       on-mail on-ssh-acc on-dot1x-eap-tls }, ],
+				       on-matrix on-mail on-ssh-acc on-dot1x-eap-tls }, ],
        element_wrapper_class => [ 'col-8', 'col-md-10' ],
        element_class         => [ 'input-sm', ],
        ne_username           => 'login',
        apply                 => [ NoSpaces, NotAllDigits, Printable, StrongPassword ],
        element_attr          => { placeholder    => 'Confirm Password',
 				  'autocomplete' => 'off', },
+     );
+
+has_field 'account.email'
+  => ( type                  => 'Email',
+       label                 => 'Email',
+       label_class           => [ 'col-2', 'text-right', 'font-weight-bold', ],
+       element_wrapper_class => [ 'col-8', 'col-md-10' ],
+       element_class         => [ 'input-sm', ],
+       ne_username           => 'mail',
+       apply                 => [ NoSpaces, NotAllDigits, Printable, ],
+       element_attr          => { placeholder => 'someuser@example.com',
+				  'autocomplete' => 'off', },
+       wrapper_class         => [ qw{ row conditional-input on-matrix } ],
      );
 
 has_field 'account.radiusgroupname'

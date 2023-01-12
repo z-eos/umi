@@ -293,8 +293,20 @@ sub _build_cfg {
 	   acc_svc_email         => [ qw(
 					  mailutilsAccount
 				       ) ],
+	   # acc_svc_web           => [ qw(
+	   #  			  account
+	   #  			  authorizedServiceObject
+	   #  			  domainRelatedObject
+	   #  			  simpleSecurityObject
+	   #  			  uidObject
+	   #  		       ) ],
 	   acc_svc_web           => [ qw(
-					  account
+					  authorizedServiceObject
+					  domainRelatedObject
+                      inetOrgPerson
+				       ) ],
+	   acc_svc_matrix        => [ qw(
+                      account
 					  authorizedServiceObject
 					  domainRelatedObject
 					  simpleSecurityObject
@@ -390,6 +402,15 @@ sub _build_cfg {
 			       associateddomain_prefix => {
 							   'talax.startrek.in' => 'im.',
 							  },
+			      },
+	   'matrix'        => {
+			       auth          => 1,
+			       descr         => 'Matrix Account',
+			       disabled      => 0,
+			       gidNumber     => 10113,
+			       icon          => 'fas fa-globe-europe',
+			       data_fields   => 'login,login_complex,password1,password2',
+			       data_relation => 'passw',
 			      },
 	   'dot1x-eap-md5' => {
 			       auth          => 1,
@@ -1567,12 +1588,12 @@ sub block {
     my @ent_toblock = $msg_usr->entries;
     foreach $ent_svc ( @ent_toblock ) {
       if ( $ent_svc->exists('userPassword') &&
-	 $ent_svc->get_value('userPassword') !~ /^\!-disabled-on-/) {
+	 $ent_svc->get_value('userPassword') !~ /^\!-disabled-by-/) {
 	# before 20210419 # $userPassword = $self->pwdgen;
 	$msg = $self->modify( $ent_svc->dn,
 			      [ replace =>
 				[ userPassword =>
-				  sprintf("!-disabled-on-%s-by-%s-%s",
+				  sprintf("!-disabled-by-%s-on-%s-%s",
 					  $self->user,
 					  $self->ts({ format => "%Y%m%d%H%M%S" }),
 					  $ent_svc->get_value('userPassword')),	],
@@ -2964,13 +2985,13 @@ is expected to be first 3 bytes of one single /24 network)
 sub ipa {
   my ( $self, $args ) = @_;
   my $arg = { svc    => $args->{svc}    // 'ovpn',
-	      naddr  => $args->{naddr}  // '',
-	      fqdn   => $args->{fqdn}   // '*',
-	      base   => $args->{base}   // $self->{cfg}->{base}->{ovpn},,
-	      filter => $args->{filter} // '(&(objectClass=umiOvpnCfg)(cn=*))',
-	      scope  => $args->{scope}  // 'base',
-	      attrs  => $args->{attrs}  // [ 'cn', 'umiOvpnCfgServer', 'umiOvpnCfgRoute' ],
-	    };
+              naddr  => $args->{naddr}  // '',
+              fqdn   => $args->{fqdn}   // '*',
+              base   => $args->{base}   // $self->{cfg}->{base}->{ovpn},,
+              filter => $args->{filter} // '(&(objectClass=umiOvpnCfg)(cn=*))',
+              scope  => $args->{scope}  // 'base',
+              attrs  => $args->{attrs}  // [ 'cn', 'umiOvpnCfgServer', 'umiOvpnCfgRoute' ],
+            };
   # log_debug { np($arg) };
   my $return;
   $return->{arg} = $arg;
@@ -2981,26 +3002,26 @@ sub ipa {
 
   if ( $arg->{naddr} =~ /$self->{a}->{re}->{net2b}/ || $arg->{naddr} =~ /$self->{a}->{re}->{net3b}/ ) {
     $f = sprintf('(|(umiOvpnCfgIfconfigPush=*%s.*)(umiOvpnCfgIroute=%s.*)(dhcpStatements=fixed-address %s.*)(ipHostNumber=%s.*))',
-		 $arg->{naddr},
-		 $arg->{naddr},
-		 $arg->{naddr},
-		 $arg->{naddr},
-		 $arg->{fqdn});
+                 $arg->{naddr},
+                 $arg->{naddr},
+                 $arg->{naddr},
+                 $arg->{naddr},
+                 $arg->{fqdn});
   } else {
     $f = sprintf('(|(&(authorizedService=ovpn@%s)(cn=*))(dhcpStatements=fixed-address *)(ipHostNumber=*))',
-		 $arg->{fqdn});
+                 $arg->{fqdn});
   }
 
   my $mesg_ovpn = $self->search({ base      => $self->{cfg}->{base}->{db},
-				  sizelimit => 0,
-  				  filter    => $f,
-  				  attrs     => [ qw( umiOvpnCfgIfconfigPush
-						     umiOvpnCfgIroute
-						     ipHostNumber
-						     dhcpStatements ) ], });
+                                  sizelimit => 0,
+                                  filter    => $f,
+                                  attrs     => [ qw( umiOvpnCfgIfconfigPush
+                                                     umiOvpnCfgIroute
+                                                     ipHostNumber
+                                                     dhcpStatements ) ], });
   if (! $mesg_ovpn->count) {
     $return->{error} = sprintf("ipa(): Some %s dn: %s configuration missed or incorrect.",
-			       uc( $arg->{svc} ), $key);
+                               uc( $arg->{svc} ), $key);
     # log_debug { np($return) };
     return $return;
   } else {
@@ -3015,33 +3036,33 @@ sub ipa {
 
       # OpenVPN option --ifconfig-push local remote-netmask [alias]
       if ( exists $val->{$key}->{umiovpncfgifconfigpush} ) {
-	foreach ( @{$val->{$key}->{umiovpncfgifconfigpush}} ) {
-	  # log_debug { np($_) };
-	  ($l, $r, $tmp) = split(/ /, $_);
-	  if ( $self->ipam_ip2dec($r) - $self->ipam_ip2dec($l) == 1 ) {
-	    $ipa->add($l . '/30');
-	  } else {
-	    $ipa->add($l);
-	  }
-	}
-	undef $tmp;
+        foreach ( @{$val->{$key}->{umiovpncfgifconfigpush}} ) {
+          # log_debug { np($_) };
+          ($l, $r, $tmp) = split(/ /, $_);
+          if ( $self->ipam_ip2dec($r) - $self->ipam_ip2dec($l) == 1 ) {
+            $ipa->add($l . '/30');
+          } else {
+            $ipa->add($l);
+          }
+        }
+        undef $tmp;
       }
 
-      # OpenVPN option  --iroute network [netmask]
-      # Generate an internal route to a specific client.
-      # The netmask parameter, if omitted, defaults to 255.255.255.255.
-      if ( exists $val->{$key}->{umiovpncfgiroute} ) {
-	foreach ( @{$val->{$key}->{umiovpncfgiroute}} ) {
-	  next if $_ eq 'NA';
-	  # log_debug { np($_) };
-	  ($l, $r) = split(/ /, $_);
-	  if ( length($r) == 0 ) {
-            $ipa->add($l);
-          } else {
-            $ipa->add($l . '/' . $self->ipam_msk_ip2dec($r));
-          }
-	}
-      }
+      # # OpenVPN option  --iroute network [netmask]
+      # # Generate an internal route to a specific client.
+      # # The netmask parameter, if omitted, defaults to 255.255.255.255.
+      # if ( exists $val->{$key}->{umiovpncfgiroute} ) {
+      #   foreach ( @{$val->{$key}->{umiovpncfgiroute}} ) {
+      #     next if $_ eq 'NA';
+      #     # log_debug { np($_) };
+      #     ($l, $r) = split(/ /, $_);
+      #     if ( length($r) == 0 ) {
+      #       $ipa->add($l);
+      #     } else {
+      #       $ipa->add($l . '/' . $self->ipam_msk_ip2dec($r));
+      #     }
+      #   }
+      # }
 
       # ISC DHCP Manual Pages - dhcpd.conf
       # The fixed-address declaration `fixed-address address [, address ... ];`
@@ -3050,18 +3071,18 @@ sub ipa {
       if ( exists $val->{$key}->{dhcpstatements} ) {
       	foreach ( @{$val->{$key}->{dhcpstatements}} ) {
       	  next if $_ !~ /^fixed-address/;
-	  # log_debug { np($_) };
+          # log_debug { np($_) };
       	  ($l, $r) = split(/ /, $_);
       	  $ipa->add($r);
       	}
       }
 
       if ( exists $val->{$key}->{iphostnumber} ) {
-	foreach ( @{$val->{$key}->{iphostnumber}} ) {
-	  next if $_ eq 'NA' || ! $self->is_ip($_);
-	  # log_debug { np($_) };
-	  $ipa->add($_);
-	}
+        foreach ( @{$val->{$key}->{iphostnumber}} ) {
+          next if $_ eq 'NA' || ! $self->is_ip($_);
+          # log_debug { np($_) };
+          $ipa->add($_);
+        }
       }
 
     }
@@ -3777,6 +3798,7 @@ sub create_account_branch_leaf {
      uidNumber              => $args->{uidNumber},
      givenName              => $args->{givenName},
      sn                     => $args->{sn},
+     email                  => $args->{email} // undef,
      login                  => $args->{login},
      login_complex          => $args->{login_complex},
      password               => $args->{password},
@@ -3851,21 +3873,20 @@ sub create_account_branch_leaf {
        $arg{service}   eq 'web' ) {
     $authorizedService = [];
   } else {
-    $authorizedService = [
-			  objectClass       => [ @{$self->cfg->{objectClass}->{acc_svc_common}},
-						 @{$arg{objectclass}} ],
-			  authorizedService => $arg{service} . '@' . $arg{associatedDomain},
-			  associatedDomain  => $arg{associatedDomain},
-			  uid               => $arg{uid},
-			  cn                => $arg{uid},
-			  givenName         => $arg{givenName},
-			  sn                => $arg{sn},
-# moved to each svc	  uidNumber => $arg{uidNumber},
-# moved to ssh-acc        loginShell => $self->cfg->{stub}->{loginShell},
-			  gecos             => $self->utf2lat( sprintf('%s %s', $args->{givenName}, $args->{sn}) ),
-			 ];
+    $authorizedService =
+      [
+       objectClass       => [ @{$self->cfg->{objectClass}->{acc_svc_common}},
+                              @{$arg{objectclass}} ],
+       authorizedService => $arg{service} . '@' . $arg{associatedDomain},
+       associatedDomain  => $arg{associatedDomain},
+       uid               => $arg{uid},
+       cn                => $arg{uid},
+       givenName         => $arg{givenName},
+       sn                => $arg{sn},
+       gecos             => $self->utf2lat( sprintf('%s %s', $args->{givenName}, $args->{sn}) ),
+      ];
   }
-  
+
   $description = defined $args->{description} && $args->{description} ne '' ? $args->{description} :
     sprintf('%s: %s @ %s', uc($arg{service}), $arg{'login'}, $arg{associatedDomain});
 
@@ -3897,6 +3918,16 @@ sub create_account_branch_leaf {
       userPassword    => $arg{password}->{$arg{service}}->{'ssha'},
       telephonenumber => $arg{telephoneNumber},
       jpegPhoto       => [ $self->file2var( $jpegPhoto_file, $return) ];
+
+  #=== SERVICE: matrix ===============================================
+  } elsif ( $arg{service} eq 'matrix') {
+    push @{$authorizedService},
+      homeDirectory   => $self->cfg->{stub}->{homeDirectory},
+      gidNumber       => $self->cfg->{authorizedService}->{$arg{service}}->{gidNumber},
+      uidNumber       => $arg{uidNumber},
+      userPassword    => $arg{password}->{$arg{service}}->{'ssha'};
+    push @{$authorizedService}, mail => $arg{email} if defined $arg{email};
+    # log_debug { np(%arg) };
 
   #=== SERVICE: 802.1x ===============================================
   } elsif ( $arg{service} eq 'dot1x-eap-md5' ||
@@ -4012,6 +4043,9 @@ sub create_account_branch_leaf {
 						 @{$arg{objectclass}} ],
 			  authorizedService => $arg{service} . '@' . $arg{associatedDomain},
 			  associatedDomain  => $arg{associatedDomain},
+			  cn                => $self->utf2lat( sprintf('%s %s', $args->{givenName}, $args->{sn}) ),
+			  givenName         => $arg{givenName},
+			  sn                => $arg{sn},
 			  uid               => $arg{uid},
 			  userPassword      => $arg{password}->{$arg{service}}->{'ssha'},
 			 ];

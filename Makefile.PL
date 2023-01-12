@@ -22,7 +22,12 @@ requires 'Config::General'; # This should reflect the config file format you've 
 #--- uni related stuff ------------------------------------------------
 
 requires 'Catalyst::Authentication::Store::LDAP';
+requires 'Catalyst::Model::Factory::PerRequest';
 requires 'Catalyst::Plugin::Authentication';
+requires 'Catalyst::Plugin::Authorization::ACL';
+requires 'Catalyst::Plugin::Authorization::Roles';
+requires 'Catalyst::Plugin::Cache';
+requires 'Catalyst::Plugin::StatusMessage';
 requires 'Catalyst::Plugin::Session::Store::FastMmap';
 requires 'Catalyst::Plugin::Unicode';
 requires 'Catalyst::View::Download';
@@ -33,11 +38,13 @@ requires 'Log::Log4perl';
 requires 'Log::Contextual';
 requires 'Log::Dispatch';
     
+requires 'Array::Utils';
 requires 'Cache::FastMmap';
 requires 'Compress::LZ4';
 requires 'Crypt::GeneratePassword';
 requires 'Crypt::HSXKPasswd';
-requires 'Crypt::RSA';
+requires 'Crypt::X509';
+requires 'Crypt::X509-CRL';
 requires 'Data::Entropy';
 requires 'Data::Printer';
 # ??? # requires 'DateTime::Format::Duration';
@@ -45,6 +52,7 @@ requires 'Digest::SHA';
 requires 'File::Which';
 requires 'GD';
 requires 'GD::Barcode::QRcode';
+
 requires 'Lingua::Translit';
 # ??? # requires 'MikroTik::API';
 requires 'Math::Random::Secure';

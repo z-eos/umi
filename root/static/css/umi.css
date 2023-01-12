@@ -435,6 +435,9 @@ ul.ldap-tree {
 .show-web           .conditional-input:not(.on-web) {
     display: none;
 }
+.show-matrix        .conditional-input:not(.on-matrix) {
+    display: none;
+}
 .show-gitlab        .conditional-input:not(.on-gitlab) {
     display: none;
 }
