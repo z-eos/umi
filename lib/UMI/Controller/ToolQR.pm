@@ -66,7 +66,7 @@ sub index :Path :Args(0) {
       $final_message->{error} = $qr->{error};
     } else {
       $final_message->{success} = sprintf('<figure class="text-center">
-  <figcaption class="h6 text-left"><pre>%s</pre></figcaption>
+  <figcaption class="h6 text-left text-monospace"><pre>%s</pre></figcaption>
   <img alt="no QR Code was generated for: %s"
        src="data:image/png;base64,%s"
        title="QR Code for user input"/>
@@ -75,6 +75,7 @@ sub index :Path :Args(0) {
 					  $params->{toqr},
 					  $qr->{qr} );
     }
+    $c->stash( final_message => $final_message );
   } else {
     $c->stash( template => 'signin.tt', );
   }
